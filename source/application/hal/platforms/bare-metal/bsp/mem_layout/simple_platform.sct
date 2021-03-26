@@ -1,0 +1,102 @@
+;  Copyright (c) 2021 Arm Limited. All rights reserved.
+;  SPDX-License-Identifier: Apache-2.0
+;
+;  Licensed under the Apache License, Version 2.0 (the "License");
+;  you may not use this file except in compliance with the License.
+;  You may obtain a copy of the License at
+;
+;      http://www.apache.org/licenses/LICENSE-2.0
+;
+;  Unless required by applicable law or agreed to in writing, software
+;  distributed under the License is distributed on an "AS IS" BASIS,
+;  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;  See the License for the specific language governing permissions and
+;  limitations under the License.
+
+; *************************************************************
+; ***       Scatter-Loading Description File                ***
+; *************************************************************
+;
+;---------------------------------------------------------
+; First load region (ITCM)
+;---------------------------------------------------------
+LOAD_REGION_0       0x00000000                  0x00080000
+{
+    ;-----------------------------------------------------
+    ; First part of code mem - 512kiB
+    ;-----------------------------------------------------
+    itcm.bin        0x00000000                  0x00080000
+    {
+        *.o (RESET, +First)
+        * (InRoot$$Sections)
+
+        ; Essentially only RO-CODE, RO-DATA is in a
+        ; different region.
+        .ANY (+RO)
+    }
+
+    ;-----------------------------------------------------
+    ; BRAM or FPGA data SRAM region worth 2MiB
+    ;-----------------------------------------------------
+    bram.bin        0x11000000  UNINIT ALIGN 16 0x00200000
+    {
+        ; activation buffers a.k.a tensor arena
+        *.o (.bss.NoInit.activation_buf)
+    }
+
+    ;-----------------------------------------------------
+    ; 128kiB of 512kiB bank is used for any other RW or ZI
+    ; data. Note: this region is internal to the Cortex-M
+    ; CPU
+    ;-----------------------------------------------------
+    dtcm.bin        0x20000000                  0x00020000
+    {
+        .ANY(+RW +ZI)
+    }
+
+    ;-----------------------------------------------------
+    ; 128kiB of stack space within the DTCM region
+    ;-----------------------------------------------------
+    ARM_LIB_STACK   0x20020000 EMPTY ALIGN 8    0x00020000
+    {}
+
+    ;-----------------------------------------------------
+    ; 256kiB of heap space within the DTCM region
+    ;-----------------------------------------------------
+    ARM_LIB_HEAP    0x20040000 EMPTY ALIGN 8    0x00040000
+    {}
+}
+
+;---------------------------------------------------------
+; Second load region (DDR)
+;---------------------------------------------------------
+LOAD_REGION_1       0x70000000                  0x02000000
+{
+    ;-----------------------------------------------------
+    ; 32 MiB of DRAM space for nn model and input vectors
+    ;-----------------------------------------------------
+    dram.bin        0x70000000 ALIGN 16         0x02000000
+    {
+        ; nn model's baked in input matrices
+        *.o (ifm)
+
+        ; nn model
+        *.o (nn_model)
+
+        ; if the activation buffer (tensor arena) doesn't
+        ; fit in the SRAM region, we accommodate it here
+        *.o (activation_buf)
+    }
+
+    ;-----------------------------------------------------
+    ; SSE-300's internal SRAM of 2MiB - reserved for
+    ; activation buffers.
+    ; This region should have 3 cycle read latency from
+    ; both Cortex-M55 and Ethos-U55
+    ;-----------------------------------------------------
+    isram.bin       0x31000000                  0x00080000
+    {
+        ; RO data (incl. unwinding tables for debugging)
+        .ANY (+RO-DATA)
+    }
+}

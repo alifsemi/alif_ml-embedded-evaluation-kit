@@ -1,0 +1,37 @@
+Changes in 21.03
+    * simple platform support added
+    * model conditioning examples added
+    * documentation updated
+    * build changed to use sources of the dependency libraries
+    * tests for native platform added
+    * anomaly detection use case added
+
+Changes in 20.11
+    * SSE-200 and SSE-300 system support was added.
+    * Support for simple fixed virtual platform for Ethos-U55 and Cortex-M55 removed.
+    * Build cmake parameters changed: TARGET_SUBSYSTEM was added, TARGET_PLATFORM accepted values were changed.
+    * Models with multiple output tensors support was added.
+    * Generic inference runner use-case added.
+    * ASR triggered by KWS added in the same use case (kws_asr). This also shows how to re-use tensor arena with two models using the same memory pool.
+
+Changes in 20.09 release:
+    * Support for TensorFlow Lite Micro version > 2.3.0 (tested with TensorFlow Lite Micro 2.4.0 commit hash: 5bbb8a2bd1def6865b1510175a3da5fd12387e10)
+    * Added speech recognition use case example.
+    * Updated Ethos-U55 Fastmodel version to r0p2-00eac0-rc4
+
+Changes in 20.08 release:
+    * Added keyword spotting use case example.
+    * Added person detection use case example.
+Known issues:
+    * telnet connection to FastModel environment may hang after some period of inactivity.
+
+Changes in 20.05 release:
+    * FastModel environment was built with FastModel Tools v11.10.22.
+    * Mps3 FPGA build support was added.
+    * Configurable timing-adaptor.
+    * Added Active and Idle cycle counts for NPU and CPU profiling report.
+    * Source code structure and build scripts refactored to support multiple ML use-cases.
+    * Used EAC Ethos-U55 software model and drivers.
+    * Windows support for build scripts.
+Known issues:
+    * telnet connection to FastModel environment may hang after some period of inactivity.

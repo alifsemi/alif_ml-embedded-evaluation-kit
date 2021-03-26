@@ -1,0 +1,17 @@
+# IDE related
+.vscode
+.idea
+
+# Downloaded files
+
+# Build files
+CMakeFiles
+build
+cmake-build-*
+
+# Virtual environments
+scripts/py/env*
+scripts/py/venv*
+env
+venv
+__pycache__*

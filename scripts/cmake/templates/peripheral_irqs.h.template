@@ -1,0 +1,138 @@
+/*
+ * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Auto-generated file
+// ** DO NOT EDIT **
+
+#ifndef PERIPHERAL_IRQS_H
+#define PERIPHERAL_IRQS_H
+
+/******************************************************************************/
+/*                    Peripheral interrupt numbers                            */
+/******************************************************************************/
+
+/* -------------------  Cortex-M Processor Exceptions Numbers  -------------- */
+/*                 -14 to -1 should be defined by the system header           */
+/* ----------------------  Core Specific Interrupt Numbers  ------------------*/
+#cmakedefine NONSEC_WATCHDOG_RESET_IRQn (@NONSEC_WATCHDOG_RESET_IRQn@)  /* Non-Secure Watchdog Reset Interrupt   */
+#cmakedefine NONSEC_WATCHDOG_IRQn       (@NONSEC_WATCHDOG_IRQn@)  /* Non-Secure Watchdog Interrupt         */
+#cmakedefine S32K_TIMER_IRQn            (@S32K_TIMER_IRQn@)  /* S32K Timer Interrupt                  */
+#cmakedefine TIMER0_IRQn                (@TIMER0_IRQn@)  /* TIMER 0 Interrupt                     */
+#cmakedefine TIMER1_IRQn                (@TIMER1_IRQn@)  /* TIMER 1 Interrupt                     */
+#cmakedefine DUALTIMER_IRQn             (@DUALTIMER_IRQn@)  /* Dual Timer Interrupt                  */
+#cmakedefine MPC_IRQn                   (@MPC_IRQn@)  /* MPC Combined (@Secure@) Interrupt       */
+#cmakedefine PPC_IRQn                   (@PPC_IRQn@)  /* PPC Combined (@Secure@) Interrupt       */
+#cmakedefine MSC_IRQn                   (@MSC_IRQn@)  /* MSC Combined (@Secure@) Interrput       */
+#cmakedefine BRIDGE_ERROR_IRQn          (@BRIDGE_ERROR_IRQn@)  /* Bridge Error Combined (@Secure@) Interrupt */
+#cmakedefine MGMT_PPU_IRQn              (@MGMT_PPU_IRQn@)  /* MGMT_PPU */
+#cmakedefine SYS_PPU_IRQn               (@SYS_PPU_IRQn@)  /* SYS_PPU */
+#cmakedefine CPU0_PPU_IRQn              (@CPU0_PPU_IRQn@)  /* CPU0_PPU */
+#cmakedefine DEBUG_PPU_IRQn             (@DEBUG_PPU_IRQn@)  /* DEBUG_PPU */
+#cmakedefine TIMER3_AON_IRQn            (@TIMER3_AON_IRQn@)  /* TIMER3_AON */
+#cmakedefine CPU0CTIIQ0_IRQn            (@CPU0CTIIQ0_IRQn@)  /* CPU0CTIIQ0 */
+#cmakedefine CPU0CTIIQ01_IRQn           (@CPU0CTIIQ01_IRQn@)  /* CPU0CTIIQ01 */
+
+#cmakedefine SYS_TSTAMP_COUNTER_IRQn    (@SYS_TSTAMP_COUNTER_IRQn@)  /* System timestamp counter interrupt */
+
+/* ----------------------  CMSDK Specific Interrupt Numbers  ----------------- */
+#cmakedefine UARTRX0_IRQn               (@UARTRX0_IRQn@)  /* UART 0 RX Interrupt                   */
+#cmakedefine UARTTX0_IRQn               (@UARTTX0_IRQn@)  /* UART 0 TX Interrupt                   */
+#cmakedefine UARTRX1_IRQn               (@UARTRX1_IRQn@)  /* UART 1 RX Interrupt                   */
+#cmakedefine UARTTX1_IRQn               (@UARTTX1_IRQn@)  /* UART 1 TX Interrupt                   */
+#cmakedefine UARTRX2_IRQn               (@UARTRX2_IRQn@)  /* UART 2 RX Interrupt                   */
+#cmakedefine UARTTX2_IRQn               (@UARTTX2_IRQn@)  /* UART 2 TX Interrupt                   */
+#cmakedefine UARTRX3_IRQn               (@UARTRX3_IRQn@)  /* UART 3 RX Interrupt                   */
+#cmakedefine UARTTX3_IRQn               (@UARTTX3_IRQn@)  /* UART 3 TX Interrupt                   */
+#cmakedefine UARTRX4_IRQn               (@UARTRX4_IRQn@)  /* UART 4 RX Interrupt                   */
+#cmakedefine UARTTX4_IRQn               (@UARTTX4_IRQn@)  /* UART 4 TX Interrupt                   */
+#cmakedefine UART0_IRQn                 (@UART0_IRQn@)  /* UART 0 combined Interrupt             */
+#cmakedefine UART1_IRQn                 (@UART1_IRQn@)  /* UART 1 combined Interrupt             */
+#cmakedefine UART2_IRQn                 (@UART2_IRQn@)  /* UART 2 combined Interrupt             */
+#cmakedefine UART3_IRQn                 (@UART3_IRQn@)  /* UART 3 combined Interrupt             */
+#cmakedefine UART4_IRQn                 (@UART4_IRQn@)  /* UART 4 combined Interrupt             */
+#cmakedefine UARTOVF_IRQn               (@UARTOVF_IRQn@)  /* UART 0,1,2,3 and 4 Overflow Interrupt */
+#cmakedefine ETHERNET_IRQn              (@ETHERNET_IRQn@)  /* Ethernet Interrupt                    */
+#cmakedefine I2S_IRQn                   (@I2S_IRQn@)  /* I2S Interrupt                         */
+#cmakedefine TSC_IRQn                   (@TSC_IRQn@)  /* Touch Screen Interrupt                */
+#cmakedefine SPI2_IRQn                  (@SPI2_IRQn@)  /* SPI 2 Interrupt                       */
+#cmakedefine SPI3_IRQn                  (@SPI3_IRQn@)  /* SPI 3 Interrupt                       */
+#cmakedefine SPI4_IRQn                  (@SPI4_IRQn@)  /* SPI 4 Interrupt                       */
+
+#cmakedefine EthosU_IRQn                (@EthosU_IRQn@)   /* Ethos-Uxx Interrupt */
+
+#cmakedefine GPIO0_IRQn                 (@GPIO0_IRQn@)  /* GPIO 0 Combined Interrupt             */
+#cmakedefine GPIO1_IRQn                 (@GPIO1_IRQn@)  /* GPIO 1 Combined Interrupt             */
+#cmakedefine GPIO2_IRQn                 (@GPIO2_IRQn@)  /* GPIO 2 Combined Interrupt             */
+#cmakedefine GPIO3_IRQn                 (@GPIO3_IRQn@)  /* GPIO 3 Combined Interrupt             */
+
+#cmakedefine GPIO0_0_IRQn               (@GPIO0_0_IRQn@)  /* All P0 I/O pins used as irq source    */
+#cmakedefine GPIO0_1_IRQn               (@GPIO0_1_IRQn@)  /* There are 16 pins in total            */
+#cmakedefine GPIO0_2_IRQn               (@GPIO0_2_IRQn@)
+#cmakedefine GPIO0_3_IRQn               (@GPIO0_3_IRQn@)
+#cmakedefine GPIO0_4_IRQn               (@GPIO0_4_IRQn@)
+#cmakedefine GPIO0_5_IRQn               (@GPIO0_5_IRQn@)
+#cmakedefine GPIO0_6_IRQn               (@GPIO0_6_IRQn@)
+#cmakedefine GPIO0_7_IRQn               (@GPIO0_7_IRQn@)
+#cmakedefine GPIO0_8_IRQn               (@GPIO0_8_IRQn@)
+#cmakedefine GPIO0_9_IRQn               (@GPIO0_9_IRQn@)
+#cmakedefine GPIO0_10_IRQn              (@GPIO0_10_IRQn@)
+#cmakedefine GPIO0_11_IRQn              (@GPIO0_11_IRQn@)
+#cmakedefine GPIO0_12_IRQn              (@GPIO0_12_IRQn@)
+#cmakedefine GPIO0_13_IRQn              (@GPIO0_13_IRQn@)
+#cmakedefine GPIO0_14_IRQn              (@GPIO0_14_IRQn@)
+#cmakedefine GPIO0_15_IRQn              (@GPIO0_15_IRQn@)
+#cmakedefine GPIO1_0_IRQn               (@GPIO1_0_IRQn@)  /* All P1 I/O pins used as irq source    */
+#cmakedefine GPIO1_1_IRQn               (@GPIO1_1_IRQn@)  /* There are 16 pins in total            */
+#cmakedefine GPIO1_2_IRQn               (@GPIO1_2_IRQn@)
+#cmakedefine GPIO1_3_IRQn               (@GPIO1_3_IRQn@)
+#cmakedefine GPIO1_4_IRQn               (@GPIO1_4_IRQn@)
+#cmakedefine GPIO1_5_IRQn               (@GPIO1_5_IRQn@)
+#cmakedefine GPIO1_6_IRQn               (@GPIO1_6_IRQn@)
+#cmakedefine GPIO1_7_IRQn               (@GPIO1_7_IRQn@)
+#cmakedefine GPIO1_8_IRQn               (@GPIO1_8_IRQn@)
+#cmakedefine GPIO1_9_IRQn               (@GPIO1_9_IRQn@)
+#cmakedefine GPIO1_10_IRQn              (@GPIO1_10_IRQn@)
+#cmakedefine GPIO1_11_IRQn              (@GPIO1_11_IRQn@)
+#cmakedefine GPIO1_12_IRQn              (@GPIO1_12_IRQn@)
+#cmakedefine GPIO1_13_IRQn              (@GPIO1_13_IRQn@)
+#cmakedefine GPIO1_14_IRQn              (@GPIO1_14_IRQn@)
+#cmakedefine GPIO1_15_IRQn              (@GPIO1_15_IRQn@)
+#cmakedefine GPIO2_0_IRQn               (@GPIO2_0_IRQn@)  /* All P2 I/O pins used as irq source    */
+#cmakedefine GPIO2_1_IRQn               (@GPIO2_1_IRQn@)  /* There are 15 pins in total            */
+#cmakedefine GPIO2_2_IRQn               (@GPIO2_2_IRQn@)
+#cmakedefine GPIO2_3_IRQn               (@GPIO2_3_IRQn@)
+#cmakedefine GPIO2_4_IRQn               (@GPIO2_4_IRQn@)
+#cmakedefine GPIO2_5_IRQn               (@GPIO2_5_IRQn@)
+#cmakedefine GPIO2_6_IRQn               (@GPIO2_6_IRQn@)
+#cmakedefine GPIO2_7_IRQn               (@GPIO2_7_IRQn@)
+#cmakedefine GPIO2_8_IRQn               (@GPIO2_8_IRQn@)
+#cmakedefine GPIO2_9_IRQn               (@GPIO2_9_IRQn@)
+#cmakedefine GPIO2_10_IRQn              (@GPIO2_10_IRQn@)
+#cmakedefine GPIO2_11_IRQn              (@GPIO2_11_IRQn@)
+#cmakedefine GPIO2_12_IRQn              (@GPIO2_12_IRQn@)
+#cmakedefine GPIO2_13_IRQn              (@GPIO2_13_IRQn@)
+#cmakedefine GPIO2_14_IRQn              (@GPIO2_14_IRQn@)
+#cmakedefine GPIO2_15_IRQn              (@GPIO2_15_IRQn@)
+#cmakedefine GPIO3_0_IRQn               (@GPIO3_0_IRQn@)  /* All P3 I/O pins used as irq source    */
+#cmakedefine GPIO3_1_IRQn               (@GPIO3_1_IRQn@)  /* There are 4 pins in total             */
+#cmakedefine GPIO3_2_IRQn               (@GPIO3_2_IRQn@)
+#cmakedefine GPIO3_3_IRQn               (@GPIO3_3_IRQn@)
+#cmakedefine UARTRX5_IRQn               (@UARTRX5_IRQn@)  /* UART 5 RX Interrupt                   */
+#cmakedefine UARTTX5_IRQn               (@UARTTX5_IRQn@)  /* UART 5 TX Interrupt                   */
+#cmakedefine UART5_IRQn                 (@UART5_IRQn@)  /* UART 5 combined Interrupt             */
+#cmakedefine HDCLCD_IRQn                (@HDCLCD_IRQn@)  /* HDCLCD Interrupt                      */
+
+#endif /* PERIPHERAL_IRQS_H */

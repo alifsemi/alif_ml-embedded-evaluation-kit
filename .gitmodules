@@ -1,0 +1,12 @@
+[submodule "dependencies/tensorflow"]
+	path = dependencies/tensorflow
+	url = https://github.com/tensorflow/tensorflow
+[submodule "dependencies/cmsis"]
+	path = dependencies/cmsis
+	url = https://github.com/ARM-software/CMSIS_5.git
+[submodule "dependencies/core_driver"]
+	path = dependencies/core_driver
+	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-driver
+[submodule "dependencies/core-software"]
+	path = dependencies/core-software
+	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-software

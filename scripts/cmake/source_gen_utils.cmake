@@ -1,0 +1,270 @@
+#----------------------------------------------------------------------------
+#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#----------------------------------------------------------------------------
+set(SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
+
+##############################################################################
+# This function generates C++ files for images located in the directory it is
+# pointed at. NOTE: uses python
+##############################################################################
+function(generate_images_code input_dir src_out hdr_out img_size)
+
+    # Absolute paths for passing into python script
+    get_filename_component(input_dir_abs ${input_dir} ABSOLUTE)
+    get_filename_component(src_out_abs ${src_out} ABSOLUTE)
+    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
+
+    message(STATUS "Generating image files from ${input_dir_abs}")
+    execute_process(
+        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_rgb_cpp.py
+        --image_path ${input_dir_abs}
+        --source_folder_path ${src_out_abs}
+        --header_folder_path ${hdr_out_abs}
+        --image_size ${img_size} ${img_size}
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate image files.")
+    endif ()
+
+endfunction()
+
+##############################################################################
+# This function generates C++ files for audio files located in the directory it is
+# pointed at. NOTE: uses python
+##############################################################################
+function(generate_audio_code input_dir src_out hdr_out s_rate_opt mono_opt off_opt duration_opt res_type_opt min_sample_opt)
+
+    # Absolute paths for passing into python script
+    get_filename_component(input_dir_abs ${input_dir} ABSOLUTE)
+    get_filename_component(src_out_abs ${src_out} ABSOLUTE)
+    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
+
+    to_py_bool(mono_opt mono_opt_py)
+
+    message(STATUS "Generating audio files from ${input_dir_abs}")
+    execute_process(
+        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_audio_cpp.py
+        --audio_path ${input_dir_abs}
+        --source_folder_path ${src_out_abs}
+        --header_folder_path ${hdr_out_abs}
+        --sampling_rate ${s_rate_opt}
+        --mono ${mono_opt_py}
+        --offset ${off_opt}
+        --duration ${duration_opt}
+        --res_type ${res_type_opt}
+        --min_samples ${min_sample_opt}
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate audio files.")
+    endif ()
+
+endfunction()
+
+##############################################################################
+# This function generates default empty input C++ files for applications with no
+# external input. Main use is for the inference runner. NOTE: uses python
+##############################################################################
+function(generate_default_input_code hdr_out)
+
+    # Absolute paths for passing into python script
+    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
+
+    message(STATUS "Generating default input files")
+    execute_process(
+            COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_default_input_cpp.py
+            --header_folder_path ${hdr_out_abs}
+            RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate default input .")
+    endif ()
+
+endfunction()
+##############################################################################
+# This function generates C++ files for tflite NN model files.
+# @param[in]    MODEL_PATH      path to a tflite file
+# @param[in]    DESTINATION     directory in which the output cc must be
+#                               placed
+# @param[in]    EXPRESSIONS     C++ code expressions to add to the generated file
+# @param[in]    NAMESPACE       model name space
+# NOTE: Uses python
+##############################################################################
+function(generate_tflite_code)
+
+    set(multiValueArgs EXPRESSIONS NAMESPACE)
+    set(oneValueArgs MODEL_PATH DESTINATION)
+    cmake_parse_arguments(PARSED "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+    # Absolute paths for passing into python script
+    get_filename_component(ABS_MODEL_PATH ${PARSED_MODEL_PATH} ABSOLUTE)
+    get_filename_component(ABS_DESTINATION ${PARSED_DESTINATION} ABSOLUTE)
+
+    if (EXISTS ${ABS_MODEL_PATH})
+        message(STATUS "Using ${ABS_MODEL_PATH}")
+    else ()
+        message(FATAL_ERROR "${ABS_MODEL_PATH} not found!")
+    endif ()
+
+
+    foreach(expression ${PARSED_EXPRESSIONS})
+        set(py_arg_exp ${py_arg_exp} --expression=${expression})
+    endforeach()
+
+    foreach(name ${PARSED_NAMESPACE})
+        set(py_arg_exp ${py_arg_exp} --namespaces=${name})
+    endforeach()
+
+    execute_process(
+        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_model_cpp.py
+        --tflite_path ${ABS_MODEL_PATH}
+        --output_dir ${ABS_DESTINATION} ${py_arg_exp}
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate model files.")
+    endif ()
+endfunction()
+
+
+##############################################################################
+# This function generates C++ file for a given labels' text file.
+# @param[in]    INPUT          Path to the label text file
+# @param[in]    DESTINATION_SRC directory in which the output cc must be
+#                               placed
+# @param[in]    DESTINATION_HDR directory in which the output h file must be
+#                               placed
+# @param[in]    OUTPUT_FILENAME    Path to required output file
+# @param[in]    NAMESPACE       data name space
+# NOTE: Uses python
+##############################################################################
+function(generate_labels_code)
+
+    set(multiValueArgs NAMESPACE)
+    set(oneValueArgs INPUT DESTINATION_SRC DESTINATION_HDR OUTPUT_FILENAME)
+    cmake_parse_arguments(PARSED "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+    # Absolute paths for passing into python script
+    get_filename_component(input_abs ${PARSED_INPUT} ABSOLUTE)
+    get_filename_component(src_out_abs ${PARSED_DESTINATION_SRC} ABSOLUTE)
+    get_filename_component(hdr_out_abs ${PARSED_DESTINATION_HDR} ABSOLUTE)
+
+    message(STATUS "Generating labels file from ${PARSED_INPUT}")
+    file(REMOVE "${hdr_out_abs}/${PARSED_OUTPUT_FILENAME}.hpp")
+    file(REMOVE "${src_out_abs}/${PARSED_OUTPUT_FILENAME}.cc")
+
+    foreach(name ${PARSED_NAMESPACE})
+        set(py_arg_exp ${py_arg_exp} --namespaces=${name})
+    endforeach()
+
+    message(STATUS "writing to ${hdr_out_abs}/${PARSED_OUTPUT_FILENAME}.hpp and ${src_out_abs}/${PARSED_OUTPUT_FILENAME}.cc")
+    execute_process(
+        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_labels_cpp.py
+        --labels_file ${input_abs}
+        --source_folder_path ${src_out_abs}
+        --header_folder_path ${hdr_out_abs}
+        --output_file_name ${PARSED_OUTPUT_FILENAME} ${py_arg_exp}
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate label files.")
+    endif ()
+endfunction()
+
+
+##############################################################################
+# This function generates C++ data files for test located in the directory it is
+# pointed at.
+# @param[in]    INPUT_DIR       directory in which are the npy files
+# @param[in]    DESTINATION_SRC directory in which the output cc must be
+#                               placed
+# @param[in]    DESTINATION_HDR directory in which the output h file must be
+#                               placed
+# @param[in]    USECASE         name of the sub-usecase
+# @param[in]    NAMESPACE       data name space
+# NOTE: Uses python
+##############################################################################
+function(generate_test_data_code)
+
+    set(multiValueArgs NAMESPACE)
+    set(oneValueArgs INPUT_DIR DESTINATION_SRC DESTINATION_HDR USECASE)
+    cmake_parse_arguments(PARSED "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+    # Absolute paths for passing into python script
+    get_filename_component(input_dir_abs ${PARSED_INPUT_DIR} ABSOLUTE)
+    get_filename_component(src_out_abs ${PARSED_DESTINATION_SRC} ABSOLUTE)
+    get_filename_component(hdr_out_abs ${PARSED_DESTINATION_HDR} ABSOLUTE)
+
+    foreach(name ${PARSED_NAMESPACE})
+        set(py_arg_exp ${py_arg_exp} --namespaces=${name})
+    endforeach()
+
+    message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
+    execute_process(
+        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_test_data_cpp.py
+        --data_folder_path ${input_dir_abs}
+        --source_folder_path ${src_out_abs}
+        --header_folder_path ${hdr_out_abs}
+        --usecase ${PARSED_USECASE}
+        ${py_arg_exp}
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to generate test data files.")
+    endif ()
+
+endfunction()
+
+
+##############################################################################
+# Function to prepare a python virtual environment for running the functions
+# outlined above.
+##############################################################################
+function(setup_source_generator)
+    if (${CMAKE_HOST_WIN32})
+#        windows python3 has python.exe
+        set(PY_EXEC python)
+        set(PYTHON ${CMAKE_BINARY_DIR}/pyenv/Scripts/${PY_EXEC})
+    else()
+        set(PY_EXEC python3)
+        set(PYTHON ${CMAKE_BINARY_DIR}/pyenv/bin/${PY_EXEC})
+    endif()
+    set(PYTHON ${PYTHON} PARENT_SCOPE)
+
+    if (EXISTS ${PYTHON})
+        message(STATUS "Using existing python at ${PYTHON}")
+        return()
+    endif ()
+    message(STATUS "Configuring python environment at ${PYTHON}")
+    execute_process(
+        COMMAND ${PY_EXEC} -m venv ${CMAKE_BINARY_DIR}/pyenv
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to setup python3 environment")
+    endif ()
+
+    execute_process(COMMAND ${PYTHON} -m pip install wheel)
+
+    execute_process(
+        COMMAND ${PYTHON} -m pip install -r ${SCRIPTS_DIR}/py/requirements.txt
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to setup python3 environment")
+    endif ()
+endfunction()
