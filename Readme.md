@@ -53,7 +53,7 @@ Common ML application functions will help you to focus on implementing logic of 
 only the use case code and leave all other components unchanged. Supplied build system will discover new ML application
 code and automatically include it into compilation flow.
 
-![APIs](./docs/media/APIs_description.png)
+![APIs](docs/media/APIs_description.png)
 
 To run an ML application on the Cortex-M and Ethos-U55 NPU, please, follow these steps:
 
@@ -66,24 +66,25 @@ If using the FPGA option, load the image on the FPGA and [launch the application
 
 To get familiar with these steps, you can follow the [quick start guide](docs/quick_start.md).
 
-For more details:
+For more details see full documentation:
 
-- [Arm Ethos-U55 NPU Code Samples](docs/documentation.md)
-  - [Trademarks](docs/documentation.md#Trademarks)
-  - [Prerequisites](docs/documentation.md#Prerequisites)
-    - [Additional reading](docs/documentation.md#additional-reading)
-  - [Repository structure](docs/documentation.md#repository-structure)
-  - [Building](docs/documentation.md#building)
-  - [Deployment](docs/documentation.md#deployment)
-  - [Running sample applications](docs/documentation.md#running-code-samples-applications)
-  - [Implementing custom ML application](docs/documentation.md#implementing-custom-ML-application)
-  - [Testing and benchmarking](docs/documentation.md#testing-and-benchmarking)
-  - [Troubleshooting](docs/documentation.md#troubleshooting)
-  - [Appendix](docs/documentation.md#appendix)
-  - [Contribution guidelines](docs/documentation.md#contribution-guidelines)
-    - [Coding standards and guidelines](docs/documentation.md#coding-standards-and-guidelines)
-    - [Code Reviews](docs/documentation.md#code-reviews)
-    - [Testing](docs/documentation.md#testing)
-  - [Communications](docs/documentation.md#communications)
-  - [Licenses](docs/documentation.md#licenses)
-
+- [Arm® ML embedded evaluation kit](./docs/documentation.md#arm-ml-embedded-evaluation-kit)
+  - [Table of Content](./docs/documentation.md#table-of-content)
+  - [Trademarks](./docs/documentation.md#trademarks)
+  - [Prerequisites](./docs/documentation.md#prerequisites)
+    - [Additional reading](./docs/documentation.md#additional-reading)
+  - [Repository structure](./docs/documentation.md#repository-structure)
+  - [Models and resources](./docs/documentation.md#models-and-resources)
+  - [Building](./docs/documentation.md#building)
+  - [Deployment](./docs/documentation.md#deployment)
+  - [Running code samples applications](./docs/documentation.md#running-code-samples-applications)
+  - [Implementing custom ML application](./docs/documentation.md#implementing-custom-ml-application)
+  - [Testing and benchmarking](./docs/documentation.md#testing-and-benchmarking)
+  - [Troubleshooting](./docs/documentation.md#troubleshooting)
+  - [Contribution guidelines](./docs/documentation.md#contribution-guidelines)
+    - [Coding standards and guidelines](./docs/documentation.md#coding-standards-and-guidelines)
+    - [Code Reviews](./docs/documentation.md#code-reviews)
+    - [Testing](./docs/documentation.md#testing)
+  - [Communication](./docs/documentation.md#communication)  
+  - [Licenses](./docs/documentation.md#licenses)  
+  - [Appendix](./docs/documentation.md#appendix)

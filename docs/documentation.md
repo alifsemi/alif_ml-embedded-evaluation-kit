@@ -1,8 +1,8 @@
-# Arm Ethos-U55 NPU Code Samples
+# Arm® ML embedded evaluation kit
 
 ## Table of Content
 
-- [Arm Ethos-U55 NPU Code Samples](./documentation.md#arm-ethos-u55-npu-code-samples)
+- [Arm® ML embedded evaluation kit](./documentation.md#arm-ml-embedded-evaluation-kit)
   - [Table of Content](./documentation.md#table-of-content)
   - [Trademarks](./documentation.md#trademarks)
   - [Prerequisites](./documentation.md#prerequisites)
@@ -15,9 +15,12 @@
   - [Implementing custom ML application](./documentation.md#implementing-custom-ml-application)
   - [Testing and benchmarking](./documentation.md#testing-and-benchmarking)
   - [Troubleshooting](./documentation.md#troubleshooting)
+  - [Contribution guidelines](./documentation.md#contribution-guidelines)
     - [Coding standards and guidelines](./documentation.md#coding-standards-and-guidelines)
     - [Code Reviews](./documentation.md#code-reviews)
     - [Testing](./documentation.md#testing)
+  - [Communication](./documentation.md#communication)  
+  - [Licenses](./documentation.md#licenses)  
   - [Appendix](./documentation.md#appendix)
 
 ## Trademarks
@@ -186,7 +189,7 @@ presentation and timer interfaces.
 
 - `platforms/bare-metal/bsp/mem_layout`: contains the platform specific linker scripts.
 
-### Models and resources
+## Models and resources
 
 The models used in the use cases implemented in this project can be downloaded
 from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo/).
@@ -196,16 +199,16 @@ from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo/).
 - [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8).
 - Anomaly Detection (coming soon).
 
-When using Ethos-U55 backend, the NN model is assumed to be optimized by Vela compiler.
+When using Ethos-U55 NPU backend, the NN model is assumed to be optimized by Vela compiler.
 However, even if not, it will fall back on the CPU and execute, if supported by TensorFlow Lite Micro.
 
 ![Vela compiler](./media/vela_flow.jpg)
 
 The Vela compiler is a tool that can optimize a neural network model
-into a version that can run on an embedded system containing Ethos-U55.
+into a version that can run on an embedded system containing Ethos-U55 NPU.
 
 The optimized model will contain custom operators for sub-graphs of the
-model that can be accelerated by Ethos-U55, the remaining layers that
+model that can be accelerated by Ethos-U55 NPU, the remaining layers that
 cannot be accelerated are left unchanged and will run on the CPU using
 optimized (CMSIS-NN) or reference kernels provided by the inference
 engine.
@@ -218,27 +221,26 @@ This section describes how to build the code sample applications from sources - 
 options and the process.
 
 The project can be built for MPS3 FPGA and FVP emulating MPS3. Default values for configuration parameters
-will build executable models with Ethos-U55 support.
+will build executable models with Ethos-U55 NPU support.
 See:
-
-- [Building](./sections/building.md)
-  - [Build prerequisites](./sections/building.md#build-prerequisites)
-  - [Build options](./sections/building.md#build-options)
-  - [Build Process](./sections/building.md#build-process)
-    - [Preparing build environment](./sections/building.md#Preparing-build-environment)
-    - [Create a build directory](./sections/building.md#Create-a-build-directory)
-    - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#Configuring-the-build-for-`MPS3:-SSE-300`)
-    - [Configuring build for different Arm Ethos-U55 configurations](./sections/building.md#Configuring-build-for-different-Arm-Ethos-U55-configurations)
-    - [Configuring the build for `MPS3: SSE-200`](./sections/building.md#Configuring-the-build-for-`MPS3:-SSE-200`)
-    - [Configuring the build native unit-test](./sections/building.md#configuring-the-build-native-unit-test)
-    - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-`simple_platform`)
-    - [Building the configured project](./sections/building.md#Building-the-configured-project)
-  - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
-  - [Add custom inputs](./sections/building.md#add-custom-inputs)
-  - [Add custom model](./sections/building.md#add-custom-model)
-  - [Optimize custom model with Vela compiler](./sections/building.md#Optimize-custom-model-with-Vela-compiler)
-  - [Memory constraints](./sections/building.md#memory-constraints)
-  - [Automatic file generation](./sections/building.md#automatic-file-generation)
+  - [Building the Code Samples application from sources](./sections/building.md#building-the-ml-embedded-code-sample-applications-from-sources)
+    - [Contents](./sections/building.md#contents)
+    - [Build prerequisites](./sections/building.md#build-prerequisites)
+    - [Build options](./sections/building.md#build-options)
+    - [Build process](./sections/building.md#build-process)
+      - [Preparing build environment](./sections/building.md#preparing-build-environment)
+      - [Create a build directory](./sections/building.md#create-a-build-directory)
+      - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#configuring-the-build-for-mps3-sse-300)
+      - [Configuring the build for `MPS3: SSE-200`](./sections/building.md#configuring-the-build-for-mps3-sse-200)
+      - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
+      - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-simple_platform)
+      - [Building the configured project](./sections/building.md#building-the-configured-project)
+    - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
+    - [Add custom inputs](./sections/building.md#add-custom-inputs)
+    - [Add custom model](./sections/building.md#add-custom-model)
+    - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
+    - [Memory constraints](./sections/building.md#memory-constraints)
+    - [Automatic file generation](./sections/building.md#automatic-file-generation)
 
 ## Deployment
 
@@ -262,7 +264,7 @@ See [Running applications](./sections/run.md).
 This section describes how to implement a custom Machine Learning application running
 on a platform supported by the repository (Fixed Virtual Platform or an MPS3 board).
 
-Ethos-U55 NPU Code Samples software project offers a simple way to incorporate additional
+Cortex-M55 CPU and Ethos-U55 NPU Code Samples software project offers a simple way to incorporate additional
 use-case code into the existing infrastructure and provides a build
 system that automatically picks up added functionality and produces
 corresponding executable for each use-case.
@@ -296,13 +298,6 @@ See:
 - [Troubleshooting](./sections/troubleshooting.md)
   - [Inference results are incorrect for my custom files](./sections/troubleshooting.md#Inference-results-are-incorrect-for-my-custom-files)
   - [The application does not work with my custom model](./sections/troubleshooting.md#The-application-does-not-work-with-my-custom-model)
-
-## Appendix
-
-See:
-
-- [Appendix](./sections/appendix.md)
-  - [Cortex-M55 Memory map overview](./sections/appendix.md#cortex-m55-memory-map-overview)
 
 ## Contribution guidelines
 
@@ -376,6 +371,12 @@ Prior to submitting a patch for review please make sure that all build variants 
 Contributions go through testing at the continuous integration system. All builds, tests and checks must pass before a
 contribution gets merged to the master branch.
 
+## Communication 
+
+Please, if you want to start public discussion, raise any issues or questions related to this repository, use 
+[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/) 
+forum. 
+
 ## Licenses
 
 The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](../LICENSE_APACHE_2.0.txt).
@@ -388,3 +389,8 @@ Application input data sample files are provided under their original license:
 | [Image Classification Samples](../resources/img_class/samples/files.md) | [Creative Commons Attribution 1.0](../resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
 | [Keyword Spotting Samples](../resources/kws/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
 | [Keyword Spotting and Automatic Speech Recognition Samples](../resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
+
+## Appendix
+See:
+- [Appendix](./sections/appendix.md)
+  - [Cortex-M55 Memory map overview](./sections/appendix.md#cortex-m55-memory-map-overview)

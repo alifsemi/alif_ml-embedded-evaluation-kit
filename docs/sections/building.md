@@ -1,8 +1,8 @@
-# Building the Code Samples application from sources
+# Building the ML embedded code sample applications from sources
 
 ## Contents
 
-- [Building the Code Samples application from sources](#building-the-code-samples-application-from-sources)
+- [Building the Code Samples application from sources](#building-the-ml-embedded-code-sample-applications-from-sources)
   - [Contents](#contents)
   - [Build prerequisites](#build-prerequisites)
   - [Build options](#build-options)
@@ -11,7 +11,7 @@
     - [Create a build directory](#create-a-build-directory)
     - [Configuring the build for `MPS3: SSE-300`](#configuring-the-build-for-mps3-sse-300)
     - [Configuring the build for `MPS3: SSE-200`](#configuring-the-build-for-mps3-sse-200)
-    - [Configuring the build native unit-test](#configuring-the-build-native-unit-test)
+    - [Configuring native unit-test build](#configuring-native-unit-test-build)
     - [Configuring the build for `simple_platform`](#configuring-the-build-for-simple_platform)
     - [Building the configured project](#building-the-configured-project)
   - [Building timing adapter with custom options](#building-timing-adapter-with-custom-options)
@@ -95,7 +95,7 @@ are fulfilled:
 
     > **Note:** Add it to the path environment variable, if needed.
 
-- Access to the Internet to download the third party dependencies, specifically: TensorFlow Lite Micro, Arm Ethos-U55
+- Access to the Internet to download the third party dependencies, specifically: TensorFlow Lite Micro, Arm Ethos-U55 NPU
 driver and CMSIS. Instructions for downloading these are listed under [preparing build environment](#preparing-build-environment).
 
 ## Build options
@@ -109,14 +109,14 @@ library and Arm® Ethos™-U55 driver libraries from the delivery package.
 
 The build script is parameterized to support different options. Default
 values for build parameters will build the executable compatible with
-the Ethos-U55 Fast Model.
+the Ethos-U55 NPU Fast Model.
 
 The build parameters are:
 
 - `TARGET_PLATFORM`: Target platform to execute application:
   - `mps3`
   - `native`
-  - `simple_plaform`
+  - `simple_platform`
 
 - `TARGET_SUBSYSTEM`: Platform target subsystem; this specifies the
     design implementation for the deployment target. For both, the MPS3
@@ -129,7 +129,7 @@ The build parameters are:
     The default value points to the TensorFlow submodule in the
     [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies` folder.
 
-- `ETHOS_U55_DRIVER_SRC_PATH`: Path to the Ethos-U55 core driver sources.
+- `ETHOS_U55_DRIVER_SRC_PATH`: Path to the Ethos-U55 NPU core driver sources.
     The default value points to the core_driver submodule in the
     [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies` folder.
 
@@ -138,9 +138,9 @@ The build parameters are:
     Arm® Cortex®-M CPU targeted configurations. The default value points to the CMSIS submodule in the
     [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies` folder.
 
-- `ETHOS_U55_ENABLED`: Sets whether the use of Ethos-U55 is available for
+- `ETHOS_U55_ENABLED`: Sets whether the use of Ethos-U55 NPU is available for
     the deployment target. By default, this is set and therefore
-    application is built with Ethos-U55 supported.
+    application is built with Ethos-U55 NPU supported.
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU
     core should be displayed. By default, this is set to false, but can
@@ -157,12 +157,12 @@ The build parameters are:
     value points to one of the delivered set of models. Make sure the
     model chosen is aligned with the `ETHOS_U55_ENABLED` setting.
 
-  - When using Ethos-U55 backend, the NN model is assumed to be
+  - When using Ethos-U55 NPU backend, the NN model is assumed to be
     optimized by Vela compiler.
     However, even if not, it will fall back on the CPU and execute,
     if supported by TensorFlow Lite Micro.
 
-  - When use of Ethos-U55 is disabled, and if a Vela optimized model
+  - When use of Ethos-U55 NPU is disabled, and if a Vela optimized model
     is provided, the application will report a failure at runtime.
 
 - `USE_CASE_BUILD`: specifies the list of applications to build. By
@@ -228,7 +228,7 @@ Certain third party sources are required to be present on the development machin
 repository to link against.
 
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
-2. [Ethos-U55 core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
+2. [Ethos-U55 NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
 
 These are part of the [ethos-u repository](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) and set as
@@ -263,10 +263,10 @@ Create a build directory in the root of the project and navigate inside:
 mkdir build && cd build
 ```
 
-### Configuring the build for `MPS3: SSE-300`
+### Configuring the build for MPS3: SSE-300
 
 On Linux, execute the following command to build the application to run
-on the Ethos-U55 when providing only the mandatory arguments for CMake configuration:
+on the Ethos-U55 NPU when providing only the mandatory arguments for CMake configuration:
 
 ```commandline
 cmake \
@@ -313,7 +313,7 @@ cmake \
 
 If the TensorFlow source tree is not in its default expected location,
 set the path using `TENSORFLOW_SRC_PATH`.
-Similarly, if the Ethos-U55 driver and CMSIS are not in the default location,
+Similarly, if the Ethos-U55 NPU driver and CMSIS are not in the default location,
 `ETHOS_U55_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` can be used to configure their location. For example:
 
 ```commandline
@@ -329,7 +329,7 @@ cmake \
 > **Note:** If re-building with changed parameters values, it is
 highly advised to clean the build directory and re-run the CMake command.
 
-### Configuring the build for `MPS3: SSE-200`
+### Configuring the build for MPS3: SSE-200
 
 ```commandline
 cmake \
@@ -348,12 +348,12 @@ cmake \
     -G "MinGW Makefiles ..
 ```
 
-### Configuring the build native unit-test
+### Configuring native unit-test build
 
 ```commandline
 cmake \
     -DTARGET_PLATFORM=native \
-    -DCMAKE_TOOLCHAIN_FILE=public/scripts/cmake/native-toolchain.cmake ..
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake ..
 ```
 
 For Windows add `-G "MinGW Makefiles"`:
@@ -361,7 +361,7 @@ For Windows add `-G "MinGW Makefiles"`:
 ```commandline
 cmake \
     -DTARGET_PLATFORM=native \
-    -DCMAKE_TOOLCHAIN_FILE=public/scripts/cmake/native-toolchain.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake \
     -G "MinGW Makefiles ..
 ```
 
@@ -373,12 +373,12 @@ Results of the build will be placed under `build/bin/` folder:
   |_ ethos-u
 ```
 
-### Configuring the build for `simple_platform`
+### Configuring the build for simple_platform
 
 ```commandline
 cmake \
     -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=public/scripts/cmake/bare-metal-toolchain.cmake ..
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
 
 For Windows add `-G "MinGW Makefiles"`:
@@ -386,7 +386,7 @@ For Windows add `-G "MinGW Makefiles"`:
 ```commandline
 cmake \
     -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=public/scripts/cmake/bare-metal-toolchain.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
     -G "MinGW Makefiles" ..
 ```
 
@@ -446,11 +446,11 @@ in the use case documentation.
 ## Building timing adapter with custom options
 
 The sources also contains the configuration for a timing adapter utility
-for the Ethos-U55 driver. The timing adapter allows the platform to simulate user
+for the Ethos-U55 NPU driver. The timing adapter allows the platform to simulate user
 provided memory bandwidth and latency constraints.
 
 The timing adapter driver aims to control the behavior of two AXI buses
-used by Ethos-U55. One is for SRAM memory region and the other is for
+used by Ethos-U55 NPU. One is for SRAM memory region and the other is for
 flash or DRAM. The SRAM is where intermediate buffers are expected to be
 allocated and therefore, this region can serve frequent R/W traffic
 generated by computation operations while executing a neural network
@@ -536,7 +536,7 @@ For a clock rate of 500MHz, this would translate to:
 
 - With a read latency of 64 cycles, and maximum pending reads as 2,
     each read could be a maximum of 64 or 128 bytes, as defined for
-    Ethos-U55\'s AXI bus\'s attribute.
+    Ethos-U55 NPU\'s AXI bus\'s attribute.
 
     The bandwidth is calculated solely by read parameters ![Bandwidth formula](
         ../media/F3.png)
@@ -592,7 +592,7 @@ specific use case documentation.
 The application performs inference using the model pointed to by the
 CMake parameter `MODEL_TFLITE_PATH`.
 
-> **Note:** If you want to run the model using Ethos-U55, ensure your custom
+> **Note:** If you want to run the model using Ethos-U55 NPU, ensure your custom
 model has been run through the Vela compiler successfully before continuing.
 
 To run the application with a custom model you will need to provide a
@@ -653,16 +653,16 @@ It is a python tool available from <https://pypi.org/project/ethos-u-vela/>.
 The source code is hosted on <https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/>.
 
 The Vela compiler is a tool that can optimize a neural network model
-into a version that can run on an embedded system containing Ethos-U55.
+into a version that can run on an embedded system containing Ethos-U55 NPU.
 
 The optimized model will contain custom operators for sub-graphs of the
-model that can be accelerated by Ethos-U55, the remaining layers that
+model that can be accelerated by Ethos-U55 NPU, the remaining layers that
 cannot be accelerated are left unchanged and will run on the CPU using
 optimized (CMSIS-NN) or reference kernels provided by the inference
 engine.
 
 After the compilation, the optimized model can only be executed on a
-system with Ethos-U55.
+system with Ethos-U55 NPU.
 
 > **Note:** The NN model provided during the build and compiled into the application
 executable binary defines whether CPU or NPU is used to execute workloads.
@@ -705,7 +705,7 @@ To see Vela helper for all the parameters use: `vela --help`.
 Please, get in touch with your Arm representative to request access to
 Vela Compiler documentation for more details.
 
-> **Note:** By default, use of the Ethos-U55 is enabled in the CMake configuration.
+> **Note:** By default, use of the Ethos-U55 NPU is enabled in the CMake configuration.
 This could be changed by passing `-DETHOS_U55_ENABLED`.
 
 ## Memory constraints
@@ -792,10 +792,10 @@ LOAD_REGION_1 0x60000000 0x02000000
 ```
 
 It is worth noting that in the bitfile implementation, only the BRAM,
-internal SRAM and DDR memory regions are accessible to the Ethos-U55
+internal SRAM and DDR memory regions are accessible to the Ethos-U55 NPU
 block. In the above snippet, the internal SRAM region memory can be seen
 to be utilized by activation buffers with a limit of 512kiB. If used,
-this region will be written to by the Ethos-U55 block frequently. A bigger
+this region will be written to by the Ethos-U55 NPU block frequently. A bigger
 region of memory for storing the model is placed in the DDR region,
 under LOAD_REGION_1. The two load regions are necessary as the MPS3's
 motherboard configuration controller limits the load size at address
