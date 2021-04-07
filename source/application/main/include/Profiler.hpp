@@ -26,10 +26,31 @@
 namespace arm {
 namespace app {
 
+    /** Statistics for a profiling metric. */
+    struct Statistics {
+        std::string name;
+        std::string unit;
+        std::uint64_t total;
+        double avrg;
+        std::uint64_t min;
+        std::uint64_t max;
+    };
+
+    /** Profiling results with calculated statistics. */
+    struct ProfileResult {
+        std::string name;
+        std::uint32_t samplesNum;
+        std::vector<Statistics> data;
+    };
+
     /** A single profiling unit definition. */
     struct ProfilingUnit {
         uint64_t npuCycles = 0;
         uint64_t activeNpuCycles = 0;
+        uint64_t idleNpuCycles = 0;
+        uint64_t axi0writes = 0;
+        uint64_t axi0reads = 0;
+        uint64_t axi1reads = 0;
         uint64_t cpuCycles = 0;
         time_t time = 0;
     };
@@ -73,18 +94,22 @@ namespace app {
         void Reset();
 
         /**
-         * @brief   Gets the results as string and resets the profiler.
-         * @returns Result string.
+         * @brief   Collects profiling results statistics and resets the profiler.
          **/
-        std::string GetResultsAndReset();
+        void GetAllResultsAndReset(std::vector<ProfileResult>& results);
+
+        /**
+         * @brief   Prints collected profiling results and resets the profiler.
+         **/
+        void PrintProfilingResult(bool printFullStat = false);
 
         /** @brief Set the profiler name. */
         void SetName(const char* str);
 
     private:
         ProfilingMap    _m_series;                /* Profiling series map. */
-        time_counter    _m_tstampSt;              /* Container for a current starting timestamp. */
-        time_counter    _m_tstampEnd;             /* Container for a current ending timestamp. */
+        time_counter    _m_tstampSt{};            /* Container for a current starting timestamp. */
+        time_counter    _m_tstampEnd{};           /* Container for a current ending timestamp. */
         hal_platform *  _m_pPlatform = nullptr;   /* Platform pointer - to get the timer. */
 
         bool            _m_started = false;       /* Indicates profiler has been started. */

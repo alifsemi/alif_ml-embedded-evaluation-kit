@@ -45,8 +45,8 @@ dev_ethosu_eval-<use_case>-tests
 ```
 
 ```log
-[INFO] native platform initialised
-[INFO] ARM Ethos-U55 Evaluation application for MPS3 FPGA Prototyping Board and FastModel
+INFO - native platform initialised
+INFO - ARM Ethos-U55 Evaluation application for MPS3 FPGA Prototyping Board and FastModel
 
 ...
 ===============================================================================

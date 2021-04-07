@@ -34,28 +34,73 @@ TEST_CASE("Common: Test Profiler")
     hal_init(&platform, &data_acq, &data_psn, &timer);
     hal_platform_init(&platform);
 
-    /* An invalid profiler shouldn't be of much use. */
-    arm::app::Profiler profilerInvalid {nullptr, "test_invalid"};
-    REQUIRE(false == profilerInvalid.StartProfiling());
-    REQUIRE(false == profilerInvalid.StopProfiling());
+    /* An invalid profiler shouldn't be of much use */
+    SECTION("Test invalid profiler") {
+        arm::app::Profiler profilerInvalid{nullptr, "test_invalid"};
+        REQUIRE(false == profilerInvalid.StartProfiling());
+        REQUIRE(false == profilerInvalid.StopProfiling());
+    }
 
-    arm::app::Profiler profilerValid{&platform, "test_valid"};
-    REQUIRE(true == profilerValid.StartProfiling());
-    REQUIRE(true == profilerValid.StopProfiling());
+    SECTION("Test valid profiler") {
+        arm::app::Profiler profilerValid{&platform, "test_valid"};
+        REQUIRE(true == profilerValid.StartProfiling());
+        REQUIRE(true == profilerValid.StopProfiling());
+        std::vector<arm::app::ProfileResult> results;
+        profilerValid.GetAllResultsAndReset(results);
+        REQUIRE(results.size() == 1);
+        REQUIRE(results[0].name == "test_valid");
+        /* Abuse should still fail: */
+        REQUIRE(false == profilerValid.StopProfiling()); /* We need to start it first */
+        REQUIRE(true == profilerValid.StartProfiling()); /* Should be able to start it fine */
+        REQUIRE(false == profilerValid.StartProfiling()); /* Can't restart it without resetting */
+        profilerValid.Reset();
+        REQUIRE(true == profilerValid.StartProfiling()); /* Can start it again now.. */
+        REQUIRE(true == profilerValid.StopProfiling());
+    }
 
-    std::string strProfile = profilerValid.GetResultsAndReset();
-    REQUIRE(std::string::npos != strProfile.find("test_valid"));
+    SECTION("Test multiple profilers") {
+        arm::app::Profiler profilerValid{&platform, "one"};
+        REQUIRE(true == profilerValid.StartProfiling());
+        REQUIRE(true == profilerValid.StopProfiling());
 
-#if defined(CPU_PROFILE_ENABLED)
-    /* We should have milliseconds elapsed. */
-    REQUIRE(std::string::npos != strProfile.find("ms"));
-#endif /* defined(CPU_PROFILE_ENABLED) */
+        REQUIRE(true == profilerValid.StartProfiling("two"));
+        REQUIRE(true == profilerValid.StopProfiling());
+        REQUIRE(true == profilerValid.StartProfiling("two"));
+        REQUIRE(true == profilerValid.StopProfiling());
 
-    /* Abuse should fail: */
-    REQUIRE(false == profilerValid.StopProfiling());  /* We need to start it first. */
-    REQUIRE(true == profilerValid.StartProfiling());  /* Should be able to start it fine. */
-    REQUIRE(false == profilerValid.StartProfiling()); /* Can't restart it without resetting. */
-    profilerValid.Reset();                            /* Reset. */
-    REQUIRE(true == profilerValid.StartProfiling());  /* Can start it again now. */
-    REQUIRE(true == profilerValid.StopProfiling());   /* Can start it again now. */
+        std::vector<arm::app::ProfileResult> results;
+        profilerValid.GetAllResultsAndReset(results);
+        REQUIRE(results.size() == 2);
+        REQUIRE(results[0].name == "one");
+        REQUIRE(results[0].samplesNum == 1);
+        REQUIRE(results[1].name == "two");
+        REQUIRE(results[1].samplesNum == 2);
+    }
+
+#if defined (CPU_PROFILE_ENABLED)
+    SECTION("Test CPU profiler") {
+
+        arm::app::Profiler profilerCPU{&platform, "test cpu"};
+        std::vector<arm::app::ProfileResult> results;
+        profilerCPU.StartProfiling();
+        profilerCPU.StopProfiling();
+        profilerCPU.GetAllResultsAndReset(results);
+        REQUIRE(results.size() == 1);
+        bool foundTime = false;
+        bool foundCPU_ACTIVE = false;
+        for(arm::app::Statistics& stat: results[0].data) {
+
+            if (!foundTime) {
+                foundTime = stat.name == "Time";
+            }
+
+            if (!foundCPU_ACTIVE) {
+                foundCPU_ACTIVE = stat.name == "CPU ACTIVE";
+            }
+
+        }
+        REQUIRE(foundTime);
+        REQUIRE(foundCPU_ACTIVE);
+    }
+#endif /* defined (CPU_PROFILE_ENABLED) */
 }

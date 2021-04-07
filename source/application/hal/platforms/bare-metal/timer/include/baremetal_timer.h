@@ -34,6 +34,9 @@ typedef struct bm_time_counter {
 #if defined (ARM_NPU)
     uint64_t                npu_total_ccnt;
     uint32_t                npu_idle_ccnt;
+    uint32_t                npu_axi0_read_ccnt;
+    uint32_t                npu_axi0_write_ccnt;
+    uint32_t                npu_axi1_read_ccnt;
 #endif /* ARM_NPU */
 
 } time_counter;

@@ -32,31 +32,31 @@
 #endif /*LOG_LEVEL*/
 
 #if (LOG_LEVEL == LOG_LEVEL_TRACE)
-    #define trace(...)        printf("[TRACE] "); printf(__VA_ARGS__)
+    #define trace(...)        printf("TRACE - "); printf(__VA_ARGS__)
 #else
     #define trace(...)
 #endif  /* LOG_LEVEL == LOG_LEVEL_TRACE */
 
 #if (LOG_LEVEL <= LOG_LEVEL_DEBUG)
-    #define debug(...)        printf("[DEBUG] "); printf(__VA_ARGS__)
+    #define debug(...)        printf("DEBUG - "); printf(__VA_ARGS__)
 #else
     #define debug(...)
 #endif  /* LOG_LEVEL > LOG_LEVEL_TRACE */
 
 #if (LOG_LEVEL <= LOG_LEVEL_INFO)
-    #define info(...)         printf("[INFO] "); printf(__VA_ARGS__)
+    #define info(...)         printf("INFO - "); printf(__VA_ARGS__)
 #else
     #define info(...)
 #endif  /* LOG_LEVEL > LOG_LEVEL_DEBUG */
 
 #if (LOG_LEVEL <= LOG_LEVEL_WARN)
-    #define warn(...)         printf("[WARN] "); printf(__VA_ARGS__)
+    #define warn(...)         printf("WARN - "); printf(__VA_ARGS__)
 #else
     #define warn(...)
 #endif  /* LOG_LEVEL > LOG_LEVEL_INFO */
 
 #if (LOG_LEVEL <= LOG_LEVEL_ERROR)
-    #define printf_err(...)   printf("[ERROR] "); printf(__VA_ARGS__)
+    #define printf_err(...)   printf("ERROR - "); printf(__VA_ARGS__)
 #else
     #define printf_err(...)
 #endif  /* LOG_LEVEL > LOG_LEVEL_INFO */

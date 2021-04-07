@@ -468,72 +468,72 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-    [INFO] uTFL version: 2.5.0
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 490 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:   1
-    [INFO] 		2:  49
-    [INFO] 		3:  10
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 1.107164
-    [INFO] ZeroPoint[0] = 95
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 12 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:  12
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.003906
-    [INFO] ZeroPoint[0] = -128
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 123616
-    [INFO] Number of operators: 16
-    [INFO] 	Operator 0: RESHAPE
-    [INFO] 	Operator 1: CONV_2D
-    [INFO] 	Operator 2: DEPTHWISE_CONV_2D
-    [INFO] 	Operator 3: CONV_2D
-    [INFO] 	Operator 4: DEPTHWISE_CONV_2D
-    [INFO] 	Operator 5: CONV_2D
-    [INFO] 	Operator 6: DEPTHWISE_CONV_2D
-    [INFO] 	Operator 7: CONV_2D
-    [INFO] 	Operator 8: DEPTHWISE_CONV_2D
-    [INFO] 	Operator 9: CONV_2D
-    [INFO] 	Operator 10: DEPTHWISE_CONV_2D
-    [INFO] 	Operator 11: CONV_2D
-    [INFO] 	Operator 12: AVERAGE_POOL_2D
-    [INFO] 	Operator 13: RESHAPE
-    [INFO] 	Operator 14: FULLY_CONNECTED
-    [INFO] 	Operator 15: SOFTMAX
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 11544 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1: 296
-    [INFO] 		2:  39
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.110316
-    [INFO] ZeroPoint[0] = -11
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 4292 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:   1
-    [INFO] 		2: 148
-    [INFO] 		3:  29
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.003906
-    [INFO] ZeroPoint[0] = -128
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 809808
-    [INFO] Number of operators: 1
-    [INFO] 	Operator 0: ethos-u
+    INFO - uTFL version: 2.5.0
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 490 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:   1
+    INFO - 		2:  49
+    INFO - 		3:  10
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 1.107164
+    INFO - ZeroPoint[0] = 95
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 12 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:  12
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.003906
+    INFO - ZeroPoint[0] = -128
+    INFO - Activation buffer (a.k.a tensor arena) size used: 123616
+    INFO - Number of operators: 16
+    INFO - 	Operator 0: RESHAPE
+    INFO - 	Operator 1: CONV_2D
+    INFO - 	Operator 2: DEPTHWISE_CONV_2D
+    INFO - 	Operator 3: CONV_2D
+    INFO - 	Operator 4: DEPTHWISE_CONV_2D
+    INFO - 	Operator 5: CONV_2D
+    INFO - 	Operator 6: DEPTHWISE_CONV_2D
+    INFO - 	Operator 7: CONV_2D
+    INFO - 	Operator 8: DEPTHWISE_CONV_2D
+    INFO - 	Operator 9: CONV_2D
+    INFO - 	Operator 10: DEPTHWISE_CONV_2D
+    INFO - 	Operator 11: CONV_2D
+    INFO - 	Operator 12: AVERAGE_POOL_2D
+    INFO - 	Operator 13: RESHAPE
+    INFO - 	Operator 14: FULLY_CONNECTED
+    INFO - 	Operator 15: SOFTMAX
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 11544 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1: 296
+    INFO - 		2:  39
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.110316
+    INFO - ZeroPoint[0] = -11
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 4292 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:   1
+    INFO - 		2: 148
+    INFO - 		3:  29
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.003906
+    INFO - ZeroPoint[0] = -128
+    INFO - Activation buffer (a.k.a tensor arena) size used: 809808
+    INFO - Number of operators: 1
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. “List” menu option prints a list of pair ... indexes - the original filenames embedded in the application:
 
     ```log
-    [INFO] List of Files:
-    [INFO] 0 => yesnogostop.wav
+    INFO - List of Files:
+    INFO - 0 => yesnogostop.wav
     ```
 
 ### Running Keyword Spotting and Automatic Speech Recognition
@@ -543,29 +543,31 @@ Please select the first menu option to execute Keyword Spotting and Automatic Sp
 The following example illustrates application output:
 
 ```log
-[INFO] KWS audio data window size 16000
-[INFO] Running KWS inference on audio clip 0 => yesnogostop.wav
-[INFO] Inference 1/7
-[INFO] Profile for Inference:
-	Active NPU cycles: 0
-	Idle NPU cycles:   6
-
-[INFO] For timestamp: 0.000000 (inference #: 0); threshold: 0.900000
-[INFO] 		label @ 0: yes, score: 0.996094
-[INFO] Keyword spotted
-[INFO] Inference 1/2
-[INFO] Profile for Inference:
-	Active NPU cycles: 28924742
-	Idle NPU cycles:   424
-
-[INFO] Inference 2/2
-[INFO] Profile for Inference:
-	Active NPU cycles: 28924740
-	Idle NPU cycles:   426
-
-[INFO] Result for inf 0: no gow
-[INFO] Result for inf 1:  stoppe
-[INFO] Final result: no gow stoppe
+INFO - KWS audio data window size 16000
+INFO - Running KWS inference on audio clip 0 => yesnogostop.wav
+INFO - Inference 1/7
+INFO - For timestamp: 0.000000 (inference #: 0); threshold: 0.900000
+INFO -          label @ 0: yes, score: 0.996094
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 217385
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 82607
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 59608
+INFO - NPU ACTIVE cycles: 680611
+INFO - NPU IDLE cycles: 561
+INFO - NPU total cycles: 681172
+INFO - Keyword spotted
+INFO - Inference 1/2
+INFO - Inference 2/2
+INFO - Result for inf 0: no gow
+INFO - Result for inf 1:  stoppe
+INFO - Final result: no gow stoppe
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 13520864
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 2841970
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 2717670
+INFO - NPU ACTIVE cycles: 28909309
+INFO - NPU IDLE cycles: 863
+INFO - NPU total cycles: 28910172
 ```
 
 It could take several minutes to complete one inference run (average time is 2-3 minutes).
@@ -578,9 +580,19 @@ The profiling section of the log shows that for the ASR inference:
 
 - Ethos-U55's PMU report:
 
-  - 28,924,740 active cycles: number of cycles that were used for computation
+  - 28,910,172 total cycle: The number of NPU cycles
 
-  - 426 idle cycles: number of cycles for which the NPU was idle
+  - 28,909,309 active cycles: number of NPU cycles that were used for computation
+
+  - 863 idle cycles: number of cycles for which the NPU was idle
+
+  - 13,520,864 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 2,841,970 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 2,717,670 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
 the CPU model is not cycle-approximate or cycle-accurate.

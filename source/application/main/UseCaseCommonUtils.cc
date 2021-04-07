@@ -21,16 +21,11 @@
 namespace arm {
 namespace app {
 
-    bool RunInference(hal_platform& platform, arm::app::Model& model)
+    bool RunInference(arm::app::Model& model, Profiler& profiler)
     {
-        Profiler profiler{&platform, "Inference"};
-        profiler.StartProfiling();
-
+        profiler.StartProfiling("Inference");
         bool runInf = model.RunInference();
-
         profiler.StopProfiling();
-        std::string profileResults = profiler.GetResultsAndReset();
-        info("%s\n", profileResults.c_str());
 
         return runInf;
     }

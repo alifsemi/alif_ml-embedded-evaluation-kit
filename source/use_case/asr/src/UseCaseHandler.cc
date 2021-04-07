@@ -67,6 +67,8 @@ namespace app {
         auto& platform = ctx.Get<hal_platform&>("platform");
         platform.data_psn->clear(COLOR_BLACK);
 
+        auto& profiler = ctx.Get<Profiler&>("profiler");
+
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
             if (!_SetAppCtxClipIdx(ctx, clipIndex)) {
@@ -168,18 +170,11 @@ namespace app {
                 info("Inference %zu/%zu\n", audioDataSlider.Index() + 1,
                      static_cast<size_t>(ceilf(audioDataSlider.FractionalTotalStrides() + 1)));
 
-                Profiler prepProfiler{&platform, "pre-processing"};
-                prepProfiler.StartProfiling();
-
                 /* Calculate MFCCs, deltas and populate the input tensor. */
                 prep.Invoke(inferenceWindow, inferenceWindowLen, inputTensor);
 
-                prepProfiler.StopProfiling();
-                std::string prepProfileResults = prepProfiler.GetResultsAndReset();
-                info("%s\n", prepProfileResults.c_str());
-
                 /* Run inference over this audio clip sliding window. */
-                arm::app::RunInference(platform, model);
+                arm::app::RunInference(model, profiler);
 
                 /* Post-process. */
                 postp.Invoke(outputTensor, reductionAxis, !audioDataSlider.HasNext());
@@ -215,6 +210,8 @@ namespace app {
             if (!_PresentInferenceResult(platform, results)) {
                 return false;
             }
+
+            profiler.PrintProfilingResult();
 
             _IncrementAppCtxClipIdx(ctx);
 
@@ -256,6 +253,8 @@ namespace app {
 
         platform.data_psn->set_text_color(COLOR_GREEN);
 
+        info("Final results:\n");
+        info("Total number of inferences: %zu\n", results.size());
         /* Results from multiple inferences should be combined before processing. */
         std::vector<arm::app::ClassificationResult> combinedResults;
         for (auto& result : results) {
@@ -268,8 +267,9 @@ namespace app {
         for (const auto & result : results) {
             std::string infResultStr = audio::asr::DecodeOutput(result.m_resultVec);
 
-            info("Result for inf %u: %s\n", result.m_inferenceNumber,
-                                            infResultStr.c_str());
+            info("For timestamp: %f (inference #: %u); label: %s\n",
+                 result.m_timeStamp, result.m_inferenceNumber,
+                 infResultStr.c_str());
         }
 
         /* Get the decoded result for the combined result. */
@@ -280,7 +280,7 @@ namespace app {
                             dataPsnTxtStartX1, dataPsnTxtStartY1,
                             allow_multiple_lines);
 
-        info("Final result: %s\n", finalResultStr.c_str());
+        info("Complete recognition: %s\n", finalResultStr.c_str());
         return true;
     }
 

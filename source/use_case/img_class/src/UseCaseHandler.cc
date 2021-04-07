@@ -74,6 +74,7 @@ namespace app {
     bool ClassifyImageHandler(ApplicationContext& ctx, uint32_t imgIndex, bool runAll)
     {
         auto& platform = ctx.Get<hal_platform&>("platform");
+        auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 2;
         constexpr uint32_t dataPsnImgStartX = 10;
@@ -144,7 +145,7 @@ namespace app {
             info("Running inference on image %u => %s\n", ctx.Get<uint32_t>("imgIndex"),
                 get_filename(ctx.Get<uint32_t>("imgIndex")));
 
-            RunInference(platform, model);
+            RunInference(model, profiler);
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
@@ -166,6 +167,8 @@ namespace app {
             if (!_PresentInferenceResult(platform, results)) {
                 return false;
             }
+
+            profiler.PrintProfilingResult();
 
             _IncrementAppCtxImageIdx(ctx);
 
@@ -230,6 +233,8 @@ namespace app {
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
         uint32_t rowIdx2 = dataPsnTxtStartY2;
 
+        info("Final results:\n");
+        info("Total number of inferences: 1\n");
         for (uint32_t i = 0; i < results.size(); ++i) {
             std::string resultStr =
                 std::to_string(i + 1) + ") " +

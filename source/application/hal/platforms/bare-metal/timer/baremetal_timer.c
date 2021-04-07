@@ -50,6 +50,53 @@ static uint64_t bm_get_npu_total_cycle_diff(time_counter *st,
 static uint64_t bm_get_npu_active_cycle_diff(time_counter *st,
                                              time_counter *end);
 
+/** @brief  Gets the difference in idle NPU cycle counts
+ * @param[in]   st      Pointer to time_counter value at start time.
+ * @param[in]   end     Pointer to time_counter value at end.
+ * @return      Idle NPU cycle counts difference between the arguments expressed
+ *              as unsigned 64 bit integer.
+ **/
+static uint64_t bm_get_npu_idle_cycle_diff(time_counter *st,
+                                           time_counter *end);
+
+/** @brief  Gets the difference in axi0 bus reads cycle counts
+ * @param[in]   st      Pointer to time_counter value at start time.
+ * @param[in]   end     Pointer to time_counter value at end.
+ * @return      NPU AXI0 read cycle counts  difference between the arguments expressed
+ *              as unsigned 64 bit integer.
+ **/
+static uint64_t bm_get_npu_axi0_read_cycle_diff(time_counter *st,
+                                                time_counter *end);
+
+/** @brief  Gets the difference in axi0 bus writes cycle counts
+ * @param[in]   st      Pointer to time_counter value at start time.
+ * @param[in]   end     Pointer to time_counter value at end.
+ * @return      NPU AXI0 write cycle counts difference between the arguments expressed
+ *              as unsigned 64 bit integer.
+ **/
+static uint64_t bm_get_npu_axi0_write_cycle_diff(time_counter *st,
+                                                 time_counter *end);
+
+/** @brief  Gets the difference in axi1 bus reads cycle counts
+ * @param[in]   st      Pointer to time_counter value at start time.
+ * @param[in]   end     Pointer to time_counter value at end.
+ * @return      NPU AXI1 read cycle counts difference between the arguments expressed
+ *              as unsigned 64 bit integer.
+ **/
+static uint64_t bm_get_npu_axi1_read_cycle_diff(time_counter *st,
+                                                time_counter *end);
+
+/** @brief  Gets the difference for 6 collected cycle counts:
+ * 1) total NPU
+ * 2) active NPU
+ * 3) idle NPU
+ * 4) axi0 read
+ * 5) axi0 write
+ * 6) axi1 read
+ * */
+static int bm_get_npu_cycle_diff(time_counter *st, time_counter *end,
+                                  uint64_t* pmu_counters_values, const size_t size);
+
 #endif /* defined (ARM_NPU) */
 
 #if defined(MPS3_PLATFORM)
@@ -126,8 +173,7 @@ void init_timer(platform_timer *timer)
 #if defined (ARM_NPU)
     /* We are capable of reporting npu cycle counts. */
     timer->cap.npu_cycles   = 1;
-    timer->get_npu_total_cycle_diff = bm_get_npu_total_cycle_diff;
-    timer->get_npu_active_cycle_diff = bm_get_npu_active_cycle_diff;
+    timer->get_npu_cycles_diff = bm_get_npu_cycle_diff;
     _init_ethosu_cyclecounter();
 #endif /* defined (ARM_NPU) */
 
@@ -149,16 +195,34 @@ static void _init_ethosu_cyclecounter(void)
     /* Reset overflow status. */
     ETHOSU_PMU_Set_CNTR_OVS(ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CCNT_Msk);
 
-    /* Set the counter #0 to count idle cycles. */
+    /* We can retrieve only 4 PMU counters: */
     ETHOSU_PMU_Set_EVTYPER(0, ETHOSU_PMU_NPU_IDLE);
+    ETHOSU_PMU_Set_EVTYPER(1, ETHOSU_PMU_AXI0_RD_DATA_BEAT_RECEIVED);
+    ETHOSU_PMU_Set_EVTYPER(2, ETHOSU_PMU_AXI0_WR_DATA_BEAT_WRITTEN);
+    ETHOSU_PMU_Set_EVTYPER(3, ETHOSU_PMU_AXI1_RD_DATA_BEAT_RECEIVED);
 
     /* Enable PMU. */
     ETHOSU_PMU_Enable();
 
     /* Enable counters for cycle and counter# 0. */
-    ETHOSU_PMU_CNTR_Enable(ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CCNT_Msk);
-
+    ETHOSU_PMU_CNTR_Enable(ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CNT2_Msk | ETHOSU_PMU_CNT3_Msk | ETHOSU_PMU_CNT4_Msk| ETHOSU_PMU_CCNT_Msk);
     _reset_ethosu_counters();
+}
+
+static int bm_get_npu_cycle_diff(time_counter *st, time_counter *end,
+                                  uint64_t* pmu_counters_values, const size_t size)
+{
+    if (size == 6) {
+        pmu_counters_values[0] = bm_get_npu_total_cycle_diff(st, end);
+        pmu_counters_values[1] = bm_get_npu_active_cycle_diff(st, end);
+        pmu_counters_values[2] = bm_get_npu_idle_cycle_diff(st, end);
+        pmu_counters_values[3] = bm_get_npu_axi0_read_cycle_diff(st, end);
+        pmu_counters_values[4] = bm_get_npu_axi0_write_cycle_diff(st, end);
+        pmu_counters_values[5] = bm_get_npu_axi1_read_cycle_diff(st, end);
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 static uint64_t bm_get_npu_total_cycle_diff(time_counter *st, time_counter *end)
@@ -166,20 +230,54 @@ static uint64_t bm_get_npu_total_cycle_diff(time_counter *st, time_counter *end)
     return end->npu_total_ccnt - st->npu_total_ccnt;
 }
 
-static uint64_t bm_get_npu_active_cycle_diff(time_counter *st, time_counter *end)
+static uint32_t counter_overflow(uint32_t pmu_counter_mask)
 {
     /* Check for overflow: The idle counter is 32 bit while the
        total cycle count is 64 bit. */
     const uint32_t overflow_status = ETHOSU_PMU_Get_CNTR_OVS();
+    return pmu_counter_mask & overflow_status;
+}
 
-    if (ETHOSU_PMU_CNT1_Msk & overflow_status) {
+static uint64_t bm_get_npu_idle_cycle_diff(time_counter *st, time_counter *end)
+{
+    if (counter_overflow(ETHOSU_PMU_CNT1_Msk)) {
         printf_err("EthosU PMU idle counter overflow.\n");
         return 0;
     }
+    return (uint64_t)(end->npu_idle_ccnt - st->npu_idle_ccnt);
+}
 
+static uint64_t bm_get_npu_active_cycle_diff(time_counter *st, time_counter *end)
+{
     /* Active NPU time = total time - idle time */
-    return (bm_get_npu_total_cycle_diff(st, end) +
-           (uint64_t)(st->npu_idle_ccnt)) - (uint64_t)(end->npu_idle_ccnt);
+    return bm_get_npu_total_cycle_diff(st, end) - bm_get_npu_idle_cycle_diff(st, end);
+}
+
+static uint64_t bm_get_npu_axi0_read_cycle_diff(time_counter *st, time_counter *end)
+{
+    if (counter_overflow(ETHOSU_PMU_CNT2_Msk)) {
+        printf_err("EthosU PMU axi0 read counter overflow.\n");
+        return 0;
+    }
+    return (uint64_t)(end->npu_axi0_read_ccnt - st->npu_axi0_read_ccnt);
+}
+
+static uint64_t bm_get_npu_axi0_write_cycle_diff(time_counter *st, time_counter *end)
+{
+    if (counter_overflow(ETHOSU_PMU_CNT3_Msk)) {
+        printf_err("EthosU PMU axi0 write counter overflow.\n");
+        return 0;
+    }
+    return (uint64_t)(end->npu_axi0_write_ccnt - st->npu_axi0_write_ccnt);
+}
+
+static uint64_t bm_get_npu_axi1_read_cycle_diff(time_counter *st, time_counter *end)
+{
+    if (counter_overflow(ETHOSU_PMU_CNT4_Msk)) {
+        printf_err("EthosU PMU axi1 read counter overflow.\n");
+        return 0;
+    }
+    return (uint64_t)(end->npu_axi1_read_ccnt - st->npu_axi1_read_ccnt);
 }
 
 #endif /* defined (ARM_NPU) */
@@ -199,15 +297,22 @@ static time_counter bm_get_time_counter(void)
         .counter = get_time_counter(),
 
 #if defined (ARM_NPU)
-        .npu_idle_ccnt = ETHOSU_PMU_Get_EVCNTR(0),
-        .npu_total_ccnt = ETHOSU_PMU_Get_CCNTR()
+            .npu_total_ccnt = ETHOSU_PMU_Get_CCNTR(),
+            .npu_idle_ccnt = ETHOSU_PMU_Get_EVCNTR(0),
+            .npu_axi0_read_ccnt = ETHOSU_PMU_Get_EVCNTR(1),
+            .npu_axi0_write_ccnt = ETHOSU_PMU_Get_EVCNTR(2),
+            .npu_axi1_read_ccnt = ETHOSU_PMU_Get_EVCNTR(3)
 #endif /* defined (ARM_NPU) */
 
     };
 
 #if defined (ARM_NPU)
-    debug("NPU total cc: %llu; NPU idle cc: %u\n",
-        t.npu_total_ccnt, t.npu_idle_ccnt);
+    debug("NPU total cc: %llu; NPU idle cc: %u; NPU axi0 read cc: %u;  NPU axi0 write cc: %u; NPU axi1 read cc: %u\n",
+        t.npu_total_ccnt,
+        t.npu_idle_ccnt,
+        t.npu_axi0_read_ccnt,
+        t.npu_axi0_write_ccnt,
+        t.npu_axi1_read_ccnt);
 #endif /* defined (ARM_NPU) */
 
     return t;

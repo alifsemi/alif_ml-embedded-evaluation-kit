@@ -76,6 +76,7 @@ namespace app {
     bool ClassifyVibrationHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
         auto& platform = ctx.Get<hal_platform&>("platform");
+        auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
@@ -98,7 +99,7 @@ namespace app {
         const auto frameLength = ctx.Get<int>("frameLength");
         const auto frameStride = ctx.Get<int>("frameStride");
         const auto scoreThreshold = ctx.Get<float>("scoreThreshold");
-        const float trainingMean = ctx.Get<float>("trainingMean");
+        const auto trainingMean = ctx.Get<float>("trainingMean");
         auto startClipIdx = ctx.Get<uint32_t>("clipIndex");
 
         TfLiteTensor* outputTensor = model.GetOutputTensor(0);
@@ -193,7 +194,7 @@ namespace app {
                      audioDataSlider.TotalStrides() + 1);
 
                 /* Run inference over this audio clip sliding window */
-                arm::app::RunInference(platform, model);
+                arm::app::RunInference(model, profiler);
 
                 /* Use the negative softmax score of the corresponding index as the outlier score */
                 std::vector<float> dequantOutput = Dequantize<int8_t>(outputTensor);
@@ -218,6 +219,8 @@ namespace app {
             if (!_PresentInferenceResult(platform, result, scoreThreshold)) {
                 return false;
             }
+
+            profiler.PrintProfilingResult();
 
             _IncrementAppCtxClipIdx(ctx);
 

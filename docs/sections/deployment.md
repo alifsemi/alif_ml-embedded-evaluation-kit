@@ -267,13 +267,13 @@ off.
 7. On the second serial port, output similar to section 2.2 should be visible:
 
     ```log
-    [INFO] Setting up system tick IRQ (for NPU)
-    [INFO] V2M-MPS3 revision C
-    [INFO] Application Note AN540, Revision B
-    [INFO] FPGA build 1
-    [INFO] Core clock has been set to: 32000000 Hz
-    [INFO] CPU ID: 0x410fd220
-    [INFO] CPU: Cortex-M55 r0p0
+    INFO - Setting up system tick IRQ (for NPU)
+    INFO - V2M-MPS3 revision C
+    INFO - Application Note AN540, Revision B
+    INFO - FPGA build 1
+    INFO - Core clock has been set to: 32000000 Hz
+    INFO - CPU ID: 0x410fd220
+    INFO - CPU: Cortex-M55 r0p0
     ...
     ```
 

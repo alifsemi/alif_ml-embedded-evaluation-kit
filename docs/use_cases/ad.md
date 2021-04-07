@@ -390,41 +390,39 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-    [INFO] uTFL version: 2.5.0
-    [INFO] Model info:
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 1024 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:  32
-    [INFO] 		2:  32
-    [INFO] 		3:   1
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.192437
-    [INFO] ZeroPoint[0] = 11
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 8 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:   8
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.048891
-    [INFO] ZeroPoint[0] = -30
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 198016
-    [INFO] Number of operators: 1
-    [INFO] 	Operator 0: ethos-u
-    [INFO] Use of Arm uNPU is enabled
-
+    INFO - uTFL version: 2.5.0
+    INFO - Model info:
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 1024 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:  32
+    INFO - 		2:  32
+    INFO - 		3:   1
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.192437
+    INFO - ZeroPoint[0] = 11
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 8 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:   8
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.048891
+    INFO - ZeroPoint[0] = -30
+    INFO - Activation buffer (a.k.a tensor arena) size used: 198016
+    INFO - Number of operators: 1
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. “List” menu option prints a list of pair ... indexes - the original filenames embedded in the application:
 
     ```log
-    [INFO] List of Files:
-    [INFO] 0 =>; anomaly_id_00_00000000.wav
-    [INFO] 1 =>; anomaly_id_02_00000076.wav
-    [INFO] 2 =>; normal_id_00_00000004.wav
-    [INFO] 3 =>; normal_id_02_00000001.wav
+    INFO - List of Files:
+    INFO - 0 =>; anomaly_id_00_00000000.wav
+    INFO - 1 =>; anomaly_id_02_00000076.wav
+    INFO - 2 =>; normal_id_00_00000004.wav
+    INFO - 3 =>; normal_id_02_00000001.wav
     ```
 
 ### Running Anomaly Detection
@@ -434,76 +432,30 @@ Please select the first menu option to execute Anomaly Detection.
 The following example illustrates application output:
 
 ```log
-[INFO] Running inference on audio clip 0 => anomaly_id_00_00000000.wav
-[INFO] Inference 1/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081154
-	Idle NPU cycles:   1012
-
-[INFO] Inference 2/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080934
-	Idle NPU cycles:   232
-
-[INFO] Inference 3/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081332
-	Idle NPU cycles:   834
-
-[INFO] Inference 4/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080748
-	Idle NPU cycles:   418
-
-[INFO] Inference 5/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080728
-	Idle NPU cycles:   438
-
-[INFO] Inference 6/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081144
-	Idle NPU cycles:   1022
-
-[INFO] Inference 7/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080924
-	Idle NPU cycles:   242
-
-[INFO] Inference 8/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081322
-	Idle NPU cycles:   844
-
-[INFO] Inference 9/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080738
-	Idle NPU cycles:   428
-
-[INFO] Inference 10/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080718
-	Idle NPU cycles:   448
-
-[INFO] Inference 11/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081134
-	Idle NPU cycles:   1032
-
-[INFO] Inference 12/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1080914
-	Idle NPU cycles:   252
-
-[INFO] Inference 13/13
-[INFO] Profile for Inference:
-	Active NPU cycles: 1081312
-	Idle NPU cycles:   854
-
-[INFO] Average anomaly score is: -0.024493
+INFO - Running inference on audio clip 0 => anomaly_id_00_00000000.wav
+INFO - Inference 1/13
+INFO - Inference 2/13
+INFO - Inference 3/13
+INFO - Inference 4/13
+INFO - Inference 5/13
+INFO - Inference 6/13
+INFO - Inference 7/13
+INFO - Inference 8/13
+INFO - Inference 9/13
+INFO - Inference 10/13
+INFO - Inference 11/13
+INFO - Inference 12/13
+INFO - Inference 13/13
+INFO - Average anomaly score is: -0.024493
 Anomaly threshold is: -0.800000
 Anomaly detected!
-
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 628122
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 135087
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 62870
+INFO - NPU ACTIVE cycles: 1081007
+INFO - NPU IDLE cycles: 626
+INFO - NPU total cycles: 1081634
 ```
 
 As multiple inferences have to be run for one clip it will take around a minute or so for all inferences to complete.
@@ -515,9 +467,19 @@ The profiling section of the log shows that for each inference. For the last inf
 
 - Ethos-U55's PMU report:
 
-  - 1,081,312 active cycles: number of cycles that were used for computation
+  - 1,081,634 total cycle: The number of NPU cycles
 
-  - 854 idle cycles: number of cycles for which the NPU was idle
+  - 1,081,007 active cycles: number of NPU cycles that were used for computation
+
+  - 626 idle cycles: number of cycles for which the NPU was idle
+
+  - 628,122 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 135,087 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 62,870 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
     the CPU model is not cycle-approximate or cycle-accurate.

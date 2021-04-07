@@ -431,7 +431,7 @@ Choice:
     compiled audio.
 
     > **Note:** Note that if the clip is over a certain length, the application will invoke multiple inference runs to
->cover the entire file.
+    >cover the entire file.
 
 2. “Classify audio clip at chosen index” menu option will run inference on the chosen audio clip.
 
@@ -444,41 +444,40 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-    [INFO] uTFL version: 2.5.0
-    [INFO] Model info:
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 11544 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1: 296
-    [INFO] 		2:  39
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.110316
-    [INFO] ZeroPoint[0] = -11
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 4292 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:   1
-    [INFO] 		2: 148
-    [INFO] 		3:  29
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.003906
-    [INFO] ZeroPoint[0] = -128
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 783168
-    [INFO] Number of operators: 1
-    [INFO] 	Operator 0: ethos-u
-    [INFO] Use of Arm uNPU is enabled
+    INFO - uTFL version: 2.5.0
+    INFO - Model info:
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 11544 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1: 296
+    INFO - 		2:  39
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.110316
+    INFO - ZeroPoint[0] = -11
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 4292 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:   1
+    INFO - 		2: 148
+    INFO - 		3:  29
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.003906
+    INFO - ZeroPoint[0] = -128
+    INFO - Activation buffer (a.k.a tensor arena) size used: 783168
+    INFO - Number of operators: 1
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. “List” menu option prints a list of pair audio clip indexes - the original filenames embedded in the application:
 
     ```log
-    [INFO] List of Files:
-    [INFO] 0 => anotherdoor.wav
-    [INFO] 1 => anotherengineer.wav
-    [INFO] 2 => itellyou.wav
-    [INFO] 3 => testingroutine.wav
+    INFO - List of Files:
+    INFO - 0 => anotherdoor.wav
+    INFO - 1 => anotherengineer.wav
+    INFO - 2 => itellyou.wav
+    INFO - 3 => testingroutine.wav
     ```
 
 ### Running Automatic Speech Recognition
@@ -488,28 +487,21 @@ Please select the first menu option to execute Automatic Speech Recognition.
 The following example illustrates application output:
 
 ```log
-[INFO] Running inference on audio clip 0 => anotherdoor.wav
-[INFO] Inference 1/2
-[INFO] Profile for pre-processing:
-	Active NPU cycles: 0
-	Idle NPU cycles:   6
-
-[INFO] Profile for Inference:
-	Active NPU cycles: 28924342
-	Idle NPU cycles:   824
-
-[INFO] Inference 2/2
-[INFO] Profile for pre-processing:
-	Active NPU cycles: 0
-	Idle NPU cycles:   6
-
-[INFO] Profile for Inference:
-	Active NPU cycles: 28924298
-	Idle NPU cycles:   868
-
-[INFO] Result for inf 0: and he walked immediately out o t
-[INFO] Result for inf 1: he aparctment by anoer dor
-[INFO] Final result: and he walked immediately out o the aparctment by anoer dor
+INFO - Running inference on audio clip 0 => another_door.wav
+INFO - Inference 1/2
+INFO - Inference 2/2
+INFO - Final results:
+INFO - Total number of inferences: 2
+INFO - For timestamp: 0.000000 (inference #: 0); label: and he walked immediately out of th
+INFO - For timestamp: 0.000000 (inference #: 1); label: e apartment by another door
+INFO - Complete recognition: and he walked immediately out of the apartment by another door
+INFO - Profile for Inference :
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 6564262
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 928889
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 841712
+INFO - NPU ACTIVE cycles: 28450696
+INFO - NPU IDLE cycles: 476
+INFO - NPU total cycles: 28451172
 ```
 
 It could take several minutes to complete each inference (average time is 5-7 minutes), and on this audio clip multiple
@@ -519,9 +511,19 @@ The profiling section of the log shows that for the first inference:
 
 - Ethos-U55's PMU report:
 
-  - 28,924,298 active cycles: number of NPU cycles that were used for computation
+  - 28,451,172 total cycle: The number of NPU cycles
 
-  - 868 idle cycles: number of cycles for which the NPU was idle
+  - 28,450,696 active cycles: number of NPU cycles that were used for computation
+
+  - 476 idle cycles: number of cycles for which the NPU was idle
+
+  - 6,564,262 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 928,889 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 841,712 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
     the CPU model is not cycle-approximate or cycle-accurate.

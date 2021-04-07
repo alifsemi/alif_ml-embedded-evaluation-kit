@@ -278,9 +278,14 @@ After the application has started the inference starts immediately and it output
 The following example illustrates application output:
 
 ```log
-[INFO] Profile for Inference:
-       Active NPU cycles: 26976
-       Idle NPU cycles: 196
+INFO - Final results:
+INFO - Profile for Inference :
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 9332
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 3248
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 2219
+INFO - NPU ACTIVE cycles: 33145
+INFO - NPU IDLE cycles: 1033
+INFO - NPU total cycles: 34178
 ```
 
 After running an inference on randomly generated data, the output of the log shows the profiling results that for this
@@ -288,9 +293,19 @@ inference:
 
 - Ethos-U55's PMU report:
 
-  - 26,976 active cycles: number of cycles that were used for computation
+  - 34,178 total cycle: The number of NPU cycles
 
-  - 196 idle cycles: number of cycles for which the NPU was idle
+  - 33,145 active cycles: number of NPU cycles that were used for computation
+
+  - 1,033 idle cycles: number of cycles for which the NPU was idle
+
+  - 2,219 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 3,248 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 9,332 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
     the CPU model is not cycle-approximate or cycle-accurate.

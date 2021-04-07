@@ -405,41 +405,40 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-    [INFO] uTFL version: 2.5.0
-    [INFO] Model info:
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 490 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:   1
-    [INFO] 		2:  49
-    [INFO] 		3:  10
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 1.107164
-    [INFO] ZeroPoint[0] = 95
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is INT8
-    [INFO] 	tensor occupies 12 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1:  12
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.003906
-    [INFO] ZeroPoint[0] = -128
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 72848
-    [INFO] Number of operators: 1
-    [INFO] 	Operator 0: ethos-u
-    [INFO] Use of Arm uNPU is enabled
+    INFO - uTFL version: 2.5.0
+    INFO - Model info:
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 490 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:   1
+    INFO - 		2:  49
+    INFO - 		3:  10
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 1.107164
+    INFO - ZeroPoint[0] = 95
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 12 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:  12
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.003906
+    INFO - ZeroPoint[0] = -128
+    INFO - Activation buffer (a.k.a tensor arena) size used: 72848
+    INFO - Number of operators: 1
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. “List audio clips” menu option prints a list of pair audio indexes - the original filenames embedded in the
     application:
 
     ```log
-    [INFO] List of Files:
-    [INFO] 0 => down.wav
-    [INFO] 1 => rightleftup.wav
-    [INFO] 2 => yes.wav
-    [INFO] 3 => yesnogostop.wav
+    INFO - List of Files:
+    INFO - 0 => down.wav
+    INFO - 1 => rightleftup.wav
+    INFO - 2 => yes.wav
+    INFO - 3 => yesnogostop.wav
     ```
 
 ### Running Keyword Spotting
@@ -448,15 +447,18 @@ Selecting the first option will run inference on the first file.
 
 The following example illustrates application output for classification:
 
-```log
-[INFO] Running inference on audio clip 0 => down.wav
-[INFO] Inference 1/1
-[INFO] Profile for Inference:
-	Active NPU cycles: 680400
-	Idle NPU cycles:   766
-
-[INFO] For timestamp: 0.000000 (inference #: 0); threshold: 0.900000
-[INFO] 		label @ 0: down, score: 0.996094
+```logINFO - Running inference on audio clip 0 => down.wav
+INFO - Inference 1/1
+INFO - Final results:
+INFO - Total number of inferences: 1
+INFO - For timestamp: 0.000000 (inference #: 0); label: down, score: 0.996094; threshold: 0.900000
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 217385
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 82607
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 59608
+INFO - NPU ACTIVE cycles: 680611
+INFO - NPU IDLE cycles: 561
+INFO - NPU total cycles: 681172
 ```
 
 Each inference should take less than 30 seconds on most systems running Fast Model.
@@ -464,9 +466,19 @@ The profiling section of the log shows that for this inference:
 
 - Ethos-U55's PMU report:
 
-  - 680,400 active cycles: number of cycles that were used for computation
+  - 681,172 total cycle: The number of NPU cycles
 
-  - 766 idle cycles: number of cycles for which the NPU was idle
+  - 680,611 active cycles: The number of NPU cycles that were used for computation
+
+  - 561 idle cycles: number of cycles for which the NPU was idle
+
+  - 217,385 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 82,607 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 59,608 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
     the CPU model is not cycle-approximate or cycle-accurate.

@@ -17,25 +17,10 @@
 #include "Profiler.hpp"
 
 #include <cstring>
-#include <string>
-#include <sstream>
+#include <iomanip>
 
 namespace arm {
 namespace app {
-
-    template<class T>
-    static void writeStatLine(std::ostringstream& s,
-                              const char* desc,
-                              T total,
-                              uint32_t samples,
-                              T min,
-                              T max)
-    {
-        s << "\t" << desc << total << " / "
-          << ((double)total / samples) << " / "
-          << min << " / " << max << std::endl;
-    }
-
     Profiler::Profiler(hal_platform* platform, const char* name = "Unknown")
     : _m_name(name)
     {
@@ -90,99 +75,162 @@ namespace app {
     void Profiler::Reset()
     {
         this->_m_started = false;
+        this->_m_series.clear();
         memset(&this->_m_tstampSt, 0, sizeof(this->_m_tstampSt));
         memset(&this->_m_tstampEnd, 0, sizeof(this->_m_tstampEnd));
     }
 
-    std::string Profiler::GetResultsAndReset()
+    void calcProfilingStat(uint64_t currentValue,
+                           Statistics& data,
+                           uint32_t samples)
     {
-        std::ostringstream strResults;
+        data.total += currentValue;
+        data.min = std::min(data.min, currentValue);
+        data.max = std::max(data.max, currentValue);
+        data.avrg = ((double)data.total / samples);
+    }
 
+    void Profiler::GetAllResultsAndReset(std::vector<ProfileResult>& results)
+    {
         for (const auto& item: this->_m_series) {
             auto name = item.first;
             ProfilingSeries series = item.second;
+            ProfileResult result{};
+            result.name = item.first;
+            result.samplesNum = series.size();
 
-            uint32_t samplesNum = series.size();
-
-            uint64_t totalNpuCycles = 0;        /* Total NPU cycles (idle + active). */
-            uint64_t totalActiveNpuCycles = 0;  /* Active NPU cycles. */
-            uint64_t totalCpuCycles = 0;        /* Total CPU cycles. */
-            time_t totalTimeMs = 0;
-
-            uint64_t minActiveNpuCycles = series[0].activeNpuCycles;
-            uint64_t minIdleNpuCycles = series[0].npuCycles - minActiveNpuCycles;
-            uint64_t minActiveCpuCycles = series[0].cpuCycles - minActiveNpuCycles;
-            time_t minTimeMs = series[0].time;
-
-            uint64_t maxIdleNpuCycles = 0;
-            uint64_t maxActiveNpuCycles = 0;
-            uint64_t maxActiveCpuCycles = 0;
-            time_t maxTimeMs = 0;
-
+            Statistics AXI0_RD {
+                .name = "NPU AXI0_RD_DATA_BEAT_RECEIVED",
+                .unit = "cycles",
+                .total = 0,
+                .avrg = 0.0,
+                .min = series[0].axi0writes,
+                .max = 0
+            };
+            Statistics AXI0_WR {
+                    .name = "NPU AXI0_WR_DATA_BEAT_WRITTEN",
+                    .unit = "cycles",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].axi0reads,
+                    .max = 0
+            };
+            Statistics AXI1_RD {
+                    .name = "NPU AXI1_RD_DATA_BEAT_RECEIVED",
+                    .unit = "cycles",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].axi1reads,
+                    .max = 0
+            };
+            Statistics NPU_ACTIVE {
+                    .name = "NPU ACTIVE",
+                    .unit = "cycles",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].activeNpuCycles,
+                    .max = 0
+            };
+            Statistics NPU_IDLE {
+                    .name = "NPU IDLE",
+                    .unit = "cycles",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].idleNpuCycles,
+                    .max = 0
+            };
+            Statistics NPU_Total {
+                    .name = "NPU total",
+                    .unit = "cycles",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].npuCycles,
+                    .max = 0,
+            };
+#if defined(CPU_PROFILE_ENABLED)
+            Statistics CPU_ACTIVE {
+                    .name = "CPU ACTIVE",
+                    .unit = "cycles (approx)",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = series[0].cpuCycles - NPU_ACTIVE.min,
+                    .max = 0
+            };
+            Statistics TIME {
+                    .name = "Time",
+                    .unit = "ms",
+                    .total = 0,
+                    .avrg = 0.0,
+                    .min = static_cast<uint64_t>(series[0].time),
+                    .max = 0
+            };
+#endif
             for(ProfilingUnit& unit: series){
-                totalNpuCycles += unit.npuCycles;
-                totalActiveNpuCycles += unit.activeNpuCycles;
-                totalCpuCycles += unit.cpuCycles;
-                totalTimeMs += unit.time;
 
-                maxActiveNpuCycles = std::max(maxActiveNpuCycles,
-                                              unit.activeNpuCycles);
-                maxIdleNpuCycles = std::max(maxIdleNpuCycles,
-                                            unit.npuCycles - maxActiveNpuCycles);
-                maxActiveCpuCycles = std::max(maxActiveCpuCycles,
-                                              unit.cpuCycles - maxActiveNpuCycles);
-                maxTimeMs = std::max(maxTimeMs, unit.time);
+                calcProfilingStat(unit.npuCycles,
+                                  NPU_Total, result.samplesNum);
 
-                minActiveNpuCycles = std::min(minActiveNpuCycles,
-                                              unit.activeNpuCycles);
-                minIdleNpuCycles = std::min(minIdleNpuCycles,
-                                            unit.npuCycles - minActiveNpuCycles);
-                minActiveCpuCycles = std::min(minActiveCpuCycles,
-                                              unit.cpuCycles - minActiveNpuCycles);
-                minTimeMs = std::min(minTimeMs, unit.time);
-            }
+                calcProfilingStat(unit.activeNpuCycles,
+                                  NPU_ACTIVE, result.samplesNum);
 
-            strResults << "Profile for " << name << ": " << std::endl;
+                calcProfilingStat(unit.idleNpuCycles,
+                                  NPU_IDLE, result.samplesNum);
 
-            if (samplesNum > 1) {
-                strResults << "\tSamples: " << samplesNum << std::endl;
-                strResults << "\t                            Total / Avg./ Min / Max"
-                           << std::endl;
+                calcProfilingStat(unit.axi0writes,
+                                  AXI0_WR, result.samplesNum);
 
-                writeStatLine<uint64_t>(strResults, "Active NPU cycles:          ",
-                                        totalActiveNpuCycles, samplesNum,
-                                        minActiveNpuCycles, maxActiveNpuCycles);
+                calcProfilingStat(unit.axi0reads,
+                                  AXI0_RD, result.samplesNum);
 
-                writeStatLine<uint64_t>(strResults, "Idle NPU cycles:            ",
-                                        (totalNpuCycles - totalActiveNpuCycles),
-                                        samplesNum, minIdleNpuCycles, maxIdleNpuCycles);
-
+                calcProfilingStat(unit.axi1reads,
+                                  AXI1_RD, result.samplesNum);
 #if defined(CPU_PROFILE_ENABLED)
-                writeStatLine<uint64_t>(strResults, "Active CPU cycles (approx): ",
-                                        (totalCpuCycles - totalActiveNpuCycles),
-                                        samplesNum, minActiveCpuCycles,
-                                        maxActiveCpuCycles);
+                calcProfilingStat(static_cast<uint64_t>(unit.time),
+                                  TIME, result.samplesNum);
 
-                writeStatLine<time_t>(strResults, "Time in ms:                 ",
-                                        totalTimeMs, samplesNum, minTimeMs, maxTimeMs);
-#endif
-            } else {
-                strResults << "\tActive NPU cycles: " << totalActiveNpuCycles
-                           << std::endl;
-                strResults << "\tIdle NPU cycles:   "
-                           << (totalNpuCycles - totalActiveNpuCycles)
-                           << std::endl;
-#if defined(CPU_PROFILE_ENABLED)
-                strResults << "\tActive CPU cycles: "
-                           << (totalCpuCycles - totalActiveNpuCycles)
-                           << " (approx)" << std::endl;
-
-                strResults << "\tTime in ms:        " << totalTimeMs << std::endl;
+                calcProfilingStat(unit.cpuCycles - unit.activeNpuCycles,
+                                  CPU_ACTIVE, result.samplesNum);
 #endif
             }
+            result.data.emplace_back(AXI0_RD);
+            result.data.emplace_back(AXI0_WR);
+            result.data.emplace_back(AXI1_RD);
+            result.data.emplace_back(NPU_ACTIVE);
+            result.data.emplace_back(NPU_IDLE);
+            result.data.emplace_back(NPU_Total);
+#if defined(CPU_PROFILE_ENABLED)
+            result.data.emplace_back(CPU_ACTIVE);
+            result.data.emplace_back(TIME);
+#endif
+        results.emplace_back(result);
         }
         this->Reset();
-        return strResults.str();
+    }
+
+    void printStatisticsHeader(uint32_t samplesNum) {
+        info("Number of samples: %i\n", samplesNum);
+        info("%s\n", "Total / Avg./ Min / Max");
+    }
+
+    void Profiler::PrintProfilingResult(bool printFullStat) {
+        std::vector<ProfileResult> results{};
+        GetAllResultsAndReset(results);
+        for(ProfileResult& result: results) {
+            info("Profile for %s:\n", result.name.c_str());
+
+            if (printFullStat) {
+                printStatisticsHeader(result.samplesNum);
+            }
+
+            for (Statistics &stat: result.data) {
+                if (printFullStat) {
+                    info("%s %s: %llu / %.0f / %llu / %llu \n", stat.name.c_str(), stat.unit.c_str(),
+                         stat.total, stat.avrg, stat.min, stat.max);
+                } else {
+                    info("%s %s: %.0f\n", stat.name.c_str(), stat.unit.c_str(), stat.avrg);
+                }
+            }
+        }
     }
 
     void Profiler::SetName(const char* str)
@@ -197,11 +245,19 @@ namespace app {
 
         struct ProfilingUnit unit;
 
-        if (timer->cap.npu_cycles && timer->get_npu_total_cycle_diff &&
-            timer->get_npu_active_cycle_diff)
+        if (timer->cap.npu_cycles && timer->get_npu_cycles_diff)
         {
-            unit.npuCycles = timer->get_npu_total_cycle_diff(&start, &end);
-            unit.activeNpuCycles = timer->get_npu_active_cycle_diff(&start, &end);
+            const size_t size = 6;
+            uint64_t pmuCounters[size] = {0};
+            /* 6 values: total cc, active cc, idle cc, axi0 read, axi0 write, axi1 read*/
+            if (0 == timer->get_npu_cycles_diff(&start, &end, pmuCounters, size)) {
+                unit.npuCycles = pmuCounters[0];
+                unit.activeNpuCycles = pmuCounters[1];
+                unit.idleNpuCycles = pmuCounters[2];
+                unit.axi0reads = pmuCounters[3];
+                unit.axi0writes = pmuCounters[4];
+                unit.axi1reads = pmuCounters[5];
+            }
         }
 
         if (timer->cap.cpu_cycles && timer->get_cpu_cycle_diff) {

@@ -60,6 +60,9 @@ TEST_CASE("Inference by index")
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
+
+    arm::app::Profiler profiler{&platform, "kws"};
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<int>("frameLength", g_FrameLength);  /* 640 sample length for DSCNN. */
@@ -137,6 +140,8 @@ TEST_CASE("Inference run all clips")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
+    arm::app::Profiler profiler{&platform, "kws"};
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);

@@ -28,6 +28,7 @@ namespace app {
     bool RunInferenceHandler(ApplicationContext& ctx)
     {
         auto& platform = ctx.Get<hal_platform&>("platform");
+        auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model = ctx.Get<Model&>("model");
 
         constexpr uint32_t dataPsnTxtInfStartX = 150;
@@ -67,13 +68,16 @@ namespace app {
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
-        RunInference(platform, model);
+        RunInference(model, profiler);
 
         /* Erase. */
         str_inf = std::string(str_inf.size(), ' ');
         platform.data_psn->present_data_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+
+        info("Final results:\n");
+        profiler.PrintProfilingResult();
 
 #if VERIFY_TEST_OUTPUT
         for (size_t outputIndex = 0; outputIndex < model.GetNumOutputs(); outputIndex++) {

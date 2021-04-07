@@ -38,11 +38,11 @@ namespace app {
      * @brief           Run inference using given model
      *                  object. If profiling is enabled, it will log the
      *                  statistics too.
-     * @param[in]       platform   Reference to the hal platform object.
      * @param[in]       model      Reference to the initialised model.
+     * @param[in]       profiler   Reference to the initialised profiler.
      * @return          true if inference succeeds, false otherwise.
      **/
-    bool RunInference(hal_platform& platform, arm::app::Model& model);
+    bool RunInference(arm::app::Model& mode, Profiler& profiler);
 
     /**
      * @brief           Read input and return as an integer.

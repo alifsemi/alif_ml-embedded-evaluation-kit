@@ -371,40 +371,39 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-    [INFO] uTFL version: 2.5.0
-    [INFO] Model info:
-    [INFO] Model INPUT tensors:
-    [INFO] 	tensor type is UINT8
-    [INFO] 	tensor occupies 150528 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1: 224
-    [INFO] 		2: 224
-    [INFO] 		3:   3
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.007812
-    [INFO] ZeroPoint[0] = 128
-    [INFO] Model OUTPUT tensors:
-    [INFO] 	tensor type is UINT8
-    [INFO] 	tensor occupies 1001 bytes with dimensions
-    [INFO] 		0:   1
-    [INFO] 		1: 1001
-    [INFO] Quant dimension: 0
-    [INFO] Scale[0] = 0.098893
-    [INFO] ZeroPoint[0] = 58
-    [INFO] Activation buffer (a.k.a tensor arena) size used: 521760
-    [INFO] Number of operators: 1
-    [INFO] 	Operator 0: ethos-u
-    [INFO] Use of Arm uNPU is enabled
+    INFO - uTFL version: 2.5.0
+    INFO - Model info:
+    INFO - Model INPUT tensors:
+    INFO - 	tensor type is UINT8
+    INFO - 	tensor occupies 150528 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1: 224
+    INFO - 		2: 224
+    INFO - 		3:   3
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.007812
+    INFO - ZeroPoint[0] = 128
+    INFO - Model OUTPUT tensors:
+    INFO - 	tensor type is UINT8
+    INFO - 	tensor occupies 1001 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1: 1001
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.098893
+    INFO - ZeroPoint[0] = 58
+    INFO - Activation buffer (a.k.a tensor arena) size used: 521760
+    INFO - Number of operators: 1
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. “List Images” menu option prints a list of pair image indexes - the original filenames embedded in the application:
 
     ```log
-    [INFO] List of Files:
-    [INFO] 0 => cat.bmp
-    [INFO] 1 => dog.bmp
-    [INFO] 2 => kimono.bmp
-    [INFO] 3 => tiger.bmp
+    INFO - List of Files:
+    INFO - 0 => cat.bmp
+    INFO - 1 => dog.bmp
+    INFO - 2 => kimono.bmp
+    INFO - 3 => tiger.bmp
     ```
 
 ### Running Image Classification
@@ -414,16 +413,21 @@ Please select the first menu option to execute Image Classification.
 The following example illustrates application output for classification:
 
 ```log
-[INFO] Running inference on image 0 => cat.bmp
-[INFO] Profile for Inference:
-	Active NPU cycles: 7622641
-	Idle NPU cycles:   525
-
-[INFO] 0) 282 (14.636096) -> tabby, tabby cat
-[INFO] 1) 286 (14.537203) -> Egyptian cat
-[INFO] 2) 283 (12.757138) -> tiger cat
-[INFO] 3) 458 (7.021370) -> bow tie, bow-tie, bowtie
-[INFO] 4) 288 (7.021370) -> lynx, catamount
+INFO - Running inference on image 0 => cat.bmp
+INFO - Final results:
+INFO - Total number of inferences: 1
+INFO - 0) 282 (14.636096) -> tabby, tabby cat
+INFO - 1) 286 (14.537203) -> Egyptian cat
+INFO - 2) 283 (12.757138) -> tiger cat
+INFO - 3) 458 (7.021370) -> bow tie, bow-tie, bowtie
+INFO - 4) 288 (7.021370) -> lynx, catamount
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 2489726
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 1098726
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 471129
+INFO - NPU ACTIVE cycles: 7489258
+INFO - NPU IDLE cycles: 914
+INFO - NPU total cycles: 7490172
 ```
 
 It could take several minutes to complete one inference run (average time is 2-3 minutes).
@@ -435,9 +439,19 @@ The profiling section of the log shows that for this inference:
 
 - Ethos-U55's PMU report:
 
-  - 7,622,641 active cycles: number of NPU cycles that were used for computation
+  - 7,490,172 total cycle: The number of NPU cycles
 
-  - 525 idle cycles: number of cycles for which the NPU was idle
+  - 7,489,258 active cycles: number of NPU cycles that were used for computation
+
+  - 914 idle cycles: number of cycles for which the NPU was idle
+
+  - 2,489,726 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+
+  - 1,098,726 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+
+  - 471,129 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
     the CPU model is not cycle-approximate or cycle-accurate.

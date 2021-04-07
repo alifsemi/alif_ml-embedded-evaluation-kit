@@ -127,6 +127,7 @@ namespace app {
 
         KWSOutput output;
 
+        auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& kwsModel = ctx.Get<Model&>("kwsmodel");
         if (!kwsModel.IsInited()) {
             printf_err("KWS model has not been initialised\n");
@@ -243,7 +244,7 @@ namespace app {
                  audioDataSlider.TotalStrides() + 1);
 
             /* Run inference over this audio clip sliding window. */
-            arm::app::RunInference(platform, kwsModel);
+            arm::app::RunInference(kwsModel, profiler);
 
             std::vector<ClassificationResult> kwsClassificationResult;
             auto& kwsClassifier = ctx.Get<KwsClassifier&>("kwsclassifier");
@@ -284,6 +285,8 @@ namespace app {
             return output;
         }
 
+        profiler.PrintProfilingResult();
+
         output.executionSuccess = true;
         return output;
     }
@@ -300,6 +303,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
+        auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& platform = ctx.Get<hal_platform&>("platform");
         platform.data_psn->clear(COLOR_BLACK);
 
@@ -389,18 +393,11 @@ namespace app {
             info("Inference %zu/%zu\n", audioDataSlider.Index() + 1,
                 static_cast<size_t>(ceilf(audioDataSlider.FractionalTotalStrides() + 1)));
 
-            Profiler prepProfiler{&platform, "pre-processing"};
-            prepProfiler.StartProfiling();
-
             /* Calculate MFCCs, deltas and populate the input tensor. */
             asrPrep.Invoke(asrInferenceWindow, asrInferenceWindowLen, asrInputTensor);
 
-            prepProfiler.StopProfiling();
-            std::string prepProfileResults = prepProfiler.GetResultsAndReset();
-            info("%s\n", prepProfileResults.c_str());
-
             /* Run inference over this audio clip sliding window. */
-            arm::app::RunInference(platform, asrModel);
+            arm::app::RunInference(asrModel, profiler);
 
             /* Post-process. */
             asrPostp.Invoke(asrOutputTensor, reductionAxis, !audioDataSlider.HasNext());
@@ -431,6 +428,8 @@ namespace app {
         if (!_PresentInferenceResult(platform, asrResults)) {
             return false;
         }
+
+        profiler.PrintProfilingResult();
 
         return true;
     }

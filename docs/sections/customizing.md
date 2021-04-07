@@ -243,12 +243,14 @@ Profiler is a helper class assisting in collection of timings and
 Ethos-U55 cycle counts for operations. It uses platform timer to get
 system timing information.
 
-| Method name          | Description                                               |
-|----------------------|-----------------------------------------------------------|
-|  StartProfiling      | Starts profiling and records the starting timing data.    |
-|  StopProfiling       | Stops profiling and records the ending timing data.       |
-|  Reset               | Resets the profiler and clears all collected data.        |
-|  GetResultsAndReset  | Gets the results as string and resets the profiler.       |
+| Method name             | Description                                                    |
+|-------------------------|----------------------------------------------------------------|
+|  StartProfiling         | Starts profiling and records the starting timing data.         |
+|  StopProfiling          | Stops profiling and records the ending timing data.            |
+|  StopProfilingAndReset  | Stops the profiling and internally resets the platform timers. |
+|  Reset                  | Resets the profiler and clears all collected data.             |
+|  GetAllResultsAndReset  | Gets the results as string and resets the profiler.            |
+|  SetName                | Set the profiler name.                                         |
 
 Usage example:
 
@@ -259,7 +261,7 @@ profiler.StartProfiling();
 // Code running inference to profile
 profiler.StopProfiling();
 
-info("%s\n", profiler.GetResultsAndReset().c_str());
+profiler.PrintProfilingResult();
 ```
 
 ## NN Model API
@@ -571,9 +573,8 @@ Profiler profiler{&platform, "Inference"};
 profiler.StartProfiling();
 model.RunInference();
 profiler.StopProfiling();
-std::string profileResults = profiler.GetResultsAndReset();
 
-info("%s\n", profileResults.c_str());
+profiler.PrintProfilingResult();
 ```
 
 ## Printing to console

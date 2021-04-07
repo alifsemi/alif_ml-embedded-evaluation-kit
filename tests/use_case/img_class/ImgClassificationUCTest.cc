@@ -53,7 +53,7 @@ TEST_CASE("Inference by index", "[.]")
     hal_platform_init(&platform);
 
     /* Model wrapper object. */
-    arm::app::MobileNetModel model;    
+    arm::app::MobileNetModel model;
 
     /* Load the model. */
     REQUIRE(model.Init());
@@ -61,6 +61,8 @@ TEST_CASE("Inference by index", "[.]")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
+    arm::app::Profiler profiler{&platform, "img_class"};
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
@@ -99,6 +101,8 @@ TEST_CASE("Inference run all images", "[.]")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
+    arm::app::Profiler profiler{&platform, "img_class"};
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);

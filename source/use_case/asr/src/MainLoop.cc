@@ -96,6 +96,8 @@ void main_loop(hal_platform& platform)
     GetLabelsVector(labels);
     arm::app::AsrClassifier classifier;  /* Classifier wrapper object. */
 
+    arm::app::Profiler profiler{&platform, "asr"};
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
