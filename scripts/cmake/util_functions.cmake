@@ -20,6 +20,21 @@
 ##############################################################################
 function(USER_OPTION name description default type)
 
+    if (${type} STREQUAL PATH_OR_FILE)
+
+        if (DEFINED ${name})
+            get_path_type(${${name}} PATH_TYPE)
+        else()
+            get_path_type(${default} PATH_TYPE)
+        endif()
+
+        # Set the default type if path is not a dir or file path (or undefined)
+        if (NOT ${PATH_TYPE} STREQUAL PATH AND NOT ${PATH_TYPE} STREQUAL FILEPATH)
+            message(FATAL_ERROR "Invalid ${name}. It should be a dir or file path.")
+        endif()
+        set(type ${PATH_TYPE})
+    endif()
+
     if (NOT DEFINED ${name})
         set(${name} ${default} CACHE ${type} ${description})
     endif()
@@ -123,7 +138,7 @@ endfunction()
 #   download_path: location where this file is to be downloaded (path including filename)
 function(download_file_from_modelzoo model_zoo_version file_sub_path download_path)
 
-    set(MODEL_ZOO_REPO      "https://github.com/ARM-software/ML-zoo/raw")
+    set(MODEL_ZOO_REPO "https://github.com/ARM-software/ML-zoo/raw")
 
     string(JOIN "/" FILE_URL
         ${MODEL_ZOO_REPO} ${model_zoo_version} ${file_sub_path})

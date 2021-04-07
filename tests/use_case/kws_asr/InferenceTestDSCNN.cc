@@ -22,34 +22,32 @@
 #include <catch.hpp>
 #include <random>
 
-namespace arm {
-namespace app {
+namespace test {
 namespace kws {
-bool RunInference(arm::app::Model& model, const int8_t vec[])
-{
+
+bool RunInference(arm::app::Model& model, const int8_t vec[]) {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
     const size_t copySz = inputTensor->bytes < IFM_DATA_SIZE ?
-                            inputTensor->bytes :
-                            IFM_DATA_SIZE;
+                          inputTensor->bytes :
+                          IFM_DATA_SIZE;
     memcpy(inputTensor->data.data, vec, copySz);
 
     return model.RunInference();
 }
 
-bool RunInferenceRandom(arm::app::Model& model)
-{
+bool RunInferenceRandom(arm::app::Model& model) {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
     std::random_device rndDevice;
     std::mt19937 mersenneGen{rndDevice()};
-    std::uniform_int_distribution<short> dist {-128, 127};
+    std::uniform_int_distribution<short> dist{-128, 127};
 
-    auto gen = [&dist, &mersenneGen](){
-                   return dist(mersenneGen);
-               };
+    auto gen = [&dist, &mersenneGen]() {
+        return dist(mersenneGen);
+    };
 
     std::vector<int8_t> randomAudio(inputTensor->bytes);
     std::generate(std::begin(randomAudio), std::end(randomAudio), gen);
@@ -59,8 +57,7 @@ bool RunInferenceRandom(arm::app::Model& model)
 }
 
 template<typename T>
-void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::Model& model)
-{
+void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::Model& model) {
     REQUIRE(RunInference(model, input_goldenFV));
 
     TfLiteTensor* outputTensor = model.GetOutputTensor(0);
@@ -71,12 +68,11 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     REQUIRE(tensorData);
 
     for (size_t i = 0; i < outputTensor->bytes; i++) {
-        REQUIRE((int)tensorData[i] == (int)((T)output_goldenFV[i]));
+        REQUIRE((int) tensorData[i] == (int) ((T) output_goldenFV[i]));
     }
 }
 
-TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]")
-{
+TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]") {
     arm::app::DsCnnModel model{};
 
     REQUIRE_FALSE(model.IsInited());
@@ -86,14 +82,12 @@ TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]")
     REQUIRE(RunInferenceRandom(model));
 }
 
-TEST_CASE("Running inference with Tflu and DsCnnModel Uint8", "[DS_CNN]")
-{
-    for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
+TEST_CASE("Running inference with Tflu and DsCnnModel Uint8", "[DS_CNN]") {
+    for (uint32_t i = 0; i < NUMBER_OF_FM_FILES; ++i) {
         const int8_t* input_goldenFV = get_ifm_data_array(i);
         const int8_t* output_goldenFV = get_ofm_data_array(i);
 
-        DYNAMIC_SECTION("Executing inference with re-init")
-        {
+        DYNAMIC_SECTION("Executing inference with re-init") {
             arm::app::DsCnnModel model{};
 
             REQUIRE_FALSE(model.IsInited());
@@ -106,6 +100,5 @@ TEST_CASE("Running inference with Tflu and DsCnnModel Uint8", "[DS_CNN]")
     }
 }
 
-} //namespace
 } //namespace
 } //namespace

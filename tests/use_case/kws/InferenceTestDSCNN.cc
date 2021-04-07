@@ -22,6 +22,8 @@
 #include <catch.hpp>
 #include <random>
 
+using namespace test;
+
 bool RunInference(arm::app::Model& model, const int8_t vec[])
 {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);

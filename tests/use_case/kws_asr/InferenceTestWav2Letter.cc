@@ -22,8 +22,7 @@
 #include <catch.hpp>
 #include <random>
 
-namespace arm {
-namespace app {
+namespace test {
 namespace asr {
 
 bool RunInference(arm::app::Model& model, const int8_t vec[], const size_t copySz)
@@ -109,6 +108,5 @@ TEST_CASE("Running inference with Tflu and Wav2LetterModel Int8", "[Wav2Letter][
     }
 }
 
-} //namespace
 } //namespace
 } //namespace

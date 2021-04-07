@@ -22,6 +22,7 @@
 
 #include <catch.hpp>
 
+using namespace test;
 
 bool RunInference(arm::app::Model& model, const uint8_t imageData[])
 {

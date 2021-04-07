@@ -21,30 +21,10 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
 
 generate_default_input_code(${INC_GEN_DIR})
 
-# If there is no tflite file pointed to
-if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH)
-
-    set(MODEL_RESOURCES_DIR     ${DOWNLOAD_DEP_DIR}/${use_case})
-    file(MAKE_DIRECTORY         ${MODEL_RESOURCES_DIR})
-    set(MODEL_FILENAME          dnn_s_quantized.tflite)
-    set(DEFAULT_MODEL_PATH      ${MODEL_RESOURCES_DIR}/${MODEL_FILENAME})
-
-    # Download the default model
-    set(ZOO_COMMON_SUBPATH      "models/keyword_spotting/dnn_small/tflite_int8/")
-    set(ZOO_MODEL_SUBPATH       "${ZOO_COMMON_SUBPATH}/${MODEL_FILENAME}")
-    set(ZOO_MODEL_VERSION       "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
-
-    download_file_from_modelzoo(${ZOO_MODEL_VERSION} ${ZOO_MODEL_SUBPATH} ${DEFAULT_MODEL_PATH})
-
-    if (ETHOS_U55_ENABLED)
-        message(STATUS
-            "Ethos-U55 is enabled, but the model downloaded is not optimized by vela. "
-            "To use Ethos-U55 acceleration, optimise the downloaded model and pass it "
-            "as ${use_case}_MODEL_TFLITE_PATH to the CMake configuration.")
-    endif()
-
+if (ETHOS_U55_ENABLED)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/dnn_s_quantized_vela.tflite)
 else()
-    set(DEFAULT_MODEL_PATH  "N/A")
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/dnn_s_quantized.tflite)
 endif()
 
 USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."

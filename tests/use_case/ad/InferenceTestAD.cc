@@ -19,13 +19,15 @@
 #include <random>
 
 #include "AdModel.hpp"
-#include "AdGoldenInput.hpp"
+#include "TestData_ad.hpp"
 #include "hal.h"
 #include "TensorFlowLiteMicro.hpp"
 
 #ifndef AD_FEATURE_VEC_DATA_SIZE
 #define AD_IN_FEATURE_VEC_DATA_SIZE (1024)
 #endif /* AD_FEATURE_VEC_DATA_SIZE */
+
+using namespace test;
 
 bool RunInference(arm::app::Model& model, const int8_t vec[])
 {
@@ -67,7 +69,7 @@ void TestInference(const T *input_goldenFV, const T *output_goldenFV, arm::app::
     TfLiteTensor *outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == AD_OUT_FEATURE_VEC_DATA_SIZE);
+    REQUIRE(outputTensor->bytes == OFM_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 
@@ -77,7 +79,7 @@ void TestInference(const T *input_goldenFV, const T *output_goldenFV, arm::app::
     }
 }
 
-TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8", "[AD][.]")
+TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8", "[AD]")
 {
     arm::app::AdModel model{};
 
@@ -88,13 +90,22 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8"
     REQUIRE(RunInferenceRandom(model));
 }
 
-TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdModel Int8", "[AD][.]")
+TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdModel Int8", "[AD]")
 {
-    arm::app::AdModel model{};
+    for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
+        auto input_goldenFV = get_ifm_data_array(i);;
+        auto output_goldenFV = get_ofm_data_array(i);
 
-    REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init());
-    REQUIRE(model.IsInited());
+        DYNAMIC_SECTION("Executing inference with re-init")
+        {
+            arm::app::AdModel model{};
 
-    TestInference(ad_golden_input, ad_golden_out, model);
+            REQUIRE_FALSE(model.IsInited());
+            REQUIRE(model.Init());
+            REQUIRE(model.IsInited());
+
+            TestInference<int8_t>(input_goldenFV, output_goldenFV, model);
+
+        }
+    }
 }

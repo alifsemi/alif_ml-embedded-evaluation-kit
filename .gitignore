@@ -3,6 +3,10 @@
 .idea
 
 # Downloaded files
+resources_downloaded
+
+#Logs
+*.log
 
 # Build files
 CMakeFiles

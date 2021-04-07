@@ -15,25 +15,9 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-# If the path to a directory or source file has been defined,
-# get the type here (FILEPATH or PATH):
-if (DEFINED ${use_case}_FILE_PATH)
-    get_path_type(${${use_case}_FILE_PATH} PATH_TYPE)
-
-    # Set the default type if path is not a dir or file path (or undefined)
-    if (NOT ${PATH_TYPE} STREQUAL PATH AND NOT ${PATH_TYPE} STREQUAL FILEPATH)
-        message(FATAL_ERROR "Invalid ${use_case}_FILE_PATH. It should be a dir or file path.")
-    endif()
-else()
-    # Default is a directory path
-    set(PATH_TYPE PATH)
-endif()
-
-message(STATUS "${use_case}_FILE_PATH is of type: ${PATH_TYPE}")
-
 USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or path to a single input WAV file, to use in the evaluation application."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
-    ${PATH_TYPE})
+    PATH_OR_FILE)
 
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
     16000
@@ -76,19 +60,10 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
         0x00200000
         STRING)
 
-# If there is no tflite file pointed to
-if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH)
-
-    set(MODEL_RESOURCES_DIR     ${DOWNLOAD_DEP_DIR}/${use_case})
-    file(MAKE_DIRECTORY         ${MODEL_RESOURCES_DIR})
-    set(MODEL_FILENAME          ad_med_nov11_int8.tflite)
-    set(DEFAULT_MODEL_PATH      ${MODEL_RESOURCES_DIR}/${MODEL_FILENAME})
-
-    # TODO: Download the model here for this use case when available on Model Zoo.
-    # For now we write a place holder file.
-    file(WRITE ${DEFAULT_MODEL_PATH} "Placeholder")
+if (ETHOS_U55_ENABLED)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/ad_medium_int8_vela.tflite)
 else()
-    set(DEFAULT_MODEL_PATH  "N/A")
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/ad_medium_int8.tflite)
 endif()
 
 set(EXTRA_MODEL_CODE

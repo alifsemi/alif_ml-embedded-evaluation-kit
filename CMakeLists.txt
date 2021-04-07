@@ -284,7 +284,8 @@ foreach(use_case ${USE_CASES})
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 
-    set(DEFAULT_MODEL_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/models)
+    set(DEFAULT_MODEL_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded/${use_case})
+    set(DEFAULT_TEST_DATA_DIR   ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)
 
@@ -424,21 +425,25 @@ foreach(use_case ${USE_CASES})
                 "${TEST_SRC_USE_CASE}/${use_case}/**/*.c"
                 )
 
-            if (DEFINED ${use_case}_TEST_IFM AND DEFINED ${use_case}_TEST_OFM)
-                message(STATUS  "Test vectors are available for ${${use_case}_MODEL_TFLITE_PATH} "
-                                "Input: ${${use_case}_TEST_IFM} "
-                                "Output: ${${use_case}_TEST_OFM}")
+            set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
+            set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)
+            file(MAKE_DIRECTORY ${TEST_SRC_GEN_DIR} ${TEST_INC_GEN_DIR})
 
-                set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
-                set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)
-                file(GLOB_RECURSE TEST_SOURCES_GEN
-                    "${TEST_SRC_GEN_DIR}/*.cc"
-                    "${TEST_SRC_GEN_DIR}/**/*.cc"
-                    )
-                message(STATUS "Adding ${TEST_SOURCES_GEN} to test sources")
-                list(APPEND TEST_SOURCES ${TEST_SOURCES_GEN})
-                list(APPEND TEST_RESOURCES_INCLUDE ${TEST_INC_GEN_DIR})
-            endif()
+            # Generate test data files to be included in x86 tests
+            generate_test_data_code(
+                    INPUT_DIR "${DEFAULT_TEST_DATA_DIR}"
+                    DESTINATION_SRC ${TEST_SRC_GEN_DIR}
+                    DESTINATION_HDR ${TEST_INC_GEN_DIR}
+                    NAMESPACE "test"
+            )
+
+            file(GLOB_RECURSE TEST_SOURCES_GEN
+                "${TEST_SRC_GEN_DIR}/*.cc"
+                "${TEST_SRC_GEN_DIR}/**/*.cc"
+                )
+            message(STATUS "Adding ${TEST_SOURCES_GEN} to test sources")
+            list(APPEND TEST_SOURCES ${TEST_SOURCES_GEN})
+            list(APPEND TEST_RESOURCES_INCLUDE ${TEST_INC_GEN_DIR})
 
             set(TEST_TARGET_NAME "${CMAKE_PROJECT_NAME}-${use_case}-tests")
             add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})

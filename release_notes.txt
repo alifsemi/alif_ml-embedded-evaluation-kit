@@ -1,3 +1,8 @@
+Changes in 21.05
+    * Added script to download and optimize default models.
+    * Added script to run default build flow.
+    * Added a model for Anomaly Detection use case.
+
 Changes in 21.03
     * simple platform support added
     * model conditioning examples added

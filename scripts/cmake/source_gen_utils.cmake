@@ -194,39 +194,62 @@ endfunction()
 #                               placed
 # @param[in]    DESTINATION_HDR directory in which the output h file must be
 #                               placed
-# @param[in]    USECASE         name of the sub-usecase
 # @param[in]    NAMESPACE       data name space
 # NOTE: Uses python
 ##############################################################################
 function(generate_test_data_code)
 
-    set(multiValueArgs NAMESPACE)
-    set(oneValueArgs INPUT_DIR DESTINATION_SRC DESTINATION_HDR USECASE)
+    set(multiValueArgs NAMESPACE INPUT_DIR)
+    set(oneValueArgs DESTINATION_SRC DESTINATION_HDR)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-    # Absolute paths for passing into python script
-    get_filename_component(input_dir_abs ${PARSED_INPUT_DIR} ABSOLUTE)
-    get_filename_component(src_out_abs ${PARSED_DESTINATION_SRC} ABSOLUTE)
-    get_filename_component(hdr_out_abs ${PARSED_DESTINATION_HDR} ABSOLUTE)
+    list(LENGTH PARSED_INPUT_DIR input_dir_length)
 
-    foreach(name ${PARSED_NAMESPACE})
-        set(py_arg_exp ${py_arg_exp} --namespaces=${name})
+    if (${input_dir_length} GREATER 1)
+        set(add_extra_namespace TRUE)
+    else()
+        set(add_extra_namespace FALSE)
+    endif()
+
+    foreach(input_dir ${PARSED_INPUT_DIR})
+        unset(py_arg_exp)
+        file(GLOB_RECURSE input_data_files
+                "${input_dir}/*.npy"
+                )
+        # no input NPY data found => skip code generation.
+        if(NOT input_data_files)
+            message(WARNING "No files were found to generated input data: ${input_dir}")
+            break()
+        endif()
+
+        # Absolute paths for passing into python script
+        get_filename_component(input_dir_abs ${input_dir} ABSOLUTE)
+        get_filename_component(input_dir_name ${input_dir} NAME)
+        get_filename_component(src_out_abs ${PARSED_DESTINATION_SRC} ABSOLUTE)
+        get_filename_component(hdr_out_abs ${PARSED_DESTINATION_HDR} ABSOLUTE)
+
+        foreach(name ${PARSED_NAMESPACE})
+            set(py_arg_exp ${py_arg_exp} --namespaces=${name})
+        endforeach()
+
+        if (${add_extra_namespace})
+            set(py_arg_exp ${py_arg_exp} --namespaces=${input_dir_name})
+        endif()
+
+        message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
+        execute_process(
+            COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_test_data_cpp.py
+            --data_folder_path ${input_dir_abs}
+            --source_folder_path ${src_out_abs}
+            --header_folder_path ${hdr_out_abs}
+            --usecase ${input_dir_name}
+            ${py_arg_exp}
+            RESULT_VARIABLE return_code
+        )
+        if (NOT return_code EQUAL "0")
+            message(FATAL_ERROR "Failed to generate test data files.")
+        endif ()
     endforeach()
-
-    message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
-    execute_process(
-        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_test_data_cpp.py
-        --data_folder_path ${input_dir_abs}
-        --source_folder_path ${src_out_abs}
-        --header_folder_path ${hdr_out_abs}
-        --usecase ${PARSED_USECASE}
-        ${py_arg_exp}
-        RESULT_VARIABLE return_code
-    )
-    if (NOT return_code EQUAL "0")
-        message(FATAL_ERROR "Failed to generate test data files.")
-    endif ()
-
 endfunction()
 
 
