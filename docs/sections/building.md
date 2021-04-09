@@ -278,7 +278,7 @@ cmake \
 Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific
 file to set the compiler and platform specific parameters.
 
-To configure a build that can be debugged using Arm-DS, we can just specify
+To configure a build that can be debugged using Arm Development Studio, we can just specify
 the build type as `Debug`:
 
 ```commandline
@@ -287,6 +287,19 @@ cmake \
     -DTARGET_SUBSYSTEM=sse-300 \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
     -DCMAKE_BUILD_TYPE=Debug ..
+```
+
+To be able to import the project in Arm Development Studio, add the Eclipse project generator and CMAKE_ECLIPSE_VERSION in the CMake command. It is advisable that the build directory is one level up relative to the source directory. When the build has been generated, you need to follow the Import wizard in Arm Development Studio and import the existing project into the workspace. You can then compile and debug the project using Arm Development Studio. Note that the below command is executed one level up from the source directory.
+
+```commandline
+cmake \
+    -DTARGET_PLATFORM=mps3 \
+    -DTARGET_SUBSYSTEM=sse-300 \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -G "Eclipse CDT4 - Unix Makefiles" \
+    -DCMAKE_ECLIPSE_VERSION=4.15 \
+    ml-embedded-evaluation-kit
 ```
 
 To configure a build that can be debugged using a tool that only supports
