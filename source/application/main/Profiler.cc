@@ -101,7 +101,7 @@ namespace app {
 
             Statistics AXI0_RD {
                 .name = "NPU AXI0_RD_DATA_BEAT_RECEIVED",
-                .unit = "cycles",
+                .unit = "beats",
                 .total = 0,
                 .avrg = 0.0,
                 .min = series[0].axi0writes,
@@ -109,7 +109,7 @@ namespace app {
             };
             Statistics AXI0_WR {
                     .name = "NPU AXI0_WR_DATA_BEAT_WRITTEN",
-                    .unit = "cycles",
+                    .unit = "beats",
                     .total = 0,
                     .avrg = 0.0,
                     .min = series[0].axi0reads,
@@ -117,7 +117,7 @@ namespace app {
             };
             Statistics AXI1_RD {
                     .name = "NPU AXI1_RD_DATA_BEAT_RECEIVED",
-                    .unit = "cycles",
+                    .unit = "beats",
                     .total = 0,
                     .avrg = 0.0,
                     .min = series[0].axi1reads,

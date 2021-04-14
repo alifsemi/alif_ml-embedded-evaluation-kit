@@ -450,9 +450,9 @@ INFO - Average anomaly score is: -0.024493
 Anomaly threshold is: -0.800000
 Anomaly detected!
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 628122
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 135087
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 62870
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 628122
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 135087
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 62870
 INFO - NPU ACTIVE cycles: 1081007
 INFO - NPU IDLE cycles: 626
 INFO - NPU total cycles: 1081634
@@ -473,12 +473,12 @@ The profiling section of the log shows that for each inference. For the last inf
 
   - 626 idle cycles: number of cycles for which the NPU was idle
 
-  - 628,122 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+  - 628,122 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus.
     AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
 
-  - 135,087 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+  - 135,087 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 62,870 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+  - 62,870 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus.
     AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as

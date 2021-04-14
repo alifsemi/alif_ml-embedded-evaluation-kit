@@ -422,9 +422,9 @@ INFO - 2) 283 (12.757138) -> tiger cat
 INFO - 3) 458 (7.021370) -> bow tie, bow-tie, bowtie
 INFO - 4) 288 (7.021370) -> lynx, catamount
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 2489726
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 1098726
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 471129
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 2489726
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 1098726
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 471129
 INFO - NPU ACTIVE cycles: 7489258
 INFO - NPU IDLE cycles: 914
 INFO - NPU total cycles: 7490172
@@ -445,12 +445,12 @@ The profiling section of the log shows that for this inference:
 
   - 914 idle cycles: number of cycles for which the NPU was idle
 
-  - 2,489,726 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+  - 2,489,726 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus.
     AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
 
-  - 1,098,726 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+  - 1,098,726 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 471,129 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+  - 471,129 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus.
     AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as

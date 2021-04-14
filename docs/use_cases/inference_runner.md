@@ -280,9 +280,9 @@ The following example illustrates application output:
 ```log
 INFO - Final results:
 INFO - Profile for Inference :
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED cycles: 9332
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN cycles: 3248
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED cycles: 2219
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 9332
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 3248
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 2219
 INFO - NPU ACTIVE cycles: 33145
 INFO - NPU IDLE cycles: 1033
 INFO - NPU total cycles: 34178
@@ -299,12 +299,12 @@ inference:
 
   - 1,033 idle cycles: number of cycles for which the NPU was idle
 
-  - 2,219 AXI0 read cycles: The number of cycles the NPU spends to execute AXI0 read transactions.
+  - 9,332 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus.
     AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
 
-  - 3,248 AXI0 write cycles: The number of cycles the NPU spends to execute AXI0 write transactions.
+  - 3,248 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 9,332 AXI1 read cycles: The number of cycles the NPU spends to execute AXI1 read transactions.
+  - 2,219 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus.
     AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
