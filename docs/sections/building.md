@@ -81,7 +81,7 @@ are fulfilled:
     python3 -m venv
     ```
 
-- Make or MinGW make For Windows
+- Make
 
     ```commandline
     make --version
@@ -275,16 +275,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
 
-For Windows, add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -G "MinGW Makefiles" \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
-```
-
 Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific
 file to set the compiler and platform specific parameters.
 
@@ -355,16 +345,6 @@ cmake \
     -DTARGET_PLATFORM=native \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake ..
 ```
-
-For Windows add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=native \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake \
-    -G "MinGW Makefiles ..
-```
-
 Results of the build will be placed under `build/bin/` folder:
 
 ```tree
@@ -398,13 +378,7 @@ If the CMake command succeeds, build the application as follows:
 make -j4
 ```
 
-or for Windows:
-
-```commandline
-mingw32-make -j4
-```
-
-Add `VERBOSE=1` to see compilation and link details.
+Add `VERBOSE=1` to see compilation and link details.
 
 Results of the build will be placed under `build/bin` folder, an
 example:

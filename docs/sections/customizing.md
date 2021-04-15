@@ -723,8 +723,6 @@ cmake \
   -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
 
-For Windows, add `-G "MinGW Makefiles"` to the CMake command.
-
 As a result, `ethos-u-hello_world.axf` should be created, MPS3 build
 will also produce `sectors/hello_world` directory with binaries and
 `images-hello_world.txt` to be copied to the board MicroSD card.

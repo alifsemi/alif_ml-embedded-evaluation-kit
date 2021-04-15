@@ -34,9 +34,8 @@
 
 Before starting the setup process, please make sure that you have:
 
-- Linux x86_64 based machine or Windows Subsystem for Linux is
-    preferable. Windows can be used as a build environment but cannot
-    run Fast Model simulations.
+- Linux x86_64 based machine or Windows Subsystem for Linux is preferable. 
+  Unfortunately, Windows is not supported as a build environment yet.
 
 - Arm Compiler license (version 6.14 or above).
 

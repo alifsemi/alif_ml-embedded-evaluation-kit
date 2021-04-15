@@ -83,17 +83,6 @@ cmake \
     -DUSE_CASE_BUILD=img_class ..
 ```
 
-For Windows, add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -G "MinGW Makefiles" \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=./scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=img_class ..
-```
-
 Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific file to set the compiler and platform specific
 parameters.
 
@@ -220,8 +209,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
     -DUSE_CASE_BUILD=img_class ..
 ```
-
-For Windows, add `-G "MinGW Makefiles"` to the CMake command.
 
 The images found in the `img_class_FILE_PATH` folder will be picked up and automatically converted to C++ files during
 the CMake configuration stage and then compiled into the application during the build phase for performing inference

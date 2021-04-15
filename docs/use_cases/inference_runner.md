@@ -75,17 +75,6 @@ cmake \
     -DUSE_CASE_BUILD=inference_runner ..
 ```
 
-For Windows, add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -G "MinGW Makefiles" \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=./scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=inference_runner ..
-```
-
 Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific file to set the compiler and platform specific
 parameters.
 
@@ -207,8 +196,6 @@ cmake \
   -DTARGET_SUBSYSTEM=sse-300 \
   -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
-
-For Windows, add `-G "MinGW Makefiles"` to the CMake command.
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
