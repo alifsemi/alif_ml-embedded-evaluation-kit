@@ -11,7 +11,7 @@ The source is http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz, 
        └── 0a9f9af7_nohash_2.wav
     ```
 
-- rightleftup.wav
+- right_left_up.wav
 
     ```tree
     speech_commands_v0.02
@@ -31,7 +31,7 @@ The source is http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz, 
        └── 0b40aa8e_nohash_0.wav
     ```
 
-- yesnogostop.wav
+- yes_no_go_stop.wav
 
     ```tree
     speech_commands_v0.02

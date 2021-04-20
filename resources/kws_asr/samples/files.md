@@ -3,7 +3,7 @@
 The sample wav audio clips provided are under Creative Commons License (Creative Commons Attribution 4.0 International Public License).
 The source is http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz, in particular the files used are listed here for traceability:
 
-- yesnogostop.wav
+- yes_no_go_stop.wav
 
     ```tree
     speech_commands_v0.02

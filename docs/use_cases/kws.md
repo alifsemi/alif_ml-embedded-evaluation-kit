@@ -421,11 +421,11 @@ Choice:
     application:
 
     ```log
-    INFO - List of Files:
-    INFO - 0 => down.wav
-    INFO - 1 => rightleftup.wav
-    INFO - 2 => yes.wav
-    INFO - 3 => yesnogostop.wav
+    [INFO] List of Files:
+    [INFO] 0 => down.wav
+    [INFO] 1 => right_left_up.wav
+    [INFO] 2 => yes.wav
+    [INFO] 3 => yes_no_go_stop.wav
     ```
 
 ### Running Keyword Spotting

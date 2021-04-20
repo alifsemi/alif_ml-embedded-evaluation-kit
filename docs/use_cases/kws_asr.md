@@ -519,8 +519,8 @@ Choice:
 5. “List” menu option prints a list of pair ... indexes - the original filenames embedded in the application:
 
     ```log
-    INFO - List of Files:
-    INFO - 0 => yesnogostop.wav
+    [INFO] List of Files:
+    [INFO] 0 => yes_no_go_stop.wav
     ```
 
 ### Running Keyword Spotting and Automatic Speech Recognition
@@ -531,7 +531,7 @@ The following example illustrates application output:
 
 ```log
 INFO - KWS audio data window size 16000
-INFO - Running KWS inference on audio clip 0 => yesnogostop.wav
+INFO - Running KWS inference on audio clip 0 => yes_no_go_stop.wav
 INFO - Inference 1/7
 INFO - For timestamp: 0.000000 (inference #: 0); threshold: 0.900000
 INFO -          label @ 0: yes, score: 0.996094
@@ -559,7 +559,7 @@ INFO - NPU total cycles: 28910172
 
 It could take several minutes to complete one inference run (average time is 2-3 minutes).
 
-Using the input “yesnogostop.wav”, the log shows inference results for the KWS operation first, detecting the
+Using the input “yes_no_go_stop.wav”, the log shows inference results for the KWS operation first, detecting the
 trigger word “yes“ with the stated probability score (in this case 0.99). After this, the ASR inference is run,
 printing the words recognized from the input sample.
 

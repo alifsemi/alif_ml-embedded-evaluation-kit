@@ -459,11 +459,11 @@ Choice:
 5. “List” menu option prints a list of pair audio clip indexes - the original filenames embedded in the application:
 
     ```log
-    INFO - List of Files:
-    INFO - 0 => anotherdoor.wav
-    INFO - 1 => anotherengineer.wav
-    INFO - 2 => itellyou.wav
-    INFO - 3 => testingroutine.wav
+    [INFO] List of Files:
+    [INFO] 0 => another_door.wav
+    [INFO] 1 => another_engineer.wav
+    [INFO] 2 => i_tell_you.wav
+    [INFO] 3 => testing_routine.wav
     ```
 
 ### Running Automatic Speech Recognition
