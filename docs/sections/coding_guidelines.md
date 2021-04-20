@@ -292,7 +292,7 @@ by other people.
   > **Note:** Leave one blank line between each of these groups for readability.
   >Use quotes for headers from within the same project and angle brackets for third-party and system headers.
   >Do not use paths relative to the current source file, such as `../Header.hpp`. Instead configure your include paths
->in the project makefiles.
+  >in the project makefiles.
 
   ```C++
   #include "ExampleClass.hpp"     // Own header

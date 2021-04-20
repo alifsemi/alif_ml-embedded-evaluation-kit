@@ -1,5 +1,7 @@
 # Testing and benchmarking
 
+## Contents
+
 - [Testing](#testing)
 - [Benchmarking](#benchmarking)
 

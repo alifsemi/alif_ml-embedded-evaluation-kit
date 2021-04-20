@@ -34,7 +34,7 @@
 
 Before starting the setup process, please make sure that you have:
 
-- Linux x86_64 based machine or Windows Subsystem for Linux is preferable. 
+- Linux x86_64 based machine or Windows Subsystem for Linux is preferable.
   Unfortunately, Windows is not supported as a build environment yet.
 
 - Arm Compiler license (version 6.14 or above).
@@ -69,7 +69,6 @@ See the following documents for other relevant information:
 - Arm® ML-Zoo: <https://github.com/ARM-software/ML-zoo/>
 
 See <http://developer.arm.com> for access to Arm documentation.
-
 
 ## Repository structure
 
@@ -222,24 +221,25 @@ options and the process.
 The project can be built for MPS3 FPGA and FVP emulating MPS3. Default values for configuration parameters
 will build executable models with Ethos-U55 NPU support.
 See:
-  - [Building the Code Samples application from sources](./sections/building.md#building-the-ml-embedded-code-sample-applications-from-sources)
-    - [Contents](./sections/building.md#contents)
-    - [Build prerequisites](./sections/building.md#build-prerequisites)
-    - [Build options](./sections/building.md#build-options)
-    - [Build process](./sections/building.md#build-process)
-      - [Preparing build environment](./sections/building.md#preparing-build-environment)
-      - [Create a build directory](./sections/building.md#create-a-build-directory)
-      - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#configuring-the-build-for-mps3-sse-300)
-      - [Configuring the build for `MPS3: SSE-200`](./sections/building.md#configuring-the-build-for-mps3-sse-200)
-      - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
-      - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-simple_platform)
-      - [Building the configured project](./sections/building.md#building-the-configured-project)
-    - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
-    - [Add custom inputs](./sections/building.md#add-custom-inputs)
-    - [Add custom model](./sections/building.md#add-custom-model)
-    - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
-    - [Memory constraints](./sections/building.md#memory-constraints)
-    - [Automatic file generation](./sections/building.md#automatic-file-generation)
+
+- [Building the Code Samples application from sources](./sections/building.md#building-the-ml-embedded-code-sample-applications-from-sources)
+  - [Contents](./sections/building.md#contents)
+  - [Build prerequisites](./sections/building.md#build-prerequisites)
+  - [Build options](./sections/building.md#build-options)
+  - [Build process](./sections/building.md#build-process)
+    - [Preparing build environment](./sections/building.md#preparing-build-environment)
+    - [Create a build directory](./sections/building.md#create-a-build-directory)
+    - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for `MPS3: SSE-200`](./sections/building.md#configuring-the-build-for-mps3-sse-200)
+    - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
+    - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-simple_platform)
+    - [Building the configured project](./sections/building.md#building-the-configured-project)
+  - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
+  - [Add custom inputs](./sections/building.md#add-custom-inputs)
+  - [Add custom model](./sections/building.md#add-custom-model)
+  - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
+  - [Memory constraints](./sections/building.md#memory-constraints)
+  - [Automatic file generation](./sections/building.md#automatic-file-generation)
 
 ## Deployment
 
@@ -370,11 +370,11 @@ Prior to submitting a patch for review please make sure that all build variants 
 Contributions go through testing at the continuous integration system. All builds, tests and checks must pass before a
 contribution gets merged to the master branch.
 
-## Communication 
+## Communication
 
-Please, if you want to start public discussion, raise any issues or questions related to this repository, use 
-[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/) 
-forum. 
+Please, if you want to start public discussion, raise any issues or questions related to this repository, use
+[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/)
+forum.
 
 ## Licenses
 
@@ -390,6 +390,8 @@ Application input data sample files are provided under their original license:
 | [Keyword Spotting and Automatic Speech Recognition Samples](../resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
 
 ## Appendix
+
 See:
+
 - [Appendix](./sections/appendix.md)
   - [Cortex-M55 Memory map overview](./sections/appendix.md#cortex-m55-memory-map-overview)

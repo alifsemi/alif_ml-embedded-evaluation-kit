@@ -1,5 +1,7 @@
 # Deployment
 
+## Contents
+
 - [Fixed Virtual Platform](#fixed-virtual-platform)
   - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
   - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
@@ -276,6 +278,5 @@ off.
     INFO - CPU: Cortex-M55 r0p0
     ...
     ```
-
 
 Next section of the main documentation, [Running code samples applications](../documentation.md#Running-code-samples-applications).

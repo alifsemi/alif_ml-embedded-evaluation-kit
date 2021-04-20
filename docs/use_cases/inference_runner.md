@@ -144,8 +144,6 @@ If the CMake command succeeded, build the application as follows:
 make -j4
 ```
 
-For Windows, use `mingw32-make`.
-
 Add VERBOSE=1 to see compilation and link details.
 
 Results of the build will be placed under `build/bin` folder:

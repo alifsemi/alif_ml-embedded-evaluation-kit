@@ -17,4 +17,4 @@ The table below is the memory mapping information specific to the Arm® Cortex®
 | SRAM  | 0x3100_0000  |  0x313F_FFFF  |   4 MiB   |  S   |   2 banks of 2 MiB each as SSE-300 internal SRAM region   |
 | DDR   | 0x7000_0000  |  0x7FFF_FFFF  |  256 MiB  |  S   |   DDR memory region                                       |
 
-Default memory map can be found here: https://developer.arm.com/documentation/101051/0002/Memory-model/Memory-map
+Default memory map can be found here: <https://developer.arm.com/documentation/101051/0002/Memory-model/Memory-map>.

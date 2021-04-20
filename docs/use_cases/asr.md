@@ -154,6 +154,7 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=./scripts/cmake/bare-metal-toolchain.cmake \
     -DUSE_CASE_BUILD=asr ..
 ```
+
 Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific file to set the compiler and platform specific
 parameters.
 
@@ -222,8 +223,6 @@ If the CMake command succeeded, build the application as follows:
 ```commandline
 make -j4
 ```
-
-For Windows, use `mingw32-make`.
 
 Add `VERBOSE=1` to see compilation and link details.
 
@@ -325,8 +324,6 @@ cmake \
     -DTARGET_SUBSYSTEM=sse-300 \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
-
-For Windows, add `-G "MinGW Makefiles"` to the CMake command.
 
 > **Note:** Clean the build directory before re-running the CMake command.
 

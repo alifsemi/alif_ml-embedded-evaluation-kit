@@ -1,5 +1,7 @@
 # Implementing custom ML application
 
+## Contents
+
 - [Software project description](#software-project-description)
 - [HAL API](#hal-api)
 - [Main loop function](#main-loop-function)

@@ -1,5 +1,7 @@
 # Troubleshooting
 
+## Contents
+
 - [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
 - [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
 

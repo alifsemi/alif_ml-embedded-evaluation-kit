@@ -341,16 +341,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
 ```
 
-for Windows add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-200 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -G "MinGW Makefiles ..
-```
-
 ### Configuring native unit-test build
 
 ```commandline
@@ -358,6 +348,7 @@ cmake \
     -DTARGET_PLATFORM=native \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake ..
 ```
+
 Results of the build will be placed under `build/bin/` folder:
 
 ```tree
@@ -372,15 +363,6 @@ Results of the build will be placed under `build/bin/` folder:
 cmake \
     -DTARGET_PLATFORM=simple_platform \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
-```
-
-For Windows add `-G "MinGW Makefiles"`:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -G "MinGW Makefiles" ..
 ```
 
 ### Building the configured project
@@ -602,9 +584,6 @@ cmake \
 ```
 
 > **Note:** For the specific use case command see the relative section in the use case documentation.
-
-For Windows, add `-G MinGW Makefiles` to the CMake command.
-
 > **Note:** Clean the build directory before re-running the CMake command.
 
 The TensorFlow Lite for Microcontrollers model pointed to by `<use_case>_MODEL_TFLITE_PATH` and

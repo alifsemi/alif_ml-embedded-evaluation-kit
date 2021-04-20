@@ -104,6 +104,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source)
+set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
 if (CPU_PROFILE_ENABLED)
     set(PROFILING_OPT "${PROFILING_OPT} -DCPU_PROFILE_ENABLED")
@@ -234,13 +236,17 @@ file(GLOB_RECURSE SRC_APPLICATION
 list(FILTER SRC_APPLICATION EXCLUDE REGEX ".*main\\.c.*$")
 
 list(JOIN USE_CASE_BUILD "" USE_CASE_BUILD_STR)
+list(APPEND USE_CASES_SEARCH_DIR_LIST ${SRC_PATH}/use_case)
+message(STATUS "Use-cases source paths: ${USE_CASES_SEARCH_DIR_LIST}.")
 if (${USE_CASE_BUILD_STR} STREQUAL all)
-    SUBDIRLIST(USE_CASES ${SRC_PATH}/use_case/)
+    foreach(USE_CASES_SEARCH_DIR ${USE_CASES_SEARCH_DIR_LIST})
+        SUBDIRLIST(USE_CASES_SUBDIRS ${USE_CASES_SEARCH_DIR})
+        list(APPEND USE_CASES ${USE_CASES_SUBDIRS})
+    endforeach()
 else()
     set(USE_CASES ${USE_CASE_BUILD})
 endif()
 
-set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 if (NOT ${CMAKE_CROSSCOMPILING})
 
     #Test TPIP
@@ -263,10 +269,17 @@ endif ()
 message(STATUS "Building use-cases: ${USE_CASES}.")
 foreach(use_case ${USE_CASES})
 
-    if (EXISTS ${SRC_PATH}/use_case/${use_case})
-        message(STATUS "Found sources for use-case ${use_case}")
-    else ()
-        message(FATAL_ERROR "Faild to find sources for ${use_case} in ${SRC_PATH}/use_case/${use_case}!")
+    set(SRC_USE_CASE "")
+    foreach(USE_CASES_SEARCH_DIR ${USE_CASES_SEARCH_DIR_LIST})
+        if (EXISTS ${USE_CASES_SEARCH_DIR}/${use_case})
+            message(STATUS "Found sources for use-case ${use_case}")
+            set(SRC_USE_CASE ${USE_CASES_SEARCH_DIR})
+            break()
+        endif ()
+    endforeach()
+
+    if (${SRC_USE_CASE} STREQUAL "")
+        message(FATAL_ERROR "Failed to find sources for ${use_case}!")
     endif ()
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
@@ -280,20 +293,20 @@ foreach(use_case ${USE_CASES})
     file(MAKE_DIRECTORY ${SRC_GEN_DIR} ${INC_GEN_DIR})
 
     file(GLOB_RECURSE UC_SRC
-        "${SRC_PATH}/use_case/${use_case}/src/*.cpp"
-        "${SRC_PATH}/use_case/${use_case}/src/*.cc"
-        "${SRC_PATH}/use_case/${use_case}/src/*.c"
-        "${SRC_PATH}/use_case/${use_case}/src/**/*.cpp"
-        "${SRC_PATH}/use_case/${use_case}/src/**/*.cc"
-        "${SRC_PATH}/use_case/${use_case}/src/**/*.c"
+        "${SRC_USE_CASE}/${use_case}/src/*.cpp"
+        "${SRC_USE_CASE}/${use_case}/src/*.cc"
+        "${SRC_USE_CASE}/${use_case}/src/*.c"
+        "${SRC_USE_CASE}/${use_case}/src/**/*.cpp"
+        "${SRC_USE_CASE}/${use_case}/src/**/*.cc"
+        "${SRC_USE_CASE}/${use_case}/src/**/*.c"
         )
 
     set(UC_INCLUDE
-        ${SRC_PATH}/use_case/${use_case}/include
+        ${SRC_USE_CASE}/${use_case}/include
         )
 
     file(GLOB UC_CMAKE_FILE
-        "${SRC_PATH}/use_case/${use_case}/*.cmake"
+        "${SRC_USE_CASE}/${use_case}/*.cmake"
         )
 
     include(${UC_CMAKE_FILE})
@@ -377,8 +390,20 @@ foreach(use_case ${USE_CASES})
             --output_file_path  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images-${use_case}.txt
             COMMENT "Generating FPGA mappings file")
     elseif (${TARGET_PLATFORM} STREQUAL native)
+
+        # If native build tests
+        set(TEST_SRC_USE_CASE "")
+        foreach(USE_CASES_TESTS_SEARCH_DIR ${USE_CASES_TESTS_SEARCH_DIR_LIST})
+
+            if (EXISTS ${USE_CASES_TESTS_SEARCH_DIR}/${use_case})
+                message(STATUS "Found tests for use-case ${use_case} at ${USE_CASES_TESTS_SEARCH_DIR}/${use_case}.")
+                set(TEST_SRC_USE_CASE ${USE_CASES_TESTS_SEARCH_DIR})
+                break()
+            endif ()
+        endforeach()
+
         # Add tests only if they exists for the usecase
-        if (EXISTS ${TEST_SRCS}/use_case/${use_case})
+        if (NOT ${TEST_SRC_USE_CASE} STREQUAL "")
 
             set(TEST_RESOURCES_INCLUDE
                 "${TEST_SRCS}/utils/"
@@ -391,12 +416,12 @@ foreach(use_case ${USE_CASES})
                 "${TEST_SRCS}/common/*.cc"
                 "${TEST_SRCS}/utils/*.cc"
                 "${TEST_SRCS}/utils/*.cpp"
-                "${TEST_SRCS}/use_case/${use_case}/*.cpp"
-                "${TEST_SRCS}/use_case/${use_case}/*.cc"
-                "${TEST_SRCS}/use_case/${use_case}/*.c"
-                "${TEST_SRCS}/use_case/${use_case}/**/*.cpp"
-                "${TEST_SRCS}/use_case/${use_case}/**/*.cc"
-                "${TEST_SRCS}/use_case/${use_case}/**/*.c"
+                "${TEST_SRC_USE_CASE}/${use_case}/*.cpp"
+                "${TEST_SRC_USE_CASE}/${use_case}/*.cc"
+                "${TEST_SRC_USE_CASE}/${use_case}/*.c"
+                "${TEST_SRC_USE_CASE}/${use_case}/**/*.cpp"
+                "${TEST_SRC_USE_CASE}/${use_case}/**/*.cc"
+                "${TEST_SRC_USE_CASE}/${use_case}/**/*.c"
                 )
 
             if (DEFINED ${use_case}_TEST_IFM AND DEFINED ${use_case}_TEST_OFM)
@@ -428,6 +453,7 @@ foreach(use_case ${USE_CASES})
                 "${TEST_TARGET_NAME}"
                 "catch2-headers"
             )
+
         endif ()
     endif ()
 endforeach()

@@ -1,19 +1,19 @@
 # Anomaly Detection Code Sample
 
-  - [Introduction](#introduction)
-    - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u55-code-sample)
-    - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Anomaly Detection](#running-anomaly-detection)
-  - [Anomaly Detection processing information](#anomaly-detection-processing-information)
-    - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
-    - [Postprocessing](#postprocessing)
+- [Introduction](#introduction)
+  - [Prerequisites](#prerequisites)
+- [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
+  - [Build options](#build-options)
+  - [Build process](#build-process)
+  - [Add custom input](#add-custom-input)
+  - [Add custom model](#add-custom-model)
+- [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u55-code-sample)
+  - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
+  - [Starting Fast Model simulation](#starting-fast-model-simulation)
+  - [Running Anomaly Detection](#running-anomaly-detection)
+- [Anomaly Detection processing information](#anomaly-detection-processing-information)
+  - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
+  - [Postprocessing](#postprocessing)
 
 ## Introduction
 
@@ -183,8 +183,6 @@ If the CMake command succeeded, build the application as follows:
 make -j4
 ```
 
-For Windows, use `mingw32-make`.
-
 Add VERBOSE=1 to see compilation and link details.
 
 Results of the build will be placed under `build/bin` folder:
@@ -248,7 +246,8 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
     -DUSE_CASE_BUILD=ad ..
 ```
-The images found in the _DIR folder will be picked up and automatically converted to C++ files during the CMake
+
+The audio flies found in the `ad_FILE_PATH` folder will be picked up and automatically converted to C++ files during the CMake
 configuration stage and then compiled into the application during the build phase for performing inference with.
 
 The log from the configuration stage should tell you what image directory path has been used:
@@ -276,8 +275,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
     -DUSE_CASE_BUILD=ad ..
 ```
-
-For Windows, add `-G "MinGW Makefiles"` to the CMake command.
 
 > **Note:** Clean the build directory before re-running the CMake command.
 

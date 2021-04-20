@@ -1,6 +1,8 @@
 
 # Running Ethos-U55 Code Samples
 
+## Contents
+
 - [Starting Fast Model simulation](#starting-fast-model-simulation)
 
 This section covers the process for getting started with pre-built binaries for the Code Samples.
