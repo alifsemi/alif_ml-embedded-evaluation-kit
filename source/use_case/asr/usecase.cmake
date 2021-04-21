@@ -102,8 +102,9 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH)
     # Download the default model
     set(ZOO_COMMON_SUBPATH      "models/speech_recognition/wav2letter/tflite_int8")
     set(ZOO_MODEL_SUBPATH       "${ZOO_COMMON_SUBPATH}/${MODEL_FILENAME}")
+    set(ZOO_MODEL_VERSION       "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
 
-    download_file_from_modelzoo(${ZOO_MODEL_SUBPATH}    ${DEFAULT_MODEL_PATH})
+    download_file_from_modelzoo(${ZOO_MODEL_VERSION} ${ZOO_MODEL_SUBPATH} ${DEFAULT_MODEL_PATH})
 
     if (ETHOS_U55_ENABLED)
         message(STATUS
@@ -124,8 +125,8 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH)
         set(${use_case}_TEST_OFM    ${MODEL_RESOURCES_DIR}/ofm0.npy CACHE FILEPATH
                                 "Input test vector for ${use_case}")
 
-        download_file_from_modelzoo(${ZOO_TEST_IFM_SUBPATH} ${${use_case}_TEST_IFM})
-        download_file_from_modelzoo(${ZOO_TEST_OFM_SUBPATH} ${${use_case}_TEST_OFM})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION} ${ZOO_TEST_IFM_SUBPATH} ${${use_case}_TEST_IFM})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION} ${ZOO_TEST_OFM_SUBPATH} ${${use_case}_TEST_OFM})
 
         set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
         set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)

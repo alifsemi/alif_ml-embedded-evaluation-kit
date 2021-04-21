@@ -120,8 +120,9 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH_KWS)
     # Download the default model
     set(ZOO_COMMON_SUBPATH_KWS      "models/keyword_spotting/ds_cnn_large/tflite_clustered_int8")
     set(ZOO_MODEL_SUBPATH_KWS       "${ZOO_COMMON_SUBPATH_KWS}/${MODEL_FILENAME_KWS}")
+    set(ZOO_MODEL_VERSION_KWS       "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
 
-    download_file_from_modelzoo(${ZOO_MODEL_SUBPATH_KWS}    ${DEFAULT_MODEL_PATH_KWS})
+    download_file_from_modelzoo(${ZOO_MODEL_VERSION_KWS} ${ZOO_MODEL_SUBPATH_KWS} ${DEFAULT_MODEL_PATH_KWS})
 
     if (ETHOS_U55_ENABLED)
         message(STATUS
@@ -142,8 +143,8 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH_KWS)
         set(${use_case}_TEST_OFM    ${MODEL_RESOURCES_DIR_KWS}/${SUB_USECASE_KWS}/ofm0.npy CACHE FILEPATH
                                     "Input test vector for ${use_case}-${SUB_USECASE_KWS}.")
 
-        download_file_from_modelzoo(${ZOO_TEST_IFM_SUBPATH_KWS} ${${use_case}_TEST_IFM})
-        download_file_from_modelzoo(${ZOO_TEST_OFM_SUBPATH_KWS} ${${use_case}_TEST_OFM})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION_KWS} ${ZOO_TEST_IFM_SUBPATH_KWS} ${${use_case}_TEST_IFM})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION_KWS} ${ZOO_TEST_OFM_SUBPATH_KWS} ${${use_case}_TEST_OFM})
         set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
         set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)
         file(MAKE_DIRECTORY ${TEST_SRC_GEN_DIR} ${TEST_INC_GEN_DIR})
@@ -181,8 +182,9 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH_ASR)
     # Download the default model
     set(ZOO_COMMON_SUBPATH_ASR      "models/speech_recognition/wav2letter/tflite_int8")
     set(ZOO_MODEL_SUBPATH_ASR       "${ZOO_COMMON_SUBPATH_ASR}/${MODEL_FILENAME_ASR}")
+    set(ZOO_MODEL_VERSION_ASR       "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
 
-    download_file_from_modelzoo(${ZOO_MODEL_SUBPATH_ASR}    ${DEFAULT_MODEL_PATH_ASR})
+    download_file_from_modelzoo(${ZOO_MODEL_VERSION_ASR} ${ZOO_MODEL_SUBPATH_ASR}    ${DEFAULT_MODEL_PATH_ASR})
 
     if (ETHOS_U55_ENABLED)
         message(STATUS
@@ -204,8 +206,8 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH_ASR)
         set(${use_case}_TEST_OFM_ASR    ${MODEL_RESOURCES_DIR_ASR}/${SUB_USECASE_ASR}/ofm0.npy CACHE FILEPATH
                                     "Input test vector for ${use_case}-${SUB_USECASE_ASR}")
 
-        download_file_from_modelzoo(${ZOO_TEST_IFM_SUBPATH_KWS} ${${use_case}_TEST_IFM_ASR})
-        download_file_from_modelzoo(${ZOO_TEST_OFM_SUBPATH_KWS} ${${use_case}_TEST_OFM_ASR})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION_ASR} ${ZOO_TEST_IFM_SUBPATH_KWS} ${${use_case}_TEST_IFM_ASR})
+        download_file_from_modelzoo(${ZOO_MODEL_VERSION_ASR} ${ZOO_TEST_OFM_SUBPATH_KWS} ${${use_case}_TEST_OFM_ASR})
 
         set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
         set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)

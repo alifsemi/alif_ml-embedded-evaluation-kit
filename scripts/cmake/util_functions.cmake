@@ -118,15 +118,15 @@ endfunction()
 
 # Function to download a files from the Arm Model Zoo
 # Arguments:
+#   model_zoo_version: hash of the Arm Model Zoo commit to use
 #   file_sub_path: subpath within the model zoo respository
 #   download_path: location where this file is to be downloaded (path including filename)
-function(download_file_from_modelzoo file_sub_path download_path)
+function(download_file_from_modelzoo model_zoo_version file_sub_path download_path)
 
     set(MODEL_ZOO_REPO      "https://github.com/ARM-software/ML-zoo/raw")
-    set(MODEL_ZOO_VERSION   "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
 
     string(JOIN "/" FILE_URL
-        ${MODEL_ZOO_REPO} ${MODEL_ZOO_VERSION} ${file_sub_path})
+        ${MODEL_ZOO_REPO} ${model_zoo_version} ${file_sub_path})
 
     message(STATUS "Downloading ${FILE_URL} to ${download_path}...")
 

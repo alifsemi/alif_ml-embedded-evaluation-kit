@@ -32,8 +32,9 @@ if (NOT DEFINED ${use_case}_MODEL_TFLITE_PATH)
     # Download the default model
     set(ZOO_COMMON_SUBPATH      "models/keyword_spotting/dnn_small/tflite_int8/")
     set(ZOO_MODEL_SUBPATH       "${ZOO_COMMON_SUBPATH}/${MODEL_FILENAME}")
+    set(ZOO_MODEL_VERSION       "68b5fbc77ed28e67b2efc915997ea4477c1d9d5b")
 
-    download_file_from_modelzoo(${ZOO_MODEL_SUBPATH}    ${DEFAULT_MODEL_PATH})
+    download_file_from_modelzoo(${ZOO_MODEL_VERSION} ${ZOO_MODEL_SUBPATH} ${DEFAULT_MODEL_PATH})
 
     if (ETHOS_U55_ENABLED)
         message(STATUS
