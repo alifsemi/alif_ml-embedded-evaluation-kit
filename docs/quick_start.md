@@ -40,6 +40,7 @@ functionality or performance. All use cases in the evaluation kit follow the ste
     python3 -m venv env
     source ./env/bin/activate
     pip install --upgrade pip
+    pip install --upgrade setuptools
     pip install ethos-u-vela
     ```
 
