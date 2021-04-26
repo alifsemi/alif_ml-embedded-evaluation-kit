@@ -407,7 +407,7 @@ foreach(use_case ${USE_CASES})
 
             set(TEST_RESOURCES_INCLUDE
                 "${TEST_SRCS}/utils/"
-                "${TEST_SRCS}/resources/golden_fv/"
+                "${TEST_SRC_USE_CASE}/${use_case}/include/"
                 )
 
             # Define Test sources and new target to run unit tests
