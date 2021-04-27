@@ -1,9 +1,9 @@
 # Arm® ML embedded evaluation kit
 
-## Table of Content
+## Table of Contents
 
 - [Arm® ML embedded evaluation kit](./documentation.md#arm-ml-embedded-evaluation-kit)
-  - [Table of Content](./documentation.md#table-of-content)
+  - [Table of Contents](./documentation.md#table-of-content)
   - [Trademarks](./documentation.md#trademarks)
   - [Prerequisites](./documentation.md#prerequisites)
     - [Additional reading](./documentation.md#additional-reading)
@@ -14,13 +14,14 @@
   - [Running code samples applications](./documentation.md#running-code-samples-applications)
   - [Implementing custom ML application](./documentation.md#implementing-custom-ml-application)
   - [Testing and benchmarking](./documentation.md#testing-and-benchmarking)
+  - [Memory considerations](./documentation.md#memory-considerations)
   - [Troubleshooting](./documentation.md#troubleshooting)
   - [Contribution guidelines](./documentation.md#contribution-guidelines)
     - [Coding standards and guidelines](./documentation.md#coding-standards-and-guidelines)
     - [Code Reviews](./documentation.md#code-reviews)
     - [Testing](./documentation.md#testing)
-  - [Communication](./documentation.md#communication)  
-  - [Licenses](./documentation.md#licenses)  
+  - [Communication](./documentation.md#communication)
+  - [Licenses](./documentation.md#licenses)
   - [Appendix](./documentation.md#appendix)
 
 ## Trademarks
@@ -238,7 +239,6 @@ See:
   - [Add custom inputs](./sections/building.md#add-custom-inputs)
   - [Add custom model](./sections/building.md#add-custom-model)
   - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
-  - [Memory constraints](./sections/building.md#memory-constraints)
   - [Automatic file generation](./sections/building.md#automatic-file-generation)
 
 ## Deployment
@@ -289,6 +289,10 @@ See:
 ## Testing and benchmarking
 
 See [Testing and benchmarking](./sections/testing_benchmarking.md).
+
+## Memory Considerations
+
+See [Memory considerations](./sections/memory_considerations.md)
 
 ## Troubleshooting
 

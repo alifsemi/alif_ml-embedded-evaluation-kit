@@ -2,23 +2,22 @@
 
 ## Contents
 
-- [Building the Code Samples application from sources](#building-the-ml-embedded-code-sample-applications-from-sources)
+- [Building the ML embedded code sample applications from sources](#building-the-ml-embedded-code-sample-applications-from-sources)
   - [Contents](#contents)
   - [Build prerequisites](#build-prerequisites)
   - [Build options](#build-options)
   - [Build process](#build-process)
     - [Preparing build environment](#preparing-build-environment)
     - [Create a build directory](#create-a-build-directory)
-    - [Configuring the build for `MPS3: SSE-300`](#configuring-the-build-for-mps3-sse-300)
-    - [Configuring the build for `MPS3: SSE-200`](#configuring-the-build-for-mps3-sse-200)
+    - [Configuring the build for MPS3: SSE-300](#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for MPS3: SSE-200](#configuring-the-build-for-mps3-sse-200)
     - [Configuring native unit-test build](#configuring-native-unit-test-build)
-    - [Configuring the build for `simple_platform`](#configuring-the-build-for-simple_platform)
+    - [Configuring the build for simple_platform](#configuring-the-build-for-simple_platform)
     - [Building the configured project](#building-the-configured-project)
   - [Building timing adapter with custom options](#building-timing-adapter-with-custom-options)
   - [Add custom inputs](#add-custom-inputs)
   - [Add custom model](#add-custom-model)
   - [Optimize custom model with Vela compiler](#optimize-custom-model-with-vela-compiler)
-  - [Memory constraints](#memory-constraints)
   - [Automatic file generation](#automatic-file-generation)
 
 This section assumes the use of an **x86 Linux** build machine.
@@ -674,99 +673,6 @@ Vela Compiler documentation for more details.
 > **Note:** By default, use of the Ethos-U55 NPU is enabled in the CMake configuration.
 This could be changed by passing `-DETHOS_U55_ENABLED`.
 
-## Memory constraints
-
-Both the MPS3 Fixed Virtual Platform and the MPS3 FPGA platform share
-the linker script (scatter file) for SSE-300 design. The design is set
-by the CMake configuration parameter `TARGET_SUBSYSTEM` as described in
-the previuous section.
-
-The memory map exposed by this design is presented in Appendix 1. This
-can be used as a reference when editing the scatter file, especially to
-make sure that region boundaries are respected. The snippet from MPS3's
-scatter file is presented below:
-
-```
-;---------------------------------------------------------
-; First load region
-;---------------------------------------------------------
-LOAD_REGION_0 0x00000000 0x00080000
-{
-    ;-----------------------------------------------------
-    ; First part of code mem -- 512kiB
-    ;-----------------------------------------------------
-    itcm.bin 0x00000000 0x00080000
-    {
-        *.o (RESET, +First)
-        * (InRoot$$Sections)
-        .ANY (+RO)
-    }
-
-    ;-----------------------------------------------------
-    ; 128kiB of 512kiB bank is used for any other RW or ZI
-    ; data. Note: this region is internal to the Cortex-M CPU
-    ;-----------------------------------------------------
-    dtcm.bin 0x20000000 0x00020000
-    {
-        .ANY(+RW +ZI)
-    }
-
-    ;-----------------------------------------------------
-    ; 128kiB of stack space within the DTCM region
-    ;-----------------------------------------------------
-    ARM_LIB_STACK 0x20020000 EMPTY ALIGN 8 0x00020000
-    {}
-
-    ;-----------------------------------------------------
-    ; 256kiB of heap space within the DTCM region
-    ;-----------------------------------------------------
-
-    ARM_LIB_HEAP 0x20040000 EMPTY ALIGN 8 0x00040000
-    {}
-
-    ;-----------------------------------------------------
-    ; SSE-300's internal SRAM
-    ;-----------------------------------------------------
-    isram.bin 0x21000000 UNINIT ALIGN 16 0x00080000
-    {
-        ; activation buffers a.k.a tensor arena
-        *.o (.bss.NoInit.activation_buf)
-    }
-}
-
-;---------------------------------------------------------
-; Second load region
-;---------------------------------------------------------
-LOAD_REGION_1 0x60000000 0x02000000
-{
-    ;-----------------------------------------------------
-    ; 32 MiB of DRAM space for nn model and input vectors
-    ;-----------------------------------------------------
-    dram.bin 0x60000000 ALIGN 16 0x02000000
-    {
-        ; nn model's baked in input matrices
-        *.o (ifm)
-
-        ; nn model
-        *.o (nn_model)
-
-        ; if the activation buffer (tensor arena) doesn't
-        ; fit in the SRAM region, we accommodate it here
-        *.o (activation_buf)
-    }
-}
-```
-
-It is worth noting that in the bitfile implementation, only the BRAM,
-internal SRAM and DDR memory regions are accessible to the Ethos-U55 NPU
-block. In the above snippet, the internal SRAM region memory can be seen
-to be utilized by activation buffers with a limit of 512kiB. If used,
-this region will be written to by the Ethos-U55 NPU block frequently. A bigger
-region of memory for storing the model is placed in the DDR region,
-under LOAD_REGION_1. The two load regions are necessary as the MPS3's
-motherboard configuration controller limits the load size at address
-0x00000000 to 512kiB. This has implications on how the application **is
-deployed** on MPS3 as explained under the section 3.8.3.
 
 ## Automatic file generation
 
