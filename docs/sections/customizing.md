@@ -410,10 +410,10 @@ class HelloWorldModel: public Model {
 
   private:
     /* Maximum number of individual operations that can be enlisted. */
-    static constexpr int _ms_maxOpCnt = 5;
+    static constexpr int ms_maxOpCnt = 5;
 
     /* A mutable op resolver instance. */
-    tflite::MicroMutableOpResolver<_ms_maxOpCnt> _m_opResolver;
+    tflite::MicroMutableOpResolver<ms_maxOpCnt> _m_opResolver;
   };
 } /* namespace app */
 } /* namespace arm */

@@ -49,7 +49,7 @@ namespace audio {
         ~MelSpecParams() = default;
 
         /** @brief  String representation of parameters */
-        std::string Str();
+        std::string Str() const;
     };
 
     /**
@@ -76,7 +76,7 @@ namespace audio {
          * @brief       Constructor
          * @param[in]   params - Mel Spectrogram parameters
         */
-        MelSpectrogram(const MelSpecParams& params);
+        explicit MelSpectrogram(const MelSpecParams& params);
 
         MelSpectrogram() = delete;
         ~MelSpectrogram() = default;
@@ -148,7 +148,7 @@ namespace audio {
          *              bank weights and adding them up to be placed into
          *              bins, according to the filter bank's first and last
          *              indices (pre-computed for each filter bank element
-         *              by _CreateMelFilterBank function).
+         *              by CreateMelFilterBank function).
          * @param[in]   fftVec                  Vector populated with FFT magnitudes
          * @param[in]   melFilterBank           2D Vector with filter bank weights
          * @param[in]   filterBankFilterFirst   Vector containing the first indices of filter bank
@@ -162,8 +162,8 @@ namespace audio {
         virtual bool ApplyMelFilterBank(
                 std::vector<float>&                 fftVec,
                 std::vector<std::vector<float>>&    melFilterBank,
-                std::vector<int32_t>&               filterBankFilterFirst,
-                std::vector<int32_t>&               filterBankFilterLast,
+                std::vector<uint32_t>&               filterBankFilterFirst,
+                std::vector<uint32_t>&               filterBankFilterLast,
                 std::vector<float>&                 melEnergies);
 
         /**
@@ -195,33 +195,33 @@ namespace audio {
         std::vector<float>              _m_melEnergies;
         std::vector<float>              _m_windowFunc;
         std::vector<std::vector<float>> _m_melFilterBank;
-        std::vector<int32_t>            _m_filterBankFilterFirst;
-        std::vector<int32_t>            _m_filterBankFilterLast;
+        std::vector<uint32_t>            _m_filterBankFilterFirst;
+        std::vector<uint32_t>            _m_filterBankFilterLast;
         bool                            _m_filterBankInitialised;
         arm::app::math::FftInstance     _m_fftInstance;
 
         /**
          * @brief       Initialises the filter banks.
          **/
-        void _InitMelFilterBank();
+        void InitMelFilterBank();
 
         /**
          * @brief       Signals whether the instance of MelSpectrogram has had its
          *              required buffers initialised
          * @return      True if initialised, false otherwise
          **/
-        bool _IsMelFilterBankInited();
+        bool IsMelFilterBankInited() const;
 
         /**
          * @brief       Create mel filter banks for Mel Spectrogram calculation.
          * @return      2D vector of floats
          **/
-        std::vector<std::vector<float>> _CreateMelFilterBank();
+        std::vector<std::vector<float>> CreateMelFilterBank();
 
         /**
          * @brief       Computes the magnitude from an interleaved complex array
          **/
-        void _ConvertToPowerSpectrum();
+        void ConvertToPowerSpectrum();
 
     };
 

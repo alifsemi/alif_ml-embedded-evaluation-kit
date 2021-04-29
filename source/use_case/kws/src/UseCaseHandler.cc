@@ -37,7 +37,7 @@ namespace app {
     * @brief            Helper function to increment current audio clip index.
     * @param[in,out]    ctx   Pointer to the application context object.
     **/
-    static void _IncrementAppCtxClipIdx(ApplicationContext& ctx);
+    static void IncrementAppCtxClipIdx(ApplicationContext& ctx);
 
     /**
      * @brief           Helper function to set the audio clip index.
@@ -45,7 +45,7 @@ namespace app {
      * @param[in]       idx   Value to be set.
      * @return          true if index is set, false otherwise.
      **/
-    static bool _SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx);
+    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx);
 
     /**
      * @brief           Presents inference results using the data presentation
@@ -56,8 +56,8 @@ namespace app {
      *                              otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise.
      **/
-    static bool _PresentInferenceResult(hal_platform& platform,
-                                        const std::vector<arm::app::kws::KwsResult>& results);
+    static bool PresentInferenceResult(hal_platform& platform,
+                                       const std::vector<arm::app::kws::KwsResult>& results);
 
     /**
      * @brief Returns a function to perform feature calculation and populates input tensor data with
@@ -96,7 +96,7 @@ namespace app {
 
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
-            if (!_SetAppCtxClipIdx(ctx, clipIndex)) {
+            if (!SetAppCtxClipIdx(ctx, clipIndex)) {
                 return false;
             }
         }
@@ -240,20 +240,20 @@ namespace app {
 
             ctx.Set<std::vector<arm::app::kws::KwsResult>>("results", results);
 
-            if (!_PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(platform, results)) {
                 return false;
             }
 
             profiler.PrintProfilingResult();
 
-            _IncrementAppCtxClipIdx(ctx);
+            IncrementAppCtxClipIdx(ctx);
 
         } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
 
         return true;
     }
 
-    static void _IncrementAppCtxClipIdx(ApplicationContext& ctx)
+    static void IncrementAppCtxClipIdx(ApplicationContext& ctx)
     {
         auto curAudioIdx = ctx.Get<uint32_t>("clipIndex");
 
@@ -265,7 +265,7 @@ namespace app {
         ctx.Set<uint32_t>("clipIndex", curAudioIdx);
     }
 
-    static bool _SetAppCtxClipIdx(ApplicationContext& ctx, const uint32_t idx)
+    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
             printf_err("Invalid idx %u (expected less than %u)\n",
@@ -276,8 +276,8 @@ namespace app {
         return true;
     }
 
-    static bool _PresentInferenceResult(hal_platform& platform,
-                                        const std::vector<arm::app::kws::KwsResult>& results)
+    static bool PresentInferenceResult(hal_platform& platform,
+                                       const std::vector<arm::app::kws::KwsResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -345,8 +345,8 @@ namespace app {
      */
     template<class T>
     std::function<void (std::vector<int16_t>&, size_t, bool, size_t)>
-    _FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
-                 std::function<std::vector<T> (std::vector<int16_t>& )> compute)
+    FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
+                std::function<std::vector<T> (std::vector<int16_t>& )> compute)
     {
         /* Feature cache to be captured by lambda function. */
         static std::vector<std::vector<T>> featureCache = std::vector<std::vector<T>>(cacheSize);
@@ -378,24 +378,24 @@ namespace app {
     }
 
     template std::function<void (std::vector<int16_t>&, size_t , bool, size_t)>
-        _FeatureCalc<int8_t>(TfLiteTensor* inputTensor,
+        FeatureCalc<int8_t>(TfLiteTensor* inputTensor,
                             size_t cacheSize,
                             std::function<std::vector<int8_t> (std::vector<int16_t>& )> compute);
 
     template std::function<void (std::vector<int16_t>&, size_t , bool, size_t)>
-        _FeatureCalc<uint8_t>(TfLiteTensor* inputTensor,
-                              size_t cacheSize,
-                              std::function<std::vector<uint8_t> (std::vector<int16_t>& )> compute);
+        FeatureCalc<uint8_t>(TfLiteTensor* inputTensor,
+                             size_t cacheSize,
+                             std::function<std::vector<uint8_t> (std::vector<int16_t>& )> compute);
 
     template std::function<void (std::vector<int16_t>&, size_t , bool, size_t)>
-        _FeatureCalc<int16_t>(TfLiteTensor* inputTensor,
-                              size_t cacheSize,
-                              std::function<std::vector<int16_t> (std::vector<int16_t>& )> compute);
+        FeatureCalc<int16_t>(TfLiteTensor* inputTensor,
+                             size_t cacheSize,
+                             std::function<std::vector<int16_t> (std::vector<int16_t>& )> compute);
 
     template std::function<void(std::vector<int16_t>&, size_t, bool, size_t)>
-        _FeatureCalc<float>(TfLiteTensor *inputTensor,
-                            size_t cacheSize,
-                            std::function<std::vector<float>(std::vector<int16_t>&)> compute);
+        FeatureCalc<float>(TfLiteTensor* inputTensor,
+                           size_t cacheSize,
+                           std::function<std::vector<float>(std::vector<int16_t>&)> compute);
 
 
     static std::function<void (std::vector<int16_t>&, int, bool, size_t)>
@@ -413,19 +413,19 @@ namespace app {
 
             switch (inputTensor->type) {
                 case kTfLiteInt8: {
-                    mfccFeatureCalc = _FeatureCalc<int8_t>(inputTensor,
-                                                           cacheSize,
-                                                           [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
-                                                               return mfcc.MfccComputeQuant<int8_t>(audioDataWindow,
-                                                                                                    quantScale,
-                                                                                                    quantOffset);
-                                                           }
+                    mfccFeatureCalc = FeatureCalc<int8_t>(inputTensor,
+                                                          cacheSize,
+                                                          [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
+                                                              return mfcc.MfccComputeQuant<int8_t>(audioDataWindow,
+                                                                                                   quantScale,
+                                                                                                   quantOffset);
+                                                          }
                     );
                     break;
                 }
                 case kTfLiteUInt8: {
-                    mfccFeatureCalc = _FeatureCalc<uint8_t>(inputTensor,
-                                                            cacheSize,
+                    mfccFeatureCalc = FeatureCalc<uint8_t>(inputTensor,
+                                                           cacheSize,
                                                            [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
                                                                return mfcc.MfccComputeQuant<uint8_t>(audioDataWindow,
                                                                                                      quantScale,
@@ -435,13 +435,13 @@ namespace app {
                     break;
                 }
                 case kTfLiteInt16: {
-                    mfccFeatureCalc = _FeatureCalc<int16_t>(inputTensor,
-                                                            cacheSize,
-                                                            [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
-                                                                return mfcc.MfccComputeQuant<int16_t>(audioDataWindow,
-                                                                                                      quantScale,
-                                                                                                      quantOffset);
-                                                            }
+                    mfccFeatureCalc = FeatureCalc<int16_t>(inputTensor,
+                                                           cacheSize,
+                                                           [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
+                                                               return mfcc.MfccComputeQuant<int16_t>(audioDataWindow,
+                                                                                                     quantScale,
+                                                                                                     quantOffset);
+                                                           }
                     );
                     break;
                 }
@@ -451,11 +451,11 @@ namespace app {
 
 
         } else {
-            mfccFeatureCalc = mfccFeatureCalc = _FeatureCalc<float>(inputTensor,
-                                                                    cacheSize,
-                                                                    [&mfcc](std::vector<int16_t>& audioDataWindow) {
-                                                                        return mfcc.MfccCompute(audioDataWindow);
-                                                                    });
+            mfccFeatureCalc = mfccFeatureCalc = FeatureCalc<float>(inputTensor,
+                                                                   cacheSize,
+                                                                   [&mfcc](std::vector<int16_t>& audioDataWindow) {
+                                                                       return mfcc.MfccCompute(audioDataWindow);
+                                                                   });
         }
         return mfccFeatureCalc;
     }

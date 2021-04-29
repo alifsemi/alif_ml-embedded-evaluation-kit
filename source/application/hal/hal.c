@@ -32,7 +32,7 @@
  * @brief   Initialises the Arm Ethos-U55 NPU
  * @return  0 if successful, error code otherwise
  **/
-static int _arm_npu_init(void);
+static int arm_npu_init(void);
 
 #endif /* ARM_NPU */
 
@@ -54,7 +54,7 @@ int hal_init(hal_platform* platform, data_acq_module* data_acq,
 /**
  * @brief  Local helper function to clean the slate for current platform.
  **/
-static void _hal_platform_clear(hal_platform* platform)
+static void hal_platform_clear(hal_platform* platform)
 {
     assert(platform);
     platform->inited = 0;
@@ -64,7 +64,7 @@ int hal_platform_init(hal_platform* platform)
 {
     int state;
     assert(platform && platform->platform_init);
-    _hal_platform_clear(platform);
+    hal_platform_clear(platform);
 
     /* Initialise platform */
     if (0 != (state = platform->platform_init())) {
@@ -94,7 +94,7 @@ int hal_platform_init(hal_platform* platform)
 #if defined(ARM_NPU)
 
     /* If Arm Ethos-U55 NPU is to be used, we initialise it here */
-    if (0 != (state = _arm_npu_init())) {
+    if (0 != (state = arm_npu_init())) {
         return state;
     }
 
@@ -120,7 +120,7 @@ void hal_platform_release(hal_platform *platform)
     data_acq_channel_release(platform->data_acq);
     data_psn_system_release(platform->data_psn);
 
-    _hal_platform_clear(platform);
+    hal_platform_clear(platform);
     info("releasing platform %s\n", platform->plat_name);
     platform->platform_release();
 }
@@ -130,7 +130,7 @@ void hal_platform_release(hal_platform *platform)
  * @brief   Defines the Ethos-U interrupt handler: just a wrapper around the default
  *          implementation.
  **/
-static void _arm_npu_irq_handler(void)
+static void arm_npu_irq_handler(void)
 {
     /* Call the default interrupt handler from the NPU driver */
     ethosu_irq_handler();
@@ -139,19 +139,19 @@ static void _arm_npu_irq_handler(void)
 /**
  * @brief  Initialises the NPU IRQ
  **/
-static void _arm_npu_irq_init(void)
+static void arm_npu_irq_init(void)
 {
     const IRQn_Type ethosu_irqnum = (IRQn_Type)EthosU_IRQn;
 
     /* Register the EthosU IRQ handler in our vector table.
      * Note, this handler comes from the EthosU driver */
-    NVIC_SetVector(ethosu_irqnum, (uint32_t)_arm_npu_irq_handler);
+    NVIC_SetVector(ethosu_irqnum, (uint32_t)arm_npu_irq_handler);
 
     /* Enable the IRQ */
     NVIC_EnableIRQ(ethosu_irqnum);
 
     debug("EthosU IRQ#: %u, Handler: 0x%p\n",
-            ethosu_irqnum, _arm_npu_irq_handler);
+            ethosu_irqnum, arm_npu_irq_handler);
 }
 
 static int _arm_npu_timing_adapter_init(void)
@@ -213,7 +213,7 @@ static int _arm_npu_timing_adapter_init(void)
     return 0;
 }
 
-static int _arm_npu_init(void)
+static int arm_npu_init(void)
 {
     int err = 0;
 
@@ -224,7 +224,7 @@ static int _arm_npu_init(void)
     }
 
     /* Initialise the IRQ */
-    _arm_npu_irq_init();
+    arm_npu_irq_init();
 
     /* Initialise Ethos-U55 device */
     const void * ethosu_base_address = (void *)(SEC_ETHOS_U55_BASE);

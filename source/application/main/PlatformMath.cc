@@ -121,7 +121,7 @@ namespace math {
             float sumReal = 0, sumImag = 0;
 
             for (int t = 0; t < inputLength; t++) {
-                float angle = 2 * M_PI * t * k / inputLength;
+                auto angle = static_cast<float>(2 * M_PI * t * k / inputLength);
                 sumReal += input[t] * cosf(angle);
                 sumImag += -input[t] * sinf(angle);
             }
@@ -147,7 +147,7 @@ namespace math {
                      output.size());
 #else /* ARM_DSP_AVAILABLE */
         for (auto in = input.begin(), out = output.begin();
-                in != input.end(); ++in, ++out) {
+             in != input.end() && out != output.end(); ++in, ++out) {
             *out = logf(*in);
         }
 #endif /* ARM_DSP_AVAILABLE */

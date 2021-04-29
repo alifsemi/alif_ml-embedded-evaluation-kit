@@ -51,9 +51,9 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
         template<typename T>
-        bool _GetTopResults(TfLiteTensor* tensor,
-                            std::vector<ClassificationResult>& vecResults,
-                            const std::vector <std::string>& labels, double scale, double zeroPoint);
+        bool GetTopResults(TfLiteTensor* tensor,
+                           std::vector<ClassificationResult>& vecResults,
+                           const std::vector <std::string>& labels, double scale, double zeroPoint);
     };
 
 } /* namespace app */

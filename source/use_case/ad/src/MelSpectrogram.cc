@@ -42,7 +42,7 @@ namespace audio {
             m_useHtkMethod(useHtkMethod)
     {}
 
-    std::string MelSpecParams::Str()
+    std::string MelSpecParams::Str() const
     {
         char strC[1024];
         snprintf(strC, sizeof(strC) - 1, "\n   \
@@ -71,7 +71,7 @@ namespace audio {
                 this->_m_params.m_numFbankBins, 0.0);
 
         this->_m_windowFunc = std::vector<float>(this->_m_params.m_frameLen);
-        const float multiplier = 2 * M_PI / this->_m_params.m_frameLen;
+        const auto multiplier = static_cast<float>(2 * M_PI / this->_m_params.m_frameLen);
 
         /* Create window function. */
         for (size_t i = 0; i < this->_m_params.m_frameLen; ++i) {
@@ -85,7 +85,7 @@ namespace audio {
 
     void MelSpectrogram::Init()
     {
-        this->_InitMelFilterBank();
+        this->InitMelFilterBank();
     }
 
     float MelSpectrogram::MelScale(const float freq, const bool useHTKMethod)
@@ -121,8 +121,8 @@ namespace audio {
     bool MelSpectrogram::ApplyMelFilterBank(
             std::vector<float>&                 fftVec,
             std::vector<std::vector<float>>&    melFilterBank,
-            std::vector<int32_t>&               filterBankFilterFirst,
-            std::vector<int32_t>&               filterBankFilterLast,
+            std::vector<uint32_t>&               filterBankFilterFirst,
+            std::vector<uint32_t>&               filterBankFilterLast,
             std::vector<float>&                 melEnergies)
     {
         const size_t numBanks = melEnergies.size();
@@ -135,11 +135,12 @@ namespace audio {
 
         for (size_t bin = 0; bin < numBanks; ++bin) {
             auto filterBankIter = melFilterBank[bin].begin();
+            auto end = melFilterBank[bin].end();
             float melEnergy = FLT_MIN; /* Avoid log of zero at later stages */
-            int32_t firstIndex = filterBankFilterFirst[bin];
-            int32_t lastIndex = filterBankFilterLast[bin];
+            const uint32_t firstIndex = filterBankFilterFirst[bin];
+            const uint32_t lastIndex = std::min<int32_t>(filterBankFilterLast[bin], fftVec.size() - 1);
 
-            for (int i = firstIndex; i <= lastIndex; ++i) {
+            for (uint32_t i = firstIndex; i <= lastIndex && filterBankIter != end; ++i) {
                 float energyRep = math::MathUtils::SqrtF32(fftVec[i]);
                 melEnergy += (*filterBankIter++ * energyRep);
             }
@@ -152,14 +153,14 @@ namespace audio {
 
     void MelSpectrogram::ConvertToLogarithmicScale(std::vector<float>& melEnergies)
     {
-        for (size_t bin = 0; bin < melEnergies.size(); ++bin) {
-            melEnergies[bin] = logf(melEnergies[bin]);
+        for (float& melEnergy : melEnergies) {
+            melEnergy = logf(melEnergy);
         }
     }
 
-    void MelSpectrogram::_ConvertToPowerSpectrum()
+    void MelSpectrogram::ConvertToPowerSpectrum()
     {
-        const uint32_t halfDim = this->_m_params.m_frameLenPadded / 2;
+        const uint32_t halfDim = this->_m_buffer.size() / 2;
 
         /* Handle this special case. */
         float firstEnergy = this->_m_buffer[0] * this->_m_buffer[0];
@@ -188,22 +189,22 @@ namespace audio {
         return 1.f;
     }
 
-    void MelSpectrogram::_InitMelFilterBank()
+    void MelSpectrogram::InitMelFilterBank()
     {
-        if (!this->_IsMelFilterBankInited()) {
-            this->_m_melFilterBank = this->_CreateMelFilterBank();
+        if (!this->IsMelFilterBankInited()) {
+            this->_m_melFilterBank = this->CreateMelFilterBank();
             this->_m_filterBankInitialised = true;
         }
     }
 
-    bool MelSpectrogram::_IsMelFilterBankInited()
+    bool MelSpectrogram::IsMelFilterBankInited() const
     {
         return this->_m_filterBankInitialised;
     }
 
     std::vector<float> MelSpectrogram::ComputeMelSpec(const std::vector<int16_t>& audioData, float trainingMean)
     {
-        this->_InitMelFilterBank();
+        this->InitMelFilterBank();
 
         /* TensorFlow way of normalizing .wav data to (-1, 1). */
         constexpr float normaliser = 1.0/(1<<15);
@@ -223,7 +224,7 @@ namespace audio {
         math::MathUtils::FftF32(this->_m_frame, this->_m_buffer, this->_m_fftInstance);
 
         /* Convert to power spectrum. */
-        this->_ConvertToPowerSpectrum();
+        this->ConvertToPowerSpectrum();
 
         /* Apply mel filterbanks. */
         if (!this->ApplyMelFilterBank(this->_m_buffer,
@@ -245,7 +246,7 @@ namespace audio {
         return this->_m_melEnergies;
     }
 
-    std::vector<std::vector<float>> MelSpectrogram::_CreateMelFilterBank()
+    std::vector<std::vector<float>> MelSpectrogram::CreateMelFilterBank()
     {
         size_t numFftBins = this->_m_params.m_frameLenPadded / 2;
         float fftBinWidth = static_cast<float>(this->_m_params.m_samplingFreq) / this->_m_params.m_frameLenPadded;
@@ -260,17 +261,18 @@ namespace audio {
         std::vector<std::vector<float>> melFilterBank(
                 this->_m_params.m_numFbankBins);
         this->_m_filterBankFilterFirst =
-                std::vector<int32_t>(this->_m_params.m_numFbankBins);
+                std::vector<uint32_t>(this->_m_params.m_numFbankBins);
         this->_m_filterBankFilterLast =
-                std::vector<int32_t>(this->_m_params.m_numFbankBins);
+                std::vector<uint32_t>(this->_m_params.m_numFbankBins);
 
         for (size_t bin = 0; bin < this->_m_params.m_numFbankBins; bin++) {
             float leftMel = melLowFreq + bin * melFreqDelta;
             float centerMel = melLowFreq + (bin + 1) * melFreqDelta;
             float rightMel = melLowFreq + (bin + 2) * melFreqDelta;
 
-            int32_t firstIndex = -1;
-            int32_t lastIndex = -1;
+            uint32_t firstIndex = 0;
+            uint32_t lastIndex = 0;
+            bool firstIndexFound = false;
             const float normaliser = this->GetMelFilterBankNormaliser(leftMel, rightMel, this->_m_params.m_useHtkMethod);
 
             for (size_t i = 0; i < numFftBins; ++i) {
@@ -287,8 +289,9 @@ namespace audio {
                     }
 
                     thisBin[i] = weight * normaliser;
-                    if (firstIndex == -1) {
+                    if (!firstIndexFound) {
                         firstIndex = i;
+                        firstIndexFound = true;
                     }
                     lastIndex = i;
                 }
@@ -298,7 +301,7 @@ namespace audio {
             this->_m_filterBankFilterLast[bin] = lastIndex;
 
             /* Copy the part we care about. */
-            for (int32_t i = firstIndex; i <= lastIndex; ++i) {
+            for (uint32_t i = firstIndex; i <= lastIndex; ++i) {
                 melFilterBank[bin].push_back(thisBin[i]);
             }
         }

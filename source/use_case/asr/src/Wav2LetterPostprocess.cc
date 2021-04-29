@@ -39,13 +39,13 @@ namespace asr {
                             const bool      lastIteration)
     {
         /* Basic checks. */
-        if (!this->_IsInputValid(tensor, axisIdx)) {
+        if (!this->IsInputValid(tensor, axisIdx)) {
             return false;
         }
 
         /* Irrespective of tensor type, we use unsigned "byte" */
         uint8_t* ptrData = tflite::GetTensorData<uint8_t>(tensor);
-        const uint32_t elemSz = this->_GetTensorElementSize(tensor);
+        const uint32_t elemSz = this->GetTensorElementSize(tensor);
 
         /* Other sanity checks. */
         if (0 == elemSz) {
@@ -59,13 +59,15 @@ namespace asr {
         /* Which axis do we need to process? */
         switch (axisIdx) {
             case arm::app::Wav2LetterModel::ms_outputRowsIdx:
-                return this->_EraseSectionsRowWise(ptrData,
-                        elemSz * tensor->dims->data[arm::app::Wav2LetterModel::ms_outputColsIdx],
-                        lastIteration);
+                return this->EraseSectionsRowWise(ptrData,
+                                                  elemSz *
+                                                  tensor->dims->data[arm::app::Wav2LetterModel::ms_outputColsIdx],
+                                                  lastIteration);
             case arm::app::Wav2LetterModel::ms_outputColsIdx:
-                return this->_EraseSectionsColWise(ptrData,
-                        elemSz * tensor->dims->data[arm::app::Wav2LetterModel::ms_outputRowsIdx],
-                        lastIteration);
+                return this->EraseSectionsColWise(ptrData,
+                                                  elemSz *
+                                                  tensor->dims->data[arm::app::Wav2LetterModel::ms_outputRowsIdx],
+                                                  lastIteration);
             default:
                 printf_err("Unsupported axis index: %u\n", axisIdx);
         }
@@ -73,8 +75,8 @@ namespace asr {
         return false;
     }
 
-    bool Postprocess::_IsInputValid(TfLiteTensor*  tensor,
-                                    const uint32_t axisIdx) const
+    bool Postprocess::IsInputValid(TfLiteTensor*  tensor,
+                                   const uint32_t axisIdx) const
     {
         if (nullptr == tensor) {
             return false;
@@ -96,17 +98,15 @@ namespace asr {
         return true;
     }
 
-    uint32_t Postprocess::_GetTensorElementSize(TfLiteTensor*  tensor)
+    uint32_t Postprocess::GetTensorElementSize(TfLiteTensor*  tensor)
     {
         switch(tensor->type) {
             case kTfLiteUInt8:
-                return 1;
             case kTfLiteInt8:
                 return 1;
             case kTfLiteInt16:
                 return 2;
             case kTfLiteInt32:
-                return 4;
             case kTfLiteFloat32:
                 return 4;
             default:
@@ -117,7 +117,7 @@ namespace asr {
         return 0;
     }
 
-    bool Postprocess::_EraseSectionsRowWise(
+    bool Postprocess::EraseSectionsRowWise(
                         uint8_t*         ptrData,
                         const uint32_t   strideSzBytes,
                         const bool       lastIteration)
@@ -154,8 +154,8 @@ namespace asr {
         return true;
     }
 
-    bool Postprocess::_EraseSectionsColWise(
-                        uint8_t*         ptrData,
+    bool Postprocess::EraseSectionsColWise(
+                        const uint8_t*         ptrData,
                         const uint32_t   strideSzBytes,
                         const bool       lastIteration)
     {

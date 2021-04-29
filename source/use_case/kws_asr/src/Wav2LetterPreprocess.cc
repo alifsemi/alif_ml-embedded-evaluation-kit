@@ -88,12 +88,12 @@ namespace asr {
         }
 
         /* Compute first and second order deltas from MFCCs. */
-        this->_ComputeDeltas(this->_m_mfccBuf,
-                             this->_m_delta1Buf,
-                             this->_m_delta2Buf);
+        this->ComputeDeltas(this->_m_mfccBuf,
+                            this->_m_delta1Buf,
+                            this->_m_delta2Buf);
 
         /* Normalise. */
-        this->_Normalise();
+        this->Normalise();
 
         /* Quantise. */
         QuantParams quantParams = GetTensorQuantParams(tensor);
@@ -105,11 +105,11 @@ namespace asr {
 
         switch(tensor->type) {
             case kTfLiteUInt8:
-                return this->_Quantise<uint8_t>(
+                return this->Quantise<uint8_t>(
                         tflite::GetTensorData<uint8_t>(tensor), tensor->bytes,
                         quantParams.scale, quantParams.offset);
             case kTfLiteInt8:
-                return this->_Quantise<int8_t>(
+                return this->Quantise<int8_t>(
                         tflite::GetTensorData<int8_t>(tensor), tensor->bytes,
                         quantParams.scale, quantParams.offset);
             default:
@@ -120,9 +120,9 @@ namespace asr {
         return false;
     }
 
-    bool Preprocess::_ComputeDeltas(Array2d<float>& mfcc,
-                                    Array2d<float>& delta1,
-                                    Array2d<float>& delta2)
+    bool Preprocess::ComputeDeltas(Array2d<float>& mfcc,
+                                   Array2d<float>& delta1,
+                                   Array2d<float>& delta2)
     {
         const std::vector <float> delta1Coeffs =
             {6.66666667e-02,  5.00000000e-02,  3.33333333e-02,
@@ -175,20 +175,20 @@ namespace asr {
         return true;
     }
 
-    float Preprocess::_GetMean(Array2d<float>& vec)
+    float Preprocess::GetMean(Array2d<float>& vec)
     {
         return math::MathUtils::MeanF32(vec.begin(), vec.totalSize());
     }
 
-    float Preprocess::_GetStdDev(Array2d<float>& vec, const float mean)
+    float Preprocess::GetStdDev(Array2d<float>& vec, const float mean)
     {
         return math::MathUtils::StdDevF32(vec.begin(), vec.totalSize(), mean);
     }
 
-    void Preprocess::_NormaliseVec(Array2d<float>& vec)
+    void Preprocess::NormaliseVec(Array2d<float>& vec)
     {
-        auto mean = Preprocess::_GetMean(vec);
-        auto stddev = Preprocess::_GetStdDev(vec, mean);
+        auto mean = Preprocess::GetMean(vec);
+        auto stddev = Preprocess::GetStdDev(vec, mean);
 
         debug("Mean: %f, Stddev: %f\n", mean, stddev);
         if (stddev == 0) {
@@ -204,14 +204,14 @@ namespace asr {
         }
     }
 
-    void Preprocess::_Normalise()
+    void Preprocess::Normalise()
     {
-        Preprocess::_NormaliseVec(this->_m_mfccBuf);
-        Preprocess::_NormaliseVec(this->_m_delta1Buf);
-        Preprocess::_NormaliseVec(this->_m_delta2Buf);
+        Preprocess::NormaliseVec(this->_m_mfccBuf);
+        Preprocess::NormaliseVec(this->_m_delta1Buf);
+        Preprocess::NormaliseVec(this->_m_delta2Buf);
     }
 
-    float Preprocess::_GetQuantElem(
+    float Preprocess::GetQuantElem(
                 const float     elem,
                 const float     quantScale,
                 const int       quantOffset,

@@ -18,6 +18,31 @@
 
 #include <catch.hpp>
 
+
+template<typename T>
+void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults, T defaultTensorValue) {
+    const int dimArray[] = {1, 1001};
+    std::vector <std::string> labels(1001);
+    std::vector<T> outputVec(1001, defaultTensorValue);
+    TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
+    TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(outputVec.data(), dims, 1, 0);
+    TfLiteTensor* outputTensor = &tfTensor;
+
+    std::vector <arm::app::ClassificationResult> resultVec;
+
+    for (auto& selectedResult : selectedResults) {
+        outputVec[selectedResult.first] = selectedResult.second;
+    }
+
+    arm::app::Classifier classifier;
+    REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 5));
+    REQUIRE(5 == resultVec.size());
+
+    for (size_t i = 0; i < resultVec.size(); ++i) {
+        REQUIRE(resultVec[i].m_labelIdx == selectedResults[i].first);
+    }
+}
+
 TEST_CASE("Common classifier")
 {
     SECTION("Test invalid classifier")
@@ -28,49 +53,31 @@ TEST_CASE("Common classifier")
         REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 5));
     }
 
-    SECTION("Test valid classifier UINT8")
+    SECTION("Test classification results")
     {
-        const int dimArray[] = {1, 1001};
-        std::vector <std::string> labels(1001);
-        std::vector <uint8_t> outputVec(1001);
-        TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
-        TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
-                outputVec.data(), dims, 1, 0, "test");
-        TfLiteTensor* outputTensor = &tfTensor;
-        std::vector <arm::app::ClassificationResult> resultVec;
-        arm::app::Classifier classifier;
-        REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 5));
-        REQUIRE(5 == resultVec.size());
-    }
+        SECTION("uint8") {
+            /* Set the top five results <position, score>. */
+            std::vector<std::pair<uint32_t, uint8_t>> selectedResults {
+                    {1000, 10}, {15, 9}, {0, 8}, {20, 7}, {10, 7} };
 
-    SECTION("Get classification results")
-    {
-        const int dimArray[] = {1, 1001};
-        std::vector <std::string> labels(1001);
-        std::vector<uint8_t> outputVec(1001, static_cast<uint8_t>(5));
-        TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
-        TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
-                outputVec.data(), dims, 1, 0, "test");
-        TfLiteTensor* outputTensor = &tfTensor;
-
-        std::vector <arm::app::ClassificationResult> resultVec;
-
-        /* Set the top five results. */
-        std::vector<std::pair<uint32_t, uint8_t>> selectedResults {
-                {0, 8}, {20, 7}, {10, 7}, {15, 9}, {1000, 10}};
-
-        for (size_t i = 0; i < selectedResults.size(); ++i) {
-            outputVec[selectedResults[i].first] = selectedResults[i].second;
+            test_classifier_result(selectedResults, static_cast<uint8_t>(5));
         }
 
-        arm::app::Classifier classifier;
-        REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 5));
-        REQUIRE(5 == resultVec.size());
+        SECTION("int8") {
+            /* Set the top five results <position, score>. */
+            std::vector<std::pair<uint32_t, int8_t>> selectedResults {
+                    {1000, 10}, {15, 9}, {0, 8}, {20, -7}, {10, -7} };
 
-        REQUIRE(resultVec[0].m_labelIdx == 1000);
-        REQUIRE(resultVec[1].m_labelIdx == 15);
-        REQUIRE(resultVec[2].m_labelIdx == 0);
-        REQUIRE(resultVec[3].m_labelIdx == 20);
-        REQUIRE(resultVec[4].m_labelIdx == 10);
+            test_classifier_result(selectedResults, static_cast<int8_t>(-100));
+        }
+
+        SECTION("float") {
+            /* Set the top five results <position, score>. */
+            std::vector<std::pair<uint32_t, float>> selectedResults {
+                    {1000, 10.9f}, {15, 9.8f}, {0, 8.7f}, {20, -7.0f}, {10, -7.1f} };
+
+            test_classifier_result(selectedResults, -100.0f);
+        }
+
     }
 }

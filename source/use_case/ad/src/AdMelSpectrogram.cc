@@ -18,6 +18,8 @@
 
 #include "PlatformMath.hpp"
 
+#include <cfloat>
+
 namespace arm {
 namespace app {
 namespace audio {
@@ -25,8 +27,8 @@ namespace audio {
     bool AdMelSpectrogram::ApplyMelFilterBank(
             std::vector<float>&                 fftVec,
             std::vector<std::vector<float>>&    melFilterBank,
-            std::vector<int32_t>&               filterBankFilterFirst,
-            std::vector<int32_t>&               filterBankFilterLast,
+            std::vector<uint32_t>&               filterBankFilterFirst,
+            std::vector<uint32_t>&               filterBankFilterLast,
             std::vector<float>&                 melEnergies)
     {
         const size_t numBanks = melEnergies.size();
@@ -39,11 +41,12 @@ namespace audio {
 
         for (size_t bin = 0; bin < numBanks; ++bin) {
             auto filterBankIter = melFilterBank[bin].begin();
-            float melEnergy = 1e-10; /* Avoid log of zero at later stages. */
-            const int32_t firstIndex = filterBankFilterFirst[bin];
-            const int32_t lastIndex = filterBankFilterLast[bin];
+            auto end = melFilterBank[bin].end();
+            float melEnergy = FLT_MIN; /* Avoid log of zero at later stages. */
+            const uint32_t firstIndex = filterBankFilterFirst[bin];
+            const uint32_t lastIndex = std::min<int32_t>(filterBankFilterLast[bin], fftVec.size() - 1);
 
-            for (int32_t i = firstIndex; i <= lastIndex; ++i) {
+            for (uint32_t i = firstIndex; i <= lastIndex && filterBankIter != end; ++i) {
                 melEnergy += (*filterBankIter++ * fftVec[i]);
             }
 
@@ -69,7 +72,7 @@ namespace audio {
 
         /* Scale the log values. */
         for (auto iterM = melEnergies.begin(), iterL = vecLogEnergies.begin();
-             iterM != melEnergies.end(); ++iterM, ++iterL) {
+             iterM != melEnergies.end() && iterL != vecLogEnergies.end(); ++iterM, ++iterL) {
 
             *iterM = *iterL * multiplier;
         }

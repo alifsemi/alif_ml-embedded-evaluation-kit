@@ -54,7 +54,7 @@ namespace app {
             this->_m_tstampEnd = this->_m_pPlatform->timer->stop_profiling();
             this->_m_started = false;
 
-            this->_AddProfilingUnit(this->_m_tstampSt, this->_m_tstampEnd, this->_m_name);
+            this->AddProfilingUnit(this->_m_tstampSt, this->_m_tstampEnd, this->_m_name);
 
             return true;
         }
@@ -238,8 +238,8 @@ namespace app {
         this->_m_name = std::string(str);
     }
 
-    void Profiler::_AddProfilingUnit(time_counter start, time_counter end,
-                                     const std::string& name)
+    void Profiler::AddProfilingUnit(time_counter start, time_counter end,
+                                    const std::string& name)
     {
         platform_timer * timer = this->_m_pPlatform->timer;
 

@@ -125,8 +125,8 @@ namespace app {
          * @param[in]   name    Name for the profiling unit series to be
          *                      appended to.
          **/
-        void _AddProfilingUnit(time_counter start, time_counter end,
-                               const std::string& name);
+        void AddProfilingUnit(time_counter start, time_counter end,
+                              const std::string& name);
     };
 
 } /* namespace app */

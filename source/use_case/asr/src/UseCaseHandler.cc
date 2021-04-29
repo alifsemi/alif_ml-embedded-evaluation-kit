@@ -35,7 +35,7 @@ namespace app {
     * @brief           Helper function to increment current audio clip index.
     * @param[in,out]   ctx   Pointer to the application context object.
     **/
-    static void _IncrementAppCtxClipIdx(ApplicationContext& ctx);
+    static void IncrementAppCtxClipIdx(ApplicationContext& ctx);
 
     /**
      * @brief           Helper function to set the audio clip index.
@@ -43,7 +43,7 @@ namespace app {
      * @param[in]       idx   Value to be set.
      * @return          true if index is set, false otherwise.
      **/
-    static bool _SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx);
+    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx);
 
     /**
      * @brief           Presents inference results using the data presentation
@@ -54,7 +54,7 @@ namespace app {
      *                              otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise.
      **/
-    static bool _PresentInferenceResult(
+    static bool PresentInferenceResult(
                     hal_platform& platform,
                     const std::vector<arm::app::asr::AsrResult>& results);
 
@@ -71,7 +71,7 @@ namespace app {
 
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
-            if (!_SetAppCtxClipIdx(ctx, clipIndex)) {
+            if (!SetAppCtxClipIdx(ctx, clipIndex)) {
                 return false;
             }
         }
@@ -207,20 +207,20 @@ namespace app {
 
             ctx.Set<std::vector<arm::app::asr::AsrResult>>("results", results);
 
-            if (!_PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(platform, results)) {
                 return false;
             }
 
             profiler.PrintProfilingResult();
 
-            _IncrementAppCtxClipIdx(ctx);
+            IncrementAppCtxClipIdx(ctx);
 
         } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
 
         return true;
     }
 
-    static void _IncrementAppCtxClipIdx(ApplicationContext& ctx)
+    static void IncrementAppCtxClipIdx(ApplicationContext& ctx)
     {
         auto curAudioIdx = ctx.Get<uint32_t>("clipIndex");
 
@@ -232,7 +232,7 @@ namespace app {
         ctx.Set<uint32_t>("clipIndex", curAudioIdx);
     }
 
-    static bool _SetAppCtxClipIdx(ApplicationContext& ctx, const uint32_t idx)
+    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
             printf_err("Invalid idx %u (expected less than %u)\n",
@@ -244,8 +244,8 @@ namespace app {
         return true;
     }
 
-    static bool _PresentInferenceResult(hal_platform& platform,
-                                        const std::vector<arm::app::asr::AsrResult>& results)
+    static bool PresentInferenceResult(hal_platform& platform,
+                                       const std::vector<arm::app::asr::AsrResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 60;

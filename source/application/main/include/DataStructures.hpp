@@ -47,15 +47,13 @@ namespace app {
          * @param[in] rows   Number of rows.
          * @param[in] cols   Number of columns.
          */
-        Array2d(unsigned rows, unsigned cols)
+        Array2d(unsigned rows, unsigned cols): _m_rows(rows), _m_cols(cols)
         {
             if (rows == 0 || cols == 0) {
                 printf_err("Array2d constructor has 0 size.\n");
                 _m_data = nullptr;
                 return;
             }
-            _m_rows = rows;
-            _m_cols = cols;
             _m_data = new T[rows * cols];
         }
 

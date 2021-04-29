@@ -25,30 +25,27 @@
 
 class TestPreprocess : public arm::app::audio::asr::Preprocess {
 public:
-    TestPreprocess()
-    : arm::app::audio::asr::Preprocess(0,0,0,0)
-    {}
 
-    bool ComputeDeltas(arm::app::Array2d<float>& mfcc,
+    static bool ComputeDeltas(arm::app::Array2d<float>& mfcc,
                        arm::app::Array2d<float>& delta1,
                        arm::app::Array2d<float>& delta2)
     {
-        return this->_ComputeDeltas(mfcc, delta1, delta2);
+        return Preprocess::ComputeDeltas(mfcc, delta1, delta2);
     }
 
-    float GetMean(arm::app::Array2d<float>& vec)
+    static float GetMean(arm::app::Array2d<float>& vec)
     {
-        return this->_GetMean(vec);
+        return Preprocess::GetMean(vec);
     }
 
-    float GetStdDev(arm::app::Array2d<float>& vec, const float mean)
+    static float GetStdDev(arm::app::Array2d<float>& vec, const float mean)
     {
-       return this->_GetStdDev(vec, mean);
+       return Preprocess::GetStdDev(vec, mean);
     }
 
-    void NormaliseVec(arm::app::Array2d<float>& vec)
+    static void NormaliseVec(arm::app::Array2d<float>& vec)
     {
-        return this->_NormaliseVec(vec);
+        return Preprocess::NormaliseVec(vec);
     }
 };
 
@@ -86,7 +83,6 @@ void populateArray2dWithVectorOfVector(std::vector<std::vector<float>> vec, arm:
 
 TEST_CASE("Floating point asr features calculation", "[ASR]")
 {
-    TestPreprocess tp;
 
     SECTION("First and second diff")
     {
@@ -109,7 +105,7 @@ TEST_CASE("Floating point asr features calculation", "[ASR]")
         std::fill(delta1Buf.begin(), delta1Buf.end(), 0.f);
         std::fill(delta2Buf.begin(), delta2Buf.end(), 0.f);
 
-        tp.ComputeDeltas(mfccBuf, delta1Buf, delta2Buf);
+        TestPreprocess::ComputeDeltas(mfccBuf, delta1Buf, delta2Buf);
 
         /* First 4 and last 4 values are different because we pad AFTER diff calculated. */
         for (size_t i = 0; i < numMfccFeats; ++i) {
@@ -136,37 +132,37 @@ TEST_CASE("Floating point asr features calculation", "[ASR]")
                                                 {-1, -2}};
         arm::app::Array2d<float> mean1(2,2); /* {{1, 2},{-1, -2}} */
         populateArray2dWithVectorOfVector(mean1vec, mean1);
-        REQUIRE(0 == Approx(tp.GetMean(mean1)));
+        REQUIRE(0 == Approx(TestPreprocess::GetMean(mean1)));
 
         arm::app::Array2d<float> mean2(2, 2);
         std::fill(mean2.begin(), mean2.end(), 0.f);
-        REQUIRE(0 == Approx(tp.GetMean(mean2)));
+        REQUIRE(0 == Approx(TestPreprocess::GetMean(mean2)));
 
         arm::app::Array2d<float> mean3(3,3);
         std::fill(mean3.begin(), mean3.end(), 1.f);
-        REQUIRE(1 == Approx(tp.GetMean(mean3)));
+        REQUIRE(1 == Approx(TestPreprocess::GetMean(mean3)));
     }
 
     SECTION("Std")
     {
         arm::app::Array2d<float> std1(2, 2);
         std::fill(std1.begin(), std1.end(), 0.f); /* {{0, 0}, {0, 0}} */
-        REQUIRE(0 == Approx(tp.GetStdDev(std1, 0)));
+        REQUIRE(0 == Approx(TestPreprocess::GetStdDev(std1, 0)));
 
         std::vector<std::vector<float>> std2vec{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 0}};
         arm::app::Array2d<float> std2(2,5);
         populateArray2dWithVectorOfVector(std2vec, std2);
-        const float mean = tp.GetMean(std2);
-        REQUIRE(2.872281323 == Approx(tp.GetStdDev(std2, mean)));
+        const float mean = TestPreprocess::GetMean(std2);
+        REQUIRE(2.872281323 == Approx(TestPreprocess::GetStdDev(std2, mean)));
 
         arm::app::Array2d<float> std3(2,2);
         std::fill(std3.begin(), std3.end(), 1.f); /* std3{{1, 1}, {1, 1}}; */
-        REQUIRE(0 == Approx(tp.GetStdDev(std3, 1)));
+        REQUIRE(0 == Approx(TestPreprocess::GetStdDev(std3, 1)));
     }
 
     SECTION("Norm") {
         auto checker = [&](arm::app::Array2d<float>& d, std::vector<float>& g) {
-            tp.NormaliseVec(d);
+            TestPreprocess::NormaliseVec(d);
             std::vector<float> d_vec(d.begin(), d.end());
             REQUIRE_THAT(g, Catch::Approx(d_vec));
         };

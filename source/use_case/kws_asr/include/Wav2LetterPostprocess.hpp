@@ -72,24 +72,24 @@ namespace asr {
          *              initialised.
          * @return      true if valid, false otherwise.
          */
-        bool _IsInputValid(TfLiteTensor*  tensor,
-                           uint32_t axisIdx) const;
+        bool IsInputValid(TfLiteTensor*  tensor,
+                          const uint32_t axisIdx) const;
 
         /**
          * @brief       Gets the tensor data element size in bytes based
          *              on the tensor type.
          * @return      Size in bytes, 0 if not supported.
          */
-        uint32_t _GetTensorElementSize(TfLiteTensor* tensor);
+        uint32_t GetTensorElementSize(TfLiteTensor* tensor);
 
         /**
          * @brief       Erases sections from the data assuming row-wise
          *              arrangement along the context axis.
          * @return      true if successful, false otherwise.
          */
-        bool _EraseSectionsRowWise(uint8_t* ptrData,
-                                   uint32_t strideSzBytes,
-                                   bool lastIteration);
+        bool EraseSectionsRowWise(uint8_t* ptrData,
+                                  const uint32_t strideSzBytes,
+                                  const bool lastIteration);
 
     };
 

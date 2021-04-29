@@ -74,16 +74,16 @@ namespace asr {
           * @param[out] delta2   Result of the second diff computation.
           * @return     true if successful, false otherwise.
           */
-         static bool _ComputeDeltas(Array2d<float>& mfcc,
-                                    Array2d<float>& delta1,
-                                    Array2d<float>& delta2);
+         static bool ComputeDeltas(Array2d<float>& mfcc,
+                                   Array2d<float>& delta1,
+                                   Array2d<float>& delta2);
 
         /**
          * @brief       Given a 2D vector of floats, computes the mean.
          * @param[in]   vec   Vctor of vector of floats.
          * @return      Mean value.
          */
-        static float _GetMean(Array2d<float>& vec);
+        static float GetMean(Array2d<float>& vec);
 
         /**
          * @brief       Given a 2D vector of floats, computes the stddev.
@@ -91,20 +91,20 @@ namespace asr {
          * @param[in]   mean   Mean value of the vector passed in.
          * @return      stddev value.
          */
-        static float _GetStdDev(Array2d<float>& vec,
-                                float mean);
+        static float GetStdDev(Array2d<float>& vec,
+                               const float mean);
 
         /**
          * @brief           Given a 2D vector of floats, normalises it using
          *                  the mean and the stddev.
          * @param[in,out]   vec   Vector of vector of floats.
          */
-        static void _NormaliseVec(Array2d<float>& vec);
+        static void NormaliseVec(Array2d<float>& vec);
 
         /**
          * @brief   Normalises the MFCC and delta buffers.
          */
-        void _Normalise();
+        void Normalise();
 
         /**
          * @brief       Given the quantisation and data type limits, computes
@@ -116,7 +116,7 @@ namespace asr {
          * @param[in]   maxVal        Numerical limit - maximum.
          * @return      Floating point quantised value.
          */
-        static float _GetQuantElem(
+        static float GetQuantElem(
                 float     elem,
                 float     quantScale,
                 int       quantOffset,
@@ -137,7 +137,7 @@ namespace asr {
          * @param[in]   quantOffset   Quantisation offset.
          */
         template <typename T>
-        bool _Quantise(
+        bool Quantise(
                 T *             outputBuf,
                 const uint32_t  outputBufSz,
                 const float     quantScale,
@@ -161,15 +161,15 @@ namespace asr {
             /* Need to transpose while copying and concatenating the tensor. */
             for (uint32_t j = 0; j < this->_m_numFeatVectors; ++j) {
                 for (uint32_t i = 0; i < this->_m_numMfccFeats; ++i) {
-                    *outputBufMfcc++ = static_cast<T>(Preprocess::_GetQuantElem(
-                                        this->_m_mfccBuf(i, j), quantScale,
-                                        quantOffset, minVal, maxVal));
-                    *outputBufD1++ = static_cast<T>(Preprocess::_GetQuantElem(
-                                        this->_m_delta1Buf(i, j), quantScale,
-                                        quantOffset, minVal, maxVal));
-                    *outputBufD2++ = static_cast<T>(Preprocess::_GetQuantElem(
-                                        this->_m_delta2Buf(i, j), quantScale,
-                                        quantOffset, minVal, maxVal));
+                    *outputBufMfcc++ = static_cast<T>(Preprocess::GetQuantElem(
+                            this->_m_mfccBuf(i, j), quantScale,
+                            quantOffset, minVal, maxVal));
+                    *outputBufD1++ = static_cast<T>(Preprocess::GetQuantElem(
+                            this->_m_delta1Buf(i, j), quantScale,
+                            quantOffset, minVal, maxVal));
+                    *outputBufD2++ = static_cast<T>(Preprocess::GetQuantElem(
+                            this->_m_delta2Buf(i, j), quantScale,
+                            quantOffset, minVal, maxVal));
                 }
                 outputBufMfcc += ptrIncr;
                 outputBufD1 += ptrIncr;

@@ -317,7 +317,7 @@ bool arm::app::Model::ShowModelInfoHandler()
 }
 namespace arm {
 namespace app {
-    static uint8_t  _tensor_arena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t  tensor_arena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
 
@@ -328,5 +328,5 @@ size_t arm::app::Model::GetActivationBufferSize()
 
 uint8_t *arm::app::Model::GetTensorArena()
 {
-    return _tensor_arena;
+    return tensor_arena;
 }

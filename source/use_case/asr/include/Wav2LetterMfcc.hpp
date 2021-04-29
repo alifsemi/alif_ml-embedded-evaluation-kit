@@ -60,8 +60,8 @@ namespace audio {
         bool ApplyMelFilterBank(
             std::vector<float>&                 fftVec,
             std::vector<std::vector<float>>&    melFilterBank,
-            std::vector<int32_t>&               filterBankFilterFirst,
-            std::vector<int32_t>&               filterBankFilterLast,
+            std::vector<uint32_t>&              filterBankFilterFirst,
+            std::vector<uint32_t>&              filterBankFilterLast,
             std::vector<float>&                 melEnergies) override;
 
         /**

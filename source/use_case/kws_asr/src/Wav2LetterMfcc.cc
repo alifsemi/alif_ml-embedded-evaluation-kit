@@ -27,8 +27,8 @@ namespace audio {
     bool Wav2LetterMFCC::ApplyMelFilterBank(
             std::vector<float>&                 fftVec,
             std::vector<std::vector<float>>&    melFilterBank,
-            std::vector<int32_t>&               filterBankFilterFirst,
-            std::vector<int32_t>&               filterBankFilterLast,
+            std::vector<uint32_t>&              filterBankFilterFirst,
+            std::vector<uint32_t>&              filterBankFilterLast,
             std::vector<float>&                 melEnergies)
     {
         const size_t numBanks = melEnergies.size();
@@ -41,11 +41,14 @@ namespace audio {
 
         for (size_t bin = 0; bin < numBanks; ++bin) {
             auto filterBankIter = melFilterBank[bin].begin();
-            float melEnergy = 1e-10;  /* Avoid log of zero at later stages, same value used in librosa. */
-            const int32_t firstIndex = filterBankFilterFirst[bin];
-            const int32_t lastIndex = filterBankFilterLast[bin];
+            auto end = melFilterBank[bin].end();
+            /* Avoid log of zero at later stages, same value used in librosa.
+             * The number was used during our default wav2letter model training. */
+            float melEnergy = 1e-10;
+            const uint32_t firstIndex = filterBankFilterFirst[bin];
+            const uint32_t lastIndex = std::min<uint32_t>(filterBankFilterLast[bin], fftVec.size() - 1);
 
-            for (int32_t i = firstIndex; i <= lastIndex; ++i) {
+            for (uint32_t i = firstIndex; i <= lastIndex && filterBankIter != end; ++i) {
                 melEnergy += (*filterBankIter++ * fftVec[i]);
             }
 
@@ -73,7 +76,7 @@ namespace audio {
 
         /* Scale the log values and get the max. */
         for (auto iterM = melEnergies.begin(), iterL = vecLogEnergies.begin();
-                  iterM != melEnergies.end(); ++iterM, ++iterL) {
+                  iterM != melEnergies.end() && iterL != vecLogEnergies.end(); ++iterM, ++iterL) {
 
             *iterM = *iterL * multiplier;
 
@@ -86,8 +89,8 @@ namespace audio {
         /* Clamp the mel energies. */
         constexpr float maxDb = 80.0;
         const float clampLevelLowdB = maxMelEnergy - maxDb;
-        for (auto iter = melEnergies.begin(); iter != melEnergies.end(); ++iter) {
-            *iter = std::max(*iter, clampLevelLowdB);
+        for (float & melEnergie : melEnergies) {
+            melEnergie = std::max(melEnergie, clampLevelLowdB);
         }
     }
 

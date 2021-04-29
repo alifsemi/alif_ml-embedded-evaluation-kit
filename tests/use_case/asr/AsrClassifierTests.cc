@@ -35,7 +35,7 @@ TEST_CASE("Test valid classifier UINT8") {
     std::vector <uint8_t> outputVec(7134);
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
-                                outputVec.data(), dims, 1, 0, "test");
+                                outputVec.data(), dims, 1, 0);
     TfLiteTensor* outputTensor = &tfTensor;
     std::vector <arm::app::ClassificationResult> resultVec;
     arm::app::AsrClassifier classifier;
@@ -51,7 +51,7 @@ TEST_CASE("Get classification results") {
     std::vector<uint8_t> outputVec(150, static_cast<uint8_t>(1));
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
-                                outputVec.data(), dims, 1, 0, "test");
+                                outputVec.data(), dims, 1, 0);
     TfLiteTensor* outputTensor = &tfTensor;
 
     std::vector <arm::app::ClassificationResult> resultVec(10);

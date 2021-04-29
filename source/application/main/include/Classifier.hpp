@@ -62,7 +62,7 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
         template<typename T>
-        bool _GetTopNResults(TfLiteTensor* tensor,
+        bool GetTopNResults(TfLiteTensor* tensor,
                             std::vector<ClassificationResult>& vecResults,
                             uint32_t topNCount,
                             const std::vector <std::string>& labels);
