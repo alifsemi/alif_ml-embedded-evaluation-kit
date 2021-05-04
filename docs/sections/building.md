@@ -10,7 +10,6 @@
     - [Preparing build environment](#preparing-build-environment)
     - [Create a build directory](#create-a-build-directory)
     - [Configuring the build for MPS3: SSE-300](#configuring-the-build-for-mps3-sse-300)
-    - [Configuring the build for MPS3: SSE-200](#configuring-the-build-for-mps3-sse-200)
     - [Configuring native unit-test build](#configuring-native-unit-test-build)
     - [Configuring the build for simple_platform](#configuring-the-build-for-simple_platform)
     - [Building the configured project](#building-the-configured-project)
@@ -122,7 +121,6 @@ The build parameters are:
     FVP and the MPS3 FPGA, this should be left to the default value of
     SSE-300:
   - `sse-300` (default - [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300))
-  - `sse-200`
 
 - `TENSORFLOW_SRC_PATH`: Path to the root of the TensorFlow directory.
     The default value points to the TensorFlow submodule in the
@@ -330,15 +328,6 @@ cmake \
 
 > **Note:** If re-building with changed parameters values, it is
 highly advised to clean the build directory and re-run the CMake command.
-
-### Configuring the build for MPS3: SSE-200
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-200 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
-```
 
 ### Configuring native unit-test build
 
@@ -771,7 +760,6 @@ scripts/
 ├── cmake
 │   ├── ...
 │   ├── subsystem-profiles
-│   │   ├── corstone-sse-200.cmake
 │   │   └── corstone-sse-300.cmake
 │   ├── templates
 │   │   ├── mem_regions.h.template

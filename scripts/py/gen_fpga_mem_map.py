@@ -50,20 +50,6 @@ class TargetSubsystem:
         """
         # Dict with mem map and binary names we expect
         self.subsystems = {
-            "sse-200": {
-                "mmap_mcc" : {
-                    # FPGA addr |  MCC addr  |
-                    "0x00000000": "0x00000000", # ITCM (NS)
-                    "0x10000000": "0x01000000", # ITCM (S)
-                    "0x20000000": "0x02000000", # DTCM (NS)
-                    "0x30000000": "0x03000000", # DTCM (S)
-                    "0x60000000": "0x08000000"  # DDR (NS)
-                },
-                "bin_names": {
-                    0: "itcm.bin",
-                    1: "dram.bin"
-                }
-            },
             "sse-300": {
                 "mmap_mcc" : {
                     # FPGA addr |  MCC addr  |

@@ -48,10 +48,10 @@ if (TARGET_PLATFORM STREQUAL mps3)
     # TARGET_SUBSYSTEM either should have been defined by the user or set to a default value
     if (NOT DEFINED TARGET_SUBSYSTEM)
         message(FATAL_ERROR "Target subsystem for mps3 undefined, "
-                            "specify -DTARGET_SUBSYSTEM=<sse-200 or sse-300>")
+                            "specify -DTARGET_SUBSYSTEM=<sse-300>")
     endif ()
 
-    if (TARGET_SUBSYSTEM STREQUAL sse-200 OR TARGET_SUBSYSTEM STREQUAL sse-300)
+    if (TARGET_SUBSYSTEM STREQUAL sse-300)
         message(STATUS          "target subsystem is ${TARGET_SUBSYSTEM}")
         set(BSP_PACKAGE_DIR     "${PLAT_HAL}/bsp/bsp-packs/mps3")
         set(SCAT_FILE           "${PLAT_HAL}/bsp/mem_layout/mps3-${TARGET_SUBSYSTEM}.sct")

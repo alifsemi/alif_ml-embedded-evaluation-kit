@@ -2,11 +2,13 @@
 
 ## Contents
 
-- [Fixed Virtual Platform](#fixed-virtual-platform)
-  - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
-  - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
-- [MPS3 board](#mps3-board)
-  - [Deployment on MPS3 board](#deployment-on-mps3-board)
+- [Deployment](#deployment)
+  - [Contents](#contents)
+  - [Fixed Virtual Platform](#fixed-virtual-platform)
+    - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
+    - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
+  - [MPS3 board](#mps3-board)
+    - [Deployment on MPS3 board](#deployment-on-mps3-board)
 
 The sample application for Arm® Ethos™-U55 can be deployed on two
 target platforms, both of which implement the Arm® Corstone™-300 design (see
@@ -24,9 +26,6 @@ Download the correct archive from the list under `Arm Corstone-300`. We need the
 
 - Emulates MPS3 board (not for MPS2 FPGA board)
 - Contains support for Arm® Ethos™-U55
-
-> **Note:** Currently, the FVP only has a Linux OS version. Also, there are no FVPs available for `SSE-200`
-> which satisfy the above conditions.
 
 For FVP, the elf or the axf file can be run using the Fast Model
 executable as outlined under the [Starting Fast Model simulation](./setup.md/#starting-fast-model-simulation)
@@ -142,7 +141,7 @@ For more information on getting started with an MPS3 board, please refer to
 ### Deployment on MPS3 board
 
 > **NOTE**: These instructions are valid only if the evaluation is being
- done using the MPS3 FPGA platform using either `SSE-200` or `SSE-300`.
+ done using the MPS3 FPGA platform using `SSE-300`.
 
 To run the application on MPS3 platform, firstly it's necessary to make sure
 that the platform has been set up using the correct configuration.

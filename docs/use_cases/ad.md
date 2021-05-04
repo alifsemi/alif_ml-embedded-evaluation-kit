@@ -1,19 +1,19 @@
 # Anomaly Detection Code Sample
 
-- [Introduction](#introduction)
-  - [Prerequisites](#prerequisites)
-- [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-  - [Build options](#build-options)
-  - [Build process](#build-process)
-  - [Add custom input](#add-custom-input)
-  - [Add custom model](#add-custom-model)
-- [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u55-code-sample)
-  - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
-  - [Starting Fast Model simulation](#starting-fast-model-simulation)
-  - [Running Anomaly Detection](#running-anomaly-detection)
-- [Anomaly Detection processing information](#anomaly-detection-processing-information)
-  - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
-  - [Postprocessing](#postprocessing)
+- [Anomaly Detection Code Sample](#anomaly-detection-code-sample)
+  - [Introduction](#introduction)
+    - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
+    - [Postprocessing](#postprocessing)
+    - [Prerequisites](#prerequisites)
+  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
+    - [Build options](#build-options)
+    - [Build process](#build-process)
+    - [Add custom input](#add-custom-input)
+    - [Add custom model](#add-custom-model)
+  - [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u55-code-sample)
+    - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
+    - [Starting Fast Model simulation](#starting-fast-model-simulation)
+    - [Running Anomaly Detection](#running-anomaly-detection)
 
 ## Introduction
 
@@ -296,7 +296,7 @@ The log from the configuration stage should tell you what model path has been us
 After compiling, your custom model will have now replaced the default one in the application.
 
  >**Note:** In order to successfully run the model, the NPU needs to be enabled and
- the platform `TARGET_PLATFORM` is set to mps3 and TARGET_SUBSYSTEM is SSE-200 or SSE-300.
+ the platform `TARGET_PLATFORM` is set to `mps3` and `TARGET_SUBSYSTEM` is `SSE-300`.
 
 ## Setting-up and running Ethos-U55 Code Sample
 

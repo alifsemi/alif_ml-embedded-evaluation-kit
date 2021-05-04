@@ -231,7 +231,6 @@ See:
     - [Preparing build environment](./sections/building.md#preparing-build-environment)
     - [Create a build directory](./sections/building.md#create-a-build-directory)
     - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#configuring-the-build-for-mps3-sse-300)
-    - [Configuring the build for `MPS3: SSE-200`](./sections/building.md#configuring-the-build-for-mps3-sse-200)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
     - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
