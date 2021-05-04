@@ -194,7 +194,9 @@ namespace app {
                      audioDataSlider.TotalStrides() + 1);
 
                 /* Run inference over this audio clip sliding window */
-                arm::app::RunInference(model, profiler);
+                if (!RunInference(model, profiler)) {
+                    return false;
+                }
 
                 /* Use the negative softmax score of the corresponding index as the outlier score */
                 std::vector<float> dequantOutput = Dequantize<int8_t>(outputTensor);

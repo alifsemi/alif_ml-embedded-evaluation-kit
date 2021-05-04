@@ -145,7 +145,9 @@ namespace app {
             info("Running inference on image %u => %s\n", ctx.Get<uint32_t>("imgIndex"),
                 get_filename(ctx.Get<uint32_t>("imgIndex")));
 
-            RunInference(model, profiler);
+            if (!RunInference(model, profiler)) {
+                return false;
+            }
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');

@@ -216,7 +216,9 @@ namespace app {
                      audioDataSlider.TotalStrides() + 1);
 
                 /* Run inference over this audio clip sliding window. */
-                arm::app::RunInference(model, profiler);
+                if (!RunInference(model, profiler)) {
+                    return false;
+                }
 
                 std::vector<ClassificationResult> classificationResult;
                 auto& classifier = ctx.Get<KwsClassifier&>("classifier");

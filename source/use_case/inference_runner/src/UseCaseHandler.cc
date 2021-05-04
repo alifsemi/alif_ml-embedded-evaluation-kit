@@ -68,7 +68,9 @@ namespace app {
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
-        RunInference(model, profiler);
+        if (!RunInference(model, profiler)) {
+            return false;
+        }
 
         /* Erase. */
         str_inf = std::string(str_inf.size(), ' ');

@@ -238,7 +238,10 @@ namespace app {
                  audioDataSlider.TotalStrides() + 1);
 
             /* Run inference over this audio clip sliding window. */
-            arm::app::RunInference(kwsModel, profiler);
+            if (!RunInference(kwsModel, profiler)) {
+                printf_err("KWS inference failed\n");
+                return output;
+            }
 
             std::vector<ClassificationResult> kwsClassificationResult;
             auto& kwsClassifier = ctx.Get<KwsClassifier&>("kwsclassifier");
@@ -391,7 +394,10 @@ namespace app {
             asrPrep.Invoke(asrInferenceWindow, asrInferenceWindowLen, asrInputTensor);
 
             /* Run inference over this audio clip sliding window. */
-            arm::app::RunInference(asrModel, profiler);
+            if (!RunInference(asrModel, profiler)) {
+                printf_err("ASR inference failed\n");
+                return false;
+            }
 
             /* Post-process. */
             asrPostp.Invoke(asrOutputTensor, reductionAxis, !audioDataSlider.HasNext());

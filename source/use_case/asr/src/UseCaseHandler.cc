@@ -174,7 +174,9 @@ namespace app {
                 prep.Invoke(inferenceWindow, inferenceWindowLen, inputTensor);
 
                 /* Run inference over this audio clip sliding window. */
-                arm::app::RunInference(model, profiler);
+                if (!RunInference(model, profiler)) {
+                    return false;
+                }
 
                 /* Post-process. */
                 postp.Invoke(outputTensor, reductionAxis, !audioDataSlider.HasNext());
