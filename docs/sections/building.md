@@ -393,9 +393,11 @@ cmake ../ -DTARGET_PLATFORM=native
 Results of the build will be placed under `build/bin/` folder:
 
 ```tree
- bin
-  |- dev_ethosu_eval-tests
-  |_ ethos-u
+bin
+├── arm_ml_embedded_evaluation_kit-<usecase1>-tests
+├── arm_ml_embedded_evaluation_kit-<usecase2>-tests
+├── ethos-u-<usecase1>
+└── ethos-u-<usecase1>
 ```
 
 ### Configuring the build for simple_platform

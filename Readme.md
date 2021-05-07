@@ -22,11 +22,11 @@ The example application at your disposal and the utilized models are listed in t
 
 |   ML application                     |  Description | Neural Network Model |
 | :----------------------------------: | :-----------------------------------------------------: | :----: |
-|  [Image classification](./docs/use_cases/img_class.md)              | Recognize the presence of objects in a given image | [Mobilenet V2](https://github.com/ARM-software/ML-zoo/blob/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8)   |
+|  [Image classification](./docs/use_cases/img_class.md)        | Recognize the presence of objects in a given image | [Mobilenet V2](https://github.com/ARM-software/ML-zoo/blob/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8)   |
 |  [Keyword spotting(KWS)](./docs/use_cases/kws.md)             | Recognize the presence of a key word in a recording | [DS-CNN-L](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8) |
 |  [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md) | Transcribe words in a recording | [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8) |
 |  [KWS and ASR](./docs/use_cases/kws_asr.md) | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [DS-CNN-L](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8) |
-|  [Anomaly Detection](./docs/use_cases/ad.md)                 | Detecting abnormal behavior based on a sound recording of a machine | Coming soon|
+|  [Anomaly Detection](./docs/use_cases/ad.md)                 | Detecting abnormal behavior based on a sound recording of a machine | [Anomaly Detection](https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite)|
 | [Generic inference runner](./docs/use_cases/inference_runner.md) | Code block allowing you to develop your own use case for Ethos-U55 NPU | Your custom model |
 
 The above use cases implement end-to-end ML flow including data pre-processing and post-processing. They will allow you
@@ -81,11 +81,95 @@ For more details see full documentation:
   - [Implementing custom ML application](./docs/documentation.md#implementing-custom-ml-application)
   - [Testing and benchmarking](./docs/documentation.md#testing-and-benchmarking)
   - [Troubleshooting](./docs/documentation.md#troubleshooting)
-  - [Contribution guidelines](./docs/documentation.md#contribution-guidelines)
-    - [Coding standards and guidelines](./docs/documentation.md#coding-standards-and-guidelines)
-    - [Code Reviews](./docs/documentation.md#code-reviews)
-    - [Testing](./docs/documentation.md#testing)
-  - [Communication](./docs/documentation.md#communication)
-  - [Licenses](./docs/documentation.md#licenses)
   - [Appendix](./docs/documentation.md#appendix)
-  
+
+## Contribution guidelines
+
+Contributions are only accepted under the following conditions:
+
+- The contribution have certified origin and give us your permission. To manage this process we use
+  [Developer Certificate of Origin (DCO) V1.1](https://developercertificate.org/).
+  To indicate that contributors agree to the the terms of the DCO, it's neccessary "sign off" the
+  contribution by adding a line with name and e-mail address to every git commit message:
+
+  ```log
+  Signed-off-by: John Doe <john.doe@example.org>
+  ```
+
+  This can be done automatically by adding the `-s` option to your `git commit` command.
+  You must use your real name, no pseudonyms or anonymous contributions are accepted.
+
+- You give permission according to the [Apache License 2.0](../LICENSE_APACHE_2.0.txt).
+
+  In each source file, include the following copyright notice:
+
+  ```copyright
+  /*
+  * Copyright (c) <years additions were made to project> <your name>, Arm Limited. All rights reserved.
+  * SPDX-License-Identifier: Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *     http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+  ```
+
+### Coding standards and guidelines
+
+This repository follows a set of guidelines, best practices, programming styles and conventions,
+see:
+
+- [Coding standards and guidelines](./docs/sections/coding_guidelines.md)
+  - [Introduction](./docs/sections/coding_guidelines.md#introduction)
+  - [Language version](./docs/sections/coding_guidelines.md#language-version)
+  - [File naming](./docs/sections/coding_guidelines.md#file-naming)
+  - [File layout](./docs/sections/coding_guidelines.md#file-layout)
+  - [Block Management](./docs/sections/coding_guidelines.md#block-management)
+  - [Naming Conventions](./docs/sections/coding_guidelines.md#naming-conventions)
+    - [C++ language naming conventions](./docs/sections/coding_guidelines.md#c_language-naming-conventions)
+    - [C language naming conventions](./docs/sections/coding_guidelines.md#c-language-naming-conventions)
+  - [Layout and formatting conventions](./docs/sections/coding_guidelines.md#layout-and-formatting-conventions)
+  - [Language usage](./docs/sections/coding_guidelines.md#language-usage)
+
+### Code Reviews
+
+Contributions must go through code review. Code reviews are performed through the
+[mlplatform.org Gerrit server](https://review.mlplatform.org). Contributors need to signup to this
+Gerrit server with their GitHub account credentials.
+In order to be merged a patch needs to:
+
+- get a "+1 Verified" from the pre-commit job.
+- get a "+2 Code-review" from a reviewer, it means the patch has the final approval.
+
+### Testing
+
+Prior to submitting a patch for review please make sure that all build variants works and unit tests pass.
+Contributions go through testing at the continuous integration system. All builds, tests and checks must pass before a
+contribution gets merged to the master branch.
+
+## Communication
+
+Please, if you want to start public discussion, raise any issues or questions related to this repository, use
+[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/)
+forum.
+
+## Licenses
+
+The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](../LICENSE_APACHE_2.0.txt).
+
+Application input data sample files are provided under their original license:
+
+|  | Licence | Provenience |
+|---------------|---------|---------|
+| [Automatic Speech Recognition Samples](./resources/asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/> |
+| [Image Classification Samples](./resources/img_class/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
+| [Keyword Spotting Samples](./resources/kws/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
+| [Keyword Spotting and Automatic Speech Recognition Samples](./resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |

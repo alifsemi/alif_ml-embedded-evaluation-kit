@@ -215,6 +215,7 @@ def set_up_resources(run_vela_on_models=False):
             new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", "_vela_H128.tflite")
             # rename default vela model
             os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
+            logging.info(f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}.")
 
 
 if __name__ == '__main__':

@@ -27,13 +27,13 @@ Where:
 - `utils`: contains utilities sources used only within the tests.
 
 When [configuring](./building.md#configuring-the-build-native-unit-test) and
-[building](./building.md#Building-the-configured-project) for `native` target platform results of the build will
-be placed under `build/bin/` folder, for example:
+[building](./building.md#building-the-configured-project) for `native` target platform results of the build will
+be placed under `<build folder>/bin/` folder, for example:
 
 ```tree
 .
-├── dev_ethosu_eval-<usecase1>-tests
-├── dev_ethosu_eval-<usecase2>-tests
+├── arm_ml_embedded_evaluation_kit-<usecase1>-tests
+├── arm_ml_embedded_evaluation_kit-<usecase2>-tests
 ├── ethos-u-<usecase1>
 └── ethos-u-<usecase1>
 ```
@@ -41,7 +41,7 @@ be placed under `build/bin/` folder, for example:
 To execute unit-tests for a specific use-case in addition to the common tests:
 
 ```commandline
-dev_ethosu_eval-<use_case>-tests
+arm_ml_embedded_evaluation_kit-<use_case>-tests
 ```
 
 ```log
