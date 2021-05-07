@@ -150,9 +150,9 @@ For details, on platform set up, please see the relevant documentation. For `Arm
 
 For MPS3 board, instead of loading the axf file directly, the executable blobs
 generated under the *sectors/<use_case>* subdirectory need to be
-copied over to the MP3 board's micro SD card. Also, every use case build
-generates a corresponding images.txt file which is used by the MPS3 to
-understand which memory regions the blobs are to be loaded into.
+copied over to the MP3 board's micro SD card. Also, *sectors/images.txt* file is
+used by the MPS3 to understand which memory regions the blobs are to be loaded
+into.
 
 Once the USB A <--> B cable between the MPS3 and the development machine
 is connected and the MPS3 board powered on, the board should enumerate
@@ -160,10 +160,10 @@ as a mass storage device over this USB connection.
 There might be two devices also, depending on the version of the board
 you are using. The device named `V2M-MPS3` or `V2MMPS3` is the `SD card`.
 
-If the axf/elf file is within 1MiB, it can be flashed into the FPGA
-memory directly without having to break it down into separate load
-region specific blobs. However, with neural network models exceeding
-this size, it becomes necessary to follow this approach.
+If the axf/elf file is within the ITCM load size limit, it can be copied into
+the FPGA memory directly without having to break it down into separate load
+region specific blobs. However, with neural network models exceeding this size,
+it becomes necessary to follow this approach.
 
 1. For example, the image classification use case will produce:
 
@@ -181,7 +181,7 @@ this size, it becomes necessary to follow this approach.
     cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/
     ```
 
-2. The generated `\<use-case\>_images.txt` file needs to be copied
+2. The `./bin/sectors/images.txt` file needs to be copied
 over to the MPS3. The exact location for the destination will depend
 on the MPS3 board's version and the application note for the bit
 file in use.
@@ -190,7 +190,7 @@ application note directory named "ETHOSU", to replace the images.txt
 file:
 
     ```commandline
-    cp ./bin/images-img_class.txt /media/user/V2M-MPS3/MB/HBI0309C/ETHOSU/images.txt
+    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/ETHOSU/images.txt
     ```
 
 3. Open the first serial port available from MPS3, for example,

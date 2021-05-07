@@ -39,15 +39,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(arm_ethos_u55_eval
-        VERSION     21.03
-        DESCRIPTION "ARM Ethos-U55 Evaluation application for MPS3 FPGA Prototyping Board and FastModel")
-
-add_compile_definitions(PRJ_VER_STR="${PROJECT_VERSION}")
-add_compile_definitions(PRJ_DES_STR="${PROJECT_DESCRIPTION}")
-
-set(CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/)
-set(DOWNLOAD_DEP_DIR  ${CMAKE_BINARY_DIR}/dependencies)
+set(CMAKE_SCRIPTS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
+set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
 
 include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
 include(${CMAKE_SCRIPTS_DIR}/util_functions.cmake)
@@ -88,14 +82,27 @@ USER_OPTION(CPU_PROFILE_ENABLED "Output CPU performance profiling information. S
     BOOL)
 
 if (TARGET_PLATFORM STREQUAL mps3)
-    message(STATUS "Platform: MPS3 FPGA Prototyping Board or SSE-XXX FVP")
+    message(STATUS "Platform: MPS3 FPGA Prototyping Board or FVP")
+    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
 elseif (TARGET_PLATFORM STREQUAL simple_platform)
-    message(STATUS "Platform: Simple platform within minimal peripherals")
+    message(STATUS "Platform: Simple platform with minimal peripherals")
+    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
 elseif (TARGET_PLATFORM STREQUAL native)
     message(STATUS "Platform: Native (Linux based x86_64/aarch64 system)")
+    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake)
 else ()
     message(FATAL_ERROR "Invalid platform specified: ${TARGET_PLATFORM}")
 endif ()
+
+if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE ${DEFAULT_TOOLCHAIN_FILE}
+        CACHE FILEPATH "Toolchain file")
+endif()
+message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+
+project(arm_ml_embedded_evaluation_kit
+        VERSION     21.05
+        DESCRIPTION "ARM ML Embedded Evaluation Kit for MPS3 FPGA and FastModel")
 
 enforce_compiler_version()
 setup_source_generator()
@@ -318,9 +325,11 @@ foreach(use_case ${USE_CASES})
         "${SRC_GEN_DIR}/*.c"
         )
 
-    set(SRC_MAIN
-        "${SRC_PATH}/application/main/Main.cc"
-        )
+    set(SRC_MAIN "${SRC_PATH}/application/main/Main.cc")
+
+    set_source_files_properties(${SRC_MAIN}
+        PROPERTIES COMPILE_DEFINITIONS
+        "PRJ_VER_STR=\"${PROJECT_VERSION}\";PRJ_DES_STR=\"${PROJECT_DESCRIPTION}\"")
 
     set(UC_LIB_NAME lib${TARGET_NAME})
 
@@ -364,32 +373,30 @@ foreach(use_case ${USE_CASES})
         $<$<BOOL:${ETHOS_U55_ENABLED}>:${ETHOS_U55_LIBS}>
         $<$<BOOL:${CMSIS_DSP_LIB}>:${CMSIS_DSP_LIB}>)
 
-    add_executable(${TARGET_NAME} ${SRC_MAIN})
+    add_executable(${TARGET_NAME} ${SRC_MAIN} ${PLAT_RETARGET_SOURCE})
 
     target_link_libraries(${TARGET_NAME} ${UC_LIB_NAME})
 
     if (${CMAKE_CROSSCOMPILING})
         set_target_properties(${TARGET_NAME} PROPERTIES SUFFIX ".axf")
+        add_target_map_file(${TARGET_NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.map)
     endif()
 
     if (${TARGET_PLATFORM} STREQUAL mps3)
 
-        SET(SECTORS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sectors/${use_case})
-        file(REMOVE_RECURSE ${SECTORS_DIR})
-        file(MAKE_DIRECTORY ${SECTORS_DIR})
+        set(SECTORS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sectors)
+        set(SECTORS_BIN_DIR ${SECTORS_DIR}/${use_case})
 
-        add_custom_command(TARGET ${TARGET_NAME}
-            POST_BUILD
-            COMMAND fromelf --bin --output=${SECTORS_DIR}/
-            ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.axf)
+        file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
+        file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
+        file(COPY ${MPS3_FPGA_CONFIG} DESTINATION ${SECTORS_DIR})
 
-        add_custom_target(
-            run-${use_case} ALL
-            COMMAND ${PYTHON} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/py/gen_fpga_mem_map.py
-            --scatter_file_path ${SCAT_FILE}
-            --target_subsystem  ${TARGET_SUBSYSTEM}
-            --output_file_path  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images-${use_case}.txt
-            COMMENT "Generating FPGA mappings file")
+        add_bin_generation_command(
+            TARGET_NAME ${TARGET_NAME}
+            OUTPUT_DIR  ${SECTORS_BIN_DIR}
+            AXF_PATH    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.axf
+            SECTION_PATTERNS    "${MPS3_SECTION_PATTERNS}"
+            OUTPUT_BIN_NAMES    "${MPS3_OUTPUT_BIN_NAMES}")
     elseif (${TARGET_PLATFORM} STREQUAL native)
 
         # If native build tests

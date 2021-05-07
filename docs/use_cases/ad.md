@@ -108,74 +108,26 @@ mkdir build_ad && cd build_ad
 On Linux, execute the following command to build **only** Anomaly Detection application to run on the Ethos-U55 Fast Model when providing only the mandatory arguments for CMake configuration:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=./scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=ad ..
+cmake ../ -DUSE_CASE_BUILD=ad
 ```
-
-Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific file to set the compiler and platform specific
-parameters.
-
 To configure a build that can be debugged using Arm-DS, we can just specify
-the build type as `Debug`:
+the build type as `Debug` and use the `Arm Compiler` toolchain file:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DUSE_CASE_BUILD=ad ..
+    -DUSE_CASE_BUILD=ad
 ```
 
-To configure a build that can be debugged using a tool that only supports
-DWARF format 3 (Modeldebugger for example), we can use:
+Also see:
+- [Configuring with custom TPIP dependencies](../sections/building.md#Configuring-with-custom-TPIP-dependencies)
+- [Using Arm Compiler](../sections/building.md#using-arm-compiler)
+- [Configuring the build for simple_platform](../sections/building.md#Configuring-the-build-for-simple_platform)
+- [Working with model debugger from Arm FastModel Tools](../sections/building.md#Working-with-model-debugger-from-Arm-FastModel-Tools)
 
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DARMCLANG_DEBUG_DWARF_LEVEL=3 \
-    -DUSE_CASE_BUILD=ad ..
-```
-
-> **Note:** If building for different Ethos-U55 configurations, see
-[Configuring build for different Arm Ethos-U55 configurations](../sections/building.md#Configuring-build-for-different-Arm-Ethos-U55-configurations):
-
-If the TensorFlow source tree is not in its default expected location,
-set the path using `TENSORFLOW_SRC_PATH`.
-Similarly, if the Ethos-U55 driver is not in the default location,
-`ETHOS_U55_DRIVER_SRC_PATH` can be used to configure the location. For example:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DTENSORFLOW_SRC_PATH=/my/custom/location/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core_driver \
-    -DUSE_CASE_BUILD=ad ..
-```
-
-Also, `CMSIS_SRC_PATH` parameter can be used to override the CMSIS sources used for compilation used by TensorFlow by
-default. For example, to use the CMSIS sources fetched by the ethos-u helper script, we can use:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DTENSORFLOW_SRC_PATH=../ethos-u/core_software/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=../ethos-u/core_software/core_driver \
-    -DCMSIS_SRC_PATH=../ethos-u/core_software/cmsis \
-    -DUSE_CASE_BUILD=ad ..
-```
-
-> **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run the CMake command.
+> **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run
+>the CMake command.
 
 If the CMake command succeeded, build the application as follows:
 
@@ -239,12 +191,9 @@ or `<any>_<text>_02_<here>.wav` if it was from machine ID 02 etc.
 Next set ad_FILE_PATH to the location of this folder when building:
 
 ```commandline
-cmake \
+cmake .. \
     -Dad_FILE_PATH=/tmp/custom_files/ \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=ad ..
+    -DUSE_CASE_BUILD=ad
 ```
 
 The audio flies found in the `ad_FILE_PATH` folder will be picked up and automatically converted to C++ files during the CMake
@@ -268,12 +217,9 @@ The application performs inference using the model pointed to by the CMake param
 An example:
 
 ```commandline
-cmake \
+cmake .. \
     -Dad_MODEL_TFLITE_PATH=<path/to/custom_ad_model_after_vela.tflite> \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=ad ..
+    -DUSE_CASE_BUILD=ad
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.

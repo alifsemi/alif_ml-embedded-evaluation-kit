@@ -19,6 +19,7 @@
 #include "hal.h"
 
 #include <cstdint>
+#include <inttypes.h>
 
 /* Initialise the model */
 arm::app::Model::~Model()
@@ -156,8 +157,8 @@ void arm::app::Model::LogTensorInfo(TfLiteTensor* tensor)
 
     debug("\ttensor is assigned to 0x%p\n", tensor);
     info("\ttensor type is %s\n", TfLiteTypeGetName(tensor->type));
-    info("\ttensor occupies %u bytes with dimensions\n",
-         (uint32_t)tensor->bytes);
+    info("\ttensor occupies %zu bytes with dimensions\n",
+         tensor->bytes);
     for (int i = 0 ; i < tensor->dims->size; ++i) {
         info ("\t\t%d: %3d\n", i, tensor->dims->data[i]);
     }
@@ -165,7 +166,7 @@ void arm::app::Model::LogTensorInfo(TfLiteTensor* tensor)
     TfLiteQuantization quant = tensor->quantization;
     if (kTfLiteAffineQuantization == quant.type) {
         auto* quantParams = (TfLiteAffineQuantization*)quant.params;
-        info("Quant dimension: %u\n", quantParams->quantized_dimension);
+        info("Quant dimension: %" PRIi32 "\n", quantParams->quantized_dimension);
         for (int i = 0; i < quantParams->scale->size; ++i) {
             info("Scale[%d] = %f\n", i, quantParams->scale->data[i]);
         }
@@ -195,11 +196,11 @@ void arm::app::Model::LogInterpreterInfo()
     info("Activation buffer (a.k.a tensor arena) size used: %zu\n",
         this->_m_pInterpreter->arena_used_bytes());
 
-    const uint32_t nOperators = this->_m_pInterpreter->operators_size();
-    info("Number of operators: %u\n", nOperators);
+    const size_t nOperators = this->_m_pInterpreter->operators_size();
+    info("Number of operators: %zu\n", nOperators);
 
     /* For each operator, display registration information */
-    for (uint32_t i = 0 ; i < nOperators; ++i) {
+    for (size_t i = 0 ; i < nOperators; ++i) {
         const tflite::NodeAndRegistration nodeReg =
             this->_m_pInterpreter->node_and_registration(i);
         const TfLiteRegistration* reg = nodeReg.registration;
@@ -213,7 +214,7 @@ void arm::app::Model::LogInterpreterInfo()
                             tflite::BuiltinOperator(reg->builtin_code)));
             }
         }
-        info("\tOperator %u: %s\n", i, opName.c_str());
+        info("\tOperator %zu: %s\n", i, opName.c_str());
     }
 }
 

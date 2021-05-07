@@ -37,7 +37,9 @@ static int acquisition_init(void)
  **/
 static int get_user_input(char* user_input, int size)
 {
-    fgets(user_input, size, stdin);
+    if (NULL == fgets(user_input, size, stdin)) {
+        return 1;
+    }
     return 0;
 }
 

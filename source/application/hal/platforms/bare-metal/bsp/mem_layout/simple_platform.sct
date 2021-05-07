@@ -36,35 +36,36 @@ LOAD_REGION_0       0x00000000                  0x00080000
     }
 
     ;-----------------------------------------------------
-    ; BRAM or FPGA data SRAM region worth 2MiB
-    ;-----------------------------------------------------
-    bram.bin        0x11000000  UNINIT ALIGN 16 0x00200000
-    {
-        ; activation buffers a.k.a tensor arena
-        *.o (.bss.NoInit.activation_buf)
-    }
-
-    ;-----------------------------------------------------
-    ; 128kiB of 512kiB bank is used for any other RW or ZI
+    ; 128kiB of 512kiB DTCM is used for any other RW or ZI
     ; data. Note: this region is internal to the Cortex-M
-    ; CPU
+    ; CPU.
     ;-----------------------------------------------------
     dtcm.bin        0x20000000                  0x00020000
     {
+        ; Any R/W and/or zero initialised data
         .ANY(+RW +ZI)
     }
 
     ;-----------------------------------------------------
-    ; 128kiB of stack space within the DTCM region
+    ; 384kiB of stack space within the DTCM region. See
+    ; `dtcm.bin` for the first section. Note: by virtue of
+    ; being part of DTCM, this region is only accessible
+    ; from Cortex-M55.
     ;-----------------------------------------------------
-    ARM_LIB_STACK   0x20020000 EMPTY ALIGN 8    0x00020000
+    ARM_LIB_STACK   0x20020000 EMPTY ALIGN 8    0x00060000
     {}
 
     ;-----------------------------------------------------
-    ; 256kiB of heap space within the DTCM region
+    ; SSE-300's internal SRAM of 4MiB - reserved for
+    ; activation buffers.
+    ; This region should have 3 cycle read latency from
+    ; both Cortex-M55 and Ethos-U55
     ;-----------------------------------------------------
-    ARM_LIB_HEAP    0x20040000 EMPTY ALIGN 8    0x00040000
-    {}
+    isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
+    {
+        ; activation buffers a.k.a tensor arena
+        *.o (.bss.NoInit.activation_buf)
+    }
 }
 
 ;---------------------------------------------------------
@@ -73,9 +74,12 @@ LOAD_REGION_0       0x00000000                  0x00080000
 LOAD_REGION_1       0x70000000                  0x02000000
 {
     ;-----------------------------------------------------
-    ; 32 MiB of DRAM space for nn model and input vectors
+    ; 32 MiB of DDR space for neural network model,
+    ; input vectors and labels. If the activation buffer
+    ; size required by the network is bigger than the
+    ; SRAM size available, it is accommodated here.
     ;-----------------------------------------------------
-    dram.bin        0x70000000 ALIGN 16         0x02000000
+    ddr.bin        0x70000000 ALIGN 16         0x02000000
     {
         ; nn model's baked in input matrices
         *.o (ifm)
@@ -83,20 +87,28 @@ LOAD_REGION_1       0x70000000                  0x02000000
         ; nn model
         *.o (nn_model)
 
+        ; labels
+        *.o (labels)
+
         ; if the activation buffer (tensor arena) doesn't
         ; fit in the SRAM region, we accommodate it here
         *.o (activation_buf)
     }
 
     ;-----------------------------------------------------
-    ; SSE-300's internal SRAM of 2MiB - reserved for
-    ; activation buffers.
-    ; This region should have 3 cycle read latency from
-    ; both Cortex-M55 and Ethos-U55
+    ; First 256kiB of BRAM (FPGA SRAM) used for RO data.
+    ; Note: Total BRAM size available is 2MiB.
     ;-----------------------------------------------------
-    isram.bin       0x31000000                  0x00080000
+    bram.bin        0x11000000          ALIGN 8 0x00040000
     {
         ; RO data (incl. unwinding tables for debugging)
         .ANY (+RO-DATA)
     }
+
+    ;-----------------------------------------------------
+    ; 960 KiB of remaining part of the 2MiB BRAM used as
+    ; heap space. 0x000F0000 of 0x0x001C0000 available.
+    ;-----------------------------------------------------
+    ARM_LIB_HEAP    0x11040000 EMPTY ALIGN 8    0x000F0000
+    {}
 }

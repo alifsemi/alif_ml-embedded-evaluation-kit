@@ -18,6 +18,8 @@
 
 #include "InputFiles.hpp"
 
+#include <inttypes.h>
+
 namespace arm {
 namespace app {
 
@@ -103,7 +105,7 @@ namespace app {
                                                  currentFilename.size(),
                                                  dataPsnTxtStartX, yVal, 0);
 
-            info("\t%u => %s\n", i, currentFilename.c_str());
+            info("\t%" PRIu32 " => %s\n", i, currentFilename.c_str());
         }
 #endif /* NUMBER_OF_FILES > 0 */
 

@@ -15,20 +15,6 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-# If the path to a directory or source file has been defined,
-# get the type here (FILEPATH or PATH):
-#if (DEFINED ${use_case}_FILE_PATH)
-#    get_path_type(${${use_case}_FILE_PATH} PATH_TYPE)
-#
-#    # Set the default type if path is not a dir or file path (or undefined)
-#    if (NOT ${PATH_TYPE} STREQUAL PATH AND NOT ${PATH_TYPE} STREQUAL FILEPATH)
-#        message(FATAL_ERROR "Invalid ${use_case}_FILE_PATH. It should be a dir or file path.")
-#    endif()
-#else()
-#    # Default is a directory path
-#    set(PATH_TYPE PATH)
-#endif()
-
 USER_OPTION(${use_case}_FILE_PATH "Directory with WAV files, or path to a single WAV file, to use in the evaluation application."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
     PATH_OR_FILE)

@@ -37,7 +37,16 @@ set(CMSIS_CORE_INC_DIR      "${CMSIS_SRC_PATH}/${CMSIS_CORE_PATH_SUFFIX}/Include
 
 file(GLOB_RECURSE
     CMSIS_DSP_SRC
-    "${CMSIS_DSP_SRC_DIR}/arm_*.c")
+
+    "${CMSIS_DSP_SRC_DIR}/BasicMathFunctions/arm_*.c"
+    "${CMSIS_DSP_SRC_DIR}/FastMathFunctions/arm_*.c"
+    "${CMSIS_DSP_SRC_DIR}/CommonTables/arm_*.c"
+    "${CMSIS_DSP_SRC_DIR}/TransformFunctions/arm_*.c"
+    "${CMSIS_DSP_SRC_DIR}/StatisticsFunctions/arm_*.c"
+
+    # Issue with q15 and q31 functions with Arm GNU toolchain, we only
+    # need f32 functions.
+    "${CMSIS_DSP_SRC_DIR}/ComplexMathFunctions/arm_*f32.c")
 
 # 4. Create static library
 set(CMSIS_DSP_TARGET        cmsis-dsp)
@@ -49,6 +58,20 @@ target_include_directories(${CMSIS_DSP_TARGET} PUBLIC
                            ${CMSIS_CORE_INC_DIR})
 target_include_directories(${CMSIS_DSP_TARGET} PRIVATE
                            ${CMSIS_DSP_PRI_INC_DIR})
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(${CMSIS_DSP_TARGET} PUBLIC -flax-vector-conversions)
+
+    # There is a known issue with -O0 optimisation option that affects
+    # FFT functions from CMSIS-DSP when compiling with Arm GNU embedded
+    # toolchain version 10.2.1
+    if (CMAKE_BUILD_TYPE STREQUAL Debug)
+        message(WARNING "There are known issues with CMSIS-DSP builds using "
+                        "MVE extension without optimisation. Forcing -O3 "
+                        "optimisation level")
+        target_compile_options(${CMSIS_DSP_TARGET} PUBLIC -O3)
+    endif()
+endif ()
 
 # 5. Add any custom/conditional flags for compilation or linkage
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL cortex-m55)

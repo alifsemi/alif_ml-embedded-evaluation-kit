@@ -26,12 +26,13 @@ from argparse import ArgumentParser
 from set_up_default_resources import set_up_resources
 
 
-def run(download_resources, run_vela_on_models):
+def run(toolchain: str, download_resources: bool, run_vela_on_models: bool):
     """
     Run the helpers scripts.
 
     Parameters:
     ----------
+    toolchain (str)          :    Specifies if 'gnu' or 'arm' toolchain needs to be used.
     download_resources (bool):    Specifies if 'Download resources' step is performed.
     run_vela_on_models (bool):    Only if `download_resources` is True, specifies if run vela on downloaded models.
     """
@@ -40,16 +41,25 @@ def run(download_resources, run_vela_on_models):
     logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    # 1. Download models if specified
+    # 1. Make sure the toolchain is supported, and set the right one here
+    supported_toolchain_ids = ["gnu", "arm"]
+    assert toolchain in supported_toolchain_ids, f"Toolchain must be from {supported_toolchain_ids}"
+    if toolchain == "arm":
+        toolchain_file_name = "bare-metal-armclang.cmake"
+    elif toolchain == "gnu":
+        toolchain_file_name = "bare-metal-gcc.cmake"
+
+    # 2. Download models if specified
     if download_resources is True:
         logging.info("Downloading resources.")
         set_up_resources(run_vela_on_models)
 
-    # 2. Build default configuration
+    # 3. Build default configuration
     logging.info("Building default configuration.")
     target_platform = "mps3"
     target_subsystem = "sse-300"
-    build_dir = os.path.join(current_file_dir, f"cmake-build-{target_platform}-{target_subsystem}-release")
+    build_dir = os.path.join(current_file_dir,
+        f"cmake-build-{target_platform}-{target_subsystem}-{toolchain}-release")
     try:
         os.mkdir(build_dir)
     except FileExistsError:
@@ -63,10 +73,14 @@ def run(download_resources, run_vela_on_models):
                     shutil.rmtree(filepath)
             except Exception as e:
                 logging.error('Failed to delete %s. Reason: %s' % (filepath, e))
+
     os.chdir(build_dir)
-    cmake_toolchain_file = os.path.join(current_file_dir, "scripts", "cmake", "bare-metal-toolchain.cmake")
-    cmake_command = (f"cmake .. -DTARGET_PLATFORM={target_platform} -DTARGET_SUBSYSTEM={target_subsystem} " +
-                     f"-DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file} ")
+    cmake_toolchain_file = os.path.join(current_file_dir, "scripts", "cmake",
+                                        "toolchains", toolchain_file_name)
+    cmake_command = (f"cmake .. -DTARGET_PLATFORM={target_platform} " +
+                     f"-DTARGET_SUBSYSTEM={target_subsystem} " +
+                     f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}")
+
     logging.info(cmake_command)
     state = subprocess.run(cmake_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     logging.info(state.stdout.decode('utf-8'))
@@ -79,6 +93,11 @@ def run(download_resources, run_vela_on_models):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
+    parser.add_argument("--toolchain", default="gnu",
+                        help="""
+                        Specify the toolchain to use (Arm or GNU).
+                        Options are [gnu, arm]; default is gnu.
+                        """)
     parser.add_argument("--skip-download",
                         help="Do not download resources: models and test vectors",
                         action="store_true")
@@ -86,4 +105,4 @@ if __name__ == '__main__':
                         help="Do not run Vela optimizer on downloaded models.",
                         action="store_true")
     args = parser.parse_args()
-    run(not args.skip_download, not args.skip_vela)
+    run(args.toolchain.lower(), not args.skip_download, not args.skip_vela)

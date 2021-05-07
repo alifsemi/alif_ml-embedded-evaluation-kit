@@ -2,20 +2,22 @@
 
 ## Contents
 
-- [Software project description](#software-project-description)
-- [HAL API](#hal-api)
-- [Main loop function](#main-loop-function)
-- [Application context](#application-context)
-- [Profiler](#profiler)
-- [NN Model API](#nn-model-api)
-- [Adding custom ML use case](#adding-custom-ml-use-case)
-- [Implementing main loop](#implementing-main-loop)
-- [Implementing custom NN model](#implementing-custom-nn-model)
-- [Executing inference](#executing-inference)
-- [Printing to console](#printing-to-console)
-- [Reading user input from console](#reading-user-input-from-console)
-- [Output to MPS3 LCD](#output-to-mps3-lcd)
-- [Building custom use case](#building-custom-use-case)
+- [Implementing custom ML application](#implementing-custom-ml-application)
+  - [Contents](#contents)
+  - [Software project description](#software-project-description)
+  - [HAL API](#hal-api)
+  - [Main loop function](#main-loop-function)
+  - [Application context](#application-context)
+  - [Profiler](#profiler)
+  - [NN Model API](#nn-model-api)
+  - [Adding custom ML use case](#adding-custom-ml-use-case)
+  - [Implementing main loop](#implementing-main-loop)
+  - [Implementing custom NN model](#implementing-custom-nn-model)
+  - [Executing inference](#executing-inference)
+  - [Printing to console](#printing-to-console)
+  - [Reading user input from console](#reading-user-input-from-console)
+  - [Output to MPS3 LCD](#output-to-mps3-lcd)
+  - [Building custom use case](#building-custom-use-case)
 
 This section describes how to implement a custom Machine Learning
 application running on `Arm® Corstone™-300` based FVP or on the Arm® MPS3 FPGA prototyping board.
@@ -731,11 +733,11 @@ To build you application follow the general instructions from
 build command:
 
 ```commandline
-cmake \
+cmake .. \
   -DTARGET_PLATFORM=mps3 \
   -DTARGET_SUBSYSTEM=sse-300 \
   -DUSE_CASE_BUILD=hello_world \
-  -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
+  -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
 As a result, `ethos-u-hello_world.axf` should be created, MPS3 build

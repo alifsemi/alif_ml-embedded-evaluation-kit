@@ -24,9 +24,6 @@ extern void *__Vectors;                   /* see irqs.c */
 #define __XTAL            (25000000)      /* Oscillator frequency             */
 #define __SYSTEM_CLOCK    (__XTAL)
 
-#define STR(x) #x
-#define RESET_REG(n) __ASM volatile("MOV " STR(r##n) ", #0" : : : STR(r##n))
-
 #if defined(CPU_CORTEX_M55)
 #define CCR_DL   (1 << 19)
 #else
@@ -68,25 +65,6 @@ void SystemInit(void)
   SCB->CPACR |= ((3U << 10U*2U) |   /* enable CP10 Full Access */
                  (3U << 11U*2U) );
 #endif
-
-    /* Initialise registers r0-r12 and LR(=r14)
-     * They must have a valid value before being potentially pushed to stack by
-     * C calling convention or by context saving in exception handling
-     */
-    RESET_REG(0);
-    RESET_REG(1);
-    RESET_REG(2);
-    RESET_REG(3);
-    RESET_REG(4);
-    RESET_REG(5);
-    RESET_REG(6);
-    RESET_REG(7);
-    RESET_REG(8);
-    RESET_REG(9);
-    RESET_REG(10);
-    RESET_REG(11);
-    RESET_REG(12);
-    RESET_REG(14);
 
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
   SCB->VTOR = (uint32_t) &__Vectors;

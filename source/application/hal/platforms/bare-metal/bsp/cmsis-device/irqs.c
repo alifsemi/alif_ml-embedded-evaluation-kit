@@ -23,24 +23,36 @@ extern "C"
 #include "cmsis.h"
 
 #include <stdio.h>
+#include <inttypes.h>
 
 static uint64_t cpu_cycle_count = 0;
+
+/**
+ * External references
+ */
+extern uint32_t __INITIAL_SP;
+extern uint32_t __STACK_LIMIT;
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    extern uint32_t __STACK_SEAL;
+#endif
+
+extern __NO_RETURN void __PROGRAM_START(void);
 
 /**
  * @brief   Dump core registers on stdout
  */
 static void LogCoreCPURegisters(void)
 {
-    printf("CTRL    : 0x%08x\n", __get_CONTROL());
-    printf("IPSR    : 0x%08x\n", __get_IPSR());
-    printf("APSR    : 0x%08x\n", __get_APSR());
-    printf("xPSR    : 0x%08x\n", __get_xPSR());
-    printf("PSP     : 0x%08x\n", __get_PSP());
-    printf("MSP     : 0x%08x\n", __get_MSP());
-    printf("PRIMASK : 0x%08x\n", __get_PRIMASK());
-    printf("BASEPRI : 0x%08x\n", __get_BASEPRI());
-    printf("FAULTMSK: 0x%08x\n", __get_FAULTMASK());
-    printf("PC      : 0x%08x\n", __current_pc());
+    printf("CTRL    : 0x%08" PRIx32 "\n", __get_CONTROL());
+    printf("IPSR    : 0x%08" PRIx32 "\n", __get_IPSR());
+    printf("APSR    : 0x%08" PRIx32 "\n", __get_APSR());
+    printf("xPSR    : 0x%08" PRIx32 "\n", __get_xPSR());
+    printf("PSP     : 0x%08" PRIx32 "\n", __get_PSP());
+    printf("MSP     : 0x%08" PRIx32 "\n", __get_MSP());
+    printf("PRIMASK : 0x%08" PRIx32 "\n", __get_PRIMASK());
+    printf("BASEPRI : 0x%08" PRIx32 "\n", __get_BASEPRI());
+    printf("FAULTMSK: 0x%08" PRIx32 "\n", __get_FAULTMASK());
 }
 
 /**
@@ -158,6 +170,9 @@ void SysTick_Handler(void)
     cpu_cycle_count += SysTick->LOAD + 1;
 }
 
+/**
+ * Gets the current SysTick derived counter value
+ */
 uint64_t Get_SysTick_Cycle_Count(void)
 {
     uint32_t systick_val;
@@ -169,47 +184,27 @@ uint64_t Get_SysTick_Cycle_Count(void)
     return cpu_cycle_count + (SysTick->LOAD - systick_val);
 }
 
-
-/**
- * These symbols are provided by the ARM lib - needs the stack and heap
- * regions in the scatter file.
- */
-extern void Image$$ARM_LIB_STACK$$ZI$$Base();
-extern void Image$$ARM_LIB_STACK$$ZI$$Limit();
-extern void Image$$ARM_LIB_HEAP$$ZI$$Base();
-extern void Image$$ARM_LIB_HEAP$$ZI$$Limit();
-extern __attribute__((noreturn)) void __main();
-
-__attribute__((naked, used)) void __user_setup_stackheap()
-{
-    __ASM volatile("LDR  r0, =Image$$ARM_LIB_HEAP$$ZI$$Base");
-    __ASM volatile("LDR  r1, =Image$$ARM_LIB_STACK$$ZI$$Limit");
-    __ASM volatile("LDR  r2, =Image$$ARM_LIB_HEAP$$ZI$$Limit");
-    __ASM volatile("LDR  r3, =Image$$ARM_LIB_STACK$$ZI$$Base");
-    __ASM volatile("bx   lr");
-}
-
 /**
  * Interrupt vector table.
  */
-irq_vec_type __Vectors[] __attribute__((section("RESET"), used)) = {
-    &Image$$ARM_LIB_STACK$$ZI$$Limit,  /* 0 Initial SP */
-    &Reset_Handler      , /* 1 Initial PC, set to entry point */
+irq_vec_type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
+    (irq_vec_type)(&__INITIAL_SP),  /*     Initial Stack Pointer */
+    Reset_Handler      , /* 1 Initial PC, set to entry point */
 
-    &NMI_Handler        , /* 2 (-14) NMI Handler            */
-    &HardFault_Handler  , /* 3 (-13) Hard Fault Handler     */
-    &MemManage_Handler  , /* 4 (-12) MPU Fault Handler      */
-    &BusFault_Handler   , /* 5 (-11) Bus Fault Handler      */
-    &UsageFault_Handler , /* 6 (-10) Usage Fault Handler    */
-    &SecureFault_Handler, /* 7 ( -9) Secure Fault Handler   */
+    NMI_Handler        , /* 2 (-14) NMI Handler            */
+    HardFault_Handler  , /* 3 (-13) Hard Fault Handler     */
+    MemManage_Handler  , /* 4 (-12) MPU Fault Handler      */
+    BusFault_Handler   , /* 5 (-11) Bus Fault Handler      */
+    UsageFault_Handler , /* 6 (-10) Usage Fault Handler    */
+    SecureFault_Handler, /* 7 ( -9) Secure Fault Handler   */
     0                   , /* 8 ( -8) Reserved               */
     0                   , /* 9 ( -7) Reserved               */
     0                   , /* 10 ( -6) Reserved              */
-    &SVC_Handler        , /* 11 ( -5) SVCall Handler        */
-    &DebugMon_Handler   , /* 12 ( -4) Debug Monitor Handler */
+    SVC_Handler        , /* 11 ( -5) SVCall Handler        */
+    DebugMon_Handler   , /* 12 ( -4) Debug Monitor Handler */
     0                   , /* 13 ( -3) Reserved              */
-    &PendSV_Handler     , /* 14 ( -2) PendSV Handler        */
-    &SysTick_Handler    , /* 15 ( -1) SysTick Handler       */
+    PendSV_Handler     , /* 14 ( -2) PendSV Handler        */
+    SysTick_Handler    , /* 15 ( -1) SysTick Handler       */
 
     /* External sources to be populated by user. */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*   0 -  16 */
@@ -222,6 +217,9 @@ irq_vec_type __Vectors[] __attribute__((section("RESET"), used)) = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 112 -  128 */
 };
 
+/**
+ * SysTick initialisation
+ */
 int Init_SysTick(void)
 {
     const uint32_t ticks_10ms = GetSystemCoreClock()/100 + 1;
@@ -252,8 +250,8 @@ __attribute__((used)) void Reset_Handler(void)
     /* Configure the system tick. */
     Init_SysTick();
 
-    /* libcxx supplied entry point. */
-    __main();
+    /* cmsis supplied entry point. */
+    __PROGRAM_START();
 }
 
 #ifdef __cplusplus

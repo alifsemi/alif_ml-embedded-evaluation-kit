@@ -33,10 +33,12 @@ extern "C" {
 #include "data_psn.h"                   /* Data presentation abstraction */
 #include "timer.h"                      /* Timer/profiler API */
 
+#include <inttypes.h>
+
 /* Structure to define a platform context to be used by the application */
 typedef struct hal_platform_context {
     int inited;                         /**< initialised */
-    char plat_name[16];                 /**< name of this platform */
+    char plat_name[64];                 /**< name of this platform */
     data_acq_module * data_acq;         /**< data acquisition module pointer */
     data_psn_module * data_psn;         /**< data presentation module pointer */
     platform_timer *  timer;            /**< timer */

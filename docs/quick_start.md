@@ -71,9 +71,6 @@ functionality or performance. All use cases in the evaluation kit follow the ste
 
     ```commandline
     cmake \
-        -DTARGET_PLATFORM=mps3 \
-        -DTARGET_SUBSYSTEM=sse-300 \
-        -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
         -DUSE_CASE_BUILD=kws \
         -Dkws_MODEL_TFLITE_PATH=output/ds_cnn_clustered_int8_vela.tflite \
         ..

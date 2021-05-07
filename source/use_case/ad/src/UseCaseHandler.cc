@@ -167,7 +167,7 @@ namespace app {
             platform.data_psn->present_data_text(
                     str_inf.c_str(), str_inf.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-            info("Running inference on audio clip %u => %s\n", currentIndex, get_filename(currentIndex));
+            info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex, get_filename(currentIndex));
 
             /* Start sliding through audio clip. */
             while (audioDataSlider.HasNext()) {
@@ -246,7 +246,7 @@ namespace app {
     static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %u (expected less than %u)\n",
+            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                        idx, NUMBER_OF_FILES);
             return false;
         }

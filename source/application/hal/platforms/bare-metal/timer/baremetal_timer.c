@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <inttypes.h>
 
 #if defined (ARM_NPU)
 
@@ -40,7 +41,7 @@ static void _init_ethosu_cyclecounter(void);
 static uint64_t bm_get_npu_total_cycle_diff(time_counter *st,
                                             time_counter *end);
 
-/** 
+/**
  * @brief       Gets the difference in active NPU cycle counts.
  * @param[in]   st      Pointer to time_counter value at start time.
  * @param[in]   end     Pointer to time_counter value at end.
@@ -100,7 +101,7 @@ static int bm_get_npu_cycle_diff(time_counter *st, time_counter *end,
 #endif /* defined (ARM_NPU) */
 
 #if defined(MPS3_PLATFORM)
-/** 
+/**
  * @brief       Wrapper for getting milliseconds duration between time counters
  * @param[in]   st      Pointer to time_counter value at start time.
  * @param[in]   end     Pointer to time_counter value at end.
@@ -148,7 +149,7 @@ static time_counter bm_stop_profiling(void);
 static uint32_t bm_get_cpu_cycles_diff(time_counter *st, time_counter *end);
 
 /**
- * @brief       Initialiser for bare metal timer. 
+ * @brief       Initialiser for bare metal timer.
  * @param[in]   timer  Platform timer to initialize.
  **/
 void init_timer(platform_timer *timer)
@@ -307,7 +308,11 @@ static time_counter bm_get_time_counter(void)
     };
 
 #if defined (ARM_NPU)
-    debug("NPU total cc: %llu; NPU idle cc: %u; NPU axi0 read cc: %u;  NPU axi0 write cc: %u; NPU axi1 read cc: %u\n",
+    debug("NPU total cc: %" PRIu64
+        "; NPU idle cc: %" PRIu32
+        "; NPU axi0 read cc: %" PRIu32
+        "; NPU axi0 write cc: %" PRIu32
+        "; NPU axi1 read cc: %" PRIu32 "\n",
         t.npu_total_ccnt,
         t.npu_idle_ccnt,
         t.npu_axi0_read_ccnt,

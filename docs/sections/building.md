@@ -8,8 +8,15 @@
   - [Build options](#build-options)
   - [Build process](#build-process)
     - [Preparing build environment](#preparing-build-environment)
+      - [Fetching submodules](#fetching-submodules)
+      - [Fetching resource files](#fetching-resource-files)
     - [Create a build directory](#create-a-build-directory)
     - [Configuring the build for MPS3: SSE-300](#configuring-the-build-for-mps3-sse-300)
+      - [Using GNU Arm Embedded Toolchain](#using-gnu-arm-embedded-toolchain)
+      - [Using Arm Compiler](#using-arm-compiler)
+      - [Generating project for Arm Development Studio](#generating-project-for-arm-development-studio)
+      - [Working with model debugger from Arm FastModel Tools](#working-with-model-debugger-from-arm-fastmodel-tools)
+      - [Configuring with custom TPIP dependencies](#configuring-with-custom-tpip-dependencies)
     - [Configuring native unit-test build](#configuring-native-unit-test-build)
     - [Configuring the build for simple_platform](#configuring-the-build-for-simple_platform)
     - [Building the configured project](#building-the-configured-project)
@@ -26,8 +33,8 @@ This section assumes the use of an **x86 Linux** build machine.
 Before proceeding, please, make sure that the following prerequisites
 are fulfilled:
 
-- Arm Compiler version 6.14 or above is installed and available on the
-    path.
+- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.14 (or higher)
+    is installed and available on the path.
 
     Test the compiler by running:
 
@@ -40,11 +47,25 @@ are fulfilled:
     Component: ARM Compiler 6.14
     ```
 
+    Alternatively,
+
+    ```commandline
+    arm-none-eabi-gcc --version
+    ```
+    ```log
+    arm-none-eabi-gcc (GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
+    Copyright (C) 2020 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    ```
+
     > **Note:** Add compiler to the path, if needed:
     >
     > `export PATH=/path/to/armclang/bin:$PATH`
+    >           OR
+    > `export PATH=/path/to/gcc-arm-none-eabi-toolchain/bin:$PATH`
 
-- Compiler license is configured correctly
+- Compiler license, if using the proprietary Arm Compiler, is configured correctly.
 
 - CMake version 3.15 or above is installed and available on the path.
     Test CMake by running:
@@ -93,26 +114,24 @@ are fulfilled:
 
     > **Note:** Add it to the path environment variable, if needed.
 
-- Access to the Internet to download the third party dependencies, specifically: TensorFlow Lite Micro, Arm Ethos-U55 NPU
+- Access to the Internet to download the third party dependencies, specifically: TensorFlow Lite Micro, Arm® Ethos™-U55 NPU
 driver and CMSIS. Instructions for downloading these are listed under [preparing build environment](#preparing-build-environment).
 
 ## Build options
 
-The project build system allows user to specify custom NN
-model (in `.tflite` format) or images and compile application binary from
-sources.
-
-The build system uses pre-built TensorFlow Lite for Microcontrollers
-library and Arm® Ethos™-U55 driver libraries from the delivery package.
+The project build system allows user to specify custom neural network
+models (in `.tflite` format) for each use case along with the network
+inputs. It also builds TensorFlow Lite for Microcontrollers library,
+Arm® Ethos™-U55 driver library, and CMSIS-DSP library from sources.
 
 The build script is parameterized to support different options. Default
-values for build parameters will build the executable compatible with
-the Ethos-U55 NPU Fast Model.
+values for build parameters will build the applications for all use cases
+for Arm® Corstone™-300 design that can execute on an MPS3 FPGA or the FVP.
 
 The build parameters are:
 
 - `TARGET_PLATFORM`: Target platform to execute application:
-  - `mps3`
+  - `mps3` (default)
   - `native`
   - `simple_platform`
 
@@ -121,6 +140,10 @@ The build parameters are:
     FVP and the MPS3 FPGA, this should be left to the default value of
     SSE-300:
   - `sse-300` (default - [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300))
+
+- `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the
+    default toolchain file used for the build. All the valid toolchain files are in the
+    scripts directory. For example, see [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
 
 - `TENSORFLOW_SRC_PATH`: Path to the root of the TensorFlow directory.
     The default value points to the TensorFlow submodule in the
@@ -221,6 +244,8 @@ During this stage application and third party libraries are built see [Building 
 
 ### Preparing build environment
 
+#### Fetching submodules
+
 Certain third party sources are required to be present on the development machine to allow the example sources in this
 repository to link against.
 
@@ -252,6 +277,21 @@ dependencies
 >paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH`, `ETHOS_U55_DRIVER_SRC_PATH`,
 >and `CMSIS_SRC_PATH`.
 
+
+#### Fetching resource files
+
+All the ML use case examples in this repository also depend on external neural
+network models. To download these, run the following command from the root of
+the repository:
+
+```sh
+python3 ./set_up_default_resources.py
+```
+
+This will fetch all the models into `resources_downloaded` directory. It will
+also optimize the models using the Vela compiler for default 128 MAC configuration
+of Arm® Ethos™-U55 NPU.
+
 ### Create a build directory
 
 Create a build directory in the root of the project and navigate inside:
@@ -262,29 +302,48 @@ mkdir build && cd build
 
 ### Configuring the build for MPS3: SSE-300
 
-On Linux, execute the following command to build the application to run
-on the Ethos-U55 NPU when providing only the mandatory arguments for CMake configuration:
+#### Using GNU Arm Embedded Toolchain
+
+On Linux, if using `Arm GNU embedded toolchain`, execute the following command
+to build the application to run on the Arm® Ethos™-U55 NPU when providing only
+the mandatory arguments for CMake configuration:
+
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
+cmake ../
 ```
 
-Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific
-file to set the compiler and platform specific parameters.
+The above command will build for the default target platform `mps3`, the default subsystem
+`sse-300`, and using the default toolchain file for the target as `bare-metal-gcc.` This is
+equivalent to:
+
+
+```commandline
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake
+    -DTARGET_PLATFORM=mps3 \
+    -DTARGET_SUBSYSTEM=sse-300
+```
+
+#### Using Arm Compiler
+
+If using `Arm Compiler` instead, the toolchain option `CMAKE_TOOLCHAIN_FILE` can be used to
+point to the ARMClang CMake file instead to set the compiler and platform specific parameters.
+
+```commandline
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
+```
 
 To configure a build that can be debugged using Arm Development Studio, we can just specify
 the build type as `Debug`:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DCMAKE_BUILD_TYPE=Debug ..
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DCMAKE_BUILD_TYPE=Debug
 ```
+
+#### Generating project for Arm Development Studio
 
 To be able to import the project in Arm Development Studio, add the Eclipse project generator and CMAKE_ECLIPSE_VERSION in the CMake command. It is advisable that the build directory is one level up relative to the source directory. When the build has been generated, you need to follow the Import wizard in Arm Development Studio and import the existing project into the workspace. You can then compile and debug the project using Arm Development Studio. Note that the below command is executed one level up from the source directory.
 
@@ -292,38 +351,39 @@ To be able to import the project in Arm Development Studio, add the Eclipse proj
 cmake \
     -DTARGET_PLATFORM=mps3 \
     -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCMAKE_BUILD_TYPE=Debug \
     -G "Eclipse CDT4 - Unix Makefiles" \
     -DCMAKE_ECLIPSE_VERSION=4.15 \
     ml-embedded-evaluation-kit
 ```
 
+#### Working with model debugger from Arm FastModel Tools
+
 To configure a build that can be debugged using a tool that only supports
 DWARF format 3 (Modeldebugger for example), we can use:
 
 ```commandline
-cmake \
+cmake .. \
     -DTARGET_PLATFORM=mps3 \
     -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DARMCLANG_DEBUG_DWARF_LEVEL=3 ..
+    -DARMCLANG_DEBUG_DWARF_LEVEL=3
 ```
 
-If the TensorFlow source tree is not in its default expected location,
-set the path using `TENSORFLOW_SRC_PATH`.
-Similarly, if the Ethos-U55 NPU driver and CMSIS are not in the default location,
-`ETHOS_U55_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` can be used to configure their location. For example:
+#### Configuring with custom TPIP dependencies
+
+If the TensorFlow source tree is not in its default expected location, set the path
+using `TENSORFLOW_SRC_PATH`. Similarly, if the Ethos-U55 NPU driver and CMSIS are
+not in the default location, `ETHOS_U55_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` can be
+used to configure their location. For example:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+cmake .. \
     -DTENSORFLOW_SRC_PATH=/my/custom/location/tensorflow \
     -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core_driver \
-    -DCMSIS_SRC_PATH=/my/custom/location/cmsis ..
+    -DCMSIS_SRC_PATH=/my/custom/location/cmsis
 ```
 
 > **Note:** If re-building with changed parameters values, it is
@@ -332,9 +392,7 @@ highly advised to clean the build directory and re-run the CMake command.
 ### Configuring native unit-test build
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=native \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/native-toolchain.cmake ..
+cmake ../ -DTARGET_PLATFORM=native
 ```
 
 Results of the build will be placed under `build/bin/` folder:
@@ -348,9 +406,15 @@ Results of the build will be placed under `build/bin/` folder:
 ### Configuring the build for simple_platform
 
 ```commandline
-cmake \
+cmake ../ -DTARGET_PLATFORM=simple_platform
+```
+
+Again, if using `Arm Compiler`, use:
+
+```commandline
+cmake .. \
     -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
 ### Building the configured project
@@ -531,11 +595,7 @@ set(TA0_BWCAP "4000")
 An example of the build with custom timing adapter configuration:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DTA_CONFIG_FILE=scripts/cmake/my_ta_config.cmake ..
+cmake .. -DTA_CONFIG_FILE=scripts/cmake/my_ta_config.cmake
 ```
 
 ## Add custom inputs
@@ -563,12 +623,12 @@ the Vela processed model file and `<use_case>_LABELS_TXT_FILE` to the
 location of the associated labels file:
 
 ```commandline
-cmake \
+cmake .. \
     -D<use_case>_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
     -D<use_case>_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DTARGET_PLATFORM=mps3 \
     -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake ..
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
 > **Note:** For the specific use case command see the relative section in the use case documentation.

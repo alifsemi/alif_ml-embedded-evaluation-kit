@@ -78,12 +78,12 @@ LOAD_REGION_0       0x00000000                  0x00080000
 LOAD_REGION_1       0x70000000                  0x02000000
 {
     ;-----------------------------------------------------
-    ; 32 MiB of DRAM space for neural network model,
+    ; 32 MiB of DDR space for neural network model,
     ; input vectors and labels. If the activation buffer
     ; size required by the network is bigger than the
     ; SRAM size available, it is accommodated here.
     ;-----------------------------------------------------
-    dram.bin        0x70000000 ALIGN 16         0x02000000
+    ddr.bin        0x70000000 ALIGN 16         0x02000000
     {
         ; nn model's baked in input matrices
         *.o (ifm)
@@ -110,9 +110,9 @@ LOAD_REGION_1       0x70000000                  0x02000000
     }
 
     ;-----------------------------------------------------
-    ; Remaining part of the 2MiB BRAM used as heap space.
-    ; 0x00200000 - 0x00040000 = 0x001C0000 (1.75 MiB)
+    ; 960 KiB of remaining part of the 2MiB BRAM used as
+    ; heap space. 0x000F0000 of 0x0x001C0000 available.
     ;-----------------------------------------------------
-    ARM_LIB_HEAP    0x11040000 EMPTY ALIGN 8    0x001C0000
+    ARM_LIB_HEAP    0x11040000 EMPTY ALIGN 8    0x000F0000
     {}
 }

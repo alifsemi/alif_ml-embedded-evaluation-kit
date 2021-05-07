@@ -1,16 +1,17 @@
 # Image Classification Code Sample
 
-- [Introduction](#introduction)
-  - [Prerequisites](#prerequisites)
-- [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-  - [Build options](#build-options)
-  - [Build process](#build-process)
-  - [Add custom input](#add-custom-input)
-  - [Add custom model](#add-custom-model)
-- [Setting-up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
-  - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
-  - [Starting Fast Model simulation](#starting-fast-model-simulation)
-  - [Running Image Classification](#running-image-classification)
+- [Image Classification Code Sample](#image-classification-code-sample)
+  - [Introduction](#introduction)
+    - [Prerequisites](#prerequisites)
+  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
+    - [Build options](#build-options)
+    - [Build process](#build-process)
+    - [Add custom input](#add-custom-input)
+    - [Add custom model](#add-custom-model)
+  - [Setting-up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
+    - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
+    - [Starting Fast Model simulation](#starting-fast-model-simulation)
+    - [Running Image Classification](#running-image-classification)
 
 ## Introduction
 
@@ -76,72 +77,24 @@ On Linux, execute the following command to build **only** Image Classification a
 Model when providing only the mandatory arguments for CMake configuration:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=./scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=img_class ..
+cmake ../ -DUSE_CASE_BUILD=img_class
 ```
-
-Toolchain option `CMAKE_TOOLCHAIN_FILE` points to the toolchain specific file to set the compiler and platform specific
-parameters.
 
 To configure a build that can be debugged using Arm-DS, we can just specify
-the build type as `Debug`:
+the build type as `Debug` and use the `Arm Compiler` toolchain file:
 
 ```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DUSE_CASE_BUILD=img_class ..
+    -DUSE_CASE_BUILD=img_class
 ```
 
-To configure a build that can be debugged using a tool that only supports
-DWARF format 3 (Modeldebugger for example), we can use:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DARMCLANG_DEBUG_DWARF_LEVEL=3 \
-    -DUSE_CASE_BUILD=img_class ..
-```
-
-> **Note:** If building for different Ethos-U55 configurations, see
->[Configuring build for different Arm Ethos-U55 configurations](../sections/building.md#Configuring-build-for-different-Arm-Ethos-U55-configurations):
-
-If the TensorFlow source tree is not in its default expected location,
-set the path using `TENSORFLOW_SRC_PATH`.
-Similarly, if the Ethos-U55 driver is not in the default location,
-`ETHOS_U55_DRIVER_SRC_PATH` can be used to configure the location. For example:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DTENSORFLOW_SRC_PATH=/my/custom/location/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core_driver \
-    -DUSE_CASE_BUILD=img_class ..
-```
-
-Also, `CMSIS_SRC_PATH` parameter can be used to override the CMSIS sources used for compilation used by TensorFlow by
-default. For example, to use the CMSIS sources fetched by the ethos-u helper script, we can use:
-
-```commandline
-cmake \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DTENSORFLOW_SRC_PATH=../ethos-u/core_software/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=../ethos-u/core_software/core_driver \
-    -DCMSIS_SRC_PATH=../ethos-u/core_software/cmsis \
-    -DUSE_CASE_BUILD=img_class ..
-```
+Also see:
+- [Configuring with custom TPIP dependencies](../sections/building.md#Configuring-with-custom-TPIP-dependencies)
+- [Using Arm Compiler](../sections/building.md#using-arm-compiler)
+- [Configuring the build for simple_platform](../sections/building.md#Configuring-the-build-for-simple_platform)
+- [Working with model debugger from Arm FastModel Tools](../sections/building.md#Working-with-model-debugger-from-Arm-FastModel-Tools)
 
 > **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run
 >the CMake command.
@@ -200,12 +153,9 @@ cp custom_image1.bmp /tmp/custom_images/
 Next set `img_class_FILE_PATH` to the location of this folder when building:
 
 ```commandline
-cmake \
+cmake .. \
     -Dimg_class_FILE_PATH=/tmp/custom_images/ \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=img_class ..
+    -DUSE_CASE_BUILD=img_class
 ```
 
 The images found in the `img_class_FILE_PATH` folder will be picked up and automatically converted to C++ files during
@@ -249,13 +199,10 @@ Then, you must set `img_class_MODEL_TFLITE_PATH` to the location of the Vela pro
 An example:
 
 ```commandline
-cmake \
+cmake .. \
     -Dimg_class_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
     -Dimg_class_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/bare-metal-toolchain.cmake \
-    -DUSE_CASE_BUILD=img_class ..
+    -DUSE_CASE_BUILD=img_class
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.

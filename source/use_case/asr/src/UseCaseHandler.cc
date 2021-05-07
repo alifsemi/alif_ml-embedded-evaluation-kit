@@ -131,7 +131,8 @@ namespace app {
 
             /* Audio clip must have enough samples to produce 1 MFCC feature. */
             if (audioArrSize < mfccParamsWinLen) {
-                printf_err("Not enough audio samples, minimum needed is %u\n", mfccParamsWinLen);
+                printf_err("Not enough audio samples, minimum needed is %" PRIu32 "\n",
+                    mfccParamsWinLen);
                 return false;
             }
 
@@ -151,7 +152,7 @@ namespace app {
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
-            info("Running inference on audio clip %u => %s\n", currentIndex,
+            info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex,
                  get_filename(currentIndex));
 
             size_t inferenceWindowLen = audioParamsWinLen;
@@ -237,7 +238,7 @@ namespace app {
     static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %u (expected less than %u)\n",
+            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                        idx, NUMBER_OF_FILES);
             return false;
         }
@@ -269,7 +270,7 @@ namespace app {
         for (const auto & result : results) {
             std::string infResultStr = audio::asr::DecodeOutput(result.m_resultVec);
 
-            info("For timestamp: %f (inference #: %u); label: %s\n",
+            info("For timestamp: %f (inference #: %" PRIu32 "); label: %s\n",
                  result.m_timeStamp, result.m_inferenceNumber,
                  infResultStr.c_str());
         }

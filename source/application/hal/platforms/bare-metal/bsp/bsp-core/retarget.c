@@ -14,177 +14,188 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 
 #include "uart_stdout.h"
 #include "bsp_core_log.h"
 
-#if defined (MPS3_PLATFORM)
-#include "smm_mps3.h"
-#endif  /* MPS3_PLATFORM */
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6100100)
+/* Arm compiler re-targeting */
+
 #include <rt_misc.h>
 #include <rt_sys.h>
 
 
 /* Standard IO device handles. */
-#define STDIN   0x8001
-#define STDOUT  0x8002
-#define STDERR  0x8003
+#define STDIN  0x8001
+#define STDOUT 0x8002
+#define STDERR 0x8003
+
+#define RETARGET(fun) _sys##fun
+
+#else
+/* GNU compiler re-targeting */
+
+/*
+ * This type is used by the _ I/O functions to denote an open
+ * file.
+ */
+typedef int FILEHANDLE;
+
+/*
+ * Open a file. May return -1 if the file failed to open.
+ */
+extern FILEHANDLE _open(const char * /*name*/, int /*openmode*/);
+
+/* Standard IO device handles. */
+#define STDIN  0x00
+#define STDOUT 0x01
+#define STDERR 0x02
+
+#define RETARGET(fun) fun
+
+#endif
 
 /* Standard IO device name defines. */
-const char __stdin_name[]   = "STDIN";
-const char __stdout_name[]  = "STDOUT";
-const char __stderr_name[]  = "STDERR";
+const char __stdin_name[] __attribute__((aligned(4)))  = "STDIN";
+const char __stdout_name[] __attribute__((aligned(4))) = "STDOUT";
+const char __stderr_name[] __attribute__((aligned(4))) = "STDERR";
 
-int fputc(int ch, FILE *f)
-{
-    UNUSED(f);
-    return (UartPutc(ch));
+void _ttywrch(int ch) {
+    (void)fputc(ch, stdout);
 }
 
-int fgetc(FILE *f)
-{
-    UNUSED(f);
-    return (UartPutc(UartGetc()));
-}
-
-int ferror(FILE *f)
-{
-    UNUSED(f);
-    /* Your implementation of ferror */
-    return EOF;
-}
-
-void _ttywrch(int ch)
-{
-    UartPutc(ch);
-}
-
-FILEHANDLE _sys_open(const char *name, int openmode)
+FILEHANDLE RETARGET(_open)(const char *name, int openmode)
 {
     UNUSED(openmode);
 
-    /* Register standard Input Output devices. */
-    if (strcmp(name, "STDIN") == 0)
-    {
+    if (strcmp(name, __stdin_name) == 0) {
         return (STDIN);
     }
-    if (strcmp(name, "STDOUT") == 0)
-    {
+
+    if (strcmp(name, __stdout_name) == 0) {
         return (STDOUT);
     }
-    if (strcmp(name, "STDERR") == 0)
-    {
+
+    if (strcmp(name, __stderr_name) == 0) {
         return (STDERR);
     }
-    return (-1);
+
+    return -1;
 }
 
-int _sys_close(FILEHANDLE fh)
-{
-    if (fh > 0x8000)
-    {
-        return (0);
-    }
-    return (-1);
-}
-
-int _sys_write(FILEHANDLE fh, const unsigned char *buf, unsigned int len, int mode)
+int RETARGET(_write)(FILEHANDLE fh, const unsigned char *buf, unsigned int len, int mode)
 {
     UNUSED(mode);
-    if (fh == STDOUT || fh == STDERR )
-    {
-        /* Standard Output device. */
-        for (; len; len--)
-        {
-            UartPutc(*buf++);
-        }
-        return (0);
-    }
 
-    if (fh > 0x8000)
-    {
-        return (-1);
+    switch (fh) {
+    case STDOUT:
+    case STDERR: {
+        int c;
+
+        while (len-- > 0) {
+            c = fputc(*buf++, stdout);
+            if (c == EOF) {
+                return EOF;
+            }
+        }
+
+        return 0;
     }
-    return (-1);
+    default:
+        return EOF;
+    }
 }
 
-int _sys_read(FILEHANDLE fh, unsigned char *buf, unsigned int len, int mode)
+int RETARGET(_read)(FILEHANDLE fh, unsigned char *buf, unsigned int len, int mode)
 {
     UNUSED(mode);
-    if (fh == STDIN)
-    {
-        /* Standard Input device. */
-        for (; len; len--)
-        {
-            *buf++ = UartGetc();
+
+    switch (fh) {
+    case STDIN: {
+        int c;
+
+        while (len-- > 0) {
+            c = fgetc(stdin);
+            if (c == EOF) {
+                return EOF;
+            }
+
+            *buf++ = (unsigned char)c;
         }
-        return (0);
-    }
 
-    if (fh > 0x8000)
-    {
-        return (-1);
+        return 0;
     }
-    return (-1);
+    default:
+        return EOF;
+    }
 }
 
-int _sys_istty(FILEHANDLE fh)
+int RETARGET(_istty)(FILEHANDLE fh)
 {
-    if (fh > 0x8000)
-    {
-        return (1);
+    switch (fh) {
+    case STDIN:
+    case STDOUT:
+    case STDERR:
+        return 1;
+    default:
+        return 0;
     }
-    return (0);
 }
 
-int _sys_seek(FILEHANDLE fh, long pos)
+int RETARGET(_close)(FILEHANDLE fh)
 {
+    if (RETARGET(_istty(fh))) {
+        return 0;
+    }
+
+    return -1;
+}
+
+int RETARGET(_seek)(FILEHANDLE fh, long pos)
+{
+    UNUSED(fh);
     UNUSED(pos);
-    if (fh > 0x8000)
-    {
-        return (-1);
-    }
-    return (-1);
+
+    return -1;
 }
 
-int _sys_ensure(FILEHANDLE fh)
+int RETARGET(_ensure)(FILEHANDLE fh)
 {
-    if (fh > 0x8000)
-    {
-        return (-1);
-    }
-    return (-1);
+    UNUSED(fh);
+
+    return -1;
 }
 
-long _sys_flen(FILEHANDLE fh)
+long RETARGET(_flen)(FILEHANDLE fh)
 {
-    if (fh > 0x8000)
-    {
-        return (0);
+    if (RETARGET(_istty)(fh)) {
+        return 0;
     }
-    return (-1);
+
+    return -1;
 }
 
-int _sys_tmpnam(char *name, int sig, unsigned maxlen)
+int RETARGET(_tmpnam)(char *name, int sig, unsigned int maxlen)
 {
     UNUSED(name);
     UNUSED(sig);
     UNUSED(maxlen);
-    return (1);
+
+    return 1;
 }
 
-char *_sys_command_string(char *cmd, int len)
+char *RETARGET(_command_string)(char *cmd, int len)
 {
     UNUSED(len);
-    return (cmd);
+
+    return cmd;
 }
 
-void _sys_exit(int return_code)
+void RETARGET(_exit)(int return_code)
 {
     UartEndSimulation(return_code);
 }
@@ -192,44 +203,66 @@ void _sys_exit(int return_code)
 int system(const char *cmd)
 {
     UNUSED(cmd);
-    return (0);
+
+    return 0;
 }
 
 time_t time(time_t *timer)
 {
     time_t current;
 
-#if defined (MPS3_PLATFORM)
-    current = MPS3_FPGAIO->COUNTER;
-#else   /* MPS3_PLATFORM */
-    current  = 0;   /* No RTC implementation available. */
-#endif  /* MPS3_PLATFORM */
+    current = 0; // To Do !! No RTC implemented
 
     if (timer != NULL) {
         *timer = current;
     }
 
-    return (current);
+    return current;
 }
 
-#else   /* #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) */
+void _clock_init(void) {}
 
-/******************************************************************************/
-/* Retarget functions for GNU Tools for ARM Embedded Processors               */
-/******************************************************************************/
-#include <stdio.h>
-#include <sys/stat.h>
-
-extern unsigned char UartPutc(unsigned char my_ch);
-
-__attribute__((used)) int _write(int fd, char *ptr, int len)
+clock_t clock(void)
 {
-    size_t i;
-    for (i = 0; i < len; i++)
-    {
-        UartPutc(ptr[i]); /* call character output function. */
-    }
-    return len;
+    return (clock_t)-1;
 }
 
-#endif /* #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) */
+int remove(const char *arg) {
+    UNUSED(arg);
+
+    return 0;
+}
+
+int rename(const char *oldn, const char *newn)
+{
+    UNUSED(oldn);
+    UNUSED(newn);
+
+    return 0;
+}
+
+int fputc(int ch, FILE *f)
+{
+    UNUSED(f);
+
+    return UartPutc(ch);
+}
+
+int fgetc(FILE *f)
+{
+    UNUSED(f);
+
+    return UartPutc(UartGetc());
+}
+
+#ifndef ferror
+
+/* arm-none-eabi-gcc with newlib uses a define for ferror */
+int ferror(FILE *f)
+{
+    UNUSED(f);
+
+    return EOF;
+}
+
+#endif /* #ifndef ferror */

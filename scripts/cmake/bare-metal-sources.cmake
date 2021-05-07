@@ -28,13 +28,15 @@ set(SOURCE_GEN_DIR          ${CMAKE_BINARY_DIR}/generated/bsp)
 if (NOT DEFINED MEM_PROFILES_SRC_DIR)
     set(MEM_PROFILES_SRC_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/subsystem-profiles)
 endif()
+
 set(MEM_PROFILE_TEMPLATE    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/templates/peripheral_memmap.h.template)
 set(IRQ_PROFILE_TEMPLATE    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/templates/peripheral_irqs.h.template)
 set(MEM_REGIONS_TEMPLATE    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/templates/mem_regions.h.template)
 set(TA_SETTINGS_TEMPLATE    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/templates/timing_adapter_settings.template)
+set(LINKER_SCRIPT_DIR       "${PLAT_HAL}/bsp/mem_layout")
 set(TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME  "libtensorflow-microlite.a")
 set(TENSORFLOW_LITE_MICRO_FLAG               "-DTF_LITE_STATIC_MEMORY")
-set(ETHOS_U55_FLAG          "-DARM_NPU=1")
+set(ETHOS_U55_FLAG                           "-DARM_NPU=1")
 
 if (ETHOS_U55_ENABLED)
     set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ETHOS_U55_FLAG}")
@@ -54,22 +56,32 @@ if (TARGET_PLATFORM STREQUAL mps3)
     if (TARGET_SUBSYSTEM STREQUAL sse-300)
         message(STATUS          "target subsystem is ${TARGET_SUBSYSTEM}")
         set(BSP_PACKAGE_DIR     "${PLAT_HAL}/bsp/bsp-packs/mps3")
-        set(SCAT_FILE           "${PLAT_HAL}/bsp/mem_layout/mps3-${TARGET_SUBSYSTEM}.sct")
+        set(LINKER_SCRIPT_NAME  "${TARGET_PLATFORM}-${TARGET_SUBSYSTEM}")
 
         # Include the mem profile definitions specific to our target subsystem
         include(${MEM_PROFILES_SRC_DIR}/corstone-${TARGET_SUBSYSTEM}.cmake)
         set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${MPS3_PLATFORM_FLAG}")
+
+        # For deployment on the MPS3 FPGA platform, we need to produce
+        # two bin files - one that is loaded into the ITCM, and another
+        # that is loaded into the DDR region.
+        set(MPS3_SECTION_PATTERNS   "*.at_itcm" "*.at_ddr")
+        set(MPS3_OUTPUT_BIN_NAMES   "itcm.bin"  "ddr.bin")
+        set(MPS3_FPGA_CONFIG        "${CMAKE_CURRENT_SOURCE_DIR}/scripts/${TARGET_PLATFORM}/${TARGET_SUBSYSTEM}/images.txt")
     else ()
         message(FATAL_ERROR "Non compatible target subsystem: ${TARGET_SUBSYSTEM}")
     endif ()
 elseif (TARGET_PLATFORM STREQUAL simple_platform)
     set(BSP_PACKAGE_DIR     "${PLAT_HAL}/bsp/bsp-packs/${TARGET_PLATFORM}")
-    set(SCAT_FILE           "${PLAT_HAL}/bsp/mem_layout/${TARGET_PLATFORM}.sct")
+    set(LINKER_SCRIPT_NAME  "${TARGET_PLATFORM}")
     include(${MEM_PROFILES_SRC_DIR}/${TARGET_PLATFORM}.cmake)
     set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS}")
 else ()
     message(FATAL_ERROR "Non compatible target platform ${TARGET_PLATFORM}")
 endif ()
+
+# Add link options for the linker script to be used:
+add_linker_script(${LINKER_SCRIPT_DIR} ${LINKER_SCRIPT_NAME})
 
 if (ETHOS_U55_ENABLED)
     USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
@@ -91,7 +103,6 @@ configure_file("${IRQ_PROFILE_TEMPLATE}" "${SOURCE_GEN_DIR}/peripheral_irqs.h")
 configure_file("${MEM_REGIONS_TEMPLATE}" "${SOURCE_GEN_DIR}/mem_regions.h")
 configure_file("${TA_SETTINGS_TEMPLATE}" "${SOURCE_GEN_DIR}/timing_adapter_settings.h")
 
-message(STATUS "Scatter file: ${SCAT_FILE}")
 message(STATUS "Using BSP package from: ${BSP_PACKAGE_DIR}")
 
 if (DEFINED VERIFY_TEST_OUTPUT)
@@ -114,27 +125,14 @@ if (DEFINED ARMCLANG_DEBUG_DWARF_LEVEL)
     set(OPTIONAL_FLAGS "${OPTIONAL_FLAGS} -gdwarf-${ARMCLANG_DEBUG_DWARF_LEVEL}")
 endif()
 
-set(COMPILER_FLAGS              "${ALL_COMMON_FLAGS} ${TENSORFLOW_LITE_MICRO_FLAG} ${PROFILING_OPT} ${OPTIONAL_FLAGS}")
+set(COMPILER_FLAGS              "${TENSORFLOW_LITE_MICRO_FLAG} ${PROFILING_OPT} ${OPTIONAL_FLAGS}")
 # For some reason, cmake doesn't pass the c++ standard flag, adding it manually
 set(CMAKE_CXX_FLAGS             "${COMPILER_FLAGS} -std=c++11" CACHE INTERNAL "")
 set(CMAKE_C_FLAGS               "${COMPILER_FLAGS}" CACHE INTERNAL "")
-set(CMAKE_ASM_FLAGS             "${CPU_LD}")
 set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
-add_link_options(--strict --callgraph --load_addr_map_info --map)
-add_link_options(--symbols --xref --scatter=${SCAT_FILE})
-
-# Warnings to be ignored:
-# L6314W = No section matches pattern
-# L6439W = Multiply defined Global Symbol
-add_link_options(--diag_suppress=L6439W,L6314W)
-add_link_options(--info sizes,totals,unused,veneers --entry Reset_Handler)
-
-if (CMAKE_BUILD_TYPE STREQUAL Release)
-    add_link_options(--no_debug)
-endif ()
-
-set(CMAKE_EXE_LINKER_FLAGS "${CPU_LD}")
+# Tell linker that reset interrupt handler is our entry point
+add_link_options(--entry Reset_Handler)
 
 set(PLAT_BSP_INCLUDES
     ${PLAT_HAL}/bsp/cmsis-device/include
@@ -168,3 +166,7 @@ file(GLOB_RECURSE SRC_PLAT_HAL
     "${PLAT_HAL}/bsp/bsp-core/*.c"
     "${BSP_PACKAGE_DIR}/*.c"
     )
+
+# Special retarget source to direct stdin, stdout and stderr streams to the
+# UART block.
+set(PLAT_RETARGET_SOURCE "${PLAT_HAL}/bsp/bsp-core/retarget.c")

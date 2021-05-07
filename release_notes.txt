@@ -2,14 +2,16 @@ Changes in 21.05
     * Added script to download and optimize default models.
     * Added script to run default build flow.
     * Added a model for Anomaly Detection use case.
+    * added support for build with Arm GNU Embedded Toolchain (10.2.1).
+    * deprecated support for target subsystem SSE-200.
 
 Changes in 21.03
-    * simple platform support added
-    * model conditioning examples added
-    * documentation updated
-    * build changed to use sources of the dependency libraries
-    * tests for native platform added
-    * anomaly detection use case added
+    * simple platform support added.
+    * model conditioning examples added.
+    * documentation updated.
+    * build changed to use sources of the dependency libraries.
+    * tests for native platform added.
+    * anomaly detection use case added.
 
 Changes in 20.11
     * SSE-200 and SSE-300 system support was added.

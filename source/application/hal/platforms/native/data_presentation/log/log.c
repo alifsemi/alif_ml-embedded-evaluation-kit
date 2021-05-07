@@ -20,6 +20,14 @@
 
 #include <stdint.h>
 
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 int log_psn_init(void)
 {
     return 0;
@@ -50,10 +58,10 @@ int log_display_text(const char* str, const size_t str_sz,
 
 
 int log_display_box_icon(const uint32_t pos_x, const uint32_t pos_y,
-                         const uint32_t width, const uint32_t height, 
+                         const uint32_t width, const uint32_t height,
                          const uint16_t color)
 {
-    debug("Showing rectangular, width: %d, height: %d, color: %d, x: %d, y: %d\n", 
+    debug("Showing rectangular, width: %d, height: %d, color: %d, x: %d, y: %d\n",
             width, height, color, pos_x, pos_y);
     return 0;
 }
@@ -69,3 +77,9 @@ int log_set_text_color (const uint16_t color)
     debug("Setting text color: %d\n", color);
     return 0;
 }
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+    #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif

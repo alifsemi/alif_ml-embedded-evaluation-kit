@@ -38,10 +38,9 @@ Before starting the setup process, please make sure that you have:
 - Linux x86_64 based machine or Windows Subsystem for Linux is preferable.
   Unfortunately, Windows is not supported as a build environment yet.
 
-- Arm Compiler license (version 6.14 or above).
-
-  - [Arm Compiler Download
-        Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads/)
+- At least one of the following toolchains:
+  - GNU Arm Embedded Toolchain (version 10.2.1 or above) - [GNU Arm Embedded Toolchain Downloads](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+  - Arm Compiler (version 6.14 or above) with a valid license - [Arm Compiler Download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads/)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
   - An MPS3 board loaded with  Arm® Corstone™-300 reference package (`AN547`) from:

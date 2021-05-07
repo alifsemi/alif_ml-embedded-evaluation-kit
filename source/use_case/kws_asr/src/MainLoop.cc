@@ -212,7 +212,7 @@ static uint32_t GetOutputContextLen(const arm::app::Model& model, const uint32_t
 
     /* Check to make sure that the input tensor supports the above context and inner lengths. */
     if (inputRows <= 2 * inputCtxLen || inputRows <= inputInnerLen) {
-        printf_err("Input rows not compatible with ctx of %u\n",
+        printf_err("Input rows not compatible with ctx of %" PRIu32 "\n",
                    inputCtxLen);
         return 0;
     }

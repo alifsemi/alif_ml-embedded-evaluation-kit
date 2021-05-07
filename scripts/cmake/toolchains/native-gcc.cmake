@@ -19,22 +19,34 @@ set(CMAKE_C_COMPILER            gcc)
 set(CMAKE_C_LINKER_PREFERENCE   gcc)
 set(CMAKE_CXX_LINKER_PREFERENCE gcc)
 
-set(CMAKE_C_FLAGS_DEBUG         "-DDEBUG -O0 -g")
-set(CMAKE_C_FLAGS_RELEASE       "-DNDEBUG -O3")
-
-set(CMAKE_CXX_FLAGS_DEBUG       "-DDEBUG -O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE     "-DNDEBUG -O3")
-
 # Platform specific directory:
 set(PLATFORM_HAL                3)
-set(WARNING_FLAGS               "-Wsign-compare -Wshadow         \
-                                 -Wextra -Wall -Wunused-function \
-                                 -Wmissing-field-initializers    \
-                                 -Wswitch -Wvla -Wunused-parameter")
-set(SPECIAL_OPTS                "-fPIC -pthread")
-set(PLATFORM_FLAGS              "-DPLATFORM_HAL=${PLATFORM_HAL}")
-set(SPECIAL_OPTS_CXX            "-fno-threadsafe-statics")
-set(CMAKE_EXE_LINKER_FLAGS      "-lm -lc -lstdc++ --verbose")
+
+# Warning compiler definitions:
+add_compile_options(
+    -Wsign-compare
+    -Wshadow
+    -Wextra
+    -Wall
+    -Wunused-function
+    -Wmissing-field-initializers
+    -Wswitch
+    -Wvla
+    -Wunused-parameter)
+
+# General purpose compile definitions:
+add_compile_options(
+    -fPIC
+    -pthread
+    -DPLATFORM_HAL=${PLATFORM_HAL}
+    "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>")
+
+# Linker options
+add_link_options(
+    -lm
+    -lc
+    -lstdc++
+    --verbose)
 
 function(enforce_compiler_version)
 endfunction()

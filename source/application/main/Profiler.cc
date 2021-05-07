@@ -208,7 +208,7 @@ namespace app {
     }
 
     void printStatisticsHeader(uint32_t samplesNum) {
-        info("Number of samples: %i\n", samplesNum);
+        info("Number of samples: %" PRIu32 "\n", samplesNum);
         info("%s\n", "Total / Avg./ Min / Max");
     }
 
@@ -224,7 +224,8 @@ namespace app {
 
             for (Statistics &stat: result.data) {
                 if (printFullStat) {
-                    info("%s %s: %llu / %.0f / %llu / %llu \n", stat.name.c_str(), stat.unit.c_str(),
+                    info("%s %s: %" PRIu64 "/ %.0f / %" PRIu64 " / %" PRIu64 " \n",
+                         stat.name.c_str(), stat.unit.c_str(),
                          stat.total, stat.avrg, stat.min, stat.max);
                 } else {
                     info("%s %s: %.0f\n", stat.name.c_str(), stat.unit.c_str(), stat.avrg);

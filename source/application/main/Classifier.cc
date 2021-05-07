@@ -23,6 +23,7 @@
 #include <string>
 #include <set>
 #include <cstdint>
+#include <inttypes.h>
 
 namespace arm {
 namespace app {
@@ -125,7 +126,7 @@ namespace app {
 
         /* Sanity checks. */
         if (totalOutputSize < topNCount) {
-            printf_err("Output vector is smaller than %u\n", topNCount);
+            printf_err("Output vector is smaller than %" PRIu32 "\n", topNCount);
             return false;
         } else if (totalOutputSize != labels.size()) {
             printf_err("Output size doesn't match the labels' size\n");

@@ -63,7 +63,7 @@ namespace asr {
                                                   tensor->dims->data[arm::app::Wav2LetterModel::ms_outputColsIdx],
                                                   lastIteration);
             default:
-                printf_err("Unsupported axis index: %u\n", axisIdx);
+                printf_err("Unsupported axis index: %" PRIu32 "\n", axisIdx);
         }
 
         return false;
@@ -77,7 +77,7 @@ namespace asr {
         }
 
         if (static_cast<int>(axisIdx) >= tensor->dims->size) {
-            printf_err("Invalid axis index: %u; Max: %d\n",
+            printf_err("Invalid axis index: %" PRIu32 "; Max: %d\n",
                 axisIdx, tensor->dims->size);
             return false;
         }

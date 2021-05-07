@@ -19,11 +19,12 @@
 #include "uart_stdout.h"
 
 #include <string.h>
+#include <inttypes.h>
 
 #if defined(MPS3_PLATFORM)
-#define CREATE_MASK(msb, lsb)           (((1U << ((msb) - (lsb) + 1)) - 1) << (lsb))
-#define MASK_BITS(arg, msb, lsb)        ((arg) & CREATE_MASK(msb, lsb))
-#define EXTRACT_BITS(arg, msb, lsb)     (MASK_BITS(arg, msb, lsb) >> (lsb))
+#define CREATE_MASK(msb, lsb)           (int)(((1U << ((msb) - (lsb) + 1)) - 1) << (lsb))
+#define MASK_BITS(arg, msb, lsb)        (int)((arg) & CREATE_MASK(msb, lsb))
+#define EXTRACT_BITS(arg, msb, lsb)     (int)(MASK_BITS(arg, msb, lsb) >> (lsb))
 #endif /* MPS3_PLATFORM */
 
 int system_init(void)
@@ -35,6 +36,7 @@ int system_init(void)
     uint32_t rev = 0;
     uint32_t aid = 0;
     uint32_t fpga_clk = 0;
+    const uint32_t ascii_A = (uint32_t)('A');
 
     /* Initialise the LEDs as the switches are */
     MPS3_FPGAIO->LED = MPS3_FPGAIO->SWITCHES & 0xFF;
@@ -43,7 +45,7 @@ int system_init(void)
     /* UART init - will enable valid use of printf (stdout
      * re-directed at this UART (UART0) */
     UartStdOutInit();
-    info("Processor internal clock: %u Hz\n", GetSystemCoreClock());
+    info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
 
 #if defined(MPS3_PLATFORM)
     /* Get revision information from various registers */
@@ -53,15 +55,15 @@ int system_init(void)
     apnote = EXTRACT_BITS(fpgaid, 15, 4);
     fpga_clk = GetMPS3CoreClock();
 
-    info("V2M-MPS3 revision %c\n\n", rev + 'A');
-    info("Application Note AN%x, Revision %c\n", apnote,
-        EXTRACT_BITS(aid, 23, 20) + 'A');
+    info("V2M-MPS3 revision %c\n\n", (char)(rev + ascii_A));
+    info("Application Note AN%" PRIx32 ", Revision %c\n", apnote,
+        (char)(EXTRACT_BITS(aid, 23, 20) + ascii_A));
     info("MPS3 build %d\n", EXTRACT_BITS(aid, 31, 24));
-    info("MPS3 core clock has been set to: %d Hz\n", fpga_clk);
+    info("MPS3 core clock has been set to: %" PRIu32 "Hz\n", fpga_clk);
 
     /* Display CPU ID */
     id = SCB->CPUID;
-    info("CPU ID: 0x%08x\n", id);
+    info("CPU ID: 0x%08" PRIx32 "\n", id);
 
     if(EXTRACT_BITS(id, 15, 8) == 0xD2) {
         if (EXTRACT_BITS(id, 7, 4) == 2) {
@@ -110,9 +112,5 @@ void system_release(void)
 
 void system_name(char* name, size_t size)
 {
-#if defined (MPS3_PLATFORM)
-    strncpy(name, "mps3-bare", size);
-#else /* MPS3_PLATFORM */
-    strncpy(name, "FVP", size);
-#endif /* MPS3_PLATFORM */
+    strncpy(name, DESIGN_NAME, size);
 }

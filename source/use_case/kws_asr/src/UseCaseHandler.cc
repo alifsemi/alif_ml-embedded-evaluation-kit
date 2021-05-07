@@ -159,7 +159,7 @@ namespace app {
          * this means an overlap of 0.5 seconds. */
         auto kwsAudioDataStride = kwsAudioDataWindowSize / 2;
 
-        info("KWS audio data window size %u\n", kwsAudioDataWindowSize);
+        info("KWS audio data window size %" PRIu32 "\n", kwsAudioDataWindowSize);
 
         /* Stride must be multiple of mfcc features window stride to re-use features. */
         if (0 != kwsAudioDataStride % kwsMfccWindowStride) {
@@ -208,7 +208,7 @@ namespace app {
                             str_inf.c_str(), str_inf.size(),
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
-        info("Running KWS inference on audio clip %u => %s\n",
+        info("Running KWS inference on audio clip %" PRIu32 " => %s\n",
              currentIndex, get_filename(currentIndex));
 
         /* Start sliding through audio clip. */
@@ -329,7 +329,8 @@ namespace app {
 
         /* Make sure the input tensor supports the above context and inner lengths. */
         if (asrInputRows <= 2 * asrInputCtxLen || asrInputRows <= asrInputInnerLen) {
-            printf_err("ASR input rows not compatible with ctx length %u\n", asrInputCtxLen);
+            printf_err("ASR input rows not compatible with ctx length %" PRIu32 "\n",
+                asrInputCtxLen);
             return false;
         }
 
@@ -354,7 +355,8 @@ namespace app {
         /* Audio clip must have enough samples to produce 1 MFCC feature. */
         std::vector<int16_t> audioBuffer = std::vector<int16_t>(audioArr, audioArr + audioArrSize);
         if (audioArrSize < asrMfccParamsWinLen) {
-            printf_err("Not enough audio samples, minimum needed is %u\n", asrMfccParamsWinLen);
+            printf_err("Not enough audio samples, minimum needed is %" PRIu32 "\n",
+                asrMfccParamsWinLen);
             return false;
         }
 
@@ -485,7 +487,7 @@ namespace app {
     static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %u (expected less than %u)\n",
+            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                 idx, NUMBER_OF_FILES);
             return false;
         }
@@ -525,11 +527,11 @@ namespace app {
                         dataPsnTxtStartX1, rowIdx1, 0);
             rowIdx1 += dataPsnTxtYIncr;
 
-            info("For timestamp: %f (inference #: %u); threshold: %f\n",
+            info("For timestamp: %f (inference #: %" PRIu32 "); threshold: %f\n",
                  results[i].m_timeStamp, results[i].m_inferenceNumber,
                  results[i].m_threshold);
             for (uint32_t j = 0; j < results[i].m_resultVec.size(); ++j) {
-                info("\t\tlabel @ %u: %s, score: %f\n", j,
+                info("\t\tlabel @ %" PRIu32 ": %s, score: %f\n", j,
                      results[i].m_resultVec[j].m_label.c_str(),
                      results[i].m_resultVec[j].m_normalisedVal);
             }
@@ -558,7 +560,7 @@ namespace app {
             /* Get the final result string using the decoder. */
             std::string infResultStr = audio::asr::DecodeOutput(result.m_resultVec);
 
-            info("Result for inf %u: %s\n", result.m_inferenceNumber,
+            info("Result for inf %" PRIu32 ": %s\n", result.m_inferenceNumber,
                  infResultStr.c_str());
         }
 

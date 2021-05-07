@@ -19,6 +19,8 @@
 #include "bsp_core_log.h"
 #include "device_mps3.h"
 
+#include <inttypes.h>
+
 void timer_reset(void)
 {
     MPS3_FPGAIO->CLK1HZ   = 0;
@@ -39,11 +41,11 @@ mps3_time_counter get_time_counter(void)
         .counter_fpga       = MPS3_FPGAIO->COUNTER,
         .counter_systick    = Get_SysTick_Cycle_Count()
     };
-    debug("Timestamp:\
-        \n\tCounter 1 Hz:   %u\
-        \n\tCounter 100 Hz: %u\
-        \n\tCounter FPGA:   %u\
-        \n\tCounter CPU:    %llu\n",
+    debug("Timestamp:"
+        "\n\tCounter 1 Hz:   %" PRIu32
+        "\n\tCounter 100 Hz: %" PRIu32
+        "\n\tCounter FPGA:   %" PRIu32
+        "\n\tCounter CPU:    %" PRIu64 "\n",
         t.counter_1Hz, t.counter_100Hz, t.counter_fpga, t.counter_systick);
     return t;
 }

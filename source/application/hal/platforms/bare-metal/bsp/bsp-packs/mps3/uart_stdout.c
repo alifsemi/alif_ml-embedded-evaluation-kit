@@ -107,10 +107,11 @@ bool GetLine(char *lp, unsigned int len)
                 return false;
 
             case CR:                            /* CR - done, stop editing line.  */
-                *lp = c;
+                UartPutc (*lp = c);             /* Echo and store character.      */
                 lp++;                           /* Increment line pointer         */
                 cnt++;                          /* and count.                     */
                 c = LF;
+                break;
             default:
                 UartPutc (*lp = c);             /* Echo and store character.      */
                 fflush (stdout);
@@ -124,7 +125,7 @@ bool GetLine(char *lp, unsigned int len)
     return true;
 }
 
-void UartEndSimulation(int code)
+__attribute__((noreturn)) void UartEndSimulation(int code)
 {
     UartPutc((char) 0x4);   /* End of simulation */
     UartPutc((char) code);  /* End of simulation */

@@ -19,6 +19,7 @@
 #include "PlatformMath.hpp"
 
 #include <cfloat>
+#include <inttypes.h>
 
 namespace arm {
 namespace app {
@@ -49,16 +50,16 @@ namespace audio {
         char strC[1024];
         snprintf(strC, sizeof(strC) - 1, "\n   \
             \n\t Sampling frequency:         %f\
-            \n\t Number of filter banks:     %u\
+            \n\t Number of filter banks:     %" PRIu32 "\
             \n\t Mel frequency limit (low):  %f\
             \n\t Mel frequency limit (high): %f\
-            \n\t Number of MFCC features:    %u\
-            \n\t Frame length:               %u\
-            \n\t Padded frame length:        %u\
+            \n\t Number of MFCC features:    %" PRIu32 "\
+            \n\t Frame length:               %" PRIu32 "\
+            \n\t Padded frame length:        %" PRIu32 "\
             \n\t Using HTK for Mel scale:    %s\n",
-                this->m_samplingFreq, this->m_numFbankBins, this->m_melLoFreq,
-                this->m_melHiFreq, this->m_numMfccFeatures, this->m_frameLen,
-                this->m_frameLenPadded, this->m_useHtkMethod ? "yes" : "no");
+            this->m_samplingFreq, this->m_numFbankBins, this->m_melLoFreq,
+            this->m_melHiFreq, this->m_numMfccFeatures, this->m_frameLen,
+            this->m_frameLenPadded, this->m_useHtkMethod ? "yes" : "no");
         return std::string{strC};
     }
 

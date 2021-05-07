@@ -187,7 +187,7 @@ namespace app {
             platform.data_psn->present_data_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-            info("Running inference on audio clip %u => %s\n", currentIndex,
+            info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex,
                  get_filename(currentIndex));
 
             /* Start sliding through audio clip. */
@@ -270,7 +270,7 @@ namespace app {
     static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %u (expected less than %u)\n",
+            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                        idx, NUMBER_OF_FILES);
             return false;
         }
@@ -313,13 +313,15 @@ namespace app {
             rowIdx1 += dataPsnTxtYIncr;
 
             if (results[i].m_resultVec.empty()) {
-                info("For timestamp: %f (inference #: %u); label: %s; threshold: %f\n",
+                info("For timestamp: %f (inference #: %" PRIu32
+                     "); label: %s; threshold: %f\n",
                      results[i].m_timeStamp, results[i].m_inferenceNumber,
                      topKeyword.c_str(),
                      results[i].m_threshold);
             } else {
                 for (uint32_t j = 0; j < results[i].m_resultVec.size(); ++j) {
-                    info("For timestamp: %f (inference #: %u); label: %s, score: %f; threshold: %f\n",
+                    info("For timestamp: %f (inference #: %" PRIu32
+                         "); label: %s, score: %f; threshold: %f\n",
                          results[i].m_timeStamp,
                          results[i].m_inferenceNumber,
                          results[i].m_resultVec[j].m_label.c_str(),

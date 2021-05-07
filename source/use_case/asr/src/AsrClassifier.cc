@@ -91,7 +91,7 @@ bool arm::app::AsrClassifier::GetClassificationResults(
             printf_err("Output tensor expected to be %dD\n", minTensorDims);
             return false;
         } else if (static_cast<uint32_t>(outputTensor->dims->data[outColsIdx]) < topNCount) {
-            printf_err("Output vectors are smaller than %u\n", topNCount);
+            printf_err("Output vectors are smaller than %" PRIu32 "\n", topNCount);
             return false;
         } else if (static_cast<uint32_t>(outputTensor->dims->data[outColsIdx]) != labels.size()) {
             printf("Output size doesn't match the labels' size\n");

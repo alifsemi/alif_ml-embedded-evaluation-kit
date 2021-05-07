@@ -19,6 +19,8 @@
 #include "bsp_core_log.h"
 #include "smm_mps3.h"
 
+#include <inttypes.h>
+
 uint32_t GetMPS3CoreClock(void)
 {
     const uint32_t default_clock = 32000000;
@@ -28,7 +30,7 @@ uint32_t GetMPS3CoreClock(void)
     }
 
     if (!warned_once) {
-        warn("MPS3_SCC->CFG_ACLK reads 0. Assuming default clock of %u\n",
+        warn("MPS3_SCC->CFG_ACLK reads 0. Assuming default clock of %" PRIu32 "\n",
             default_clock);
         warned_once = 1;
     }

@@ -22,6 +22,8 @@
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 
+#include <inttypes.h>
+
 using ImgClassClassifier = arm::app::Classifier;
 
 namespace arm {
@@ -142,7 +144,7 @@ namespace app {
                                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Run inference over this image. */
-            info("Running inference on image %u => %s\n", ctx.Get<uint32_t>("imgIndex"),
+            info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
                 get_filename(ctx.Get<uint32_t>("imgIndex")));
 
             if (!RunInference(model, profiler)) {
@@ -185,13 +187,13 @@ namespace app {
                               inputTensor->bytes : IMAGE_DATA_SIZE;
         const uint8_t* imgSrc = get_img_array(imIdx);
         if (nullptr == imgSrc) {
-            printf_err("Failed to get image index %u (max: %u)\n", imIdx,
+            printf_err("Failed to get image index %" PRIu32 " (max: %u)\n", imIdx,
                        NUMBER_OF_FILES - 1);
             return false;
         }
 
         memcpy(inputTensor->data.data, imgSrc, copySz);
-        debug("Image %u loaded\n", imIdx);
+        debug("Image %" PRIu32 " loaded\n", imIdx);
         return true;
     }
 
@@ -210,7 +212,7 @@ namespace app {
     static bool SetAppCtxImageIdx(ApplicationContext& ctx, uint32_t idx)
     {
         if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %u (expected less than %u)\n",
+            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                        idx, NUMBER_OF_FILES);
             return false;
         }
@@ -254,8 +256,9 @@ namespace app {
                                         dataPsnTxtStartX2, rowIdx2, 0);
             rowIdx2 += dataPsnTxtYIncr;
 
-            info("%u) %u (%f) -> %s\n", i, results[i].m_labelIdx,
-                 results[i].m_normalisedVal, results[i].m_label.c_str());
+            info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n", i,
+                results[i].m_labelIdx, results[i].m_normalisedVal,
+                results[i].m_label.c_str());
         }
 
         return true;
