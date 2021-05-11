@@ -43,6 +43,9 @@ set(CMAKE_SCRIPTS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
 set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
 
+set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
+                        CACHE PATH "Resources directory")
+
 include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
 include(${CMAKE_SCRIPTS_DIR}/util_functions.cmake)
 
@@ -291,7 +294,7 @@ foreach(use_case ${USE_CASES})
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 
-    set(DEFAULT_MODEL_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded/${use_case})
+    set(DEFAULT_MODEL_DIR       ${RESOURCES_DIR}/${use_case})
     set(DEFAULT_TEST_DATA_DIR   ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)

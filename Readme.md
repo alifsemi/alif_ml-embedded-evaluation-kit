@@ -9,7 +9,7 @@ the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-
 
 ## Overview of the evaluation kit
 
-The purpose of the evaluation kit is to allow the user to develop software and test the performance of the Ethos-U55 NPU and
+The purpose of this evaluation kit is to allow users to develop software and test the performance of the Ethos-U55 NPU and
 Cortex-M55 CPU. The Ethos-U55 NPU is a new class of machine learning(ML) processor, specifically designed to accelerate
 computation for ML workloads in constrained embedded and IoT devices. The product is optimized to execute
 mathematical operations efficiently that are commonly used in ML algorithms, such as convolutions or activation functions.
@@ -85,6 +85,6 @@ For more details see full documentation:
     - [Coding standards and guidelines](./docs/documentation.md#coding-standards-and-guidelines)
     - [Code Reviews](./docs/documentation.md#code-reviews)
     - [Testing](./docs/documentation.md#testing)
-  - [Communication](./docs/documentation.md#communication)  
-  - [Licenses](./docs/documentation.md#licenses)  
+  - [Communication](./docs/documentation.md#communication)
+  - [Licenses](./docs/documentation.md#licenses)
   - [Appendix](./docs/documentation.md#appendix)
