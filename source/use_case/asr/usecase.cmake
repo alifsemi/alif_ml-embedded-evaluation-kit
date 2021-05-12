@@ -75,7 +75,7 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     STRING)
 
 if (ETHOS_U55_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_int8_vela.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_int8_vela_H128.tflite)
 else()
     set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_int8.tflite)
 endif()

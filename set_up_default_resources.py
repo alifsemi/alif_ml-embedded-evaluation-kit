@@ -93,10 +93,14 @@ def call_command(command: str) -> str:
     command (string):  Specifies the command to run.
     """
     logging.info(command)
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    stdout_log = proc.communicate()[0].decode("utf-8")
-    logging.info(stdout_log)
-    return stdout_log
+    proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    log = proc.stdout.decode("utf-8")
+    if proc.returncode == 0:
+        logging.info(log)
+    else:
+        logging.error(log)
+    proc.check_returncode()
+    return log
 
 
 def set_up_resources(run_vela_on_models=False):
@@ -185,7 +189,7 @@ def set_up_resources(run_vela_on_models=False):
     # New models will have same name with '_vela' appended.
     # For example:
     #   original model:  ds_cnn_clustered_int8.tflite
-    # after vela model:  ds_cnn_clustered_int8_vela.tflite
+    # after vela model:  ds_cnn_clustered_int8_vela_H128.tflite
     #
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.
@@ -205,6 +209,12 @@ def set_up_resources(run_vela_on_models=False):
                        "--system-config=Ethos_U55_High_End_Embedded " +
                        f"--output-dir={output_dir}")
             call_command(command)
+            # model name after compiling with vela is an initial model name + _vela suffix
+            vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
+            # we want it to be initial model name + _vela_H128 suffix which indicates selected MAC config.
+            new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", "_vela_H128.tflite")
+            # rename default vela model
+            os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
 
 
 if __name__ == '__main__':

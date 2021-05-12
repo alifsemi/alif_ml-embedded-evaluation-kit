@@ -23,9 +23,18 @@ function(USER_OPTION name description default type)
     if (${type} STREQUAL PATH_OR_FILE)
 
         if (DEFINED ${name})
+            get_filename_component(ABSPATH "${${name}}" ABSOLUTE BASE_DIR ${CMAKE_SOURCE_DIR})
+
             get_path_type(${${name}} PATH_TYPE)
         else()
+            get_filename_component(ABSPATH "${default}" ABSOLUTE BASE_DIR ${CMAKE_SOURCE_DIR})
+
             get_path_type(${default} PATH_TYPE)
+        endif()
+
+        if (NOT EXISTS ${ABSPATH})
+            message(FATAL_ERROR
+                    "Invalid directory or file path. Description: ${description}; Path: ${ABSPATH}")
         endif()
 
         # Set the default type if path is not a dir or file path (or undefined)

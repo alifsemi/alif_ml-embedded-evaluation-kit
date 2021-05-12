@@ -439,9 +439,10 @@ foreach(use_case ${USE_CASES})
             set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)
             file(MAKE_DIRECTORY ${TEST_SRC_GEN_DIR} ${TEST_INC_GEN_DIR})
 
+            set(${use_case}_DEFAULT_TEST_DATA_DIR ${DEFAULT_TEST_DATA_DIR} CACHE PATH "")
             # Generate test data files to be included in x86 tests
             generate_test_data_code(
-                    INPUT_DIR "${DEFAULT_TEST_DATA_DIR}"
+                    INPUT_DIR "${${use_case}_DEFAULT_TEST_DATA_DIR}"
                     DESTINATION_SRC ${TEST_SRC_GEN_DIR}
                     DESTINATION_HDR ${TEST_INC_GEN_DIR}
                     NAMESPACE "test"
