@@ -30,13 +30,13 @@ namespace app {
 
     /**
     * @brief           Helper function to increment current audio clip index
-    * @param[in/out]   ctx     pointer to the application context object
+    * @param[in,out]   ctx     pointer to the application context object
     **/
     static void IncrementAppCtxClipIdx(ApplicationContext& ctx);
 
     /**
      * @brief           Helper function to set the audio clip index
-     * @param[in/out]   ctx     pointer to the application context object
+     * @param[in,out]   ctx     pointer to the application context object
      * @param[in]       idx     value to be set
      * @return          true if index is set, false otherwise
      **/
@@ -47,7 +47,7 @@ namespace app {
      *                  object.
      * @param[in]       platform    reference to the hal platform object
      * @param[in]       result      average sum of classification results
-     * @param[in]       threhsold   if larger than this value we have an anomaly
+     * @param[in]       threshold   if larger than this value we have an anomaly
      * @return          true if successful, false otherwise
      **/
     static bool PresentInferenceResult(hal_platform& platform, float result, float threshold);
@@ -61,9 +61,10 @@ namespace app {
      *
      * Warning: mfcc calculator provided as input must have the same life scope as returned function.
      *
-     * @param[in]           mfcc            MFCC feature calculator.
-     * @param[in/out]       inputTensor     Input tensor pointer to store calculated features.
-     * @param[i]            cacheSize       Size of the feture vectors cache (number of feature vectors).
+     * @param[in]           melSpec         MFCC feature calculator.
+     * @param[in,out]       inputTensor     Input tensor pointer to store calculated features.
+     * @param[in]           cacheSize       Size of the feture vectors cache (number of feature vectors).
+     * @param[in]           trainingMean    Training mean.
      * @return function     function to be called providing audio sample and sliding window index.
      */
     static std::function<void (std::vector<int16_t>&, int, bool, size_t, size_t)>

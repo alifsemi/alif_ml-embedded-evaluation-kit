@@ -69,7 +69,7 @@ namespace audio {
          *              energies to logarithmic scale. The difference from
          *              default behaviour is that the power is converted to dB
          *              and subsequently clamped.
-         * @param[in/out]   melEnergies - 1D vector of Mel energies
+         * @param[in,out]   melEnergies - 1D vector of Mel energies
          **/
         virtual void ConvertToLogarithmicScale(std::vector<float>& melEnergies) override;
 

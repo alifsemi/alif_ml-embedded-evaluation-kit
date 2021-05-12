@@ -61,27 +61,27 @@ namespace audio {
     }
 
     MelSpectrogram::MelSpectrogram(const MelSpecParams& params):
-            _m_params(params),
-            _m_filterBankInitialised(false)
+            m_params(params),
+            m_filterBankInitialised(false)
     {
-        this->_m_buffer = std::vector<float>(
-                this->_m_params.m_frameLenPadded, 0.0);
-        this->_m_frame = std::vector<float>(
-                this->_m_params.m_frameLenPadded, 0.0);
-        this->_m_melEnergies = std::vector<float>(
-                this->_m_params.m_numFbankBins, 0.0);
+        this->m_buffer = std::vector<float>(
+                this->m_params.m_frameLenPadded, 0.0);
+        this->m_frame = std::vector<float>(
+                this->m_params.m_frameLenPadded, 0.0);
+        this->m_melEnergies = std::vector<float>(
+                this->m_params.m_numFbankBins, 0.0);
 
-        this->_m_windowFunc = std::vector<float>(this->_m_params.m_frameLen);
-        const auto multiplier = static_cast<float>(2 * M_PI / this->_m_params.m_frameLen);
+        this->m_windowFunc = std::vector<float>(this->m_params.m_frameLen);
+        const auto multiplier = static_cast<float>(2 * M_PI / this->m_params.m_frameLen);
 
         /* Create window function. */
-        for (size_t i = 0; i < this->_m_params.m_frameLen; ++i) {
-            this->_m_windowFunc[i] = (0.5 - (0.5 *
+        for (size_t i = 0; i < this->m_params.m_frameLen; ++i) {
+            this->m_windowFunc[i] = (0.5 - (0.5 *
                                              math::MathUtils::CosineF32(static_cast<float>(i) * multiplier)));
         }
 
-        math::MathUtils::FftInitF32(this->_m_params.m_frameLenPadded, this->_m_fftInstance);
-        debug("Instantiated Mel Spectrogram object: %s\n", this->_m_params.Str().c_str());
+        math::MathUtils::FftInitF32(this->m_params.m_frameLenPadded, this->m_fftInstance);
+        debug("Instantiated Mel Spectrogram object: %s\n", this->m_params.Str().c_str());
     }
 
     void MelSpectrogram::Init()
@@ -161,20 +161,20 @@ namespace audio {
 
     void MelSpectrogram::ConvertToPowerSpectrum()
     {
-        const uint32_t halfDim = this->_m_buffer.size() / 2;
+        const uint32_t halfDim = this->m_buffer.size() / 2;
 
         /* Handle this special case. */
-        float firstEnergy = this->_m_buffer[0] * this->_m_buffer[0];
-        float lastEnergy = this->_m_buffer[1] * this->_m_buffer[1];
+        float firstEnergy = this->m_buffer[0] * this->m_buffer[0];
+        float lastEnergy = this->m_buffer[1] * this->m_buffer[1];
 
         math::MathUtils::ComplexMagnitudeSquaredF32(
-                this->_m_buffer.data(),
-                this->_m_buffer.size(),
-                this->_m_buffer.data(),
-                this->_m_buffer.size()/2);
+                this->m_buffer.data(),
+                this->m_buffer.size(),
+                this->m_buffer.data(),
+                this->m_buffer.size()/2);
 
-        this->_m_buffer[0] = firstEnergy;
-        this->_m_buffer[halfDim] = lastEnergy;
+        this->m_buffer[0] = firstEnergy;
+        this->m_buffer[halfDim] = lastEnergy;
     }
 
     float MelSpectrogram::GetMelFilterBankNormaliser(
@@ -193,14 +193,14 @@ namespace audio {
     void MelSpectrogram::InitMelFilterBank()
     {
         if (!this->IsMelFilterBankInited()) {
-            this->_m_melFilterBank = this->CreateMelFilterBank();
-            this->_m_filterBankInitialised = true;
+            this->m_melFilterBank = this->CreateMelFilterBank();
+            this->m_filterBankInitialised = true;
         }
     }
 
     bool MelSpectrogram::IsMelFilterBankInited() const
     {
-        return this->_m_filterBankInitialised;
+        return this->m_filterBankInitialised;
     }
 
     std::vector<float> MelSpectrogram::ComputeMelSpec(const std::vector<int16_t>& audioData, float trainingMean)
@@ -209,64 +209,64 @@ namespace audio {
 
         /* TensorFlow way of normalizing .wav data to (-1, 1). */
         constexpr float normaliser = 1.0/(1<<15);
-        for (size_t i = 0; i < this->_m_params.m_frameLen; ++i) {
-            this->_m_frame[i] = static_cast<float>(audioData[i]) * normaliser;
+        for (size_t i = 0; i < this->m_params.m_frameLen; ++i) {
+            this->m_frame[i] = static_cast<float>(audioData[i]) * normaliser;
         }
 
         /* Apply window function to input frame. */
-        for(size_t i = 0; i < this->_m_params.m_frameLen; ++i) {
-            this->_m_frame[i] *= this->_m_windowFunc[i];
+        for(size_t i = 0; i < this->m_params.m_frameLen; ++i) {
+            this->m_frame[i] *= this->m_windowFunc[i];
         }
 
         /* Set remaining frame values to 0. */
-        std::fill(this->_m_frame.begin() + this->_m_params.m_frameLen,this->_m_frame.end(), 0);
+        std::fill(this->m_frame.begin() + this->m_params.m_frameLen,this->m_frame.end(), 0);
 
         /* Compute FFT. */
-        math::MathUtils::FftF32(this->_m_frame, this->_m_buffer, this->_m_fftInstance);
+        math::MathUtils::FftF32(this->m_frame, this->m_buffer, this->m_fftInstance);
 
         /* Convert to power spectrum. */
         this->ConvertToPowerSpectrum();
 
         /* Apply mel filterbanks. */
-        if (!this->ApplyMelFilterBank(this->_m_buffer,
-                                      this->_m_melFilterBank,
-                                      this->_m_filterBankFilterFirst,
-                                      this->_m_filterBankFilterLast,
-                                      this->_m_melEnergies)) {
+        if (!this->ApplyMelFilterBank(this->m_buffer,
+                                      this->m_melFilterBank,
+                                      this->m_filterBankFilterFirst,
+                                      this->m_filterBankFilterLast,
+                                      this->m_melEnergies)) {
             printf_err("Failed to apply MEL filter banks\n");
         }
 
         /* Convert to logarithmic scale */
-        this->ConvertToLogarithmicScale(this->_m_melEnergies);
+        this->ConvertToLogarithmicScale(this->m_melEnergies);
 
         /* Perform mean subtraction. */
-        for (auto& energy:this->_m_melEnergies) {
+        for (auto& energy:this->m_melEnergies) {
             energy -= trainingMean;
         }
 
-        return this->_m_melEnergies;
+        return this->m_melEnergies;
     }
 
     std::vector<std::vector<float>> MelSpectrogram::CreateMelFilterBank()
     {
-        size_t numFftBins = this->_m_params.m_frameLenPadded / 2;
-        float fftBinWidth = static_cast<float>(this->_m_params.m_samplingFreq) / this->_m_params.m_frameLenPadded;
+        size_t numFftBins = this->m_params.m_frameLenPadded / 2;
+        float fftBinWidth = static_cast<float>(this->m_params.m_samplingFreq) / this->m_params.m_frameLenPadded;
 
-        float melLowFreq = MelSpectrogram::MelScale(this->_m_params.m_melLoFreq,
-                                          this->_m_params.m_useHtkMethod);
-        float melHighFreq = MelSpectrogram::MelScale(this->_m_params.m_melHiFreq,
-                                           this->_m_params.m_useHtkMethod);
-        float melFreqDelta = (melHighFreq - melLowFreq) / (this->_m_params.m_numFbankBins + 1);
+        float melLowFreq = MelSpectrogram::MelScale(this->m_params.m_melLoFreq,
+                                          this->m_params.m_useHtkMethod);
+        float melHighFreq = MelSpectrogram::MelScale(this->m_params.m_melHiFreq,
+                                           this->m_params.m_useHtkMethod);
+        float melFreqDelta = (melHighFreq - melLowFreq) / (this->m_params.m_numFbankBins + 1);
 
         std::vector<float> thisBin = std::vector<float>(numFftBins);
         std::vector<std::vector<float>> melFilterBank(
-                this->_m_params.m_numFbankBins);
-        this->_m_filterBankFilterFirst =
-                std::vector<uint32_t>(this->_m_params.m_numFbankBins);
-        this->_m_filterBankFilterLast =
-                std::vector<uint32_t>(this->_m_params.m_numFbankBins);
+                this->m_params.m_numFbankBins);
+        this->m_filterBankFilterFirst =
+                std::vector<uint32_t>(this->m_params.m_numFbankBins);
+        this->m_filterBankFilterLast =
+                std::vector<uint32_t>(this->m_params.m_numFbankBins);
 
-        for (size_t bin = 0; bin < this->_m_params.m_numFbankBins; bin++) {
+        for (size_t bin = 0; bin < this->m_params.m_numFbankBins; bin++) {
             float leftMel = melLowFreq + bin * melFreqDelta;
             float centerMel = melLowFreq + (bin + 1) * melFreqDelta;
             float rightMel = melLowFreq + (bin + 2) * melFreqDelta;
@@ -274,11 +274,11 @@ namespace audio {
             uint32_t firstIndex = 0;
             uint32_t lastIndex = 0;
             bool firstIndexFound = false;
-            const float normaliser = this->GetMelFilterBankNormaliser(leftMel, rightMel, this->_m_params.m_useHtkMethod);
+            const float normaliser = this->GetMelFilterBankNormaliser(leftMel, rightMel, this->m_params.m_useHtkMethod);
 
             for (size_t i = 0; i < numFftBins; ++i) {
                 float freq = (fftBinWidth * i); /* Center freq of this fft bin. */
-                float mel = MelSpectrogram::MelScale(freq, this->_m_params.m_useHtkMethod);
+                float mel = MelSpectrogram::MelScale(freq, this->m_params.m_useHtkMethod);
                 thisBin[i] = 0.0;
 
                 if (mel > leftMel && mel < rightMel) {
@@ -298,8 +298,8 @@ namespace audio {
                 }
             }
 
-            this->_m_filterBankFilterFirst[bin] = firstIndex;
-            this->_m_filterBankFilterLast[bin] = lastIndex;
+            this->m_filterBankFilterFirst[bin] = firstIndex;
+            this->m_filterBankFilterLast[bin] = lastIndex;
 
             /* Copy the part we care about. */
             for (uint32_t i = firstIndex; i <= lastIndex; ++i) {

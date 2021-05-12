@@ -27,7 +27,7 @@ namespace asr {
     /**
      * @brief       Gets the top N classification results from the
      *              output vector.
-     * @param[in]   tensor   Label output from classifier.
+     * @param[in]   vecResults   Label output from classifier.
      * @return      true if successful, false otherwise.
     **/
     std::string DecodeOutput(const std::vector<ClassificationResult>& vecResults);

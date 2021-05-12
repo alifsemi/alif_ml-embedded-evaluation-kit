@@ -131,10 +131,11 @@ cmake .. \
 ```
 
 Also see:
-- [Configuring with custom TPIP dependencies](../sections/building.md#Configuring-with-custom-TPIP-dependencies)
+
+- [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
-- [Configuring the build for simple_platform](../sections/building.md#Configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm FastModel Tools](../sections/building.md#Working-with-model-debugger-from-Arm-FastModel-Tools)
+- [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
+- [Working with model debugger from Arm FastModel Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
 
 > **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run the CMake command.
 
@@ -261,7 +262,7 @@ custom_model_after_vela.tflite.cc
 
 After compiling, your custom model will have now replaced the default one in the application.
 
-## Setting-up and running Ethos-U55 code sample
+## Setting up and running Ethos-U55 code sample
 
 ### Setting up the Ethos-U55 Fast Model
 

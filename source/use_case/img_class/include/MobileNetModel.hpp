@@ -46,7 +46,7 @@ namespace app {
         static constexpr int ms_maxOpCnt = 7;
 
         /* A mutable op resolver instance. */
-        tflite::MicroMutableOpResolver<ms_maxOpCnt> _m_opResolver;
+        tflite::MicroMutableOpResolver<ms_maxOpCnt> m_opResolver;
     };
 
 } /* namespace app */

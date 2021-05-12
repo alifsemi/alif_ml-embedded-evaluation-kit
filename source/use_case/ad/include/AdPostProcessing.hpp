@@ -38,7 +38,7 @@ namespace app {
 
     /** @brief      Given a wav file name return AD model output index.
      *  @param[in]  wavFileName Audio WAV filename.
-     *                          File name should be in format <anything>_<goes>_XX_<here>.wav
+     *                          File name should be in format anything_goes_XX_here.wav
      *                          where XX is the machine ID e.g. 00, 02, 04 or 06
      *  @return     AD model output index as 8 bit integer.
     **/

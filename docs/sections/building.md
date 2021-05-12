@@ -1,9 +1,6 @@
 # Building the ML embedded code sample applications from sources
 
-## Contents
-
 - [Building the ML embedded code sample applications from sources](#building-the-ml-embedded-code-sample-applications-from-sources)
-  - [Contents](#contents)
   - [Build prerequisites](#build-prerequisites)
   - [Build options](#build-options)
   - [Build process](#build-process)
@@ -11,7 +8,7 @@
       - [Fetching submodules](#fetching-submodules)
       - [Fetching resource files](#fetching-resource-files)
     - [Create a build directory](#create-a-build-directory)
-    - [Configuring the build for MPS3: SSE-300](#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse-300)
       - [Using GNU Arm Embedded Toolchain](#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](#using-arm-compiler)
       - [Generating project for Arm Development Studio](#generating-project-for-arm-development-studio)
@@ -34,9 +31,8 @@ Before proceeding, please, make sure that the following prerequisites
 are fulfilled:
 
 - GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.14 (or higher)
-    is installed and available on the path.
-
-    Test the compiler by running:
+  is installed and available on the path.
+  Test the compiler by running:
 
     ```commandline
     armclang -v
@@ -47,11 +43,12 @@ are fulfilled:
     Component: ARM Compiler 6.14
     ```
 
-    Alternatively,
+  Alternatively,
 
     ```commandline
     arm-none-eabi-gcc --version
     ```
+
     ```log
     arm-none-eabi-gcc (GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
     Copyright (C) 2020 Free Software Foundation, Inc.
@@ -59,11 +56,11 @@ are fulfilled:
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     ```
 
-    > **Note:** Add compiler to the path, if needed:
-    >
-    > `export PATH=/path/to/armclang/bin:$PATH`
-    >           OR
-    > `export PATH=/path/to/gcc-arm-none-eabi-toolchain/bin:$PATH`
+> **Note:** Add compiler to the path, if needed:
+>
+> `export PATH=/path/to/armclang/bin:$PATH`
+> OR
+> `export PATH=/path/to/gcc-arm-none-eabi-toolchain/bin:$PATH`
 
 - Compiler license, if using the proprietary Arm Compiler, is configured correctly.
 
@@ -78,9 +75,9 @@ are fulfilled:
     cmake version 3.16.2
     ```
 
-    > **Note:** Add cmake to the path, if needed:
-    >
-    > `export PATH=/path/to/cmake/bin:$PATH`
+> **Note:** Add cmake to the path, if needed:
+>
+> `export PATH=/path/to/cmake/bin:$PATH`
 
 - Python 3.6 or above is installed. Test python version by running:
 
@@ -112,7 +109,7 @@ are fulfilled:
     ...
     ```
 
-    > **Note:** Add it to the path environment variable, if needed.
+> **Note:** Add it to the path environment variable, if needed.
 
 - Access to the Internet to download the third party dependencies, specifically: TensorFlow Lite Micro, Arm® Ethos™-U55 NPU
 driver and CMSIS. Instructions for downloading these are listed under [preparing build environment](#preparing-build-environment).
@@ -220,8 +217,8 @@ The build parameters are:
 
 > **Note:** For details on the specific use case build options, follow the
 > instructions in the use-case specific documentation.
-> Also, when setting any of the CMake configuration parameters that expect a directory/file path , it is advised
->to **use absolute paths instead of relative paths**.
+> Also, when setting any of the CMake configuration parameters that expect a directory/file path, it is advised
+> to **use absolute paths instead of relative paths**.
 
 ## Build process
 
@@ -274,9 +271,8 @@ dependencies
 ```
 
 > **NOTE**: The default source paths for the TPIP sources assume the above directory structure, but all of the relevant
->paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH`, `ETHOS_U55_DRIVER_SRC_PATH`,
->and `CMSIS_SRC_PATH`.
-
+> paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH`, `ETHOS_U55_DRIVER_SRC_PATH`,
+> and `CMSIS_SRC_PATH`.
 
 #### Fetching resource files
 
@@ -300,14 +296,13 @@ Create a build directory in the root of the project and navigate inside:
 mkdir build && cd build
 ```
 
-### Configuring the build for MPS3: SSE-300
+### Configuring the build for MPS3 SSE-300
 
 #### Using GNU Arm Embedded Toolchain
 
 On Linux, if using `Arm GNU embedded toolchain`, execute the following command
 to build the application to run on the Arm® Ethos™-U55 NPU when providing only
 the mandatory arguments for CMake configuration:
-
 
 ```commandline
 cmake ../
@@ -316,7 +311,6 @@ cmake ../
 The above command will build for the default target platform `mps3`, the default subsystem
 `sse-300`, and using the default toolchain file for the target as `bare-metal-gcc.` This is
 equivalent to:
-
 
 ```commandline
 cmake .. \
@@ -722,7 +716,6 @@ Vela Compiler documentation for more details.
 > **Note:** By default, use of the Ethos-U55 NPU is enabled in the CMake configuration.
 This could be changed by passing `-DETHOS_U55_ENABLED`.
 
-
 ## Automatic file generation
 
 As mentioned in the previous sections, some files such as neural network
@@ -763,55 +756,55 @@ For example, the generated utility functions for image classification are:
 
 - `build/generated/include/InputFiles.hpp`
 
-```c++
-#ifndef GENERATED_IMAGES_H
-#define GENERATED_IMAGES_H
+    ```C++
+    #ifndef GENERATED_IMAGES_H
+    #define GENERATED_IMAGES_H
 
-#include <cstdint>
+    #include <cstdint>
 
-#define NUMBER_OF_FILES  (2U)
-#define IMAGE_DATA_SIZE  (150528U)
+    #define NUMBER_OF_FILES  (2U)
+    #define IMAGE_DATA_SIZE  (150528U)
 
-extern const uint8_t im0[IMAGE_DATA_SIZE];
-extern const uint8_t im1[IMAGE_DATA_SIZE];
+    extern const uint8_t im0[IMAGE_DATA_SIZE];
+    extern const uint8_t im1[IMAGE_DATA_SIZE];
 
-const char* get_filename(const uint32_t idx);
-const uint8_t* get_img_array(const uint32_t idx);
+    const char* get_filename(const uint32_t idx);
+    const uint8_t* get_img_array(const uint32_t idx);
 
-#endif /* GENERATED_IMAGES_H */
-```
+    #endif /* GENERATED_IMAGES_H */
+    ```
 
 - `build/generated/src/InputFiles.cc`
 
-```c++
-#include "InputFiles.hpp"
+    ```C++
+    #include "InputFiles.hpp"
 
-static const char *img_filenames[] = {
-    "img1.bmp",
-    "img2.bmp",
-};
+    static const char *img_filenames[] = {
+        "img1.bmp",
+        "img2.bmp",
+    };
 
-static const uint8_t *img_arrays[] = {
-    im0,
-    im1
-};
+    static const uint8_t *img_arrays[] = {
+        im0,
+        im1
+    };
 
-const char* get_filename(const uint32_t idx)
-{
-    if (idx < NUMBER_OF_FILES) {
-        return img_filenames[idx];
+    const char* get_filename(const uint32_t idx)
+    {
+        if (idx < NUMBER_OF_FILES) {
+            return img_filenames[idx];
+        }
+        return nullptr;
     }
-    return nullptr;
-}
 
-const uint8_t* get_img_array(const uint32_t idx)
-{
-    if (idx < NUMBER_OF_FILES) {
-        return img_arrays[idx];
+    const uint8_t* get_img_array(const uint32_t idx)
+    {
+        if (idx < NUMBER_OF_FILES) {
+            return img_arrays[idx];
+        }
+        return nullptr;
     }
-    return nullptr;
-}
-```
+    ```
 
 These headers are generated using python templates, that are in `scripts/py/templates/*.template`.
 
@@ -940,4 +933,4 @@ build/generated/
         └── <uc2_model_name>.tflite.cc
 ```
 
-Next section of the documentation: [Deployment](../documentation.md#Deployment).
+Next section of the documentation: [Deployment](deployment.md).

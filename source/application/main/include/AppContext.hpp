@@ -35,14 +35,14 @@ namespace app {
     public:
         ~Attribute() override = default;
 
-        explicit Attribute(const T value): _m_value(value){}
+        explicit Attribute(const T value): m_value(value){}
 
         T Get()
         {
-            return _m_value;
+            return m_value;
         }
     private:
-        T _m_value;
+        T m_value;
     };
 
     /* Application context class */
@@ -58,7 +58,7 @@ namespace app {
         template<typename T>
         void Set(const std::string &name, T object)
         {
-            this->_m_attributes[name] = new Attribute<T>(object);
+            this->m_attributes[name] = new Attribute<T>(object);
         }
 
         /**
@@ -70,7 +70,7 @@ namespace app {
         template<typename T>
         T Get(const std::string &name)
         {
-            auto a = (Attribute<T>*)_m_attributes[name];
+            auto a = (Attribute<T>*)m_attributes[name];
             return a->Get();
         }
 
@@ -81,19 +81,19 @@ namespace app {
          */
         bool Has(const std::string& name)
         {
-            return _m_attributes.find(name) != _m_attributes.end();
+            return m_attributes.find(name) != m_attributes.end();
         }
 
         ApplicationContext() = default;
 
         ~ApplicationContext() {
-            for (auto& attribute : _m_attributes)
+            for (auto& attribute : m_attributes)
                 delete attribute.second;
 
-            this->_m_attributes.clear();
+            this->m_attributes.clear();
         }
     private:
-        std::map<std::string, IAttribute*> _m_attributes;
+        std::map<std::string, IAttribute*> m_attributes;
     };
 
 } /* namespace app */

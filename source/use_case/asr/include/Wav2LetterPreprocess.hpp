@@ -144,31 +144,31 @@ namespace asr {
                 const int       quantOffset)
         {
             /* Check the output size will fit everything. */
-            if (outputBufSz < (this->_m_mfccBuf.size(0) * 3 * sizeof(T))) {
+            if (outputBufSz < (this->m_mfccBuf.size(0) * 3 * sizeof(T))) {
                 printf_err("Tensor size too small for features\n");
                 return false;
             }
 
             /* Populate. */
             T * outputBufMfcc = outputBuf;
-            T * outputBufD1 = outputBuf + this->_m_numMfccFeats;
-            T * outputBufD2 = outputBufD1 + this->_m_numMfccFeats;
-            const uint32_t ptrIncr = this->_m_numMfccFeats * 2;  /* (3 vectors - 1 vector) */
+            T * outputBufD1 = outputBuf + this->m_numMfccFeats;
+            T * outputBufD2 = outputBufD1 + this->m_numMfccFeats;
+            const uint32_t ptrIncr = this->m_numMfccFeats * 2;  /* (3 vectors - 1 vector) */
 
             const float minVal = std::numeric_limits<T>::min();
             const float maxVal = std::numeric_limits<T>::max();
 
             /* Need to transpose while copying and concatenating the tensor. */
-            for (uint32_t j = 0; j < this->_m_numFeatVectors; ++j) {
-                for (uint32_t i = 0; i < this->_m_numMfccFeats; ++i) {
+            for (uint32_t j = 0; j < this->m_numFeatVectors; ++j) {
+                for (uint32_t i = 0; i < this->m_numMfccFeats; ++i) {
                     *outputBufMfcc++ = static_cast<T>(Preprocess::GetQuantElem(
-                            this->_m_mfccBuf(i, j), quantScale,
+                            this->m_mfccBuf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
                     *outputBufD1++ = static_cast<T>(Preprocess::GetQuantElem(
-                            this->_m_delta1Buf(i, j), quantScale,
+                            this->m_delta1Buf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
                     *outputBufD2++ = static_cast<T>(Preprocess::GetQuantElem(
-                            this->_m_delta2Buf(i, j), quantScale,
+                            this->m_delta2Buf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
                 }
                 outputBufMfcc += ptrIncr;
@@ -180,18 +180,18 @@ namespace asr {
         }
 
     private:
-        Wav2LetterMFCC      _m_mfcc;            /* MFCC instance. */
+        Wav2LetterMFCC      m_mfcc;            /* MFCC instance. */
 
         /* Actual buffers to be populated. */
-        Array2d<float>      _m_mfccBuf;         /* Contiguous buffer 1D: MFCC */
-        Array2d<float>      _m_delta1Buf;       /* Contiguous buffer 1D: Delta 1 */
-        Array2d<float>      _m_delta2Buf;       /* Contiguous buffer 1D: Delta 2 */
+        Array2d<float>      m_mfccBuf;         /* Contiguous buffer 1D: MFCC */
+        Array2d<float>      m_delta1Buf;       /* Contiguous buffer 1D: Delta 1 */
+        Array2d<float>      m_delta2Buf;       /* Contiguous buffer 1D: Delta 2 */
 
-        uint32_t            _m_windowLen;       /* Window length for MFCC. */
-        uint32_t            _m_windowStride;    /* Window stride len for MFCC. */
-        uint32_t            _m_numMfccFeats;    /* Number of MFCC features per window. */
-        uint32_t            _m_numFeatVectors;  /* Number of _m_numMfccFeats. */
-        AudioWindow         _m_window;          /* Sliding window. */
+        uint32_t            m_windowLen;       /* Window length for MFCC. */
+        uint32_t            m_windowStride;    /* Window stride len for MFCC. */
+        uint32_t            m_numMfccFeats;    /* Number of MFCC features per window. */
+        uint32_t            m_numFeatVectors;  /* Number of m_numMfccFeats. */
+        AudioWindow         m_window;          /* Sliding window. */
 
     };
 

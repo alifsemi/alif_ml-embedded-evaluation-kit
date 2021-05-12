@@ -32,18 +32,18 @@ namespace asr {
         const uint32_t  windowLen,
         const uint32_t  windowStride,
         const uint32_t  numMfccVectors):
-            _m_mfcc(numMfccFeatures, windowLen),
-            _m_mfccBuf(numMfccFeatures, numMfccVectors),
-            _m_delta1Buf(numMfccFeatures, numMfccVectors),
-            _m_delta2Buf(numMfccFeatures, numMfccVectors),
-            _m_windowLen(windowLen),
-            _m_windowStride(windowStride),
-            _m_numMfccFeats(numMfccFeatures),
-            _m_numFeatVectors(numMfccVectors),
-            _m_window()
+            m_mfcc(numMfccFeatures, windowLen),
+            m_mfccBuf(numMfccFeatures, numMfccVectors),
+            m_delta1Buf(numMfccFeatures, numMfccVectors),
+            m_delta2Buf(numMfccFeatures, numMfccVectors),
+            m_windowLen(windowLen),
+            m_windowStride(windowStride),
+            m_numMfccFeats(numMfccFeatures),
+            m_numFeatVectors(numMfccVectors),
+            m_window()
     {
         if (numMfccFeatures > 0 && windowLen > 0) {
-            this->_m_mfcc.Init();
+            this->m_mfcc.Init();
         }
     }
 
@@ -52,45 +52,45 @@ namespace asr {
                 const uint32_t  audioDataLen,
                 TfLiteTensor*   tensor)
     {
-        this->_m_window = SlidingWindow<const int16_t>(
+        this->m_window = SlidingWindow<const int16_t>(
                             audioData, audioDataLen,
-                            this->_m_windowLen, this->_m_windowStride);
+                            this->m_windowLen, this->m_windowStride);
 
         uint32_t mfccBufIdx = 0;
 
-        std::fill(_m_mfccBuf.begin(), _m_mfccBuf.end(), 0.f);
-        std::fill(_m_delta1Buf.begin(), _m_delta1Buf.end(), 0.f);
-        std::fill(_m_delta2Buf.begin(), _m_delta2Buf.end(), 0.f);
+        std::fill(m_mfccBuf.begin(), m_mfccBuf.end(), 0.f);
+        std::fill(m_delta1Buf.begin(), m_delta1Buf.end(), 0.f);
+        std::fill(m_delta2Buf.begin(), m_delta2Buf.end(), 0.f);
 
         /* While we can slide over the window. */
-        while (this->_m_window.HasNext()) {
-            const int16_t*  mfccWindow = this->_m_window.Next();
+        while (this->m_window.HasNext()) {
+            const int16_t*  mfccWindow = this->m_window.Next();
             auto mfccAudioData = std::vector<int16_t>(
                                         mfccWindow,
-                                        mfccWindow + this->_m_windowLen);
-            auto mfcc = this->_m_mfcc.MfccCompute(mfccAudioData);
-            for (size_t i = 0; i < this->_m_mfccBuf.size(0); ++i) {
-                this->_m_mfccBuf(i, mfccBufIdx) = mfcc[i];
+                                        mfccWindow + this->m_windowLen);
+            auto mfcc = this->m_mfcc.MfccCompute(mfccAudioData);
+            for (size_t i = 0; i < this->m_mfccBuf.size(0); ++i) {
+                this->m_mfccBuf(i, mfccBufIdx) = mfcc[i];
             }
             ++mfccBufIdx;
         }
 
         /* Pad MFCC if needed by adding MFCC for zeros. */
-        if (mfccBufIdx != this->_m_numFeatVectors) {
-            std::vector<int16_t> zerosWindow = std::vector<int16_t>(this->_m_windowLen, 0);
-            std::vector<float> mfccZeros = this->_m_mfcc.MfccCompute(zerosWindow);
+        if (mfccBufIdx != this->m_numFeatVectors) {
+            std::vector<int16_t> zerosWindow = std::vector<int16_t>(this->m_windowLen, 0);
+            std::vector<float> mfccZeros = this->m_mfcc.MfccCompute(zerosWindow);
 
-            while (mfccBufIdx != this->_m_numFeatVectors) {
-                memcpy(&this->_m_mfccBuf(0, mfccBufIdx),
-                       mfccZeros.data(), sizeof(float) * _m_numMfccFeats);
+            while (mfccBufIdx != this->m_numFeatVectors) {
+                memcpy(&this->m_mfccBuf(0, mfccBufIdx),
+                       mfccZeros.data(), sizeof(float) * m_numMfccFeats);
                 ++mfccBufIdx;
             }
         }
 
         /* Compute first and second order deltas from MFCCs. */
-        Preprocess::ComputeDeltas(this->_m_mfccBuf,
-                            this->_m_delta1Buf,
-                            this->_m_delta2Buf);
+        Preprocess::ComputeDeltas(this->m_mfccBuf,
+                            this->m_delta1Buf,
+                            this->m_delta2Buf);
 
         /* Normalise. */
         this->Normalise();
@@ -206,9 +206,9 @@ namespace asr {
 
     void Preprocess::Normalise()
     {
-        Preprocess::NormaliseVec(this->_m_mfccBuf);
-        Preprocess::NormaliseVec(this->_m_delta1Buf);
-        Preprocess::NormaliseVec(this->_m_delta2Buf);
+        Preprocess::NormaliseVec(this->m_mfccBuf);
+        Preprocess::NormaliseVec(this->m_delta1Buf);
+        Preprocess::NormaliseVec(this->m_delta2Buf);
     }
 
     float Preprocess::GetQuantElem(

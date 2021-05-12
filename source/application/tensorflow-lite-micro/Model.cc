@@ -24,8 +24,8 @@
 /* Initialise the model */
 arm::app::Model::~Model()
 {
-    if (this->_m_pInterpreter) {
-        delete this->_m_pInterpreter;
+    if (this->m_pInterpreter) {
+        delete this->m_pInterpreter;
     }
 
     /**
@@ -34,10 +34,10 @@ arm::app::Model::~Model()
 }
 
 arm::app::Model::Model() :
-    _m_inited (false),
-    _m_type(kTfLiteNoType)
+    m_inited (false),
+    m_type(kTfLiteNoType)
 {
-    this->_m_pErrorReporter = &this->_m_uErrorReporter;
+    this->m_pErrorReporter = &this->m_uErrorReporter;
 }
 
 bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
@@ -47,13 +47,13 @@ bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
      * copying or parsing, it's a very lightweight operation. */
     const uint8_t* model_addr = ModelPointer();
     debug("loading model from @ 0x%p\n", model_addr);
-    this->_m_pModel = ::tflite::GetModel(model_addr);
+    this->m_pModel = ::tflite::GetModel(model_addr);
 
-    if (this->_m_pModel->version() != TFLITE_SCHEMA_VERSION) {
-        this->_m_pErrorReporter->Report(
+    if (this->m_pModel->version() != TFLITE_SCHEMA_VERSION) {
+        this->m_pErrorReporter->Report(
             "[ERROR] model's schema version %d is not equal "
             "to supported version %d.",
-            this->_m_pModel->version(), TFLITE_SCHEMA_VERSION);
+            this->m_pModel->version(), TFLITE_SCHEMA_VERSION);
         return false;
     }
 
@@ -69,80 +69,80 @@ bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
     this->EnlistOperations();
 
     /* Create allocator instance, if it doesn't exist */
-    this->_m_pAllocator = allocator;
-    if (!this->_m_pAllocator) {
+    this->m_pAllocator = allocator;
+    if (!this->m_pAllocator) {
         /* Create an allocator instance */
         info("Creating allocator using tensor arena in %s\n",
             ACTIVATION_BUF_SECTION_NAME);
 
-        this->_m_pAllocator = tflite::MicroAllocator::Create(
+        this->m_pAllocator = tflite::MicroAllocator::Create(
                                         this->GetTensorArena(),
                                         this->GetActivationBufferSize(),
-                                        this->_m_pErrorReporter);
+                                        this->m_pErrorReporter);
 
-        if (!this->_m_pAllocator) {
+        if (!this->m_pAllocator) {
             printf_err("Failed to create allocator\n");
             return false;
         }
-        debug("Created new allocator @ 0x%p\n", this->_m_pAllocator);
+        debug("Created new allocator @ 0x%p\n", this->m_pAllocator);
     } else {
-        debug("Using existing allocator @ 0x%p\n", this->_m_pAllocator);
+        debug("Using existing allocator @ 0x%p\n", this->m_pAllocator);
     }
 
-    this->_m_pInterpreter = new ::tflite::MicroInterpreter(
-        this->_m_pModel, this->GetOpResolver(),
-        this->_m_pAllocator, this->_m_pErrorReporter);
+    this->m_pInterpreter = new ::tflite::MicroInterpreter(
+        this->m_pModel, this->GetOpResolver(),
+        this->m_pAllocator, this->m_pErrorReporter);
 
-    if (!this->_m_pInterpreter) {
+    if (!this->m_pInterpreter) {
         printf_err("Failed to allocate interpreter\n");
         return false;
     }
 
     /* Allocate memory from the tensor_arena for the model's tensors. */
     info("Allocating tensors\n");
-    TfLiteStatus allocate_status = this->_m_pInterpreter->AllocateTensors();
+    TfLiteStatus allocate_status = this->m_pInterpreter->AllocateTensors();
 
     if (allocate_status != kTfLiteOk) {
-        this->_m_pErrorReporter->Report("[ERROR] allocateTensors() failed");
+        this->m_pErrorReporter->Report("[ERROR] allocateTensors() failed");
         printf_err("tensor allocation failed!\n");
-        delete this->_m_pInterpreter;
+        delete this->m_pInterpreter;
         return false;
     }
 
     /* Get information about the memory area to use for the model's input. */
-    this->_m_input.resize(this->GetNumInputs());
+    this->m_input.resize(this->GetNumInputs());
     for (size_t inIndex = 0; inIndex < this->GetNumInputs(); inIndex++)
-        this->_m_input[inIndex] = this->_m_pInterpreter->input(inIndex);
+        this->m_input[inIndex] = this->m_pInterpreter->input(inIndex);
 
-    this->_m_output.resize(this->GetNumOutputs());
+    this->m_output.resize(this->GetNumOutputs());
     for (size_t outIndex = 0; outIndex < this->GetNumOutputs(); outIndex++)
-        this->_m_output[outIndex] = this->_m_pInterpreter->output(outIndex);
+        this->m_output[outIndex] = this->m_pInterpreter->output(outIndex);
 
-    if (this->_m_input.empty() || this->_m_output.empty()) {
+    if (this->m_input.empty() || this->m_output.empty()) {
         printf_err("failed to get tensors\n");
         return false;
     } else {
-        this->_m_type = this->_m_input[0]->type;  /* Input 0 should be the main input */
+        this->m_type = this->m_input[0]->type;  /* Input 0 should be the main input */
 
         /* Clear the input & output tensors */
         for (size_t inIndex = 0; inIndex < this->GetNumInputs(); inIndex++) {
-            std::memset(this->_m_input[inIndex]->data.data, 0, this->_m_input[inIndex]->bytes);
+            std::memset(this->m_input[inIndex]->data.data, 0, this->m_input[inIndex]->bytes);
         }
         for (size_t outIndex = 0; outIndex < this->GetNumOutputs(); outIndex++) {
-            std::memset(this->_m_output[outIndex]->data.data, 0, this->_m_output[outIndex]->bytes);
+            std::memset(this->m_output[outIndex]->data.data, 0, this->m_output[outIndex]->bytes);
         }
 
         this->LogInterpreterInfo();
     }
 
-    this->_m_inited = true;
+    this->m_inited = true;
     return true;
 }
 
 tflite::MicroAllocator* arm::app::Model::GetAllocator()
 {
     if (this->IsInited()) {
-        return this->_m_pAllocator;
+        return this->m_pAllocator;
     }
     return nullptr;
 }
@@ -178,31 +178,31 @@ void arm::app::Model::LogTensorInfo(TfLiteTensor* tensor)
 
 void arm::app::Model::LogInterpreterInfo()
 {
-    if (!this->_m_pInterpreter) {
+    if (!this->m_pInterpreter) {
         printf_err("Invalid interpreter\n");
         return;
     }
 
     info("Model INPUT tensors: \n");
-    for (auto input : this->_m_input) {
+    for (auto input : this->m_input) {
         this->LogTensorInfo(input);
     }
 
     info("Model OUTPUT tensors: \n");
-    for (auto output : this->_m_output) {
+    for (auto output : this->m_output) {
         this->LogTensorInfo(output);
     }
 
     info("Activation buffer (a.k.a tensor arena) size used: %zu\n",
-        this->_m_pInterpreter->arena_used_bytes());
+        this->m_pInterpreter->arena_used_bytes());
 
-    const size_t nOperators = this->_m_pInterpreter->operators_size();
+    const size_t nOperators = this->m_pInterpreter->operators_size();
     info("Number of operators: %zu\n", nOperators);
 
     /* For each operator, display registration information */
     for (size_t i = 0 ; i < nOperators; ++i) {
         const tflite::NodeAndRegistration nodeReg =
-            this->_m_pInterpreter->node_and_registration(i);
+            this->m_pInterpreter->node_and_registration(i);
         const TfLiteRegistration* reg = nodeReg.registration;
         std::string opName{""};
 
@@ -220,7 +220,7 @@ void arm::app::Model::LogInterpreterInfo()
 
 bool arm::app::Model::IsInited() const
 {
-    return this->_m_inited;
+    return this->m_inited;
 }
 
 bool arm::app::Model::IsDataSigned() const
@@ -231,8 +231,8 @@ bool arm::app::Model::IsDataSigned() const
 bool arm::app::Model::RunInference()
 {
     bool inference_state = false;
-    if (this->_m_pModel && this->_m_pInterpreter) {
-        if (kTfLiteOk != this->_m_pInterpreter->Invoke()) {
+    if (this->m_pModel && this->m_pInterpreter) {
+        if (kTfLiteOk != this->m_pInterpreter->Invoke()) {
             printf_err("Invoke failed.\n");
         } else {
             inference_state = true;
@@ -246,7 +246,7 @@ bool arm::app::Model::RunInference()
 TfLiteTensor* arm::app::Model::GetInputTensor(size_t index) const
 {
     if (index < this->GetNumInputs()) {
-        return this->_m_input.at(index);
+        return this->m_input.at(index);
     }
     return nullptr;
 }
@@ -254,23 +254,23 @@ TfLiteTensor* arm::app::Model::GetInputTensor(size_t index) const
 TfLiteTensor* arm::app::Model::GetOutputTensor(size_t index) const
 {
     if (index < this->GetNumOutputs()) {
-        return this->_m_output.at(index);
+        return this->m_output.at(index);
     }
     return nullptr;
 }
 
 size_t arm::app::Model::GetNumInputs() const
 {
-    if (this->_m_pModel && this->_m_pInterpreter) {
-        return this->_m_pInterpreter->inputs_size();
+    if (this->m_pModel && this->m_pInterpreter) {
+        return this->m_pInterpreter->inputs_size();
     }
     return 0;
 }
 
 size_t arm::app::Model::GetNumOutputs() const
 {
-    if (this->_m_pModel && this->_m_pInterpreter) {
-        return this->_m_pInterpreter->outputs_size();
+    if (this->m_pModel && this->m_pInterpreter) {
+        return this->m_pInterpreter->outputs_size();
     }
     return 0;
 }
@@ -278,13 +278,13 @@ size_t arm::app::Model::GetNumOutputs() const
 
 TfLiteType arm::app::Model::GetType() const
 {
-    return this->_m_type;
+    return this->m_type;
 }
 
 TfLiteIntArray* arm::app::Model::GetInputShape(size_t index) const
 {
     if (index < this->GetNumInputs()) {
-        return this->_m_input.at(index)->dims;
+        return this->m_input.at(index)->dims;
     }
     return nullptr;
 }
@@ -292,7 +292,7 @@ TfLiteIntArray* arm::app::Model::GetInputShape(size_t index) const
 TfLiteIntArray* arm::app::Model::GetOutputShape(size_t index) const
 {
     if (index < this->GetNumOutputs()) {
-        return this->_m_output.at(index)->dims;
+        return this->m_output.at(index)->dims;
     }
     return nullptr;
 }

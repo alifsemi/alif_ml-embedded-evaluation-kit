@@ -104,14 +104,14 @@ namespace audio {
             float minVal = std::numeric_limits<T>::min();
             float maxVal = std::numeric_limits<T>::max();
 
-            std::vector<T> mfccOut(this->_m_params.m_numMfccFeatures);
-            const size_t numFbankBins = this->_m_params.m_numFbankBins;
+            std::vector<T> mfccOut(this->m_params.m_numMfccFeatures);
+            const size_t numFbankBins = this->m_params.m_numFbankBins;
 
             /* Take DCT. Uses matrix mul. */
             for (size_t i = 0, j = 0; i < mfccOut.size(); ++i, j += numFbankBins) {
                 float sum = 0;
                 for (size_t k = 0; k < numFbankBins; ++k) {
-                    sum += this->_m_dctMatrix[j + k] * this->_m_melEnergies[k];
+                    sum += this->m_dctMatrix[j + k] * this->m_melEnergies[k];
                 }
                 /* Quantize to T. */
                 sum = std::round((sum / quantScale) + quantOffset);
@@ -131,7 +131,7 @@ namespace audio {
         /**
          * @brief       Project input frequency to Mel Scale.
          * @param[in]   freq           Input frequency in floating point.
-         * @param[in]   useHTKmethod   bool to signal if HTK method is to be
+         * @param[in]   useHTKMethod   bool to signal if HTK method is to be
          *                             used for calculation.
          * @return      Mel transformed frequency in floating point.
          **/
@@ -141,8 +141,8 @@ namespace audio {
         /**
          * @brief       Inverse Mel transform - convert MEL warped frequency
          *              back to normal frequency.
-         * @param[in]   freq           Mel frequency in floating point.
-         * @param[in]   useHTKmethod   bool to signal if HTK method is to be
+         * @param[in]   melFreq        Mel frequency in floating point.
+         * @param[in]   useHTKMethod   bool to signal if HTK method is to be
          *                             used for calculation.
          * @return      Real world frequency in floating point.
          **/
@@ -207,17 +207,17 @@ namespace audio {
                         bool     useHTKMethod);
 
     private:
-        MfccParams                      _m_params;
-        std::vector<float>              _m_frame;
-        std::vector<float>              _m_buffer;
-        std::vector<float>              _m_melEnergies;
-        std::vector<float>              _m_windowFunc;
-        std::vector<std::vector<float>> _m_melFilterBank;
-        std::vector<float>              _m_dctMatrix;
-        std::vector<uint32_t>           _m_filterBankFilterFirst;
-        std::vector<uint32_t>           _m_filterBankFilterLast;
-        bool                            _m_filterBankInitialised;
-        arm::app::math::FftInstance     _m_fftInstance;
+        MfccParams                      m_params;
+        std::vector<float>              m_frame;
+        std::vector<float>              m_buffer;
+        std::vector<float>              m_melEnergies;
+        std::vector<float>              m_windowFunc;
+        std::vector<std::vector<float>> m_melFilterBank;
+        std::vector<float>              m_dctMatrix;
+        std::vector<uint32_t>           m_filterBankFilterFirst;
+        std::vector<uint32_t>           m_filterBankFilterLast;
+        bool                            m_filterBankInitialised;
+        arm::app::math::FftInstance     m_fftInstance;
 
         /**
          * @brief       Initialises the filter banks and the DCT matrix. **/

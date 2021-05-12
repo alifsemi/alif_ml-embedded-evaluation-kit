@@ -20,19 +20,19 @@
 
 const tflite::MicroOpResolver& arm::app::AdModel::GetOpResolver()
 {
-    return this->_m_opResolver;
+    return this->m_opResolver;
 }
 
 bool arm::app::AdModel::EnlistOperations()
 {
-    this->_m_opResolver.AddAveragePool2D();
-    this->_m_opResolver.AddConv2D();
-    this->_m_opResolver.AddDepthwiseConv2D();
-    this->_m_opResolver.AddRelu6();
-    this->_m_opResolver.AddReshape();
+    this->m_opResolver.AddAveragePool2D();
+    this->m_opResolver.AddConv2D();
+    this->m_opResolver.AddDepthwiseConv2D();
+    this->m_opResolver.AddRelu6();
+    this->m_opResolver.AddReshape();
 
 #if defined(ARM_NPU)
-    if (kTfLiteOk == this->_m_opResolver.AddEthosU()) {
+    if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",
             tflite::GetString_ETHOSU());
     } else {

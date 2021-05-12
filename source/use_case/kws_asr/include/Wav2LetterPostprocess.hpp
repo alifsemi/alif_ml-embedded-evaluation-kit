@@ -33,10 +33,11 @@ namespace asr {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   contextLen   Left and right context length for
-         *                           output tensor.
-         * @param[in]   innerLen     This is the length of the section
-         *                           between left and right context.
+         * @param[in]   contextLen     Left and right context length for
+         *                             output tensor.
+         * @param[in]   innerLen       This is the length of the section
+         *                             between left and right context.
+         * @param[in]   blankTokenIdx  Blank token index.
          **/
         Postprocess(uint32_t contextLen,
                     uint32_t innerLen,
@@ -61,11 +62,11 @@ namespace asr {
                     bool lastIteration = false);
 
     private:
-        uint32_t    _m_contextLen;      /* Lengths of left and right contexts. */
-        uint32_t    _m_innerLen;        /* Length of inner context. */
-        uint32_t    _m_totalLen;        /* Total length of the required axis. */
-        uint32_t    _m_countIterations; /* Current number of iterations. */
-        uint32_t    _m_blankTokenIdx;   /* Index of the labels blank token. */
+        uint32_t    m_contextLen;      /* Lengths of left and right contexts. */
+        uint32_t    m_innerLen;        /* Length of inner context. */
+        uint32_t    m_totalLen;        /* Total length of the required axis. */
+        uint32_t    m_countIterations; /* Current number of iterations. */
+        uint32_t    m_blankTokenIdx;   /* Index of the labels blank token. */
         /**
          * @brief       Checks if the tensor and axis index are valid
          *              inputs to the object - based on how it has been

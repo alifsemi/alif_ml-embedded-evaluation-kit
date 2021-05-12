@@ -1,9 +1,8 @@
 # Memory considerations
 
-## Table of Contents
+## Contents
 
 - [Memory considerations](#memory-considerations)
-  - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Understanding memory usage from Vela output](#understanding-memory-usage-from-vela-output)
     - [Total SRAM used](#total-sram-used)
@@ -43,7 +42,7 @@ When the neural network model is compiled with Vela, a summary report that inclu
 usage is generated. For example, compiling the keyword spotting model [ds_cnn_clustered_int8](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite)
 with Vela produces, among others, the following output:
 
-```
+```log
 Total SRAM used                                 70.77 KiB
 Total Off-chip Flash used                      430.78 KiB
 ```
@@ -74,9 +73,10 @@ the `tensor arena`. Vela supports optimizing the model for this configuration wi
 memory mode. See [vela.ini](../../scripts/vela/vela.ini). To make use of a neural network model
 optimised for this configuration, the linker script for the target platform would need to be
 changed. By default, the linker scripts are set up to support the default configuration only. See
-[Memory constraints](#Memory-constraints) for snippet of a script.
+[Memory constraints](#memory-constraints) for snippet of a script.
 
 > Note
+>
 > 1. The default configuration is represented by `Shared_Sram` memory mode.
 > 2. `Dedicated_Sram` mode is only applicable for Arm® Ethos™-U65.
 
@@ -104,11 +104,11 @@ in the linker script.
 The following numbers have been obtained from Vela for `Shared_Sram` memory mode and the SRAM and
 flash memory requirements for the different use cases of the evaluation kit. Note that the SRAM usage
 does not include memory used by TensorFlow Lite Micro and this will need to be topped up as explained
-under [Total SRAM used](#Total-SRAM-used).
+under [Total SRAM used](#total-sram-used).
 
 - [Keyword spotting model](https://github.com/ARM-software/ML-zoo/tree/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8) requires
-  -  70.7 KiB of SRAM
-  -  430.7 KiB of flash memory.
+  - 70.7 KiB of SRAM
+  - 430.7 KiB of flash memory.
 
 - [Image classification model](https://github.com/ARM-software/ML-zoo/tree/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8) requires
   - 638.6 KiB of SRAM
@@ -122,13 +122,13 @@ under [Total SRAM used](#Total-SRAM-used).
 
 Both the MPS3 Fixed Virtual Platform and the MPS3 FPGA platform share the linker script for Arm® Corstone™-300
 design. The design is set by the CMake configuration parameter `TARGET_SUBSYSTEM` as described in
-[build options](./building.md#Build-options).
+[build options](./building.md#build-options).
 
 The memory map exposed by this design is presented in [Appendix 1](./appendix.md). This can be used as a reference
 when editing the linker script, especially to make sure that region boundaries are respected. The snippet from the
 scatter file is presented below:
 
-```
+```log
 ;---------------------------------------------------------
 ; First load region (ITCM)
 ;---------------------------------------------------------
@@ -235,4 +235,6 @@ by the Arm® Ethos™-U55 NPU block frequently. A bigger region of memory for st
 network model is placed in the DDR/flash region under LOAD_REGION_1. The two load regions are necessary
 as the MPS3's motherboard configuration controller limits the load size at address 0x00000000 to 1MiB.
 This has implications on how the application **is deployed** on MPS3 as explained under the section
-[Deployment on MPS3](./deployment.md#MPS3-board).
+[Deployment on MPS3](./deployment.md#mps3-board).
+
+Next section of the documentation: [Troubleshooting](troubleshooting.md).

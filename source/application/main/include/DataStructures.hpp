@@ -47,39 +47,39 @@ namespace app {
          * @param[in] rows   Number of rows.
          * @param[in] cols   Number of columns.
          */
-        Array2d(unsigned rows, unsigned cols): _m_rows(rows), _m_cols(cols)
+        Array2d(unsigned rows, unsigned cols): m_rows(rows), m_cols(cols)
         {
             if (rows == 0 || cols == 0) {
                 printf_err("Array2d constructor has 0 size.\n");
-                _m_data = nullptr;
+                m_data = nullptr;
                 return;
             }
-            _m_data = new T[rows * cols];
+            m_data = new T[rows * cols];
         }
 
         ~Array2d()
         {
-            delete[] _m_data;
+            delete[] m_data;
         }
 
         T& operator() (unsigned int row, unsigned int col)
         {
 #if defined(DEBUG)
-            if (row >= _m_rows || col >= _m_cols ||  _m_data == nullptr) {
+            if (row >= m_rows || col >= m_cols ||  m_data == nullptr) {
                 printf_err("Array2d subscript out of bounds.\n");
             }
 #endif /* defined(DEBUG) */
-            return _m_data[_m_cols * row + col];
+            return m_data[m_cols * row + col];
         }
 
         T operator() (unsigned int row, unsigned int col) const
         {
 #if defined(DEBUG)
-            if (row >= _m_rows || col >= _m_cols ||  _m_data == nullptr) {
+            if (row >= m_rows || col >= m_cols ||  m_data == nullptr) {
                 printf_err("const Array2d subscript out of bounds.\n");
             }
 #endif /* defined(DEBUG) */
-            return _m_data[_m_cols * row + col];
+            return m_data[m_cols * row + col];
         }
 
         /**
@@ -91,9 +91,9 @@ namespace app {
             switch (dim)
             {
                 case 0:
-                    return _m_rows;
+                    return m_rows;
                 case 1:
-                    return _m_cols;
+                    return m_cols;
                 default:
                     return 0;
             }
@@ -104,7 +104,7 @@ namespace app {
          */
         size_t totalSize()
         {
-            return _m_rows * _m_cols;
+            return m_rows * m_cols;
         }
 
         /**
@@ -113,15 +113,15 @@ namespace app {
         using iterator=T*;
         using const_iterator=T const*;
 
-        iterator begin() { return _m_data; }
-        iterator end() { return _m_data + totalSize(); }
-        const_iterator begin() const { return _m_data; }
-        const_iterator end() const { return _m_data + totalSize(); };
+        iterator begin() { return m_data; }
+        iterator end() { return m_data + totalSize(); }
+        const_iterator begin() const { return m_data; }
+        const_iterator end() const { return m_data + totalSize(); };
 
     private:
-        size_t _m_rows;
-        size_t _m_cols;
-        T* _m_data;
+        size_t m_rows;
+        size_t m_cols;
+        T* m_data;
     };
 
 } /* namespace app */

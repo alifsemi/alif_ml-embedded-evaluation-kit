@@ -1,9 +1,6 @@
 # Implementing custom ML application
 
-## Contents
-
 - [Implementing custom ML application](#implementing-custom-ml-application)
-  - [Contents](#contents)
   - [Software project description](#software-project-description)
   - [HAL API](#hal-api)
   - [Main loop function](#main-loop-function)
@@ -69,14 +66,14 @@ sources are in the `use-case` subfolder.
 > headers in an `include` directory, C/C++ sources in a `src` directory.
 > For example:
 >
->```tree
->use_case
-> └──img_class
->       ├── include
->       │   └── *.hpp
->       └── src
->           └── *.cc
->```
+> ```tree
+> use_case
+>   └──img_class
+>         ├── include
+>         │   └── *.hpp
+>         └── src
+>             └── *.cc
+> ```
 
 ## HAL API
 
@@ -165,7 +162,7 @@ To access them, include `hal.h` header.
 
 Example of the API initialization in the main function:
 
-```c++
+```C++
 #include "hal.h"
 
 int main ()
@@ -203,7 +200,7 @@ The main loop function has external linkage and main executable for the
 use-case will have reference to the function defined in the use-case
 code.
 
-```c++
+```C++
 void main_loop(hal_platform& platform){
 
 ...
@@ -224,7 +221,7 @@ loop iterations. Include AppContext.hpp to use ApplicationContext class.
 
 For example:
 
-```c++
+```C++
 #include "hal.h"
 #include "AppContext.hpp"
 
@@ -260,7 +257,7 @@ system timing information.
 
 Usage example:
 
-```c++
+```C++
 Profiler profiler{&platform, "Inference"};
 
 profiler.StartProfiling();
@@ -306,13 +303,13 @@ To use this abstraction, import TensorFlowLiteMicro.hpp header.
 
 > **Convention:**  Each ML use-case must have extension of this class and implementation of the protected virtual methods:
 >
->```c++
+> ```C++
 > virtual const uint8_t* ModelPointer() = 0;
 > virtual size_t ModelSize() = 0;
 > virtual const tflite::MicroOpResolver& GetOpResolver() = 0;
 > virtual bool EnlistOperations() = 0;
 > virtual size_t GetActivationBufferSize() = 0;
->```
+> ```
 >
 > Network models have different set of operators that must be registered with
 > tflite::MicroMutableOpResolver object in the EnlistOperations method.
@@ -361,7 +358,7 @@ Create a `MainLoop.cc` file in the `src` directory (the one created under
 important. Define `main_loop` function with the signature described in
 [Main loop function](#main-loop-function):
 
-```c++
+```C++
 #include "hal.h"
 
 void main_loop(hal_platform& platform) {
@@ -370,7 +367,7 @@ void main_loop(hal_platform& platform) {
 ```
 
 The above is already a working use-case, if you compile and run it (see
-[Building custom usecase](#Building-custom-use-case)) the application will start, print
+[Building custom usecase](#building-custom-use-case)) the application will start, print
 message to console and exit straight away.
 
 Now, you can start filling this function with logic.
@@ -389,7 +386,7 @@ declare required methods.
 
 For example:
 
-```c++
+```C++
 #ifndef HELLOWORLDMODEL_HPP
 #define HELLOWORLDMODEL_HPP
 
@@ -415,7 +412,7 @@ class HelloWorldModel: public Model {
     static constexpr int ms_maxOpCnt = 5;
 
     /* A mutable op resolver instance. */
-    tflite::MicroMutableOpResolver<ms_maxOpCnt> _m_opResolver;
+    tflite::MicroMutableOpResolver<ms_maxOpCnt> m_opResolver;
   };
 } /* namespace app */
 } /* namespace arm */
@@ -437,13 +434,13 @@ The following example shows how to add the custom Ethos-U55 operator with
 TensorFlow Lite Micro framework. We will use the ARM_NPU define to exclude
 the code if the application was built without NPU support.
 
-```c++
+```C++
 #include "HelloWorldModel.hpp"
 
 bool arm::app::HelloWorldModel::EnlistOperations() {
 
 #if defined(ARM_NPU)
-    if (kTfLiteOk == this->_m_opResolver.AddEthosU()) {
+    if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",
             tflite::GetString_ETHOSU());
     } else {
@@ -465,7 +462,7 @@ This generation the C++ array from the .tflite file, logic needs to be defined i
 the `usecase.cmake` file for this `HelloWorld` example.
 
 For more details on `usecase.cmake`, see [Building custom use case](#building-custom-use-case).
-For details on code generation flow in general, see [Automatic file generation](./building.md#Automatic-file-generation)
+For details on code generation flow in general, see [Automatic file generation](./building.md#automatic-file-generation)
 
 The TensorFlow Lite model data is read during Model::Init() method execution, see
 `application/tensorflow-lite-micro/Model.cc` for more details. Model invokes
@@ -476,7 +473,7 @@ file `build/generated/hello_world/src/<model_file_name>.cc`. Generated
 file is added to the compilation automatically.
 
 Use `${use-case}_MODEL_TFLITE_PATH` build parameter to include custom
-model to the generation/compilation process (see [Build options](./building.md/#build-options)).
+model to the generation/compilation process (see [Build options](./building.md#build-options)).
 
 ## Executing inference
 
@@ -506,7 +503,7 @@ to generate C++ sources from the provided images with
 
 The following code adds inference invocation to the main loop function:
 
-```c++
+```C++
 #include "hal.h"
 #include "HelloWorldModel.hpp"
 
@@ -541,7 +538,7 @@ The code snippet has several important blocks:
 
 - Creating HelloWorldModel object and initializing it.
 
-  ```c++
+  ```C++
   arm::app::HelloWorldModel model;
 
   /* Load the model */
@@ -553,7 +550,7 @@ The code snippet has several important blocks:
 
 - Getting pointers to allocated input and output tensors.
 
-  ```c++
+  ```C++
   TfLiteTensor *outputTensor = model.GetOutputTensor();
   TfLiteTensor *inputTensor = model.GetInputTensor();
   ```
@@ -561,20 +558,20 @@ The code snippet has several important blocks:
 - Copying input data to the input tensor. We assume input tensor size
   to be 1000 uint8 elements.
 
-  ```c++
+  ```C++
   memcpy(inputTensor->data.data, inputData, 1000);
   ```
 
 - Running inference
 
-  ```c++
+  ```C++
   model.RunInference();
   ```
 
 - Reading inference results: data and data size from the output
   tensor. We assume that output layer has uint8 data type.
 
-  ```c++
+  ```C++
   Const uint32_t tensorSz = outputTensor->bytes ;
 
   const uint8_t *outputData = tflite::GetTensorData<uint8>(outputTensor);
@@ -584,7 +581,7 @@ Adding profiling for Ethos-U55 is easy. Include `Profiler.hpp` header and
 invoke `StartProfiling` and `StopProfiling` around inference
 execution.
 
-```c++
+```C++
 Profiler profiler{&platform, "Inference"};
 
 profiler.StartProfiling();
@@ -617,7 +614,7 @@ Default output level is info = level 2.
 Platform data acquisition module has get_input function to read keyboard
 input from the UART. It can be used as follows:
 
-```c++
+```C++
 char ch_input[128];
 platform.data_acq->get_input(ch_input, sizeof(ch_input));
 ```
@@ -647,7 +644,7 @@ screen it will go outside the screen boundary.
 
 Example that prints "Hello world" on the LCD:
 
-```c++
+```C++
 std::string hello("Hello world");
 platform.data_psn->present_data_text(hello.c_str(), hello.size(), 10, 35, 0);
 ```
@@ -665,7 +662,7 @@ Image presentation function has the following signature:
 For example, the following code snippet visualizes an input tensor data
 for MobileNet v2 224 (down sampling it twice):
 
-```c++
+```C++
 platform.data_psn->present_data_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
@@ -717,7 +714,6 @@ USER_OPTION(${use_case}_MODEL_TFLITE_PATH "Neural network model in tflite format
     FILEPATH
     )
 
-# Generate model file
 generate_tflite_code(
     MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
     DESTINATION ${SRC_GEN_DIR}
@@ -729,7 +725,7 @@ up by the build system. More information on auto-generations is available under 
 [Automatic file generation](./building.md#Automatic-file-generation).
 
 To build you application follow the general instructions from
-[Add Custom inputs](#add-custom-inputs) and specify the name of the use-case in the
+[Add Custom inputs](./building.md#add-custom-inputs) and specify the name of the use-case in the
 build command:
 
 ```commandline
@@ -744,4 +740,4 @@ As a result, `ethos-u-hello_world.axf` should be created, MPS3 build
 will also produce `sectors/hello_world` directory with binaries and
 `images-hello_world.txt` to be copied to the board MicroSD card.
 
-Next section of the documentation: [Testing and benchmarking](../documentation.md#Testing-and-benchmarking).
+Next section of the documentation: [Testing and benchmarking](testing_benchmarking.md).

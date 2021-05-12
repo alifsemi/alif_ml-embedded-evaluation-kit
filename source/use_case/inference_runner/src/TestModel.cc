@@ -20,7 +20,7 @@
 
 const tflite::AllOpsResolver& arm::app::TestModel::GetOpResolver()
 {
-    return this->_m_opResolver;
+    return this->m_opResolver;
 }
 
 extern uint8_t* GetModelPointer();

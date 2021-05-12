@@ -65,16 +65,16 @@ namespace audio {
         /**
         * @brief        Extract Mel Spectrogram for one single small frame of
         *               audio data e.g. 640 samples.
-        * @param[in]    audioData - Vector of audio samples to calculate
+        * @param[in]    audioData       Vector of audio samples to calculate
         *               features for.
-        * @param[in]    trainingMean - Value to subtract from the the computed mel spectrogram, default 0.
+        * @param[in]    trainingMean    Value to subtract from the the computed mel spectrogram, default 0.
         * @return       Vector of extracted Mel Spectrogram features.
         **/
         std::vector<float> ComputeMelSpec(const std::vector<int16_t>& audioData, float trainingMean = 0);
 
         /**
          * @brief       Constructor
-         * @param[in]   params - Mel Spectrogram parameters
+         * @param[in]   params   Mel Spectrogram parameters
         */
         explicit MelSpectrogram(const MelSpecParams& params);
 
@@ -87,10 +87,11 @@ namespace audio {
         /**
          * @brief        Extract Mel Spectrogram features and quantise for one single small
          *               frame of audio data e.g. 640 samples.
-         * @param[in]    audioData - Vector of audio samples to calculate
+         * @param[in]    audioData      Vector of audio samples to calculate
          *               features for.
-         * @param[in]    quantScale - quantisation scale.
-         * @param[in]    quantOffset - quantisation offset
+         * @param[in]    quantScale     quantisation scale.
+         * @param[in]    quantOffset    quantisation offset.
+         * @param[in]    trainingMean   training mean.
          * @return       Vector of extracted quantised Mel Spectrogram features.
          **/
         template<typename T>
@@ -103,12 +104,12 @@ namespace audio {
             float minVal = std::numeric_limits<T>::min();
             float maxVal = std::numeric_limits<T>::max();
 
-            std::vector<T> melSpecOut(this->_m_params.m_numFbankBins);
-            const size_t numFbankBins = this->_m_params.m_numFbankBins;
+            std::vector<T> melSpecOut(this->m_params.m_numFbankBins);
+            const size_t numFbankBins = this->m_params.m_numFbankBins;
 
             /* Quantize to T. */
             for (size_t k = 0; k < numFbankBins; ++k) {
-                auto quantizedEnergy = std::round(((this->_m_melEnergies[k]) / quantScale) + quantOffset);
+                auto quantizedEnergy = std::round(((this->m_melEnergies[k]) / quantScale) + quantOffset);
                 melSpecOut[k] = static_cast<T>(std::min<float>(std::max<float>(quantizedEnergy, minVal), maxVal));
             }
 
@@ -124,9 +125,9 @@ namespace audio {
     protected:
         /**
          * @brief       Project input frequency to Mel Scale.
-         * @param[in]   freq - input frequency in floating point
-         * @param[in]   useHTKmethod - bool to signal if HTK method is to be
-         *              used for calculation
+         * @param[in]   freq          input frequency in floating point
+         * @param[in]   useHTKMethod  bool to signal if HTK method is to be
+         *                            used for calculation
          * @return      Mel transformed frequency in floating point
          **/
         static float MelScale(const float    freq,
@@ -135,9 +136,9 @@ namespace audio {
         /**
          * @brief       Inverse Mel transform - convert MEL warped frequency
          *              back to normal frequency
-         * @param[in]   freq - Mel frequency in floating point
-         * @param[in]   useHTKmethod - bool to signal if HTK method is to be
-         *              used for calculation
+         * @param[in]   melFreq          Mel frequency in floating point
+         * @param[in]   useHTKMethod  bool to signal if HTK method is to be
+         *                            used for calculation
          * @return      Real world frequency in floating point
          **/
         static float InverseMelScale(const float melFreq,
@@ -168,7 +169,7 @@ namespace audio {
 
         /**
          * @brief           Converts the Mel energies for logarithmic scale
-         * @param[in/out]   melEnergies - 1D vector of Mel energies
+         * @param[in,out]   melEnergies 1D vector of Mel energies
          **/
         virtual void ConvertToLogarithmicScale(std::vector<float>& melEnergies);
 
@@ -176,10 +177,10 @@ namespace audio {
          * @brief       Given the low and high Mel values, get the normaliser
          *              for weights to be applied when populating the filter
          *              bank.
-         * @param[in]   leftMel - low Mel frequency value
-         * @param[in]   rightMel - high Mel frequency value
-         * @param[in]   useHTKMethod - bool to signal if HTK method is to be
-         *              used for calculation
+         * @param[in]   leftMel      low Mel frequency value
+         * @param[in]   rightMel     high Mel frequency value
+         * @param[in]   useHTKMethod bool to signal if HTK method is to be
+         *                           used for calculation
          * @return      Return float value to be applied 
          *              when populating the filter bank.
          */
@@ -189,16 +190,16 @@ namespace audio {
                 const bool     useHTKMethod);
 
     private:
-        MelSpecParams                   _m_params;
-        std::vector<float>              _m_frame;
-        std::vector<float>              _m_buffer;
-        std::vector<float>              _m_melEnergies;
-        std::vector<float>              _m_windowFunc;
-        std::vector<std::vector<float>> _m_melFilterBank;
-        std::vector<uint32_t>            _m_filterBankFilterFirst;
-        std::vector<uint32_t>            _m_filterBankFilterLast;
-        bool                            _m_filterBankInitialised;
-        arm::app::math::FftInstance     _m_fftInstance;
+        MelSpecParams                   m_params;
+        std::vector<float>              m_frame;
+        std::vector<float>              m_buffer;
+        std::vector<float>              m_melEnergies;
+        std::vector<float>              m_windowFunc;
+        std::vector<std::vector<float>> m_melFilterBank;
+        std::vector<uint32_t>            m_filterBankFilterFirst;
+        std::vector<uint32_t>            m_filterBankFilterLast;
+        bool                            m_filterBankInitialised;
+        arm::app::math::FftInstance     m_fftInstance;
 
         /**
          * @brief       Initialises the filter banks.

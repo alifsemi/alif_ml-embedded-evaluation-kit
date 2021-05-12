@@ -42,12 +42,11 @@ namespace app {
      * @param[in]       profiler   Reference to the initialised profiler.
      * @return          true if inference succeeds, false otherwise.
      **/
-    bool RunInference(arm::app::Model& mode, Profiler& profiler);
+    bool RunInference(arm::app::Model& model, Profiler& profiler);
 
     /**
      * @brief           Read input and return as an integer.
      * @param[in]       platform   Reference to the hal platform object.
-     * @param[in]       model      Reference to the initialised model.
      * @return          Integer value corresponding to the user input.
      **/
     int ReadUserInputAsInt(hal_platform& platform);

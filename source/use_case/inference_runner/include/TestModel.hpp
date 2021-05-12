@@ -38,7 +38,7 @@ namespace app {
     private:
 
         /* No need to define individual ops at the cost of extra memory. */
-        tflite::AllOpsResolver _m_opResolver;
+        tflite::AllOpsResolver m_opResolver;
     };
 
 } /* namespace app */

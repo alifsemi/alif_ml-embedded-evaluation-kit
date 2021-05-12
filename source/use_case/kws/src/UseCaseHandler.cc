@@ -52,8 +52,6 @@ namespace app {
      *                  object.
      * @param[in]       platform    Reference to the hal platform object.
      * @param[in]       results     Vector of classification results to be displayed.
-     * @param[in]       infTimeMs   Inference time in milliseconds, if available,
-     *                              otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise.
      **/
     static bool PresentInferenceResult(hal_platform& platform,
@@ -341,11 +339,11 @@ namespace app {
      * Real features math is done by a lambda function provided as a parameter.
      * Features are written to input tensor memory.
      *
-     * @tparam T            Feature vector type.
-     * @param inputTensor   Model input tensor pointer.
-     * @param cacheSize     Number of feature vectors to cache. Defined by the sliding window overlap.
-     * @param compute       Features calculator function.
-     * @return              Lambda function to compute features.
+     * @tparam T                Feature vector type.
+     * @param[in] inputTensor   Model input tensor pointer.
+     * @param[in] cacheSize     Number of feature vectors to cache. Defined by the sliding window overlap.
+     * @param[in] compute       Features calculator function.
+     * @return                  Lambda function to compute features.
      */
     template<class T>
     std::function<void (std::vector<int16_t>&, size_t, bool, size_t)>

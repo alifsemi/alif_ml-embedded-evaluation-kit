@@ -58,8 +58,6 @@ namespace app {
      *                  object.
      * @param[in]       platform    Reference to the hal platform object.
      * @param[in]       results     Vector of classification results to be displayed.
-     * @param[in]       infTimeMs   Inference time in milliseconds, if available
-     *                              otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise.
      **/
     static bool PresentInferenceResult(hal_platform& platform,

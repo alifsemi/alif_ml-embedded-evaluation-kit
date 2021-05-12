@@ -123,16 +123,16 @@ namespace app {
         size_t GetActivationBufferSize();
 
     private:
-        tflite::MicroErrorReporter      _m_uErrorReporter;                     /* Error reporter object. */
-        tflite::ErrorReporter*          _m_pErrorReporter      = nullptr;      /* Pointer to the error reporter. */
-        const tflite::Model*            _m_pModel              = nullptr;      /* Tflite model pointer. */
-        tflite::MicroInterpreter*       _m_pInterpreter        = nullptr;      /* Tflite interpreter. */
-        tflite::MicroAllocator*         _m_pAllocator          = nullptr;      /* Tflite micro allocator. */
-        bool                            _m_inited              = false;        /* Indicates whether this object has been initialised. */
+        tflite::MicroErrorReporter      m_uErrorReporter;                     /* Error reporter object. */
+        tflite::ErrorReporter*          m_pErrorReporter      = nullptr;      /* Pointer to the error reporter. */
+        const tflite::Model*            m_pModel              = nullptr;      /* Tflite model pointer. */
+        tflite::MicroInterpreter*       m_pInterpreter        = nullptr;      /* Tflite interpreter. */
+        tflite::MicroAllocator*         m_pAllocator          = nullptr;      /* Tflite micro allocator. */
+        bool                            m_inited              = false;        /* Indicates whether this object has been initialised. */
 
-        std::vector<TfLiteTensor*>      _m_input              = {};           /* Model's input tensor pointers. */
-        std::vector<TfLiteTensor*>      _m_output             = {};           /* Model's output tensor pointers. */
-        TfLiteType                      _m_type               = kTfLiteNoType;/* Model's data type. */
+        std::vector<TfLiteTensor*>      m_input              = {};           /* Model's input tensor pointers. */
+        std::vector<TfLiteTensor*>      m_output             = {};           /* Model's output tensor pointers. */
+        TfLiteType                      m_type               = kTfLiteNoType;/* Model's data type. */
 
     };
 

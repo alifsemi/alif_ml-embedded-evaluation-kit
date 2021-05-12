@@ -1,7 +1,5 @@
 # Troubleshooting
 
-## Contents
-
 - [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
 - [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
 
@@ -26,4 +24,4 @@ Check that cmake parameters match your new models input requirements.
 It is a python tool available from <https://pypi.org/project/ethos-u-vela/>.
 The source code is hosted on <https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/>.
 
-Next section of the documentation: [Contribution guidelines](../documentation.md#Contribution-guidelines).
+Next section of the documentation: [Appendix](appendix.md).

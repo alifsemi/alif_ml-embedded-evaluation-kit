@@ -1,28 +1,18 @@
 # Arm® ML embedded evaluation kit
 
-## Table of Contents
-
-- [Arm® ML embedded evaluation kit](./documentation.md#arm-ml-embedded-evaluation-kit)
-  - [Table of Contents](./documentation.md#table-of-content)
-  - [Trademarks](./documentation.md#trademarks)
-  - [Prerequisites](./documentation.md#prerequisites)
-    - [Additional reading](./documentation.md#additional-reading)
-  - [Repository structure](./documentation.md#repository-structure)
-  - [Models and resources](./documentation.md#models-and-resources)
-  - [Building](./documentation.md#building)
-  - [Deployment](./documentation.md#deployment)
-  - [Running code samples applications](./documentation.md#running-code-samples-applications)
-  - [Implementing custom ML application](./documentation.md#implementing-custom-ml-application)
-  - [Testing and benchmarking](./documentation.md#testing-and-benchmarking)
-  - [Memory considerations](./documentation.md#memory-considerations)
-  - [Troubleshooting](./documentation.md#troubleshooting)
-  - [Contribution guidelines](./documentation.md#contribution-guidelines)
-    - [Coding standards and guidelines](./documentation.md#coding-standards-and-guidelines)
-    - [Code Reviews](./documentation.md#code-reviews)
-    - [Testing](./documentation.md#testing)
-  - [Communication](./documentation.md#communication)
-  - [Licenses](./documentation.md#licenses)
-  - [Appendix](./documentation.md#appendix)
+- [Arm® ML embedded evaluation kit](#arm_ml-embedded-evaluation-kit)
+  - [Trademarks](#trademarks)
+  - [Prerequisites](#prerequisites)
+    - [Additional reading](#additional-reading)
+  - [Repository structure](#repository-structure)
+  - [Models and resources](#models-and-resources)
+  - [Building](#building)
+  - [Deployment](#deployment)
+  - [Implementing custom ML application](#implementing-custom-ml-application)
+  - [Testing and benchmarking](#testing-and-benchmarking)
+  - [Memory considerations](#memory-considerations)
+  - [Troubleshooting](#troubleshooting)
+  - [Appendix](#appendix)
 
 ## Trademarks
 
@@ -222,16 +212,22 @@ The project can be built for MPS3 FPGA and FVP emulating MPS3. Default values fo
 will build executable models with Ethos-U55 NPU support.
 See:
 
-- [Building the Code Samples application from sources](./sections/building.md#building-the-ml-embedded-code-sample-applications-from-sources)
-  - [Contents](./sections/building.md#contents)
+- [Building the ML embedded code sample applications from sources](./sections/building.md#building-the-ml-embedded-code-sample-applications-from-sources)
   - [Build prerequisites](./sections/building.md#build-prerequisites)
   - [Build options](./sections/building.md#build-options)
   - [Build process](./sections/building.md#build-process)
     - [Preparing build environment](./sections/building.md#preparing-build-environment)
+      - [Fetching submodules](./sections/building.md#fetching-submodules)
+      - [Fetching resource files](./sections/building.md#fetching-resource-files)
     - [Create a build directory](./sections/building.md#create-a-build-directory)
-    - [Configuring the build for `MPS3: SSE-300`](./sections/building.md#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for MPS3 SSE-300](./sections/building.md#configuring-the-build-for-mps3-sse-300)
+      - [Using GNU Arm Embedded Toolchain](./sections/building.md#using-gnu-arm-embedded-toolchain)
+      - [Using Arm Compiler](./sections/building.md#using-arm-compiler)
+      - [Generating project for Arm Development Studio](./sections/building.md#generating-project-for-arm-development-studio)
+      - [Working with model debugger from Arm FastModel Tools](./sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
+      - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
-    - [Configuring the build for `simple_platform`](./sections/building.md#configuring-the-build-for-simple_platform)
+    - [Configuring the build for simple_platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./sections/building.md#add-custom-inputs)
@@ -245,16 +241,11 @@ This section describes how to deploy the code sample applications on the Fixed V
 See:
 
 - [Deployment](./sections/deployment.md)
-  - [Fixed Virtual Platform](./sections/deployment.md#fixed-Virtual-Platform)
-    - [Setting up the MPS3 Corstone-300 FVP](./sections/deployment.md#Setting-up-the-MPS3-Corstone-300-FVP)
-    - [Deploying on an FVP emulating MPS3](./sections/deployment.md#Deploying-on-an-FVP-emulating-MPS3)
-  - [MPS3 board](./sections/deployment.md#MPS3-board)
-    - [Deployment on MPS3 board](./sections/deployment.md#Deployment-on-MPS3-board)
-
-## Running code samples applications
-
-This section covers the process for getting started with pre-built binaries for the code samples.
-See [Running applications](./sections/run.md).
+  - [Fixed Virtual Platform](./sections/deployment.md#fixed-virtual-platform)
+    - [Setting up the MPS3 Corstone-300 FVP](./sections/deployment.md#setting-up-the-mps3-arm-corstone-300-fvp)
+    - [Deploying on an FVP emulating MPS3](./sections/deployment.md#deploying-on-an-fvp-emulating-mps3)
+  - [MPS3 board](./sections/deployment.md#mps3-board)
+    - [Deployment on MPS3 board](./sections/deployment.md#deployment-on-mps3-board)
 
 ## Implementing custom ML application
 
@@ -268,20 +259,20 @@ corresponding executable for each use-case.
 
 See:
 
-- [Customizing](./sections/customizing.md)
-  - [Software project description](./sections/customizing.md#Software-project-description)
+- [Implementing custom ML application](./sections/customizing.md)
+  - [Software project description](./sections/customizing.md#software-project-description)
   - [HAL API](./sections/customizing.md#hal-api)
   - [Main loop function](./sections/customizing.md#main-loop-function)
   - [Application context](./sections/customizing.md#application-context)
-  - [Profiler](./sections/customizing.md#Profiler)
-  - [NN Model API](./sections/customizing.md#NN-model-API)
-  - [Adding custom ML use-case](./sections/customizing.md#Adding-custom-ML-use-case)
-  - [Implementing main loop](./sections/customizing.md#Implementing-main-loop)
-  - [Implementing custom NN model](./sections/customizing.md#Implementing-custom-NN-model)
+  - [Profiler](./sections/customizing.md#profiler)
+  - [NN Model API](./sections/customizing.md#nn-model-api)
+  - [Adding custom ML use-case](./sections/customizing.md#adding-custom-ml-use-case)
+  - [Implementing main loop](./sections/customizing.md#implementing-main-loop)
+  - [Implementing custom NN model](./sections/customizing.md#implementing-custom-nn-model)
   - [Executing inference](./sections/customizing.md#executing-inference)
   - [Printing to console](./sections/customizing.md#printing-to-console)
   - [Reading user input from console](./sections/customizing.md#reading-user-input-from-console)
-  - [Output to MPS3 LCD](./sections/customizing.md#output-to-MPS3-LCD)
+  - [Output to MPS3 LCD](./sections/customizing.md#output-to-mps3-lcd)
   - [Building custom use-case](./sections/customizing.md#building-custom-use-case)
 
 ## Testing and benchmarking
@@ -297,103 +288,12 @@ See [Memory considerations](./sections/memory_considerations.md)
 See:
 
 - [Troubleshooting](./sections/troubleshooting.md)
-  - [Inference results are incorrect for my custom files](./sections/troubleshooting.md#Inference-results-are-incorrect-for-my-custom-files)
-  - [The application does not work with my custom model](./sections/troubleshooting.md#The-application-does-not-work-with-my-custom-model)
-
-## Contribution guidelines
-
-Contributions are only accepted under the following conditions:
-
-- The contribution have certified origin and give us your permission. To manage this process we use
-  [Developer Certificate of Origin (DCO) V1.1](https://developercertificate.org/).
-  To indicate that contributors agree to the the terms of the DCO, it's neccessary "sign off" the
-  contribution by adding a line with name and e-mail address to every git commit message:
-
-  ```log
-  Signed-off-by: John Doe <john.doe@example.org>
-  ```
-
-  This can be done automatically by adding the `-s` option to your `git commit` command.
-  You must use your real name, no pseudonyms or anonymous contributions are accepted.
-
-- You give permission according to the [Apache License 2.0](../LICENSE_APACHE_2.0.txt).
-
-  In each source file, include the following copyright notice:
-
-  ```copyright
-  /*
-  * Copyright (c) <years additions were made to project> <your name>, Arm Limited. All rights reserved.
-  * SPDX-License-Identifier: Apache-2.0
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-  ```
-
-### Coding standards and guidelines
-
-This repository follows a set of guidelines, best practices, programming styles and conventions,
-see:
-
-- [Coding standards and guidelines](./sections/coding_guidelines.md)
-  - [Introduction](./sections/coding_guidelines.md#introduction)
-  - [Language version](./sections/coding_guidelines.md#language-version)
-  - [File naming](./sections/coding_guidelines.md#file-naming)
-  - [File layout](./sections/coding_guidelines.md#file-layout)
-  - [Block Management](./sections/coding_guidelines.md#block-management)
-  - [Naming Conventions](./sections/coding_guidelines.md#naming-conventions)
-    - [C++ language naming conventions](./sections/coding_guidelines.md#c_language-naming-conventions)
-    - [C language naming conventions](./sections/coding_guidelines.md#c-language-naming-conventions)
-  - [Layout and formatting conventions](./sections/coding_guidelines.md#layout-and-formatting-conventions)
-  - [Language usage](./sections/coding_guidelines.md#language-usage)
-
-### Code Reviews
-
-Contributions must go through code review. Code reviews are performed through the
-[mlplatform.org Gerrit server](https://review.mlplatform.org). Contributors need to signup to this
-Gerrit server with their GitHub account credentials.
-In order to be merged a patch needs to:
-
-- get a "+1 Verified" from the pre-commit job.
-- get a "+2 Code-review" from a reviewer, it means the patch has the final approval.
-
-### Testing
-
-Prior to submitting a patch for review please make sure that all build variants works and unit tests pass.
-Contributions go through testing at the continuous integration system. All builds, tests and checks must pass before a
-contribution gets merged to the master branch.
-
-## Communication
-
-Please, if you want to start public discussion, raise any issues or questions related to this repository, use
-[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/)
-forum.
-
-## Licenses
-
-The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](../LICENSE_APACHE_2.0.txt).
-
-Application input data sample files are provided under their original license:
-
-|  | Licence | Provenience |
-|---------------|---------|---------|
-| [Automatic Speech Recognition Samples](../resources/asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/> |
-| [Image Classification Samples](../resources/img_class/samples/files.md) | [Creative Commons Attribution 1.0](../resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
-| [Keyword Spotting Samples](../resources/kws/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
-| [Keyword Spotting and Automatic Speech Recognition Samples](../resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](../resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
+  - [Inference results are incorrect for my custom files](./sections/troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
+  - [The application does not work with my custom model](./sections/troubleshooting.md#the-application-does-not-work-with-my-custom-model)
 
 ## Appendix
 
 See:
 
 - [Appendix](./sections/appendix.md)
-  - [Cortex-M55 Memory map overview](./sections/appendix.md#cortex-m55-memory-map-overview)
+  - [Cortex-M55 Memory map overview](./sections/appendix.md#arm_cortex_m55-memory-map-overview-for-corstone_300-reference-design)

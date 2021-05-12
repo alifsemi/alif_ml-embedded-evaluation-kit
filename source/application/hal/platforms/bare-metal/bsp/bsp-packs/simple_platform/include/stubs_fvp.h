@@ -35,7 +35,6 @@ uint32_t GetCoreClock(void);
 /************************  GLCD related functions ****************************/
 /**
  * @brief      Initialize the Himax LCD with HX8347-D LCD Controller
- * @return     none
  */
 void GLCD_Initialize(void);
 
@@ -48,7 +47,6 @@ void GLCD_Initialize(void);
  * @param[in]  w        width of bitmap.
  * @param[in]  h        height of bitmap.
  * @param[in]  bitmap   address at which the bitmap data resides.
- * @return     none
  */
 void GLCD_Bitmap(unsigned int x,  unsigned int y,
                 unsigned int w, unsigned int h,
@@ -65,7 +63,6 @@ void GLCD_Bitmap(unsigned int x,  unsigned int y,
  * @param[in] pos_y     start y position for the LCD.
  * @param[in] downsample_factor   factor by which the image
  *                                is downsampled by.
- * @return none
  */
 void GLCD_Image(void *data, const uint32_t width,
                 const uint32_t height, const uint32_t channels,
@@ -75,14 +72,12 @@ void GLCD_Image(void *data, const uint32_t width,
 /**
  * @brief      Clear display
  * @param[in]  color    display clearing color
- * @return     none
  */
 void GLCD_Clear(unsigned short color);
 
 /**
  * @brief      Set foreground color
  * @param[in]  color    foreground color
- * @return     none
  */
 void GLCD_SetTextColor(unsigned short color);
 
@@ -92,7 +87,6 @@ void GLCD_SetTextColor(unsigned short color);
  * @param[in]  col   column number
  * @param[in]  fi    font index (0 = 9x15)
  * @param[in]  c     ASCII character
- * @return     none
  */
 void GLCD_DisplayChar(unsigned int ln, unsigned int col,
                     unsigned char fi, unsigned char  c);
@@ -103,7 +97,6 @@ void GLCD_DisplayChar(unsigned int ln, unsigned int col,
  * @param[in]  col   column number
  * @param[in]  fi    font index (0 = 9x15)
  * @param[in]  s     pointer to string
- * @return     none
  */
 void GLCD_DisplayString(unsigned int ln, unsigned int col,
                         unsigned char fi, char *s);
@@ -115,7 +108,6 @@ void GLCD_DisplayString(unsigned int ln, unsigned int col,
  * @param[in]  w:       window width in pixels
  * @param[in]  h:       window height in pixels
  * @param[in]  color    box color
- * @return     none
  */
 void GLCD_Box(unsigned int x, unsigned int y,
             unsigned int w, unsigned int h,

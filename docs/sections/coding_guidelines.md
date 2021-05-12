@@ -1,7 +1,5 @@
 # Coding standards and guidelines
 
-## Contents
-
 - [Introduction](#introduction)
 - [Language version](#language-version)
 - [File naming](#file-naming)

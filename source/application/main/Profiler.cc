@@ -22,14 +22,14 @@
 namespace arm {
 namespace app {
     Profiler::Profiler(hal_platform* platform, const char* name = "Unknown")
-    : _m_name(name)
+    : m_name(name)
     {
         if (platform && platform->inited) {
-            this->_m_pPlatform = platform;
+            this->m_pPlatform = platform;
             this->Reset();
         } else {
             printf_err("Profiler %s initialised with invalid platform\n",
-                this->_m_name.c_str());
+                this->m_name.c_str());
         }
     }
 
@@ -38,27 +38,27 @@ namespace app {
         if (name) {
             this->SetName(name);
         }
-        if (this->_m_pPlatform && !this->_m_started) {
-            this->_m_pPlatform->timer->reset();
-            this->_m_tstampSt = this->_m_pPlatform->timer->start_profiling();
-            this->_m_started = true;
+        if (this->m_pPlatform && !this->m_started) {
+            this->m_pPlatform->timer->reset();
+            this->m_tstampSt = this->m_pPlatform->timer->start_profiling();
+            this->m_started = true;
             return true;
         }
-        printf_err("Failed to start profiler %s\n", this->_m_name.c_str());
+        printf_err("Failed to start profiler %s\n", this->m_name.c_str());
         return false;
     }
 
     bool Profiler::StopProfiling()
     {
-        if (this->_m_pPlatform && this->_m_started) {
-            this->_m_tstampEnd = this->_m_pPlatform->timer->stop_profiling();
-            this->_m_started = false;
+        if (this->m_pPlatform && this->m_started) {
+            this->m_tstampEnd = this->m_pPlatform->timer->stop_profiling();
+            this->m_started = false;
 
-            this->AddProfilingUnit(this->_m_tstampSt, this->_m_tstampEnd, this->_m_name);
+            this->AddProfilingUnit(this->m_tstampSt, this->m_tstampEnd, this->m_name);
 
             return true;
         }
-        printf_err("Failed to stop profiler %s\n", this->_m_name.c_str());
+        printf_err("Failed to stop profiler %s\n", this->m_name.c_str());
         return false;
     }
 
@@ -68,16 +68,16 @@ namespace app {
             this->Reset();
             return true;
         }
-        printf_err("Failed to stop profiler %s\n", this->_m_name.c_str());
+        printf_err("Failed to stop profiler %s\n", this->m_name.c_str());
         return false;
     }
 
     void Profiler::Reset()
     {
-        this->_m_started = false;
-        this->_m_series.clear();
-        memset(&this->_m_tstampSt, 0, sizeof(this->_m_tstampSt));
-        memset(&this->_m_tstampEnd, 0, sizeof(this->_m_tstampEnd));
+        this->m_started = false;
+        this->m_series.clear();
+        memset(&this->m_tstampSt, 0, sizeof(this->m_tstampSt));
+        memset(&this->m_tstampEnd, 0, sizeof(this->m_tstampEnd));
     }
 
     void calcProfilingStat(uint64_t currentValue,
@@ -92,7 +92,7 @@ namespace app {
 
     void Profiler::GetAllResultsAndReset(std::vector<ProfileResult>& results)
     {
-        for (const auto& item: this->_m_series) {
+        for (const auto& item: this->m_series) {
             auto name = item.first;
             ProfilingSeries series = item.second;
             ProfileResult result{};
@@ -236,13 +236,13 @@ namespace app {
 
     void Profiler::SetName(const char* str)
     {
-        this->_m_name = std::string(str);
+        this->m_name = std::string(str);
     }
 
     void Profiler::AddProfilingUnit(time_counter start, time_counter end,
                                     const std::string& name)
     {
-        platform_timer * timer = this->_m_pPlatform->timer;
+        platform_timer * timer = this->m_pPlatform->timer;
 
         struct ProfilingUnit unit;
 
@@ -269,7 +269,7 @@ namespace app {
             unit.time = timer->get_duration_ms(&start, &end);
         }
 
-        this->_m_series[name].emplace_back(unit);
+        this->m_series[name].emplace_back(unit);
     }
 
 } /* namespace app */

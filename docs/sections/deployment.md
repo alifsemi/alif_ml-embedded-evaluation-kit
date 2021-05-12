@@ -1,9 +1,6 @@
 # Deployment
 
-## Contents
-
 - [Deployment](#deployment)
-  - [Contents](#contents)
   - [Fixed Virtual Platform](#fixed-virtual-platform)
     - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
     - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
@@ -27,11 +24,6 @@ Download the correct archive from the list under `Arm Corstone-300`. We need the
 - Emulates MPS3 board (not for MPS2 FPGA board)
 - Contains support for Arm® Ethos™-U55
 
-For FVP, the elf or the axf file can be run using the Fast Model
-executable as outlined under the [Starting Fast Model simulation](./setup.md/#starting-fast-model-simulation)
-except for the binary being pointed at here
-is the one just built using the steps in the previous section.
-
 ### Setting up the MPS3 Arm Corstone-300 FVP
 
 For Ethos-U55 sample application, please download the MPS3 version of the
@@ -48,12 +40,12 @@ currently only supported on Linux based machines. To install the FVP:
 
 ### Deploying on an FVP emulating MPS3
 
-This section assumes that the FVP has been installed (see [Setting up the MPS3 Arm Corstone-300 FVP](#Setting-up-the-MPS3-Arm-Corstone-300-FVP)) to the user's home directory `~/FVP_Corstone_SSE-300_Ethos-U55`.
+This section assumes that the FVP has been installed (see [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)) to the user's home directory `~/FVP_Corstone_SSE-300_Ethos-U55`.
 
 The installation, typically, will have the executable under `~/FVP_Corstone_SSE-300_Ethos-U55/model/<OS>_<compiler-version>/`
 directory. For the example below, we assume it to be `~/FVP_Corstone_SSE-300_Ethos-U55/models/Linux64_GCC-6.4`.
 
-To run a use case on the FVP, from the [Build directory](../sections/building.md#Create-a-build-directory):
+To run a use case on the FVP, from the [Build directory](../sections/building.md#create-a-build-directory):
 
 ```commandline
 ~/FVP_Corstone_SSE-300_Ethos-U55/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-<use_case>.axf
@@ -71,6 +63,8 @@ This will also launch a telnet window with the sample application's standard out
 information about the pre-built application version, TensorFlow Lite Micro library version used, data type as well as
 the input and output tensor sizes of the model compiled into the executable binary.
 
+> **Note:** For details on the specific use-case follow the instructions in the corresponding documentation.
+
 After the application has started it outputs a menu and waits for the user input from telnet terminal.
 
 For example, the image classification use case can be started by:
@@ -78,6 +72,10 @@ For example, the image classification use case can be started by:
 ```commandline
 ~/FVP_Corstone_SSE-300_Ethos-U55/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-img_class.axf
 ```
+
+![FVP](../media/fvp.png)
+
+![FVP Terminal](../media/fvpterminal.png)
 
 The FVP supports many command line parameters:
 
@@ -278,4 +276,4 @@ off.
     ...
     ```
 
-Next section of the main documentation, [Running code samples applications](../documentation.md#Running-code-samples-applications).
+Next section of the documentation: [Implementing custom ML application](customizing.md).

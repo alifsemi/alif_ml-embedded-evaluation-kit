@@ -50,6 +50,7 @@ int log_display_image(uint8_t* data, const uint32_t width,
  * @param[in]   str_sz      Length of the string.
  * @param[in]   pos_x       Screen position x co-ordinate.
  * @param[in]   pos_y       Screen position y co-ordinate.
+ * @param[in]   allow_multiple_lines  Specifies if multiple lines are allowed.
  * @return      0 if successful, non-zero otherwise.
  **/
 int log_display_text(const char* str, const size_t str_sz,

@@ -88,3 +88,4 @@ For more details see full documentation:
   - [Communication](./docs/documentation.md#communication)
   - [Licenses](./docs/documentation.md#licenses)
   - [Appendix](./docs/documentation.md#appendix)
+  

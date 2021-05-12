@@ -1,7 +1,5 @@
 # Testing and benchmarking
 
-## Contents
-
 - [Testing](#testing)
 - [Benchmarking](#benchmarking)
 
@@ -86,4 +84,4 @@ For example:
     Time in ms:        210
 ```
 
-Next section of the main documentation: [Troubleshooting](../documentation.md#Troubleshooting).
+Next section of the documentation: [Memory Considerations](memory_considerations.md).

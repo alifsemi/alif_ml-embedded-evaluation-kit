@@ -67,8 +67,6 @@ namespace app {
      *                  object.
      * @param[in]       platform    reference to the hal platform object
      * @param[in]       results     vector of classification results to be displayed
-     * @param[in]       infTimeMs   inference time in milliseconds, if available
-     *                              Otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise
      **/
     static bool PresentInferenceResult(hal_platform& platform, std::vector<arm::app::kws::KwsResult>& results);
@@ -78,8 +76,6 @@ namespace app {
      *                  object.
      * @param[in]       platform    reference to the hal platform object
      * @param[in]       results     vector of classification results to be displayed
-     * @param[in]       infTimeMs   inference time in milliseconds, if available
-     *                              Otherwise, this can be passed in as 0.
      * @return          true if successful, false otherwise
      **/
     static bool PresentInferenceResult(hal_platform& platform, std::vector<arm::app::asr::AsrResult>& results);
@@ -291,8 +287,8 @@ namespace app {
     /**
      * @brief Performs the ASR pipeline.
      *
-     * @param ctx[in/out]   pointer to the application context object
-     * @param kwsOutput[in] struct containing pointer to audio data where ASR should begin
+     * @param[in,out] ctx   pointer to the application context object
+     * @param[in] kwsOutput struct containing pointer to audio data where ASR should begin
      *                      and how much data to process
      * @return bool         true if pipeline executed without failure
      */

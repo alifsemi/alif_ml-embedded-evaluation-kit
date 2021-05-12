@@ -27,11 +27,11 @@ namespace asr {
     Postprocess::Postprocess(const uint32_t contextLen,
                              const uint32_t innerLen,
                              const uint32_t blankTokenIdx)
-        :   _m_contextLen(contextLen),
-            _m_innerLen(innerLen),
-            _m_totalLen(2 * this->_m_contextLen + this->_m_innerLen),
-            _m_countIterations(0),
-            _m_blankTokenIdx(blankTokenIdx)
+        :   m_contextLen(contextLen),
+            m_innerLen(innerLen),
+            m_totalLen(2 * this->m_contextLen + this->m_innerLen),
+            m_countIterations(0),
+            m_blankTokenIdx(blankTokenIdx)
     {}
 
     bool Postprocess::Invoke(TfLiteTensor*  tensor,
@@ -51,7 +51,7 @@ namespace asr {
         if (0 == elemSz) {
             printf_err("Tensor type not supported for post processing\n");
             return false;
-        } else if (elemSz * this->_m_totalLen > tensor->bytes) {
+        } else if (elemSz * this->m_totalLen > tensor->bytes) {
             printf_err("Insufficient number of tensor bytes\n");
             return false;
         }
@@ -88,7 +88,7 @@ namespace asr {
             return false;
         }
 
-        if (static_cast<int>(this->_m_totalLen) !=
+        if (static_cast<int>(this->m_totalLen) !=
                              tensor->dims->data[axisIdx]) {
             printf_err("Unexpected tensor dimension for axis %d, \n",
                 tensor->dims->data[axisIdx]);
@@ -124,31 +124,31 @@ namespace asr {
     {
         /* In this case, the "zero-ing" is quite simple as the region
          * to be zeroed sits in contiguous memory (row-major). */
-        const uint32_t eraseLen = strideSzBytes * this->_m_contextLen;
+        const uint32_t eraseLen = strideSzBytes * this->m_contextLen;
 
         /* Erase left context? */
-        if (this->_m_countIterations > 0) {
+        if (this->m_countIterations > 0) {
             /* Set output of each classification window to the blank token. */
             std::memset(ptrData, 0, eraseLen);
-            for (size_t windowIdx = 0; windowIdx < this->_m_contextLen; windowIdx++) {
-                ptrData[windowIdx*strideSzBytes + this->_m_blankTokenIdx] = 1;
+            for (size_t windowIdx = 0; windowIdx < this->m_contextLen; windowIdx++) {
+                ptrData[windowIdx*strideSzBytes + this->m_blankTokenIdx] = 1;
             }
         }
 
         /* Erase right context? */
         if (false == lastIteration) {
-            uint8_t * rightCtxPtr = ptrData + (strideSzBytes * (this->_m_contextLen + this->_m_innerLen));
+            uint8_t * rightCtxPtr = ptrData + (strideSzBytes * (this->m_contextLen + this->m_innerLen));
             /* Set output of each classification window to the blank token. */
             std::memset(rightCtxPtr, 0, eraseLen);
-            for (size_t windowIdx = 0; windowIdx < this->_m_contextLen; windowIdx++) {
-                rightCtxPtr[windowIdx*strideSzBytes + this->_m_blankTokenIdx] = 1;
+            for (size_t windowIdx = 0; windowIdx < this->m_contextLen; windowIdx++) {
+                rightCtxPtr[windowIdx*strideSzBytes + this->m_blankTokenIdx] = 1;
             }
         }
 
         if (lastIteration) {
-            this->_m_countIterations = 0;
+            this->m_countIterations = 0;
         } else {
-            ++this->_m_countIterations;
+            ++this->m_countIterations;
         }
 
         return true;

@@ -107,14 +107,14 @@ namespace app {
         void SetName(const char* str);
 
     private:
-        ProfilingMap    _m_series;                /* Profiling series map. */
-        time_counter    _m_tstampSt{};            /* Container for a current starting timestamp. */
-        time_counter    _m_tstampEnd{};           /* Container for a current ending timestamp. */
-        hal_platform *  _m_pPlatform = nullptr;   /* Platform pointer - to get the timer. */
+        ProfilingMap    m_series;                /* Profiling series map. */
+        time_counter    m_tstampSt{};            /* Container for a current starting timestamp. */
+        time_counter    m_tstampEnd{};           /* Container for a current ending timestamp. */
+        hal_platform *  m_pPlatform = nullptr;   /* Platform pointer - to get the timer. */
 
-        bool            _m_started = false;       /* Indicates profiler has been started. */
+        bool            m_started = false;       /* Indicates profiler has been started. */
 
-        std::string     _m_name;                  /* Name given to this profiler. */
+        std::string     m_name;                  /* Name given to this profiler. */
 
         /**
          * @brief       Appends the profiling unit computed by the "start" and
