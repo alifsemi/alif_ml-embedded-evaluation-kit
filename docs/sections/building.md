@@ -371,12 +371,13 @@ cmake .. \
 If the TensorFlow source tree is not in its default expected location, set the path
 using `TENSORFLOW_SRC_PATH`. Similarly, if the Ethos-U55 NPU driver and CMSIS are
 not in the default location, `ETHOS_U55_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` can be
-used to configure their location. For example:
+used to configure their location.
+For example:
 
 ```commandline
 cmake .. \
     -DTENSORFLOW_SRC_PATH=/my/custom/location/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core_driver \
+    -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core-driver \
     -DCMSIS_SRC_PATH=/my/custom/location/cmsis
 ```
 

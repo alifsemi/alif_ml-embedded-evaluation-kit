@@ -175,7 +175,7 @@ if (ETHOS_U55_ENABLED)
 
     USER_OPTION(ETHOS_U55_DRIVER_SRC_PATH
         "Path to Ethos-U55 core driver sources"
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core_driver"
+        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-driver"
         PATH
         )
 
