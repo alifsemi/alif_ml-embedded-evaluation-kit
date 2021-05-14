@@ -146,7 +146,7 @@ static time_counter bm_stop_profiling(void);
  * @return  CPU cycle difference between given time counters expressed
  *          as unsigned 32 bit integer.
  **/
-static uint32_t bm_get_cpu_cycles_diff(time_counter *st, time_counter *end);
+static uint64_t bm_get_cpu_cycles_diff(time_counter *st, time_counter *end);
 
 /**
  * @brief       Initialiser for bare metal timer.
@@ -335,7 +335,7 @@ static time_counter bm_stop_profiling(void)
     return bm_get_time_counter();
 }
 
-static uint32_t bm_get_cpu_cycles_diff(time_counter *st, time_counter *end)
+static uint64_t bm_get_cpu_cycles_diff(time_counter *st, time_counter *end)
 {
     return get_cycle_count_diff(&(st->counter), &(end->counter));
 }

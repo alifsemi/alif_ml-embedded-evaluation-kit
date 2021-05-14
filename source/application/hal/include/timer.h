@@ -54,7 +54,7 @@ typedef struct _platform_timer {
     time_t (* get_duration_us)(time_counter *start, time_counter *end);
 
     /* Gets difference in CPU cycle counts. */
-    uint32_t (* get_cpu_cycle_diff)(time_counter *start, time_counter *end);
+    uint64_t (* get_cpu_cycle_diff)(time_counter *start, time_counter *end);
 
     /* Gets the difference in terms of cycle counts for collected pmu counters. */
     int (* get_npu_cycles_diff)(time_counter *start, time_counter *end,

@@ -10,8 +10,8 @@ resources_downloaded
 
 # Build files
 CMakeFiles
-build
-cmake-build-*
+build*/
+cmake-build-*/
 
 # Virtual environments
 scripts/py/env*
