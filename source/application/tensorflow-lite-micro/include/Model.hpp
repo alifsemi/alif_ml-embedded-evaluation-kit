@@ -84,8 +84,8 @@ namespace app {
         /** @brief  Checks if the model uses signed data. */
         bool IsDataSigned() const;
 
-        /** @brief  Runs the inference (invokes the interpreter). */
-        bool RunInference();
+         /** @brief  Runs the inference (invokes the interpreter). */
+         virtual bool RunInference();
 
         /** @brief   Model information handler common to all models.
          *  @return  true or false based on execution success.
