@@ -96,7 +96,7 @@ int system_init(void)
     }
 #else /* MPS3_PLATFORM */
 
-    info("ARM model environment ready..\n");
+    info("%s: complete\n", __FUNCTION__);
     return 0;
 #endif /* MPS3_PLATFORM */
 

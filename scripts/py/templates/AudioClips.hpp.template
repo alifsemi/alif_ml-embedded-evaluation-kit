@@ -23,6 +23,7 @@
 #include <stddef.h>
 
 #define NUMBER_OF_FILES  ({{clips_count}}U)
+
 {% for var_name, size in varname_size %}
 extern const int16_t {{var_name}}[{{size}}];
 {% endfor %}

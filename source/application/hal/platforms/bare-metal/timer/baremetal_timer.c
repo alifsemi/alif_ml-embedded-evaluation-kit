@@ -260,7 +260,7 @@ static uint64_t bm_get_npu_axi0_read_cycle_diff(time_counter *st, time_counter *
         printf_err("EthosU PMU axi0 read counter overflow.\n");
         return 0;
     }
-    return (uint64_t)(end->npu_axi0_read_ccnt - st->npu_axi0_read_ccnt);
+    return (uint64_t)(end->npu_axi0_read_beats - st->npu_axi0_read_beats);
 }
 
 static uint64_t bm_get_npu_axi0_write_cycle_diff(time_counter *st, time_counter *end)
@@ -269,7 +269,7 @@ static uint64_t bm_get_npu_axi0_write_cycle_diff(time_counter *st, time_counter 
         printf_err("EthosU PMU axi0 write counter overflow.\n");
         return 0;
     }
-    return (uint64_t)(end->npu_axi0_write_ccnt - st->npu_axi0_write_ccnt);
+    return (uint64_t)(end->npu_axi0_write_beats - st->npu_axi0_write_beats);
 }
 
 static uint64_t bm_get_npu_axi1_read_cycle_diff(time_counter *st, time_counter *end)
@@ -278,7 +278,7 @@ static uint64_t bm_get_npu_axi1_read_cycle_diff(time_counter *st, time_counter *
         printf_err("EthosU PMU axi1 read counter overflow.\n");
         return 0;
     }
-    return (uint64_t)(end->npu_axi1_read_ccnt - st->npu_axi1_read_ccnt);
+    return (uint64_t)(end->npu_axi1_read_beats - st->npu_axi1_read_beats);
 }
 
 #endif /* defined (ARM_NPU) */
@@ -300,9 +300,9 @@ static time_counter bm_get_time_counter(void)
 #if defined (ARM_NPU)
             .npu_total_ccnt = ETHOSU_PMU_Get_CCNTR(),
             .npu_idle_ccnt = ETHOSU_PMU_Get_EVCNTR(0),
-            .npu_axi0_read_ccnt = ETHOSU_PMU_Get_EVCNTR(1),
-            .npu_axi0_write_ccnt = ETHOSU_PMU_Get_EVCNTR(2),
-            .npu_axi1_read_ccnt = ETHOSU_PMU_Get_EVCNTR(3)
+            .npu_axi0_read_beats = ETHOSU_PMU_Get_EVCNTR(1),
+            .npu_axi0_write_beats = ETHOSU_PMU_Get_EVCNTR(2),
+            .npu_axi1_read_beats = ETHOSU_PMU_Get_EVCNTR(3)
 #endif /* defined (ARM_NPU) */
 
     };
@@ -310,14 +310,14 @@ static time_counter bm_get_time_counter(void)
 #if defined (ARM_NPU)
     debug("NPU total cc: %" PRIu64
         "; NPU idle cc: %" PRIu32
-        "; NPU axi0 read cc: %" PRIu32
-        "; NPU axi0 write cc: %" PRIu32
-        "; NPU axi1 read cc: %" PRIu32 "\n",
+        "; NPU axi0 read beats: %" PRIu32
+        "; NPU axi0 write beats: %" PRIu32
+        "; NPU axi1 read beats: %" PRIu32 "\n",
         t.npu_total_ccnt,
         t.npu_idle_ccnt,
-        t.npu_axi0_read_ccnt,
-        t.npu_axi0_write_ccnt,
-        t.npu_axi1_read_ccnt);
+        t.npu_axi0_read_beats,
+        t.npu_axi0_write_beats,
+        t.npu_axi1_read_beats);
 #endif /* defined (ARM_NPU) */
 
     return t;

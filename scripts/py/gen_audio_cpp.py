@@ -75,7 +75,7 @@ def write_hpp_file(header_filepath, cc_filepath, header_template_file, num_audio
 
 def write_individual_audio_cc_file(clip_dirpath, clip_filename,
                                    cc_filename, header_template_file, array_name,
-                                   sampling_rate_value, mono_value, offset_value, 
+                                   sampling_rate_value, mono_value, offset_value,
                                    duration_value, res_type_value, min_len):
     print(f"++ Converting {clip_filename} to {path.basename(cc_filename)}")
     audio_filepath = path.join(clip_dirpath, clip_filename)
@@ -85,8 +85,8 @@ def write_individual_audio_cc_file(clip_dirpath, clip_filename,
                                                                 res_type_value, min_len)
 
     # Change from [-1, 1] fp32 range to int16 range.
-    clip_data = np.clip((clip_data * (1 << 15)), 
-                        np.iinfo(np.int16).min, 
+    clip_data = np.clip((clip_data * (1 << 15)),
+                        np.iinfo(np.int16).min,
                         np.iinfo(np.int16).max).flatten().astype(np.int16)
 
     header_template = env.get_template(header_template_file)
@@ -117,7 +117,7 @@ def main(args):
     header_filepath = path.join(args.header_folder_path, header_filename)
     common_cc_filepath = path.join(args.source_folder_path, common_cc_filename)
 
-    if os.path.isdir(args.audio_path):  
+    if os.path.isdir(args.audio_path):
         filepaths = sorted(glob.glob(path.join(args.audio_path, '**/*.wav'), recursive=True))
     elif os.path.isfile(args.audio_path):
         filepaths = [args.audio_path]
@@ -125,7 +125,7 @@ def main(args):
         raise OSError("Directory or file does not exist.")
 
     for filepath in filepaths:
-        filename = path.basename(filepath)	
+        filename = path.basename(filepath)
         clip_dirpath = path.dirname(filepath)
         try:
             audioclip_filenames.append(filename)
@@ -145,8 +145,11 @@ def main(args):
             if args.verbosity:
                 print(f"Failed to open {filename} as an audio.")
 
-    write_hpp_file(header_filepath, common_cc_filepath, args.license_template,
-                   audioclip_idx, audioclip_filenames, audioclip_array_names)
+    if len(audioclip_filenames) > 0:
+        write_hpp_file(header_filepath, common_cc_filepath, args.license_template,
+                    audioclip_idx, audioclip_filenames, audioclip_array_names)
+    else:
+        raise FileNotFoundError("No valid audio clip files found.")
 
 
 if __name__ == '__main__':

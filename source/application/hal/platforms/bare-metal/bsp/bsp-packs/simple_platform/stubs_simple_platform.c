@@ -14,9 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "stubs_fvp.h"
+#include "stubs_simple_platform.h"
 
 #include "bsp_core_log.h"
+
+#include <inttypes.h>
 
 uint32_t GetCoreClock(void)
 {
@@ -46,9 +48,10 @@ void GLCD_Image(void *data, const uint32_t width, const uint32_t height,
     UNUSED(height);
     UNUSED(channels);
     UNUSED(downsample_factor);
-    debug("image display: (x, y, w, h) = (%u, %u, %u, %u)\n",
+    debug("image display: (x, y, w, h) = "
+        "(%" PRIu32 ", %" PRIu32 ", %" PRIu32 ", %" PRIu32 ")\n",
         pos_x, pos_y, width, height);
-    debug("image display: channels = %u, downsample factor = %u\n",
+    debug("image display: channels = %" PRIu32 ", downsample factor = %" PRIu32 "\n",
         channels, downsample_factor);
 }
 
@@ -100,12 +103,12 @@ void LED_On(uint32_t num, uint32_t port)
 {
     UNUSED(num);
     UNUSED(port);
-    debug("LED %u ON\n", num);
+    debug("LED %" PRIu32 " ON\n", num);
 }
 
 void LED_Off(uint32_t num, uint32_t port)
 {
     UNUSED(num);
     UNUSED(port);
-    debug("LED %u OFF\n", num);
+    debug("LED %" PRIu32 " OFF\n", num);
 }

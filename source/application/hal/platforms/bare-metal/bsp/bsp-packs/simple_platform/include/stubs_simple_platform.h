@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BSP_PACK_FASTMODEL_H
-#define BSP_PACK_FASTMODEL_H
+#ifndef STUBS_SIMPLE_PLATFORM_H
+#define STUBS_SIMPLE_PLATFORM_H
 
 #include "cmsis.h"                  /* device specific header file    */
 #include "peripheral_memmap.h"      /* peripheral memory map definitions */
 
 /****************************************************************************/
 /*              Definitions and stub functions for modules currently        */
-/*              unavailable on the model                                    */
+/*              unavailable on this target platform                         */
 /****************************************************************************/
 #define GLCD_WIDTH      320
 #define GLCD_HEIGHT     240
@@ -113,4 +113,4 @@ void GLCD_Box(unsigned int x, unsigned int y,
             unsigned int w, unsigned int h,
             unsigned short color);
 
-#endif /* BSP_PACK_FASTMODEL_H */
+#endif /* STUBS_SIMPLE_PLATFORM_H */

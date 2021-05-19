@@ -22,10 +22,10 @@
 
 #if defined (MPS3_PLATFORM)
     #include "timer_mps3.h"
-    typedef mps3_time_counter   base_time_counter;
+    typedef mps3_time_counter       base_time_counter;
 #else /* defined (MPS3_PLATFORM) */
-    #include "timer_fvp.h"
-    typedef fvp_time_counter    base_time_counter;
+    #include "timer_simple_platform.h"
+    typedef generic_time_counter    base_time_counter;
 #endif  /* defined (MPS3_PLATFORM) */
 
 typedef struct bm_time_counter {
@@ -34,9 +34,9 @@ typedef struct bm_time_counter {
 #if defined (ARM_NPU)
     uint64_t                npu_total_ccnt;
     uint32_t                npu_idle_ccnt;
-    uint32_t                npu_axi0_read_ccnt;
-    uint32_t                npu_axi0_write_ccnt;
-    uint32_t                npu_axi1_read_ccnt;
+    uint32_t                npu_axi0_read_beats;
+    uint32_t                npu_axi0_write_beats;
+    uint32_t                npu_axi1_read_beats;
 #endif /* ARM_NPU */
 
 } time_counter;

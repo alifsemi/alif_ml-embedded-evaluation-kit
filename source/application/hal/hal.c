@@ -28,6 +28,8 @@
 #include "timing_adapter.h"             /* Arm Ethos-U55 timing adapter driver header */
 #include "timing_adapter_settings.h"    /* Arm Ethos-U55 timing adapter settings */
 
+extern struct ethosu_driver ethosu_drv; /* Default Ethos-U55 device driver */
+
 /**
  * @brief   Initialises the Arm Ethos-U55 NPU
  * @return  0 if successful, error code otherwise
@@ -133,7 +135,7 @@ void hal_platform_release(hal_platform *platform)
 static void arm_npu_irq_handler(void)
 {
     /* Call the default interrupt handler from the NPU driver */
-    ethosu_irq_handler();
+    ethosu_irq_handler(&ethosu_drv);
 }
 
 /**
@@ -229,7 +231,8 @@ static int arm_npu_init(void)
     /* Initialise Ethos-U55 device */
     const void * ethosu_base_address = (void *)(SEC_ETHOS_U55_BASE);
 
-    if (0 != (err = ethosu_init_v3(
+    if (0 != (err = ethosu_init(
+                        &ethosu_drv,            /* Ethos-U55 driver device pointer */
                         ethosu_base_address,    /* Ethos-U55's base address. */
                         NULL,                   /* Pointer to fast mem area - NULL for U55. */
                         0,                      /* Fast mem region size. */
@@ -243,7 +246,7 @@ static int arm_npu_init(void)
 
     /* Get Ethos-U55 version */
     struct ethosu_version version;
-    if (0 != (err = ethosu_get_version(&version))) {
+    if (0 != (err = ethosu_get_version(&ethosu_drv, &version))) {
         printf_err("failed to fetch Ethos-U55 version info\n");
         return err;
     }

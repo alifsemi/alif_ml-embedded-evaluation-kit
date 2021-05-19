@@ -199,11 +199,12 @@ bool GetLine (char *lp, unsigned int len)
             case 0:
                 *lp = 0;                       /* ESC - stop editing line.       */
                 return false;
-            case CR:                           /* CR - done, stop editing line.  */
-                *lp = c;
-                lp++;                          /* increment line pointer.        */
-                cnt++;                         /* and count.                     */
+            case CR:                            /* CR - done, stop editing line.  */
+                UartPutc (*lp = c);             /* Echo and store character.      */
+                lp++;                           /* Increment line pointer         */
+                cnt++;                          /* and count.                     */
                 c = LF;
+                break;
             default:
                 UartPutc (*lp = c);            /* echo and store character.      */
                 fflush (stdout);

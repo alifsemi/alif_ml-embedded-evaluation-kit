@@ -30,8 +30,8 @@
 
 #else /* MPS3_PLATFORM */
 
-#include "stubs_fvp.h"      /* Stubs for FVP. */
-#include "timer_fvp.h"      /* Timer API for FVP. */
+#include "stubs_simple_platform.h"      /* Stubs for simple_platform. */
+#include "timer_simple_platform.h"      /* Timer API for simple_platform. */
 
 #endif /* MPS3_PLATFORM */
 

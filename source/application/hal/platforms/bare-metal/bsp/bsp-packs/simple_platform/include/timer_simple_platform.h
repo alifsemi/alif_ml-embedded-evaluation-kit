@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TIMER_FVP_H
-#define TIMER_FVP_H
+#ifndef TIMER_SIMPLE_PLATFORM_H
+#define TIMER_SIMPLE_PLATFORM_H
 
-#include "stubs_fvp.h"
+#include "stubs_simple_platform.h"
 
-/* Container for timestamp for fastmodel. */
-typedef struct _fvp_time_counter {
+/* Container for timestamp for simple platform. */
+typedef struct _generic_time_counter {
     uint64_t    counter_systick;
-} fvp_time_counter;
+} generic_time_counter;
 
 /**
  * @brief   Resets the counters.
@@ -33,13 +33,13 @@ void timer_reset(void);
  * @brief   Gets the current counter values.
  * @returns counter struct.
  **/
-fvp_time_counter get_time_counter(void);
+generic_time_counter get_time_counter(void);
 
 /**
  * @brief   Gets the cycle counts elapsed between start and end.
  * @return  difference in counter values as 32 bit unsigned integer.
  */
-uint64_t get_cycle_count_diff(fvp_time_counter *start, fvp_time_counter *end);
+uint64_t get_cycle_count_diff(generic_time_counter *start, generic_time_counter *end);
 
 /**
  * @brief   Enables or triggers cycle counting mechanism, if required
@@ -52,4 +52,4 @@ void start_cycle_counter(void);
  */
 void stop_cycle_counter(void);
 
-#endif /* TIMER_FVP_H */
+#endif /* TIMER_SIMPLE_PLATFORM_H */

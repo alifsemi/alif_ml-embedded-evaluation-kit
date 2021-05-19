@@ -24,7 +24,7 @@
 #                              Application specific config                                        #
 ###################################################################################################
 
-# This parameter is based on the linker/scatter script for internal FVP. Do not change this
+# This parameter is based on the linker/scatter script for simple platform. Do not change this
 # parameter in isolation.
 set(ACTIVATION_BUF_SRAM_SZ "0x00200000"      CACHE STRING "Maximum SRAM size for activation buffers")
 set(DESIGN_NAME            "Simple platform" CACHE STRING "Design name")

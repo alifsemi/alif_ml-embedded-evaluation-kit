@@ -14,17 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "timer_fvp.h"
+#include "timer_simple_platform.h"
 
 #include "irqs.h"
 #include "bsp_core_log.h"
 
-fvp_time_counter get_time_counter(void)
+#include <inttypes.h>
+
+generic_time_counter get_time_counter(void)
 {
-    fvp_time_counter t = {
+    generic_time_counter t = {
         .counter_systick = Get_SysTick_Cycle_Count()
     };
-    debug("counter_systick: %llu\n", t.counter_systick);
+    debug("counter_systick: %" PRIu64 "\n", t.counter_systick);
     return t;
 }
 
@@ -36,8 +38,8 @@ void timer_reset(void)
     debug("system tick config ready\n");
 }
 
-uint64_t get_cycle_count_diff(fvp_time_counter *start,
-                              fvp_time_counter *end)
+uint64_t get_cycle_count_diff(generic_time_counter *start,
+                              generic_time_counter *end)
 {
     if (start->counter_systick > end->counter_systick) {
         warn("start > end; counter might have overflown\n");

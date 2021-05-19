@@ -127,8 +127,12 @@ def main(args):
     header_filepath = os.path.join(args.header_folder_path, header_filename)
     common_cc_filename = "InputFiles.cc"
     common_cc_filepath = os.path.join(args.source_folder_path, common_cc_filename)
-    write_hpp_file(header_filepath, common_cc_filepath, args.license_template,
-                   image_idx, image_filenames, image_array_names, args.image_size)
+
+    if len(image_filenames) > 0:
+        write_hpp_file(header_filepath, common_cc_filepath, args.license_template,
+                    image_idx, image_filenames, image_array_names, args.image_size)
+    else:
+        raise FileNotFoundError("No valid images found.")
 
 
 if __name__ == '__main__':
