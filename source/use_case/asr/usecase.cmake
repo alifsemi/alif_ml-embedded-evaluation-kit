@@ -63,7 +63,7 @@ generate_audio_code(${${use_case}_FILE_PATH} ${SRC_GEN_DIR} ${INC_GEN_DIR}
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)
 generate_labels_code(
-    INPUT           "${${use_case}_LABELS_TXT_FILE}" 
+    INPUT           "${${use_case}_LABELS_TXT_FILE}"
     DESTINATION_SRC ${SRC_GEN_DIR}
     DESTINATION_HDR ${INC_GEN_DIR}
     OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
@@ -75,9 +75,9 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     STRING)
 
 if (ETHOS_U55_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_int8_vela_H128.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_H128.tflite)
 else()
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_int8.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)
 endif()
 
 set(EXTRA_MODEL_CODE

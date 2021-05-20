@@ -10,7 +10,7 @@
   - [Deployment](#deployment)
   - [Implementing custom ML application](#implementing-custom-ml-application)
   - [Testing and benchmarking](#testing-and-benchmarking)
-  - [Memory considerations](#memory-considerations)
+  - [Memory Considerations](#memory-considerations)
   - [Troubleshooting](#troubleshooting)
   - [Appendix](#appendix)
 
@@ -184,7 +184,7 @@ from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo/).
 
 - [Mobilenet V2](https://github.com/ARM-software/ML-zoo/blob/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8).
 - [DS-CNN](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8).
-- [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8).
+- [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8).
 - [Anomaly Detection](https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite).
 
 When using Ethos-U55 NPU backend, the NN model is assumed to be optimized by Vela compiler.

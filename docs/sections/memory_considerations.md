@@ -1,7 +1,5 @@
 # Memory considerations
 
-## Contents
-
 - [Memory considerations](#memory-considerations)
   - [Introduction](#introduction)
   - [Understanding memory usage from Vela output](#understanding-memory-usage-from-vela-output)
@@ -114,9 +112,9 @@ under [Total SRAM used](#total-sram-used).
   - 638.6 KiB of SRAM
   - 3.1 MB of flash memory.
 
-- [Automated speech recognition](https://github.com/ARM-software/ML-zoo/tree/master/models/speech_recognition/wav2letter/tflite_int8) requires
-  - 635.3 KiB of SRAM
-  - 21.1 MB of flash memory.
+- [Automated speech recognition](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8) requires
+  - 655.16 KiB of SRAM
+  - 13.42 MB of flash memory.
 
 ## Memory constraints
 

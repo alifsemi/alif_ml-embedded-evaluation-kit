@@ -3,7 +3,7 @@
 This is a quick start guide that will show you how to run the keyword spotting example application.
 The aim of this quick start guide is to enable you to run an application quickly on the Fixed Virtual Platform.
 The assumption we are making is that your Arm® Ethos™-U55 NPU is configured to use 128 Multiply-Accumulate units,
-is using a shared SRAM with the Arm® Cortex®-M55.  
+is using a shared SRAM with the Arm® Cortex®-M55.
 
 1. Verify you have installed [the required prerequisites](sections/building.md#Build-prerequisites).
 
@@ -58,11 +58,11 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a
     --output ./resources_downloaded/ad/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/ad/ofm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/wav2letter_int8.tflite \
-    --output ./resources_downloaded/asr/wav2letter_int8.tflite
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/testing_input/input_2_int8/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/wav2letter_pruned_int8.tflite \
+    --output ./resources_downloaded/asr/wav2letter_pruned_int8.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_input/input_2_int8/0.npy \
     --output ./resources_downloaded/asr/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/testing_output/Identity_int8/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_output/Identity_int8/0.npy \
     --output ./resources_downloaded/asr/ofm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8/mobilenet_v2_1.0_224_quantized_1_default_1.tflite \
     --output ./resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1.tflite
@@ -76,13 +76,11 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea
     --output ./resources_downloaded/kws/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/kws/ofm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/wav2letter_int8.tflite \
-    --output ./resources_downloaded/kws_asr/wav2letter_int8.tflite
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/testing_input/input_2_int8/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/wav2letter_pruned_int8.tflite \
+    --output ./resources_downloaded/kws_asr/wav2letter_pruned_int8.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_input/input_2_int8/0.npy \
     --output ./resources_downloaded/kws_asr/asr/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/testing_input/input_2_int8/0.npy
-    --output ./resources_downloaded/kws_asr/asr/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/speech_recognition/wav2letter/tflite_int8/testing_output/Identity_int8/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_output/Identity_int8/0.npy \
     --output ./resources_downloaded/kws_asr/asr/ofm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite \
     --output ./resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite
