@@ -45,22 +45,17 @@ namespace audio {
                         m_useHtkMethod(useHtkMethod)
     {}
 
-    std::string MfccParams::Str() const
+    void MfccParams::Log() const
     {
-        char strC[1024];
-        snprintf(strC, sizeof(strC) - 1, "\n   \
-            \n\t Sampling frequency:         %f\
-            \n\t Number of filter banks:     %" PRIu32 "\
-            \n\t Mel frequency limit (low):  %f\
-            \n\t Mel frequency limit (high): %f\
-            \n\t Number of MFCC features:    %" PRIu32 "\
-            \n\t Frame length:               %" PRIu32 "\
-            \n\t Padded frame length:        %" PRIu32 "\
-            \n\t Using HTK for Mel scale:    %s\n",
-            this->m_samplingFreq, this->m_numFbankBins, this->m_melLoFreq,
-            this->m_melHiFreq, this->m_numMfccFeatures, this->m_frameLen,
-            this->m_frameLenPadded, this->m_useHtkMethod ? "yes" : "no");
-        return std::string{strC};
+        debug("MFCC parameters:\n");
+        debug("\t Sampling frequency:         %f\n", this->m_samplingFreq);
+        debug("\t Number of filter banks:     %" PRIu32 "\n", this->m_numFbankBins);
+        debug("\t Mel frequency limit (low):  %f\n", this->m_melLoFreq);
+        debug("\t Mel frequency limit (high): %f\n", this->m_melHiFreq);
+        debug("\t Number of MFCC features:    %" PRIu32 "\n", this->m_numMfccFeatures);
+        debug("\t Frame length:               %" PRIu32 "\n", this->m_frameLen);
+        debug("\t Padded frame length:        %" PRIu32 "\n", this->m_frameLenPadded);
+        debug("\t Using HTK for Mel scale:    %s\n", this->m_useHtkMethod ? "yes" : "no");
     }
 
     MFCC::MFCC(const MfccParams& params):
@@ -84,7 +79,7 @@ namespace audio {
         }
 
         math::MathUtils::FftInitF32(this->m_params.m_frameLenPadded, this->m_fftInstance);
-        debug("Instantiated MFCC object: %s\n", this->m_params.Str().c_str());
+        this->m_params.Log();
     }
 
     void MFCC::Init()

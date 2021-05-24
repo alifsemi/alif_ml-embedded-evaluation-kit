@@ -41,12 +41,11 @@ mps3_time_counter get_time_counter(void)
         .counter_fpga       = MPS3_FPGAIO->COUNTER,
         .counter_systick    = Get_SysTick_Cycle_Count()
     };
-    debug("Timestamp:"
-        "\n\tCounter 1 Hz:   %" PRIu32
-        "\n\tCounter 100 Hz: %" PRIu32
-        "\n\tCounter FPGA:   %" PRIu32
-        "\n\tCounter CPU:    %" PRIu64 "\n",
-        t.counter_1Hz, t.counter_100Hz, t.counter_fpga, t.counter_systick);
+    debug("Timestamp:\n");
+    debug("\tCounter 1 Hz:   %" PRIu32 "\n", t.counter_1Hz);
+    debug("\tCounter 100 Hz: %" PRIu32 "\n", t.counter_100Hz);
+    debug("\tCounter FPGA:   %" PRIu32 "\n", t.counter_fpga);
+    debug("\tCounter CPU:    %" PRIu64 "\n", t.counter_systick);
     return t;
 }
 

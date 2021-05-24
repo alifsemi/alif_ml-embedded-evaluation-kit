@@ -40,7 +40,8 @@ enum opcodes
 
 static void DisplayMenu()
 {
-    printf("\n\nUser input required\n");
+    printf("\n\n");
+    printf("User input required\n");
     printf("Enter option number from:\n\n");
     printf("  %u. Classify next audio clip\n", MENU_OPT_RUN_INF_NEXT);
     printf("  %u. Classify audio clip at chosen index\n", MENU_OPT_RUN_INF_CHOSEN);

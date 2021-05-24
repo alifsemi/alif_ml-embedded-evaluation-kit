@@ -71,7 +71,8 @@ __attribute__((noreturn)) static void DefaultHandler(void)
 
 #define DEFAULT_HANDLER_CALL(type)              \
     do {                                        \
-        printf("\n%s caught by function %s\n",  \
+        printf("\n");                           \
+        printf("%s caught by function %s\n",    \
              type, __FUNCTION__);               \
         DefaultHandler();                       \
     } while (0)
@@ -237,6 +238,11 @@ int Init_SysTick(void)
 
     /* Enable interrupt again. */
     NVIC_EnableIRQ(SysTick_IRQn);
+
+    /* Wait for SysTick to kick off */
+    while (!err && !SysTick->VAL) {
+        __NOP();
+    }
 
     return err;
 }

@@ -51,8 +51,8 @@ namespace audio {
 
         ~MfccParams() = default;
 
-        /** @brief  String representation of parameters */
-        std::string Str() const;
+        /** @brief  Log parameters */
+        void Log() const;
     };
 
     /**
