@@ -7,6 +7,7 @@
     - [Preparing build environment](#preparing-build-environment)
       - [Fetching submodules](#fetching-submodules)
       - [Fetching resource files](#fetching-resource-files)
+    - [Building for default configuration](#building-for-default-configuration)
     - [Create a build directory](#create-a-build-directory)
     - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse-300)
       - [Using GNU Arm Embedded Toolchain](#using-gnu-arm-embedded-toolchain)
@@ -253,6 +254,10 @@ repository to link against.
 These are part of the [ethos-u repository](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) and set as
 submodules of this project.
 
+> **NOTE**: If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
+> instructions. Proceed to [Fetching resource files](#fetching-resource-files) section.
+>
+
 To pull the submodules:
 
 ```sh
@@ -263,11 +268,10 @@ This will download all the required components and place them in a tree like:
 
 ```tree
 dependencies
- └── ethos-u
-     ├── cmsis
-     ├── core_driver
-     ├── tensorflow
-     └── ...
+    ├── cmsis
+    ├── core-driver
+    ├── core-software
+    └── tensorflow
 ```
 
 > **NOTE**: The default source paths for the TPIP sources assume the above directory structure, but all of the relevant
@@ -288,9 +292,33 @@ This will fetch all the models into `resources_downloaded` directory. It will
 also optimize the models using the Vela compiler for default 128 MAC configuration
 of Arm® Ethos™-U55 NPU.
 
+### Building for default configuration
+
+A helper script `build_default.py` is provided to configure and build all the
+applications. It configures the project with default settings i.e., for `mps3`
+target and `sse-300` subsystem. Under the hood, it invokes all the necessary
+CMake commands that are described in the next sections.
+
+If using the `Arm GNU embedded toolchain`, execute:
+
+```commandline
+./build_default.py
+```
+
+If using the `Arm Compiler`, execute:
+
+```commandline
+./build_default.py --toolchain arm
+```
+
+Additional command line arguments supported by this script are:
+ - `--skip-download`: Do not download resources: models and test vectors
+ - `--skip-vela`: Do not run Vela optimizer on downloaded models.
+
 ### Create a build directory
 
-Create a build directory in the root of the project and navigate inside:
+To configure and build the project manually, create a build directory in the
+root of the project and navigate inside:
 
 ```commandline
 mkdir build && cd build

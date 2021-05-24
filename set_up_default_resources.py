@@ -176,14 +176,18 @@ def set_up_resources(run_vela_on_models=False):
                 res_dst = os.path.join(download_dir,
                                        uc["use_case_name"],
                                        res_name)
-            try:
-                g = urllib.request.urlopen(res_url)
-                with open(res_dst, 'b+w') as f:
-                    f.write(g.read())
-                    logging.info(f"- Downloaded {res_url} to {res_dst}.")
-            except URLError:
-                logging.error(f"URLError while downloading {res_url}.")
-                raise
+
+            if os.path.isfile(res_dst):
+                logging.info(f"File {res_dst} exists, skipping download.")
+            else:
+                try:
+                    g = urllib.request.urlopen(res_url)
+                    with open(res_dst, 'b+w') as f:
+                        f.write(g.read())
+                        logging.info(f"- Downloaded {res_url} to {res_dst}.")
+                except URLError:
+                    logging.error(f"URLError while downloading {res_url}.")
+                    raise
 
     # 3. Run vela on models in resources_downloaded
     # New models will have same name with '_vela' appended.
@@ -201,6 +205,15 @@ def set_up_resources(run_vela_on_models=False):
 
         for model in models:
             output_dir = os.path.dirname(model)
+            # model name after compiling with vela is an initial model name + _vela suffix
+            vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
+            # we want it to be initial model name + _vela_H128 suffix which indicates selected MAC config.
+            new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", "_vela_H128.tflite")
+
+            if os.path.isfile(new_vela_optimised_model_path):
+                logging.info(f"File {new_vela_optimised_model_path} exists, skipping optimisation.")
+                continue
+
             command = (f". {env_activate} && vela {model} " +
                        "--accelerator-config=ethos-u55-128 " +
                        "--block-config-limit=0 " +
@@ -209,10 +222,7 @@ def set_up_resources(run_vela_on_models=False):
                        "--system-config=Ethos_U55_High_End_Embedded " +
                        f"--output-dir={output_dir}")
             call_command(command)
-            # model name after compiling with vela is an initial model name + _vela suffix
-            vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
-            # we want it to be initial model name + _vela_H128 suffix which indicates selected MAC config.
-            new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", "_vela_H128.tflite")
+
             # rename default vela model
             os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
             logging.info(f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}.")

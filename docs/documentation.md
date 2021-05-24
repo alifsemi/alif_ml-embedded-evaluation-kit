@@ -68,6 +68,9 @@ The repository has the following structure:
 .
 ├── dependencies
 ├── docs
+├── model_conditioning_examples
+├── resources
+├── /resources_downloaded/
 ├── scripts
 │   └── ...
 ├── source
@@ -77,9 +80,9 @@ The repository has the following structure:
 │   │ └── tensorflow-lite-micro
 │   └── use_case
 │     └── <usecase_name>
-│          ├── include
-│          ├── src
-│          └── usecase.cmake
+│                ├── include
+│                ├── src
+│                └── usecase.cmake
 ├── tests
 │   └── ...
 └── CMakeLists.txt
@@ -90,6 +93,14 @@ Where:
 - `dependencies`: contains all the third party dependencies for this project.
 
 - `docs`: contains the documentation for this ML applications.
+
+- `model_conditioning_examples`: contains short example scripts that demonstrate some methods available in TensorFlow 
+    to condition your model in preparation for deployment on Arm Ethos NPU.
+
+- `resources`: contains ML use cases applications resources such as input data, label files, etc.
+
+- `resources_downloaded`: created by `set_up_default_resources.py`, contains downloaded resources for ML use cases 
+    applications such as models, test data, etc.
 
 - `scripts`: contains build related and source generation scripts.
 
