@@ -28,7 +28,15 @@ is using a shared SRAM with the Arm® Cortex®-M55.
     neural network operators should be [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
 
     ```commandline
-    python3 build_default.py
+    ./build_default.py
+    ```
+
+    > **Note** The above command assumes you are using the GNU Arm Embedded Toolchain.
+    > If you are using the Arm Compiler instead, you can override the default selection
+    > by executing:
+
+    ```commandline
+    ./build_default.py --toolchain arm
     ```
 
 5. Launch the project as explained [here](sections/deployment.md#Deployment). For the purpose of this quick start guide,
