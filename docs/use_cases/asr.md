@@ -185,8 +185,8 @@ bin
  ├── ethos-u-asr.axf
  ├── ethos-u-asr.htm
  ├── ethos-u-asr.map
- ├── images-asr.txt
  └── sectors
+      ├── images.txt
       └── asr
           ├── dram.bin
           └── itcm.bin
@@ -201,9 +201,9 @@ Where:
 
 - `ethos-u-asr.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/asr`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
-- `Images-asr.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
 
 ### Add custom input
 

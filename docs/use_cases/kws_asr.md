@@ -225,8 +225,8 @@ bin
  ├── ethos-u-kws_asr.axf
  ├── ethos-u-kws_asr.htm
  ├── ethos-u-kws_asr.map
- ├── images-kws_asr.txt
  └── sectors
+      ├── images.txt
       └── kws_asr
            ├── dram.bin
            └── itcm.bin
@@ -242,9 +242,9 @@ Where:
 
 - `ethos-u-kws_asr.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/kws_asr`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
-- `Images-kws_asr.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
 
 ### Add custom input
 

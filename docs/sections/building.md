@@ -288,6 +288,9 @@ the repository:
 python3 ./set_up_default_resources.py
 ```
 
+> **Note:** This script requires Python version 3.6 or higher. See all pre-requisites under the section
+> [Build Prerequisites](#build-prerequisites).
+
 This will fetch all the models into `resources_downloaded` directory. It will
 also optimize the models using the Vela compiler for default 128 MAC configuration
 of Arm® Ethos™-U55 NPU.
@@ -460,8 +463,8 @@ bin
  ├── ethos-u-<use_case_name>.axf
  ├── ethos-u-<use_case_name>.htm
  ├── ethos-u-<use_case_name>.map
- ├── images-<use_case_name>.txt
  └── sectors
+        ├── images.txt
         └── <use_case>
                 ├── dram.bin
                 └── itcm.bin
@@ -480,10 +483,10 @@ the following build artefacts will be created:
 - `ethos-u-<use case name>.htm`: Human readable file containing the
     call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files
+- `sectors/<use_case_name>`: Folder containing the built application, split into files
     for loading into different FPGA memory regions.
 
-- `images-<use case name>.txt`: Tells the FPGA which memory regions to
+- `sectors/images.txt`: Tells the FPGA which memory regions to
     use for loading the binaries in sectors/** folder.
 
 > **Note:**  For the specific use case commands see the relative section

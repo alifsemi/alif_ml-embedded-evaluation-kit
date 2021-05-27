@@ -738,6 +738,6 @@ cmake .. \
 
 As a result, `ethos-u-hello_world.axf` should be created, MPS3 build
 will also produce `sectors/hello_world` directory with binaries and
-`images-hello_world.txt` to be copied to the board MicroSD card.
+`sectors/images.txt` to be copied to the board MicroSD card.
 
 Next section of the documentation: [Testing and benchmarking](testing_benchmarking.md).

@@ -22,6 +22,9 @@ is using a shared SRAM with the Arm® Cortex®-M55.
 
 4. Next, you can use the `build_default` python script to get the default neural network models, compile them with
     Vela and build the project.
+
+    > **Note:** This helper script needs python version 3.6 or higher.
+
     [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela) is an open-source python tool converting
     TensorFlow Lite for Microcontrollers neural network model into an optimized model that can run on an embedded system
     containing an Ethos-U55 NPU. It is worth noting that in order to take full advantage of the capabilities of the NPU, the

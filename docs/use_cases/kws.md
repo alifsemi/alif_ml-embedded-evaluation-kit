@@ -10,7 +10,7 @@
     - [Build process](#build-process)
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
+  - [Setting up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
     - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Keyword Spotting](#running-keyword-spotting)
@@ -154,8 +154,8 @@ bin
  ├── ethos-u-kws.axf
  ├── ethos-u-kws.htm
  ├── ethos-u-kws.map
- ├── images-kws.txt
  └── sectors
+      ├── images.txt
       └── kws
            ├── dram.bin
            └── itcm.bin
@@ -170,9 +170,9 @@ Where:
 
 - `ethos-u-kws.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/kws`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
-- `Images-kws.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/\*\* folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/\*\* folder.
 
 ### Add custom input
 

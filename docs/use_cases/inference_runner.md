@@ -7,7 +7,7 @@
     - [Build options](#build-options)
     - [Build process](#build-process)
     - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
+  - [Setting up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
     - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Inference Runner](#running-inference-runner)
@@ -106,11 +106,9 @@ bin
  ├── ethos-u-inference_runner.axf
  ├── ethos-u-inference_runner.htm
  ├── ethos-u-inference_runner.map
- ├── images-inference_runner.txt
  └── sectors
-      ├── kws
-      │ └── ...
-      └── img_class
+      ├── images.txt
+      └── inference_runner
         ├── dram.bin
         └── itcm.bin
 ```
@@ -124,9 +122,9 @@ Where:
 
 - `ethos-u-inference_runner.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/inference_runner`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
-- `Images-inference_runner.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/**
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/**
     folder.
 
 ### Add custom model

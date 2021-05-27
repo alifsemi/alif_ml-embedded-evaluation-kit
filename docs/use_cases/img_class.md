@@ -8,7 +8,7 @@
     - [Build process](#build-process)
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
+  - [Setting up and running Ethos-U55 code sample](#setting-up-and-running-ethos-u55-code-sample)
     - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Image Classification](#running-image-classification)
@@ -115,8 +115,8 @@ bin
  ├── ethos-u-img_class.axf
  ├── ethos-u-img_class.htm
  ├── ethos-u-img_class.map
- ├── images-img_class.txt
  └── sectors
+      ├── images.txt
       └── img_class
            ├── dram.bin
            └── itcm.bin
@@ -131,9 +131,9 @@ Where:
 
 - `ethos-u-img_class.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/img_class`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
-- `Images-img_class.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
 
 ### Add custom input
 
