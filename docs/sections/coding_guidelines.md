@@ -7,8 +7,8 @@
   - [File layout](#file-layout)
   - [Block Management](#block-management)
   - [Naming Conventions](#naming-conventions)
-    - [C++ language naming conventions](#c-language-naming-conventions)
-    - [C language naming conventions](#c-language-naming-conventions-1)
+    - [CPP language naming conventions](#cpp-language-naming-conventions)
+    - [C language naming conventions](#c-language-naming-conventions)
   - [Layout and formatting conventions](#layout-and-formatting-conventions)
   - [Language usage](#language-usage)
 
@@ -151,7 +151,7 @@ Software components written in C/C++ may use the language features allowed and i
 
 ## Naming Conventions
 
-### C++ language naming conventions
+### CPP language naming conventions
 
 - Type (class, struct, enum) names must be `PascalCase`:
 

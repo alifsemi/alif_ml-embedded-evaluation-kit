@@ -1,7 +1,7 @@
 # Deployment
 
 - [Deployment](#deployment)
-  - [Fixed Virtual Platform (FVP)](#fixed-virtual-platform-fvp)
+  - [Fixed Virtual Platform](#fixed-virtual-platform)
     - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
     - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
   - [MPS3 board](#mps3-board)
@@ -17,7 +17,7 @@ The sample application for Arm® *Ethos™-U55* can be deployed on two target pl
 Both implement the Arm® *Corstone™-300* design. For further information, please refer to:
 [Arm Corstone-300](https://www.arm.com/products/iot/soc/corstone-300)
 
-## Fixed Virtual Platform (FVP)
+## Fixed Virtual Platform
 
 The FVP is available publicly from the following page:
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).

@@ -2,7 +2,7 @@
 
 - [Implementing custom ML application](#implementing-custom-ml-application)
   - [Software project description](#software-project-description)
-  - [Hardware Abstraction Layer (HAL) API](#hardware-abstraction-layer-hal-api)
+  - [Hardware Abstraction Layer API](#hardware-abstraction-layer-api)
   - [Main loop function](#main-loop-function)
   - [Application context](#application-context)
   - [Profiler](#profiler)
@@ -10,7 +10,7 @@
   - [Adding custom ML use-case](#adding-custom-ml-use-case)
   - [Implementing main loop](#implementing-main-loop)
   - [Implementing custom NN model](#implementing-custom-nn-model)
-    - [Define `ModelPointer` and `ModelSize` methods](#define-modelpointer-and-modelsize-methods)
+    - [Define ModelPointer and ModelSize methods](#define-modelpointer-and-modelsize-methods)
   - [Executing inference](#executing-inference)
   - [Printing to console](#printing-to-console)
   - [Reading user input from console](#reading-user-input-from-console)
@@ -72,7 +72,7 @@ use-cases, sources are in the `use-case` subfolder.
 >             └── *.cc
 > ```
 
-## Hardware Abstraction Layer (HAL) API
+## Hardware Abstraction Layer API
 
 The HAL is represented by the following interfaces. To access them, include the `hal.h` header.
 
@@ -435,7 +435,7 @@ bool arm::app::HelloWorldModel::EnlistOperations() {
 To minimize the memory footprint of the application, we advise you to only register operators that are used by the NN
 model.
 
-### Define `ModelPointer` and `ModelSize` methods
+### Define ModelPointer and ModelSize methods
 
 These functions are wrappers around the functions generated in the C++ file containing the neural network model as an
 array. This generation the C++ array from the `.tflite` file, logic needs to be defined in the `usecase.cmake` file for
@@ -641,7 +641,7 @@ twice:
 platform.data_psn->present_data_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
-Please refer to the [HAL API](#hal-api) section for more data presentation functions.
+Please refer to the [Hardware Abstraction Layer (HAL) API](#hardware-abstraction-layer-hal-api) section for more data presentation functions.
 
 ## Building custom use-case
 
@@ -694,7 +694,7 @@ generate_tflite_code(
 
 This ensures that the model path pointed to by `${use_case}_MODEL_TFLITE_PATH` is converted to a C++ array and is picked
 up by the build system. More information on auto-generations is available under section:
-[Automatic file generation](./building.md#Automatic-file-generation).
+[Automatic file generation](./building.md#automatic-file-generation).
 
 To build you application, follow the general instructions from [Add Custom inputs](./building.md#add-custom-inputs) and
 then specify the name of the use-case in the build command, like so:
