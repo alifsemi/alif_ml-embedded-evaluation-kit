@@ -113,8 +113,6 @@ def set_up_resources(run_vela_on_models=False):
     """
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.abspath(os.path.join(current_file_dir, "resources_downloaded"))
-    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     try:
         #   1.1 Does the download dir exist?
@@ -234,4 +232,8 @@ if __name__ == '__main__':
                         help="Do not run Vela optimizer on downloaded models.",
                         action="store_true")
     args = parser.parse_args()
+
+    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
     set_up_resources(not args.skip_vela)

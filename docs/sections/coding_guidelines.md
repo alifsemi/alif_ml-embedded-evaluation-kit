@@ -1,45 +1,47 @@
 # Coding standards and guidelines
 
-- [Introduction](#introduction)
-- [Language version](#language-version)
-- [File naming](#file-naming)
-- [File layout](#file-layout)
-- [Block Management](#block-management)
-- [Naming Conventions](#naming-conventions)
-  - [C++ language naming conventions](#c_language-naming-conventions)
-  - [C language naming conventions](#c-language-naming-conventions)
-- [Layout and formatting conventions](#layout-and-formatting-conventions)
-- [Language usage](#language-usage)
+- [Coding standards and guidelines](#coding-standards-and-guidelines)
+  - [Introduction](#introduction)
+  - [Language version](#language-version)
+  - [File naming](#file-naming)
+  - [File layout](#file-layout)
+  - [Block Management](#block-management)
+  - [Naming Conventions](#naming-conventions)
+    - [C++ language naming conventions](#c-language-naming-conventions)
+    - [C language naming conventions](#c-language-naming-conventions-1)
+  - [Layout and formatting conventions](#layout-and-formatting-conventions)
+  - [Language usage](#language-usage)
 
 ## Introduction
 
 This document presents some standard coding guidelines to be followed for contributions to this repository. Most of the
-code is written in C++, but there is some written in C as well. There is a clear C/C++ boundary at the Hardware
-Abstraction Layer (HAL). Both these languages follow different naming conventions within this repository, by design, to:
+code is written in C++, but there is also some written in C. There is a clear C/C++ boundary at the Hardware Abstraction
+Layer (HAL). Both of these languages follow different naming conventions within this repository, by design, to:
 
-- have clearly distinguishable C and C++ sources.
-- make cross language function calls stand out. Mostly these will be C++ function calls to the HAL functions written in C.
-However, because we also issue function calls to third party API's (and they may not follow these conventions), the
-intended outcome may not be fully realised in all of the cases.
+- Have clearly distinguishable C and C++ sources.
+- Make cross language function calls stand out. These are mainly C++ function calls to the HAL functions, that were
+  written in C.
+
+However, because we also issue function calls to third-party APIs, and they are not guaranteed to follow these
+conventions, the intended outcome could be different for every case.
 
 ## Language version
 
-For this project, code written in C++ shall use a subset of the C++11 feature set and software
-may be written using the C++11 language standard. Code written in C should be compatible
-with the C99 standard.
+For this project, code written in C++ uses a subset of the `C++11` feature set and software may be written using the
+`C++11` language standard. Code written in C is compatible with the `C99` standard.
 
-Software components written in C/C++ may use the language features allowed and encouraged by this documentation.
+Software components written in C/C++ may use the language features allowed and is encouraged.
 
 ## File naming
 
-- C files should have `.c` extension
-- C++ files should have `.cc` or `.cpp` extension.
-- Header files for functions implemented in C should have `.h` extension.
-- Header files for functions implemented in C++ should have `.hpp` extension.
+- C files must have a `.c` extension
+- C++ files must have a `.cc` or `.cpp` extension.
+- Header files for functions implemented in C must have a `.h` extension.
+- Header files for functions implemented in C++ must have a `.hpp` extension.
 
 ## File layout
 
-- Standard copyright notice must be included in all files:
+- The standard copyright notice must be included in all files:
 
   ```copyright
   /*
@@ -60,8 +62,8 @@ Software components written in C/C++ may use the language features allowed and e
   */
   ```
 
-- Source lines must be no longer than 120 characters. Prefer to spread code out vertically rather than horizontally,
-  wherever it makes sense:
+- Source lines must be no longer than 120 characters. You can spread the code out vertically, rather than horizontally,
+  if required. For example:
 
   ```C++
   # This is significantly easier to read
@@ -76,9 +78,9 @@ Software components written in C/C++ may use the language features allowed and e
   enum class SomeEnum2 { ENUM_VALUE_1, ENUM_VALUE_2, ENUM_VALUE_3 };
   ```
 
-- Block indentation should use 4 characters, no tabs.
+- Block indentation must use 4 characters and not use tabs.
 
-- Each statement must be on a separate line.
+- Each statement must be on a separate line. For example:
 
   ```C++
   int a, b; // Error prone
@@ -88,18 +90,18 @@ Software components written in C/C++ may use the language features allowed and e
   int *p = nullptr; // GOOD
   ```
 
-- Source must not contain commented out code or unreachable code
+- Also, the source code must not contain code that has been commented out or is unreachable.
 
 ## Block Management
 
-- Blocks must use braces and braces location must be consistent.
-  - Each function has its opening brace at the next line on the same indentation level as its header, the code within
-  the braces is indented and the closing brace at the end is on the same level as the opening.
-  For compactness, if the class/function body is empty braces are accepted on the same line.
+- Blocks must use braces and the brace location must be consistent throughout.
+  - Therefore, each function has its opening brace at the next line on the same indentation level as its header. The
+    code within the braces is indented and the closing brace at the end is on the same level as the opening. For
+    compactness, if the class, or function, body is empty, then braces on the same line are acceptable.
 
-  - Conditional statements and loops, even if are just single-statement body, needs to be surrounded by braces, the
-opening brace is at the same line, the closing brace is at the next line on the same indentation level as its header;
-the same rule is applied to classes.
+  - Conditional statements and loops, even if they are just single-statement body, must be surrounded by braces. The
+    opening brace is at the same line, the closing brace is at the next line, and on the same indentation level as its
+    header. The same rule is applied to classes.
 
     ```C++
     class Class1 {
@@ -172,7 +174,7 @@ the same rule is applied to classes.
   void SomeFunction(int someParameter) {}
   ```
 
-- Macros, pre-processor definitions, and enumeration values should use upper case names:
+- Use uppercase names for macros, pre-processor definitions, and enumeration values:
 
   ```C++
   #define SOME_DEFINE
@@ -184,7 +186,7 @@ the same rule is applied to classes.
   };
   ```
 
-- Namespace names must be lower case
+- Namespace names must be lowercase
 
   ```C++
   namespace nspace
@@ -193,18 +195,18 @@ the same rule is applied to classes.
   };
   ```
 
-- Source code should use Hungarian notation to annotate the name of a variable with information about its meaning.
+- Source code must use Hungarian notation to annotate the name of a variable with information about its meaning.
 
   | Prefix | Class | Description |
   | ------ | ----- | ----------- |
-  | p | Type      | Pointer to any other type |
-  | k | Qualifier | Constant |
-  | v | Qualifier | Volatile |
-  | m | Scope     | Member of a class or struct |
-  | s | Scope     | Static |
-  | g | Scope     | Used to indicate variable has scope beyond the current function: file-scope or externally visible scope|
+  | `p` | Type      | Pointer to any other type |
+  | `k` | Qualifier | Constant |
+  | `v` | Qualifier | Volatile |
+  | `m` | Scope     | Member of a class or struct |
+  | `s` | Scope     | Static |
+  | `g` | Scope     | Used to indicate variable has scope beyond the current function: file-scope or externally visible scope. |
 
-The following examples  of Hungarian notation are one possible set of uses:
+The following examples of Hungarian notation are one possible set of uses:
 
   ```C++
   int g_GlobalInt=123;
@@ -218,7 +220,7 @@ The following examples  of Hungarian notation are one possible set of uses:
 
 For C sources, we follow the Linux variant of the K&R style wherever possible.
 
-- For function and variable names we use `snake_case` convention:
+- For function and variable names, we use the `snake_case` convention:
 
   ```C
   int some_variable;
@@ -226,7 +228,7 @@ For C sources, we follow the Linux variant of the K&R style wherever possible.
   void some_function(int some_parameter) {}
   ```
 
-- Macros, pre-processor definitions, and enumeration values should use upper case names:
+- Use uppercase names for macros, pre-processor definitions, and enumeration values:
 
   ```C
   #define SOME_DEFINE
@@ -240,13 +242,11 @@ For C sources, we follow the Linux variant of the K&R style wherever possible.
 
 ## Layout and formatting conventions
 
-- C++ class code layout
-  Public function definitions should be at the top of a class definition, since they are things most likely to be used
-by other people.
-  Private functions and member variables should be last.
-  Class functions and member variables should be laid out logically in blocks of related functionality.
+- C++ class code layout: Public function definitions must be at the top of a class definition, since they are most
+  likely to be used. Private functions and member variables are left to last. Lay out class functions and member
+  variables logically in blocks of related functionality.
 
-- Class  inheritance keywords are not indented.
+- Class inheritance keywords are not indented. For example:
 
   ```C++
   class MyClass
@@ -260,12 +260,12 @@ by other people.
   };
   ```
 
-- Don't leave trailing spaces at the end of lines.
+- Do not leave trailing spaces at the end of lines.
 
-- Empty lines should have no trailing spaces.
+- Empty lines do not have trailing spaces.
 
-- For pointers and references, the symbols `*` and `&` should be adjacent to the name of the type, not the name
-  of the variable.
+- For pointers and references, the symbols `*` and `&` must be next to the name of the type - *not* the name of the
+  variable.
 
   ```C++
   char* someText = "abc";
@@ -275,22 +275,23 @@ by other people.
 
 ## Language usage
 
-- Header `#include` statements should be minimized.
-  Inclusion of unnecessary headers slows down compilation, and can hide errors where a function calls a
-  subroutine which it should not be using if the unnecessary header defining this subroutine is included.
+- Minimize header `#include` statements: The inclusion of unnecessary headers slows down compilation. If the unnecessary
+  header defining this subroutine is included, then it can also hide errors where a function calls a subroutine that it
+  must not use.
 
-  Header statements should be included in the following order:
+  Include header statements in the following order:
 
-  - Header file corresponding to the current source file (if applicable)
-  - Headers from the same component
-  - Headers from other components
-  - Third-party headers
-  - System headers
+  - If applicable, begin with the header file corresponding to the current source file,
+  - Headers from the same component,
+  - Headers from other components,
+  - Third-party headers,
+  - System headers.
 
-  > **Note:** Leave one blank line between each of these groups for readability.
-  >Use quotes for headers from within the same project and angle brackets for third-party and system headers.
-  >Do not use paths relative to the current source file, such as `../Header.hpp`. Instead configure your include paths
-  >in the project makefiles.
+  > **Note:** Leave one blank line between each of these groups for readability. Use quotes for headers from within the
+  > same project and angle brackets for third-party and system headers. Do not use paths relative to the current source
+  > file, such as `../Header.hpp`. Instead, configure your include paths in the project makefiles.
+
+  For example:
 
   ```C++
   #include "ExampleClass.hpp"     // Own header
@@ -307,7 +308,7 @@ by other people.
   // [...]
   ```
 
-- C++ casts should use the template-styled case syntax
+- Use the template-styled case syntax for C++ casts:
 
   ```C++
   int a = 100;
@@ -315,7 +316,7 @@ by other people.
   float c = static_cast<float>(a); // OK
   ```
 
-- Use the const keyword to declare constants instead of define.
+- Use the `const` keyword to declare constants instead of `define`.
 
-- Should use `nullptr` instead of `NULL`,
-  C++11 introduced the `nullptr` type to distinguish null pointer constants from the integer 0.
+- Use `nullptr` instead of `NULL`. C++11 introduced the `nullptr` type to distinguish null pointer constants from the
+  integer 0.

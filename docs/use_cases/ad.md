@@ -17,38 +17,40 @@
 
 ## Introduction
 
-This document describes the process of setting up and running the Arm® Ethos™-U55 Anomaly Detection example.
+This document describes the process of setting up and running the Arm® *Ethos™-U55* Anomaly Detection example.
 
-Use case code could be found in [source/use_case/ad](../../source/use_case/ad]) directory.
+Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad]).
 
 ### Preprocessing and feature extraction
 
-The Anomaly Detection model that is used with the Code Samples expects audio data to be preprocessed
-in a specific way before performing an inference. This section aims to provide an overview of the feature extraction
-process used.
+The Anomaly Detection model that is used with the Code Samples andexpects audio data to be preprocessed in a specific
+way before performing an inference.
 
-First the audio data is normalized to the range (-1, 1).
+Therefore, this section provides an overview of the feature extraction process used.
 
-Next, a window of 1024 audio samples are taken from the start of the audio clip. From these 1024 samples we calculate 64
+First, the audio data is normalized to the range (`-1`, `1`).
+
+Next, a window of 1024 audio samples is taken from the start of the audio clip. From these 1024 samples, we calculate 64
 Log Mel Energies that form part of a Log Mel Spectrogram.
 
 The window is shifted by 512 audio samples and another 64 Log Mel Energies are calculated. This is repeated until we
 have 64 sets of Log Mel Energies.
 
-This 64x64 matrix of values is resized by a factor of 2 resulting in a 32x32 matrix of values.
+This 64x64 matrix of values is then resized by a factor of two, resulting in a 32x32 matrix of values.
 
-The average of the training dataset is subtracted from this 32x32 matrix and an inference can then be performed.
+The average of the training dataset is then subtracted from this 32x32 matrix and an inference can now be performed.
 
-We start this process again but shifting the start by 20\*512=10240 audio samples. This keeps repeating until enough
+We start this process again, but shift the start by 20\*512=10240 audio samples. This keeps repeating until enough
 inferences have been performed to cover the whole audio clip.
 
 ### Postprocessing
 
-Softmax is applied to the result of each inference. Based on the machine ID of the wav clip being processed we look at a
-specific index in each output vector. An average of the negative value at this index across all the inferences performed
-for the audio clip is taken. If this average value is greater than a chosen threshold score, then the machine in the
-clip is not behaving anomalously. If the score is lower than the threshold then the machine in the clip is behaving
-anomalously.
+Softmax is then applied to the result of each inference. Based on the machine ID of the wav clip being processed, we
+look at a specific index in each output vector. An average of the negative value at this index across all the inferences
+performed for the audio clip is taken.
+
+If this average value is greater than a chosen threshold score, then the machine in the clip is not behaving
+anomalously. If the score is lower than the threshold, then the machine in the clip is behaving anomalously.
 
 ### Prerequisites
 
@@ -58,61 +60,66 @@ See [Prerequisites](../documentation.md#prerequisites)
 
 ### Build options
 
-In addition to the already specified build option in the main documentation, Anomaly Detection use case adds:
+In addition to the already specified build option in the main documentation, the Anomaly Detection use-case adds:
 
-- `ad_MODEL_TFLITE_PATH` - Path to the NN model file in TFLite format. Model will be processed and included into
-the application axf
-    file. The default value points to one of the delivered set of models. Note that the parameters `ad_LABELS_TXT_FILE`,
-    `TARGET_PLATFORM` and `ETHOS_U55_ENABLED` should be aligned with the chosen model, i.e.:
-  - if `ETHOS_U55_ENABLED` is set to `On` or `1`, the NN model is assumed to be optimized. The model will naturally fall
-back to the Arm® Cortex®-M CPU if an unoptimized model is supplied.
+- `ad_MODEL_TFLITE_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
+  the application `axf` file. The default value points to one of the delivered set of models.
+
+    Note that the parameters `ad_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U55_ENABLED` must be aligned with the
+    chosen model. In other words:
+
+  - If `ETHOS_U55_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
+    falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
   - if `ETHOS_U55_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
-model in this case will result in a runtime error.
+    model in this case results in a runtime error.
 
 - `ad_FILE_PATH`: Path to the directory containing audio files, or a path to single WAV file, to be used in the
-    application. The default value points to the resources/ad/samples folder containing the delivered set of audio clips.
+  application. The default value points to the `resources/ad/samples` folder containing the delivered set of audio
+  clips.
 
-- `ad_AUDIO_RATE`: Input data sampling rate. Each audio file from ad_FILE_PATH is preprocessed during the build to match
-NN model input requirements.
-    Default value is 16000.
+- `ad_AUDIO_RATE`: The input data sampling rate. Each audio file from `ad_FILE_PATH` is preprocessed during the build to
+  match the NN model input requirements. The default value is `16000`.
 
-- `ad_AUDIO_MONO`: If set to ON the audio data will be converted to mono. Default is ON.
+- `ad_AUDIO_MONO`: If set to `ON`, then the audio data is converted to mono. The default value is `ON`.
 
-- `ad_AUDIO_OFFSET`: Start loading audio data starting from this offset (in seconds). Default value is 0.
+- `ad_AUDIO_OFFSET`: begin loading the audio data, while starting from this offset amount, defined in seconds. The
+  default value is set to `0`.
 
-- `ad_AUDIO_DURATION`: Length of the audio data to be used in the application in seconds. Default is 0 meaning the
-    whole audio file will be taken.
+- `ad_AUDIO_DURATION`: Length of the audio data to be used in the application in seconds. Default is `0`, meaning that
+  the whole audio file is used.
 
 - `ad_AUDIO_MIN_SAMPLES`: Minimum number of samples required by the network model. If the audio clip is shorter than
-    this number, it is padded with zeros. Default value is 16000.
+  this number, then it is padded with zeros. The default value is `16000`.
 
-- `ad_MODEL_SCORE_THRESHOLD`: Threshold value to be applied to average softmax score over the clip, if larger than this
-score we have an anomaly.
+- `ad_MODEL_SCORE_THRESHOLD`: Threshold value to be applied to average Softmax score over the clip, if larger than this
+  value, then there is an anomaly.
 
-- `ad_ACTIVATION_BUF_SZ`: The intermediate/activation buffer size reserved for the NN model. By default, it is set to
-    2MiB and should be enough for most models.
+- `ad_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it is set
+  to 2MiB and is enough for most models.
 
-In order to build **ONLY** Anomaly Detection example application add to the `cmake` command line specified in [Building](../documentation.md#Building) `-DUSE_CASE_BUILD=ad`.
+In order to **ONLY** build the Anomaly Detection example application, add `-DUSE_CASE_BUILD=ad` to the `cmake` command
+line that is specified in: [Building](../documentation.md#Building).
 
 ### Build process
 
-> **Note:** This section describes the process for configuring the build for `MPS3: SSE-300` for different target
->platform see [Building](../documentation.md#Building).
+> **Note:** This section describes the process for configuring the build for the `MPS3: SSE-300` for a different target
+> platform. Additional information can be found at: [Building](../documentation.md#Building).
 
-Create a build directory folder and navigate inside:
+Create a build directory folder and then navigate inside using:
 
 ```commandline
 mkdir build_ad && cd build_ad
 ```
 
-On Linux, execute the following command to build **only** Anomaly Detection application to run on the Ethos-U55 Fast Model when providing only the mandatory arguments for CMake configuration:
+On Linux, when providing only the mandatory arguments for CMake configuration, execute the following command to **only**
+build the Anomaly Detection application to run on the *Ethos-U55* Fast Model:
 
 ```commandline
 cmake ../ -DUSE_CASE_BUILD=ad
 ```
 
-To configure a build that can be debugged using Arm-DS, we can just specify
-the build type as `Debug` and use the `Arm Compiler` toolchain file:
+To configure a build that can be debugged using Arm DS, specify the build type as `Debug` and use the `Arm Compiler`
+toolchain file, like so:
 
 ```commandline
 cmake .. \
@@ -121,15 +128,15 @@ cmake .. \
     -DUSE_CASE_BUILD=ad
 ```
 
-Also see:
+For additional information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm FastModel Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
+- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
 
-> **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run
->the CMake command.
+> **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and then
+> re-run the CMake command.
 
 If the CMake command succeeded, build the application as follows:
 
@@ -137,9 +144,9 @@ If the CMake command succeeded, build the application as follows:
 make -j4
 ```
 
-Add VERBOSE=1 to see compilation and link details.
+To see compilation and link details, add `VERBOSE=1`.
 
-Results of the build will be placed under `build/bin` folder:
+Results of the build are placed under `build/bin` folder. For example:
 
 ```tree
 bin
@@ -149,30 +156,31 @@ bin
  └── sectors
       ├── images.txt
       └── ad
-          ├── dram.bin
+          ├── ddr.bin
           └── itcm.bin
 ```
 
-Where:
+The bin folder contains the following files and folders:
 
-- `ethos-u-ad.axf`: The built application binary for the Anomaly Detection use case.
+- `ethos-u-ad.axf`: The built application binary for the Anomaly Detection use-case.
 
-- `ethos-u-ad.map`: Information from building the application (e.g. libraries used, what was optimized, location of
-    objects)
+- `ethos-u-ad.map`: Information from building the application. For example, the libraries used, what was optimized, and
+  the location of objects.
 
 - `ethos-u-ad.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/ad`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/ad`: Folder containing the built application. is split into files for loading into different FPGA memory
+  regions.
 
-- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/\*\* folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in the `sectors/..` folder.
 
 ### Add custom input
 
-The application anomaly detection on audio data found in the folder, or an individual file, set by the CMake parameter
-``ad_FILE_PATH``.
+The application anomaly detection is set up to perform inferences on data found in the folder, or an individual file,
+that is pointed to by the parameter `ad_FILE_PATH`.
 
-To run the application with your own audio clips first create a folder to hold them and then copy the custom clips into
-this folder:
+To run the application with your own audio clips, first create a folder to hold them and then copy the custom clips into
+the following folder:
 
 ```commandline
 mkdir /tmp/custom_files
@@ -181,16 +189,16 @@ cp custom_id_00.wav /tmp/custom_files/
 ```
 
 > **Note:** The data used for this example comes from
-[https://zenodo.org/record/3384388\#.X6GILFNKiqA](https://zenodo.org/record/3384388\#.X6GILFNKiqA)
-and the model included in this example is trained on the ‘Slider’ part of the dataset.
-The machine ID (00, 02, 04, 06) the clip comes from must be in the file name for the application to work.
-The file name should have a pattern that matches
-e.g. `<any>_<text>_00_<here>.wav` if the audio was from machine ID 00
-or `<any>_<text>_02_<here>.wav` if it was from machine ID 02 etc.
+> [https://zenodo.org/record/3384388\#.X6GILFNKiqA](https://zenodo.org/record/3384388\#.X6GILFNKiqA) and the model
+> included in this example is trained on the "Slider" part of the dataset.\
+> The machine ID for the clip, so: `00`, `02`, `04`, `06`, comes from must be in the file name for the application to
+> work.\
+> The file name must have a pattern that matches. For example: `<any>_<text>_00_<here>.wav` if the audio was from machine
+> ID `00`, or `<any>_<text>_02_<here>.wav` if it was from machine ID `02`, and so on.
 >
 > **Note:** Clean the build directory before re-running the CMake command.
 
-Next set ad_FILE_PATH to the location of this folder when building:
+Next, set `ad_FILE_PATH` to the location of the following folder when building:
 
 ```commandline
 cmake .. \
@@ -198,25 +206,27 @@ cmake .. \
     -DUSE_CASE_BUILD=ad
 ```
 
-The audio flies found in the `ad_FILE_PATH` folder will be picked up and automatically converted to C++ files during the CMake
-configuration stage and then compiled into the application during the build phase for performing inference with.
+The audio flies found in the `ad_FILE_PATH` folder are picked up and automatically converted to C++ files during the
+CMake configuration stage. They are then compiled into the application during the build phase for performing inference
+with.
 
-The log from the configuration stage should tell you what image directory path has been used:
+The log from the configuration stage tells you what image directory path has been used:
 
 ```log
 -- User option ad_FILE_PATH is set to /tmp/custom_files
 ```
 
-After compiling, your custom inputs will have now replaced the default ones in the application.
+After compiling, your custom inputs have now replaced the default ones in the application.
 
 ### Add custom model
 
 The application performs inference using the model pointed to by the CMake parameter ``ad_MODEL_TFLITE_PATH``.
 
-> **Note:** If you want to run the model using Ethos-U55, ensure your custom model has been run through the Vela compiler
->successfully before continuing. See [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
+> **Note:** If you want to run the model using an *Ethos-U55*, ensure that your custom model has been successfully run
+> through the Vela compiler *before* continuing. Please refer to this section for more help:
+> [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
 
-An example:
+For example:
 
 ```commandline
 cmake .. \
@@ -226,11 +236,10 @@ cmake .. \
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `ad_MODEL_TFLITE_PATH` will be converted
-to C++ files during the CMake configuration
-stage and then compiled into the application for performing inference with.
+The `.tflite` model file pointed to by `ad_MODEL_TFLITE_PATH` is converted to C++ files during the CMake configuration
+stage and is then compiled into the application for performing inference with.
 
-The log from the configuration stage should tell you what model path has been used:
+The log from the configuration stage tells you what model path has been used. For example:
 
 ```log
 -- User option TARGET_PLATFORM is set to fastmodel
@@ -241,44 +250,46 @@ The log from the configuration stage should tell you what model path has been us
 ...
 ```
 
-After compiling, your custom model will have now replaced the default one in the application.
+After compiling, your custom model has now replaced the default one in the application.
 
- >**Note:** In order to successfully run the model, the NPU needs to be enabled and
- the platform `TARGET_PLATFORM` is set to `mps3` and `TARGET_SUBSYSTEM` is `SSE-300`.
+ >**Note:** To successfully run the model, the NPU must be enabled and the platform `TARGET_PLATFORM` is set to `mps3`
+ >and `TARGET_SUBSYSTEM` is `SSE-300`.
 
 ## Setting-up and running Ethos-U55 Code Sample
 
 ### Setting up the Ethos-U55 Fast Model
 
-The FVP is available publicly from [Arm Ecosystem FVP downloads
-](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
+The FVP is available publicly from
+[Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-For Ethos-U55 evaluation, please download the MPS3 version of the Arm® Corstone™-300 model that contains Ethos-U55 and
-Cortex-M55. The model is currently only supported on Linux based machines. To install the FVP:
+For the *Ethos-U55* evaluation, please download the MPS3 version of the Arm® *Corstone™-300* model that contains both
+the *Ethos-U55* and *Cortex-M55*. The model is currently only supported on Linux-based machines.
 
-- Unpack the archive
+To install the FVP:
 
-- Run the install script in the extracted package
+- Unpack the archive.
+
+- Run the install script in the extracted package:
 
 ```commandline
 .FVP_Corstone_SSE-300_Ethos-U55.sh
 ```
 
-- Follow the instructions to install the FVP to your desired location
+- Follow the instructions to install the FVP to the required location.
 
 ### Starting Fast Model simulation
 
-> **Note:** The anomaly detection example does not come pre-built. You will first need to follow the instructions in
->section 3 for building the application from source.
+> **Note:** The anomaly detection example does not come pre-built. Therefore, you must first follow the instructions in
+> section three for building the application from source.
 
-After building, and assuming the install location of the FVP was set to ~/FVP_install_location, the simulation can be
-started by:
+After building, and assuming the install location of the FVP was set to the `~/FVP_install_location`, the simulation can
+be started by running:
 
 ```commandline
 ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/ethos-u-ad.axf
 ```
 
-A log output should appear on the terminal:
+A log output now appears on the terminal:
 
 ```log
 telnetterminal0: Listening for serial connection on port 5000
@@ -287,13 +298,13 @@ telnetterminal2: Listening for serial connection on port 5002
 telnetterminal5: Listening for serial connection on port 5003
 ```
 
-This will also launch a telnet window with the sample application's standard output and error log entries containing
-information about the pre-built application version, TensorFlow Lite Micro library version used, data type as well as
-the input and output tensor sizes of the model compiled into the executable binary.
+This also launches a telnet window with the standard output of the sample application. It also includes error log
+entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
+data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started if `ad_FILE_PATH` pointed to a single file (or a folder containing a single input file)
-the inference starts immediately. In case of multiple inputs choice, it outputs a menu and waits for the user input from
-telnet terminal:
+After the application has started, if `ad_FILE_PATH` points to a single file, or even a folder that contains a single
+input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
+input from the user. For example:
 
 ```log
 User input required
@@ -309,44 +320,46 @@ Choice:
 
 ```
 
-1. “Classify next audio clip” menu option will run single inference on the next in line.
+What the preceding choices do:
 
-2. “Classify audio clip at chosen index” menu option will run inference on the chosen audio clip.
+1. Classify next audio clip: Runs a single inference on the next in line.
 
-    > **Note:** Please make sure to select audio clip index in the range of supplied audio clips during application build.
-    By default, pre-built application has 4 files, indexes from 0 to 3.
+2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
 
-3. “Run ... on all” menu option triggers sequential inference executions on all built-in .
+    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
+    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
 
-4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
+3. Run ... on all: Triggers sequential inference executions on all built-in applications.
+
+4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
 
     ```log
     INFO - uTFL version: 2.5.0
     INFO - Model info:
     INFO - Model INPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 1024 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  32
-    INFO - 		2:  32
-    INFO - 		3:   1
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 1024 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1:  32
+    INFO -    2:  32
+    INFO -    3:   1
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.192437
     INFO - ZeroPoint[0] = 11
     INFO - Model OUTPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 8 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:   8
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 8 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1:   8
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.048891
     INFO - ZeroPoint[0] = -30
     INFO - Activation buffer (a.k.a tensor arena) size used: 198016
     INFO - Number of operators: 1
-    INFO - 	Operator 0: ethos-u
+    INFO -  Operator 0: ethos-u
     ```
 
-5. “List” menu option prints a list of pair ... indexes - the original filenames embedded in the application:
+5. List: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
 
     ```log
     INFO - List of Files:
@@ -358,9 +371,9 @@ Choice:
 
 ### Running Anomaly Detection
 
-Please select the first menu option to execute Anomaly Detection.
+Please select the first menu option to execute the Anomaly Detection.
 
-The following example illustrates application output:
+The following example illustrates the output of an application:
 
 ```log
 INFO - Running inference on audio clip 0 => anomaly_id_00_00000000.wav
@@ -389,14 +402,14 @@ INFO - NPU IDLE cycles: 626
 INFO - NPU total cycles: 1081634
 ```
 
-As multiple inferences have to be run for one clip it will take around a minute or so for all inferences to complete.
+As multiple inferences must be run for one clip, it takes around a minute for all inferences to complete.
 
-For the anomaly_id_00_00000000.wav clip, after averaging results across all inferences the score is greater than the
-chosen anomaly threshold so an anomaly was detected with the machine in this clip.
+For the `anomaly_id_00_00000000.wav` clip, after averaging results across all inferences, the score is greater than the
+chosen anomaly threshold. Therefore, an anomaly was detected with the machine in this clip.
 
-The profiling section of the log shows that for each inference. For the last inference the profiling reports:
+The profiling section of the log shows that for each inference. For the last inference, the profiling reports:
 
-- Ethos-U55's PMU report:
+- *Ethos-U55* PMU report:
 
   - 1,081,634 total cycle: The number of NPU cycles
 
@@ -404,13 +417,13 @@ The profiling section of the log shows that for each inference. For the last inf
 
   - 626 idle cycles: number of cycles for which the NPU was idle
 
-  - 628,122 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus.
-    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+  - 628,122 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
+    Ethos-U55 NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
   - 135,087 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 62,870 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus.
-    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
+  - 62,870 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
+    Ethos-U55 NPU reads the model. So, read-only.
 
-- For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
-    the CPU model is not cycle-approximate or cycle-accurate.
+- For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
+  model is not cycle-approximate or cycle-accurate.

@@ -1,59 +1,62 @@
 # Quick start example ML application
 
-This is a quick start guide that will show you how to run the keyword spotting example application.
-The aim of this quick start guide is to enable you to run an application quickly on the Fixed Virtual Platform.
-The assumption we are making is that your Arm® Ethos™-U55 NPU is configured to use 128 Multiply-Accumulate units,
-is using a shared SRAM with the Arm® Cortex®-M55.
+This is a quick start guide that shows you how to run the keyword spotting example application.
 
-1. Verify you have installed [the required prerequisites](sections/building.md#Build-prerequisites).
+The aim of this quick start guide is to enable you to run an application quickly on the Fixed Virtual Platform (FVP).
+This documentation assumes that your Arm® *Ethos™-U55* NPU is configured to use 128 Multiply-Accumulate units, and is
+sharing SRAM with the Arm® *Cortex®-M55*.
 
-2. Clone the Ethos-U55 evaluation kit repository.
+To get started quickly, please follow these steps:
+
+1. First, verify that you have installed [the required prerequisites](sections/building.md#Build-prerequisites).
+
+2. Clone the *Ethos-U55* evaluation kit repository:
 
     ```commandline
     git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit"
     cd ml-embedded-evaluation-kit
     ```
 
-3. Pull all the external dependencies with the commands below:
+3. Pull all the external dependencies with the following command:
 
     ```commandline
     git submodule update --init
     ```
 
-4. Next, you can use the `build_default` python script to get the default neural network models, compile them with
-    Vela and build the project.
+4. Next, you can use the `build_default` Python script to get the default neural network models, compile them with Vela,
+    and then build the project.
 
-    > **Note:** This helper script needs python version 3.6 or higher.
+    [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela) is an open-source Python tool. Vela
+    converts a TensorFlow Lite for Microcontrollers neural network model into an optimized model that can run on an
+    embedded system that contains an *Ethos-U55* NPU.
 
-    [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela) is an open-source python tool converting
-    TensorFlow Lite for Microcontrollers neural network model into an optimized model that can run on an embedded system
-    containing an Ethos-U55 NPU. It is worth noting that in order to take full advantage of the capabilities of the NPU, the
-    neural network operators should be [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
+    It is worth noting that to take full advantage of the capabilities of the NPU, the neural network operators must be
+    [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
 
     ```commandline
     ./build_default.py
     ```
 
-    > **Note** The above command assumes you are using the GNU Arm Embedded Toolchain.
-    > If you are using the Arm Compiler instead, you can override the default selection
-    > by executing:
+    > **Note** The preceding command assumes you are using the GNU Arm Embedded toolchain. If you are using the Arm
+    > Compiler instead, you can override the default selection by executing:
 
     ```commandline
     ./build_default.py --toolchain arm
     ```
 
-5. Launch the project as explained [here](sections/deployment.md#Deployment). For the purpose of this quick start guide,
-    we'll use the keyword spotting application and the Fixed Virtual Platform.
-    Point the generated `bin/ethos-u-kws.axf` file in stage 4 to the FVP that you have downloaded when
-    installing the prerequisites.
+5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#Deployment). In quick
+   start guide, we use the keyword spotting application and the FVP.
+
+    Point the generated `bin/ethos-u-kws.axf` file, from step four, to the FVP you downloaded when installing the
+    prerequisites. Now use the following command:
 
     ```commandline
     <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
     ```
 
-6. A telnet window is launched through which you can interact with the application and obtain performance figures.
+6. A telnet window is launched through where you can interact with the application and obtain performance figures.
 
-> **Note:**: Execution of the build_default.py script is equivalent to running the following commands:
+> **Note:** Executing the `build_default.py` script is equivalent to running the following commands:
 
 ```commandline
 mkdir resources_downloaded && cd resources_downloaded
@@ -166,5 +169,6 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake
 ```
 
-> **Note:** If you want to make changes to the application (for example modifying the number of MAC units of the Ethos-U or running a custom neural network),
-> you should follow the approach defined in [documentation.md](../docs/documentation.md) instead of using the `build_default` python script.
+> **Note:** If you want to change the application, then, instead of using the `build_default` Python script, follow the
+> approach defined in [documentation.md](./documentation.md). For example, if you wanted to modify the number of
+> MAC units of the Ethos-U, or running a custom neural network.

@@ -20,108 +20,136 @@
 ## Introduction
 
 This document describes the process of setting up and running an example of sequential execution of the Keyword Spotting
-and Automatic Speech Recognition models on Cortex-M CPU and Ethos-U NPU.
+and Automatic Speech Recognition models on a *Cortex-M* CPU and *Ethos-U* NPU.
 
-The Keyword Spotting and Automatic Speech Recognition example demonstrates how to run multiple models sequentially. A
-Keyword Spotting model is first run on the CPU and if a set keyword is detected then an Automatic Speech Recognition
-model is run on Ethos-U55 on the remaining audio.
-Tensor arena memory region is reused between models to optimise application memory footprint.
+The Keyword Spotting and Automatic Speech Recognition example demonstrates how to run multiple models sequentially.
 
-"Yes" key word is used to trigger full command recognition following the key word.
-Use case code could be found in [source/use_case/kws_asr](../../source/use_case/kws_asr]) directory.
+A Keyword Spotting model is first run on the CPU. If a set keyword is detected on the remaining audio, then an Automatic
+Speech Recognition model is run on the *Ethos-U55*.
+
+The tensor arena memory region is reused between models to optimize application memory footprint.
+
+The `Yes` keyword is used to trigger full command recognition following the keyword.
+
+Use-case code could be found in the following directory: [source/use_case/kws_asr](../../source/use_case/kws_asr]).
 
 ### Preprocessing and feature extraction
 
-In this use-case there are 2 different models being used with different requirements for preprocessing. As such each
-preprocessing process is detailed below. Note that Automatic Speech Recognition only occurs if a keyword is detected in
-the audio clip.
+In this use-case, there are two different models being used with different requirements for preprocessing. As such, each
+preprocessing process is detailed as follows.
 
-By default the KWS model is run purely on CPU and not on the Ethos-U55.
+> **Note:** Automatic Speech Recognition only occurs if a keyword is detected in the audio clip.
+
+By default, the KWS model is run purely on the CPU and **not** on the *Ethos-U55*.
 
 #### Keyword Spotting Preprocessing
 
-The DS-CNN keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in
-a specific way before performing an inference. This section aims to provide an overview of the feature extraction
-process used.
+The `DS-CNN` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
+specific way before performing an inference.
 
-First the audio data is normalized to the range (-1, 1).
+Therefore, this section aims to provide an overview of the feature extraction process used.
 
-> **Note:** Mel-frequency cepstral coefficients (MFCCs) are a common feature extracted from audio data and can be used as input for machine learning tasks like keyword spotting and speech recognition. See source/application/main/include/Mfcc.hpp for implementation details.
+First, the audio data is normalized to the range (`-1`, `1`).
 
-Next, a window of 640 audio samples is taken from the start of the audio clip. From these 640 samples we calculate 10
+> **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
+> be used as input for machine learning tasks. Such as keyword spotting and speech recognition. For implementation
+> details, please refer to: `source/application/main/include/Mfcc.hpp`
+
+Next, a window of 640 audio samples is taken from the start of the audio clip. From these 640 samples, we calculate 10
 MFCC features.
 
 The whole window is shifted to the right by 320 audio samples and 10 new MFCC features are calculated. This process of
-shifting and calculating is repeated until the end of the 16000 audio samples needed to perform an inference is reached.
-In total this will be 49 windows that each have 10 MFCC features calculated for them, giving an input tensor of shape
-49x10.
+shifting and calculating is repeated until the end of the 16000 audio samples required to perform an inference is
+reached.
 
-These extracted features are quantized, and an inference is performed.
+In total, this is 49 windows that each have 10 MFCC features calculated for them, giving an input tensor of shape 49x10.
 
-If the audio clip is longer than 16000 audio samples then the initial starting position is offset by 16000/2 = 8000
-audio samples. From this new starting point, MFCC features for the next 16000 audio samples are calculated and another
-inference is performed (i.e. do an inference for samples 8000-24000).
+These extracted features are quantized and an inference is performed.
 
-> **Note:** Parameters of the MFCC feature extraction such as window size, stride, number of features etc. all depend on what was used during model training. These values are specific to each model and if you try a different keyword spotting model that uses MFCC input then values are likely to need changing to match the new model.
+If the audio clip is longer than 16000 audio samples, then the initial starting position is offset by `16000/2 = 8000`
+audio samples. From this new starting point, MFCC features for the next `16000` audio samples are calculated and another
+inference is performed. In other words, do an inference for samples `8000-24000`.
 
-In addition, MFCC feature extraction methods can vary slightly with different normalization methods or scaling etc. being used.
+> **Note:** Parameters of the MFCC feature extraction all depend on what was used during model training. These values
+> are specific to each model.
+
+If you try a different keyword spotting model that uses MFCC input, then values check to see if the values need changing
+to match the new model.
+
+In addition, MFCC feature extraction methods can vary slightly with different normalization methods or scaling being
+used.
 
 #### Automatic Speech Recognition Preprocessing
 
-The wav2letter automatic speech recognition model that is used with the Code Samples expects audio data to be
+The *wav2letter* automatic speech recognition model that is used with the Code Samples expects audio data to be
 preprocessed in a specific way before performing an inference. This section aims to provide an overview of the feature
 extraction process used.
 
-First the audio data is normalized to the range (-1, 1).
+First, the audio data is normalized to the range (`-1`, `1`).
 
-> **Note:** Mel-frequency cepstral coefficients (MFCCs) are a common feature extracted from audio data and can be used as input for machine learning tasks like keyword spotting and speech recognition. See source/application/main/include/Mfcc.hpp for implementation details.
+> **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
+> be used as input for machine learning tasks. Such as keyword spotting and speech recognition. For implementation
+> details, please refer to: `source/application/main/include/Mfcc.hpp`
 
-Next, a window of 512 audio samples is taken from the start of the audio clip. From these 512 samples we calculate 13
+Next, a window of 512 audio samples is taken from the start of the audio clip. From these 512 samples, we calculate 13
 MFCC features.
 
 The whole window is shifted to the right by 160 audio samples and 13 new MFCC features are calculated. This process of
-shifting and calculating is repeated until enough audio samples to perform an inference have been processed. In total
-this will be 296 windows that each have 13 MFCC features calculated for them.
+shifting and calculating is repeated until enough audio samples to perform an inference have been processed.
 
-After extracting MFCC features the first and second order derivatives of these features with respect to time are
-calculated. These derivative features are then standardized and concatenated with the MFCC features (which also get
-standardized). At this point the input tensor will have a shape of 296x39.
+In total, this is 296 windows that each have 13 MFCC features calculated for them.
 
-These extracted features are quantized, and an inference is performed.
+After extracting MFCC features, the first and second order derivatives of these features, regarding time, are
+calculated.
 
-For longer audio clips where multiple inferences need to be performed, then the initial starting position is offset by
-(100\*160) = 16000 audio samples. From this new starting point, MFCC and derivative features are calculated as before
-until there is enough to perform another inference. Padding can be used if there are not enough audio samples for at
-least 1 inference. This step is repeated until the whole audio clip has been processed. If there are not enough audio
-samples for a final complete inference the MFCC features will be padded by repeating the last calculated feature until
-an inference can be performed.
+These derivative features are then standardized and concatenated with the MFCC features (which also get standardized).
+At this point, the input tensor has a shape of 296x39.
 
-> **Note:** Parameters of the MFCC feature extraction such as window size, stride, number of features etc. all depend on what was used during model training. These values are specific to each model. If you switch to a different ASR model than the one supplied, then the feature extraction process could be completely different to the one currently implemented.
+These extracted features are quantized and an inference is performed.
 
-The amount of audio samples we offset by for long audio clips is specific to the included wav2letter model.
+For longer audio clips, where multiple inferences must be performed, then the initial starting position is offset by
+`(100*160) = 16000` audio samples. From this new starting point, MFCC and derivative features are calculated as before,
+until there is enough to perform another inference.
+
+Padding can be used if there are not enough audio samples for at least one inference. This step is repeated until the
+whole audio clip has been processed. If there are not enough audio samples for a final complete inference, then the MFCC
+features are padded by repeating the last calculated feature until an inference can be performed.
+
+> **Note:** Parameters of the MFCC feature extraction all depend on what was used during model training. These values
+> are specific to each model.\
+If you switch to a different ASR model than the one supplied, then the feature extraction process could be completely
+different to the one currently implemented.
+
+The amount of time that audio samples that are offset for long audio clips is specific to the included *wav2letter*
+model.
 
 ### Postprocessing
 
-If a keyword is detected then the ASR process is run and the raw output of that inference needs to be postprocessed to
-get a usable result.
+If a keyword is detected, then the ASR process is run and the raw output of that inference must be postprocessed to get
+a usable result.
 
 The raw output from the model is a tensor of shape 148x29 where each row is a probability distribution over the possible
 29 characters that can appear at each of the 148 time steps.
 
-This wav2letter model is trained using context windows, this means that only certain parts of the output are usable
-depending on the bit of the audio clip that is currently being processed.
+This *wav2letter* model is trained using context windows. This means that, depending on the bit of the audio clip that
+is being processed, only certain parts of the output are usable.
 
-If this is the first inference and multiple inferences are required, then ignore the final 49 rows of the output.
-Similarly, if this is the final inference from multiple inferences then ignore the first 49 rows of the output. Finally,
-if this inference is not the last or first inference then ignore the first and last 49 rows of the model output.
+If this is the first inference, and multiple inferences are required, then ignore the final 49 rows of the output.
+Similarly, if this is the final inference from multiple inferences, then ignore the first 49 rows of the output.
 
-> **Note:** If the audio clip is small enough then the whole of the model output is usable and there is no need to throw away any of the output before continuing.
+Finally, if this inference is not the last, or the first inference, then ignore the first and last 49 rows of the model
+output.
 
-Once any rows have been removed the final processing can be done. To process the output, first the letter with the
-highest probability at each time step is found. Next, any letters that are repeated multiple times in a row are removed
-(e.g. [t, t, t, o, p, p] becomes [t, o, p]). Finally, the 29^th^ blank token letter is removed from the output.
+> **Note:** If the audio clip is small enough, then the whole of the model output is usable and there is no need to
+> throw away any of the outputs before continuing.
 
-For the final output, the result from all inferences are combined before decoding. What you are left with is then
+Once any rows have been removed, the final processing can be done. To process the output, the letter with the highest
+probability at each time step is found first. Next, any letters that are repeated multiple times in a row are removed.
+
+For example: [`t`, `t`, `t`, `o`, `p`, `p`] becomes [`t`, `o`, `p`]). Finally, the 29th blank token letter is removed
+from the output.
+
+For the final output, the results from all inferences are combined before decoding. What you are left with is then
 displayed to the console.
 
 ### Prerequisites
@@ -132,67 +160,74 @@ See [Prerequisites](../documentation.md#prerequisites)
 
 ### Build options
 
-In addition to the already specified build option in the main documentation, Keyword Spotting and Automatic Speech
-Recognition use case adds:
+In addition to the already specified build option in the main documentation, the Keyword Spotting and Automatic Speech
+Recognition use-case adds:
 
-- `kws_asr_MODEL_TFLITE_PATH_ASR` and `kws_asr_MODEL_TFLITE_PATH_KWS`: Path to the NN model files in TFLite format.
-    Models will be processed and included into the application axf file. The default value points to one of the delivered set of models.
-    Note that the parameters `kws_asr_LABELS_TXT_FILE_KWS`, `kws_asr_LABELS_TXT_FILE_ASR`,`TARGET_PLATFORM` and `ETHOS_U55_ENABLED`
-    should be aligned with the chosen model, i.e:
-  - if `ETHOS_U55_ENABLED` is set to `On` or `1`, the NN model is assumed to be optimized. The model will naturally fall back to the Arm® Cortex®-M CPU if an unoptimized model is supplied.
-  - if `ETHOS_U55_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized model in this case will result in a runtime error.
+- `kws_asr_MODEL_TFLITE_PATH_ASR` and `kws_asr_MODEL_TFLITE_PATH_KWS`: The path to the NN model file in `TFLite` format.
+    The model is processed and then included into the application `axf` file. The default value points to one of the
+    delivered set of models. Note that the parameters `kws_asr_LABELS_TXT_FILE_KWS`,
+    `kws_asr_LABELS_TXT_FILE_ASR`,`TARGET_PLATFORM`, and `ETHOS_U55_ENABLED` must be aligned with the chosen model. In
+    other words:
+  - If `ETHOS_U55_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
+    falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
+  - If `ETHOS_U55_ENABLED` is set to `Off` or `0`, then the NN model is assumed to be unoptimized. Supplying an
+    optimized model in this case results in a runtime error.
 
-- `kws_asr_FILE_PATH`: Path to the directory containing audio files, or a path to single WAV file, to be used in the application. The default value
-    points to the resources/kws_asr/samples folder containing the delivered set of audio clips.
+- `kws_asr_FILE_PATH`: The path to the directory containing audio files, or a path to single WAV file, to be used in the
+  application. The default value points to the `resources/kws_asr/samples` folder that contains the delivered set of
+  audio clips.
 
-- `kws_asr_LABELS_TXT_FILE_KWS` and `kws_asr_LABELS_TXT_FILE_ASR`: Path respectively to keyword spotting labels' and the automatic speech
-    recognition labels' text files. The file is used to map
-    letter class index to the text label. The default value points to the delivered labels.txt file inside the delivery
-    package.
+- `kws_asr_LABELS_TXT_FILE_KWS` and `kws_asr_LABELS_TXT_FILE_ASR`: The respective paths to the keyword spotting labels
+    and the automatic speech recognition labels text files. The file is used to map letter class index to the text
+    label. The default value points to the delivered `labels.txt` file inside the delivery package.
 
-- `kws_asr_AUDIO_RATE`: Input data sampling rate. Each audio file from kws_asr_FILE_PATH is preprocessed during the
-    build to match NN model input requirements. Default value is 16000.
+- `kws_asr_AUDIO_RATE`: The input data sampling rate. Each audio file from `kws_asr_FILE_PATH` is preprocessed during
+  the build to match the NN model input requirements. The default value is `16000`.
 
-- `kws_asr_AUDIO_MONO`: If set to ON the audio data will be converted to mono. Default is ON.
+- `kws_asr_AUDIO_MONO`: If set to `ON`, then the audio data is converted to mono. The default value is `ON`.
 
-- `kws_asr_AUDIO_OFFSET`: Start loading audio data starting from this offset (in seconds). Default value is 0.
+- `kws_asr_AUDIO_OFFSET`: Begins loading audio data and starts from this specified offset, defined in seconds. the
+  default value is set to `0`.
 
-- `kws_asr_AUDIO_DURATION`: Length of the audio data to be used in the application in seconds. Default is 0 meaning
-    the whole audio file will be taken.
+- `kws_asr_AUDIO_DURATION`: The length of the audio data to be used in the application in seconds. The default is `0`,
+  meaning that the whole audio file is used.
 
 - `kws_asr_AUDIO_MIN_SAMPLES`: Minimum number of samples required by the network model. If the audio clip is shorter
-    than this number, it is padded with zeros. Default value is 16000.
+  than this number, then it is padded with zeros. The default value is `16000`.
 
-- `kws_asr_MODEL_SCORE_THRESHOLD_KWS`: Threshold value that must be applied to the keyword spotting inference
-    results for a label to be deemed valid. Default is 0.9.
+- `kws_asr_MODEL_SCORE_THRESHOLD_KWS`: Threshold value that must be applied to the inference results for a label to be
+  deemed valid. The default is `0.9`.
 
 - `kws_asr_MODEL_SCORE_THRESHOLD_ASR`: Threshold value that must be applied to the automatic speech recognition
-    inference results for a label to be deemed valid. Default is 0.5.
+  inference results for a label to be deemed valid. The default is `0.5`.
 
-- `kws_asr_ACTIVATION_BUF_SZ`: The intermediate/activation buffer size reserved for the NN model. By default, it is
-    set to 2MiB and should be enough for most models.
+- `kws_asr_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it is
+  set to 2MiB and is enough for most models.
 
-In order to build **ONLY** Keyword Spotting and Automatic Speech
-Recognition example application add to the `cmake` command line specified in [Building](../documentation.md#Building) `-DUSE_CASE_BUILD=kws_asr`.
+To **ONLY** build the automatic speech recognition example application, add `-DUSE_CASE_BUILD=kws_asr` to the `cmake`
+command line, as specified in: [Building](../documentation.md#Building).
 
 ### Build process
 
-> **Note:** This section describes the process for configuring the build for `MPS3: SSE-300` for different target platform see [Building](../documentation.md#Building).
+> **Note:** This section describes the process for configuring the build for the *MPS3: SSE-300*. To build for a
+> different target platform, please refer to: [Building](../documentation.md#Building).
 
-Create a build directory and navigate inside:
+To build **only** the keyword spotting and automatic speech recognition example, create a build directory and navigate
+inside, like so:
 
 ```commandline
 mkdir build_kws_asr && cd build_kws_asr
 ```
 
-On Linux, execute the following command to build the application to run on the Ethos-U55 Fast Model when providing only the mandatory arguments for CMake configuration:
+On Linux, when providing only the mandatory arguments for CMake configuration, execute the following command to build
+**only** the Keyword Spotting and Automatic Speech Recognition application to run on the *Ethos-U55* Fast Model:
 
 ```commandline
 cmake ../ -DUSE_CASE_BUILD=kws_asr
 ```
 
-To configure a build that can be debugged using Arm-DS, we can just specify
-the build type as `Debug` and use the `Arm Compiler` toolchain file:
+To configure a build that can be debugged using Arm DS specify the build type as `Debug` and then use the `Arm Compiler`
+toolchain file:
 
 ```commandline
 cmake .. \
@@ -201,24 +236,25 @@ cmake .. \
     -DUSE_CASE_BUILD=kws_asr
 ```
 
-Also see:
+For further information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm FastModel Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
+- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
 
-> **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run the CMake command.
+> **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
+> the CMake command.
 
-If the CMake command succeeded, build the application as follows:
+If the CMake command succeeds, build the application as follows:
 
 ```commandline
 make -j4
 ```
 
-Add VERBOSE=1 to see compilation and link details.
+To see compilation and link details, add `VERBOSE=1`.
 
-Results of the build will be placed under `build/bin` folder:
+Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
@@ -228,30 +264,32 @@ bin
  └── sectors
       ├── images.txt
       └── kws_asr
-           ├── dram.bin
+           ├── ddr.bin
            └── itcm.bin
 ```
 
-Where:
+The `bin` folder contains the following files:
 
-- `ethos-u-kws_asr.axf`: The built application binary for the Keyword Spotting and Automatic Speech Recognition use
-    case.
+- `ethos-u-kws_asr.axf`: The built application binary for the Keyword Spotting and Automatic Speech Recognition
+  use-case.
 
-- `ethos-u-kws_asr.map`: Information from building the application (e.g. libraries used, what was optimized, location
-    of objects)
+- `ethos-u-kws_asr.map`: Information from building the application. For example: The libraries used, what was optimized,
+  and the location of objects.
 
 - `ethos-u-kws_asr.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/kws_asr`: Folder containing the built application, split into files for loading into different FPGA memory regions.
+- `sectors/kws_asr`: Folder containing the built application. It is split into files for loading into different FPGA memory
+  regions.
 
-- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in sectors/** folder.
+- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in the `sectors/..` folder.
 
 ### Add custom input
 
-The application performs inference on data found in the folder set by the CMake parameter `kws_asr_FILE_PATH`.
+The application anomaly detection is set up to perform inferences on data found in the folder, or an individual file,
+that is pointed to by the parameter `kws_asr_FILE_PATH`.
 
-To run the application with your own audio clips first create a folder to hold them and then copy the custom files into
-this folder:
+To run the application with your own audio clips, first create a folder to hold them and then copy the custom clips into
+the following folder:
 
 ```commandline
 mkdir /tmp/custom_files
@@ -261,7 +299,7 @@ cp custom_audio1.wav /tmp/custom_files/
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-Next set `kws_asr_FILE_PATH` to the location of this folder when building:
+Next, when building, set `kws_asr_FILE_PATH` to the location of the following folder:
 
 ```commandline
 cmake .. \
@@ -269,35 +307,41 @@ cmake .. \
     -DUSE_CASE_BUILD=kws_asr
 ```
 
-The files found in the `kws_asr_FILE_PATH` folder will be picked up and automatically converted to C++ files during the
-CMake configuration stage and then compiled into the application during the build phase for performing inference with.
+The audio flies found in the `kws_asr_FILE_PATH` folder are picked up and automatically converted to C++ files during
+the CMake configuration stage. They are then compiled into the application during the build phase for performing
+inference with.
 
-The log from the configuration stage should tell you what directory path has been used:
+The log from the configuration stage tells you what audio directory path has been used:
 
 ```log
 -- User option kws_asr_FILE_PATH is set to /tmp/custom_files
 ```
 
-After compiling, your custom inputs will have now replaced the default ones in the application.
+After compiling, your custom inputs have now replaced the default ones in the application.
 
 ### Add custom model
 
-The application performs KWS inference using the model pointed to by the CMake parameter `kws_asr_MODEL_TFLITE_PATH_KWS` and
-ASR inference using the model pointed to by the CMake parameter `kws_asr_MODEL_TFLITE_PATH_ASR`.
+The application performs KWS inference using the model pointed to by the CMake parameter
+`kws_asr_MODEL_TFLITE_PATH_KWS`. ASR inference is performed using the model pointed to by the CMake parameter
+`kws_asr_MODEL_TFLITE_PATH_ASR`.
 
-This section assumes you wish to change the existing ASR model to a custom one. If instead you wish to change the KWS
-model then the instructions will be the same except ASR will change to KWS.
+This section assumes you want to change the existing ASR model to a custom one. If, instead, you want to change the KWS
+model, then the instructions are the same. Except ASR changes to KWS.
 
-> **Note:** If you want to run the model using Ethos-U55, ensure your custom model has been run through the Vela compiler successfully before continuing. See [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
+> **Note:** If you want to run the model using an *Ethos-U55*, ensure that your custom model has been successfully run
+> through the Vela compiler *before* continuing.
 
-To run the application with a custom model you will need to provide a labels_<model_name>.txt file of labels
-associated with the model. Each line of the file should correspond to one of the outputs in your model. See the provided
-labels_wav2letter.txt file for an example.
+For further information:
+[Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
 
-Then, you must set `kws_asr_MODEL_TFLITE_PATH_ASR` to the location of the Vela processed model file and
-`kws_asr_LABELS_TXT_FILE_ASR` to the location of the associated labels file.
+To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
+associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
+provided `labels_wav2letter.txt` file for an example.
 
-An example:
+Then, you must set `kws_asr_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
+`kws_asr_LABELS_TXT_FILE`to the location of the associated labels file.
+
+For example:
 
 ```commandline
 cmake .. \
@@ -308,11 +352,11 @@ cmake .. \
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model files pointed to by `kws_asr_MODEL_TFLITE_PATH_KWS` and `kws_asr_MODEL_TFLITE_PATH_ASR`, labels text files pointed to by `kws_asr_LABELS_TXT_FILE_KWS` and `kws_asr_LABELS_TXT_FILE_ASR`
-will be converted to C++ files during the CMake configuration stage and then compiled into the application for
-performing inference with.
+The `.tflite` model files pointed to by `kws_asr_MODEL_TFLITE_PATH_KWS` and `kws_asr_MODEL_TFLITE_PATH_ASR`, and the
+labels text files pointed to by `kws_asr_LABELS_TXT_FILE_KWS` and `kws_asr_LABELS_TXT_FILE_ASR` are converted to C++
+files during the CMake configuration stage. They are then compiled into the application for performing inference with.
 
-The log from the configuration stage should tell you what model path and labels file have been used:
+The log from the configuration stage tells you what model path and labels file have been used, for example:
 
 ```log
 -- User option TARGET_PLATFORM is set to mps3
@@ -328,38 +372,44 @@ custom_asr_model_after_vela.tflite.cc
 ...
 ```
 
-After compiling, your custom model will have now replaced the default one in the application.
+After compiling, your custom model has now replaced the default one in the application.
 
 ## Setting-up and running Ethos-U55 Code Samples
 
 ### Setting up the Ethos-U55 Fast Model
 
-The FVP is available publicly from [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
+The FVP is available publicly from
+[Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-For Ethos-U55 evaluation, please download the MPS3 version of the Arm® Corstone™-300 model that contains Ethos-U55 and
-Cortex-M55. The model is currently only supported on Linux based machines. To install the FVP:
+For the *Ethos-U55* evaluation, please download the MPS3 version of the Arm® *Corstone™-300* model that contains both
+the *Ethos-U55* and *Cortex-M55*. The model is only supported on Linux-based machines.
 
-- Unpack the archive
+To install the FVP:
 
-- Run the install script in the extracted package
+- Unpack the archive.
+
+- Run the install script in the extracted package:
 
 ```commandline
 ./FVP_Corstone_SSE-300_Ethos-U55.sh
 ```
 
-- Follow the instructions to install the FVP to your desired location
+- Follow the instructions to install the FVP to the required location.
 
 ### Starting Fast Model simulation
 
-Once completed the building step, application binary ethos-u-kws_asr.axf can be found in the `build/bin` folder.
-Assuming the install location of the FVP was set to ~/FVP_install_location, the simulation can be started by:
+Once the building has been completed, the application binary `ethos-u-kws_asr.axf` can be found in the `build/bin`
+folder.
+
+Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
+using:
 
 ```commandline
 $ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
 ./bin/mps3-sse-300/ethos-u-kws_asr.axf
 ```
 
-A log output should appear on the terminal:
+A log output appears on the terminal:
 
 ```log
 telnetterminal0: Listening for serial connection on port 5000
@@ -368,12 +418,15 @@ telnetterminal2: Listening for serial connection on port 5002
 telnetterminal5: Listening for serial connection on port 5003
 ```
 
-This will also launch a telnet window with the sample application's standard output and error log entries containing
-information about the pre-built application version, TensorFlow Lite Micro library version used, data type as well as
-the input and output tensor sizes of the model compiled into the executable binary.
+This also launches a telnet window with the standard output of the sample application. It also includes error log
+entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
+data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started if `kws_asr_FILE_PATH` pointed to a single file (or a folder containing a single input file)
-the inference starts immediately. In case of multiple inputs choice, it outputs a menu and waits for the user input from telnet terminal:
+After the application has started, if `kws_asr_FILE_PATH` points to a single file, or even a folder that contains a
+single input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits
+for input from the user.
+
+For example:
 
 ```log
 User input required
@@ -389,79 +442,82 @@ Choice:
 
 ```
 
-1. “Classify next audio clip” menu option will run single inference on the next included file.
+What the preceding choices do:
 
-2. “Classify audio clip at chosen index” menu option will run inference on the chosen audio clip.
+1. Classify next audio clip: Runs a single inference on the next in line.
 
-    > **Note:** Please make sure to select audio clip index in the range of supplied audio clips during application build.
+2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
 
-3. “Run ... on all” menu option triggers sequential inference executions on all built-in files.
+    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
+    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
 
-4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
+3. Run ... on all: Triggers sequential inference executions on all built-in applications.
+
+4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
 
     ```log
     INFO - uTFL version: 2.5.0
     INFO - Model INPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 490 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:   1
-    INFO - 		2:  49
-    INFO - 		3:  10
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 490 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1:   1
+    INFO -    2:  49
+    INFO -    3:  10
     INFO - Quant dimension: 0
     INFO - Scale[0] = 1.107164
     INFO - ZeroPoint[0] = 95
     INFO - Model OUTPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 12 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  12
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 12 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1:  12
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.003906
     INFO - ZeroPoint[0] = -128
     INFO - Activation buffer (a.k.a tensor arena) size used: 123616
     INFO - Number of operators: 16
-    INFO - 	Operator 0: RESHAPE
-    INFO - 	Operator 1: CONV_2D
-    INFO - 	Operator 2: DEPTHWISE_CONV_2D
-    INFO - 	Operator 3: CONV_2D
-    INFO - 	Operator 4: DEPTHWISE_CONV_2D
-    INFO - 	Operator 5: CONV_2D
-    INFO - 	Operator 6: DEPTHWISE_CONV_2D
-    INFO - 	Operator 7: CONV_2D
-    INFO - 	Operator 8: DEPTHWISE_CONV_2D
-    INFO - 	Operator 9: CONV_2D
-    INFO - 	Operator 10: DEPTHWISE_CONV_2D
-    INFO - 	Operator 11: CONV_2D
-    INFO - 	Operator 12: AVERAGE_POOL_2D
-    INFO - 	Operator 13: RESHAPE
-    INFO - 	Operator 14: FULLY_CONNECTED
-    INFO - 	Operator 15: SOFTMAX
+    INFO -  Operator 0: RESHAPE
+    INFO -  Operator 1: CONV_2D
+    INFO -  Operator 2: DEPTHWISE_CONV_2D
+    INFO -  Operator 3: CONV_2D
+    INFO -  Operator 4: DEPTHWISE_CONV_2D
+    INFO -  Operator 5: CONV_2D
+    INFO -  Operator 6: DEPTHWISE_CONV_2D
+    INFO -  Operator 7: CONV_2D
+    INFO -  Operator 8: DEPTHWISE_CONV_2D
+    INFO -  Operator 9: CONV_2D
+    INFO -  Operator 10: DEPTHWISE_CONV_2D
+    INFO -  Operator 11: CONV_2D
+    INFO -  Operator 12: AVERAGE_POOL_2D
+    INFO -  Operator 13: RESHAPE
+    INFO -  Operator 14: FULLY_CONNECTED
+    INFO -  Operator 15: SOFTMAX
     INFO - Model INPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 11544 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1: 296
-    INFO - 		2:  39
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 11544 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1: 296
+    INFO -    2:  39
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.110316
     INFO - ZeroPoint[0] = -11
     INFO - Model OUTPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 4292 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:   1
-    INFO - 		2: 148
-    INFO - 		3:  29
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 4292 bytes with dimensions
+    INFO -    0:   1
+    INFO -    1:   1
+    INFO -    2: 148
+    INFO -    3:  29
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.003906
     INFO - ZeroPoint[0] = -128
     INFO - Activation buffer (a.k.a tensor arena) size used: 809808
     INFO - Number of operators: 1
-    INFO - 	Operator 0: ethos-u
+    INFO -  Operator 0: ethos-u
     ```
 
-5. “List” menu option prints a list of pair ... indexes - the original filenames embedded in the application:
+5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
 
     ```log
     [INFO] List of Files:
@@ -472,7 +528,7 @@ Choice:
 
 Please select the first menu option to execute Keyword Spotting and Automatic Speech Recognition.
 
-The following example illustrates application output:
+The following example illustrates the output of an application:
 
 ```log
 INFO - KWS audio data window size 16000
@@ -502,32 +558,32 @@ INFO - NPU IDLE cycles: 863
 INFO - NPU total cycles: 28910172
 ```
 
-It could take several minutes to complete one inference run (average time is 2-3 minutes).
+It can take several minutes to complete one inference run. The average time is around 2-3 minutes.
 
-Using the input “yes_no_go_stop.wav”, the log shows inference results for the KWS operation first, detecting the
-trigger word “yes“ with the stated probability score (in this case 0.99). After this, the ASR inference is run,
-printing the words recognized from the input sample.
+Using the input `yes_no_go_stop.wav`, the log shows inference results for the KWS operation first. Detecting the trigger
+word `yes` with the stated probability score. In this case, `0.99`. After this, the ASR inference is run, printing the
+words recognized from the input sample.
 
 The profiling section of the log shows that for the ASR inference:
 
-- Ethos-U55's PMU report:
+- *Ethos-U55* PMU report:
 
-  - 28,910,172 total cycle: The number of NPU cycles
+  - 28,910,172 total cycle: The number of NPU cycles.
 
-  - 28,909,309 active cycles: number of NPU cycles that were used for computation
+  - 28,909,309 active cycles: The number of NPU cycles that were used for computation.
 
-  - 863 idle cycles: number of cycles for which the NPU was idle
+  - 863 idle cycles: The number of cycles for which the NPU was idle.
 
-  - 13,520,864 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus.
-    AXI0 is the bus where Ethos-U55 NPU reads and writes to the computation buffers (activation buf/tensor arenas).
+  - 13,520,864 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where
+    the *Ethos-U55* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
   - 2,841,970 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 2,717,670 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus.
-    AXI1 is the bus where Ethos-U55 NPU reads the model (read only)
+  - 2,717,670 AXI1 read beats: The number of AXI beats with read transactions from the AXI1 bus. AXI1 is the bus where
+    the *Ethos-U55* NPU reads the model. So, read-only.
 
-- For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
-the CPU model is not cycle-approximate or cycle-accurate.
+- For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
+  model is not cycle-approximate or cycle-accurate.
 
-    Note that in this example the KWS inference does not use the Ethos-U55 and is run purely on CPU, therefore 0 Active
-    NPU cycles is shown.
+> **Note:** In this example, the KWS inference does *not* use the *Ethos-U55* and only runs on the CPU. Therefore, `0`
+> Active NPU cycles are shown.

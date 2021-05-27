@@ -38,8 +38,6 @@ def run(toolchain: str, download_resources: bool, run_vela_on_models: bool):
     """
 
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     # 1. Make sure the toolchain is supported, and set the right one here
     supported_toolchain_ids = ["gnu", "arm"]
@@ -105,4 +103,8 @@ if __name__ == '__main__':
                         help="Do not run Vela optimizer on downloaded models.",
                         action="store_true")
     args = parser.parse_args()
+
+    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
     run(args.toolchain.lower(), not args.skip_download, not args.skip_vela)

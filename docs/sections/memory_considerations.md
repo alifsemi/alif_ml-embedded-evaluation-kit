@@ -7,37 +7,37 @@
     - [Total Off-chip Flash used](#total-off-chip-flash-used)
   - [Non-default configurations](#non-default-configurations)
   - [Tensor arena and neural network model memory placement](#tensor-arena-and-neural-network-model-memory-placement)
-  - [Memory usage for ML use cases](#memory-usage-for-ml-use-cases)
+  - [Memory usage for ML use-cases](#memory-usage-for-ml-use-cases)
   - [Memory constraints](#memory-constraints)
 
 ## Introduction
 
-This section provides useful details on how the Machine Learning use cases of the
-evaluation kit use the system memory. Although the guidance provided here is with
-respect to the Arm® Corstone™-300 system, it is fairly generic and is applicable
-for other platforms too. Arm® Corstone™-300 is composed of Arm® Cortex™-M55 and
-Arm® Ethos™-U55 and the memory map for the Arm® Cortex™-M55 core can be found in the
-[Appendix 1](./appendix.md).
+This section provides useful details on how the Machine Learning use-cases of the evaluation kit use the system memory.
 
-The Arm® Ethos™-U55 NPU interacts with the system via two AXI interfaces. The first one
-is envisaged to be the higher bandwidth and/or lower latency interface. In a typical
-system would this be wired to an SRAM as it would be required to service frequent R/W
-traffic. The second interface is expected to have higher latency and/or lower bandwidth
-characteristics and would typically be wired to a flash device servicing read-only
-traffic. In this configuration, the Arm® Cortex™-M55 CPU and Arm® Ethos™-U55 NPU read the contents
-of the neural network model (`.tflite file`) from the flash memory region with Arm® Ethos™-U55
-requesting these read transactions over its second AXI bus.
-The input and output tensors, along with any intermediate computation buffers, would be
-placed on SRAM and both the Arm® Cortex™-M55 CPU and Arm® Ethos™-U55 NPU would be reading/writing
-to this region when running an inference. The Arm® Ethos™-U55 NPU will be requesting these R/W
-transactions over the first AXI bus.
+Although the guidance provided here is concerning the Arm® *Corstone™-300* system, it is fairly generic and is
+applicable for other platforms too. The Arm® *Corstone™-300* is composed of both the Arm® *Cortex™-M55* and the Arm®
+*Ethos™-U55*. The memory map for the Arm® *Cortex™-M55* core can be found in the [Appendix](./appendix.md).
+
+The Arm® *Ethos™-U55* NPU interacts with the system through two AXI interfaces. The first one, is envisaged to be the
+higher-bandwidth, lower-latency, interface. In a typical system, this is wired to an SRAM as it is required to service
+frequent Read and Write traffic.
+
+The second interface is expected to have a higher-latency, lower-bandwidth characteristic, and is typically wired to a
+flash device servicing read-only traffic. In this configuration, the Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U55* NPU
+read the contents of the neural network model, or the `.tflite` file, from the flash memory region. With the Arm®
+*Ethos™-U55* requesting these read transactions over its second AXI bus.
+
+The input and output tensors, along with any intermediate computation buffers, are placed on SRAM. Therefore, both the
+Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U55* NPU would be reading, or writing, to this region when running an inference.
+The Arm® *Ethos™-U55* NPU requests these Read and Write transactions over the first AXI bus.
 
 ## Understanding memory usage from Vela output
 
 ### Total SRAM used
 
-When the neural network model is compiled with Vela, a summary report that includes memory
-usage is generated. For example, compiling the keyword spotting model [ds_cnn_clustered_int8](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite)
+When the neural network model is compiled with Vela, a summary report that includes memory usage is generated. For
+example, compiling the keyword spotting model
+[ds_cnn_clustered_int8](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite)
 with Vela produces, among others, the following output:
 
 ```log
@@ -45,86 +45,94 @@ Total SRAM used                                 70.77 KiB
 Total Off-chip Flash used                      430.78 KiB
 ```
 
-The `Total SRAM used` here indicates the required memory to store the `tensor arena` for the
-TensorFlow Lite Micro framework. This is the amount of memory required to store the input,
-output and intermediate buffers. In the example above, the tensor arena requires 70.77 KiB
-of available SRAM. Note that Vela can only estimate the SRAM required for graph execution.
-It has no way of estimating the memory used by internal structures from TensorFlow Lite
-Micro framework. Therefore, it is recommended to top this memory size by at least 2KiB and
-carve out the `tensor arena` of this size and place it on the target system's SRAM.
+The `Total SRAM used` here shows the required memory to store the `tensor arena` for the TensorFlow Lite Micro
+framework. This is the amount of memory required to store the input, output, and intermediate buffers. In the preceding
+example, the tensor arena requires 70.77 KiB of available SRAM.
+
+> **Note:** Vela can only estimate the SRAM required for graph execution. It has no way of estimating the memory used by
+> internal structures from TensorFlow Lite Micro framework.
+
+Therefore, we recommend that you top this memory size by at least 2KiB. We also recoomend that you also carve out the
+`tensor arena` of this size, and then place it on the SRAM of the target system.
 
 ### Total Off-chip Flash used
 
-The `Total Off-chip Flash` parameter indicates the minimum amount of flash required to store
-the neural network model. In the example above, the system needs to have a minimum of 430.78
-KiB of available flash memory to store `.tflite` file contents.
+The `Total Off-chip Flash` parameter indicates the minimum amount of flash required to store the neural network model.
+In the preceding example, the system must have a minimum of 430.78 KiB of available flash memory to store the `.tflite`
+file contents.
 
-> Note: For Arm® Corstone™-300 system we use the DDR region as a flash memory. The timing
-> adapter sets up AXI bus wired to the DDR to mimic bandwidth and latency
-> characteristics of a flash memory device.
+> **Note:** The Arm® *Corstone™-300* system uses the DDR region as a flash memory. The timing adapter sets up the AXI
+> bus that is wired to the DDR to mimic both bandwidth and latency characteristics of a flash memory device.
 
 ## Non-default configurations
 
-The above example outlines a typical configuration, and this corresponds to the default Vela
-setting. However, the system SRAM can also be used to store the neural network model along with
-the `tensor arena`. Vela supports optimizing the model for this configuration with its `Sram_Only`
-memory mode. See [vela.ini](../../scripts/vela/vela.ini). To make use of a neural network model
-optimised for this configuration, the linker script for the target platform would need to be
-changed. By default, the linker scripts are set up to support the default configuration only. See
-[Memory constraints](#memory-constraints) for snippet of a script.
+The preceding example outlines a typical configuration, and this corresponds to the default Vela setting. However, the
+system SRAM can also be used to store the neural network model along with the `tensor arena`. Vela supports optimizing
+the model for this configuration with its `Sram_Only` memory mode.
 
-> Note
+For further information, please refer to: [vela.ini](../../scripts/vela/vela.ini).
+
+To make use of a neural network model that is optimized for this configuration, the linker script for the target
+platform must be changed. By default, the linker scripts are set up to support the default configuration only.
+
+For script snippets, please refer to: [Memory constraints](#memory-constraints).
+
+> **Note:**
 >
-> 1. The default configuration is represented by `Shared_Sram` memory mode.
-> 2. `Dedicated_Sram` mode is only applicable for Arm® Ethos™-U65.
+> 1. The the `Shared_Sram` memory mode represents the default configuration.
+> 2. The `Dedicated_Sram` mode is only applicable for the Arm® *Ethos™-U65*.
 
 ## Tensor arena and neural network model memory placement
 
-The evaluation kit uses the name `activation buffer` for what is called `tensor arena` in the
-TensorFlow Lite Micro framework. Every use case application has a corresponding
-`<use_case_name>_ACTIVATION_BUF_SZ` parameter that governs the maximum available size of the
-`activation buffer` for that particular use case.
+The evaluation kit uses the name `activation buffer` for the `tensor arena` in the TensorFlow Lite Micro framework.
+Every use-case application has a corresponding `<use_case_name>_ACTIVATION_BUF_SZ` parameter that governs the maximum
+available size of the `activation buffer` for that particular use-case.
 
-The linker script is set up to place this memory region in SRAM. However, if the memory required
-is more than what the target platform supports, this buffer needs to be placed on flash instead.
-Every target platform has a profile definition in the form of a CMake file. See [Corstone-300
-profile](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake) for example. The parameter
-`ACTIVATION_BUF_SRAM_SZ` defines the maximum SRAM size available for the platform. This is
-propagated through the build system and if the `<use_case_name>_ACTIVATION_BUF_SZ` for a given
-use case is more than the `ACTIVATION_BUF_SRAM_SZ` for the target build platform, the `activation buffer`
-is placed on the flash instead.
+The linker script is set up to place this memory region in SRAM. However, if the memory required is more than what the
+target platform supports, this buffer needs to be placed on flash instead. Every target platform has a profile
+definition in the form of a `CMake` file.
 
-The neural network model is always placed in the flash region. However, this can be changed easily
-in the linker script.
+For further information and an example, please refer to: [Corstone-300 profile](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake).
 
-## Memory usage for ML use cases
+The parameter `ACTIVATION_BUF_SRAM_SZ` defines the maximum SRAM size available for the platform. This is propagated
+through the build system. If the `<use_case_name>_ACTIVATION_BUF_SZ` for a given use-case is *more* than the
+`ACTIVATION_BUF_SRAM_SZ` for the target build platform, then the `activation buffer` is placed on the flash memory
+instead.
 
-The following numbers have been obtained from Vela for `Shared_Sram` memory mode and the SRAM and
-flash memory requirements for the different use cases of the evaluation kit. Note that the SRAM usage
-does not include memory used by TensorFlow Lite Micro and this will need to be topped up as explained
-under [Total SRAM used](#total-sram-used).
+The neural network model is always placed in the flash region. However, this can be changed in the linker script.
 
-- [Keyword spotting model](https://github.com/ARM-software/ML-zoo/tree/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8) requires
+## Memory usage for ML use-cases
+
+The following numbers have been obtained from Vela for the `Shared_Sram` memory mode, along with the SRAM and flash
+memory requirements for the different use-cases of the evaluation kit.
+
+> **Note:** The SRAM usage does not include memory used by TensorFlow Lite Micro and must be topped up as explained
+> under [Total SRAM used](#total-sram-used).
+
+- [Keyword spotting model](https://github.com/ARM-software/ML-zoo/tree/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8)
+  requires
   - 70.7 KiB of SRAM
   - 430.7 KiB of flash memory.
 
-- [Image classification model](https://github.com/ARM-software/ML-zoo/tree/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8) requires
+- [Image classification model](https://github.com/ARM-software/ML-zoo/tree/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8)
+  requires
   - 638.6 KiB of SRAM
   - 3.1 MB of flash memory.
 
-- [Automated speech recognition](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8) requires
+- [Automated speech recognition](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8)
+  requires
   - 655.16 KiB of SRAM
   - 13.42 MB of flash memory.
 
 ## Memory constraints
 
-Both the MPS3 Fixed Virtual Platform and the MPS3 FPGA platform share the linker script for Arm® Corstone™-300
-design. The design is set by the CMake configuration parameter `TARGET_SUBSYSTEM` as described in
+Both the MPS3 Fixed Virtual Platform (FVP) and the MPS3 FPGA platform share the linker script for Arm® *Corstone™-300*
+design. The CMake configuration parameter `TARGET_SUBSYSTEM` sets the design, which is described in:
 [build options](./building.md#build-options).
 
-The memory map exposed by this design is presented in [Appendix 1](./appendix.md). This can be used as a reference
-when editing the linker script, especially to make sure that region boundaries are respected. The snippet from the
-scatter file is presented below:
+The memory map exposed by this design is located in the [Appendix](./appendix.md), and can be used as a reference when
+editing the linker script. This is useful to make sure that the region boundaries are respected. The snippet from the
+scatter file is as follows:
 
 ```log
 ;---------------------------------------------------------
@@ -189,7 +197,7 @@ LOAD_REGION_1       0x70000000                  0x02000000
     ; size required by the network is bigger than the
     ; SRAM size available, it is accommodated here.
     ;-----------------------------------------------------
-    dram.bin        0x70000000 ALIGN 16         0x02000000
+    ddr.bin        0x70000000 ALIGN 16         0x02000000
     {
         ; nn model's baked in input matrices
         *.o (ifm)
@@ -225,14 +233,15 @@ LOAD_REGION_1       0x70000000                  0x02000000
 
 ```
 
-It is worth noting that for the Arm® Corstone™-300 FPGA and FVP implementations, only the BRAM,
-internal SRAM and DDR memory regions are accessible to the Arm® Ethos™-U55 NPU block. In the above
-snippet, the internal SRAM region memory can be seen to be utilized by activation buffers with
-a limit of 4MiB. If used by a Vela optimised neural network model, this region will be written to
-by the Arm® Ethos™-U55 NPU block frequently. A bigger region of memory for storing the neural
-network model is placed in the DDR/flash region under LOAD_REGION_1. The two load regions are necessary
-as the MPS3's motherboard configuration controller limits the load size at address 0x00000000 to 1MiB.
-This has implications on how the application **is deployed** on MPS3 as explained under the section
-[Deployment on MPS3](./deployment.md#mps3-board).
+> **Note:** With Arm® *Corstone™-300* FPGA and FVP implementations, only the BRAM, internal SRAM, and DDR memory regions
+> are accessible to the Arm® Ethos™-U55 NPU block.
 
-Next section of the documentation: [Troubleshooting](troubleshooting.md).
+In the preceding snippet, the internal SRAM region memory is utilized by the activation buffers with a limit of 4MiB. If
+used by a Vela optimized neural network model, then the Arm® *Ethos™-U55* NPU writes to this block frequently.
+
+A bigger region of memory for storing the neural network model is placed in the DDR, or flash, region under
+`LOAD_REGION_1`. The two load regions are necessary as the motherboard configuration controller of the MPS3 limits the
+load size at address `0x00000000` to 1MiB. This has implications on how the application **is deployed** on MPS3, as
+explained under the following section: [Deployment on MPS3](./deployment.md#mps3-board).
+
+The next section of the documentation covers: [Troubleshooting](troubleshooting.md).
