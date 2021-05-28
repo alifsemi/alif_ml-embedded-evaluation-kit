@@ -242,7 +242,7 @@ For further information, please see:
       - [Using GNU Arm embedded toolchain](./sections/building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./sections/building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./sections/building.md#generating-project-for-arm-development-studio)
-      - [Working with model debugger from Arm Fast Model Tools](./sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
+      - [Working with model debugger from Arm Fast Model Tools](./sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
       - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
     - [Configuring the build for simple_platform](./sections/building.md#configuring-the-build-for-simple_platform)
@@ -279,7 +279,7 @@ For further information, please see:
 
 - [Implementing custom ML application](./sections/customizing.md)
   - [Software project description](./sections/customizing.md#software-project-description)
-  - [HAL API](./sections/customizing.md#hal-api)
+  - [Hardware Abstraction Layer API](./sections/customizing.md#hardware-abstraction-layer-api)
   - [Main loop function](./sections/customizing.md#main-loop-function)
   - [Application context](./sections/customizing.md#application-context)
   - [Profiler](./sections/customizing.md#profiler)
