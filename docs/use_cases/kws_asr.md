@@ -241,7 +241,7 @@ For further information, please refer to:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
+- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
 > the CMake command.
