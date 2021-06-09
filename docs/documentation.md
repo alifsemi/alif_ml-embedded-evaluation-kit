@@ -63,6 +63,8 @@ for additional information:
 
 - Arm® ML-Zoo: <https://github.com/ARM-software/ML-zoo/>
 
+- Arm® Ethos-U software: <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u>
+
 To access Arm documentation online, please visit: <http://developer.arm.com>
 
 ## Repository structure

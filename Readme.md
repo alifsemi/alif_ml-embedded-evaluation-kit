@@ -45,7 +45,7 @@ The Ethos-U NPU software stack is described [here](https://developer.arm.com/doc
 All ML use cases, albeit illustrating a different application, have common code such as initializing the Hardware
 Abstraction Layer (HAL). The application common code can be run on x86 or Arm Cortex-M architecture thanks to the HAL.
 For the ML application-specific part, Google® TensorFlow™ Lite for Microcontrollers inference engine is used to schedule
-the neural networks models executions. TensorFlow Lite for Microcontrollers is integrated with the [Ethos-U55 driver](https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git)
+the neural networks models executions. TensorFlow Lite for Microcontrollers is integrated with the [Ethos-U55 driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver)
 and delegates execution of certain operators to the NPU or, if the neural network model operators are not supported on
 NPU, to the CPU. [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise CPU workload execution
 with int8 data type.

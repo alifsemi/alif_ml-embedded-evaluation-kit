@@ -22,7 +22,7 @@ Also, please check that the cmake parameters used match the input requirements o
 
 > **Note:** The Vela tool is not available within this software project. It is a separate Python tool that is available
 > from: <https://pypi.org/project/ethos-u-vela/>. The source code is hosted on
-> <https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/>.
+> <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
 ## NPU configuration mismatch error when running inference
 

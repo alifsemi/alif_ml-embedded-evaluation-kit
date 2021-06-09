@@ -136,16 +136,16 @@ The build parameters are:
   build. All the valid toolchain files are located in the scripts directory. For example, see:
   [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
 
-- `TENSORFLOW_SRC_PATH`: the path to the root of the TensorFlow directory. The default value points to the TensorFlow
-  submodule in the [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies` folder.
+- `TENSORFLOW_SRC_PATH`: the path to the root of the TensorFlow directory. The default value points to the
+  `dependencies/tensorflow` git submodule. Respository is hosted here: [tensorflow](https://github.com/tensorflow/tensorflow)
 
 - `ETHOS_U55_DRIVER_SRC_PATH`: The path to the *Ethos-U55* NPU core driver sources. The default value points to the
-  `core_driver` submodule in the [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies`
-  folder.
+  `dependencies/core-driver` git submodule. Repository is hosted here:
+  [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
 - `CMSIS_SRC_PATH`: The path to the CMSIS sources to be used to build TensorFlow Lite Micro library. This parameter is
-  optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the `CMSIS`
-  submodule in the [ethos-u](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) `dependencies` folder.
+  optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the
+  `dependencies/cmsis` git submodule. Respository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
 
 - `ETHOS_U55_ENABLED`: Sets whether the use of *Ethos-U55* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U55* NPU supported.
@@ -228,9 +228,6 @@ repository to link against.
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U55 NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
-
-These are part of the [ethos-u repository](https://git.mlplatform.org/ml/ethos-u/ethos-u.git/about/) and set as
-submodules of this project.
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](#fetching-resource-files) section.
@@ -647,7 +644,7 @@ After compiling, your custom model has now replaced the default one in the appli
 
 > **Note:** This tool is not available within this project. It is a Python tool available from
 > <https://pypi.org/project/ethos-u-vela/>.\
-The source code is hosted on <https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/>.
+The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U55* NPU.

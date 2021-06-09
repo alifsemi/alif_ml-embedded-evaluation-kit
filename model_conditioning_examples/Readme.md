@@ -170,4 +170,4 @@ compiler for further optimizations before it can be used (see [Optimize model wi
 - [Quantization aware training](https://www.tensorflow.org/model_optimization/guide/quantization/training)
 - [Weight pruning](https://www.tensorflow.org/model_optimization/guide/pruning)
 - [Weight clustering](https://www.tensorflow.org/model_optimization/guide/clustering)
-- [Vela](https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/about/)
+- [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela)
