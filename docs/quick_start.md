@@ -107,7 +107,7 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws/ds_cnn_clustered_int8.tflite \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/kws
@@ -115,7 +115,7 @@ mv resources_downloaded/kws/ds_cnn_clustered_int8_vela.tflite resources_download
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/kws_asr
@@ -123,7 +123,7 @@ mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite -\
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/kws_asr
@@ -131,7 +131,7 @@ mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_down
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/inference_runner/dnn_s_quantized.tflite -\
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/inference_runner
@@ -139,7 +139,7 @@ mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_d
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1.tflite \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/img_class
@@ -147,7 +147,7 @@ mv resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1_vel
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/asr
@@ -155,7 +155,7 @@ mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/ad/ad_medium_int8.tflite \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 --config scripts/vela/default_vela.ini \
+    --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/ad

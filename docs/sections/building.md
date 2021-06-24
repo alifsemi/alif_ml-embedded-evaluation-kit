@@ -665,7 +665,7 @@ optimized with the following parameters:
 ```commandline
 vela \
     --accelerator-config=ethos-u55-128 \
-    --block-config-limit=0 \
+    --optimise Performance \
     --config my_vela_cfg.ini \
     --memory-mode Shared_Sram \
     --system-config Ethos_U55_High_End_Embedded \

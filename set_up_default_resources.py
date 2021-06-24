@@ -137,7 +137,7 @@ def set_up_resources(run_vela_on_models=False):
             call_command(command)
         os.chdir(current_file_dir)
     # 1.3 Make sure to have all the requirement
-    requirements = ["ethos-u-vela==2.1.1"]
+    requirements = ["ethos-u-vela==3.0.0"]
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
     for req in requirements:
@@ -214,7 +214,7 @@ def set_up_resources(run_vela_on_models=False):
 
             command = (f". {env_activate} && vela {model} " +
                        "--accelerator-config=ethos-u55-128 " +
-                       "--block-config-limit=0 " +
+                       "--optimise Performance " +
                        f"--config {config_file} " +
                        "--memory-mode=Shared_Sram " +
                        "--system-config=Ethos_U55_High_End_Embedded " +
