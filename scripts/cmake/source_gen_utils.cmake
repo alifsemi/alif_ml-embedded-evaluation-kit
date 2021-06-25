@@ -272,22 +272,38 @@ function(setup_source_generator)
         message(STATUS "Using existing python at ${PYTHON}")
         return()
     endif ()
+
     message(STATUS "Configuring python environment at ${PYTHON}")
+
     execute_process(
         COMMAND ${PY_EXEC} -m venv ${CMAKE_BINARY_DIR}/pyenv
         RESULT_VARIABLE return_code
     )
-    if (NOT return_code EQUAL "0")
-        message(FATAL_ERROR "Failed to setup python3 environment")
+    if (NOT return_code STREQUAL "0")
+        message(FATAL_ERROR "Failed to setup python3 environment. Return code: ${return_code}")
     endif ()
 
-    execute_process(COMMAND ${PYTHON} -m pip install wheel)
+    execute_process(
+        COMMAND ${PYTHON} -m pip install --upgrade pip
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to upgrade pip")
+    endif ()
+
+    execute_process(
+        COMMAND ${PYTHON} -m pip install wheel
+        RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to install wheel")
+    endif ()
 
     execute_process(
         COMMAND ${PYTHON} -m pip install -r ${SCRIPTS_DIR}/py/requirements.txt
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
-        message(FATAL_ERROR "Failed to setup python3 environment")
+        message(FATAL_ERROR "Failed to install requirements")
     endif ()
 endfunction()
