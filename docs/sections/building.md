@@ -7,6 +7,7 @@
     - [Preparing build environment](#preparing-build-environment)
       - [Fetching submodules](#fetching-submodules)
       - [Fetching resource files](#fetching-resource-files)
+    - [Building for default configuration](#building-for-default-configuration)
     - [Create a build directory](#create-a-build-directory)
     - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse-300)
       - [Using GNU Arm Embedded toolchain](#using-gnu-arm-embedded-toolchain)
@@ -677,7 +678,7 @@ The Vela folder contains the following:
   `ethos-u55-64`, and `ethos-u55-32`.
 - `--block-config-limit`: Limits the block config search space. Use `zero` for unlimited search space.
 - `--config`: Specifies the path to the Vela configuration file. The format of the file is a Python ConfigParser `.ini`
-    file. An example can be found in the `dependencies` folder [vela.ini](../../scripts/vela/vela.ini).
+    file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).
 - `--memory-mode`: Selects the memory mode to use as specified in the Vela configuration file.
 - `--system-config`: Selects the system configuration to use as specified in the Vela configuration file.
 
