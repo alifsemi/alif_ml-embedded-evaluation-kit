@@ -672,11 +672,11 @@ vela \
     <model>.tflite
 ```
 
-The Vela folder contains the following:
+The Vela command contains the following:
 
 - `--accelerator-config`: Specifies the accelerator configuration to use between `ethos-u55-256`, `ethos-u55-128`,
   `ethos-u55-64`, and `ethos-u55-32`.
-- `--block-config-limit`: Limits the block config search space. Use `zero` for unlimited search space.
+- `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising the SRAM usage whereas the Performance strategy optimises the neural network for maximal perforamance. Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
 - `--config`: Specifies the path to the Vela configuration file. The format of the file is a Python ConfigParser `.ini`
     file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).
 - `--memory-mode`: Selects the memory mode to use as specified in the Vela configuration file.

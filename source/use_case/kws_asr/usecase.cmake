@@ -55,7 +55,7 @@ USER_OPTION(${use_case}_LABELS_TXT_FILE_ASR "Labels' txt file for the chosen mod
 
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00200000
+    0x00400000
     STRING)
 
 USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD_KWS "Specify the score threshold [0.0, 1.0) that must be applied to the KWS results for a label to be deemed valid."
