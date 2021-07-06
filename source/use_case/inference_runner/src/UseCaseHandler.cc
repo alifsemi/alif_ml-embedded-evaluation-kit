@@ -41,6 +41,17 @@ namespace app {
 
         const size_t numInputs = model.GetNumInputs();
 
+#if VERIFY_TEST_OUTPUT
+        info("Initial input tensors values:\n");
+        for (size_t inputIndex = 0; inputIndex < model.GetNumInputs(); inputIndex++) {
+            arm::app::DumpTensor(model.GetInputTensor(inputIndex));
+        }
+        info("Initial output tensors values:\n");
+        for (size_t outputIndex = 0; outputIndex < model.GetNumOutputs(); outputIndex++) {
+            arm::app::DumpTensor(model.GetOutputTensor(outputIndex));
+        }
+#endif /* VERIFY_TEST_OUTPUT */
+
         /* Populate each input tensor with random data. */
         for (size_t inputIndex = 0; inputIndex < numInputs; inputIndex++) {
 

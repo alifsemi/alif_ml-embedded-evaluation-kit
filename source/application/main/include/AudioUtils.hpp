@@ -124,18 +124,6 @@ namespace audio {
             return ((m_dataSize - m_size)/m_stride);
         }
 
-        /**
-         * @brief  Calculates number of times the window can stride through the given data.
-         *         May not be a whole number.
-         * @return Number of strides to cover all data.
-         */
-        float FractionalTotalStrides() {
-            if (this->m_dataSize < this->m_size) {
-                return 0;
-            } else {
-                return ((this->m_dataSize - this->m_size)/ static_cast<float>(this->m_stride));
-            }
-        }
 
     protected:
         T *m_start = nullptr;
@@ -146,11 +134,11 @@ namespace audio {
     };
 
     /*
-     * Sliding window for ASR will cover the whole of the input, even if
+     * Sliding window that will cover the whole length of the input, even if
      * this means the last window is not a full window length.
      */
     template<class T>
-    class ASRSlidingWindow : public SlidingWindow<T> {
+    class FractionalSlidingWindow : public SlidingWindow<T> {
     public:
         using SlidingWindow<T>::SlidingWindow;
 
@@ -160,6 +148,19 @@ namespace audio {
          */
         bool HasNext() {
             return this->m_count < 1 + this->FractionalTotalStrides() && (this->NextWindowStartIndex() < this->m_dataSize);
+        }
+
+        /**
+        * @brief  Calculates number of times the window can stride through the given data.
+        *         May not be a whole number.
+        * @return Number of strides to cover all data.
+        */
+        float FractionalTotalStrides() {
+            if (this->m_dataSize < this->m_size) {
+                return 0;
+            } else {
+                return ((this->m_dataSize - this->m_size) / static_cast<float>(this->m_stride));
+            }
         }
     };
 

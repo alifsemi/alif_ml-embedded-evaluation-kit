@@ -58,8 +58,13 @@ namespace app {
      * @param[in]   lineBreakForNumElements     number of elements
      *              after which line break will be added.
      **/
-    void DumpTensor(TfLiteTensor* tensor,
-                    const size_t lineBreakForNumElements = 16);
+    void DumpTensor(const TfLiteTensor* tensor,
+                    size_t lineBreakForNumElements = 16);
+
+
+    void DumpTensorData(const uint8_t* tensorData,
+                        size_t size,
+                        size_t lineBreakForNumElements = 16);
 #endif /* VERIFY_TEST_OUTPUT */
 
     /**

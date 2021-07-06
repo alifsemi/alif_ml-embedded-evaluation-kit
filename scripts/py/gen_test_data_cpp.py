@@ -137,7 +137,7 @@ def main(args):
         if ifm_size == -1:
             ifm_size = get_npy_vec_size(filename)
         elif ifm_size != get_npy_vec_size(filename):
-            raise Exeception(f"ifm size changed for index {idx}")
+            raise Exception(f"ifm size changed for index {idx}")
 
         # Save the fm cc file
         base_name = "ofm" + str(idx)
@@ -149,7 +149,7 @@ def main(args):
         if ofm_size == -1:
             ofm_size = get_npy_vec_size(filename)
         elif ofm_size != get_npy_vec_size(filename):
-            raise Exeception(f"ofm size changed for index {idx}")
+            raise Exception(f"ofm size changed for index {idx}")
 
     common_cc_filepath = os.path.join(args.source_folder_path, common_cc_filename)
     write_hpp_file(header_filename, common_cc_filepath, args.license_template,

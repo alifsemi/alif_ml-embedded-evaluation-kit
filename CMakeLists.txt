@@ -460,7 +460,7 @@ foreach(use_case ${USE_CASES})
             add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})
             target_include_directories(${TEST_TARGET_NAME} PUBLIC
                 ${TEST_TPIP_INCLUDE} ${TEST_RESOURCES_INCLUDE})
-            target_link_libraries(${TEST_TARGET_NAME} libethos-u-${use_case})
+            target_link_libraries(${TEST_TARGET_NAME} ${UC_LIB_NAME})
             target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)

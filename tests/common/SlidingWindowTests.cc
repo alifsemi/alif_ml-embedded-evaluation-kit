@@ -223,7 +223,7 @@ TEST_CASE("Common: Next window data index")
     /* Check we get the correct index returned */
     SECTION("Stride 1")
     {
-        auto slider = arm::app::audio::ASRSlidingWindow<int>(test.data(), test.size(), 1, 1);
+        auto slider = arm::app::audio::FractionalSlidingWindow<int>(test.data(), test.size(), 1, 1);
         REQUIRE(slider.NextWindowStartIndex() == 0);
         slider.Next();
         REQUIRE(slider.NextWindowStartIndex() == 1);
@@ -241,7 +241,7 @@ TEST_CASE("Common: Next window data index")
 
     SECTION("Stride 2")
     {
-        auto slider = arm::app::audio::ASRSlidingWindow<int>(test.data(), test.size(), 1, 2);
+        auto slider = arm::app::audio::FractionalSlidingWindow<int>(test.data(), test.size(), 1, 2);
         REQUIRE(slider.NextWindowStartIndex() == 0);
         slider.Next();
         REQUIRE(slider.NextWindowStartIndex() == 2);
@@ -252,7 +252,7 @@ TEST_CASE("Common: Next window data index")
 
     SECTION("Stride 3")
     {
-        auto slider = arm::app::audio::ASRSlidingWindow<int>(test.data(), test.size(), 1, 3);
+        auto slider = arm::app::audio::FractionalSlidingWindow<int>(test.data(), test.size(), 1, 3);
         REQUIRE(slider.NextWindowStartIndex() == 0);
         slider.Next();
         REQUIRE(slider.NextWindowStartIndex() == 3);

@@ -135,7 +135,7 @@ namespace app {
             }
 
             /* Initialise an audio slider. */
-            auto audioDataSlider = audio::ASRSlidingWindow<const int16_t>(
+            auto audioDataSlider = audio::FractionalSlidingWindow<const int16_t>(
                                         audioArr,
                                         audioArrSize,
                                         audioParamsWinLen,

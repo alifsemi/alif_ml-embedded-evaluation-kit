@@ -41,11 +41,30 @@ namespace app {
         return atoi(chInput);
     }
 
-    void DumpTensor(TfLiteTensor* tensor, const size_t lineBreakForNumElements)
-    {
-        char strhex[8];
-        std::string strdump;
+    void DumpTensorData(const uint8_t* tensorData,
+                        size_t size,
+                        size_t lineBreakForNumElements)
+        {
+            char strhex[8];
+            std::string strdump;
 
+            for (size_t i = 0; i < size; ++i) {
+                if (0 == i % lineBreakForNumElements) {
+                    printf("%s\n\t", strdump.c_str());
+                    strdump.clear();
+                }
+                snprintf(strhex, sizeof(strhex) - 1,
+                         "0x%02x, ", tensorData[i]);
+                strdump += std::string(strhex);
+            }
+
+            if (!strdump.empty()) {
+                printf("%s\n", strdump.c_str());
+            }
+        }
+
+    void DumpTensor(const TfLiteTensor* tensor, const size_t lineBreakForNumElements)
+    {
         if (!tensor) {
             printf_err("invalid tensor\n");
             return;
@@ -54,19 +73,7 @@ namespace app {
         const uint32_t tensorSz = tensor->bytes;
         const uint8_t* tensorData = tflite::GetTensorData<uint8_t>(tensor);
 
-        for (size_t i = 0; i < tensorSz; ++i) {
-            if (0 == i % lineBreakForNumElements) {
-                printf("%s\n\t", strdump.c_str());
-                strdump.clear();
-            }
-            snprintf(strhex, sizeof(strhex) - 1,
-                     "0x%02x, ", tensorData[i]);
-            strdump += std::string(strhex);
-        }
-
-        if (strdump.size()) {
-            printf("%s\n", strdump.c_str());
-        }
+        DumpTensorData(tensorData, tensorSz, lineBreakForNumElements);
     }
 
     bool ListFilesHandler(ApplicationContext& ctx)
@@ -92,7 +99,7 @@ namespace app {
                                              strNumFiles.size(),
                                              dataPsnTxtStartX,
                                              dataPsnTxtStartY,
-                                             0);
+                                             false);
 
 #if NUMBER_OF_FILES > 0
         constexpr uint32_t dataPsnTxtYIncr = 16;
@@ -103,7 +110,7 @@ namespace app {
             std::string currentFilename{get_filename(i)};
             platform.data_psn->present_data_text(currentFilename.c_str(),
                                                  currentFilename.size(),
-                                                 dataPsnTxtStartX, yVal, 0);
+                                                 dataPsnTxtStartX, yVal, false);
 
             info("\t%" PRIu32 " => %s\n", i, currentFilename.c_str());
         }
