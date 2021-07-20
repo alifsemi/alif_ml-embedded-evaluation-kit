@@ -140,7 +140,7 @@ namespace app {
                     .max = 0
             };
             Statistics NPU_Total {
-                    .name = "NPU total",
+                    .name = "NPU TOTAL",
                     .unit = "cycles",
                     .total = 0,
                     .avrg = 0.0,

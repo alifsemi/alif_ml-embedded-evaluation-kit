@@ -232,7 +232,7 @@ INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 3248
 INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 2219
 INFO - NPU ACTIVE cycles: 33145
 INFO - NPU IDLE cycles: 1033
-INFO - NPU total cycles: 34178
+INFO - NPU TOTAL cycles: 34178
 ```
 
 After running an inference on randomly generated data, the output of the log shows the profiling results that for this

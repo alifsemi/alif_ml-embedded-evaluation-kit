@@ -416,7 +416,7 @@ INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 82607
 INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 59608
 INFO - NPU ACTIVE cycles: 680611
 INFO - NPU IDLE cycles: 561
-INFO - NPU total cycles: 681172
+INFO - NPU TOTAL cycles: 681172
 ```
 
 On most systems running Fast Model, each inference takes under 30 seconds.

@@ -399,7 +399,7 @@ INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 135087
 INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 62870
 INFO - NPU ACTIVE cycles: 1081007
 INFO - NPU IDLE cycles: 626
-INFO - NPU total cycles: 1081634
+INFO - NPU TOTAL cycles: 1081634
 ```
 
 As multiple inferences must be run for one clip, it takes around a minute for all inferences to complete.

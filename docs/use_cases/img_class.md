@@ -374,7 +374,7 @@ INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 1098726
 INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 471129
 INFO - NPU ACTIVE cycles: 7489258
 INFO - NPU IDLE cycles: 914
-INFO - NPU total cycles: 7490172
+INFO - NPU TOTAL cycles: 7490172
 ```
 
 It can take several minutes to complete one inference run. The average time is around 2-3 minutes.
