@@ -117,12 +117,6 @@ ifeq ($(TARGET),$(filter $(TARGET), cortex_m_ethos_eval))
     MICROLITE_LIBS := $(filter-out -lm,$(MICROLITE_LIBS))
 
   else ifeq ($(TOOLCHAIN), gcc)
-    export PATH := $(MAKEFILE_DIR)/downloads/gcc_embedded/bin/:$(PATH)
-    DOWNLOAD_RESULT := $(shell $(MAKEFILE_DIR)/arm_gcc_download.sh ${MAKEFILE_DIR}/downloads)
-    ifneq ($(DOWNLOAD_RESULT), SUCCESS)
-      $(error Something went wrong with the GCC download: $(DOWNLOAD_RESULT))
-    endif
-
     TARGET_TOOLCHAIN_PREFIX := arm-none-eabi-
 
     FLAGS_GCC = -mcpu=$(GCC_TARGET_ARCH) -mfpu=auto
@@ -132,6 +126,16 @@ ifeq ($(TARGET),$(filter $(TARGET), cortex_m_ethos_eval))
   else
     $(error "TOOLCHAIN=$(TOOLCHAIN) is not supported.")
   endif
+
+# TODO(#47718): resolve warnings.
+CXX_OMIT_ERRORS = \
+  -Wno-implicit-fallthrough \
+  -Wno-unused-variable
+
+# TODO: Remove when Arm Ethos-U NPU driver is updated to version > 21.05
+CC_OMIT_ERRORS = \
+  ${CXX_OMIT_ERRORS} \
+  -Wno-int-conversion
 
   PLATFORM_FLAGS = \
     -DTF_LITE_MCU_DEBUG_LOG \
@@ -147,7 +151,7 @@ ifeq ($(TARGET),$(filter $(TARGET), cortex_m_ethos_eval))
     $(TARGET_SPECIFIC_FLAGS)
 
   # Common + C/C++ flags
-  CXXFLAGS += $(PLATFORM_FLAGS)
-  CCFLAGS += $(PLATFORM_FLAGS)
+  CXXFLAGS += $(PLATFORM_FLAGS) ${CXX_OMIT_ERRORS}
+  CCFLAGS += $(PLATFORM_FLAGS) ${CC_OMIT_ERRORS}
 
 endif

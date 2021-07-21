@@ -456,7 +456,6 @@ What the preceding choices do:
 4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
 
     ```log
-    INFO - uTFL version: 2.5.0
     INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 490 bytes with dimensions

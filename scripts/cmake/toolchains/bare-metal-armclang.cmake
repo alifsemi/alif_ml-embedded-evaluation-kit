@@ -25,7 +25,7 @@ set(CMAKE_ASM_COMPILER_AR           armar)
 set(CMAKE_CROSSCOMPILING            true)
 set(CMAKE_SYSTEM_NAME               Generic)
 
-set(MIN_ARM_CLANG_VERSION           6.14)
+set(MIN_ARM_CLANG_VERSION           6.15)
 
 # Skip compiler test execution
 set(CMAKE_C_COMPILER_WORKS          1)

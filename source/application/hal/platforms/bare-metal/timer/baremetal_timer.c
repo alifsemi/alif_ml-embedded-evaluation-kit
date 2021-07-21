@@ -25,6 +25,8 @@
 
 #include "pmu_ethosu.h"
 
+extern struct ethosu_driver ethosu_drv; /* Default Ethos-U55 device driver */
+
 /**
  * @brief Initialises the PMU and enables the cycle counter.
  **/
@@ -183,30 +185,25 @@ void init_timer(platform_timer *timer)
 }
 
 #if defined (ARM_NPU)
-
-static void _reset_ethosu_counters(void)
+static void _reset_ethosu_counters()
 {
     /* Reset all cycle and event counters. */
-    ETHOSU_PMU_CYCCNT_Reset();
-    ETHOSU_PMU_EVCNTR_ALL_Reset();
+    ETHOSU_PMU_CYCCNT_Reset(&ethosu_drv);
+    ETHOSU_PMU_EVCNTR_ALL_Reset(&ethosu_drv);
 }
-
-static void _init_ethosu_cyclecounter(void)
+static void _init_ethosu_cyclecounter()
 {
     /* Reset overflow status. */
-    ETHOSU_PMU_Set_CNTR_OVS(ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CCNT_Msk);
-
+    ETHOSU_PMU_Set_CNTR_OVS(&ethosu_drv, ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CCNT_Msk);
     /* We can retrieve only 4 PMU counters: */
-    ETHOSU_PMU_Set_EVTYPER(0, ETHOSU_PMU_NPU_IDLE);
-    ETHOSU_PMU_Set_EVTYPER(1, ETHOSU_PMU_AXI0_RD_DATA_BEAT_RECEIVED);
-    ETHOSU_PMU_Set_EVTYPER(2, ETHOSU_PMU_AXI0_WR_DATA_BEAT_WRITTEN);
-    ETHOSU_PMU_Set_EVTYPER(3, ETHOSU_PMU_AXI1_RD_DATA_BEAT_RECEIVED);
-
+    ETHOSU_PMU_Set_EVTYPER(&ethosu_drv, 0, ETHOSU_PMU_NPU_IDLE);
+    ETHOSU_PMU_Set_EVTYPER(&ethosu_drv, 1, ETHOSU_PMU_AXI0_RD_DATA_BEAT_RECEIVED);
+    ETHOSU_PMU_Set_EVTYPER(&ethosu_drv, 2, ETHOSU_PMU_AXI0_WR_DATA_BEAT_WRITTEN);
+    ETHOSU_PMU_Set_EVTYPER(&ethosu_drv, 3, ETHOSU_PMU_AXI1_RD_DATA_BEAT_RECEIVED);
     /* Enable PMU. */
-    ETHOSU_PMU_Enable();
-
+    ETHOSU_PMU_Enable(&ethosu_drv);
     /* Enable counters for cycle and counter# 0. */
-    ETHOSU_PMU_CNTR_Enable(ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CNT2_Msk | ETHOSU_PMU_CNT3_Msk | ETHOSU_PMU_CNT4_Msk| ETHOSU_PMU_CCNT_Msk);
+    ETHOSU_PMU_CNTR_Enable(&ethosu_drv, ETHOSU_PMU_CNT1_Msk | ETHOSU_PMU_CNT2_Msk | ETHOSU_PMU_CNT3_Msk | ETHOSU_PMU_CNT4_Msk| ETHOSU_PMU_CCNT_Msk);
     _reset_ethosu_counters();
 }
 
@@ -235,7 +232,7 @@ static uint32_t counter_overflow(uint32_t pmu_counter_mask)
 {
     /* Check for overflow: The idle counter is 32 bit while the
        total cycle count is 64 bit. */
-    const uint32_t overflow_status = ETHOSU_PMU_Get_CNTR_OVS();
+    const uint32_t overflow_status = ETHOSU_PMU_Get_CNTR_OVS(&ethosu_drv);
     return pmu_counter_mask & overflow_status;
 }
 
@@ -298,11 +295,11 @@ static time_counter bm_get_time_counter(void)
         .counter = get_time_counter(),
 
 #if defined (ARM_NPU)
-            .npu_total_ccnt = ETHOSU_PMU_Get_CCNTR(),
-            .npu_idle_ccnt = ETHOSU_PMU_Get_EVCNTR(0),
-            .npu_axi0_read_beats = ETHOSU_PMU_Get_EVCNTR(1),
-            .npu_axi0_write_beats = ETHOSU_PMU_Get_EVCNTR(2),
-            .npu_axi1_read_beats = ETHOSU_PMU_Get_EVCNTR(3)
+            .npu_total_ccnt = ETHOSU_PMU_Get_CCNTR(&ethosu_drv),
+            .npu_idle_ccnt = ETHOSU_PMU_Get_EVCNTR(&ethosu_drv, 0),
+            .npu_axi0_read_beats = ETHOSU_PMU_Get_EVCNTR(&ethosu_drv, 1),
+            .npu_axi0_write_beats = ETHOSU_PMU_Get_EVCNTR(&ethosu_drv, 2),
+            .npu_axi1_read_beats = ETHOSU_PMU_Get_EVCNTR(&ethosu_drv, 3)
 #endif /* defined (ARM_NPU) */
 
     };

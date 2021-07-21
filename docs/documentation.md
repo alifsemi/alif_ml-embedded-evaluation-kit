@@ -33,7 +33,7 @@ Before starting the setup process, please make sure that you have:
 - At least one of the following toolchains:
   - GNU Arm Embedded toolchain (version 10.2.1 or above) -
   [GNU Arm Embedded toolchain downloads](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-  - Arm Compiler (version 6.14 or above) with a valid license -
+  - Arm Compiler (version 6.15 or above) with a valid license -
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads/)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:

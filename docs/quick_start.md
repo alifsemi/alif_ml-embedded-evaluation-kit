@@ -143,7 +143,7 @@ mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_d
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/img_class
-mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite_vela_H128.tflite
+mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \

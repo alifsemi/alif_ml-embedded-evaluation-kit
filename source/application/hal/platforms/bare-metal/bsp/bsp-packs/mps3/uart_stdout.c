@@ -111,6 +111,10 @@ bool GetLine(char *lp, unsigned int len)
                 lp++;                           /* Increment line pointer         */
                 cnt++;                          /* and count.                     */
                 c = LF;
+                UartPutc (*lp = c);             /* Echo and store character.      */
+                fflush (stdout);
+                lp++;                           /* Increment line pointer         */
+                    cnt++;                      /* and count.                     */
                 break;
             default:
                 UartPutc (*lp = c);             /* Echo and store character.      */
