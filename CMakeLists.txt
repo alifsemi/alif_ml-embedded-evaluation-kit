@@ -385,21 +385,25 @@ foreach(use_case ${USE_CASES})
         add_target_map_file(${TARGET_NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.map)
     endif()
 
-    if (${TARGET_PLATFORM} STREQUAL mps3)
+    if (${TARGET_PLATFORM} STREQUAL mps3 OR ${TARGET_PLATFORM} STREQUAL simple_platform)
 
         set(SECTORS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sectors)
         set(SECTORS_BIN_DIR ${SECTORS_DIR}/${use_case})
 
         file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
         file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
-        file(COPY ${MPS3_FPGA_CONFIG} DESTINATION ${SECTORS_DIR})
 
         add_bin_generation_command(
             TARGET_NAME ${TARGET_NAME}
             OUTPUT_DIR  ${SECTORS_BIN_DIR}
             AXF_PATH    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.axf
-            SECTION_PATTERNS    "${MPS3_SECTION_PATTERNS}"
-            OUTPUT_BIN_NAMES    "${MPS3_OUTPUT_BIN_NAMES}")
+            SECTION_PATTERNS    "${LINKER_SECTION_TAGS}"
+            OUTPUT_BIN_NAMES    "${LINKER_OUTPUT_BIN_TAGS}")
+
+        if (${TARGET_PLATFORM} STREQUAL mps3)
+            file(COPY ${MPS3_FPGA_CONFIG} DESTINATION ${SECTORS_DIR})
+        endif()
+
     elseif (${TARGET_PLATFORM} STREQUAL native)
 
         # If native build tests
