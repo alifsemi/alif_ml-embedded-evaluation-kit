@@ -19,7 +19,7 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U55* Keyword Spotting example.
 
-Use-case code could be found in the following directory: [source/use_case/kws](../../source/use_case/kws]).
+Use-case code could be found in the following directory: [source/use_case/kws](../../source/use_case/kws).
 
 ### Preprocessing and feature extraction
 

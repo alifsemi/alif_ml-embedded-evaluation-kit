@@ -19,7 +19,7 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U55* Anomaly Detection example.
 
-Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad]).
+Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad).
 
 ### Preprocessing and feature extraction
 

@@ -28,7 +28,7 @@ The inference runner populates all input tensors for the provided model with ran
 then performed. Profiling results are then displayed in the console.
 
 The example use-case code can be found in the following directory:
-[source/use_case/inference_runner](../../source/use_case/inference_runner]).
+[source/use_case/inference_runner](../../source/use_case/inference_runner).
 
 ### Prerequisites
 

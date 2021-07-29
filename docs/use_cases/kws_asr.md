@@ -31,7 +31,7 @@ The tensor arena memory region is reused between models to optimize application 
 
 The `Yes` keyword is used to trigger full command recognition following the keyword.
 
-Use-case code could be found in the following directory: [source/use_case/kws_asr](../../source/use_case/kws_asr]).
+Use-case code could be found in the following directory: [source/use_case/kws_asr](../../source/use_case/kws_asr).
 
 ### Preprocessing and feature extraction
 

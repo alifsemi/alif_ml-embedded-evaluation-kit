@@ -20,7 +20,7 @@
 This document describes the process of setting up and running the Arm® *Ethos™-U55* Automatic Speech Recognition
 example.
 
-Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr]).
+Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr).
 
 ### Preprocessing and feature extraction
 

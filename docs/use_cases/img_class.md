@@ -20,7 +20,7 @@ This document describes the process of setting up and running the ArmÂ® *Ethosâ„
 This use-case example solves the classical computer vision problem of image classification. The ML sample was developed
 using the *MobileNet v2* model that was trained on the *ImageNet* dataset.
 
-Use-case code could be found in the following directory:[source/use_case/img_class](../../source/use_case/img_class]).
+Use-case code could be found in the following directory:[source/use_case/img_class](../../source/use_case/img_class).
 
 ### Prerequisites
 
