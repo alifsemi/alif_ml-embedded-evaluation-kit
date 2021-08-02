@@ -2,15 +2,20 @@
 
 This repository is for building and deploying Machine Learning (ML) applications targeted for Arm® Cortex®-M and Arm®
 Ethos™-U NPU.
-To run evaluations using this software, we suggest using an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3)
-or a fixed virtual platform (FVP) that supports Ethos-U55 software fast model. Both environments run a combination of
-the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
-[Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
+To run evaluations using this software, we suggest using:
+
+- an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3) that runs a combination of
+the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
+[Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
+- a [Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+  that offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
+  or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination of
+  the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55).
 
 ## Overview of the evaluation kit
 
-The purpose of this evaluation kit is to allow users to develop software and test the performance of the Ethos-U55 NPU and
-Cortex-M55 CPU. The Ethos-U55 NPU is a new class of machine learning(ML) processor, specifically designed to accelerate
+The purpose of this evaluation kit is to allow users to develop software and test the performance of the Ethos-U NPU and
+Cortex-M55 CPU. The Ethos-U NPU is a new class of machine learning (ML) processor, specifically designed to accelerate
 computation for ML workloads in constrained embedded and IoT devices. The product is optimized to execute
 mathematical operations efficiently that are commonly used in ML algorithms, such as convolutions or activation functions.
 
@@ -27,10 +32,10 @@ The example application at your disposal and the utilized models are listed in t
 |  [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md) | Transcribe words in a recording | [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8) |
 |  [KWS and ASR](./docs/use_cases/kws_asr.md) | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [DS-CNN-L](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/blob/master/models/speech_recognition/wav2letter/tflite_int8) |
 |  [Anomaly Detection](./docs/use_cases/ad.md)                 | Detecting abnormal behavior based on a sound recording of a machine | [Anomaly Detection](https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite)|
-| [Generic inference runner](./docs/use_cases/inference_runner.md) | Code block allowing you to develop your own use case for Ethos-U55 NPU | Your custom model |
+| [Generic inference runner](./docs/use_cases/inference_runner.md) | Code block allowing you to develop your own use case for Ethos-U NPU | Your custom model |
 
 The above use cases implement end-to-end ML flow including data pre-processing and post-processing. They will allow you
-to investigate embedded software stack, evaluate performance of the networks running on Cortex-M55 CPU and Ethos-U55 NPU
+to investigate embedded software stack, evaluate performance of the networks running on Cortex-M55 CPU and Ethos-U NPU
 by displaying different performance metrics such as inference cycle count estimation and results of the network execution.
 
 ## Software and hardware overview
@@ -45,7 +50,8 @@ The Ethos-U NPU software stack is described [here](https://developer.arm.com/doc
 All ML use cases, albeit illustrating a different application, have common code such as initializing the Hardware
 Abstraction Layer (HAL). The application common code can be run on x86 or Arm Cortex-M architecture thanks to the HAL.
 For the ML application-specific part, Google® TensorFlow™ Lite for Microcontrollers inference engine is used to schedule
-the neural networks models executions. TensorFlow Lite for Microcontrollers is integrated with the [Ethos-U55 driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver)
+the neural networks models executions. TensorFlow Lite for Microcontrollers is integrated with the
+[Ethos-U NPU driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver)
 and delegates execution of certain operators to the NPU or, if the neural network model operators are not supported on
 NPU, to the CPU. [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise CPU workload execution
 with int8 data type.
@@ -55,7 +61,7 @@ code and automatically include it into compilation flow.
 
 ![APIs](docs/media/APIs_description.png)
 
-To run an ML application on the Cortex-M and Ethos-U55 NPU, please, follow these steps:
+To run an ML application on the Cortex-M and Ethos-U NPU, please, follow these steps:
 
 1. Setup your environment by installing [the required prerequisites](./docs/sections/building.md#Build-prerequisites).
 2. Generate an optimized neural network model for Ethos-U with a Vela compiler by following instructions [here](./docs/sections/building.md#Add-custom-model).
@@ -64,11 +70,20 @@ To run an ML application on the Cortex-M and Ethos-U55 NPU, please, follow these
 5. If using a FVP, [launch the desired application on the FVP](./docs/sections/deployment.md#Fixed-Virtual-Platform).
 If using the FPGA option, load the image on the FPGA and [launch the application](./docs/sections/deployment.md#MPS3-board).
 
-To get familiar with these steps, you can follow the [quick start guide](docs/quick_start.md).
+**To get familiar with these steps, you can follow the [quick start guide](docs/quick_start.md).**
+
+> **Note:** The default flow assumes Arm® *Ethos™-U55* NPU usage, configured to use 128 Multiply-Accumulate units
+> and is sharing SRAM with the Arm® *Cortex®-M55*.
+> Evaluation kit supports also:
+>
+> - *Ethos™-U55* NPU configured to use 32, 64 and 256 Multiply-Accumulate units.
+> - *Ethos™-U65* NPU configured to use 256 and 512 Multiply-Accumulate units.
+>
+> For more information see [Building](./docs/documentation.md#building).
 
 For more details see full documentation:
 
-- [Arm® ML embedded evaluation kit](./docs/documentation.md#arm-ml-embedded-evaluation-kit)
+- [Arm® ML embedded evaluation kit](./docs/documentation.md#arm_ml-embedded-evaluation-kit)
   - [Table of Content](./docs/documentation.md#table-of-content)
   - [Trademarks](./docs/documentation.md#trademarks)
   - [Prerequisites](./docs/documentation.md#prerequisites)

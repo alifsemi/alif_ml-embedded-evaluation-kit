@@ -72,7 +72,7 @@ USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or none
     sse-300
     STRING)
 
-USER_OPTION(ETHOS_U55_ENABLED "Select if Ethos-U55 is available for the platform and subsystem"
+USER_OPTION(ETHOS_U_NPU_ENABLED "Select if Ethos-U55 is available for the platform and subsystem"
     ON
     BOOL)
 
@@ -164,29 +164,29 @@ if (${CMAKE_CROSSCOMPILING})
 endif ()
 
 # If we need NPU libraries:
-if (ETHOS_U55_ENABLED)
+if (ETHOS_U_NPU_ENABLED)
 
     message(STATUS "Using ARM Ethos-U55 - adding core-driver and timing-adapter-driver includes and libraries")
-    USER_OPTION(ETHOS_U55_TIMING_ADAPTER_SRC_PATH
+    USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
         "Path to Ethos-U55 timing adapter sources"
         "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-software/drivers/timing_adapter"
         PATH
         )
 
-    USER_OPTION(ETHOS_U55_DRIVER_SRC_PATH
+    USER_OPTION(ETHOS_U_NPU_DRIVER_SRC_PATH
         "Path to Ethos-U55 core driver sources"
         "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-driver"
         PATH
         )
 
-    include_directories("${ETHOS_U55_TIMING_ADAPTER_SRC_PATH}/include/")
+    include_directories("${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH}/include/")
 
-    add_subdirectory("${ETHOS_U55_TIMING_ADAPTER_SRC_PATH}" ${CMAKE_BINARY_DIR}/timing-adapter)
+    add_subdirectory("${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH}" ${CMAKE_BINARY_DIR}/timing-adapter)
 
-    set(ETHOSU_INCLUDES ${ETHOS_U55_TIMING_ADAPTER_SRC_PATH}/include
-                        ${ETHOS_U55_DRIVER_SRC_PATH}/include)
+    set(ETHOSU_INCLUDES ${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH}/include
+                        ${ETHOS_U_NPU_DRIVER_SRC_PATH}/include)
 
-    list(APPEND ETHOS_U55_LIBS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libtiming_adapter.a)
+    list(APPEND ETHOS_U_NPU_LIBS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libtiming_adapter.a)
 endif ()
 
 include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
@@ -359,7 +359,7 @@ foreach(use_case ${USE_CASES})
 
     if (${CMAKE_CROSSCOMPILING})
         # If we are building timing adapter, set the dependency:
-        if (ETHOS_U55_ENABLED)
+        if (ETHOS_U_NPU_ENABLED)
             message(STATUS "Adding timing_adapter as a dependency to ${UC_LIB_NAME}")
             add_dependencies(${UC_LIB_NAME} timing_adapter)
         endif()
@@ -373,7 +373,7 @@ foreach(use_case ${USE_CASES})
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         ${TENSORFLOW_LIBRARY}
-        $<$<BOOL:${ETHOS_U55_ENABLED}>:${ETHOS_U55_LIBS}>
+        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:${ETHOS_U_NPU_LIBS}>
         $<$<BOOL:${CMSIS_DSP_LIB}>:${CMSIS_DSP_LIB}>)
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${PLAT_RETARGET_SOURCE})

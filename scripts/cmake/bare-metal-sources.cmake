@@ -36,10 +36,10 @@ set(TA_SETTINGS_TEMPLATE    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/templates/
 set(LINKER_SCRIPT_DIR       "${PLAT_HAL}/bsp/mem_layout")
 set(TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME  "libtensorflow-microlite.a")
 set(TENSORFLOW_LITE_MICRO_FLAG               "-DTF_LITE_STATIC_MEMORY")
-set(ETHOS_U55_FLAG                           "-DARM_NPU=1")
+set(ETHOS_U_NPU_FLAG                           "-DARM_NPU=1")
 
-if (ETHOS_U55_ENABLED)
-    set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ETHOS_U55_FLAG}")
+if (ETHOS_U_NPU_ENABLED)
+    set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ETHOS_U_NPU_FLAG}")
 endif ()
 
 # Set specific flags depending on target platform and subsystem
@@ -85,9 +85,9 @@ endif ()
 # Add link options for the linker script to be used:
 add_linker_script(${LINKER_SCRIPT_DIR} ${LINKER_SCRIPT_NAME})
 
-if (ETHOS_U55_ENABLED)
+if (ETHOS_U_NPU_ENABLED)
     USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
-            "${CMAKE_SCRIPTS_DIR}/ta_config.cmake"
+            "${CMAKE_SCRIPTS_DIR}/timing_adapter/ta_config_u55_high_end.cmake"
             FILEPATH)
 
     # must be included after target subsystem CMake file

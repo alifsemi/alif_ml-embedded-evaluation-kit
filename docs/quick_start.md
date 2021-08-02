@@ -3,14 +3,14 @@
 This is a quick start guide that shows you how to run the keyword spotting example application.
 
 The aim of this quick start guide is to enable you to run an application quickly on the Fixed Virtual Platform (FVP).
-This documentation assumes that your Arm® *Ethos™-U55* NPU is configured to use 128 Multiply-Accumulate units, and is
+This documentation assumes that you are using an Arm® *Ethos™-U55* NPU, it is configured to use 128 Multiply-Accumulate units, and is
 sharing SRAM with the Arm® *Cortex®-M55*.
 
 To get started quickly, please follow these steps:
 
 1. First, verify that you have installed [the required prerequisites](sections/building.md#Build-prerequisites).
 
-2. Clone the *Ethos-U55* evaluation kit repository:
+2. Clone the *Ethos-U* evaluation kit repository:
 
     ```commandline
     git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit"
@@ -28,7 +28,7 @@ To get started quickly, please follow these steps:
 
     [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela) is an open-source Python tool. Vela
     converts a TensorFlow Lite for Microcontrollers neural network model into an optimized model that can run on an
-    embedded system that contains an *Ethos-U55* NPU.
+    embedded system that contains an *Ethos-U* NPU.
 
     It is worth noting that to take full advantage of the capabilities of the NPU, the neural network operators must be
     [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).

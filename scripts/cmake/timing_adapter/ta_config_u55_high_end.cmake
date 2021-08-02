@@ -20,8 +20,8 @@
 # NPU core with two AXIs).
 #----------------------------------------------------------------------------
 
-set(TA0_BASE "${SEC_ETHOS_U55_TA0_BASE}"   CACHE STRING "Timing adapter 0: base-address")
-set(TA1_BASE "${SEC_ETHOS_U55_TA1_BASE}"   CACHE STRING "Timing adapter 1: base-address")
+set(TA0_BASE "${SEC_ETHOS_U_NPU_TA0_BASE}"   CACHE STRING "Timing adapter 0: base-address")
+set(TA1_BASE "${SEC_ETHOS_U_NPU_TA1_BASE}"   CACHE STRING "Timing adapter 1: base-address")
 
 message(STATUS "using TA0_BASE @ ${TA0_BASE}; TA1_BASE @ ${TA1_BASE}.")
 

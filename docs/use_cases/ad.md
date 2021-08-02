@@ -10,8 +10,8 @@
     - [Build process](#build-process)
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u55-code-sample)
-    - [Setting up the Ethos-U55 Fast Model](#setting-up-the-ethos-u55-fast-model)
+  - [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u-npu-code-sample)
+    - [Setting up the Ethos-U Fast Model](#setting-up-the-ethos-u-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Anomaly Detection](#running-anomaly-detection)
 
@@ -65,12 +65,12 @@ In addition to the already specified build option in the main documentation, the
 - `ad_MODEL_TFLITE_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
   the application `axf` file. The default value points to one of the delivered set of models.
 
-    Note that the parameters `ad_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U55_ENABLED` must be aligned with the
+    Note that the parameters `ad_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the
     chosen model. In other words:
 
-  - If `ETHOS_U55_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
+  - If `ETHOS_U_NPU_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
     falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
-  - if `ETHOS_U55_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
+  - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
     model in this case results in a runtime error.
 
 - `ad_FILE_PATH`: Path to the directory containing audio files, or a path to single WAV file, to be used in the
@@ -134,6 +134,7 @@ For additional information, please refer to:
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
+- [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos-u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and then
 > re-run the CMake command.
@@ -222,7 +223,7 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 
 The application performs inference using the model pointed to by the CMake parameter ``ad_MODEL_TFLITE_PATH``.
 
-> **Note:** If you want to run the model using an *Ethos-U55*, ensure that your custom model has been successfully run
+> **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing. Please refer to this section for more help:
 > [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
 
@@ -257,13 +258,13 @@ After compiling, your custom model has now replaced the default one in the appli
 
 ## Setting-up and running Ethos-U55 Code Sample
 
-### Setting up the Ethos-U55 Fast Model
+### Setting up the Ethos-U Fast Model
 
 The FVP is available publicly from
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-For the *Ethos-U55* evaluation, please download the MPS3 version of the Arm® *Corstone™-300* model that contains both
-the *Ethos-U55* and *Cortex-M55*. The model is currently only supported on Linux-based machines.
+For the *Ethos-U* evaluation, please download the MPS3 based version of the Arm® *Corstone™-300* model that contains *Cortex-M55*
+and offers a choice of the *Ethos-U55* and *Ethos-U65* processors.
 
 To install the FVP:
 
@@ -272,7 +273,7 @@ To install the FVP:
 - Run the install script in the extracted package:
 
 ```commandline
-.FVP_Corstone_SSE-300_Ethos-U55.sh
+./FVP_Corstone_SSE-300.sh
 ```
 
 - Follow the instructions to install the FVP to the required location.
@@ -409,7 +410,7 @@ chosen anomaly threshold. Therefore, an anomaly was detected with the machine in
 
 The profiling section of the log shows that for each inference. For the last inference, the profiling reports:
 
-- *Ethos-U55* PMU report:
+- *Ethos-U* PMU report:
 
   - 1,081,634 total cycle: The number of NPU cycles
 
@@ -418,12 +419,12 @@ The profiling section of the log shows that for each inference. For the last inf
   - 626 idle cycles: number of cycles for which the NPU was idle
 
   - 628,122 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
-    Ethos-U55 NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
+    *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
   - 135,087 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
   - 62,870 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
-    Ethos-U55 NPU reads the model. So, read-only.
+   *Ethos-U* NPU reads the model. So, read-only.
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
   model is not cycle-approximate or cycle-accurate.

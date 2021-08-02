@@ -67,9 +67,9 @@
 #cmakedefine CMSDK_UART2_BASE         (@CMSDK_UART2_BASE@)       /* UART 2 Base Address */
 #cmakedefine CMSDK_UART3_BASE         (@CMSDK_UART3_BASE@)       /* UART 3 Base Address Shield 0*/
 
-#cmakedefine ETHOS_U55_BASE           (@ETHOS_U55_BASE@)    /* Ethos-U55 base address*/
-#cmakedefine ETHOS_U55_TA0_BASE       (@ETHOS_U55_TA0_BASE@)    /* Ethos-U55's timing adapter 0 base address */
-#cmakedefine ETHOS_U55_TA1_BASE       (@ETHOS_U55_TA1_BASE@)    /* Ethos-U55's timing adapter 1 base address */
+#cmakedefine ETHOS_U_NPU_BASE           (@ETHOS_U_NPU_BASE@)    /* Ethos-U NPU base address*/
+#cmakedefine ETHOS_U_NPU_TA0_BASE       (@ETHOS_U_NPU_TA0_BASE@)    /* Ethos-U NPU's timing adapter 0 base address */
+#cmakedefine ETHOS_U_NPU_TA1_BASE       (@ETHOS_U_NPU_TA1_BASE@)    /* Ethos-U NPU's timing adapter 1 base address */
 
 #cmakedefine CMSDK_UART4_BASE         (@CMSDK_UART4_BASE@)       /* UART 4 Base Address Shield 1*/
 #cmakedefine CMSDK_UART5_BASE         (@CMSDK_UART5_BASE@)       /* UART 5 Base Address */
@@ -140,9 +140,9 @@
 #cmakedefine SEC_SMSC9220_BASE        (@SEC_SMSC9220_BASE@)       /* Ethernet SMSC9220 Base Address */
 #cmakedefine SEC_USB_BASE             (@SEC_USB_BASE@)       /* USB Base Address */
 
-#cmakedefine SEC_ETHOS_U55_BASE       (@SEC_ETHOS_U55_BASE@)   /* Ethos-U55 base address*/
-#cmakedefine SEC_ETHOS_U55_TA0_BASE   (@SEC_ETHOS_U55_TA0_BASE@)   /* Ethos-U55's timing adapter 0 base address */
-#cmakedefine SEC_ETHOS_U55_TA1_BASE   (@SEC_ETHOS_U55_TA1_BASE@)   /* Ethos-U55's timing adapter 1 base address */
+#cmakedefine SEC_ETHOS_U_NPU_BASE       (@SEC_ETHOS_U_NPU_BASE@)   /* Ethos-U NPU base address*/
+#cmakedefine SEC_ETHOS_U_NPU_TA0_BASE   (@SEC_ETHOS_U_NPU_TA0_BASE@)   /* Ethos-U NPU's timing adapter 0 base address */
+#cmakedefine SEC_ETHOS_U_NPU_TA1_BASE   (@SEC_ETHOS_U_NPU_TA1_BASE@)   /* Ethos-U NPU's timing adapter 1 base address */
 
 #cmakedefine SEC_USER_BASE            (@SEC_USER_BASE@)       /* User ? Base Address */
 

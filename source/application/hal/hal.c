@@ -24,14 +24,14 @@
 
 #if defined(ARM_NPU)
 
-#include "ethosu_driver.h"              /* Arm Ethos-U55 driver header */
-#include "timing_adapter.h"             /* Arm Ethos-U55 timing adapter driver header */
-#include "timing_adapter_settings.h"    /* Arm Ethos-U55 timing adapter settings */
+#include "ethosu_driver.h"              /* Arm Ethos-U driver header */
+#include "timing_adapter.h"             /* Arm Ethos-U timing adapter driver header */
+#include "timing_adapter_settings.h"    /* Arm Ethos-U timing adapter settings */
 
-extern struct ethosu_driver ethosu_drv; /* Default Ethos-U55 device driver */
+extern struct ethosu_driver ethosu_drv; /* Default Ethos-U device driver */
 
 /**
- * @brief   Initialises the Arm Ethos-U55 NPU
+ * @brief   Initialises the Arm Ethos-U NPU
  * @return  0 if successful, error code otherwise
  **/
 static int arm_npu_init(void);
@@ -95,7 +95,7 @@ int hal_platform_init(hal_platform* platform)
 
 #if defined(ARM_NPU)
 
-    /* If Arm Ethos-U55 NPU is to be used, we initialise it here */
+    /* If Arm Ethos-U NPU is to be used, we initialise it here */
     if (0 != (state = arm_npu_init())) {
         return state;
     }
@@ -219,7 +219,7 @@ static int arm_npu_init(void)
 {
     int err = 0;
 
-    /* If the platform has timing adapter blocks along with Ethos-U55 core
+    /* If the platform has timing adapter blocks along with Ethos-U core
      * block, initialise them here. */
     if (0 != (err = _arm_npu_timing_adapter_init())) {
         return err;
@@ -228,30 +228,30 @@ static int arm_npu_init(void)
     /* Initialise the IRQ */
     arm_npu_irq_init();
 
-    /* Initialise Ethos-U55 device */
-    const void * ethosu_base_address = (void *)(SEC_ETHOS_U55_BASE);
+    /* Initialise Ethos-U device */
+    const void * ethosu_base_address = (void *)(SEC_ETHOS_U_NPU_BASE);
 
     if (0 != (err = ethosu_init(
-                        &ethosu_drv,            /* Ethos-U55 driver device pointer */
-                        ethosu_base_address,    /* Ethos-U55's base address. */
+                        &ethosu_drv,            /* Ethos-U driver device pointer */
+                        ethosu_base_address,    /* Ethos-U NPU's base address. */
                         NULL,                   /* Pointer to fast mem area - NULL for U55. */
                         0,                      /* Fast mem region size. */
                         1,                      /* Security enable. */
                         1))) {                  /* Privilege enable. */
-        printf_err("failed to initalise Ethos-U55 device\n");
+        printf_err("failed to initalise Ethos-U device\n");
         return err;
     }
 
-    info("Ethos-U55 device initialised\n");
+    info("Ethos-U device initialised\n");
 
-    /* Get Ethos-U55 version */
+    /* Get Ethos-U version */
     struct ethosu_version version;
     if (0 != (err = ethosu_get_version(&ethosu_drv, &version))) {
-        printf_err("failed to fetch Ethos-U55 version info\n");
+        printf_err("failed to fetch Ethos-U version info\n");
         return err;
     }
 
-    info("Ethos-U55 version info:\n");
+    info("Ethos-U version info:\n");
     info("\tArch:       v%u.%u.%u\n", version.id.arch_major_rev,
                                     version.id.arch_minor_rev,
                                     version.id.arch_patch_rev);

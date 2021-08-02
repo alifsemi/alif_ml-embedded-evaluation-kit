@@ -34,18 +34,18 @@ set(DESIGN_NAME            "Simple platform" CACHE STRING "Design name")
 ###################################################################################################
 set(PL011_UART0_BASE            "0x49303000" CACHE STRING "PL011 UART 0 Base Address")
 
-if (ETHOS_U55_ENABLED)
-    set(ETHOS_U55_BASE          "0x48102000" CACHE STRING "Ethos-U55 base address")
-    set(ETHOS_U55_TA0_BASE      "0x48103000" CACHE STRING "Ethos-U55's timing adapter 0 base address")
-    set(ETHOS_U55_TA1_BASE      "0x48103200" CACHE STRING "Ethos-U55's timing adapter 1 base address")
-    set(SEC_ETHOS_U55_BASE      "0x58102000" CACHE STRING "Ethos-U55 base address")
-    set(SEC_ETHOS_U55_TA0_BASE  "0x58103000" CACHE STRING "Ethos-U55's timing adapter 0 base address")
-    set(SEC_ETHOS_U55_TA1_BASE  "0x58103200" CACHE STRING "Ethos-U55's timing adapter 1 base address")
+if (ETHOS_U_NPU_ENABLED)
+    set(ETHOS_U_NPU_BASE          "0x48102000" CACHE STRING "Ethos-U NPU base address")
+    set(ETHOS_U_NPU_TA0_BASE      "0x48103000" CACHE STRING "Ethos-U NPU's timing adapter 0 base address")
+    set(ETHOS_U_NPU_TA1_BASE      "0x48103200" CACHE STRING "Ethos-U NPU's timing adapter 1 base address")
+    set(SEC_ETHOS_U_NPU_BASE      "0x58102000" CACHE STRING "Ethos-U NPU base address")
+    set(SEC_ETHOS_U_NPU_TA0_BASE  "0x58103000" CACHE STRING "Ethos-U NPU's timing adapter 0 base address")
+    set(SEC_ETHOS_U_NPU_TA1_BASE  "0x58103200" CACHE STRING "Ethos-U NPU's timing adapter 1 base address")
 endif ()
 
 ###################################################################################################
 #                                           IRQ numbers                                           #
 ###################################################################################################
-if (ETHOS_U55_ENABLED)
-    set(EthosU_IRQn             "56"         CACHE STRING "Ethos-U55 Interrupt")
+if (ETHOS_U_NPU_ENABLED)
+    set(EthosU_IRQn             "56"         CACHE STRING "Ethos-U NPU Interrupt")
 endif ()

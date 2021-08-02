@@ -22,6 +22,7 @@
   - [Add custom inputs](#add-custom-inputs)
   - [Add custom model](#add-custom-model)
   - [Optimize custom model with Vela compiler](#optimize-custom-model-with-vela-compiler)
+  - [Building for different Ethos-U NPU variants](#building-for-different-ethos-u-npu-variants)
   - [Automatic file generation](#automatic-file-generation)
 
 This section assumes that you are using an **x86 Linux** build machine.
@@ -115,7 +116,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 The project build system allows you to specify custom neural network models (in the `.tflite` format) for each use-case
 along with the network inputs.
 
-It also builds TensorFlow Lite for Microcontrollers library, Arm® *Ethos™-U55* driver library, and the CMSIS-DSP library
+It also builds TensorFlow Lite for Microcontrollers library, Arm® *Ethos™-U* NPU driver library, and the CMSIS-DSP library
 from sources.
 
 The build script is parameterized to support different options. Default values for build parameters build the
@@ -140,7 +141,7 @@ The build parameters are:
 - `TENSORFLOW_SRC_PATH`: the path to the root of the TensorFlow directory. The default value points to the
   `dependencies/tensorflow` git submodule. Respository is hosted here: [tensorflow](https://github.com/tensorflow/tensorflow)
 
-- `ETHOS_U55_DRIVER_SRC_PATH`: The path to the *Ethos-U55* NPU core driver sources. The default value points to the
+- `ETHOS_U_NPU_DRIVER_SRC_PATH`: The path to the *Ethos-U* NPU core driver sources. The default value points to the
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
@@ -148,8 +149,8 @@ The build parameters are:
   optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the
   `dependencies/cmsis` git submodule. Respository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
 
-- `ETHOS_U55_ENABLED`: Sets whether the use of *Ethos-U55* NPU is available for the deployment target. By default, this
-  is set and therefore application is built with *Ethos-U55* NPU supported.
+- `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
+  is set and therefore application is built with *Ethos-U* NPU supported.
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
   set to false, but can be turned on for FPGA targets. The the FVP and the CPU core cycle counts are not meaningful and
@@ -161,19 +162,19 @@ The build parameters are:
 
 - `<use_case>_MODEL_TFLITE_PATH`: The path to the model file that is processed and is included into the application
   `axf` file. The default value points to one of the delivered set of models. Make sure that the model chosen is aligned
-  with the `ETHOS_U55_ENABLED` setting.
+  with the `ETHOS_U_NPU_ENABLED` setting.
 
-  - When using the *Ethos-U55* NPU backend, the NN model is assumed to be optimized by Vela compiler. However, even if
+  - When using the *Ethos-U* NPU backend, the NN model is assumed to be optimized by Vela compiler. However, even if
     not, if it is supported by TensorFlow Lite Micro, it falls back on the CPU and execute.
 
-  - When use of the *Ethos-U55* NPU is disabled, and if a Vela optimized model is provided, then the application reports
+  - When use of the *Ethos-U* NPU is disabled, and if a Vela optimized model is provided, then the application reports
     a failure at runtime.
 
 - `USE_CASE_BUILD`: Specifies the list of applications to build. By default, the build system scans sources to identify
   available ML applications and produces executables for all detected use-cases. This parameter can accept single value,
   for example: `USE_CASE_BUILD=img_class`, or multiple values. For example: `USE_CASE_BUILD="img_class;kws"`.
 
-- `ETHOS_U55_TIMING_ADAPTER_SRC_PATH`: The path to timing adapter sources. The default value points to the
+- `ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH`: The path to timing adapter sources. The default value points to the
   `timing_adapter` dependencies folder.
 
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
@@ -251,7 +252,7 @@ dependencies
 ```
 
 > **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all of the
-> relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U55_DRIVER_SRC_PATH`,
+> relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U_NPU_DRIVER_SRC_PATH`,
 > and `CMSIS_SRC_PATH`.
 
 #### Fetching resource files
@@ -272,7 +273,7 @@ for the default 128 MAC configuration of the Arm® *Ethos™-U55* NPU.
 ### Building for default configuration
 
 A helper script `build_default.py` is provided to configure and build all the applications. It configures the project
-with default settings i.e., for `mps3` target and `sse-300` subsystem. Under the hood, it invokes all the necessary
+with default settings i.e., for `mps3` target, `sse-300` subsystem and *Ethos-U55* timing-adapter settings. Under the hood, it invokes all the necessary
 CMake commands that are described in the next sections.
 
 If using the `Arm GNU embedded toolchain`, execute:
@@ -311,14 +312,16 @@ Arm® *Ethos™-U55* NPU when providing only the mandatory arguments for CMake c
 cmake ../
 ```
 
-The preceding command builds for the default target platform `mps3`, the default subsystem `sse-300`, and using the
-default toolchain file for the target as `bare-metal-gcc.` This is equivalent to running:
+The preceding command builds for the default target platform `mps3`, the default subsystem `sse-300`, using the
+default toolchain file for the target as `bare-metal-gcc` and the default *Ethos-U55* timing adapter settings.
+This is equivalent to running:
 
 ```commandline
 cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake
     -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300
+    -DTARGET_SUBSYSTEM=sse-300 \
+    -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake
 ```
 
 #### Using Arm Compiler
@@ -378,15 +381,15 @@ cmake .. \
 #### Configuring with custom TPIP dependencies
 
 If the TensorFlow source tree is not in its default expected location, set the path using `TENSORFLOW_SRC_PATH`.
-Similarly, if the *Ethos-U55* NPU driver and `CMSIS` are not in the default location, then use
-`ETHOS_U55_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` to configure their location.
+Similarly, if the *Ethos-U* NPU driver and `CMSIS` are not in the default location, then use
+`ETHOS_U_NPU_DRIVER_SRC_PATH` and `CMSIS_SRC_PATH` to configure their location.
 
 For example:
 
 ```commandline
 cmake .. \
     -DTENSORFLOW_SRC_PATH=/my/custom/location/tensorflow \
-    -DETHOS_U55_DRIVER_SRC_PATH=/my/custom/location/core-driver \
+    -DETHOS_U_NPU_DRIVER_SRC_PATH=/my/custom/location/core-driver \
     -DCMSIS_SRC_PATH=/my/custom/location/cmsis
 ```
 
@@ -465,10 +468,10 @@ Where for each implemented use-case under the `source/use-case` directory, the f
 
 ## Building timing adapter with custom options
 
-The sources also contain the configuration for a timing adapter utility for the *Ethos-U55* NPU driver. The timing
+The sources also contain the configuration for a timing adapter utility for the *Ethos-U* NPU driver. The timing
 adapter allows the platform to simulate user provided memory bandwidth and latency constraints.
 
-The timing adapter driver aims to control the behavior of two AXI buses used by *Ethos-U55* NPU. One is for SRAM memory
+The timing adapter driver aims to control the behavior of two AXI buses used by *Ethos-U* NPU. One is for SRAM memory
 region, and the other is for flash or DRAM.
 
 The SRAM is where intermediate buffers are expected to be allocated and therefore, this region can serve frequent Read
@@ -544,7 +547,7 @@ For a clock rate of 500MHz, this would translate to:
   ![Maximum bit rate formula](../media/F2.png)
 
 - With a read latency of 64 cycles, and maximum pending reads as 2, each read could be a maximum of 64 or 128 bytes. As
-  defined for the *Ethos-U55* NPU AXI bus attribute.
+  defined for the *Ethos-U* NPU AXI bus attribute.
 
     The bandwidth is calculated solely by read parameters:
 
@@ -560,7 +563,7 @@ Timing adapter requires recompilation to change parameters. Default timing adapt
 `TA_CONFIG_FILE` build parameter is located in the `scripts/cmake folder` and contains all options for `AXI0` and `AXI1`
 as previously described.
 
-here is an example of `scripts/cmake/ta_config.cmake`:
+here is an example of `scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake`:
 
 ```cmake
 # Timing adapter options
@@ -581,7 +584,7 @@ set(TA0_BWCAP "4000")
 An example of the build with a custom timing adapter configuration:
 
 ```commandline
-cmake .. -DTA_CONFIG_FILE=scripts/cmake/my_ta_config.cmake
+cmake .. -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/my_ta_config.cmake
 ```
 
 ## Add custom inputs
@@ -593,7 +596,7 @@ see section 3.3 in the specific use-case documentation.
 
 The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
 
-> **Note:** If you want to run the model using *Ethos-U55* NPU, ensure that your custom model has been run through the
+> **Note:** If you want to run the model using *Ethos-U* NPU, ensure that your custom model has been run through the
 > Vela compiler successfully before continuing.
 
 To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
@@ -603,7 +606,7 @@ Each line of the file should correspond to one of the outputs in your model. See
 `labels_mobilenet_v2_1.0_224.txt` file in the `img_class` use-case for an example.
 
 Then, you must set `<use_case>_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
-`<use_case>_LABELS_TXT_FILE` to the location of the associated labels file, like so:
+`<use_case>_LABELS_TXT_FILE` to the location of the associated labels file (if necessary), like so:
 
 ```commandline
 cmake .. \
@@ -648,13 +651,13 @@ After compiling, your custom model has now replaced the default one in the appli
 The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
-containing an *Ethos-U55* NPU.
+containing an *Ethos-U* NPU.
 
-The optimized model contains custom operators for sub-graphs of the model that can be accelerated by the *Ethos-U55*
+The optimized model contains custom operators for sub-graphs of the model that can be accelerated by the *Ethos-U*
 NPU. The remaining layers that cannot be accelerated, are left unchanged and are run on the CPU using optimized, or
 `CMSIS-NN`, or reference kernels that are provided by the inference engine.
 
-After the compilation, the optimized model can only be executed on a system using an *Ethos-U55* NPU.
+After the compilation, the optimized model can only be executed on a system using an *Ethos-U* NPU.
 
 > **Note:** The NN model provided during the build and compiled into the application executable binary defines whether
 the CPU or NPU is used to execute workloads. If an unoptimized model is used, then inference runs on the *Cortex-M* CPU.
@@ -675,12 +678,15 @@ vela \
 The Vela command contains the following:
 
 - `--accelerator-config`: Specifies the accelerator configuration to use between `ethos-u55-256`, `ethos-u55-128`,
-  `ethos-u55-64`, and `ethos-u55-32`.
-- `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising the SRAM usage whereas the Performance strategy optimises the neural network for maximal perforamance. Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
+  `ethos-u55-64`, `ethos-u55-32`, `ethos-u65-256`, and `ethos-u65-512`.
+- `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising the SRAM
+  usage whereas the Performance strategy optimises the neural network for maximal perforamance.
+  Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
 - `--config`: Specifies the path to the Vela configuration file. The format of the file is a Python ConfigParser `.ini`
     file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).
 - `--memory-mode`: Selects the memory mode to use as specified in the Vela configuration file.
-- `--system-config`: Selects the system configuration to use as specified in the Vela configuration file.
+- `--system-config`: Selects the system configuration to use as specified in the Vela configuration file:
+  `Ethos_U55_High_End_Embedded`for *Ethos-U55* and `Ethos_U65_High_End` for *Ethos-U65*.
 
 Vela compiler accepts `.tflite` file as input and saves optimized network model as a `.tflite` file.
 
@@ -689,8 +695,39 @@ includes a summary of all the subgraphs and their inputs and outputs.
 
 To see Vela helper for all the parameters use: `vela --help`.
 
-> **Note:** By default, use of the *Ethos-U55* NPU is enabled in the CMake configuration. This can be changed by passing
-> `-DETHOS_U55_ENABLED`.
+> **Note:** By default, use of the *Ethos-U* NPU is enabled in the CMake configuration. This can be changed by passing
+> `-DETHOS_U_NPU_ENABLED`.
+
+## Building for different Ethos-U NPU variants
+
+The building process described in the previous paragraphs assumes building for the default *Ethos-U55* NPU with 128 MACs,
+using the *Ethos-U55* High End timing adapter system configuration.
+
+To build for a different *Ethos-U* NPU variant:
+
+- Optimize the model with Vela compiler with the correct parameters. See [Optimize custom model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler).
+- Use the Vela model as custom model in the building command. See [Add custom model](./building.md#add-custom-model)
+- Use the correct timing adapter settings configuration. See [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
+
+For example, when building for *Ethos-U65* High End system configuration, the Vela comand will be:
+
+```commandline
+vela \
+    <model_file>.tflite \
+    --accelerator-config ethos-u65-256 \
+    --optimise Performance \
+    --memory-mode=Shared_Sram \
+    --system-config=Ethos_U65_High_End \
+    --config=../scripts/vela/default_vela.ini
+```
+
+And the cmake command:
+
+```commandline
+cmake .. \
+    -D<use_case>_MODEL_TFLITE_PATH=<path/to/ethos_u65_vela_model.tflite> \
+    -DTA_CONFIG_FILE=scripts/cmake/ta_config_u65_high_end.cmake
+```
 
 ## Automatic file generation
 

@@ -18,11 +18,11 @@
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/build_native)
 set(PLAT_HAL ${CMAKE_CURRENT_SOURCE_DIR}/source/application/hal/platforms/native)
 
-if (ETHOS_U55_ENABLED)
+if (ETHOS_U_NPU_ENABLED)
     message(WARNING "EthosU can't be enabled for native builds."
-                    "Use -DETHOS_U55_ENABLED=0 flag for this target platform."
+                    "Use -DETHOS_U_NPU_ENABLED=0 flag for this target platform."
                     "Overriding, disabling use of EthosU...")
-    set(ETHOS_U55_ENABLED OFF)
+    set(ETHOS_U_NPU_ENABLED OFF)
 endif()
 
 if (DEFINED LOG_LEVEL)

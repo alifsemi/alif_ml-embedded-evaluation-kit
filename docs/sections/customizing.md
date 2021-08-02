@@ -55,7 +55,7 @@ As mentioned in the [Repository structure](../documentation.md#repository-struct
 ```
 
 Where the `source` folder contains C/C++ sources for the platform and ML applications. Common code related to the
-*Ethos-U55* code samples software framework resides in the `application` sub-folder and ML application-specific logic,
+*Ethos-U* code samples software framework resides in the `application` sub-folder and ML application-specific logic,
 use-cases, sources are in the `use-case` subfolder.
 
 > **Convention**: Separate use-cases must be organized in sub-folders under the use-case folder. The name of the
@@ -145,7 +145,7 @@ The HAL is represented by the following interfaces. To access them, include the 
   |  `get_duration_ms`    |  Pointer to a function to calculate duration between two time-counters in milliseconds. |
   |  `get_duration_us`    |  Pointer to a function to calculate duration between two time-counters in microseconds |
   |  `get_cpu_cycle_diff` |  Pointer to a function to calculate duration between two time-counters in *Cortex-M55* cycles. |
-  |  `get_npu_cycle_diff` |  Pointer to a function to calculate duration between two time-counters in *Ethos-U55* cycles. Available only when project is configured with `ETHOS_U55_ENABLED` set. |
+  |  `get_npu_cycle_diff` |  Pointer to a function to calculate duration between two time-counters in *Ethos-U* cycles. Available only when project is configured with `ETHOS_U_NPU_ENABLED` set. |
   |  `start_profiling`    |  If necessary, wraps the `get_time_counter` function with another profiling initialization, if necessary. |
   |  `stop_profiling`     |  If necessary, wraps the `get_time_counter` function along with more instructions when profiling ends. |
 
@@ -227,7 +227,7 @@ void main_loop(hal_platform& platform) {
 
 ## Profiler
 
-The profiler is a helper class that assists with the collection of timings and *Ethos-U55* cycle counts for operations.
+The profiler is a helper class that assists with the collection of timings and *Ethos-U* cycle counts for operations.
 It uses platform timer to get system timing information.
 
 | Method name             | Description                                                    |
@@ -358,7 +358,7 @@ You can now start filling this function with logic.
 Before inference could be run with a custom NN model, TensorFlow Lite Micro framework must learn about the operators, or
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
-The *Ethos-U55* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](#nn-model-api)).
+The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](#nn-model-api)).
 Create `HelloWorldModel.hpp` in the use-case include sub-directory, extend Model abstract class,
 and then declare the required methods.
 
@@ -405,10 +405,10 @@ Create the `HelloWorldModel.cc` file in the `src` sub-directory and define the m
 
 Please refer to `use_case/img_class/src/MobileNetModel.cc` for code examples.
 
-If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U55* operator to the
+If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U* operator to the
 operators list.
 
-The following example shows how to add the custom *Ethos-U55* operator with the TensorFlow Lite Micro framework. when
+The following example shows how to add the custom *Ethos-U* operator with the TensorFlow Lite Micro framework. when
 defined, `ARM_NPU` excludes the code if the application was built without NPU support.
 
 For example:
@@ -553,7 +553,7 @@ The code snippet has several important blocks:
   const uint8_t *outputData = tflite::GetTensorData<uint8>(outputTensor);
   ```
 
-To add profiling for the *Ethos-U55*, include a `Profiler.hpp` header and invoke both `StartProfiling` and
+To add profiling for the *Ethos-U*, include a `Profiler.hpp` header and invoke both `StartProfiling` and
 `StopProfiling` around inference execution.
 
 For example:
@@ -660,7 +660,7 @@ in the root of your use-case. However, the name of the file is not important.
 > - `use_case` – The name of the current use-case.
 > - `UC_SRC` – A list of use-case sources.
 > - `UC_INCLUDE` – The path to the use-case headers.
-> - `ETHOS_U55_ENABLED` – The flag indicating if the current build supports Ethos-U55.
+> - `ETHOS_U_NPU_ENABLED` – The flag indicating if the current build supports Ethos-U55.
 > - `TARGET_PLATFORM` – The target platform being built for.
 > - `TARGET_SUBSYSTEM` – If target platform supports multiple subsystems, this is the name of the subsystem.
 > - All standard build options.
@@ -671,7 +671,7 @@ For the hello world use-case, it is enough to create a `helloworld.cmake` file a
 so:
 
 ```cmake
-if (ETHOS_U55_ENABLED EQUAL 1)
+if (ETHOS_U_NPU_ENABLED EQUAL 1)
   set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_uint8_vela.tflite)
 else()
   set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_uint8.tflite)

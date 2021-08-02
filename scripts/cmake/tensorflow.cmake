@@ -69,7 +69,7 @@ if (TARGET_PLATFORM STREQUAL native)
 else()
     set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_ethos_eval")
     set(TENSORFLOW_LITE_MICRO_TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR}${CPU_FEATURES})
-    if(ETHOS_U55_ENABLED)
+    if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
         set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
     endif()
@@ -104,7 +104,7 @@ add_custom_target(tensorflow_build ALL
         TARGET=${TENSORFLOW_LITE_MICRO_TARGET}
         TARGET_ARCH=${TENSORFLOW_LITE_MICRO_TARGET_ARCH}
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
-        ETHOSU_DRIVER_PATH=${ETHOS_U55_DRIVER_SRC_PATH}
+        ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}
         CMSIS_PATH=${CMSIS_SRC_PATH}
 
         # Conditional arguments

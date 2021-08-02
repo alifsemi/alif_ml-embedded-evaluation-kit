@@ -46,7 +46,7 @@ Before starting the setup process, please make sure that you have:
 
 ### Additional reading
 
-This document contains information that is specific to Arm® Ethos™-U55 products. Please refer to the following documents
+This document contains information that is specific to Arm® Ethos™-U55 and Arm® Ethos™-U65 products. Please refer to the following documents
 for additional information:
 
 - ML platform overview: <https://mlplatform.org/>
@@ -57,6 +57,9 @@ for additional information:
 
 - ML processor, also referred to as a Neural Processing Unit (NPU) - Arm® `Ethos™-U55`:
     <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55>
+
+- ML processor, also referred to as a Neural Processing Unit (NPU) - Arm® `Ethos™-U65`:
+    <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65>
 
 - Arm® MPS3 FPGA Prototyping Board:
     <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>
@@ -112,12 +115,12 @@ What these folders contain:
 - `scripts`: Build and source generation scripts.
 
 - `source`: C/C++ sources for the platform and ML applications.
-    > **Note:** Common code related to the `Ethos-U55` NPU software framework resides in *application* subfolder.
+    > **Note:** Common code related to the `Ethos-U` NPU software framework resides in *application* subfolder.
 
   The contents of the *application* subfolder is as follows:
 
   - `application`: All sources that form the *core* of the application. The `use-case` part of the sources depend on the
-    sources themsleves, such as:
+    sources themselves, such as:
 
     - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform agnostic API to access hardware
       platform-specific functions.
@@ -208,15 +211,15 @@ The models used in the use-cases implemented in this project can be downloaded f
 - [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8).
 - [Anomaly Detection](https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite).
 
-When using *Ethos-U55* NPU backend, Vela compiler optimizes the the NN model. However, if not and it is supported by
+When using *Ethos-U* NPU backend, Vela compiler optimizes the the NN model. However, if not and it is supported by
 TensorFlow Lite Micro, then it falls back on the CPU and execute.
 
 ![Vela compiler](./media/vela_flow.jpg)
 
 The Vela compiler is a tool that can optimize a neural network model into a version that run on an embedded system
-containing the *Ethos-U55* NPU.
+containing the *Ethos-U* NPU.
 
-The optimized model contains custom operators for sub-graphs of the model that the *Ethos-U55* NPU can accelerate. The
+The optimized model contains custom operators for sub-graphs of the model that the *Ethos-U* NPU can accelerate. The
 remaining layers that cannot be accelerated, are left unchanged, and are run on the CPU using optimized, `CMSIS-NN`, or
 reference kernels provided by the inference engine.
 
@@ -228,7 +231,7 @@ This section describes how to build the code sample applications from sources an
 options and the process.
 
 The project can be built for MPS3 FPGA and FVP emulating MPS3. Using default values for configuration parameters builds
-executable models that support the *Ethos-U55* NPU.
+executable models that support the *Ethos-U* NPU.
 
 For further information, please see:
 
@@ -253,6 +256,7 @@ For further information, please see:
   - [Add custom inputs](./sections/building.md#add-custom-inputs)
   - [Add custom model](./sections/building.md#add-custom-model)
   - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
+  - [Building for different Ethos-U NPU variants](#building-for-different-ethos-u-npu-variants)
   - [Automatic file generation](./sections/building.md#automatic-file-generation)
 
 ## Deployment
@@ -273,7 +277,7 @@ For further information, please see:
 This section describes how to implement a custom Machine Learning application running on a platform supported by the
 repository, either an FVP or an MPS3 board.
 
-Both the *Cortex-M55* CPU and *Ethos-U55* NPU Code Samples software project offers a way to incorporate extra use-case
+Both the *Cortex-M55* CPU and *Ethos-U* NPU Code Samples software project offers a way to incorporate extra use-case
 code into the existing infrastructure. It also provides a build system that automatically picks up added functionality
 and produces corresponding executable for each use-case.
 
