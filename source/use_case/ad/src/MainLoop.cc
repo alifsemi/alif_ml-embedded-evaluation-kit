@@ -40,6 +40,7 @@ static void DisplayMenu()
     printf("  %u. Show NN model info\n", MENU_OPT_SHOW_MODEL_INFO);
     printf("  %u. List audio signals\n\n", MENU_OPT_LIST_AUDIO_CLIPS);
     printf("  Choice: ");
+    fflush(stdout);
 }
 
 

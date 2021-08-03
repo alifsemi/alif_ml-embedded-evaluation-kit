@@ -44,6 +44,7 @@ static void DisplayMenu()
     printf("  %u. Show NN model info\n", MENU_OPT_SHOW_MODEL_INFO);
     printf("  %u. List images\n\n", MENU_OPT_LIST_IMAGES);
     printf("  Choice: ");
+    fflush(stdout);
 }
 
 void main_loop(hal_platform& platform)

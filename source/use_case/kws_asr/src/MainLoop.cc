@@ -49,6 +49,7 @@ static void DisplayMenu()
     printf("  %u. Show NN model info\n", MENU_OPT_SHOW_MODEL_INFO);
     printf("  %u. List audio clips\n\n", MENU_OPT_LIST_AUDIO_CLIPS);
     printf("  Choice: ");
+    fflush(stdout);
 }
 
 /** @brief Gets the number of MFCC features for a single window. */

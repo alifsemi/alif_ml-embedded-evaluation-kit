@@ -266,21 +266,23 @@ namespace app {
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
 
-        std::string resultStr = std::string{"Average anomaly score is: "} + std::to_string(result) +
-                std::string("\n") + std::string("Anomaly threshold is: ") + std::to_string(threshold) +
-                std::string("\n");
+        std::string anomalyScore = std::string{"Average anomaly score is: "} + std::to_string(result);
+        std::string anomalyThreshold = std::string("Anomaly threshold is: ") + std::to_string(threshold);
 
+        std::string anomalyResult;
         if (result > threshold) {
-            resultStr += std::string("Anomaly detected!");
+            anomalyResult += std::string("Anomaly detected!");
         } else {
-            resultStr += std::string("Everything fine, no anomaly detected!");
+            anomalyResult += std::string("Everything fine, no anomaly detected!");
         }
 
         platform.data_psn->present_data_text(
-                resultStr.c_str(), resultStr.size(),
+                anomalyScore.c_str(), anomalyScore.size(),
                 dataPsnTxtStartX1, rowIdx1, false);
 
-        info("%s\n", resultStr.c_str());
+        info("%s\n", anomalyScore.c_str());
+        info("%s\n", anomalyThreshold.c_str());
+        info("%s\n", anomalyResult.c_str());
 
         return true;
     }

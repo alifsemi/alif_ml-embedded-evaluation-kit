@@ -44,6 +44,7 @@ static void DisplayMenu()
     printf("  %u. Show NN model info\n", MENU_OPT_SHOW_MODEL_INFO);
     printf("  %u. List audio clips\n\n", MENU_OPT_LIST_AUDIO_CLIPS);
     printf("  Choice: ");
+    fflush(stdout);
 }
 
 /** @brief Verify input and output tensor are of certain min dimensions. */
