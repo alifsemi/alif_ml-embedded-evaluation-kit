@@ -16,20 +16,20 @@ This section provides useful details on how the Machine Learning use-cases of th
 
 Although the guidance provided here is concerning the Arm® *Corstone™-300* system, it is fairly generic and is
 applicable for other platforms too. The Arm® *Corstone™-300* is composed of both the Arm® *Cortex™-M55* and the Arm®
-*Ethos™-U55*. The memory map for the Arm® *Cortex™-M55* core can be found in the [Appendix](./appendix.md).
+*Ethos™-U* NPU. The memory map for the Arm® *Cortex™-M55* core can be found in the [Appendix](./appendix.md).
 
-The Arm® *Ethos™-U55* NPU interacts with the system through two AXI interfaces. The first one, is envisaged to be the
+The Arm® *Ethos™-U* NPU interacts with the system through two AXI interfaces. The first one, is envisaged to be the
 higher-bandwidth, lower-latency, interface. In a typical system, this is wired to an SRAM as it is required to service
 frequent Read and Write traffic.
 
 The second interface is expected to have a higher-latency, lower-bandwidth characteristic, and is typically wired to a
-flash device servicing read-only traffic. In this configuration, the Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U55* NPU
+flash device servicing read-only traffic. In this configuration, the Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU
 read the contents of the neural network model, or the `.tflite` file, from the flash memory region. With the Arm®
-*Ethos™-U55* requesting these read transactions over its second AXI bus.
+*Ethos™-U* NPU requesting these read transactions over its second AXI bus.
 
 The input and output tensors, along with any intermediate computation buffers, are placed on SRAM. Therefore, both the
-Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U55* NPU would be reading, or writing, to this region when running an inference.
-The Arm® *Ethos™-U55* NPU requests these Read and Write transactions over the first AXI bus.
+Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU would be reading, or writing, to this region when running an inference.
+The Arm® *Ethos™-U* NPU requests these Read and Write transactions over the first AXI bus.
 
 ## Understanding memory usage from Vela output
 
@@ -177,7 +177,7 @@ LOAD_REGION_0       0x00000000                  0x00080000
     ; SSE-300's internal SRAM of 4MiB - reserved for
     ; activation buffers.
     ; This region should have 3 cycle read latency from
-    ; both Cortex-M55 and Ethos-U55
+    ; both Cortex-M55 and Ethos-U NPU
     ;-----------------------------------------------------
     isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
     {
@@ -234,10 +234,10 @@ LOAD_REGION_1       0x70000000                  0x02000000
 ```
 
 > **Note:** With Arm® *Corstone™-300* FPGA and FVP implementations, only the BRAM, internal SRAM, and DDR memory regions
-> are accessible to the Arm® Ethos™-U55 NPU block.
+> are accessible to the Arm® Ethos™-U NPU block.
 
 In the preceding snippet, the internal SRAM region memory is utilized by the activation buffers with a limit of 4MiB. If
-used by a Vela optimized neural network model, then the Arm® *Ethos™-U55* NPU writes to this block frequently.
+used by a Vela optimized neural network model, then the Arm® *Ethos™-U* NPU writes to this block frequently.
 
 A bigger region of memory for storing the neural network model is placed in the DDR, or flash, region under
 `LOAD_REGION_1`. The two load regions are necessary as the motherboard configuration controller of the MPS3 limits the

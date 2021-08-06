@@ -22,7 +22,7 @@
   - [Add custom inputs](#add-custom-inputs)
   - [Add custom model](#add-custom-model)
   - [Optimize custom model with Vela compiler](#optimize-custom-model-with-vela-compiler)
-  - [Building for different Ethos-U NPU variants](#building-for-different-ethos-u-npu-variants)
+  - [Building for different Ethos-U NPU variants](#building-for-different-ethos_u-npu-variants)
   - [Automatic file generation](#automatic-file-generation)
 
 This section assumes that you are using an **x86 Linux** build machine.

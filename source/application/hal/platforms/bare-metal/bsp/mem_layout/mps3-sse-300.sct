@@ -18,7 +18,7 @@
 ; *************************************************************
 ; Please see docs/sections/appendix.md for memory mapping information.
 ;
-; Note: Ethos-U55 can access BRAM, internal SRAM and the DDR sections => activation buffers and
+; Note: Ethos-U NPU can access BRAM, internal SRAM and the DDR sections => activation buffers and
 ;       the model should only be placed in those regions.
 ;
 ;---------------------------------------------------------
@@ -63,7 +63,7 @@ LOAD_REGION_0       0x00000000                  0x00080000
     ; SSE-300's internal SRAM of 4MiB - reserved for
     ; activation buffers.
     ; This region should have 3 cycle read latency from
-    ; both Cortex-M55 and Ethos-U55
+    ; both Cortex-M55 and Ethos-U NPU
     ;-----------------------------------------------------
     isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
     {

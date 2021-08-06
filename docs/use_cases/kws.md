@@ -149,7 +149,7 @@ For further information, please refer to:
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
-- [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos-u-npu-variants)
+- [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
 > the CMake command.

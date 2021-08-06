@@ -256,7 +256,7 @@ For further information, please see:
   - [Add custom inputs](./sections/building.md#add-custom-inputs)
   - [Add custom model](./sections/building.md#add-custom-model)
   - [Optimize custom model with Vela compiler](./sections/building.md#optimize-custom-model-with-vela-compiler)
-  - [Building for different Ethos-U NPU variants](#building-for-different-ethos-u-npu-variants)
+  - [Building for different Ethos-U NPU variants](./sections/building.md#building-for-different-ethos_u-npu-variants)
   - [Automatic file generation](./sections/building.md#automatic-file-generation)
 
 ## Deployment
