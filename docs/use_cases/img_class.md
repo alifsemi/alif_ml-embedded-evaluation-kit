@@ -319,7 +319,6 @@ What the preceding choices do:
 4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
 
     ```log
-    INFO - uTFL version: 2.5.0
     INFO - Model info:
     INFO - Model INPUT tensors:
     INFO -  tensor type is UINT8
@@ -329,19 +328,20 @@ What the preceding choices do:
     INFO -    2: 224
     INFO -    3:   3
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007812
-    INFO - ZeroPoint[0] = 128
+    INFO - Scale[0] = 0.007843
+    INFO - ZeroPoint[0] = -1
     INFO - Model OUTPUT tensors:
-    INFO -  tensor type is UINT8
+    INFO -  tensor type is INT8
     INFO -  tensor occupies 1001 bytes with dimensions
     INFO -    0:   1
     INFO -    1: 1001
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.098893
-    INFO - ZeroPoint[0] = 58
-    INFO - Activation buffer (a.k.a tensor arena) size used: 521760
+    INFO - Scale[0] = 0.03906
+    INFO - ZeroPoint[0] = -128
+    INFO - Activation buffer (a.k.a tensor arena) size used: 1510012
     INFO - Number of operators: 1
     INFO -  Operator 0: ethos-u
+   
     ```
 
 5. List Images: Prints a list of pair image indexes. The original filenames are embedded in the application, like so:
@@ -364,18 +364,18 @@ The following example illustrates an application output for classification:
 INFO - Running inference on image 0 => cat.bmp
 INFO - Final results:
 INFO - Total number of inferences: 1
-INFO - 0) 282 (14.636096) -> tabby, tabby cat
-INFO - 1) 286 (14.537203) -> Egyptian cat
-INFO - 2) 283 (12.757138) -> tiger cat
-INFO - 3) 458 (7.021370) -> bow tie, bow-tie, bowtie
-INFO - 4) 288 (7.021370) -> lynx, catamount
+INFO - 0) 282 (0.753906) -> tabby, tabby cat
+INFO - 1) 286 (0.148438) -> Egyptian cat
+INFO - 2) 283 (0.062500) -> tiger cat
+INFO - 3) 458 (0.003906) -> bow tie, bow-tie, bowtie
+INFO - 4) 288 (0.003906) -> lynx, catamount
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 2489726
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 1098726
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 471129
-INFO - NPU ACTIVE cycles: 7489258
-INFO - NPU IDLE cycles: 914
-INFO - NPU TOTAL cycles: 7490172
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 2468259
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 1151319
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 432351
+INFO - NPU ACTIVE cycles: 7345741
+INFO - NPU IDLE cycles: 431
+INFO - NPU TOTAL cycles: 7346172
 ```
 
 It can take several minutes to complete one inference run. The average time is around 2-3 minutes.
@@ -387,18 +387,18 @@ The profiling section of the log shows that for this inference:
 
 - *Ethos-U* PMU report:
 
-  - 7,490,172 total cycle: The number of NPU cycles.
+  - 7,346,172 total cycle: The number of NPU cycles.
 
-  - 7,489,258 active cycles: The number of NPU cycles that were used for computation.
+  - 7,345,741 active cycles: The number of NPU cycles that were used for computation.
 
-  - 914 idle cycles: The number of cycles for which the NPU was idle.
+  - 413 idle cycles: The number of cycles for which the NPU was idle.
 
-  - 2,489,726 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where the
+  - 2,468,259 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where the
     *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
-  - 1,098,726 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
+  - 1,151,319 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 471,129 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where the
+  - 432,351 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where the
     *Ethos-U* NPU reads the model. So, read-only.
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU

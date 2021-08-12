@@ -78,11 +78,11 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59d
     --output ./resources_downloaded/asr/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_output/Identity_int8/0.npy \
     --output ./resources_downloaded/asr/ofm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8/mobilenet_v2_1.0_224_quantized_1_default_1.tflite \
-    --output ./resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1.tflite
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8/testing_input/input/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/mobilenet_v2_1.0_224_INT8.tflite \
+    --output ./resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/testing_input/tfl.quantize/0.npy \
     --output ./resources_downloaded/img_class/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8/testing_output/output/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/testing_output/MobilenetV2/Predictions/Reshape_11/0.npy \
     --output ./resources_downloaded/img_class/ofm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite \
     --output ./resources_downloaded/kws/ds_cnn_clustered_int8.tflite
@@ -137,13 +137,13 @@ mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_down
     --output-dir=resources_downloaded/inference_runner
 mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_downloaded/inference_runner/dnn_s_quantized_vela_H128.tflite
 
-. resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1.tflite \
+. resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/img_class
-mv resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_quantized_1_default_1_vela_H128.tflite
+mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \

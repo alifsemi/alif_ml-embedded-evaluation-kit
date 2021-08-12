@@ -54,8 +54,7 @@ bool RunInferenceRandom(arm::app::Model& model)
     return true;
 }
 
-/* Skip this test, Wav2LetterModel if not Vela optimized but only from ML-zoo will fail. */
-TEST_CASE("Running random inference with TensorFlow Lite Micro and Wav2LetterModel Int8", "[Wav2Letter][.]")
+TEST_CASE("Running random inference with TensorFlow Lite Micro and Wav2LetterModel Int8", "[Wav2Letter]")
 {
     arm::app::Wav2LetterModel model{};
 
@@ -86,7 +85,7 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     }
 }
 
-TEST_CASE("Running inference with Tflu and Wav2LetterModel Int8", "[Wav2Letter][.]")
+TEST_CASE("Running inference with Tflu and Wav2LetterModel Int8", "[Wav2Letter]")
 {
     for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
         auto input_goldenFV = get_ifm_data_array(i);;

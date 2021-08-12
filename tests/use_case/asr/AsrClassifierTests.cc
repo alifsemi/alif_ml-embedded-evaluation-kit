@@ -30,7 +30,7 @@ TEST_CASE("Test invalid classifier")
 
 
 TEST_CASE("Test valid classifier UINT8") {
-    const int dimArray[] = {4, 1, 1, 246, 29};
+    int dimArray[] = {4, 1, 1, 246, 29};
     std::vector <std::string> labels(29);
     std::vector <uint8_t> outputVec(7134);
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
@@ -46,7 +46,7 @@ TEST_CASE("Test valid classifier UINT8") {
 
 
 TEST_CASE("Get classification results") {
-    const int dimArray[] = {4, 1, 1, 10, 15};
+    int dimArray[] = {4, 1, 1, 10, 15};
     std::vector <std::string> labels(15);
     std::vector<uint8_t> outputVec(150, static_cast<uint8_t>(1));
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);

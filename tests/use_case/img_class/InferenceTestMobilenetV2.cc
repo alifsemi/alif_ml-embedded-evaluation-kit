@@ -24,7 +24,7 @@
 
 using namespace test;
 
-bool RunInference(arm::app::Model& model, const uint8_t imageData[])
+bool RunInference(arm::app::Model& model, const int8_t imageData[])
 {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);

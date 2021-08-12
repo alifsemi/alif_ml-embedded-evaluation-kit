@@ -1,6 +1,6 @@
 [submodule "dependencies/tensorflow"]
 	path = dependencies/tensorflow
-	url = https://github.com/tensorflow/tensorflow
+	url = https://github.com/tensorflow/tflite-micro.git
 [submodule "dependencies/cmsis"]
 	path = dependencies/cmsis
 	url = https://github.com/ARM-software/CMSIS_5.git

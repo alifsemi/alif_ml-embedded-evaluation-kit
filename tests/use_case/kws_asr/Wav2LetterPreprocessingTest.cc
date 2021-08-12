@@ -108,7 +108,7 @@ TEST_CASE("Preprocessing calculation INT8")
     /* Constants. */
     const uint32_t  windowLen       = 512;
     const uint32_t  windowStride    = 160;
-    const int       dimArray[]      = {3, 1, numMfccFeatures * 3, numMfccVectors};
+    int             dimArray[]      = {3, 1, numMfccFeatures * 3, numMfccVectors};
     const float     quantScale      = 0.1410219967365265;
     const int       quantOffset     = -11;
 

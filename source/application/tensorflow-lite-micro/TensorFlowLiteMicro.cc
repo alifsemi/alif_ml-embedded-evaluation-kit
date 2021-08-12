@@ -19,10 +19,7 @@
 #include "hal.h"
 
 void PrintTensorFlowVersion()
-{
-    info("uTFL version: %u.%u.%u\n", TF_MAJOR_VERSION, TF_MINOR_VERSION,
-        TF_PATCH_VERSION);
-}
+{}
 
 arm::app::QuantParams arm::app::GetTensorQuantParams(TfLiteTensor* tensor)
 {

@@ -26,9 +26,9 @@ const tflite::MicroOpResolver& arm::app::Wav2LetterModel::GetOpResolver()
 bool arm::app::Wav2LetterModel::EnlistOperations()
 {
     this->m_opResolver.AddConv2D();
-    this->m_opResolver.AddMul();
-    this->m_opResolver.AddMaximum();
     this->m_opResolver.AddReshape();
+    this->m_opResolver.AddLeakyRelu();
+    this->m_opResolver.AddSoftmax();
 
 #if defined(ARM_NPU)
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {

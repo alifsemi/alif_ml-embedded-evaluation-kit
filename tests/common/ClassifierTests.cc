@@ -21,7 +21,7 @@
 
 template<typename T>
 void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults, T defaultTensorValue) {
-    const int dimArray[] = {1, 1001};
+    int dimArray[] = {1, 1001};
     std::vector <std::string> labels(1001);
     std::vector<T> outputVec(1001, defaultTensorValue);
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);

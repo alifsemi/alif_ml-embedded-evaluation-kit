@@ -196,14 +196,22 @@ void arm::app::Model::LogInterpreterInfo()
     info("Activation buffer (a.k.a tensor arena) size used: %zu\n",
         this->m_pInterpreter->arena_used_bytes());
 
-    const size_t nOperators = this->m_pInterpreter->operators_size();
-    info("Number of operators: %zu\n", nOperators);
+    /* We expect there to be only one subgraph. */
+    const uint32_t nOperators = tflite::NumSubgraphOperators(this->m_pModel, 0);
+    info("Number of operators: %" PRIu32 "\n", nOperators);
 
-    /* For each operator, display registration information */
+    const tflite::SubGraph* subgraph = this->m_pModel->subgraphs()->Get(0);
+
+    auto* opcodes = this->m_pModel->operator_codes();
+
+    /* For each operator, display registration information. */
     for (size_t i = 0 ; i < nOperators; ++i) {
-        const tflite::NodeAndRegistration nodeReg =
-            this->m_pInterpreter->node_and_registration(i);
-        const TfLiteRegistration* reg = nodeReg.registration;
+        const tflite::Operator* op = subgraph->operators()->Get(i);
+        const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
+        const TfLiteRegistration* reg = nullptr;
+
+        tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(),
+                                          this->m_pErrorReporter, &reg);
         std::string opName{""};
 
         if (reg) {

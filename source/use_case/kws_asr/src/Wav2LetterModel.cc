@@ -35,8 +35,8 @@ const tflite::MicroOpResolver& arm::app::Wav2LetterModel::GetOpResolver()
 bool arm::app::Wav2LetterModel::EnlistOperations()
 {
     this->m_opResolver.AddConv2D();
-    this->m_opResolver.AddMul();
-    this->m_opResolver.AddMaximum();
+    this->m_opResolver.AddLeakyRelu();
+    this->m_opResolver.AddSoftmax();
     this->m_opResolver.AddReshape();
 
 #if defined(ARM_NPU)
