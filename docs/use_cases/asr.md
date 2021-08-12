@@ -32,7 +32,7 @@ This section provides an overview of the feature extraction process used.
 First, the audio data is normalized to the range (`-1`, `1`).
 
 > **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
-> be used as input for machine learning tasks. Such as keyword spotting and speech recognition. For implementation
+> be used as input for machine learning tasks such as keyword spotting and speech recognition. For implementation
 > details, please refer to: `source/application/main/include/Mfcc.hpp`
 
 Next, a window of 512 audio samples is taken from the start of the audio clip. From these 512 samples, we calculate 13
