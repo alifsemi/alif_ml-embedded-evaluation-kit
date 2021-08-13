@@ -34,7 +34,7 @@ Before starting the setup process, please make sure that you have:
   - GNU Arm Embedded toolchain (version 10.2.1 or above) -
   [GNU Arm Embedded toolchain downloads](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
   - Arm Compiler (version 6.15 or above) with a valid license -
-  [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads/)
+  [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
   - An MPS3 board loaded with Arm® Corstone™-300 reference package (`AN547`) from:
@@ -115,7 +115,7 @@ What these folders contain:
 - `scripts`: Build and source generation scripts.
 
 - `source`: C/C++ sources for the platform and ML applications.
-    > **Note:** Common code related to the `Ethos-U` NPU software framework resides in *application* subfolder.
+  > **Note:** Common code related to the `Ethos-U` NPU software framework resides in *application* subfolder.
 
   The contents of the *application* subfolder is as follows:
 
@@ -204,12 +204,12 @@ What these folders contain:
 
 ## Models and resources
 
-The models used in the use-cases implemented in this project can be downloaded from: [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo/).
+The models used in the use-cases implemented in this project can be downloaded from: [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo).
 
-- [Mobilenet V2](https://github.com/ARM-software/ML-zoo/blob/master/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8).
-- [DS-CNN](https://github.com/ARM-software/ML-zoo/blob/master/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8).
+- [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_uint8).
+- [DS-CNN](https://github.com/ARM-software/ML-zoo/tree/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b//models/keyword_spotting/ds_cnn_large/tflite_clustered_int8).
 - [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8).
-- [Anomaly Detection](https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite).
+- [Anomaly Detection](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8).
 
 When using *Ethos-U* NPU backend, Vela compiler optimizes the the NN model. However, if not and it is supported by
 TensorFlow Lite Micro, then it falls back on the CPU and execute.
@@ -243,14 +243,14 @@ For further information, please see:
       - [Fetching submodules](./sections/building.md#fetching-submodules)
       - [Fetching resource files](./sections/building.md#fetching-resource-files)
     - [Create a build directory](./sections/building.md#create-a-build-directory)
-    - [Configuring the build for MPS3 SSE-300](./sections/building.md#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for MPS3 SSE-300](./sections/building.md#configuring-the-build-for-mps3-sse_300)
       - [Using GNU Arm embedded toolchain](./sections/building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./sections/building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./sections/building.md#generating-project-for-arm-development-studio)
       - [Working with model debugger from Arm Fast Model Tools](./sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
       - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
-    - [Configuring native unit-test build](./sections/building.md#configuring-native-unit-test-build)
-    - [Configuring the build for simple_platform](./sections/building.md#configuring-the-build-for-simple_platform)
+    - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
+    - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./sections/building.md#add-custom-inputs)
@@ -265,9 +265,9 @@ This section describes how to deploy the code sample applications on the Fixed V
 
 For further information, please see:
 
-- [Deployment](./sections/deployment.md)
+- [Deployment](./sections/deployment.md#deployment)
   - [Fixed Virtual Platform](./sections/deployment.md#fixed-virtual-platform)
-    - [Setting up the MPS3 Corstone-300 FVP](./sections/deployment.md#setting-up-the-mps3-arm-corstone-300-fvp)
+    - [Setting up the MPS3 Corstone-300 FVP](./sections/deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
     - [Deploying on an FVP emulating MPS3](./sections/deployment.md#deploying-on-an-fvp-emulating-mps3)
   - [MPS3 board](./sections/deployment.md#mps3-board)
     - [Deployment on MPS3 board](./sections/deployment.md#deployment-on-mps3-board)
@@ -283,35 +283,35 @@ and produces corresponding executable for each use-case.
 
 For further information, please see:
 
-- [Implementing custom ML application](./sections/customizing.md)
+- [Implementing custom ML application](./sections/customizing.md#implementing-custom-ml-application)
   - [Software project description](./sections/customizing.md#software-project-description)
   - [Hardware Abstraction Layer API](./sections/customizing.md#hardware-abstraction-layer-api)
   - [Main loop function](./sections/customizing.md#main-loop-function)
   - [Application context](./sections/customizing.md#application-context)
   - [Profiler](./sections/customizing.md#profiler)
   - [NN Model API](./sections/customizing.md#nn-model-api)
-  - [Adding custom ML use-case](./sections/customizing.md#adding-custom-ml-use-case)
+  - [Adding custom ML use-case](./sections/customizing.md#adding-custom-ml-use_case)
   - [Implementing main loop](./sections/customizing.md#implementing-main-loop)
   - [Implementing custom NN model](./sections/customizing.md#implementing-custom-nn-model)
   - [Executing inference](./sections/customizing.md#executing-inference)
   - [Printing to console](./sections/customizing.md#printing-to-console)
   - [Reading user input from console](./sections/customizing.md#reading-user-input-from-console)
   - [Output to MPS3 LCD](./sections/customizing.md#output-to-mps3-lcd)
-  - [Building custom use-case](./sections/customizing.md#building-custom-use-case)
+  - [Building custom use-case](./sections/customizing.md#building-custom-use_case)
 
 ## Testing and benchmarking
 
-Please refer to: [Testing and benchmarking](./sections/testing_benchmarking.md).
+Please refer to: [Testing and benchmarking](./sections/testing_benchmarking.md#testing-and-benchmarking).
 
 ## Memory Considerations
 
-Please refer to: [Memory considerations](./sections/memory_considerations.md)
+Please refer to: [Memory considerations](./sections/memory_considerations.md#memory-considerations)
 
 ## Troubleshooting
 
 For further information, please see:
 
-- [Troubleshooting](./sections/troubleshooting.md)
+- [Troubleshooting](./sections/troubleshooting.md#troubleshooting)
   - [Inference results are incorrect for my custom files](./sections/troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
   - [The application does not work with my custom model](./sections/troubleshooting.md#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](./sections/troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
@@ -320,5 +320,5 @@ For further information, please see:
 
 Please refer to:
 
-- [Appendix](./sections/appendix.md)
+- [Appendix](./sections/appendix.md#appendix)
   - [Cortex-M55 Memory map overview](./sections/appendix.md#arm_cortex_m55-memory-map-overview-for-corstone_300-reference-design)

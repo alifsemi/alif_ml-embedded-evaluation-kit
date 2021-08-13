@@ -170,5 +170,5 @@ cmake .. \
 ```
 
 > **Note:** If you want to change the application, then, instead of using the `build_default` Python script, follow the
-> approach defined in [documentation.md](./documentation.md). For example, if you wanted to modify the number of
+> approach defined in [documentation.md](./documentation.md#arm_ml-embedded-evaluation-kit). For example, if you wanted to modify the number of
 > MAC units of the Ethos-U, or running a custom neural network.

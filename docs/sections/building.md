@@ -9,14 +9,14 @@
       - [Fetching resource files](#fetching-resource-files)
     - [Building for default configuration](#building-for-default-configuration)
     - [Create a build directory](#create-a-build-directory)
-    - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse-300)
+    - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse_300)
       - [Using GNU Arm Embedded toolchain](#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](#using-arm-compiler)
       - [Generating project for Arm Development Studio](#generating-project-for-arm-development-studio)
       - [Working with model debugger from Arm Fast Model Tools](#working-with-model-debugger-from-arm-fast-model-tools)
       - [Configuring with custom TPIP dependencies](#configuring-with-custom-tpip-dependencies)
-    - [Configuring native unit-test build](#configuring-native-unit-test-build)
-    - [Configuring the build for simple_platform](#configuring-the-build-for-simple_platform)
+    - [Configuring native unit-test build](#configuring-native-unit_test-build)
+    - [Configuring the build for simple-platform](#configuring-the-build-for-simple_platform)
     - [Building the configured project](#building-the-configured-project)
   - [Building timing adapter with custom options](#building-timing-adapter-with-custom-options)
   - [Add custom inputs](#add-custom-inputs)
@@ -211,7 +211,7 @@ The build process uses three major steps:
 2. Configure the build for the platform chosen. This stage includes:
     - CMake options configuration
     - When `<use_case>_MODEL_TFLITE_PATH` build options are not provided, the default neural network models can be
-      downloaded from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo/). For native builds, the network input and
+      downloaded from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo). For native builds, the network input and
       output data for tests are downloaded.
     - Some files such as neural network models, network inputs, and output labels are automatically converted into C/C++
       arrays, see: [Automatic file generation](#automatic-file-generation).
@@ -412,7 +412,7 @@ bin
 └── ethos-u-<usecase1>
 ```
 
-### Configuring the build for simple_platform
+### Configuring the build for simple-platform
 
 ```commandline
 cmake ../ -DTARGET_PLATFORM=simple_platform
@@ -549,13 +549,13 @@ For a clock rate of 500MHz, this would translate to:
 - With a read latency of 64 cycles, and maximum pending reads as 2, each read could be a maximum of 64 or 128 bytes. As
   defined for the *Ethos-U* NPU AXI bus attribute.
 
-    The bandwidth is calculated solely by read parameters:
+  The bandwidth is calculated solely by read parameters:
 
-    ![Bandwidth formula](../media/F3.png)
+  ![Bandwidth formula](../media/F3.png)
 
-    This is higher than the overall bandwidth dictated by the bus parameters of:
+  This is higher than the overall bandwidth dictated by the bus parameters of:
 
-    ![Overall bandwidth formula](../media/F4.png)
+  ![Overall bandwidth formula](../media/F4.png)
 
 This suggests that the read operation is only limited by the overall bus bandwidth.
 
@@ -647,8 +647,8 @@ After compiling, your custom model has now replaced the default one in the appli
 ## Optimize custom model with Vela compiler
 
 > **Note:** This tool is not available within this project. It is a Python tool available from
-> <https://pypi.org/project/ethos-u-vela/>.\
-The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
+> <https://pypi.org/project/ethos-u-vela/>.
+> The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.

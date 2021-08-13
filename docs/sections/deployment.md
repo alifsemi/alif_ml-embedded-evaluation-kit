@@ -2,10 +2,10 @@
 
 - [Deployment](#deployment)
   - [Fixed Virtual Platform](#fixed-virtual-platform)
-    - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp)
+    - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone_300-fvp)
     - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
   - [MPS3 board](#mps3-board)
-    - [MPS3 board top-view](#mps3-board-top-view)
+    - [MPS3 board top-view](#mps3-board-top_view)
     - [Deployment on MPS3 board](#deployment-on-mps3-board)
 
 The sample application for Arm® *Ethos™-U55* can be deployed on two target platforms:

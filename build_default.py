@@ -104,7 +104,7 @@ if __name__ == '__main__':
                         action="store_true")
     args = parser.parse_args()
 
-    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
+    logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG, filemode='w')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     run(args.toolchain.lower(), not args.skip_download, not args.skip_vela)

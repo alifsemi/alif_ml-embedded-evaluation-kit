@@ -4,10 +4,10 @@
   - [Introduction](#introduction)
   - [Understanding memory usage from Vela output](#understanding-memory-usage-from-vela-output)
     - [Total SRAM used](#total-sram-used)
-    - [Total Off-chip Flash used](#total-off-chip-flash-used)
+    - [Total Off-chip Flash used](#total-off_chip-flash-used)
   - [Non-default configurations](#non-default-configurations)
   - [Tensor arena and neural network model memory placement](#tensor-arena-and-neural-network-model-memory-placement)
-  - [Memory usage for ML use-cases](#memory-usage-for-ml-use-cases)
+  - [Memory usage for ML use-cases](#memory-usage-for-ml-use_cases)
   - [Memory constraints](#memory-constraints)
 
 ## Introduction
@@ -16,7 +16,7 @@ This section provides useful details on how the Machine Learning use-cases of th
 
 Although the guidance provided here is concerning the Arm® *Corstone™-300* system, it is fairly generic and is
 applicable for other platforms too. The Arm® *Corstone™-300* is composed of both the Arm® *Cortex™-M55* and the Arm®
-*Ethos™-U* NPU. The memory map for the Arm® *Cortex™-M55* core can be found in the [Appendix](./appendix.md).
+*Ethos™-U* NPU. The memory map for the Arm® *Cortex™-M55* core can be found in the [Appendix](./appendix.md#appendix).
 
 The Arm® *Ethos™-U* NPU interacts with the system through two AXI interfaces. The first one, is envisaged to be the
 higher-bandwidth, lower-latency, interface. In a typical system, this is wired to an SRAM as it is required to service
@@ -75,7 +75,7 @@ For further information, please refer to: [vela.ini](../../scripts/vela/vela.ini
 To make use of a neural network model that is optimized for this configuration, the linker script for the target
 platform must be changed. By default, the linker scripts are set up to support the default configuration only.
 
-For script snippets, please refer to: [Memory constraints](#memory-constraints).
+For script snippets, please refer to: [Memory constraints](./memory_considerations.md#memory-constraints).
 
 > **Note:**
 >
@@ -130,7 +130,7 @@ Both the MPS3 Fixed Virtual Platform (FVP) and the MPS3 FPGA platform share the 
 design. The CMake configuration parameter `TARGET_SUBSYSTEM` sets the design, which is described in:
 [build options](./building.md#build-options).
 
-The memory map exposed by this design is located in the [Appendix](./appendix.md), and can be used as a reference when
+The memory map exposed by this design is located in the [Appendix](./appendix.md#appendix), and can be used as a reference when
 editing the linker script. This is useful to make sure that the region boundaries are respected. The snippet from the
 scatter file is as follows:
 

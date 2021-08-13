@@ -7,14 +7,14 @@
     - [Build options](#build-options)
     - [Build process](#build-process)
     - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos-u-npu-code-sample)
-    - [Setting up the Ethos-U Fast Model](#setting-up-the-ethos-u-fast-model)
+  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Inference Runner](#running-inference-runner)
 
 ## Introduction
 
-This document describes the process of setting up and running the Arm® *Ethos™-U55* NPU Inference Runner.
+This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Inference Runner.
 
 The inference runner is intended for quickly checking profiling results for any wanted network, providing it has been
 processed by the Vela compiler.
@@ -90,7 +90,7 @@ For further information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
-- [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
+- [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
@@ -173,7 +173,7 @@ After compiling, your custom model has now replaced the default one in the appli
 
 ## Setting up and running Ethos-U NPU code sample
 
-### Setting up the Ethos-U Fast Model
+### Setting up the Ethos-U NPU Fast Model
 
 The FVP is available publicly from
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).

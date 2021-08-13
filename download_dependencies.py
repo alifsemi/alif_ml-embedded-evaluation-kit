@@ -81,7 +81,7 @@ def main(dependencies_path: str):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='download_dependencies.log', level=logging.DEBUG)
+    logging.basicConfig(filename='download_dependencies.log', level=logging.DEBUG, filemode='w')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     download_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dependencies"))

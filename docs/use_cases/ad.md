@@ -10,14 +10,14 @@
     - [Build process](#build-process)
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U55 Code Sample](#setting-up-and-running-ethos-u-npu-code-sample)
-    - [Setting up the Ethos-U Fast Model](#setting-up-the-ethos-u-fast-model)
+  - [Setting-up and running Ethos-U NPU Code Sample](#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Anomaly Detection](#running-anomaly-detection)
 
 ## Introduction
 
-This document describes the process of setting up and running the Arm® *Ethos™-U55* Anomaly Detection example.
+This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Anomaly Detection example.
 
 Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad).
 
@@ -132,7 +132,7 @@ For additional information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
-- [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
+- [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
@@ -256,9 +256,9 @@ After compiling, your custom model has now replaced the default one in the appli
  >**Note:** To successfully run the model, the NPU must be enabled and the platform `TARGET_PLATFORM` is set to `mps3`
  >and `TARGET_SUBSYSTEM` is `SSE-300`.
 
-## Setting-up and running Ethos-U55 Code Sample
+## Setting up and running Ethos-U NPU code sample
 
-### Setting up the Ethos-U Fast Model
+### Setting up the Ethos-U NPU Fast Model
 
 The FVP is available publicly from
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).

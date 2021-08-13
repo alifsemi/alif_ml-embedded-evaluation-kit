@@ -7,7 +7,7 @@
   - [Application context](#application-context)
   - [Profiler](#profiler)
   - [NN Model API](#nn-model-api)
-  - [Adding custom ML use-case](#adding-custom-ml-use-case)
+  - [Adding custom ML use-case](#adding-custom-ml-use_case)
   - [Implementing main loop](#implementing-main-loop)
   - [Implementing custom NN model](#implementing-custom-nn-model)
     - [Define ModelPointer and ModelSize methods](#define-modelpointer-and-modelsize-methods)
@@ -15,7 +15,7 @@
   - [Printing to console](#printing-to-console)
   - [Reading user input from console](#reading-user-input-from-console)
   - [Output to MPS3 LCD](#output-to-mps3-lcd)
-  - [Building custom use-case](#building-custom-use-case)
+  - [Building custom use-case](#building-custom-use_case)
 
 This section describes how to implement a custom Machine Learning application running on Arm® *Corstone™-300* based FVP
 or on the Arm® MPS3 FPGA prototyping board.
@@ -441,7 +441,7 @@ These functions are wrappers around the functions generated in the C++ file cont
 array. This generation the C++ array from the `.tflite` file, logic needs to be defined in the `usecase.cmake` file for
 this `HelloWorld` example.
 
-For more details on `usecase.cmake`, refer to: [Building custom use-case](#building-custom-use-case).
+For more details on `usecase.cmake`, refer to: [Building options](./building.md#build-options).
 
 For details on code generation flow in general, refer to: [Automatic file generation](./building.md#automatic-file-generation).
 
@@ -641,7 +641,7 @@ twice:
 platform.data_psn->present_data_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
-Please refer to the [Hardware Abstraction Layer (HAL) API](#hardware-abstraction-layer-hal-api) section for more data presentation functions.
+Please refer to the [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api) section for more data presentation functions.
 
 ## Building custom use-case
 

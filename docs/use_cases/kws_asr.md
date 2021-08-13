@@ -12,8 +12,8 @@
     - [Build process](#build-process)
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos-u-npu-code-sample)
-    - [Setting up the Ethos-U Fast Model](#setting-up-the-ethos-u-fast-model)
+  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Keyword Spotting and Automatic Speech Recognition](#running-keyword-spotting-and-automatic-speech-recognition)
 
@@ -25,7 +25,7 @@ and Automatic Speech Recognition models on a *Cortex-M* CPU and *Ethos-U* NPU.
 The Keyword Spotting and Automatic Speech Recognition example demonstrates how to run multiple models sequentially.
 
 A Keyword Spotting model is first run on the CPU. If a set keyword is detected on the remaining audio, then an Automatic
-Speech Recognition model is run on the *Ethos-U55*.
+Speech Recognition model is run on the *Ethos-U* NPU.
 
 The tensor arena memory region is reused between models to optimize application memory footprint.
 
@@ -240,7 +240,7 @@ For further information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
-- [Configuring the build for simple_platform](../sections/building.md#configuring-the-build-for-simple_platform)
+- [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
@@ -377,7 +377,7 @@ After compiling, your custom model has now replaced the default one in the appli
 
 ## Setting up and running Ethos-U NPU code sample
 
-### Setting up the Ethos-U Fast Model
+### Setting up the Ethos-U NPU Fast Model
 
 The FVP is available publicly from
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).

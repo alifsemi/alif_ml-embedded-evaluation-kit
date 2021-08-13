@@ -27,7 +27,7 @@ The folders contain the following information:
 - `use_case`: Every use-case specific test in their respective folders.
 - `utils`: Utility sources that are only used within the tests.
 
-When [configuring](./building.md#configuring-the-build-native-unit-test) and
+When [configuring](./building.md#configuring-native-unit_test-build) and
 [building](./building.md#building-the-configured-project) for your `native` target platform, the results of the build is
 placed under `<build folder>/bin/` folder. For example:
 
