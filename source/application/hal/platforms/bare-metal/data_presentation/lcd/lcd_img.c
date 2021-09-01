@@ -45,7 +45,7 @@ static int show_title(void)
 
     /* Second line */
 #if defined (ARM_NPU)
-    snprintf(title, sizeof(title), "%s + Arm Ethos-U55 NPU", cpu_name);
+    snprintf(title, sizeof(title), "%s + Arm Ethos-U NPU", cpu_name);
 #else /* defined (ARM_NPU) */
     snprintf(title, sizeof(title), "%s", cpu_name);
 #endif /* defined (ARM_NPU) */
