@@ -182,7 +182,7 @@ namespace math {
 #if ARM_DSP_AVAILABLE
         arm_cmplx_mag_squared_f32(ptrSrc, ptrDst, srcLen/2);
 #else /* ARM_DSP_AVAILABLE */
-        for (uint32_t j = 0; j < srcLen; ++j) {
+        for (uint32_t j = 0; j < srcLen/2; ++j) {
             const float real = *ptrSrc++;
             const float im = *ptrSrc++;
             *ptrDst++ = real*real + im*im;
