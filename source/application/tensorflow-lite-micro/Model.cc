@@ -67,6 +67,16 @@ bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
     debug("loading op resolver\n");
 
     this->EnlistOperations();
+    
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    bool contains_ethosu_operator = this->ContainsEthosUOperator();
+    if (contains_ethosu_operator)
+    {
+        printf_err("Ethos-U operator present in the model but this build does not include Ethos-U drivers\n");
+        return false;
+    }
+#endif /* ARM_NPU */
 
     /* Create allocator instance, if it doesn't exist */
     this->m_pAllocator = allocator;
@@ -234,6 +244,30 @@ bool arm::app::Model::IsInited() const
 bool arm::app::Model::IsDataSigned() const
 {
     return this->GetType() == kTfLiteInt8;
+}
+
+bool arm::app::Model::ContainsEthosUOperator() const
+{
+    /* We expect there to be only one subgraph. */
+    const uint32_t nOperators = tflite::NumSubgraphOperators(this->m_pModel, 0);
+    const tflite::SubGraph* subgraph = this->m_pModel->subgraphs()->Get(0);
+    const auto* opcodes = this->m_pModel->operator_codes();
+
+    /* check for custom operators */
+    for (size_t i = 0; (i < nOperators); ++i)
+    {
+        const tflite::Operator* op = subgraph->operators()->Get(i);
+        const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
+
+        auto builtin_code = tflite::GetBuiltinCode(opcode);
+        if ((builtin_code == tflite::BuiltinOperator_CUSTOM) &&
+            ( nullptr != opcode->custom_code()) &&
+            ( 0 == std::string(opcode->custom_code()->c_str()).compare("ethos-u")))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool arm::app::Model::RunInference()

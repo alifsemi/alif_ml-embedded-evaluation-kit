@@ -51,6 +51,7 @@
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "tensorflow/lite/schema/schema_utils.h"
 
 #if defined (TESTS)
     #include "tensorflow/lite/micro/test_helpers.h"
