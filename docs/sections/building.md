@@ -31,7 +31,7 @@ This section assumes that you are using an **x86 Linux** build machine.
 
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
-- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.14, or higher, is installed and available
+- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.15, or higher, is installed and available
   on the path. Test the compiler by running:
 
     ```commandline
@@ -39,8 +39,8 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```
 
     ```log
-    Product: ARM Compiler 6.14 Professional
-    Component: ARM Compiler 6.14
+    Product: ARM Compiler 6.15 Professional
+    Component: ARM Compiler 6.15
     ```
 
   Alternatively, use:
