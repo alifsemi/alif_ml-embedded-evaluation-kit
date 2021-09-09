@@ -501,8 +501,16 @@ The CMake build framework allows the parameters to control the behavior of each 
 
 - `PULSE_OFF`: The number of cycles where addresses are blocked. The default value is `5100`.
 
-- `BWCAP`: Maximum number of 64-bit words transferred per pulse cycle. A pulse cycle is `PULSE_ON` and `PULSE_OFF`. `0`
+- `BWCAP`: Maximum number of 64-bit words transferred per pulse cycle. A pulse cycle is defined by `PULSE_ON` and `PULSE_OFF`. `0`
   is inferred as infinite and the default value is `625`.
+
+  > **Note:** The bandwidth cap `BWCAP` operates on the transaction level and, because of its simple implementation, the accuracy is limited.
+  > When set to a small value it allows only a small number of transactions for each pulse cycle.
+  > Once the counter has reached or exceeded the configured cap, no transactions will be allowed before the next pulse cycle.
+  > In order to minimise this effect some possible solutions are:
+  >
+  >- scale up all the parameters to a reasonably large value.
+  >- scale up `BWCAP` as a multiple of the burst length (in this case bulk traffic will not face rounding errors in the bandwidth cap).
 
 - `MODE`: Timing adapter operation mode. Default value is `0`.
 
