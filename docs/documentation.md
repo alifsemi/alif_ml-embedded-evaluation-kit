@@ -322,3 +322,7 @@ Please refer to:
 
 - [Appendix](./sections/appendix.md#appendix)
   - [Cortex-M55 Memory map overview](./sections/appendix.md#arm_cortex_m55-memory-map-overview-for-corstone_300-reference-design)
+
+## FAQ
+
+Please refer to: [FAQ](./sections/faq.md#faq)

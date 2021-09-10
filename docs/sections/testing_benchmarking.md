@@ -23,7 +23,7 @@ The `tests` folder uses the following structure:
 
 The folders contain the following information:
 
-- `common`: The tests for generic and common appplication functions.
+- `common`: The tests for generic and common application functions.
 - `use_case`: Every use-case specific test in their respective folders.
 - `utils`: Utility sources that are only used within the tests.
 
