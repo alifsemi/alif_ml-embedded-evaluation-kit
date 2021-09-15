@@ -58,6 +58,12 @@ namespace app {
         template<typename T>
         void Set(const std::string &name, T object)
         {
+            /* check if we have already the attribute allocated. */
+            if( true == this->Has(name) ){
+                //delete its value
+                delete this->m_attributes[name];
+            }
+            /* allocate new value */
             this->m_attributes[name] = new Attribute<T>(object);
         }
 
