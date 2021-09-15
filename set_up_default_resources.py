@@ -61,6 +61,15 @@ json_uc_res = [{
                       {"name": "ofm0.npy",
                        "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy"}]
     },
+     {
+        "use_case_name": "vww",
+        "resources": [{"name": "vww4_128_128_INT8.tflite",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite"},
+                      {"name": "ifm0.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/testing_input/input/0.npy"},
+                      {"name": "ofm0.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/testing_output/Identity/0.npy"}]
+    },
     {
         "use_case_name": "kws_asr",
         "resources": [{"name": "wav2letter_pruned_int8.tflite",

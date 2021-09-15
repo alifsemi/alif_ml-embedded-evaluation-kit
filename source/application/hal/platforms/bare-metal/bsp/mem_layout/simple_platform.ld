@@ -65,7 +65,14 @@ SECTIONS
   .text.at_itcm :
   {
     KEEP(*(.vectors))
-    *(.text*)
+
+    /**
+     * All code goes here, with one exception of
+     * all_ops_resolver object file. This code
+     * instead placed on BRAM. See comment in the
+     * BRAM section for details.
+     **/
+    *(EXCLUDE_FILE(*all_ops_resolver.o *hal.c.obj) .text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
@@ -85,11 +92,6 @@ SECTIONS
     *(.dtors)
 
     KEEP(*(.eh_frame*))
-  } > ITCM
-
-  .ARM.extab.at_itcm :
-  {
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
   } > ITCM
 
   __exidx_start = .;
@@ -206,6 +208,20 @@ SECTIONS
     KEEP(*(.fini_array))
     PROVIDE_HIDDEN (__fini_array_end = .);
     KEEP(*(.jcr*))
+    . = ALIGN(4);
+
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(4);
+
+    /**
+     * Place the all ops resolver code data here. This accounts
+     * for ~4k worth of saving on the ITCM load region. It is
+     * only designed to be included (by default) for the inference
+     * runner use case.
+     **/
+    *all_ops_resolver.o (*.text*)
+    . = ALIGN(4);
+    *hal.c.obj (*.text*)
     . = ALIGN(4);
 
     __data_end__ = .;

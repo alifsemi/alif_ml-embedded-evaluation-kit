@@ -49,20 +49,6 @@ namespace app {
     };
 
     /**
-    * @brief           Helper function to increment current audio clip index
-    * @param[in,out]   ctx     pointer to the application context object
-    **/
-    static void IncrementAppCtxClipIdx(ApplicationContext& ctx);
-
-    /**
-     * @brief           Helper function to set the audio clip index
-     * @param[in,out]   ctx     pointer to the application context object
-     * @param[in]       idx     value to be set
-     * @return          true if index is set, false otherwise
-     **/
-    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx);
-
-    /**
      * @brief           Presents kws inference results using the data presentation
      *                  object.
      * @param[in]       platform    reference to the hal platform object
@@ -440,7 +426,7 @@ namespace app {
 
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxClipIdx(ctx, clipIndex)) {
+            if (!SetAppCtxIfmIdx(ctx, clipIndex,"kws_asr")) {
                 return false;
             }
         }
@@ -461,35 +447,13 @@ namespace app {
                 }
             }
 
-            IncrementAppCtxClipIdx(ctx);
+            IncrementAppCtxIfmIdx(ctx,"kws_asr");
 
         } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
 
         return true;
     }
 
-    static void IncrementAppCtxClipIdx(ApplicationContext& ctx)
-    {
-        auto curAudioIdx = ctx.Get<uint32_t>("clipIndex");
-
-        if (curAudioIdx + 1 >= NUMBER_OF_FILES) {
-            ctx.Set<uint32_t>("clipIndex", 0);
-            return;
-        }
-        ++curAudioIdx;
-        ctx.Set<uint32_t>("clipIndex", curAudioIdx);
-    }
-
-    static bool SetAppCtxClipIdx(ApplicationContext& ctx, uint32_t idx)
-    {
-        if (idx >= NUMBER_OF_FILES) {
-            printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
-                idx, NUMBER_OF_FILES);
-            return false;
-        }
-        ctx.Set<uint32_t>("clipIndex", idx);
-        return true;
-    }
 
     static bool PresentInferenceResult(hal_platform& platform,
                                        std::vector<arm::app::kws::KwsResult>& results)

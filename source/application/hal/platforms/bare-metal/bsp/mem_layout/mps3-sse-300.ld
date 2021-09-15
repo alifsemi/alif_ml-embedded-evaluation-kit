@@ -72,7 +72,7 @@ SECTIONS
      * instead placed on BRAM. See comment in the
      * BRAM section for details.
      **/
-    *(EXCLUDE_FILE(*all_ops_resolver.o) .text*)
+    *(EXCLUDE_FILE(*all_ops_resolver.o *hal.c.obj) .text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
@@ -220,6 +220,8 @@ SECTIONS
      * runner use case.
      **/
     *all_ops_resolver.o (*.text*)
+    . = ALIGN(4);
+    *hal.c.obj (*.text*)
     . = ALIGN(4);
 
     __data_end__ = .;

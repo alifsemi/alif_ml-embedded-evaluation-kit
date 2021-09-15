@@ -18,15 +18,15 @@
 #include "Classifier.hpp"           /* Classifier. */
 #include "InputFiles.hpp"           /* For input images. */
 #include "Labels.hpp"               /* For label strings. */
-#include "MobileNetModel.hpp"       /* Model class for running inference. */
+#include "VisualWakeWordModel.hpp" /* Model class for running inference. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 
-using ImgClassClassifier = arm::app::Classifier;
+using ViusalWakeWordClassifier = arm::app::Classifier;
 
-void main_loop(hal_platform& platform)
+void main_loop(hal_platform &platform)
 {
-    arm::app::MobileNetModel model;  /* Model wrapper object. */
+    arm::app::VisualWakeWordModel model;  /* Model wrapper object. */
 
     /* Load the model. */
     if (!model.Init()) {
@@ -37,13 +37,13 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "img_class"};
+    arm::app::Profiler profiler{&platform, "vww"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
 
-    ImgClassClassifier classifier;  /* Classifier wrapper object. */
+    ViusalWakeWordClassifier classifier;  /* Classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
 
     std::vector <std::string> labels;
@@ -53,15 +53,14 @@ void main_loop(hal_platform& platform)
     /* Loop. */
     bool executionSuccessful = true;
     constexpr bool bUseMenu = NUMBER_OF_FILES > 1 ? true : false;
-
-    /* Loop. */
     do {
         int menuOption = common::MENU_OPT_RUN_INF_NEXT;
-        if (bUseMenu) {
+        if (bUseMenu) { 
             DisplayCommonMenu();
             menuOption = arm::app::ReadUserInputAsInt(platform);
             printf("\n");
         }
+
         switch (menuOption) {
             case common::MENU_OPT_RUN_INF_NEXT:
                 executionSuccessful = ClassifyImageHandler(caseContext, caseContext.Get<uint32_t>("imgIndex"), false);
@@ -75,9 +74,10 @@ void main_loop(hal_platform& platform)
             case common::MENU_OPT_RUN_INF_ALL:
                 executionSuccessful = ClassifyImageHandler(caseContext, caseContext.Get<uint32_t>("imgIndex"), true);
                 break;
-            case common::MENU_OPT_SHOW_MODEL_INFO:
+            case common::MENU_OPT_SHOW_MODEL_INFO: {
                 executionSuccessful = model.ShowModelInfoHandler();
                 break;
+            }
             case common::MENU_OPT_LIST_IFM:
                 executionSuccessful = ListFilesHandler(caseContext);
                 break;
@@ -87,4 +87,5 @@ void main_loop(hal_platform& platform)
         }
     } while (executionSuccessful && bUseMenu);
     info("Main loop terminated.\n");
+
 }

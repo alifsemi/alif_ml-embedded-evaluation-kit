@@ -21,6 +21,11 @@
 #include "Model.hpp"
 #include "AppContext.hpp"
 #include "Profiler.hpp"
+#include "UseCaseHandler.hpp"       /* Handlers for different user options. */
+#include "Classifier.hpp"           /* Classifier. */
+#include "InputFiles.hpp"
+#include <inttypes.h>
+
 
 /* Helper macro to convert RGB888 to RGB565 format. */
 #define RGB888_TO_RGB565(R8,G8,B8)  ((((R8>>3) & 0x1F) << 11) |     \
@@ -31,9 +36,86 @@ constexpr uint16_t COLOR_BLACK  = 0;
 constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0, 255,  0); // 2016;
 constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255, 255,  0); // 65504;
 
+
+void DisplayCommonMenu();
+
+namespace image{
+
+  /**
+  * @brief           Helper function to convert a UINT8 image to INT8 format.
+  * @param[in,out]   data            Pointer to the data start.
+  * @param[in]       kMaxImageSize   Total number of pixels in the image.
+  **/
+  void ConvertImgToInt8(void * data, size_t kMaxImageSize);
+
+  /**
+   * @brief           Presents inference results using the data presentation
+   *                  object.
+   * @param[in]       platform    Reference to the hal platform object.
+   * @param[in]       results     Vector of classification results to be displayed.
+   * @return          true if successful, false otherwise.
+   **/
+  bool PresentInferenceResult(hal_platform & platform,
+    const std::vector < arm::app::ClassificationResult > & results);
+
+
+  /**
+   * @brief           Presents inference results along with the inference time using the data presentation
+   *                  object.
+   * @param[in]       platform    Reference to the hal platform object.
+   * @param[in]       results     Vector of classification results to be displayed.
+   * @param[in]       results     Inference time in ms.
+   * @return          true if successful, false otherwise.
+   **/
+  bool PresentInferenceResult(hal_platform & platform,
+    const std::vector < arm::app::ClassificationResult > & results,
+      const time_t infTimeMs);
+
+  /**
+  * @brief           Presents inference results along with the inference time using the data presentation
+  *                  object.
+  * @param[in]       platform    Reference to the hal platform object.
+  * @param[in]       results     Vector of classification results to be displayed.
+  * @param[in]       results     Inference time in ms.
+  * @return          true if successful, false otherwise.
+  **/
+  bool PresentInferenceResult(hal_platform & platform,
+                              const std::vector < arm::app::ClassificationResult > & results,
+                              bool profilingEnabled,
+                              const time_t infTimeMs = 0);
+  }
+
+/**
+   * @brief           Helper function to increment current input feature vector index.
+   * @param[in,out]   ctx       Pointer to the application context object.
+   * @param[in]       useCase   Use case name
+   **/
+void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCase);
+
+/**
+   * @brief           Helper function to set the input feature map index.
+   * @param[in,out]   ctx          Pointer to the application context object.
+   * @param[in]       idx          Value to be set.
+   * @param[in]       ctxIfmName   Input Feature Map name
+   * @return          true if index is set, false otherwise.
+   **/
+bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, std::string ctxIfmName);
+
+
+namespace common {
+
+  enum OPCODES {
+        MENU_OPT_RUN_INF_NEXT = 1, /* Run on next vector. */
+        MENU_OPT_RUN_INF_CHOSEN, /* Run on a user provided vector index. */
+        MENU_OPT_RUN_INF_ALL, /* Run inference on all. */
+        MENU_OPT_SHOW_MODEL_INFO, /* Show model info. */
+        MENU_OPT_LIST_IFM /* List the current IFM. */
+  };
+
+}
+
 namespace arm {
 namespace app {
-
     /**
      * @brief           Run inference using given model
      *                  object. If profiling is enabled, it will log the
@@ -76,5 +158,6 @@ namespace app {
 
 } /* namespace app */
 } /* namespace arm */
+
 
 #endif /* USECASE_COMMON_UTILS_HPP */
