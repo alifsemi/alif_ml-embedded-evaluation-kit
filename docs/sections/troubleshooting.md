@@ -4,6 +4,7 @@
   - [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
   - [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](#npu-configuration-mismatch-error-when-running-inference)
+  - [Problem installing Vela](#problem-installing-vela)
 
 ## Inference results are incorrect for my custom files
 
@@ -65,5 +66,23 @@ INFO - Arm Corstone-300 (SSE-300) platform initialised
 INFO - ARM ML Embedded Evaluation Kit for MPS3 FPGA and FastModel
 INFO - Target system design: Arm Corstone-300 (SSE-300)
 ```
+
+## Problem installing Vela
+
+During Vela installation, part of the package is compiled and requires libpython3.
+If the system lacks this dependency the following error will occur:
+
+```shell
+ x86_64-linux-gnu-gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O2 -Wall -g -fstack-protector-strong -Wformat -Werror=format-security -g -fwrapv -O2 -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION -I/venv/include -I/usr/include/python3.8 -I/venv/lib/python3.8/site-packages/numpy/core/include -c ethosu/mlw_codec/mlw_codecmodule.c -o build/temp.linux-x86_64-3.8/ethosu/mlw_codec/mlw_codecmodule.o
+    ethosu/mlw_codec/mlw_codecmodule.c:20:10: fatal error: Python.h: No such file or directory
+       20 | #include <Python.h>
+          |          ^~~~~~~~~~
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+    ----------------------------------------
+ERROR: Command errored out with exit status 1: /venv/bin/python -u -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"'; __file__='"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-externally-managed --compile --install-headers /venv/include/site/python3.8/ethos-u-vela Check the logs for full command output.
+```
+
+To solve this issue install libpython3 on the system.
 
 Next section of the documentation: [Appendix](appendix.md).
