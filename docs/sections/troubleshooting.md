@@ -36,20 +36,20 @@ ERROR - Invoke failed.
 ERROR - Inference failed.
 ```
 
-It shows that the configuration of the Vela compiled `.tflite` file doesn't match the number of MAC units on the FVP.
+It shows that the configuration of the Vela compiled `.tflite` file doesn't match the number of MACs units on the FVP.
 
 The Vela configuration parameter `accelerator-config` used for producing the .`tflite` file that is used
-while building the application should match the MAC configuration that the FVP is emulating.
+while building the application should match the MACs configuration that the FVP is emulating.
 For example, if the `accelerator-config` from the Vela command was `ethos-u55-128`, the FVP should be emulating the
-128 MAC configuration of the Ethos-U55 block(default FVP configuration). If the `accelerator-config` used was
+128 MACs configuration of the Ethos-U55 block(default FVP configuration). If the `accelerator-config` used was
 `ethos-u55-256`, the FVP must be executed with additional command line parameter to instruct it to emulate the
-256 MAC configuration instead.
+256 MACs configuration instead.
 
 The [deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3) page provides guidance
-on how to instruct the FVP to change the number of MAC units.
+on how to instruct the FVP to change the number of MACs units.
 
 Note that when the FVP is launched and the application starts executing, various parameters about the system are
-logged over UART. These include the MAC/cc configuration of the FVP.
+logged over UART. These include the MACs/cc configuration of the FVP.
 
 ```log
 INFO - MPS3 core clock has been set to: 32000000Hz

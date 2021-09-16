@@ -214,25 +214,38 @@ def set_up_resources(run_vela_on_models=False):
             output_dir = os.path.dirname(model)
             # model name after compiling with vela is an initial model name + _vela suffix
             vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
-            # we want it to be initial model name + _vela_H128 suffix which indicates selected MAC config.
-            new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", "_vela_H128.tflite")
 
-            if os.path.isfile(new_vela_optimised_model_path):
-                logging.info(f"File {new_vela_optimised_model_path} exists, skipping optimisation.")
-                continue
-
-            command = (f". {env_activate} && vela {model} " +
+            # Ethos-U NPU default generation
+            vela_opt_suffixes = ["_vela_H128.tflite", "_vela_Y256.tflite"]
+            vela_commands = [f". {env_activate} && vela {model} " +
                        "--accelerator-config=ethos-u55-128 " +
                        "--optimise Performance " +
                        f"--config {config_file} " +
                        "--memory-mode=Shared_Sram " +
                        "--system-config=Ethos_U55_High_End_Embedded " +
-                       f"--output-dir={output_dir}")
-            call_command(command)
+                       f"--output-dir={output_dir}",
 
-            # rename default vela model
-            os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
-            logging.info(f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}.")
+                       f". {env_activate} && vela {model} " +
+                       "--accelerator-config=ethos-u65-256 " +
+                       "--optimise Performance " +
+                       f"--config {config_file} " +
+                       "--memory-mode=Dedicated_Sram " +
+                       "--system-config=Ethos_U65_High_End " +
+                       f"--output-dir={output_dir}"]
+
+            for vela_suffix, command in zip(vela_opt_suffixes, vela_commands):
+                # we want it to be initial model name + _vela_H128 suffix which indicates selected MACs config.
+                new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", vela_suffix)
+
+                if os.path.isfile(new_vela_optimised_model_path):
+                    logging.info(f"File {new_vela_optimised_model_path} exists, skipping optimisation.")
+                    continue
+
+                call_command(command)
+
+                # rename default vela model
+                os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
+                logging.info(f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}.")
 
 
 if __name__ == '__main__':

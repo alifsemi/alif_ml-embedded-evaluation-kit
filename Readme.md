@@ -75,10 +75,13 @@ If using the FPGA option, load the image on the FPGA and [launch the application
 
 > **Note:** The default flow assumes Arm® *Ethos™-U55* NPU usage, configured to use 128 Multiply-Accumulate units
 > and is sharing SRAM with the Arm® *Cortex®-M55*.
-> Evaluation kit supports also:
 >
-> - *Ethos™-U55* NPU configured to use 32, 64 and 256 Multiply-Accumulate units.
-> - *Ethos™-U65* NPU configured to use 256 and 512 Multiply-Accumulate units.
+> Ml embedded evaluation kit supports:
+>
+> |  *Ethos™-U* NPU  | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
+> |------------------|-----------------|-------------------------|---------------------|------------------------------|
+> |   *Ethos™-U55*   |       128       |      32, 64, 256        |     Shared_Sram     |          Sram_Only           |
+> |   *Ethos™-U65*   |       256       |          512            |    Dedicated_Sram   |         Shared_Sram          |
 >
 > For more information see [Building](./docs/documentation.md#building).
 
@@ -105,7 +108,7 @@ Contributions are only accepted under the following conditions:
 
 - The contribution have certified origin and give us your permission. To manage this process we use
   [Developer Certificate of Origin (DCO) V1.1](https://developercertificate.org/).
-  To indicate that contributors agree to the the terms of the DCO, it's neccessary "sign off" the
+  To indicate that contributors agree to the the terms of the DCO, it's necessary "sign off" the
   contribution by adding a line with name and e-mail address to every git commit message:
 
   ```log

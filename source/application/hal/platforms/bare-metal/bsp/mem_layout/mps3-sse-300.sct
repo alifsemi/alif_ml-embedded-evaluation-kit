@@ -67,8 +67,11 @@ LOAD_REGION_0       0x00000000                  0x00080000
     ;-----------------------------------------------------
     isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
     {
-        ; activation buffers a.k.a tensor arena
-        *.o (.bss.NoInit.activation_buf)
+        ; Cache area (if used)
+        *.o (.bss.NoInit.ethos_u_cache)
+
+        ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
+        *.o (.bss.NoInit.activation_buf_sram)
     }
 }
 
@@ -88,15 +91,14 @@ LOAD_REGION_1       0x70000000                  0x02000000
         ; nn model's baked in input matrices
         *.o (ifm)
 
-        ; nn model
+        ; nn model's default space
         *.o (nn_model)
 
         ; labels
         *.o (labels)
 
-        ; if the activation buffer (tensor arena) doesn't
-        ; fit in the SRAM region, we accommodate it here
-        *.o (activation_buf)
+        ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+        *.o (activation_buf_dram)
     }
 
     ;-----------------------------------------------------

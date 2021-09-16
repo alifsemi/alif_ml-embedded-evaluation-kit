@@ -45,20 +45,41 @@ set(TA0_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15)
 set(TA0_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
 
 # Timing adapter settings for AXI1
-set(TA1_MAXR        "2"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(TA1_MAXW        "0"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
-set(TA1_MAXRW       "0"       CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
-set(TA1_RLATENCY    "64"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
-set(TA1_WLATENCY    "0"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
-set(TA1_PULSE_ON    "320"     CACHE STRING "No. of cycles addresses let through (0-65535).")
-set(TA1_PULSE_OFF   "80"      CACHE STRING "No. of cycles addresses blocked (0-65535).")
-set(TA1_BWCAP       "50"      CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
-set(TA1_PERFCTRL    "0"       CACHE STRING "6-bit field selecting an event for event counter 0=default")
-set(TA1_PERFCNT     "0"       CACHE STRING "32-bit event counter")
-set(TA1_MODE        "1"       CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
-                                            Bit 1: 1=enable random AR reordering (0=default);
-                                            Bit 2: 1=enable random R reordering (0=default);
-                                            Bit 3: 1=enable random B reordering (0=default);
-                                            Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
-set(TA1_HISTBIN     "0"       CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
-set(TA1_HISTCNT     "0"       CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+# If Memory mode is Sram_Only Timing adapter settings for AXI1 need to match the same as AXI0
+if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
+    set(TA1_MAXR        ${TA0_MAXR}         CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(TA1_MAXW        ${TA0_MAXW}         CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(TA1_MAXRW       ${TA0_MAXRW}        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(TA1_RLATENCY    ${TA0_RLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(TA1_WLATENCY    ${TA0_WLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(TA1_PULSE_ON    ${TA0_PULSE_ON}     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(TA1_PULSE_OFF   ${TA0_PULSE_OFF}    CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(TA1_BWCAP       ${TA0_BWCAP}        CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(TA1_PERFCTRL    ${TA0_PERFCTRL}     CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(TA1_PERFCNT     ${TA0_PERFCNT}      CACHE STRING "32-bit event counter")
+    set(TA1_MODE        ${TA0_MODE}         CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                          Bit 1: 1=enable random AR reordering (0=default);
+                                                          Bit 2: 1=enable random R reordering (0=default);
+                                                          Bit 3: 1=enable random B reordering (0=default);
+                                                          Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(TA1_HISTBIN     ${TA0_HISTBIN}      CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(TA1_HISTCNT     ${TA0_HISTCNT}      CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+else ()
+    set(TA1_MAXR        "2"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(TA1_MAXW        "0"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(TA1_MAXRW       "0"       CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(TA1_RLATENCY    "64"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(TA1_WLATENCY    "0"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(TA1_PULSE_ON    "320"     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(TA1_PULSE_OFF   "80"      CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(TA1_BWCAP       "50"      CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(TA1_PERFCTRL    "0"       CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(TA1_PERFCNT     "0"       CACHE STRING "32-bit event counter")
+    set(TA1_MODE        "1"       CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                Bit 1: 1=enable random AR reordering (0=default);
+                                                Bit 2: 1=enable random R reordering (0=default);
+                                                Bit 3: 1=enable random B reordering (0=default);
+                                                Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(TA1_HISTBIN     "0"       CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(TA1_HISTCNT     "0"       CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+endif ()

@@ -144,7 +144,11 @@ SECTIONS
   .sram :
   {
     . = ALIGN(16);
-    *(.bss.NoInit.activation_buf)
+    /* Cache area (if used) */
+    *(.bss.NoInit.ethos_u_cache)
+    . = ALIGN (16);
+    /* activation buffers a.k.a tensor arena when memory mode sram only or shared sram */
+    *(.bss.NoInit.activation_buf_sram)
     . = ALIGN(16);
   } > SRAM AT > SRAM
 
@@ -177,13 +181,17 @@ SECTIONS
     /* __attribute__((aligned(16))) is not handled by the CMSIS startup code.
      * Force the alignment here as a workaround */
     . = ALIGN(16);
+    /* nn model's baked in input matrices */
     *(ifm)
     . = ALIGN(16);
+    /* nn model's default space */
     *(nn_model)
     . = ALIGN (16);
+    /* labels */
     *(labels)
     . = ALIGN (16);
-    *(activation_buf)
+    /* activation buffers a.k.a tensor arena when memory mode dedicated sram */
+    *(activation_buf_dram)
     . = ALIGN (16);
   } > DDR AT > DDR
 

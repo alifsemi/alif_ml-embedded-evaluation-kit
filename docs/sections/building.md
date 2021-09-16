@@ -139,7 +139,7 @@ The build parameters are:
   [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
 
 - `TENSORFLOW_SRC_PATH`: the path to the root of the TensorFlow directory. The default value points to the
-  `dependencies/tensorflow` git submodule. Respository is hosted here: [tensorflow](https://github.com/tensorflow/tensorflow)
+  `dependencies/tensorflow` git submodule. Repository is hosted here: [tensorflow](https://github.com/tensorflow/tensorflow)
 
 - `ETHOS_U_NPU_DRIVER_SRC_PATH`: The path to the *Ethos-U* NPU core driver sources. The default value points to the
   `dependencies/core-driver` git submodule. Repository is hosted here:
@@ -147,10 +147,22 @@ The build parameters are:
 
 - `CMSIS_SRC_PATH`: The path to the CMSIS sources to be used to build TensorFlow Lite Micro library. This parameter is
   optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the
-  `dependencies/cmsis` git submodule. Respository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+  `dependencies/cmsis` git submodule. Repository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
+
+- `ETHOS_U_NPU_ID`: The *Ethos-U* NPU processor:
+  - `U55` (default)
+  - `U65`
+
+- `ETHOS_U_NPU_MEMORY_MODE`:  The *Ethos-U* NPU memory mode:
+  - `Shared_Sram` (default for *Ethos-U55* NPU)
+  - `Dedicated_Sram` (default for *Ethos-U65* NPU)
+  - `Sram_Only`
+
+  >**Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
+  > for *Ethos-U65* NPU and `Sram_Only` only for Ethos-U55* NPU.
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
   set to false, but can be turned on for FPGA targets. The the FVP and the CPU core cycle counts are not meaningful and
@@ -178,7 +190,9 @@ The build parameters are:
   `timing_adapter` dependencies folder.
 
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
-  the timing adapter build is enabled.
+  the timing adapter build is enabled. Default for Ethos-U55 NPU is
+  [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake),
+  for Ethos-U65 NPU is [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake).
 
 - `TENSORFLOW_LITE_MICRO_CLEAN_BUILD`: Optional parameter to enable, or disable, "cleaning" prior to building for the
   TensorFlow Lite Micro library. Enabled by default.
@@ -189,12 +203,12 @@ The build parameters are:
 - `ARMCLANG_DEBUG_DWARF_LEVEL`: When the CMake build type is specified as `Debug` and when the `armclang` toolchain is
   being used to build for a *Cortex-M* CPU target, this optional argument can be set to specify the `DWARF` format.
 
-    By default, this is set to 4 and is synonymous with passing `-g` flag to the compiler. This is compatible with Arm
-    DS and other tools which can interpret the latest DWARF format. To allow debugging using the Model Debugger from Arm
-    Fast Model Tools Suite, this argument can be used to pass DWARF format version as "3".
+  By default, this is set to 4 and is synonymous with passing `-g` flag to the compiler. This is compatible with Arm
+  DS and other tools which can interpret the latest DWARF format. To allow debugging using the Model Debugger from Arm
+  Fast Model Tools Suite, this argument can be used to pass DWARF format version as "3".
 
-    >**Note:** This option is only available when the CMake project is configured with the `-DCMAKE_BUILD_TYPE=Debug`
-    >argument. Also, the same dwarf format is used for building TensorFlow Lite Micro library.
+  >**Note:** This option is only available when the CMake project is configured with the `-DCMAKE_BUILD_TYPE=Debug`
+  >argument. Also, the same dwarf format is used for building TensorFlow Lite Micro library.
 
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
@@ -265,7 +279,7 @@ python3 ./set_up_default_resources.py
 ```
 
 This fetches every model into the `resources_downloaded` directory. It also optimizes the models using the Vela compiler
-for the default 128 MAC configuration of the Arm® *Ethos™-U55* NPU.
+for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
 > **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](#build-prerequisites)
 > are satisfied.
@@ -507,7 +521,7 @@ The CMake build framework allows the parameters to control the behavior of each 
   > **Note:** The bandwidth cap `BWCAP` operates on the transaction level and, because of its simple implementation, the accuracy is limited.
   > When set to a small value it allows only a small number of transactions for each pulse cycle.
   > Once the counter has reached or exceeded the configured cap, no transactions will be allowed before the next pulse cycle.
-  > In order to minimise this effect some possible solutions are:
+  > In order to minimize this effect some possible solutions are:
   >
   >- scale up all the parameters to a reasonably large value.
   >- scale up `BWCAP` as a multiple of the burst length (in this case bulk traffic will not face rounding errors in the bandwidth cap).
@@ -688,7 +702,7 @@ The Vela command contains the following:
 - `--accelerator-config`: Specifies the accelerator configuration to use between `ethos-u55-256`, `ethos-u55-128`,
   `ethos-u55-64`, `ethos-u55-32`, `ethos-u65-256`, and `ethos-u65-512`.
 - `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising the SRAM
-  usage whereas the Performance strategy optimises the neural network for maximal perforamance.
+  usage whereas the Performance strategy optimises the neural network for maximal performance.
   Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
 - `--config`: Specifies the path to the Vela configuration file. The format of the file is a Python ConfigParser `.ini`
     file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).
@@ -714,17 +728,18 @@ using the *Ethos-U55* High End timing adapter system configuration.
 To build for a different *Ethos-U* NPU variant:
 
 - Optimize the model with Vela compiler with the correct parameters. See [Optimize custom model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler).
+- Use the correct `ETHOS_U_NPU_ID`: `U55` for *Ethos-U55* NPU, `U65` for *Ethos-U65* NPU.
 - Use the Vela model as custom model in the building command. See [Add custom model](./building.md#add-custom-model)
 - Use the correct timing adapter settings configuration. See [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
 
-For example, when building for *Ethos-U65* High End system configuration, the Vela comand will be:
+For example, when building for *Ethos-U65* High End system configuration and 512 MACs/cc, the Vela command will be:
 
 ```commandline
 vela \
     <model_file>.tflite \
-    --accelerator-config ethos-u65-256 \
+    --accelerator-config ethos-u65-512 \
     --optimise Performance \
-    --memory-mode=Shared_Sram \
+    --memory-mode=Dedicated_Sram \
     --system-config=Ethos_U65_High_End \
     --config=../scripts/vela/default_vela.ini
 ```
@@ -733,8 +748,8 @@ And the cmake command:
 
 ```commandline
 cmake .. \
-    -D<use_case>_MODEL_TFLITE_PATH=<path/to/ethos_u65_vela_model.tflite> \
-    -DTA_CONFIG_FILE=scripts/cmake/ta_config_u65_high_end.cmake
+    -DETHOS_U_NPU_ID=U65 \
+    -D<use_case>_MODEL_TFLITE_PATH=<path/to/ethos_u65_vela_model.tflite>
 ```
 
 ## Automatic file generation

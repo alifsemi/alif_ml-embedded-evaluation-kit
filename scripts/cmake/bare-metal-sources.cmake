@@ -39,7 +39,52 @@ set(TENSORFLOW_LITE_MICRO_FLAG               "-DTF_LITE_STATIC_MEMORY")
 set(ETHOS_U_NPU_FLAG                           "-DARM_NPU=1")
 
 if (ETHOS_U_NPU_ENABLED)
-    set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ETHOS_U_NPU_FLAG}")
+
+    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
+        "U55"
+        STRING)
+
+    if ((ETHOS_U_NPU_ID STREQUAL U55) OR (ETHOS_U_NPU_ID STREQUAL U65))
+        if (ETHOS_U_NPU_ID STREQUAL U55)
+            set(DEFAULT_NPU_MEM_MODE    "Shared_Sram")
+            set(DEFAULT_NPU_CONFIG_ID     "H128")
+        elseif(ETHOS_U_NPU_ID STREQUAL U65)
+            set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
+            set(DEFAULT_NPU_CONFIG_ID     "Y256")
+        endif()
+    else ()
+        message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID}")
+    endif ()
+
+    USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
+        "${DEFAULT_NPU_MEM_MODE}"
+        STRING)
+
+    if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
+
+        if (ETHOS_U_NPU_ID STREQUAL U55)
+            set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
+        else ()
+            message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
+        endif ()
+
+    elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
+        # Shared Sram can be used for Ethos-U55 and Ethos-U65
+        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
+
+    elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
+        # Dedicated Sram is used only for Ethos-U65
+        if (ETHOS_U_NPU_ID STREQUAL U65)
+            set(ETHOS_U_NPU_MEMORY_MODE_FLAG  "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM")
+        else ()
+            message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
+        endif ()
+
+    else ()
+        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
+    endif ()
+
+    set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ETHOS_U_NPU_FLAG} ${ETHOS_U_NPU_MEMORY_MODE_FLAG}")
 endif ()
 
 # Set specific flags depending on target platform and subsystem
@@ -86,8 +131,13 @@ endif ()
 add_linker_script(${LINKER_SCRIPT_DIR} ${LINKER_SCRIPT_NAME})
 
 if (ETHOS_U_NPU_ENABLED)
+    if (ETHOS_U_NPU_ID STREQUAL U55)
+        set(DEFAULT_TA_CONFIG_FILE_PATH "${CMAKE_SCRIPTS_DIR}/timing_adapter/ta_config_u55_high_end.cmake")
+    else ()
+        set(DEFAULT_TA_CONFIG_FILE_PATH "${CMAKE_SCRIPTS_DIR}/timing_adapter/ta_config_u65_high_end.cmake")
+    endif ()
     USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
-            "${CMAKE_SCRIPTS_DIR}/timing_adapter/ta_config_u55_high_end.cmake"
+            ${DEFAULT_TA_CONFIG_FILE_PATH}
             FILEPATH)
 
     # must be included after target subsystem CMake file

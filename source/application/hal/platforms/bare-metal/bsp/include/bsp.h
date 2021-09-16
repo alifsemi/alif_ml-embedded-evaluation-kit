@@ -35,4 +35,8 @@
 
 #endif /* MPS3_PLATFORM */
 
+#if defined(ARM_NPU)
+#include "ethosu_mem_config.h"
+#endif /* defined(ARM_NPU) */
+
 #endif /* BSP_H */

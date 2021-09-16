@@ -1,9 +1,16 @@
+Changes in 21.11
+    * Support for 21.08 Ethos-U component and dependencies (core-software, core-driver, Vela 3.1.0, CMSIS, TensorFlow Lite).
+    * Added dynamic load support for FVP for inference runner use-case.
+    * Added support for different memory modes: Shared_Sram, Dedicated_Sram and Sram_Only
+    * Documentation updates.
+
 Changes in 21.08
     * Support for 21.05 Ethos-U component (core-software, core-driver, Vela 3.0.0).
     * TensorFlow submodule changed to https://github.com/tensorflow/tflite-micro (tested with TensorFlow Lite Micro commit hash: f510d38d0eaa3195ce3af66e3f32648740f08afb).
     * Image classification model changed (from uint8 to int8 datatype).
     * Documentation updates, added support to Corstone-300 + Ethos-U65.
     * Various scripts improvements.
+    * Added Visual Wake Word use case.
 
 Changes in 21.05
     * Added script to download and optimize default models.

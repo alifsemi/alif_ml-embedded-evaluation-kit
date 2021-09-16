@@ -36,7 +36,7 @@ static void print_application_intro()
     info("%s\n", PRJ_DES_STR);
     info("Target system design: %s\n", DESIGN_NAME);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
-    info("Copyright (C) ARM Ltd 2020. All rights reserved.\n\n");
+    info("Copyright (C) ARM Ltd 2021. All rights reserved.\n\n");
 }
 
 int main ()

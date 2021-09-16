@@ -67,8 +67,8 @@ USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD_ASR "Specify the score threshold [
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8_vela_H128.tflite)
-    set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_H128.tflite)
+    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8_vela_${DEFAULT_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${DEFAULT_NPU_CONFIG_ID}.tflite)
 else()
     set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8.tflite)
     set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)

@@ -24,17 +24,38 @@
 
 #if defined(ARM_NPU)
 
+#include "ethosu_mem_config.h"          /* Arm Ethos-U memory config */
 #include "ethosu_driver.h"              /* Arm Ethos-U driver header */
 #include "timing_adapter.h"             /* Arm Ethos-U timing adapter driver header */
 #include "timing_adapter_settings.h"    /* Arm Ethos-U timing adapter settings */
 
 struct ethosu_driver ethosu_drv; /* Default Ethos-U device driver */
 
+#if defined(ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0)
+    static uint8_t  cache_arena[ETHOS_U_CACHE_BUF_SZ] CACHE_BUF_ATTRIBUTE;
+#else /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
+    static uint8_t* cache_arena = NULL;
+#endif /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
+
 /**
  * @brief   Initialises the Arm Ethos-U NPU
  * @return  0 if successful, error code otherwise
  **/
 static int arm_npu_init(void);
+
+static uint8_t * get_cache_arena()
+{
+    return cache_arena;
+}
+
+static size_t get_cache_arena_size()
+{
+#if defined(ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0)
+    return sizeof(cache_arena);
+#else /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
+    return 0;
+#endif /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
+}
 
 #endif /* ARM_NPU */
 
@@ -232,12 +253,12 @@ static int arm_npu_init(void)
     const void * ethosu_base_address = (void *)(SEC_ETHOS_U_NPU_BASE);
 
     if (0 != (err = ethosu_init(
-                        &ethosu_drv,            /* Ethos-U driver device pointer */
-                        ethosu_base_address,    /* Ethos-U NPU's base address. */
-                        NULL,                   /* Pointer to fast mem area - NULL for U55. */
-                        0,                      /* Fast mem region size. */
-                        1,                      /* Security enable. */
-                        1))) {                  /* Privilege enable. */
+                        &ethosu_drv,             /* Ethos-U driver device pointer */
+                        ethosu_base_address,     /* Ethos-U NPU's base address. */
+                        get_cache_arena(),       /* Pointer to fast mem area - NULL for U55. */
+                        get_cache_arena_size(), /* Fast mem region size. */
+                        1,                       /* Security enable. */
+                        1))) {                   /* Privilege enable. */
         printf_err("failed to initalise Ethos-U device\n");
         return err;
     }
@@ -266,4 +287,5 @@ static int arm_npu_init(void)
 
     return 0;
 }
+
 #endif /* ARM_NPU */

@@ -306,7 +306,16 @@ Please refer to: [Testing and benchmarking](./sections/testing_benchmarking.md#t
 
 ## Memory Considerations
 
-Please refer to: [Memory considerations](./sections/memory_considerations.md#memory-considerations)
+Please refer to:
+
+- [Memory considerations](./sections/memory_considerations.md#memory-considerations)
+  - [Understanding memory usage from Vela output](./sections/memory_considerations.md#understanding-memory-usage-from-vela-output)
+    - [Total SRAM used](./sections/memory_considerations.md#total-sram-used)
+    - [Total Off-chip Flash used](./sections/memory_considerations.md#total-off_chip-flash-used)
+  - [Memory mode configurations](./sections/memory_considerations.md#memory-mode-configurations)
+  - [Tensor arena and neural network model memory placement](./sections/memory_considerations.md#tensor-arena-and-neural-network-model-memory-placement)
+  - [Memory usage for ML use-cases](./sections/memory_considerations.md#memory-usage-for-ml-use_cases)
+  - [Memory constraints](./sections/memory_considerations.md#memory-constraints)
 
 ## Troubleshooting
 
