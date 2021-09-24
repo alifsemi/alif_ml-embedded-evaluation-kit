@@ -66,6 +66,18 @@ set(DDR4_BLK1_BASE_S      "0x90000000" CACHE STRING "DDR4 block 1 Secure base ad
 set(DDR4_BLK2_BASE_S      "0xB0000000" CACHE STRING "DDR4 block 2 Secure base address")
 set(DDR4_BLK3_BASE_S      "0xD0000000" CACHE STRING "DDR4 block 3 Secure base address")
 
+###################################################################################################
+#           Base addresses for dynamic loads (to be used for FVP form only)                       #
+###################################################################################################
+# This parameter is also mentioned in the linker/scatter script for SSE-300. Do not change these
+# parameters in isolation.
+set(DYNAMIC_MODEL_BASE      "${DDR4_BLK1_BASE_S}" CACHE STRING
+                            "Region to be used for dynamic load of model into memory")
+set(DYNAMIC_MODEL_SIZE      "0x02000000" CACHE STRING "Size of the space reserved for the model")
+math(EXPR DYNAMIC_IFM_BASE  "${DYNAMIC_MODEL_BASE} + ${DYNAMIC_MODEL_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(DYNAMIC_IFM_SIZE        "0x01000000" CACHE STRING "Size of the space reserved for the IFM")
+math(EXPR DYNAMIC_OFM_BASE  "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(DYNAMIC_OFM_SIZE        "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
 ###################################################################################################
 #                     Base addresses for peripherals - non secure                                 #

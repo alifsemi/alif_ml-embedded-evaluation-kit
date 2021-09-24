@@ -115,4 +115,28 @@ LOAD_REGION_1       0x70000000                  0x02000000
     ;-----------------------------------------------------
     ARM_LIB_HEAP    0x11040000 EMPTY ALIGN 8    0x000F0000
     {}
+
+    ;-----------------------------------------------------
+    ; The following regions are for use by the FVP to
+    ; allow loading or dumping of dynamic data into or
+    ; from the memory. These regions are mentioned in
+    ; the CMake subsystem profile. Do not change the
+    ; addresses and sizes below in isolation.
+    ;-----------------------------------------------------
+    ; 32 MiB of model space for run-time load of model
+    ;-----------------------------------------------------
+    runtime_model   0x90000000 EMPTY ALIGN 16   0x02000000
+    {}
+
+    ;-----------------------------------------------------
+    ; 16 MiB of IFM space for run-time loading (FVP only)
+    ;-----------------------------------------------------
+    runtime_ifm     0x92000000 EMPTY ALIGN 16   0x01000000
+    {}
+
+    ;-----------------------------------------------------
+    ; 16 MiB of OFM space for run-time loading (FVP only)
+    ;-----------------------------------------------------
+    runtime_ofm     0x93000000 EMPTY ALIGN 16   0x01000000
+    {}
 }

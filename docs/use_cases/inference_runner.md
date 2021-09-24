@@ -11,6 +11,8 @@
     - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Inference Runner](#running-inference-runner)
+    - [Building with dynamic model load capability](#building-with-dynamic-model-load-capability)
+    - [Running the FVP with dynamic model loading](#running-the-fvp-with-dynamic-model-loading)
 
 ## Introduction
 
@@ -54,6 +56,8 @@ following:
 
 - `inference_runner_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By
   default, it is set to 2MiB and is enough for most models.
+
+- `inference_runner_DYNAMIC_MEM_LOAD_ENABLED`: This can be set to ON or OFF, to allow dynamic model load capability for use with MPS3 FVPs. See section [Building with dynamic model load capability](#building-with-dynamic-model-load-capability) below for more details.
 
 To build **ONLY** the Inference Runner example application, add `-DUSE_CASE_BUILD=inferece_runner` to the `cmake`
 command line, as specified in: [Building](../documentation.md#Building).
@@ -257,3 +261,68 @@ inference. For example:
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
   model is not cycle-approximate or cycle-accurate.
+
+### Building with dynamic model load capability
+
+It is possible to build the inference runner application, targeting only the FVP environment, that allows
+loading of the TFLite model file at runtime. In this build configuration, the model TFLite file is not
+baked into the application but the application expects this model binary to be loaded at a specific address
+by an external agent. This loading capability also extends to the input data for the model.
+
+This feature depends on these addresses to be specified in target platform's CMake description and, by
+default, is available for use on the MPS3 FVP platform.
+
+> **NOTE**: The application built with this support will not work on the FPGA. This capability is only
+> provided for use with the FVP, to make it easier to try different ML workloads without having to build
+> the applications with different TFLite files baked into the application statically.
+> Also, this feature is not available for `native` target.
+
+The parameter `inference_runner_DYNAMIC_MEM_LOAD_ENABLED` should be set to ON in the CMake configuration
+command to enable this feature. For example, from a freshly created build directory, run:
+
+```commandline
+cmake .. \
+  -Dinference_runner_DYNAMIC_MEM_LOAD_ENABLED=ON \
+  -DUSE_CASE_BUILD=inference_runner
+```
+
+Once the configuration completes, running:
+```commandline
+make -j
+```
+will build the application that will expect the neural network model and the IFM to be loaded into
+specific addresses. These addresses are defined in
+[corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake) for the MPS3
+target.
+
+### Running the FVP with dynamic model loading
+
+If the application has been built with dynamic loading capability, as described in the previous section,
+the FVP can be invoked with command line parameters that will load specific data into memory. For example,
+the command below loads a custom model at address `0x90000000`, a custom input from address `0x92000000`
+and when the FVP exits, it dumps a file named `output.bin` with the output tensors consolidated into a
+binary blob.
+
+> **NOTE** The CMake profile for the target should also give an indication of the maximum sizes for
+> each of the regions. This is also mentioned in the linker scripts for the same target. For MPS3,
+> the model size can be a maximum of 32MiB. The IFM and OFM spaces are both reserved as 16MiB sections.
+
+```commandline
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a \
+  ./bin/ethos-u-inference_runner.axf \
+  --data /path/to/custom-model.tflite@0x90000000 \
+  --data /path/to/custom-ifm.bin@0x92000000 \
+  --dump cpu0=/path/to/output.bin@Memory:0x93000000,1024
+```
+The above command will dump a 1KiB (1024 bytes) file with output tensors as a binary blob after it
+has consumed the model and IFM data provided by the file paths specified and the inference is
+executed successfully.
+If the size of the output tensors is unknown before running the FVP, it can be run without the `--dump`
+parameter to check the size of the output first by looking at the application log. Alternatively, a
+size of 16MiB will dump the whole reserved section for the OFM to a file.
+
+> **NOTE**: When there are multiple input tensors, the application is set up to iterate over all of
+> them and populate each of them, in sequence, with the required amount of data. The sequence in which
+> these tensors are populated is governed by the index assigned to them within the TensorFlow Lite Micro
+> framework. So, the input binary blob should be a consolidated file containing data for all the input
+> tensors. The same packing is used for output binary dumps.

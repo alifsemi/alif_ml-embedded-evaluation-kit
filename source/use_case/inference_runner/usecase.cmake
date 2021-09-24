@@ -27,12 +27,48 @@ else()
     set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/dnn_s_quantized.tflite)
 endif()
 
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
-    ${DEFAULT_MODEL_PATH}
-    FILEPATH)
+if (NOT TARGET_PLATFORM STREQUAL native)
+    USER_OPTION(
+        ${use_case}_DYNAMIC_MEM_LOAD_ENABLED
+        "Allow dynamically loading model and ifm at runtime (valid for FVP only)"
+        OFF
+        BOOL)
+endif()
 
-# Generate model file
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
-    DESTINATION ${SRC_GEN_DIR}
-)
+# For non-native targets, for use with the FVPs only.
+if (${${use_case}_DYNAMIC_MEM_LOAD_ENABLED})
+
+    message(STATUS "NOTE: Dynamic memory load enabled. This ${use_case} application will run on FVP only.")
+
+    if (NOT DEFINED DYNAMIC_MODEL_BASE AND DEFINED DYNAMIC_MODEL_SIZE)
+        message(FATAL_ERROR "${TARGET_PLATFORM} does not support dynamic load for model files.")
+    else()
+        set(${use_case}_COMPILE_DEFS
+            "DYNAMIC_MODEL_BASE=${DYNAMIC_MODEL_BASE};DYNAMIC_MODEL_SIZE=${DYNAMIC_MODEL_SIZE}")
+    endif()
+
+    if (DEFINED DYNAMIC_IFM_BASE AND DEFINED DYNAMIC_IFM_SIZE)
+        string(APPEND ${use_case}_COMPILE_DEFS
+            ";DYNAMIC_IFM_BASE=${DYNAMIC_IFM_BASE};DYNAMIC_IFM_SIZE=${DYNAMIC_IFM_SIZE}")
+    else()
+        message(WARNING "${TARGET_PLATFORM} does not support dynamic load for input tensors.")
+    endif()
+
+    if (DEFINED DYNAMIC_OFM_BASE AND DEFINED DYNAMIC_OFM_SIZE)
+        string(APPEND ${use_case}_COMPILE_DEFS
+            ";DYNAMIC_OFM_BASE=${DYNAMIC_OFM_BASE};DYNAMIC_OFM_SIZE=${DYNAMIC_OFM_SIZE}")
+    else()
+        message(WARNING "${TARGET_PLATFORM} does not support dumping of output tensors.")
+    endif()
+
+else()
+    USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
+        ${DEFAULT_MODEL_PATH}
+        FILEPATH)
+
+    # Generate model file
+    generate_tflite_code(
+        MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+        DESTINATION ${SRC_GEN_DIR}
+    )
+endif()

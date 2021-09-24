@@ -23,14 +23,34 @@ const tflite::AllOpsResolver& arm::app::TestModel::GetOpResolver()
     return this->m_opResolver;
 }
 
-extern uint8_t* GetModelPointer();
-const uint8_t* arm::app::TestModel::ModelPointer()
-{
-    return GetModelPointer();
-}
+#if defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE)
 
-extern size_t GetModelLen();
-size_t arm::app::TestModel::ModelSize()
-{
-    return GetModelLen();
-}
+    const uint8_t* arm::app::TestModel::ModelPointer()
+    {
+        info("Model pointer: 0x%08x\n", DYNAMIC_MODEL_BASE);
+        return reinterpret_cast<uint8_t *>(DYNAMIC_MODEL_BASE);
+    }
+
+    size_t arm::app::TestModel::ModelSize()
+    {
+        /* TODO: Can we get the actual model size here somehow?
+         * Currently we return the reserved space. It is possible to do
+         * so by reading the memory pattern but it will not be reliable. */
+        return static_cast<size_t>(DYNAMIC_MODEL_SIZE);
+    }
+
+#else /* defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE) */
+
+    extern uint8_t* GetModelPointer();
+    const uint8_t* arm::app::TestModel::ModelPointer()
+    {
+        return GetModelPointer();
+    }
+
+    extern size_t GetModelLen();
+    size_t arm::app::TestModel::ModelSize()
+    {
+        return GetModelLen();
+    }
+
+#endif /* defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE) */

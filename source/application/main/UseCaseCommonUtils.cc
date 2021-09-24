@@ -136,6 +136,7 @@ bool image::PresentInferenceResult(hal_platform &platform,
 
 void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCase)
 {
+#if NUMBER_OF_FILES > 0
     auto curImIdx = ctx.Get<uint32_t>(useCase);
 
     if (curImIdx + 1 >= NUMBER_OF_FILES) {
@@ -144,10 +145,15 @@ void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCas
     }
     ++curImIdx;
     ctx.Set<uint32_t>(useCase, curImIdx);
+#else /* NUMBER_OF_FILES > 0 */
+    UNUSED(ctx);
+    UNUSED(useCase);
+#endif /* NUMBER_OF_FILES > 0 */
 }
 
 bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, std::string ctxIfmName)
 {
+#if NUMBER_OF_FILES > 0
     if (idx >= NUMBER_OF_FILES) {
         printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n",
                    idx, NUMBER_OF_FILES);
@@ -155,8 +161,13 @@ bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, std::strin
     }
     ctx.Set<uint32_t>(ctxIfmName, idx);
     return true;
+#else /* NUMBER_OF_FILES > 0 */
+    UNUSED(ctx);
+    UNUSED(idx);
+    UNUSED(ctxIfmName);
+    return false;
+#endif /* NUMBER_OF_FILES > 0 */
 }
-
 
 namespace arm {
 namespace app {

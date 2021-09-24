@@ -104,7 +104,7 @@ endif()
 message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     21.05
+        VERSION     21.08
         DESCRIPTION "ARM ML Embedded Evaluation Kit for MPS3 FPGA and FastModel")
 
 enforce_compiler_version()
@@ -333,6 +333,13 @@ foreach(use_case ${USE_CASES})
     set_source_files_properties(${SRC_MAIN}
         PROPERTIES COMPILE_DEFINITIONS
         "PRJ_VER_STR=\"${PROJECT_VERSION}\";PRJ_DES_STR=\"${PROJECT_DESCRIPTION}\"")
+
+    if (DEFINED ${use_case}_COMPILE_DEFS)
+        message(STATUS "Additional compilation flags for ${use_case}: ${${use_case}_COMPILE_DEFS}")
+        set_source_files_properties(${UC_SRC}
+            PROPERTIES COMPILE_DEFINITIONS
+            "${${use_case}_COMPILE_DEFS}")
+    endif()
 
     set(UC_LIB_NAME lib${TARGET_NAME})
 

@@ -26,6 +26,13 @@ MEMORY
   BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00200000
   SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00400000
   DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
+
+  /* Dynamic load regions declared for use by FVP only
+   * These regions are mentioned in the CMake subsystem profile.
+   * Do not change the addresses here in isolation. */
+  DDR_dynamic_model (rx) : ORIGIN = 0x90000000, LENGTH = 0x02000000
+  DDR_dynamic_ifm   (rx) : ORIGIN = 0x92000000, LENGTH = 0x01000000
+  DDR_dynamic_ofm   (rx) : ORIGIN = 0x93000000, LENGTH = 0x01000000
 }
 
 /* Linker script to place sections and symbol values. Should be used together
