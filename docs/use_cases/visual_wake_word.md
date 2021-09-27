@@ -1,6 +1,6 @@
 # Visual Wake Word Code Sample
 
-- [Visual Wake Word Code Sample](#visual-wake-word-sample)
+- [Visual Wake Word Code Sample](#visual-wake-word-code-sample)
   - [Introduction](#introduction)
     - [Prerequisites](#prerequisites)
   - [Building the Code Samples application from sources](#building-the-code-samples-application-from-sources)
@@ -9,7 +9,7 @@
     - [Add custom input](#add-custom-input)
     - [Add custom model](#add-custom-model)
   - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-      - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
+    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
     - [Starting Fast Model simulation](#starting-fast-model-simulation)
     - [Running Visual Wake Word](#running-visual-wake-word)
 
@@ -33,11 +33,11 @@ In addition to the already specified build option in the main reference manual, 
   the application `axf` file. The default value points to one of the delivered set of models.
   Note that the parameters `vww_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the
   chosen model. In other words:
-    - If `ETHOS_U_NPU_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
+  - If `ETHOS_U_NPU_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
       falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
-    - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
+  - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
       model in this case results in a runtime error.
-      
+
 - `vww_FILE_PATH`: Path to directory or file to be used as custom image file(s) to use in the evaluation
     application. The default value points to the resources/vww/samples folder containing the delivered set
     of images. See more in the Running custom input data section.
@@ -87,9 +87,8 @@ Also see:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm FastModel
-  Tools](../sections/building.md#working-with-model-debugger-from-arm-fastmodel-tools)
--[Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos-u-npu-variants)
+- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
+- [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos-u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run
 >the CMake command.
@@ -228,8 +227,8 @@ After compiling, your custom model will have now replaced the default one in the
 
 ### Setting up the Ethos-U NPU Fast Model
 
-The FVP is available publicly from [Arm Ecosystem FVP
-downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
+The FVP is available publicly from
+[Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
 For the *Ethos-U* evaluation, please download the MPS3 based version of the Arm® *Corstone™-300* model that contains *Cortex-M55*
 and offers a choice of the *Ethos-U55* and *Ethos-U65* processors.
