@@ -127,15 +127,6 @@ ifeq ($(TARGET),$(filter $(TARGET), cortex_m_ethos_eval))
     $(error "TOOLCHAIN=$(TOOLCHAIN) is not supported.")
   endif
 
-# TODO(#47718): resolve warnings.
-CXX_OMIT_ERRORS = \
-  -Wno-implicit-fallthrough \
-  -Wno-unused-variable
-
-# TODO: Remove when Arm Ethos-U NPU driver is updated to version > 21.05
-CC_OMIT_ERRORS = \
-  ${CXX_OMIT_ERRORS} \
-  -Wno-int-conversion
 
   PLATFORM_FLAGS = \
     -DTF_LITE_MCU_DEBUG_LOG \
@@ -151,7 +142,7 @@ CC_OMIT_ERRORS = \
     $(TARGET_SPECIFIC_FLAGS)
 
   # Common + C/C++ flags
-  CXXFLAGS += $(PLATFORM_FLAGS) ${CXX_OMIT_ERRORS}
-  CCFLAGS += $(PLATFORM_FLAGS) ${CC_OMIT_ERRORS}
+  CXXFLAGS += $(PLATFORM_FLAGS)
+  CCFLAGS += $(PLATFORM_FLAGS)
 
 endif

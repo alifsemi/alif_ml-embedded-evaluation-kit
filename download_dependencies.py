@@ -25,10 +25,10 @@ import tempfile
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-tf = "https://github.com/tensorflow/tflite-micro/archive/f510d38d0eaa3195ce3af66e3f32648740f08afb.zip"
-cmsis = "https://github.com/ARM-software/CMSIS_5/archive/e9637de2b4cfd99cd5c93893d88593262d8660c1.zip"
-ethos_u_core_sw = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-software.git/snapshot/ethos-u-core-software-8b1d9ded33ec59545897ff45019d05403dba7eee.tar.gz"
-ethos_u_core_driver = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-d1ea036bd870663d737db9bfbb25e2aa04a389e0.tar.gz"
+tf = "https://github.com/tensorflow/tflite-micro/archive/4e091a46e935afcb27035e538044e37892d4a983.zip"
+cmsis = "https://github.com/ARM-software/CMSIS_5/archive/c43379be65dec9d808b72b8efbe52cad762909be.zip"
+ethos_u_core_sw = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-software.git/snapshot/ethos-u-core-software-21.08.tar.gz"
+ethos_u_core_driver = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-21.08.tar.gz"
 
 
 def download(url_file: str, post_process=None):
