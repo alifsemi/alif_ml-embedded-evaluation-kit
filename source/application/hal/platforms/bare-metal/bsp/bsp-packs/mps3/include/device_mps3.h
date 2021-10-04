@@ -26,6 +26,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#define PERIF_CLK               (25000000) /* Clock source for APB peripherals */
+
 typedef struct _CMSDK_UART_TypeDef_
 {
     __IO uint32_t  DATA;        /* Offset: 0x000 (R/W) Data Register.    */

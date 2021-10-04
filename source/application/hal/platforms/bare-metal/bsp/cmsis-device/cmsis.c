@@ -21,7 +21,7 @@ extern void *__Vectors;                   /* see irqs.c */
 /*----------------------------------------------------------------------------*\
  *                        Define clocks (uses OSC1 ACLK)                      *
 \*----------------------------------------------------------------------------*/
-#define __XTAL            (25000000)      /* Oscillator frequency             */
+#define __XTAL            (32000000)      /* Oscillator frequency             */
 #define __SYSTEM_CLOCK    (__XTAL)
 
 #if defined(CPU_CORTEX_M55)

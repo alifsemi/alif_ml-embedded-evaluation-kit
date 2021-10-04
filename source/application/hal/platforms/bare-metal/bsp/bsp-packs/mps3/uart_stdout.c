@@ -30,8 +30,7 @@
 
 void UartStdOutInit(void)
 {
-    /* NOTE: SystemCoreClock should have been set before initialising UART. */
-    CMSDK_UART0->BAUDDIV = SystemCoreClock / 115200;   /* => (25 or 32 MHz) / (115200 bps). */
+    CMSDK_UART0->BAUDDIV = PERIF_CLK / 115200;   /* => (25 or 32 MHz) / (115200 bps). */
     CMSDK_UART0->CTRL    = ((1ul <<  0) |              /* TX enable. */
                             (1ul <<  1) );             /* RX enable. */
     return;

@@ -21,11 +21,16 @@
 
 #include <inttypes.h>
 
+extern uint32_t GetSystemCoreClock(void);
+
 uint32_t GetMPS3CoreClock(void)
 {
-    const uint32_t default_clock = 32000000;
+    const uint32_t default_clock = GetSystemCoreClock();
     static int warned_once = 0;
     if (0 != MPS3_SCC->CFG_ACLK) {
+        if (default_clock != MPS3_SCC->CFG_ACLK) {
+            warn("System clock is different to the MPS3 config set clock.\n");
+        }
         return MPS3_SCC->CFG_ACLK;
     }
 
