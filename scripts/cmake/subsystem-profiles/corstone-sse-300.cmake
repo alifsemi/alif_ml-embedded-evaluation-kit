@@ -17,15 +17,6 @@
 
 # CMake configuration file for peripheral memory map for MPS3 as per SSE-300 design
 ###################################################################################################
-#                              Application specific config                                        #
-###################################################################################################
-
-# This parameter is based on the linker/scatter script for SSE-300. Do not change this parameter
-# in isolation.
-set(ACTIVATION_BUF_SRAM_SZ "0x00400000" CACHE STRING "Maximum SRAM size for activation buffers")
-set(DESIGN_NAME            "Arm Corstone-300 (SSE-300)" CACHE STRING "Design name")
-
-###################################################################################################
 #                                         Mem sizes                                               #
 ###################################################################################################
 set(ITCM_SIZE             "0x00080000" CACHE STRING "ITCM size:       512 kiB")
@@ -65,6 +56,17 @@ set(DDR4_BLK0_BASE_S      "0x70000000" CACHE STRING "DDR4 block 0 Secure base ad
 set(DDR4_BLK1_BASE_S      "0x90000000" CACHE STRING "DDR4 block 1 Secure base address")
 set(DDR4_BLK2_BASE_S      "0xB0000000" CACHE STRING "DDR4 block 2 Secure base address")
 set(DDR4_BLK3_BASE_S      "0xD0000000" CACHE STRING "DDR4 block 3 Secure base address")
+
+###################################################################################################
+#                              Application specific config                                        #
+###################################################################################################
+
+# This parameter is based on the linker/scatter script for SSE-300. Do not change this parameter
+# in isolation.
+set(DESIGN_NAME            "Arm Corstone-300 (SSE-300)" CACHE STRING "Design name")
+
+# SRAM size reserved for activation buffers
+math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 
 ###################################################################################################
 #           Base addresses for dynamic loads (to be used for FVP form only)                       #

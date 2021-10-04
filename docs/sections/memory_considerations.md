@@ -2,6 +2,8 @@
 
 - [Memory considerations](#memory-considerations)
   - [Introduction](#introduction)
+  - [Memory available on the target platform](#memory-available-on-the-target-platform)
+    - [Parameters linked to SRAM size definitions](#parameters-linked-to-sram-size-definitions)
   - [Understanding memory usage from Vela output](#understanding-memory-usage-from-vela-output)
     - [Total SRAM used](#total-sram-used)
     - [Total Off-chip Flash used](#total-off_chip-flash-used)
@@ -20,7 +22,7 @@ applicable for other platforms too. The Arm® *Corstone™-300* is composed of b
 
 The Arm® *Ethos™-U* NPU interacts with the system through two AXI interfaces. The first one, is envisaged to be the
 higher-bandwidth, lower-latency, interface. In a typical system, this is wired to an SRAM as it is required to service
-frequent Read and Write traffic.
+frequent read and write traffic.
 
 The second interface is expected to have a higher-latency, lower-bandwidth characteristic, and is typically wired to a
 flash device servicing read-only traffic. In this configuration, the Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU
@@ -30,6 +32,63 @@ read the contents of the neural network model, or the `.tflite` file, from the f
 The input and output tensors, along with any intermediate computation buffers, are placed on SRAM. Therefore, both the
 Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU would be reading, or writing, to this region when running an inference.
 The Arm® *Ethos™-U* NPU requests these Read and Write transactions over the first AXI bus.
+
+## Memory available on the target platform
+
+Embedded target platforms supported have a description in the form of CMake files. These files
+have definitions that describe the memory regions and the peripheral base addresses.
+
+See the example for Arm® *Corstone™-300* description file [corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake). For the discussion on this page, it is useful to note the following definitions:
+
+```
+set(ISRAM0_SIZE           "0x00200000" CACHE STRING "ISRAM0 size:       2 MiB")
+set(ISRAM1_SIZE           "0x00200000" CACHE STRING "ISRAM1 size:       2 MiB")
+...
+# SRAM size reserved for activation buffers
+math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+```
+This will set `ACTIVATION_BUF_SRAM_SZ` to be **4 MiB** for Arm® *Corstone™-300* target platform.
+As mentioned in the comments within the file, this size is directly linked to the size mentioned
+in the linker scripts, and therefore, it should not be changed without corresponding changes
+in the linker script too. For example, a snippet from the scatter file for Corstone™-300 shows:
+
+```
+;-----------------------------------------------------
+; SSE-300's internal SRAM of 4MiB - reserved for
+; activation buffers.
+; This region should have 3 cycle read latency from
+; both Cortex-M55 and Ethos-U NPU
+;-----------------------------------------------------
+isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
+{
+  ...
+}
+```
+If the usable size of the internal SRAM was to be increased/decreased, the change should be
+made in both the linker script as well as the `corstone-300.cmake` definition.
+
+### Parameters linked to SRAM size definitions
+
+Other than the obvious link between the linker script and the target profile description in
+CMake files, there are other parameters linked to what the reserved space for activation
+buffers is. These are:
+
+- The file [default_vela.ini](../../scripts/vela/default_vela.ini) contains a parameter called
+  `arena_cache_size` under `Shared_Sram` memory mode. For example:
+  ```
+  [Memory_Mode.Shared_Sram]
+  const_mem_area=Axi1
+  arena_mem_area=Axi0
+  cache_mem_area=Axi0
+  arena_cache_size=4194304
+  ```
+  This size of **4 MiB** here is provided here to allow the default vela optimisation process to
+  use this size as a hint for the available SRAM size for use by the CPU and the NPU.
+
+- In every `usecase.cmake` file (present within each use case's source directory), there is
+  a parameter called `${use_case}_ACTIVATION_BUF_SZ` set to a fixed value by default. This
+  default value should be less than the `ACTIVATION_BUF_SRAM_SZ` if the activation buffer needs
+  to be reserved in the target platform's SRAM region.
 
 ## Understanding memory usage from Vela output
 
