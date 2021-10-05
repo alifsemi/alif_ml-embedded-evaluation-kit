@@ -64,7 +64,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
     # There is a known issue with -O0 optimisation option that affects
     # FFT functions from CMSIS-DSP when compiling with Arm GNU embedded
-    # toolchain version 10.2.1
+    # toolchain version 10.2.1 or 10.3-2021.07
     if (CMAKE_BUILD_TYPE STREQUAL Debug)
         message(WARNING "There are known issues with CMSIS-DSP builds using "
                         "MVE extension without optimisation. Forcing -O3 "
