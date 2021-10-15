@@ -85,7 +85,7 @@ def write_individual_cc_file(filename, cc_filename, header_filename, header_temp
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(fm_data, math.ceil(len(fm_data) / 20)))
 
-    env.get_template('testdata.cc.template').stream(common_template_header=hdr,
+    env.get_template('iofmdata.cc.template').stream(common_template_header=hdr,
                                                  include_h=header_filename,
                                                  var_name=array_name,
                                                  fm_data=hex_line_generator,
