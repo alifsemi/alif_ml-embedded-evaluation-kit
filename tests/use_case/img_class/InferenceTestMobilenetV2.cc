@@ -56,7 +56,7 @@ void TestInference(int imageIdx, arm::app::Model& model, T tolerance) {
     REQUIRE(tensorData);
 
     for (size_t i = 0; i < outputTensor->bytes; i++) {
-        REQUIRE((int)tensorData[i] == Approx((int)((T)goldenFV[i])).epsilon(tolerance));
+        REQUIRE(static_cast<int>(tensorData[i]) == Approx(static_cast<int>((T)goldenFV[i])).epsilon(tolerance));
     }
 }
 

@@ -95,6 +95,7 @@ void main_loop(hal_platform& platform)
                 break;
             case MENU_OPT_RUN_INF_CHOSEN: {
                 printf("    Enter the audio clip index [0, %d]: ", NUMBER_OF_FILES-1);
+                fflush(stdout);
                 auto clipIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt(platform));
                 executionSuccessful = ClassifyAudioHandler(caseContext, clipIndex, false);
                 break;

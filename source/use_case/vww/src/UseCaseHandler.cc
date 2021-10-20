@@ -21,6 +21,8 @@
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 
+#include <algorithm>
+
 namespace arm {
 namespace app {
 
@@ -94,13 +96,19 @@ namespace app {
 
             /* Display this image on the LCD. */
             platform.data_psn->present_data_image(
-                (uint8_t *) inputTensor->data.data,
+                static_cast<uint8_t *>(inputTensor->data.data),
                 nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
-            /* If the data is signed. */
-            if (model.IsDataSigned()) {
-                image::ConvertImgToInt8(inputTensor->data.data, inputTensor->bytes);
+            /* Vww model preprocessing is image conversion from uint8 to [0,1] float values,
+             * then quantize them with input quantization info. */
+            QuantParams inQuantParams = GetTensorQuantParams(inputTensor);
+
+            auto* req_data = static_cast<uint8_t *>(inputTensor->data.data);
+            auto* signed_req_data = static_cast<int8_t *>(inputTensor->data.data);
+            for (size_t i = 0; i < inputTensor->bytes; i++) {
+                auto i_data_int8 = static_cast<int8_t>(((static_cast<float>(req_data[i]) / 255.0f) / inQuantParams.scale) + inQuantParams.offset);
+                signed_req_data[i] = std::min<int8_t>(INT8_MAX, std::max<int8_t>(i_data_int8, INT8_MIN));
             }
 
             /* Display message on the LCD - inference running. */
@@ -159,7 +167,7 @@ namespace app {
         const uint32_t nChannels = (inputTensor->dims->size == 4) ? inputTensor->dims->data[3] : 1;
 
         const uint8_t* srcPtr = get_img_array(imIdx);
-        auto* dstPtr = (uint8_t*)inputTensor->data.data;
+        auto* dstPtr = static_cast<uint8_t *>(inputTensor->data.data);
         if (1 == nChannels) {
             /**
              * Visual Wake Word model accepts only one channel =>

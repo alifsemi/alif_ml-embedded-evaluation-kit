@@ -18,12 +18,12 @@
 
 void convertImgIoInt8(void * data, const size_t sz)
 {
-    uint8_t * tmp_req_data          = (uint8_t *)data;
-    int8_t * tmp_signed_req_data    = (int8_t *) data;
+    uint8_t * tmp_req_data          = static_cast<uint8_t *>(data);
+    int8_t * tmp_signed_req_data    = static_cast<int8_t *>(data);
 
     for (size_t i = 0; i < sz; ++i) {
-        tmp_signed_req_data[i] = (int8_t)(
-                (int32_t)(tmp_req_data[i]) - 128);
+        tmp_signed_req_data[i] = static_cast<int8_t>(
+                static_cast<int32_t>(tmp_req_data[i]) - 128);
     }
 }
 

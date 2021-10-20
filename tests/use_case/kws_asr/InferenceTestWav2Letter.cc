@@ -83,7 +83,7 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     REQUIRE(tensorData);
 
     for (size_t i = 0; i < outputTensor->bytes; i++) {
-        REQUIRE((int)tensorData[i] == (int)((T)output_goldenFV[i]));
+        REQUIRE(static_cast<int>(tensorData[i]) == static_cast<int>(((T)output_goldenFV[i])));
     }
 }
 

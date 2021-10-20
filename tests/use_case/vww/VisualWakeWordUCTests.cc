@@ -73,7 +73,7 @@ TEST_CASE("Inference by index")
 
     auto results = caseContext.Get<std::vector<arm::app::ClassificationResult>>("results");
 
-    REQUIRE(results[0].m_labelIdx == 0);
+    REQUIRE(results[0].m_labelIdx == 1);
 }
 
 TEST_CASE("Inference run all images")

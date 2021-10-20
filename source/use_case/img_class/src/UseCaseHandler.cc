@@ -97,7 +97,7 @@ namespace app {
 
             /* Display this image on the LCD. */
             platform.data_psn->present_data_image(
-                (uint8_t*) inputTensor->data.data,
+                static_cast<uint8_t *>(inputTensor->data.data),
                 nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 

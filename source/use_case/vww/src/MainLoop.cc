@@ -67,6 +67,7 @@ void main_loop(hal_platform &platform)
                 break;
             case common::MENU_OPT_RUN_INF_CHOSEN: {
                 printf("    Enter the image index [0, %d]: ", NUMBER_OF_FILES-1);
+                fflush(stdout);
                 auto imgIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt(platform));
                 executionSuccessful = ClassifyImageHandler(caseContext, imgIndex, false);
                 break;

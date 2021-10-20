@@ -90,6 +90,7 @@ void main_loop(hal_platform& platform)
             case MENU_OPT_RUN_INF_CHOSEN: {
                 printf("    Enter the data index [0, %d]: ",
                        NUMBER_OF_FILES-1);
+                fflush(stdout);
                 auto audioIndex = static_cast<uint32_t>(
                         arm::app::ReadUserInputAsInt(platform));
                 executionSuccessful = ClassifyVibrationHandler(caseContext,

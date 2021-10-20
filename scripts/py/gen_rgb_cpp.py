@@ -70,12 +70,23 @@ def write_individual_img_cc_file(image_filename, cc_filename, header_template_fi
                                  gen_time=datetime.datetime.now(),
                                  file_name=os.path.basename(image_filename),
                                  year=datetime.datetime.now().year)
+    # IFM size
+    ifm_width = image_size[0]
+    ifm_height = image_size[1]
 
-    original_image.thumbnail(image_size)
-    delta_w = abs(image_size[0] - original_image.size[0])
-    delta_h = abs(image_size[1] - original_image.size[1])
-    resized_image = Image.new('RGB', args.image_size, (255, 255, 255, 0))
-    resized_image.paste(original_image, (int(delta_w / 2), int(delta_h / 2)))
+    # Aspect ratio resize
+    scale_ratio = (float)(max(ifm_width, ifm_height)) / (float)(min(original_image.size[0], original_image.size[1]))
+    resized_width = (int)(original_image.size[0] * scale_ratio)
+    resized_height = (int)(original_image.size[1] * scale_ratio)
+    resized_image = original_image.resize([resized_width,resized_height], Image.BILINEAR)
+
+    # Crop the center of the image
+    resized_image = resized_image.crop((
+        (resized_width - ifm_width) / 2,   # left
+        (resized_height - ifm_height) / 2, # top
+        (resized_width + ifm_width) / 2,   # right
+        (resized_height + ifm_height) / 2  # bottom
+        ))
 
     # Convert the image and write it to the cc file
     rgb_data = np.array(resized_image, dtype=np.uint8).flatten()

@@ -35,8 +35,8 @@ void DisplayCommonMenu()
 
 void image::ConvertImgToInt8(void* data, const size_t kMaxImageSize)
 {
-    auto* tmp_req_data = (uint8_t*) data;
-    auto* tmp_signed_req_data = (int8_t*) data;
+    auto* tmp_req_data = static_cast<uint8_t *>(data);
+    auto* tmp_signed_req_data = static_cast<int8_t *>(data);
 
     for (size_t i = 0; i < kMaxImageSize; i++) {
         tmp_signed_req_data[i] = (int8_t) (
