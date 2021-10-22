@@ -34,6 +34,15 @@ namespace math {
 #endif /* ARM_DSP_AVAILABLE */
     }
 
+    float MathUtils::SineF32(float radians)
+    {
+#if ARM_DSP_AVAILABLE
+        return arm_sin_f32(radians);
+#else /* ARM_DSP_AVAILABLE */
+        return sin(radians);
+#endif /* ARM_DSP_AVAILABLE */
+    }
+
     float MathUtils::SqrtF32(float input)
     {
 #if ARM_DSP_AVAILABLE
@@ -89,54 +98,144 @@ namespace math {
 #endif /* ARM_DSP_AVAILABLE */
     }
 
-    bool MathUtils::FftInitF32(const uint16_t fftLen, arm::app::math::FftInstance& fftInstance)
+    void MathUtils::FftInitF32(const uint16_t fftLen,
+                               FftInstance& fftInstance,
+                               const FftType type)
     {
-#if ARM_DSP_AVAILABLE
-        if (!fftInstance.initialised) {
-            arm_status status = arm_rfft_fast_init_f32(&fftInstance.instance, fftLen);
+        fftInstance.m_fftLen = fftLen;
+        fftInstance.m_initialised = false;
+        fftInstance.m_optimisedOptionAvailable = false;
+        fftInstance.m_type = type;
 
-            if (ARM_MATH_SUCCESS != status) {
-                return false;
-            }
-            fftInstance.initialised = true;
+#if ARM_DSP_AVAILABLE
+        arm_status status = ARM_MATH_ARGUMENT_ERROR;
+        switch (fftInstance.m_type) {
+        case FftType::real:
+            status = arm_rfft_fast_init_f32(&fftInstance.m_instanceReal, fftLen);
+            break;
+
+        case FftType::complex:
+            status = arm_cfft_init_f32(&fftInstance.m_instanceComplex, fftLen);
+            break;
+
+        default:
+            printf_err("Invalid FFT type\n");
+            return;
         }
-#else
-        UNUSED(fftLen);
-        UNUSED(fftInstance);
+
+        if (ARM_MATH_SUCCESS != status) {
+            printf_err("Failed to initialise FFT for len %d\n", fftLen);
+        } else {
+            fftInstance.m_optimisedOptionAvailable = true;
+        }
 #endif /* ARM_DSP_AVAILABLE */
-        return true;
+
+        if (!fftInstance.m_optimisedOptionAvailable) {
+            debug("Non optimised FFT will be used\n.");
+        }
+
+        fftInstance.m_initialised = true;
+    }
+
+    static void FftRealF32(std::vector<float>& input,
+                           std::vector<float>& fftOutput)
+    {
+        const size_t inputLength = input.size();
+        const size_t halfLength = input.size() / 2;
+
+        fftOutput[0] = 0;
+        fftOutput[1] = 0;
+        for (size_t t = 0; t < inputLength; t++) {
+            fftOutput[0] += input[t];
+            fftOutput[1] += input[t] *
+                MathUtils::CosineF32(2 * M_PI * halfLength * t / inputLength);
+        }
+
+        for (size_t k = 1, j = 2; k < halfLength; ++k, j += 2) {
+            float sumReal = 0;
+            float sumImag = 0;
+
+            const float theta = static_cast<float>(2 * M_PI * k / inputLength);
+
+            for (size_t t = 0; t < inputLength; t++) {
+                const auto angle = static_cast<float>(t * theta);
+                sumReal += input[t] * MathUtils::CosineF32(angle);
+                sumImag += -input[t]* MathUtils::SineF32(angle);
+            }
+
+            /* Arrange output to [real0, realN/2, real1, im1, real2, im2, ...] */
+            fftOutput[j] = sumReal;
+            fftOutput[j + 1] = sumImag;
+        }
+    }
+
+    static void FftComplexF32(std::vector<float>& input,
+                           std::vector<float>& fftOutput)
+    {
+        const size_t fftLen = input.size() / 2;
+        for (size_t k = 0; k < fftLen; k++) {
+            float sumReal = 0;
+            float sumImag = 0;
+            const auto theta = static_cast<float>(2 * M_PI * k / fftLen);
+            for (size_t t = 0; t < fftLen; t++) {
+                const auto angle = theta * t;
+                const auto cosine = MathUtils::CosineF32(angle);
+                const auto sine = MathUtils::SineF32(angle);
+                sumReal += input[t*2] * cosine + input[t*2 + 1] * sine;
+                sumImag += -input[t*2] * sine + input[t*2 + 1] * cosine;
+            }
+            fftOutput[k*2] = sumReal;
+            fftOutput[k*2 + 1] = sumImag;
+        }
     }
 
     void MathUtils::FftF32(std::vector<float>& input,
                            std::vector<float>& fftOutput,
                            arm::app::math::FftInstance& fftInstance)
     {
-#if ARM_DSP_AVAILABLE
-        arm_rfft_fast_f32(&fftInstance.instance, input.data(), fftOutput.data(), 0);
-#else
-        UNUSED(fftInstance);
-        const int inputLength = input.size();
-
-        for (int k = 0; k <= inputLength / 2; k++) {
-            float sumReal = 0, sumImag = 0;
-
-            for (int t = 0; t < inputLength; t++) {
-                auto angle = static_cast<float>(2 * M_PI * t * k / inputLength);
-                sumReal += input[t] * cosf(angle);
-                sumImag += -input[t] * sinf(angle);
-            }
-
-            /* Arrange output to [real0, realN/2, real1, im1, real2, im2, ...] */
-            if (k == 0) {
-                fftOutput[0] = sumReal;
-            } else if (k == inputLength / 2) {
-                fftOutput[1] = sumReal;
-            } else {
-                fftOutput[k*2] = sumReal;
-                fftOutput[k*2 + 1] = sumImag;
-            };
+        if (!fftInstance.m_initialised) {
+            printf_err("FFT uninitialised\n");
+            return;
+        } else if (input.size() < fftInstance.m_fftLen) {
+            printf_err("FFT len: %" PRIu16 "; input len: %zu\n",
+                fftInstance.m_fftLen, input.size());
+            return;
+        } else if (fftOutput.size() < input.size()) {
+            printf_err("Output vector len insufficient to hold FFTs\n");
+            return;
         }
+
+        switch (fftInstance.m_type) {
+        case FftType::real:
+
+#if ARM_DSP_AVAILABLE
+            if (fftInstance.m_optimisedOptionAvailable) {
+                arm_rfft_fast_f32(&fftInstance.m_instanceReal, input.data(), fftOutput.data(), 0);
+                return;
+            }
 #endif /* ARM_DSP_AVAILABLE */
+            FftRealF32(input, fftOutput);
+            return;
+
+        case FftType::complex:
+            if (input.size() < fftInstance.m_fftLen * 2) {
+                printf_err("Complex FFT instance should have input size >= (FFT len x 2)");
+                return;
+            }
+#if ARM_DSP_AVAILABLE
+            if (fftInstance.m_optimisedOptionAvailable) {
+                fftOutput = input; /* Complex function works in-place */
+                arm_cfft_f32(&fftInstance.m_instanceComplex, fftOutput.data(), 0, 0);
+                return;
+            }
+#endif /* ARM_DSP_AVAILABLE */
+            FftComplexF32(input, fftOutput);
+            return;
+
+        default:
+            printf_err("Invalid FFT type\n");
+            return;
+        }
     }
 
     void MathUtils::VecLogarithmF32(std::vector <float>& input,

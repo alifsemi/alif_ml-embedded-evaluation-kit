@@ -36,11 +36,20 @@ namespace arm {
 namespace app {
 namespace math {
 
+    enum class FftType {
+        real = 0,
+        complex = 1
+    };
+
     struct FftInstance {
 #if ARM_DSP_AVAILABLE
-        arm_rfft_fast_instance_f32 instance;
+        arm_rfft_fast_instance_f32  m_instanceReal;
+        arm_cfft_instance_f32       m_instanceComplex;
 #endif
-        bool initialised = false;
+        uint16_t                    m_fftLen{0};
+        FftType                     m_type;
+        bool                        m_optimisedOptionAvailable{false};
+        bool                        m_initialised{false};
     };
 
     /* Class to provide Math functions like FFT, mean, stddev etc.
@@ -57,6 +66,13 @@ namespace math {
          * @return      Cosine value (floating point).
          */
         static float CosineF32(float radians);
+
+        /**
+         * @brief       Get the sine value of the argument in floating point.
+         * @param[in]   radians   Angle in radians.
+         * @return      Sine value (floating point).
+         */
+        static float SineF32(float radians);
 
         /**
          * @brief       Get the square root of the argument in floating point.
@@ -90,9 +106,11 @@ namespace math {
          *              prior to Fft32 function call if built with ARM DSP functions.
          * @param[in]   fftLen        Requested length of the FFT.
          * @param[in]   fftInstance   FFT instance struct to use.
-         * @return      true if successful, false otherwise.
+         * @param[in]   type          FFT type (real or complex)
          */
-        static bool FftInitF32(const uint16_t fftLen, arm::app::math::FftInstance& fftInstance);
+        static void FftInitF32(const uint16_t fftLen,
+                               FftInstance& fftInstance,
+                               const FftType type = FftType::real);
 
         /**
          * @brief       Computes the FFT for the input vector.
@@ -102,7 +120,7 @@ namespace math {
          */
         static void FftF32(std::vector<float>& input,
                            std::vector<float>& fftOutput,
-                           arm::app::math::FftInstance& fftInstance);
+                           FftInstance& fftInstance);
 
         /**
          * @brief       Computes the natural logarithms of input floating point

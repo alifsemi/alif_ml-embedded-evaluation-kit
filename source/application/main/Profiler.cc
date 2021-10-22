@@ -242,6 +242,11 @@ namespace app {
     void Profiler::AddProfilingUnit(time_counter start, time_counter end,
                                     const std::string& name)
     {
+        if (!this->m_pPlatform) {
+            printf_err("Invalid platform\n");
+            return;
+        }
+
         platform_timer * timer = this->m_pPlatform->timer;
 
         struct ProfilingUnit unit;
