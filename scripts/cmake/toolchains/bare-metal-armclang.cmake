@@ -43,7 +43,7 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(FLOAT_ABI                   hard)
     set(ARM_MATH_DSP                1)
     set(ARM_MATH_LOOPUNROLL         1)
-    set(CPU_LINK_OPT                "--cpu=8.1-M.Main.dsp")
+    set(CPU_LINK_OPT                "--cpu=Cortex-M55")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m33)
     # Flags for cortex-m33 to go here
 endif()

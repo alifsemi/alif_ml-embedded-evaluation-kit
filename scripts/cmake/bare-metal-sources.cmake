@@ -60,6 +60,10 @@ if (ETHOS_U_NPU_ENABLED)
         "${DEFAULT_NPU_MEM_MODE}"
         STRING)
 
+    USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
+        "${DEFAULT_NPU_CONFIG_ID}"
+        STRING)
+
     if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
 
         if (ETHOS_U_NPU_ID STREQUAL U55)

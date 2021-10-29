@@ -164,6 +164,18 @@ The build parameters are:
   >**Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
   > for *Ethos-U65* NPU and `Sram_Only` only for Ethos-U55* NPU.
 
+- `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
+For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
+should be used. For Ethos-U65, it defaults to `Y256` instead. However, the user can override these
+defaults to a configuration ID from `H32`, `H64`, `H256` and `Y512`.
+
+  > **Note:** This ID is only used to choose which tflite file path is to be used by the CMake
+configuration for all the use cases. If the user has overridden use-case specific model path
+parameter `ETHOS_U_NPU_CONFIG_ID` parameter will become irrelevant for that use-case. Also, the
+model files for the chosen `ETHOS_U_NPU_CONFIG_ID` are expected to exist in the default locations.
+See [Fetching resource files](#fetching-resource-files) for details on how to do this for your
+chosen configuration.
+
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
   set to false, but can be turned on for FPGA targets. The the FVP and the CPU core cycle counts are not meaningful and
   are not to be used.
@@ -284,6 +296,17 @@ for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for t
 > **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](#build-prerequisites)
 > are satisfied.
 
+If you need to optimize the models for a different Ethos-U configuration, you can pass a
+list of additional configurations for Vela compiler. For example, to optimize the downloaded models
+for *Ethos™-U55* 32 MAC configuration and *Ethos™-U65* 512 MAC configuration, you can choose to run:
+
+```sh
+python3 ./set_up_default_resources.py \
+  --additional-ethos-u-config-name ethos-u55-32 \
+  --additional-ethos-u-config-name ethos-u65-512
+```
+> **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128` and `ethosu-u65-256`.
+
 ### Building for default configuration
 
 A helper script `build_default.py` is provided to configure and build all the applications. It configures the project
@@ -306,6 +329,20 @@ Additional command line arguments supported by this script are:
 
 - `--skip-download`: Do not download resources: models and test vectors
 - `--skip-vela`: Do not run Vela optimizer on downloaded models.
+- `--npu-config-name`: Arm Ethos-U configuration to build for. The default value is
+    `ethos-u55-128`. Valid values are:
+    - `ethos-u55-32`
+    - `ethos-u55-64`
+    - `ethos-u55-128`
+    - `ethos-u55-256`
+    - `ethos-u65-256`
+    - `ethos-u65-512`
+
+To build for *Ethos™-U55* 32 MAC configuration, using `Arm Compiler`, run:
+
+```commandline
+./build_default.py --npu-config-name ethos-u55-32 --toolchain arm
+```
 
 ### Create a build directory
 

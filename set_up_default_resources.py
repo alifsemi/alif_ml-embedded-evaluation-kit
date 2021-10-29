@@ -24,6 +24,8 @@ import sys
 
 from argparse import ArgumentParser
 from urllib.error import URLError
+from collections import namedtuple
+
 
 json_uc_res = [{
     "use_case_name": "ad",
@@ -92,6 +94,22 @@ json_uc_res = [{
                       ]
     },]
 
+# Valid NPU configurations:
+valid_npu_config_names = [
+        'ethos-u55-32', 'ethos-u55-64',
+        'ethos-u55-128', 'ethos-u55-256',
+        'ethos-u65-256','ethos-u65-512']
+
+# Default NPU configurations (these are always run when the models are optimised)
+default_npu_config_names = [valid_npu_config_names[2], valid_npu_config_names[4]]
+
+# NPU config named tuple
+NPUConfig = namedtuple('NPUConfig',['config_name',
+                                    'memory_mode',
+                                    'system_config',
+                                    'ethos_u_npu_id',
+                                    'ethos_u_config_id'])
+
 
 def call_command(command: str) -> str:
     """
@@ -112,13 +130,52 @@ def call_command(command: str) -> str:
     return log
 
 
-def set_up_resources(run_vela_on_models=False):
+def get_default_npu_config_from_name(config_name: str) -> NPUConfig:
+    """
+    Gets the file suffix for the tflite file from the
+    `accelerator_config` string.
+
+    Parameters:
+    ----------
+    config_name (str):   Ethos-U NPU configuration from valid_npu_config_names
+
+    Returns:
+    -------
+    NPUConfig: An NPU config named tuple populated with defaults for the given
+               config name
+    """
+    if config_name not in valid_npu_config_names:
+        raise ValueError(f"""
+            Invalid Ethos-U NPU configuration.
+            Select one from {valid_npu_config_names}.
+            """)
+
+    strings_ids = ["ethos-u55-", "ethos-u65-"]
+    processor_ids = ["U55", "U65"]
+    prefix_ids = ["H", "Y"]
+    memory_modes = ["Shared_Sram", "Dedicated_Sram"]
+    system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
+
+    for i in range(len(strings_ids)):
+        if config_name.startswith(strings_ids[i]):
+            npu_config_id = config_name.replace(strings_ids[i], prefix_ids[i])
+            return  NPUConfig(config_name=config_name,
+                              memory_mode=memory_modes[i],
+                              system_config=system_configs[i],
+                              ethos_u_npu_id=processor_ids[i],
+                              ethos_u_config_id=npu_config_id)
+
+    return None
+
+
+def set_up_resources(run_vela_on_models=False, additional_npu_config_names=[]):
     """
     Helpers function that retrieve the output from a command.
 
     Parameters:
     ----------
     run_vela_on_models (bool):    Specifies if run vela on downloaded models.
+    additional_npu_config_names(list): list of strings of Ethos-U NPU configs.
     """
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.abspath(os.path.join(current_file_dir, "resources_downloaded"))
@@ -210,38 +267,41 @@ def set_up_resources(run_vela_on_models=False):
                   for dirpath, dirnames, files in os.walk(download_dir)
                   for f in fnmatch.filter(files, '*.tflite') if "vela" not in f]
 
+        # Consolidate all config names while discarding duplicates:
+        config_names = list(set(default_npu_config_names + additional_npu_config_names))
+
+        # Get npu config tuple for each config name in a list:
+        npu_configs = [get_default_npu_config_from_name(name) for name in config_names]
+
+        logging.info(f'All models will be optimised for these configs:')
+        for config in npu_configs:
+            logging.info(config)
+
         for model in models:
             output_dir = os.path.dirname(model)
             # model name after compiling with vela is an initial model name + _vela suffix
             vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
 
-            # Ethos-U NPU default generation
-            vela_opt_suffixes = ["_vela_H128.tflite", "_vela_Y256.tflite"]
-            vela_commands = [f". {env_activate} && vela {model} " +
-                       "--accelerator-config=ethos-u55-128 " +
+            for config in npu_configs:
+                vela_command = (f". {env_activate} && vela {model} " +
+                       f"--accelerator-config={config.config_name} " +
                        "--optimise Performance " +
                        f"--config {config_file} " +
-                       "--memory-mode=Shared_Sram " +
-                       "--system-config=Ethos_U55_High_End_Embedded " +
-                       f"--output-dir={output_dir}",
+                       f"--memory-mode={config.memory_mode} " +
+                       f"--system-config={config.system_config} " +
+                       f"--output-dir={output_dir}")
 
-                       f". {env_activate} && vela {model} " +
-                       "--accelerator-config=ethos-u65-256 " +
-                       "--optimise Performance " +
-                       f"--config {config_file} " +
-                       "--memory-mode=Dedicated_Sram " +
-                       "--system-config=Ethos_U65_High_End " +
-                       f"--output-dir={output_dir}"]
-
-            for vela_suffix, command in zip(vela_opt_suffixes, vela_commands):
-                # we want it to be initial model name + _vela_H128 suffix which indicates selected MACs config.
-                new_vela_optimised_model_path = vela_optimised_model_path.replace("_vela.tflite", vela_suffix)
+                # we want the name to include the configuration suffix. For example: vela_H128,
+                # vela_Y512 etc.
+                new_suffix = "_vela_" + config.ethos_u_config_id + '.tflite'
+                new_vela_optimised_model_path = (
+                    vela_optimised_model_path.replace("_vela.tflite", new_suffix))
 
                 if os.path.isfile(new_vela_optimised_model_path):
                     logging.info(f"File {new_vela_optimised_model_path} exists, skipping optimisation.")
                     continue
 
-                call_command(command)
+                call_command(vela_command)
 
                 # rename default vela model
                 os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
@@ -253,9 +313,13 @@ if __name__ == '__main__':
     parser.add_argument("--skip-vela",
                         help="Do not run Vela optimizer on downloaded models.",
                         action="store_true")
+    parser.add_argument("--additional-ethos-u-config-name",
+                        help=f"""Additional (non-default) configurations for Vela:
+                        {valid_npu_config_names}""",
+                        default=[], action="append")
     args = parser.parse_args()
 
     logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    set_up_resources(not args.skip_vela)
+    set_up_resources(not args.skip_vela, args.additional_ethos_u_config_name)

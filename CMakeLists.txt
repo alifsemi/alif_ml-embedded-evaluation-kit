@@ -72,7 +72,7 @@ USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or none
     sse-300
     STRING)
 
-USER_OPTION(ETHOS_U_NPU_ENABLED "Select if Ethos-U55 is available for the platform and subsystem"
+USER_OPTION(ETHOS_U_NPU_ENABLED "Select if Ethos-U NPU is available for the platform and subsystem"
     ON
     BOOL)
 
@@ -166,15 +166,15 @@ endif ()
 # If we need NPU libraries:
 if (ETHOS_U_NPU_ENABLED)
 
-    message(STATUS "Using ARM Ethos-U55 - adding core-driver and timing-adapter-driver includes and libraries")
+    message(STATUS "Using ARM Ethos-U NPU - adding core-driver and timing-adapter-driver includes and libraries")
     USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
-        "Path to Ethos-U55 timing adapter sources"
+        "Path to Ethos-U NPU timing adapter sources"
         "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-software/drivers/timing_adapter"
         PATH
         )
 
     USER_OPTION(ETHOS_U_NPU_DRIVER_SRC_PATH
-        "Path to Ethos-U55 core driver sources"
+        "Path to Ethos-U NPU core driver sources"
         "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-driver"
         PATH
         )
