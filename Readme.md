@@ -10,7 +10,9 @@ the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/
 - a [Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
   that offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination of
-  the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55).
+  the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55). You can also take advantage of
+  [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) and [run the Fixed Virtual Platform
+  in the cloud](./docs/sections/arm_virtual_hardware.md).
 
 ## Overview of the evaluation kit
 
