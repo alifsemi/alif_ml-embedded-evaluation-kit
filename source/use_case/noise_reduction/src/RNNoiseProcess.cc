@@ -68,20 +68,20 @@ void RNNoiseProcess::PreprocessFrame(const float*   audioData,
 
 void RNNoiseProcess::PostProcessFrame(vec1D32F& modelOutput, FrameFeatures& features, vec1D32F& outFrame)
 {
-    std::vector<float> g = modelOutput;  /* Gain values. */
-    std::vector<float> gf(FREQ_SIZE, 0);
+    std::vector<float> outputBands = modelOutput;
+    std::vector<float> gain(FREQ_SIZE, 0);
 
     if (!features.m_silence) {
-        PitchFilter(features, g);
+        PitchFilter(features, outputBands);
         for (size_t i = 0; i < NB_BANDS; i++) {
             float alpha = .6f;
-            g[i] = std::max(g[i], alpha * m_lastGVec[i]);
-            m_lastGVec[i] = g[i];
+            outputBands[i] = std::max(outputBands[i], alpha * m_lastGVec[i]);
+            m_lastGVec[i] = outputBands[i];
         }
-        InterpBandGain(gf, g);
+        InterpBandGain(gain, outputBands);
         for (size_t i = 0; i < FREQ_SIZE; i++) {
-            features.m_fftX[2 * i] *= gf[i];  /* Real. */
-            features.m_fftX[2 * i + 1] *= gf[i];  /*imaginary. */
+            features.m_fftX[2 * i] *= gain[i];  /* Real. */
+            features.m_fftX[2 * i + 1] *= gain[i];  /*imaginary. */
 
         }
 
@@ -132,7 +132,7 @@ void RNNoiseProcess::ComputeFrameFeatures(vec1D32F& audioWindow,
                         features.m_Ex,
                         this->m_analysisMem);
 
-    float E = 0.0;
+    float energy = 0.0;
 
     vec1D32F Ly(NB_BANDS, 0);
     vec1D32F p(WINDOW_SIZE, 0);
@@ -197,12 +197,12 @@ void RNNoiseProcess::ComputeFrameFeatures(vec1D32F& audioWindow,
         Ly[i] = std::max<float>(logMax - 7, std::max<float>(follow - 1.5, Ly[i]));
         logMax = std::max<float>(logMax, Ly[i]);
         follow = std::max<float>(follow - 1.5, Ly[i]);
-        E += features.m_Ex[i];
+        energy += features.m_Ex[i];
     }
 
     /* If there's no audio avoid messing up the state. */
     features.m_silence = true;
-    if (E < 0.04) {
+    if (energy < 0.04) {
         return;
     } else {
         features.m_silence = false;
@@ -215,7 +215,8 @@ void RNNoiseProcess::ComputeFrameFeatures(vec1D32F& audioWindow,
     VERIFY(CEPS_MEM > 2);
     uint32_t stIdx1 = this->m_memId < 1 ? CEPS_MEM + this->m_memId - 1 : this->m_memId - 1;
     uint32_t stIdx2 = this->m_memId < 2 ? CEPS_MEM + this->m_memId - 2 : this->m_memId - 2;
-
+    VERIFY(stIdx1 < this->m_cepstralMem.size());
+    VERIFY(stIdx2 < this->m_cepstralMem.size());
     auto ceps1 = this->m_cepstralMem[stIdx1];
     auto ceps2 = this->m_cepstralMem[stIdx2];
 
@@ -547,7 +548,7 @@ int RNNoiseProcess::RemoveDoubling(
     }
 
     size_t pitchIdx  = pitchIdx0_;
-    size_t pitchIdx0 = pitchIdx0_;
+    const size_t pitchIdx0 = pitchIdx0_;
 
     float xx = 0;
     for ( size_t i = xStart; i < xStart+frameSize; ++i) {
@@ -563,7 +564,7 @@ int RNNoiseProcess::RemoveDoubling(
     yyLookup[0] = xx;
     float yy = xx;
 
-    for ( size_t i = 1; i < maxPeriod+1; ++i) {
+    for ( size_t i = 1; i < yyLookup.size(); ++i) {
         yy = yy + (pitchBuf[xStart-i] * pitchBuf[xStart-i]) -
                 (pitchBuf[xStart+frameSize-i] * pitchBuf[xStart+frameSize-i]);
         yyLookup[i] = std::max(0.0f, yy);
@@ -605,6 +606,7 @@ int RNNoiseProcess::RemoveDoubling(
             xy2 += (pitchBuf[i] * pitchBuf[i-pitchIdx1b]);
         }
         xy = 0.5f * (xy + xy2);
+        VERIFY(pitchIdx1b < maxPeriod+1);
         yy = 0.5f * (yyLookup[pitchIdx1] + yyLookup[pitchIdx1b]);
 
         float g1 = this->ComputePitchGain(xy, xx, yy);
@@ -710,7 +712,7 @@ void RNNoiseProcess::AutoCorr(
 void RNNoiseProcess::PitchXCorr(
     const vec1D32F& x,
     const vec1D32F& y,
-    vec1D32F& ac,
+    vec1D32F& xCorr,
     size_t len,
     size_t maxPitch)
 {
@@ -719,17 +721,17 @@ void RNNoiseProcess::PitchXCorr(
         for (size_t j = 0; j < len; j++) {
             sum += x[j] * y[i + j];
         }
-        ac[i] = sum;
+        xCorr[i] = sum;
     }
 }
 
 /* Linear predictor coefficients */
 void RNNoiseProcess::LPC(
-    const vec1D32F& ac,
+    const vec1D32F& correlation,
     int32_t p,
     vec1D32F& lpc)
 {
-    auto error = ac[0];
+    auto error = correlation[0];
 
     if (error != 0) {
         for (int i = 0; i < p; i++) {
@@ -737,10 +739,10 @@ void RNNoiseProcess::LPC(
             /* Sum up this iteration's reflection coefficient */
             float rr = 0;
             for (int j = 0; j < i; j++) {
-                rr += lpc[j] * ac[i - j];
+                rr += lpc[j] * correlation[i - j];
             }
 
-            rr += ac[i + 1];
+            rr += correlation[i + 1];
             auto r = -rr / error;
 
             /* Update LP coefficients and total error */
@@ -755,7 +757,7 @@ void RNNoiseProcess::LPC(
             error = error - (r * r * error);
 
             /* Bail out once we get 30dB gain */
-            if (error < (0.001 * ac[0])) {
+            if (error < (0.001 * correlation[0])) {
                 break;
             }
         }
@@ -790,19 +792,19 @@ void RNNoiseProcess::Fir5(
     }
 }
 
-void RNNoiseProcess::PitchFilter(FrameFeatures &features, vec1D32F &g) {
+void RNNoiseProcess::PitchFilter(FrameFeatures &features, vec1D32F &gain) {
     std::vector<float> r(NB_BANDS, 0);
     std::vector<float> rf(FREQ_SIZE, 0);
     std::vector<float> newE(NB_BANDS);
 
     for (size_t i = 0; i < NB_BANDS; i++) {
-        if (features.m_Exp[i] > g[i]) {
+        if (features.m_Exp[i] > gain[i]) {
             r[i] = 1;
         } else {
 
 
-            r[i] = std::pow(features.m_Exp[i], 2) * (1 - std::pow(g[i], 2)) /
-                   (.001 + std::pow(g[i], 2) * (1 - std::pow(features.m_Exp[i], 2)));
+            r[i] = std::pow(features.m_Exp[i], 2) * (1 - std::pow(gain[i], 2)) /
+                   (.001 + std::pow(gain[i], 2) * (1 - std::pow(features.m_Exp[i], 2)));
         }
 
 

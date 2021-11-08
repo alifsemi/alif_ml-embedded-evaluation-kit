@@ -192,7 +192,7 @@ namespace rnn {
          * @brief       Computes pitch cross-correlation.
          * @param[in]   x          Input vector 1.
          * @param[in]   y          Input vector 2.
-         * @param[out]  ac         Cross-correlation output vector.
+         * @param[out]  xCorr         Cross-correlation output vector.
          * @param[in]   len        Number of elements to consider for correlation.
          *                         computation.
          * @param[in]   maxPitch   Maximum pitch.
@@ -200,7 +200,7 @@ namespace rnn {
         void PitchXCorr(
             const vec1D32F& x,
             const vec1D32F& y,
-            vec1D32F& ac,
+            vec1D32F& xCorr,
             size_t len,
             size_t maxPitch);
 

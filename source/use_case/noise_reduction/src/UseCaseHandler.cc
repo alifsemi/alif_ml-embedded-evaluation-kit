@@ -291,7 +291,7 @@ namespace app {
 
         size_t numByteToBeWritten = audioFrame.size() * sizeof(int16_t);
         if( numByteToBeWritten > memSize) {
-            printf_err("Overflow error: Writing %d of %d bytes to memory @ 0x%p.\n", memSize, numByteToBeWritten, memAddress);
+            printf_err("Overflow error: Writing %zu of %zu bytes to memory @ 0x%p.\n", memSize, numByteToBeWritten, memAddress);
             numByteToBeWritten = memSize;
         }
 
