@@ -102,6 +102,26 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea
     --output ./resources_downloaded/kws_asr/kws/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/kws_asr/kws/ofm0.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite \
+    --output ./resources_downloaded/noise_reduction/rnnoise_INT8.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/main_input_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ifm0.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/vad_gru_prev_state_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ifm1.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/noise_gru_prev_state_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ifm2.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/denoise_gru_prev_state_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ifm3.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ofm0.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_1_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ofm1.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_2_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ofm2.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_3_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ofm3.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_4_int8/0.npy \
+    --output ./resources_downloaded/noise_reduction/ofm4.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/dnn_small/tflite_int8/dnn_s_quantized.tflite \
     --output ./resources_downloaded/inference_runner/dnn_s_quantized.tflite
 
@@ -216,6 +236,38 @@ mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/ad
 mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad_medium_int8_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/vww/vww4_128_128_INT8.tflite \
+    --accelerator-config=ethos-u55-128 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Shared_Sram \
+    --system-config=Ethos_U55_High_End_Embedded \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/vww/vww4_128_128_INT8_vela_H128.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/vww/vww4_128_128_INT8.tflite \
+    --accelerator-config=ethos-u65-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U65_High_End \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/vww/vww4_128_128_INT8_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/noise_reduction/rnnoise_INT8.tflite \
+    --accelerator-config=ethos-u55-128 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Shared_Sram \
+    --system-config=Ethos_U55_High_End_Embedded \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downloaded/noise_reduction/rnnoise_INT8_vela_H128.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/noise_reduction/rnnoise_INT8.tflite \
+    --accelerator-config=ethos-u65-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U65_High_End \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downloaded/noise_reduction/rnnoise_INT8_vela_Y256.tflite
 
 mkdir cmake-build-mps3-sse-300-gnu-release and cd cmake-build-mps3-sse-300-gnu-release
 

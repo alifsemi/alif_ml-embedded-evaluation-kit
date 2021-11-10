@@ -29,9 +29,9 @@ bool RunInference(arm::app::Model& model, const int8_t vec[]) {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < IFM_DATA_SIZE ?
+    const size_t copySz = inputTensor->bytes < IFM_0_DATA_SIZE ?
                           inputTensor->bytes :
-                          IFM_DATA_SIZE;
+                          IFM_0_DATA_SIZE;
     memcpy(inputTensor->data.data, vec, copySz);
 
     return model.RunInference();
@@ -63,7 +63,7 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     TfLiteTensor* outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_DATA_SIZE);
+    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 
@@ -83,7 +83,8 @@ TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]") 
 }
 
 TEST_CASE("Running inference with Tflu and DsCnnModel Uint8", "[DS_CNN]") {
-    for (uint32_t i = 0; i < NUMBER_OF_FM_FILES; ++i) {
+    REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
+    for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
         const int8_t* input_goldenFV = get_ifm_data_array(i);
         const int8_t* output_goldenFV = get_ofm_data_array(i);
 

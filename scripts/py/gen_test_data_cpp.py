@@ -22,6 +22,7 @@ import datetime
 import math
 import os
 import numpy as np
+from pathlib import Path
 
 from argparse import ArgumentParser
 from jinja2 import Environment, FileSystemLoader
@@ -43,8 +44,8 @@ env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__)
                   lstrip_blocks=True)
 
 
-def write_hpp_file(header_filename, cc_file_path, header_template_file, num_iofms,
-                   ifm_array_names, ifm_size, ofm_array_names, ofm_size, iofm_data_type):
+def write_hpp_file(header_filename, cc_file_path, header_template_file, num_ifms, num_ofms,
+                   ifm_array_names, ifm_sizes, ofm_array_names, ofm_sizes, iofm_data_type):
     header_file_path = os.path.join(args.header_folder_path, header_filename)
 
     print(f"++ Generating {header_file_path}")
@@ -53,11 +54,12 @@ def write_hpp_file(header_filename, cc_file_path, header_template_file, num_iofm
                                  gen_time=datetime.datetime.now(),
                                  year=datetime.datetime.now().year)
     env.get_template('TestData.hpp.template').stream(common_template_header=hdr,
-                                                   fm_count=num_iofms,
+                                                   ifm_count=num_ifms,
+                                                   ofm_count=num_ofms,
                                                    ifm_var_names=ifm_array_names,
-                                                   ifm_var_size=ifm_size,
+                                                   ifm_var_sizes=ifm_sizes,
                                                    ofm_var_names=ofm_array_names,
-                                                   ofm_var_size=ofm_size,
+                                                   ofm_var_sizes=ofm_sizes,
                                                    data_type=iofm_data_type,
                                                    namespaces=args.namespaces) \
         .dump(str(header_file_path))
@@ -116,17 +118,20 @@ def main(args):
     common_cc_filename = "TestData" + add_usecase_fname + ".cc"
 
     # In the data_folder_path there should be pairs of ifm-ofm
-    # It's assumed the ifm-ofm nameing convention: ifm0.npy-ofm0.npy, ifm1.npy-ofm1.npy
-    i_ofms_count = int(len([name for name in os.listdir(os.path.join(args.data_folder_path)) if name.lower().endswith('.npy')]) / 2)
+    # It's assumed the ifm-ofm naming convention: ifm0.npy-ofm0.npy, ifm1.npy-ofm1.npy
+    ifms_count = int(len(list(Path(args.data_folder_path).glob('ifm*.npy'))))
+    ofms_count = int(len(list(Path(args.data_folder_path).glob('ofm*.npy'))))
+
+    #i_ofms_count = int(len([name for name in os.listdir(os.path.join(args.data_folder_path)) if name.lower().endswith('.npy')]) / 2)
 
     iofm_data_type = "int8_t"
-    if (i_ofms_count > 0):
+    if ifms_count > 0:
         iofm_data_type = "int8_t" if (np.load(os.path.join(args.data_folder_path, "ifm0.npy")).dtype == np.int8) else "uint8_t"
 
-    ifm_size = -1
-    ofm_size = -1
+    ifm_sizes = []
+    ofm_sizes = []
 
-    for idx in range(i_ofms_count):
+    for idx in range(ifms_count):
         # Save the fm cc file
         base_name = "ifm" + str(idx)
         filename = base_name+".npy"
@@ -134,11 +139,9 @@ def main(args):
         cc_filename = os.path.join(args.source_folder_path, array_name + ".cc")
         ifm_array_names.append(array_name)
         write_individual_cc_file(filename, cc_filename, header_filename, args.license_template, array_name, iofm_data_type)
-        if ifm_size == -1:
-            ifm_size = get_npy_vec_size(filename)
-        elif ifm_size != get_npy_vec_size(filename):
-            raise Exception(f"ifm size changed for index {idx}")
+        ifm_sizes.append(get_npy_vec_size(filename))
 
+    for idx in range(ofms_count):
         # Save the fm cc file
         base_name = "ofm" + str(idx)
         filename = base_name+".npy"
@@ -146,14 +149,11 @@ def main(args):
         cc_filename = os.path.join(args.source_folder_path, array_name + ".cc")
         ofm_array_names.append(array_name)
         write_individual_cc_file(filename, cc_filename, header_filename, args.license_template, array_name, iofm_data_type)
-        if ofm_size == -1:
-            ofm_size = get_npy_vec_size(filename)
-        elif ofm_size != get_npy_vec_size(filename):
-            raise Exception(f"ofm size changed for index {idx}")
+        ofm_sizes.append(get_npy_vec_size(filename))
 
     common_cc_filepath = os.path.join(args.source_folder_path, common_cc_filename)
     write_hpp_file(header_filename, common_cc_filepath, args.license_template,
-                   i_ofms_count, ifm_array_names, ifm_size, ofm_array_names, ofm_size, iofm_data_type)
+                   ifms_count, ofms_count, ifm_array_names, ifm_sizes, ofm_array_names, ofm_sizes, iofm_data_type)
 
 
 if __name__ == '__main__':

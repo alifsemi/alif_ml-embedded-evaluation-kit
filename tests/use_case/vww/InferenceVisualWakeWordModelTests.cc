@@ -28,9 +28,9 @@ bool RunInference(arm::app::Model& model, const int8_t* imageData)
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < IFM_DATA_SIZE ?
+    const size_t copySz = inputTensor->bytes < IFM_0_DATA_SIZE ?
                             inputTensor->bytes :
-                            IFM_DATA_SIZE;
+                            IFM_0_DATA_SIZE;
 
     memcpy(inputTensor->data.data, imageData, copySz);
 
@@ -52,7 +52,7 @@ void TestInference(int imageIdx,arm::app::Model& model) {
     TfLiteTensor* outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_DATA_SIZE);
+    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 

@@ -29,9 +29,9 @@ bool RunInference(arm::app::Model& model, const int8_t imageData[])
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < IFM_DATA_SIZE ?
+    const size_t copySz = inputTensor->bytes < IFM_0_DATA_SIZE ?
                             inputTensor->bytes :
-                            IFM_DATA_SIZE;
+                            IFM_0_DATA_SIZE;
     memcpy(inputTensor->data.data, imageData, copySz);
 
     if(model.IsDataSigned()){
@@ -51,7 +51,7 @@ void TestInference(int imageIdx, arm::app::Model& model, T tolerance) {
     TfLiteTensor* outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_DATA_SIZE);
+    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 
@@ -71,12 +71,12 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
         REQUIRE(model.Init());
         REQUIRE(model.IsInited());
 
-        for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
+        for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
             TestInference<uint8_t>(i, model, 1);
         }
     }
 
-    for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
+    for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
         DYNAMIC_SECTION("Executing inference with re-init")
         {
             arm::app::MobileNetModel model{};

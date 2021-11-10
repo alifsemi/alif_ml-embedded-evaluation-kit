@@ -78,7 +78,7 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     TfLiteTensor* outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_DATA_SIZE);
+    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 
@@ -89,7 +89,8 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
 
 TEST_CASE("Running inference with Tflu and Wav2LetterModel Int8", "[Wav2Letter]")
 {
-    for (uint32_t i = 0 ; i < NUMBER_OF_FM_FILES; ++i) {
+    REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
+    for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
         auto input_goldenFV = get_ifm_data_array(i);;
         auto output_goldenFV = get_ofm_data_array(i);
 

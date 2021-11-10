@@ -32,7 +32,7 @@ static const {{data_type}} *ofm_arrays[] = {
 
 const {{data_type}}* get_ifm_data_array(const uint32_t idx)
 {
-    if (idx < NUMBER_OF_FM_FILES) {
+    if (idx < NUMBER_OF_IFM_FILES) {
         return ifm_arrays[idx];
     }
     return nullptr;
@@ -40,7 +40,7 @@ const {{data_type}}* get_ifm_data_array(const uint32_t idx)
 
 const {{data_type}}* get_ofm_data_array(const uint32_t idx)
 {
-    if (idx < NUMBER_OF_FM_FILES) {
+    if (idx < NUMBER_OF_OFM_FILES) {
         return ofm_arrays[idx];
     }
     return nullptr;

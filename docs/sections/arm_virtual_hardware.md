@@ -23,5 +23,5 @@ Note that you can register to receive free AWS credits to use Arm Virtual Hardwa
 
 You can find more information about Arm Virtual Hardware [here](https://arm-software.github.io/VHT/main/overview/html/index.html).
 
-Once you have access to the AWS instance, we recommend starting from the [quick start guide](../quick_start.md) in order to get familiar
+Once you have access to the AWS instance, we recommend starting from the [quick start guide](../quick_start.md#Quick-start-example-ML-application) in order to get familiar
 with the ml-embedded-evaluation-kit. Note that on the AWS instance, the FVP is available under `/opt/FVP_Corstone_SSE-300`.

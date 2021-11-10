@@ -88,6 +88,30 @@ json_uc_res = [{
                        "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy"}]
     },
     {
+        "use_case_name": "noise_reduction",
+        "resources": [{"name": "rnnoise_INT8.tflite",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite"},
+                      {"name": "ifm0.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/main_input_int8/0.npy"},
+                      {"name": "ifm1.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/vad_gru_prev_state_int8/0.npy"},
+                      {"name": "ifm2.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/noise_gru_prev_state_int8/0.npy"},
+                      {"name": "ifm3.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_input/denoise_gru_prev_state_int8/0.npy"},
+                      {"name": "ofm0.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_int8/0.npy"},
+                      {"name": "ofm1.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_1_int8/0.npy"},
+                      {"name": "ofm2.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_2_int8/0.npy"},
+                      {"name": "ofm3.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_3_int8/0.npy"},
+                      {"name": "ofm4.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/testing_output/Identity_4_int8/0.npy"},
+                     ]
+    },
+    {
         "use_case_name": "inference_runner",
         "resources": [{"name": "dnn_s_quantized.tflite",
                        "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/dnn_small/tflite_int8/dnn_s_quantized.tflite"}

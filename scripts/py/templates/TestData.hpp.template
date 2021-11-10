@@ -25,16 +25,21 @@
 namespace {{namespace}} {
 {% endfor %}
 
-#define NUMBER_OF_FM_FILES  ({{fm_count}}U)
-#define IFM_DATA_SIZE  ({{ifm_var_size}}U)
-#define OFM_DATA_SIZE  ({{ofm_var_size}}U)
+#define NUMBER_OF_IFM_FILES  ({{ifm_count}}U)
+#define NUMBER_OF_OFM_FILES  ({{ofm_count}}U)
+{% for ifm_size in ifm_var_sizes %}
+#define IFM_{{loop.index0}}_DATA_SIZE  ({{ifm_size}}U)
+{% endfor %}
+{% for ofm_size in ofm_var_sizes %}
+#define OFM_{{loop.index0}}_DATA_SIZE  ({{ofm_size}}U)
+{% endfor %}
 
 {% for ifm_var_name in ifm_var_names %}
-extern const {{data_type}} {{ifm_var_name}}[IFM_DATA_SIZE];
+extern const {{data_type}} {{ifm_var_name}}[IFM_{{loop.index0}}_DATA_SIZE];
 {% endfor %}
 
 {% for ofm_var_name in ofm_var_names %}
-extern const {{data_type}} {{ofm_var_name}}[OFM_DATA_SIZE];
+extern const {{data_type}} {{ofm_var_name}}[OFM_{{loop.index0}}_DATA_SIZE];
 {% endfor %}
 
 const {{data_type}}* get_ifm_data_array(const uint32_t idx);
