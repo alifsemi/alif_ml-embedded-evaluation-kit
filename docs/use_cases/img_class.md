@@ -295,11 +295,11 @@ input from the user:
 User input required
 Enter option number from:
 
-1. Classify next image
-2. Classify image at chosen index
-3. Run classification on all images
-4. Show NN model info
-5. List images
+  1. Classify next ifm
+  2. Classify ifm at chosen index
+  3. Run classification on all ifm
+  4. Show NN model info
+  5. List ifm
 
 Choice:
 

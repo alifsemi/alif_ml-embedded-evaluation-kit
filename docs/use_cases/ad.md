@@ -311,13 +311,13 @@ input from the user. For example:
 User input required
 Enter option number from:
 
-1. Classify next audio clip
-2. Classify audio clip at chosen index
-3. Run classification on all audio clips
-4. Show NN model info
-5. List audio clips
+  1. Classify next audio signal
+  2. Classify audio signal at chosen index
+  3. Run classification on all audio signals
+  4. Show NN model info
+  5. List audio signals
 
-Choice:
+  Choice:
 
 ```
 
@@ -328,7 +328,7 @@ What the preceding choices do:
 2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
 
     > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
+    > build. By default, the pre-built application has one file with index `0`.
 
 3. Run ... on all: Triggers sequential inference executions on all built-in applications.
 
@@ -354,7 +354,7 @@ What the preceding choices do:
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.048891
     INFO - ZeroPoint[0] = -30
-    INFO - Activation buffer (a.k.a tensor arena) size used: 198016
+    INFO - Activation buffer (a.k.a tensor arena) size used: 321252
     INFO - Number of operators: 1
     INFO -  Operator 0: ethos-u
     ```
@@ -363,10 +363,7 @@ What the preceding choices do:
 
     ```log
     INFO - List of Files:
-    INFO - 0 =>; anomaly_id_00_00000000.wav
-    INFO - 1 =>; anomaly_id_02_00000076.wav
-    INFO - 2 =>; normal_id_00_00000004.wav
-    INFO - 3 =>; normal_id_02_00000001.wav
+    INFO - 0 =>; random_id_00_000000.wav
     ```
 
 ### Running Anomaly Detection
@@ -376,53 +373,41 @@ Please select the first menu option to execute the Anomaly Detection.
 The following example illustrates the output of an application:
 
 ```log
-INFO - Running inference on audio clip 0 => anomaly_id_00_00000000.wav
-INFO - Inference 1/13
-INFO - Inference 2/13
-INFO - Inference 3/13
-INFO - Inference 4/13
-INFO - Inference 5/13
-INFO - Inference 6/13
-INFO - Inference 7/13
-INFO - Inference 8/13
-INFO - Inference 9/13
-INFO - Inference 10/13
-INFO - Inference 11/13
-INFO - Inference 12/13
-INFO - Inference 13/13
-INFO - Average anomaly score is: -0.024493
-Anomaly threshold is: -0.800000
-Anomaly detected!
+INFO - Running inference on audio clip 4 => random_id_00_000000.wav
+INFO - Inference 1/1
+INFO - Average anomaly score is: -0.883147
+INFO - Anomaly threshold is: -0.800000
+INFO - Everything fine, no anomaly detected!
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 628122
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 135087
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 62870
-INFO - NPU ACTIVE cycles: 1081007
-INFO - NPU IDLE cycles: 626
-INFO - NPU TOTAL cycles: 1081634
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 485194
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 138111
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 56245
+INFO - NPU ACTIVE cycles: 967731
+INFO - NPU IDLE cycles: 441
+INFO - NPU TOTAL cycles: 968172
 ```
 
 As multiple inferences must be run for one clip, it takes around a minute for all inferences to complete.
 
-For the `anomaly_id_00_00000000.wav` clip, after averaging results across all inferences, the score is greater than the
-chosen anomaly threshold. Therefore, an anomaly was detected with the machine in this clip.
+For the `random_id_00_000000.wav` clip, after averaging results across all inferences needed, the score is less than the
+chosen anomaly threshold. Therefore, an anomaly was not detected with the machine in this clip.
 
 The profiling section of the log shows that for each inference. For the last inference, the profiling reports:
 
 - *Ethos-U* PMU report:
 
-  - 1,081,634 total cycle: The number of NPU cycles
+  - 968,172 total cycle: The number of NPU cycles
 
-  - 1,081,007 active cycles: number of NPU cycles that were used for computation
+  - 967,731 active cycles: number of NPU cycles that were used for computation
 
-  - 626 idle cycles: number of cycles for which the NPU was idle
+  - 441 idle cycles: number of cycles for which the NPU was idle
 
-  - 628,122 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
+  - 48,5194 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
     *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
-  - 135,087 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
+  - 138,111 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 62,870 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
+  - 56,245 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
    *Ethos-U* NPU reads the model. So, read-only.
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU

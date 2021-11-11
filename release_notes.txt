@@ -1,7 +1,9 @@
 Changes in 21.11
     * Support for 21.08 Ethos-U component and dependencies (core-software, core-driver, Vela 3.1.0, CMSIS, TensorFlow Lite).
     * Added dynamic load support for FVP for inference runner use-case.
-    * Added support for different memory modes: Shared_Sram, Dedicated_Sram and Sram_Only
+    * Added support for different memory modes: Shared_Sram, Dedicated_Sram and Sram_Only.
+    * Added Noise Reduction use case.
+    * Updated support for Arm GNU Embedded Toolchain 10.3-2021.07 and Arm Compiler 6.17.
     * Documentation updates.
 
 Changes in 21.08

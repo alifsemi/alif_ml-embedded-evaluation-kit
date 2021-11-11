@@ -16,6 +16,7 @@
 ## Introduction
 
 This document describes the process of setting up and running the Arm® Ethos™-U NPU Visual Wake Word example.
+Visual Wake Words is a common vision use-case to detect if a the provided image contains a person.
 
 Use case code could be found in [source/use_case/vww](../../source/use_case/vww) directory.
 
@@ -57,7 +58,7 @@ In addition to the already specified build option in the main reference manual, 
 ### Build process
 
 > **Note:** This section describes the process for configuring the build for `MPS3: SSE-300` for different target
->platform see [Building](../documentation.md#Building) section.
+> platform see [Building](../documentation.md#Building) section.
 
 Create a build directory and navigate inside:
 
@@ -274,11 +275,11 @@ user input from telnet terminal:
 User input required
 Enter option number from:
 
-1. Classify next image
-2. Classify image at chosen index
-3. Run classification on all images
-4. Show NN model info
-5. List images
+  1. Classify next ifm
+  2. Classify ifm at chosen index
+  3. Run classification on all ifm
+  4. Show NN model info
+  5. List ifm
 
 Choice:
 
@@ -297,57 +298,56 @@ Choice:
 4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
 
     ```log
-     INFO - uTFL version: 2.5.0                                                                                              
-    INFO - Added ethos-u support to op resolver                                                                             
-    INFO - Creating allocator using tensor arena in SRAM                                                                    
-    INFO - Allocating tensors                                                                                               
-    INFO - Model INPUT tensors:                                                                                             
-    INFO -  tensor type is INT8                                                                                             
-    INFO -  tensor occupies 16384 bytes with dimensions                                                                     
-    INFO -          0:   1                                                                                                  
-    INFO -          1: 128                                                                                                  
-    INFO -          2: 128                                                                                                  
-    INFO -          3:   1                                                                                                  
-    INFO - Quant dimension: 0                                                                                               
-    INFO - Scale[0] = 0.008138                                                                                              
-    INFO - ZeroPoint[0] = -70                                                                                               
-    INFO - Model OUTPUT tensors:                                                                                            
-    INFO -  tensor type is INT8                                                                                             
-    INFO -  tensor occupies 2 bytes with dimensions                                                                         
-    INFO -          0:   1                                                                                                  
-    INFO -          1:   2                                                                                                  
-    INFO - Quant dimension: 0                                                                                               
-    INFO - Scale[0] = 0.022299                                                                                              
-    INFO - ZeroPoint[0] = -17                                                                                               
-    INFO - Activation buffer (a.k.a tensor arena) size used: 133292                                                         
-    INFO - Number of operators: 19                                                                                          
-    INFO -  Operator 0: ethos-u                                                                                             
-    INFO -  Operator 1: PAD                                                                                                
-    INFO -  Operator 2: ethos-u                                                                                             
-    INFO -  Operator 3: PAD                                                                                                 
-    INFO -  Operator 4: ethos-u                                                                                             
-    INFO -  Operator 5: PAD                                                                                                
-    INFO -  Operator 6: ethos-u                                                                                             
-    INFO -  Operator 7: PAD                                                                                                 
-    INFO -  Operator 8: ethos-u                                                                                             
-    INFO -  Operator 9: PAD                                                                                                 
-    INFO -  Operator 10: ethos-u                                                                                            
-    INFO -  Operator 11: PAD                                                                                                
-    INFO -  Operator 12: ethos-u                                                                                            
-    INFO -  Operator 13: PAD                                                                                                
-    INFO -  Operator 14: ethos-u                                                                                            
-    INFO -  Operator 15: PAD                                                                                                
-    INFO -  Operator 16: ethos-u                                                                                            
-    INFO -  Operator 17: AVERAGE_POOL_2D                                                                                    
-    INFO -  Operator 18: ethos-u  
+    INFO - Added ethos-u support to op resolver
+    INFO - Creating allocator using tensor arena in SRAM
+    INFO - Allocating tensors
+    INFO - Model INPUT tensors: 
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 16384 bytes with dimensions
+    INFO -          0:   1
+    INFO -          1: 128
+    INFO -          2: 128
+    INFO -          3:   1
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.008138
+    INFO - ZeroPoint[0] = -70
+    INFO - Model OUTPUT tensors: 
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 2 bytes with dimensions
+    INFO -          0:   1
+    INFO -          1:   2
+    INFO - Quant dimension: 0
+    INFO - Scale[0] = 0.022299
+    INFO - ZeroPoint[0] = -17
+    INFO - Activation buffer (a.k.a tensor arena) size used: 133716
+    INFO - Number of operators: 19
+    INFO -  Operator 0: ethos-u
+    INFO -  Operator 1: PAD
+    INFO -  Operator 2: ethos-u
+    INFO -  Operator 3: PAD
+    INFO -  Operator 4: ethos-u
+    INFO -  Operator 5: PAD
+    INFO -  Operator 6: ethos-u
+    INFO -  Operator 7: PAD
+    INFO -  Operator 8: ethos-u
+    INFO -  Operator 9: PAD
+    INFO -  Operator 10: ethos-u
+    INFO -  Operator 11: PAD
+    INFO -  Operator 12: ethos-u
+    INFO -  Operator 13: PAD
+    INFO -  Operator 14: ethos-u
+    INFO -  Operator 15: PAD
+    INFO -  Operator 16: ethos-u
+    INFO -  Operator 17: AVERAGE_POOL_2D
+    INFO -  Operator 18: ethos-u
     ```
 
 5. “List Images” menu option prints a list of pair image indexes - the original filenames embedded in the application:
 
     ```log
-    INFO - List of images:
-    INFO - 0 => adult_blur.png
-    INFO - 1 => man_in_red_jacket.png
+    INFO - List of Files:
+    INFO -  0 => man_in_red_jacket.png
+    INFO -  1 => st_paul_s_cathedral.png
     ```
 
 ### Running Visual Wake Word
@@ -357,40 +357,40 @@ Please select the first menu option to execute Visual Wake Word.
 The following example illustrates application output for classification:
 
 ```log
-INFO - Running inference on image 0 => adult_blur.png
+INFO - Running inference on image 0 => man_in_red_jacket.png
 INFO - Final results:
-INFO -Total number of inferences: 1
-INFO - 0) 0 (0.601562) -> Person detected: No
-INFO - Profile for Inference :
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 95992
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 59735
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 34477
-INFO - NPU ACTIVE cycles: 372782
-INFO - NPU IDLE cycles: 390
-INFO - NPU total cycles: 373172
+INFO - Total number of inferences: 1
+INFO - 0) 1 (3.211100) -> person
+INFO - Profile for Inference:
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 228679
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 153031
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 40625
+INFO - NPU ACTIVE cycles: 706754
+INFO - NPU IDLE cycles: 10954
+INFO - NPU TOTAL cycles: 717708
 ```
 
 It could take several minutes to complete one inference run (average time is 2-3 minutes).
 
-The log shows the inference results for “image 1” (1 - index) that corresponds to “adult_blur.png” in the sample
+The log shows the inference results for “image 1” (1 - index) that corresponds to man_in_red_jacket.png” in the sample
 image resource folder.
 
 The profiling section of the log shows that for this inference:
 
 - Ethos-U's PMU report:
 
-  - 373,172 total cycle: The number of NPU cycles
+  - 717,708 total cycle: The number of NPU cycles
 
-  - 372,782 active cycles: number of NPU cycles that were used for computation
+  - 706,754 active cycles: number of NPU cycles that were used for computation
 
-  - 390 idle cycles: number of cycles for which the NPU was idle
+  - 10,954 idle cycles: number of cycles for which the NPU was idle
 
-  - 95,992 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
+  - 228,679 AXI0 read beats: The number of AXI beats with read transactions from AXI0 bus. AXI0 is the bus where
     Ethos-U NPU reads and writes to the computation buffers (activation buf/tensor arenas).
 
-  - 59,735 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
+  - 153,031 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 34,477 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
+  - 40,625 AXI1 read beats: The number of AXI beats with read transactions from AXI1 bus. AXI1 is the bus where
     Ethos-U NPU reads the model (read only)
 
 - For FPGA platforms, CPU cycle count can also be enabled. For FVP, however, CPU cycle counters should not be used as
