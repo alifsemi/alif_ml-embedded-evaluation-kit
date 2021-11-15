@@ -134,6 +134,9 @@ NPUConfig = namedtuple('NPUConfig',['config_name',
                                     'ethos_u_npu_id',
                                     'ethos_u_config_id'])
 
+# The default internal SRAM size for Corstone-300 implementation on MPS3
+mps3_max_sram_sz = 4 * 1024 * 1024 # 4 MiB
+
 
 def call_command(command: str) -> str:
     """
@@ -192,7 +195,9 @@ def get_default_npu_config_from_name(config_name: str) -> NPUConfig:
     return None
 
 
-def set_up_resources(run_vela_on_models=False, additional_npu_config_names=[]):
+def set_up_resources(run_vela_on_models=False,
+                     additional_npu_config_names=[],
+                     arena_cache_size=mps3_max_sram_sz):
     """
     Helpers function that retrieve the output from a command.
 
@@ -200,6 +205,7 @@ def set_up_resources(run_vela_on_models=False, additional_npu_config_names=[]):
     ----------
     run_vela_on_models (bool):    Specifies if run vela on downloaded models.
     additional_npu_config_names(list): list of strings of Ethos-U NPU configs.
+    arena_cache_size(int):    Specifies arena cache size in bytes.
     """
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.abspath(os.path.join(current_file_dir, "resources_downloaded"))
@@ -313,7 +319,8 @@ def set_up_resources(run_vela_on_models=False, additional_npu_config_names=[]):
                        f"--config {config_file} " +
                        f"--memory-mode={config.memory_mode} " +
                        f"--system-config={config.system_config} " +
-                       f"--output-dir={output_dir}")
+                       f"--output-dir={output_dir} " +
+                       f"--arena-cache-size={arena_cache_size} ")
 
                 # we want the name to include the configuration suffix. For example: vela_H128,
                 # vela_Y512 etc.
@@ -341,9 +348,15 @@ if __name__ == '__main__':
                         help=f"""Additional (non-default) configurations for Vela:
                         {valid_npu_config_names}""",
                         default=[], action="append")
+    parser.add_argument("--arena-cache-size",
+                        help="Arena cache size in bytes",
+                        type=int,
+                        default=mps3_max_sram_sz)
     args = parser.parse_args()
 
     logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    set_up_resources(not args.skip_vela, args.additional_ethos_u_config_name)
+    set_up_resources(not args.skip_vela,
+                     args.additional_ethos_u_config_name,
+                     args.arena_cache_size)
