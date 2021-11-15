@@ -174,7 +174,8 @@ Once the USB A to USB B cable between the MPS3 and the development machine is co
 the board enumerates as a mass storage device over this USB connection.
 
 Depending on the version of the board you are using, there might be two devices listed. The device named `V2M-MPS3`, or
-`V2MMPS3`, which is the `SD card`.
+`V2MMPS3`, which is the `SD card`. Note that if `V2M-MPS3` or `V2MMPS3` device is not listed, you may need to enable USB
+connection from the board. You can do this by opening a serial connection to the first serial port and issuing a `usb_on` command.
 
 If the `axf` or `elf` file is within the ITCM load size limit, it can be copied into the FPGA memory directly without
 having to break it down into separate load region-specific blobs. However, if the neural network models exceed this
@@ -195,14 +196,17 @@ size, you must use the following approach:
     cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/
     ```
 
+    Note that the `itcm.bin` and `ddr.bin` files correspond to the part of the application residing in the first and second load region respectively,
+    as defined in the [scatter file](../../source/application/hal/platforms/bare-metal/bsp/mem_layout/mps3-sse-300.sct).
+
 2. The `./bin/sectors/images.txt` file must be copied over to the MPS3. The exact location for the destination depends
    on the version of the MPS3 board and the application note for the bit file in use.
 
-   For example, the revision C of the MPS3 board hardware uses an application note directory named `ETHOSU`, to replace the
+   For example, the revision C of the MPS3 board hardware uses an application note directory named `AN547`, to replace the
    `images.txt` file, like so:
 
     ```commandline
-    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/ETHOSU/images.txt
+    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN547/images.txt
     ```
 
 3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0`. This can be typically done using
@@ -248,7 +252,7 @@ size, you must use the following approach:
     FPGA memory locations. For example:
 
     ```log
-    Reading images file \MB\HBI0309C\ETHOSU\images.txt
+    Reading images file \MB\HBI0309C\AN547\images.txt
     Writing File \SOFTWARE\itcm.bin to Address 0x00000000
 
     ............
