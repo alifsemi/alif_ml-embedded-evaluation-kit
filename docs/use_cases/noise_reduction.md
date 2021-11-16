@@ -1,21 +1,21 @@
 # Noise Reduction Code Sample
 
-- [Noise Reduction Code Sample](#noise-reduction-code-sample)
-  - [Introduction](#introduction)
-  - [How the default neural network model works](#how-the-default-neural-network-model-works)
-  - [Post-processing](#post_processing)
-    - [Dumping of memory contents from the Fixed Virtual Platform](#dumping-of-memory-contents-from-the-fixed-virtual-platform)
-    - [Dumping post processed results for all inferences](#dumping-post_processed-results-for-all-inferences)
-  - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Noise Reduction](#running-noise-reduction)
+- [Noise Reduction Code Sample](./noise_reduction.md#noise-reduction-code-sample)
+  - [Introduction](./noise_reduction.md#introduction)
+  - [How the default neural network model works](./noise_reduction.md#how-the-default-neural-network-model-works)
+  - [Post-processing](./noise_reduction.md#post_processing)
+    - [Dumping of memory contents from the Fixed Virtual Platform](./noise_reduction.md#dumping-of-memory-contents-from-the-fixed-virtual-platform)
+    - [Dumping post processed results for all inferences](./noise_reduction.md#dumping-post_processed-results-for-all-inferences)
+  - [Prerequisites](./noise_reduction.md#prerequisites)
+  - [Building the code sample application from sources](./noise_reduction.md#building-the-code-sample-application-from-sources)
+    - [Build options](./noise_reduction.md#build-options)
+    - [Build process](./noise_reduction.md#build-process)
+    - [Add custom input](./noise_reduction.md#add-custom-input)
+    - [Add custom model](./noise_reduction.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./noise_reduction.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./noise_reduction.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./noise_reduction.md#starting-fast-model-simulation)
+    - [Running Noise Reduction](./noise_reduction.md#running-noise-reduction)
 
 ## Introduction
 
@@ -71,7 +71,7 @@ For you to verify the outputs of the model after post-processing, you will have 
 to convert the post-processed outputs into a wav file.
 This offline script takes a dump file as the input and saves the denoised WAV file to disk. The following is an example
 of how to call the script from the command line after running the use-case and
-[selecting to dump memory contents](#dumping-post_processed-results-for-all-inferences).
+[selecting to dump memory contents](./noise_reduction.md#dumping-post_processed-results-for-all-inferences).
 
 ```commandline
 python scripts/py/rnnoise_dump_extractor.py --dump_file <path_to_dump_file.bin> --output_dir <path_to_output_folder>
@@ -284,7 +284,7 @@ cmake .. \
 
 > **Note** Changing the neural network model often also requires the pre-processing implementation
 > to be changed. Please refer to:
-> [How the default neural network model works](#how-the-default-neural-network-model-works).
+> [How the default neural network model works](./noise_reduction.md#how-the-default-neural-network-model-works).
 
 > **Note:** Before re-running the CMake command, clean the build directory.
 
@@ -504,7 +504,7 @@ INFO - NPU TOTAL cycles: 104514
 > **Note:** When running Fast Model, each inference can take several seconds on most systems.
 
 Each inference dumps the post processed output to memory. For further information, please refer to: 
-[Dumping post processed results for all inferences](#dumping-post_processed-results-for-all-inferences).
+[Dumping post processed results for all inferences](./noise_reduction.md#dumping-post_processed-results-for-all-inferences).
 
 The profiling section of the log shows that for this inference:
 

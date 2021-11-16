@@ -1,16 +1,16 @@
 # Coding standards and guidelines
 
-- [Coding standards and guidelines](#coding-standards-and-guidelines)
-  - [Introduction](#introduction)
-  - [Language version](#language-version)
-  - [File naming](#file-naming)
-  - [File layout](#file-layout)
-  - [Block Management](#block-management)
-  - [Naming Conventions](#naming-conventions)
-    - [CPP language naming conventions](#cpp-language-naming-conventions)
-    - [C language naming conventions](#c-language-naming-conventions)
-  - [Layout and formatting conventions](#layout-and-formatting-conventions)
-  - [Language usage](#language-usage)
+- [Coding standards and guidelines](./coding_guidelines.md#coding-standards-and-guidelines)
+  - [Introduction](./coding_guidelines.md#introduction)
+  - [Language version](./coding_guidelines.md#language-version)
+  - [File naming](./coding_guidelines.md#file-naming)
+  - [File layout](./coding_guidelines.md#file-layout)
+  - [Block Management](./coding_guidelines.md#block-management)
+  - [Naming Conventions](./coding_guidelines.md#naming-conventions)
+    - [CPP language naming conventions](./coding_guidelines.md#cpp-language-naming-conventions)
+    - [C language naming conventions](./coding_guidelines.md#c-language-naming-conventions)
+  - [Layout and formatting conventions](./coding_guidelines.md#layout-and-formatting-conventions)
+  - [Language usage](./coding_guidelines.md#language-usage)
 
 ## Introduction
 

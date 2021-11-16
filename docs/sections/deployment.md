@@ -1,12 +1,12 @@
 # Deployment
 
-- [Deployment](#deployment)
-  - [Fixed Virtual Platform](#fixed-virtual-platform)
-    - [Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone_300-fvp)
-    - [Deploying on an FVP emulating MPS3](#deploying-on-an-fvp-emulating-mps3)
-  - [MPS3 board](#mps3-board)
-    - [MPS3 board top-view](#mps3-board-top_view)
-    - [Deployment on MPS3 board](#deployment-on-mps3-board)
+- [Deployment](./deployment.md#deployment)
+  - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
+    - [Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
+    - [Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3)
+  - [MPS3 board](./deployment.md#mps3-board)
+    - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
+    - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
 
 The sample application for Arm® *Ethos™-U55* can be deployed on two target platforms:
 
@@ -45,7 +45,7 @@ To install the FVP:
 ### Deploying on an FVP emulating MPS3
 
 This section assumes that the FVP has been installed (see
-[Setting up the MPS3 Arm Corstone-300 FVP](#setting-up-the-mps3-arm-corstone-300-fvp))
+[Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone-300-fvp))
 to the home directory of the user: `~/FVP_Corstone_SSE-300`.
 
 The installation, typically, has the executable under `~/FVP_Corstone_SSE-300/model/<OS>_<compiler-version>/`

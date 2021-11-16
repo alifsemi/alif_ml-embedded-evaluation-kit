@@ -1,17 +1,17 @@
 # Visual Wake Word Code Sample
 
-- [Visual Wake Word Code Sample](#visual-wake-word-code-sample)
-  - [Introduction](#introduction)
-    - [Prerequisites](#prerequisites)
-  - [Building the Code Samples application from sources](#building-the-code-samples-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Visual Wake Word](#running-visual-wake-word)
+- [Visual Wake Word Code Sample](./visual_wake_word.md#visual-wake-word-code-sample)
+  - [Introduction](./visual_wake_word.md#introduction)
+    - [Prerequisites](./visual_wake_word.md#prerequisites)
+  - [Building the Code Samples application from sources](./visual_wake_word.md#building-the-code-samples-application-from-sources)
+    - [Build options](./visual_wake_word.md#build-options)
+    - [Build process](./visual_wake_word.md#build-process)
+    - [Add custom input](./visual_wake_word.md#add-custom-input)
+    - [Add custom model](./visual_wake_word.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./visual_wake_word.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./visual_wake_word.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./visual_wake_word.md#starting-fast-model-simulation)
+    - [Running Visual Wake Word](./visual_wake_word.md#running-visual-wake-word)
 
 ## Introduction
 

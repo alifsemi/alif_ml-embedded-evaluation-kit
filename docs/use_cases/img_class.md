@@ -1,17 +1,17 @@
 # Image Classification Code Sample
 
-- [Image Classification Code Sample](#image-classification-code-sample)
-  - [Introduction](#introduction)
-    - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Image Classification](#running-image-classification)
+- [Image Classification Code Sample](./img_class.md#image-classification-code-sample)
+  - [Introduction](./img_class.md#introduction)
+    - [Prerequisites](./img_class.md#prerequisites)
+  - [Building the code sample application from sources](./img_class.md#building-the-code-sample-application-from-sources)
+    - [Build options](./img_class.md#build-options)
+    - [Build process](./img_class.md#build-process)
+    - [Add custom input](./img_class.md#add-custom-input)
+    - [Add custom model](./img_class.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./img_class.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./img_class.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./img_class.md#starting-fast-model-simulation)
+    - [Running Image Classification](./img_class.md#running-image-classification)
 
 ## Introduction
 
@@ -48,7 +48,7 @@ specifies:
    be used in the application. The default value points to the `resources/img_class/samples` folder containing the
    delivered set of images.
 
-    For further information, please refer to: [Add custom input data section](#add-custom-input).
+    For further information, please refer to: [Add custom input data section](./img_class.md#add-custom-input).
 
 - `img_class_IMAGE_SIZE`: The NN model requires input images to be of a specific size. This parameter defines the size
   of the image side in pixels. Images are considered squared. The default value is `224`, which is what the supplied

@@ -1,10 +1,10 @@
 # Troubleshooting
 
-- [Troubleshooting](#troubleshooting)
-  - [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
-  - [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
-  - [NPU configuration mismatch error when running inference](#npu-configuration-mismatch-error-when-running-inference)
-  - [Problem installing Vela](#problem-installing-vela)
+- [Troubleshooting](./troubleshooting.md#troubleshooting)
+  - [Inference results are incorrect for my custom files](./troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
+  - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
+  - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
+  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
 
 ## Inference results are incorrect for my custom files
 

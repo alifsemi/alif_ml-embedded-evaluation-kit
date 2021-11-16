@@ -1,19 +1,19 @@
 # Anomaly Detection Code Sample
 
-- [Anomaly Detection Code Sample](#anomaly-detection-code-sample)
-  - [Introduction](#introduction)
-    - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
-    - [Postprocessing](#postprocessing)
-    - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting-up and running Ethos-U NPU Code Sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Anomaly Detection](#running-anomaly-detection)
+- [Anomaly Detection Code Sample](./ad.md#anomaly-detection-code-sample)
+  - [Introduction](./ad.md#introduction)
+    - [Preprocessing and feature extraction](./ad.md#preprocessing-and-feature-extraction)
+    - [Postprocessing](./ad.md#postprocessing)
+    - [Prerequisites](./ad.md#prerequisites)
+  - [Building the code sample application from sources](./ad.md#building-the-code-sample-application-from-sources)
+    - [Build options](./ad.md#build-options)
+    - [Build process](./ad.md#build-process)
+    - [Add custom input](./ad.md#add-custom-input)
+    - [Add custom model](./ad.md#add-custom-model)
+  - [Setting-up and running Ethos-U NPU Code Sample](./ad.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./ad.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./ad.md#starting-fast-model-simulation)
+    - [Running Anomaly Detection](./ad.md#running-anomaly-detection)
 
 ## Introduction
 

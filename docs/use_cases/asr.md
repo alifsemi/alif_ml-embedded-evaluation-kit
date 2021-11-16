@@ -1,19 +1,19 @@
 # Automatic Speech Recognition Code Sample
 
-- [Automatic Speech Recognition Code Sample](#automatic-speech-recognition-code-sample)
-  - [Introduction](#introduction)
-    - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
-    - [Postprocessing](#postprocessing)
-    - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Automatic Speech Recognition](#running-automatic-speech-recognition)
+- [Automatic Speech Recognition Code Sample](./asr.md#automatic-speech-recognition-code-sample)
+  - [Introduction](./asr.md#introduction)
+    - [Preprocessing and feature extraction](./asr.md#preprocessing-and-feature-extraction)
+    - [Postprocessing](./asr.md#postprocessing)
+    - [Prerequisites](./asr.md#prerequisites)
+  - [Building the code sample application from sources](./asr.md#building-the-code-sample-application-from-sources)
+    - [Build options](./asr.md#build-options)
+    - [Build process](./asr.md#build-process)
+    - [Add custom input](./asr.md#add-custom-input)
+    - [Add custom model](./asr.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./asr.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./asr.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./asr.md#starting-fast-model-simulation)
+    - [Running Automatic Speech Recognition](./asr.md#running-automatic-speech-recognition)
 
 ## Introduction
 

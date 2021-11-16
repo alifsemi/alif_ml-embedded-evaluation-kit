@@ -124,6 +124,12 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5
     --output ./resources_downloaded/noise_reduction/ofm4.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/dnn_small/tflite_int8/dnn_s_quantized.tflite \
     --output ./resources_downloaded/inference_runner/dnn_s_quantized.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite \
+    --output ./resources_downloaded/vww/vww4_128_128_INT8.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/testing_input/input/0.npy \
+    --output ./resources_downloaded/vww/ifm0.npy
+curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/testing_output/Identity/0.npy \
+    --output ./resources_downloaded/vww/ofm0.npy
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws/ds_cnn_clustered_int8.tflite \
     --accelerator-config=ethos-u55-128 \

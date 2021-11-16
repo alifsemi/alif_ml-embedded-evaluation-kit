@@ -1,16 +1,16 @@
 # Memory considerations
 
-- [Memory considerations](#memory-considerations)
-  - [Introduction](#introduction)
-  - [Memory available on the target platform](#memory-available-on-the-target-platform)
-    - [Parameters linked to SRAM size definitions](#parameters-linked-to-sram-size-definitions)
-  - [Understanding memory usage from Vela output](#understanding-memory-usage-from-vela-output)
-    - [Total SRAM used](#total-sram-used)
-    - [Total Off-chip Flash used](#total-off_chip-flash-used)
-  - [Memory mode configurations](#memory-mode-configurations)
-  - [Tensor arena and neural network model memory placement](#tensor-arena-and-neural-network-model-memory-placement)
-  - [Memory usage for ML use-cases](#memory-usage-for-ml-use_cases)
-  - [Memory constraints](#memory-constraints)
+- [Memory considerations](./memory_considerations.md#memory-considerations)
+  - [Introduction](./memory_considerations.md#introduction)
+  - [Memory available on the target platform](./memory_considerations.md#memory-available-on-the-target-platform)
+    - [Parameters linked to SRAM size definitions](./memory_considerations.md#parameters-linked-to-sram-size-definitions)
+  - [Understanding memory usage from Vela output](./memory_considerations.md#understanding-memory-usage-from-vela-output)
+    - [Total SRAM used](./memory_considerations.md#total-sram-used)
+    - [Total Off-chip Flash used](./memory_considerations.md#total-off_chip-flash-used)
+  - [Memory mode configurations](./memory_considerations.md#memory-mode-configurations)
+  - [Tensor arena and neural network model memory placement](./memory_considerations.md#tensor-arena-and-neural-network-model-memory-placement)
+  - [Memory usage for ML use-cases](./memory_considerations.md#memory-usage-for-ml-use_cases)
+  - [Memory constraints](./memory_considerations.md#memory-constraints)
 
 ## Introduction
 
@@ -199,7 +199,7 @@ The following numbers have been obtained from Vela for the `Shared_Sram` memory 
 memory requirements for the different use-cases of the evaluation kit.
 
 > **Note:** The SRAM usage does not include memory used by TensorFlow Lite Micro and must be topped up as explained
-> under [Total SRAM used](#total-sram-used).
+> under [Total SRAM used](./memory_considerations.md#total-sram-used).
 
 - [Keyword spotting model](https://github.com/ARM-software/ML-zoo/tree/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b//models/keyword_spotting/ds_cnn_large/tflite_clustered_int8)
   requires

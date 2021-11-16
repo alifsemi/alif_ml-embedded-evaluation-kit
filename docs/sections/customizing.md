@@ -1,21 +1,21 @@
 # Implementing custom ML application
 
-- [Implementing custom ML application](#implementing-custom-ml-application)
-  - [Software project description](#software-project-description)
-  - [Hardware Abstraction Layer API](#hardware-abstraction-layer-api)
-  - [Main loop function](#main-loop-function)
-  - [Application context](#application-context)
-  - [Profiler](#profiler)
-  - [NN Model API](#nn-model-api)
-  - [Adding custom ML use-case](#adding-custom-ml-use_case)
-  - [Implementing main loop](#implementing-main-loop)
-  - [Implementing custom NN model](#implementing-custom-nn-model)
-    - [Define ModelPointer and ModelSize methods](#define-modelpointer-and-modelsize-methods)
-  - [Executing inference](#executing-inference)
-  - [Printing to console](#printing-to-console)
-  - [Reading user input from console](#reading-user-input-from-console)
-  - [Output to MPS3 LCD](#output-to-mps3-lcd)
-  - [Building custom use-case](#building-custom-use_case)
+- [Implementing custom ML application](./customizing.md#implementing-custom-ml-application)
+  - [Software project description](./customizing.md#software-project-description)
+  - [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api)
+  - [Main loop function](./customizing.md#main-loop-function)
+  - [Application context](./customizing.md#application-context)
+  - [Profiler](./customizing.md#profiler)
+  - [NN Model API](./customizing.md#nn-model-api)
+  - [Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)
+  - [Implementing main loop](./customizing.md#implementing-main-loop)
+  - [Implementing custom NN model](./customizing.md#implementing-custom-nn-model)
+    - [Define ModelPointer and ModelSize methods](./customizing.md#define-modelpointer-and-modelsize-methods)
+  - [Executing inference](./customizing.md#executing-inference)
+  - [Printing to console](./customizing.md#printing-to-console)
+  - [Reading user input from console](./customizing.md#reading-user-input-from-console)
+  - [Output to MPS3 LCD](./customizing.md#output-to-mps3-lcd)
+  - [Building custom use-case](./customizing.md#building-custom-use_case)
 
 This section describes how to implement a custom Machine Learning application running on Arm® *Corstone™-300* based FVP
 or on the Arm® MPS3 FPGA prototyping board.
@@ -323,7 +323,7 @@ use_case
 ```
 
 Start with creation of a sub-directory under the `use_case` directory and two additional directories `src` and `include`
-as described in the [Software project description](#software-project-description) section.
+as described in the [Software project description](./customizing.md#software-project-description) section.
 
 ## Implementing main loop
 
@@ -336,9 +336,9 @@ Main loop has knowledge about the platform and has access to the platform compon
 Layer (HAL).
 
 Start by creating a `MainLoop.cc` file in the `src` directory (the one created under
-[Adding custom ML use case](#adding-custom-ml-use-case)).  The name used is not important.
+[Adding custom ML use case](./customizing.md#adding-custom-ml-use-case)).  The name used is not important.
 
-Now define the `main_loop` function with the signature described in [Main loop function](#main-loop-function):
+Now define the `main_loop` function with the signature described in [Main loop function](./customizing.md#main-loop-function):
 
 ```C++
 #include "hal.h"
@@ -348,7 +348,7 @@ void main_loop(hal_platform& platform) {
 }
 ```
 
-The preceeding code is already a working use-case. If you compile and run it (see [Building custom usecase](#building-custom-use-case)),
+The preceeding code is already a working use-case. If you compile and run it (see [Building custom usecase](./customizing.md#building-custom-use-case)),
 then the application starts and prints a message to console and exits straight away.
 
 You can now start filling this function with logic.
@@ -358,7 +358,7 @@ You can now start filling this function with logic.
 Before inference could be run with a custom NN model, TensorFlow Lite Micro framework must learn about the operators, or
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
-The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](#nn-model-api)).
+The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](./customizing.md#nn-model-api)).
 Create `HelloWorldModel.hpp` in the use-case include sub-directory, extend Model abstract class,
 and then declare the required methods.
 

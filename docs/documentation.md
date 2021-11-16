@@ -1,18 +1,18 @@
 # Arm® ML embedded evaluation kit
 
-- [Arm® ML embedded evaluation kit](#arm_ml-embedded-evaluation-kit)
-  - [Trademarks](#trademarks)
-  - [Prerequisites](#prerequisites)
-    - [Additional reading](#additional-reading)
-  - [Repository structure](#repository-structure)
-  - [Models and resources](#models-and-resources)
-  - [Building](#building)
-  - [Deployment](#deployment)
-  - [Implementing custom ML application](#implementing-custom-ml-application)
-  - [Testing and benchmarking](#testing-and-benchmarking)
-  - [Memory Considerations](#memory-considerations)
-  - [Troubleshooting](#troubleshooting)
-  - [Appendix](#appendix)
+- [Arm® ML embedded evaluation kit](./documentation.md#arm_ml-embedded-evaluation-kit)
+  - [Trademarks](./documentation.md#trademarks)
+  - [Prerequisites](./documentation.md#prerequisites)
+    - [Additional reading](./documentation.md#additional-reading)
+  - [Repository structure](./documentation.md#repository-structure)
+  - [Models and resources](./documentation.md#models-and-resources)
+  - [Building](./documentation.md#building)
+  - [Deployment](./documentation.md#deployment)
+  - [Implementing custom ML application](./documentation.md#implementing-custom-ml-application)
+  - [Testing and benchmarking](./documentation.md#testing-and-benchmarking)
+  - [Memory Considerations](./documentation.md#memory-considerations)
+  - [Troubleshooting](./documentation.md#troubleshooting)
+  - [Appendix](./documentation.md#appendix)
 
 ## Trademarks
 

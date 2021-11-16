@@ -1,18 +1,18 @@
 # Inference Runner Code Sample
 
-- [Inference Runner Code Sample](#inference-runner-code-sample)
-  - [Introduction](#introduction)
-    - [Prerequisites](#prerequisites)
-  - [Building the Code Samples application from sources](#building-the-code-samples-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Inference Runner](#running-inference-runner)
-    - [Building with dynamic model load capability](#building-with-dynamic-model-load-capability)
-    - [Running the FVP with dynamic model loading](#running-the-fvp-with-dynamic-model-loading)
+- [Inference Runner Code Sample](./inference_runner.md#inference-runner-code-sample)
+  - [Introduction](./inference_runner.md#introduction)
+    - [Prerequisites](./inference_runner.md#prerequisites)
+  - [Building the Code Samples application from sources](./inference_runner.md#building-the-code-samples-application-from-sources)
+    - [Build options](./inference_runner.md#build-options)
+    - [Build process](./inference_runner.md#build-process)
+    - [Add custom model](./inference_runner.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./inference_runner.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./inference_runner.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./inference_runner.md#starting-fast-model-simulation)
+    - [Running Inference Runner](./inference_runner.md#running-inference-runner)
+    - [Building with dynamic model load capability](./inference_runner.md#building-with-dynamic-model-load-capability)
+    - [Running the FVP with dynamic model loading](./inference_runner.md#running-the-fvp-with-dynamic-model-loading)
 
 ## Introduction
 
@@ -57,7 +57,7 @@ following:
 - `inference_runner_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By
   default, it is set to 2MiB and is enough for most models.
 
-- `inference_runner_DYNAMIC_MEM_LOAD_ENABLED`: This can be set to ON or OFF, to allow dynamic model load capability for use with MPS3 FVPs. See section [Building with dynamic model load capability](#building-with-dynamic-model-load-capability) below for more details.
+- `inference_runner_DYNAMIC_MEM_LOAD_ENABLED`: This can be set to ON or OFF, to allow dynamic model load capability for use with MPS3 FVPs. See section [Building with dynamic model load capability](./inference_runner.md#building-with-dynamic-model-load-capability) below for more details.
 
 To build **ONLY** the Inference Runner example application, add `-DUSE_CASE_BUILD=inferece_runner` to the `cmake`
 command line, as specified in: [Building](../documentation.md#Building).

@@ -1,5 +1,5 @@
-- [Overview](#overview)
-  - [Getting started](#getting-started)
+- [Overview](./arm_virtual_hardware.md#overview)
+  - [Getting started](./arm_virtual_hardware.md#getting-started)
 
 # Overview
 

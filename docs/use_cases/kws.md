@@ -1,19 +1,19 @@
 # Keyword Spotting Code Sample
 
-- [Keyword Spotting Code Sample](#keyword-spotting-code-sample)
-  - [Introduction](#introduction)
-    - [Preprocessing and feature extraction](#preprocessing-and-feature-extraction)
-    - [Postprocessing](#postprocessing)
-    - [Prerequisites](#prerequisites)
-  - [Building the code sample application from sources](#building-the-code-sample-application-from-sources)
-    - [Build options](#build-options)
-    - [Build process](#build-process)
-    - [Add custom input](#add-custom-input)
-    - [Add custom model](#add-custom-model)
-  - [Setting up and running Ethos-U NPU code sample](#setting-up-and-running-ethos_u-npu-code-sample)
-    - [Setting up the Ethos-U NPU Fast Model](#setting-up-the-ethos_u-npu-fast-model)
-    - [Starting Fast Model simulation](#starting-fast-model-simulation)
-    - [Running Keyword Spotting](#running-keyword-spotting)
+- [Keyword Spotting Code Sample](./kws.md#keyword-spotting-code-sample)
+  - [Introduction](./kws.md#introduction)
+    - [Preprocessing and feature extraction](./kws.md#preprocessing-and-feature-extraction)
+    - [Postprocessing](./kws.md#postprocessing)
+    - [Prerequisites](./kws.md#prerequisites)
+  - [Building the code sample application from sources](./kws.md#building-the-code-sample-application-from-sources)
+    - [Build options](./kws.md#build-options)
+    - [Build process](./kws.md#build-process)
+    - [Add custom input](./kws.md#add-custom-input)
+    - [Add custom model](./kws.md#add-custom-model)
+  - [Setting up and running Ethos-U NPU code sample](./kws.md#setting-up-and-running-ethos_u-npu-code-sample)
+    - [Setting up the Ethos-U NPU Fast Model](./kws.md#setting-up-the-ethos_u-npu-fast-model)
+    - [Starting Fast Model simulation](./kws.md#starting-fast-model-simulation)
+    - [Running Keyword Spotting](./kws.md#running-keyword-spotting)
 
 ## Introduction
 

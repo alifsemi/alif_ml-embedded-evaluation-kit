@@ -1,29 +1,29 @@
 # Building the ML embedded code sample applications from sources
 
-- [Building the ML embedded code sample applications from sources](#building-the-ml-embedded-code-sample-applications-from-sources)
-  - [Build prerequisites](#build-prerequisites)
-  - [Build options](#build-options)
-  - [Build process](#build-process)
-    - [Preparing build environment](#preparing-build-environment)
-      - [Fetching submodules](#fetching-submodules)
-      - [Fetching resource files](#fetching-resource-files)
-    - [Building for default configuration](#building-for-default-configuration)
-    - [Create a build directory](#create-a-build-directory)
-    - [Configuring the build for MPS3 SSE-300](#configuring-the-build-for-mps3-sse_300)
-      - [Using GNU Arm Embedded toolchain](#using-gnu-arm-embedded-toolchain)
-      - [Using Arm Compiler](#using-arm-compiler)
-      - [Generating project for Arm Development Studio](#generating-project-for-arm-development-studio)
-      - [Working with model debugger from Arm Fast Model Tools](#working-with-model-debugger-from-arm-fast-model-tools)
-      - [Configuring with custom TPIP dependencies](#configuring-with-custom-tpip-dependencies)
-    - [Configuring native unit-test build](#configuring-native-unit_test-build)
-    - [Configuring the build for simple-platform](#configuring-the-build-for-simple_platform)
-    - [Building the configured project](#building-the-configured-project)
-  - [Building timing adapter with custom options](#building-timing-adapter-with-custom-options)
-  - [Add custom inputs](#add-custom-inputs)
-  - [Add custom model](#add-custom-model)
-  - [Optimize custom model with Vela compiler](#optimize-custom-model-with-vela-compiler)
-  - [Building for different Ethos-U NPU variants](#building-for-different-ethos_u-npu-variants)
-  - [Automatic file generation](#automatic-file-generation)
+- [Building the ML embedded code sample applications from sources](./building.md#building-the-ml-embedded-code-sample-applications-from-sources)
+  - [Build prerequisites](./building.md#build-prerequisites)
+  - [Build options](./building.md#build-options)
+  - [Build process](./building.md#build-process)
+    - [Preparing build environment](./building.md#preparing-build-environment)
+      - [Fetching submodules](./building.md#fetching-submodules)
+      - [Fetching resource files](./building.md#fetching-resource-files)
+    - [Building for default configuration](./building.md#building-for-default-configuration)
+    - [Create a build directory](./building.md#create-a-build-directory)
+    - [Configuring the build for MPS3 SSE-300](./building.md#configuring-the-build-for-mps3-sse_300)
+      - [Using GNU Arm Embedded toolchain](./building.md#using-gnu-arm-embedded-toolchain)
+      - [Using Arm Compiler](./building.md#using-arm-compiler)
+      - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
+      - [Working with model debugger from Arm Fast Model Tools](./building.md#working-with-model-debugger-from-arm-fast-model-tools)
+      - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
+    - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
+    - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
+    - [Building the configured project](./building.md#building-the-configured-project)
+  - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
+  - [Add custom inputs](./building.md#add-custom-inputs)
+  - [Add custom model](./building.md#add-custom-model)
+  - [Optimize custom model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler)
+  - [Building for different Ethos-U NPU variants](./building.md#building-for-different-ethos_u-npu-variants)
+  - [Automatic file generation](./building.md#automatic-file-generation)
 
 This section assumes that you are using an **x86 Linux** build machine.
 
@@ -109,7 +109,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
 - Access to the internet to download the third-party dependencies, specifically: TensorFlow Lite Micro, Arm®
   *Ethos™-U55* NPU driver, and CMSIS. Instructions for downloading these are listed under:
-  [preparing build environment](#preparing-build-environment).
+  [preparing build environment](./building.md#preparing-build-environment).
 
 ## Build options
 
@@ -173,7 +173,7 @@ defaults to a configuration ID from `H32`, `H64`, `H256` and `Y512`.
 configuration for all the use cases. If the user has overridden use-case specific model path
 parameter `ETHOS_U_NPU_CONFIG_ID` parameter will become irrelevant for that use-case. Also, the
 model files for the chosen `ETHOS_U_NPU_CONFIG_ID` are expected to exist in the default locations.
-See [Fetching resource files](#fetching-resource-files) for details on how to do this for your
+See [Fetching resource files](./building.md#fetching-resource-files) for details on how to do this for your
 chosen configuration.
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
@@ -232,7 +232,7 @@ paths instead of relative paths**.
 The build process uses three major steps:
 
 1. Prepare the build environment by downloading third-party sources required, see
-   [Preparing build environment](#preparing-build-environment).
+   [Preparing build environment](./building.md#preparing-build-environment).
 
 2. Configure the build for the platform chosen. This stage includes:
     - CMake options configuration
@@ -240,11 +240,11 @@ The build process uses three major steps:
       downloaded from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo). For native builds, the network input and
       output data for tests are downloaded.
     - Some files such as neural network models, network inputs, and output labels are automatically converted into C/C++
-      arrays, see: [Automatic file generation](#automatic-file-generation).
+      arrays, see: [Automatic file generation](./building.md#automatic-file-generation).
 
 3. Build the application.\
    Application and third-party libraries are now built. For further information, see:
-   [Building the configured project](#building-the-configured-project).
+   [Building the configured project](./building.md#building-the-configured-project).
 
 ### Preparing build environment
 
@@ -258,7 +258,7 @@ repository to link against.
 3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
-> instructions. Proceed to [Fetching resource files](#fetching-resource-files) section.
+> instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
 >
 
 To pull the submodules:
@@ -293,7 +293,7 @@ python3 ./set_up_default_resources.py
 This fetches every model into the `resources_downloaded` directory. It also optimizes the models using the Vela compiler
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
-> **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](#build-prerequisites)
+> **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
 
 If you need to optimize the models for a different Ethos-U configuration, you can pass a

@@ -1,8 +1,8 @@
 # Testing and benchmarking
 
-- [Testing and benchmarking](#testing-and-benchmarking)
-  - [Testing](#testing)
-  - [Benchmarking](#benchmarking)
+- [Testing and benchmarking](./testing_benchmarking.md#testing-and-benchmarking)
+  - [Testing](./testing_benchmarking.md#testing)
+  - [Benchmarking](./testing_benchmarking.md#benchmarking)
 
 ## Testing
 
