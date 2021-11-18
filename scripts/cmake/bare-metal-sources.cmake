@@ -183,7 +183,7 @@ endif()
 
 set(COMPILER_FLAGS              "${TENSORFLOW_LITE_MICRO_FLAG} ${PROFILING_OPT} ${OPTIONAL_FLAGS}")
 # For some reason, cmake doesn't pass the c++ standard flag, adding it manually
-set(CMAKE_CXX_FLAGS             "${COMPILER_FLAGS} -std=c++11" CACHE INTERNAL "")
+set(CMAKE_CXX_FLAGS             "${COMPILER_FLAGS}" CACHE INTERNAL "")
 set(CMAKE_C_FLAGS               "${COMPILER_FLAGS}" CACHE INTERNAL "")
 set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 

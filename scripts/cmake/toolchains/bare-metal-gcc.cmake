@@ -36,11 +36,15 @@ endif()
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     # Flags for cortex-m55
-    set(CPU_COMPILE_DEF             CPU_CORTEX_M55)
+    set(CPU_ID                      M55)
+    set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(CPU_NAME                    ${CMAKE_SYSTEM_PROCESSOR})
+    set(ARM_CPU                     "ARMC${CPU_ID}")
     set(FLOAT_ABI                   hard)
     set(ARM_MATH_DSP                1)
     set(ARM_MATH_LOOPUNROLL         1)
+    set(CPU_HEADER_FILE             "${ARM_CPU}.h")
+    set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m33)
     # Flags for cortex-m33 to go here
 endif()
@@ -71,7 +75,8 @@ add_compile_options(
 # Compile definitions:
 add_compile_definitions(
     PLATFORM_HAL=${PLATFORM_HAL}
-    ${CPU_COMPILE_DEF}=1
+    CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
+    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
     $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
     $<$<BOOL:${ARM_MATH_LOOPUNROLL}>:ARM_MATH_LOOPUNROLL>)
 

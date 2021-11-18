@@ -27,8 +27,8 @@ conventions, the intended outcome could be different for every case.
 
 ## Language version
 
-For this project, code written in C++ uses a subset of the `C++11` feature set and software may be written using the
-`C++11` language standard. Code written in C is compatible with the `C99` standard.
+For this project, code written in C++ uses a subset of the `C++14` feature set and software may be written using the
+`C++14` language standard. Code written in C is compatible with the `C99` standard.
 
 Software components written in C/C++ may use the language features allowed and is encouraged.
 

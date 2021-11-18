@@ -58,7 +58,7 @@ set(TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT "${TENSORFLOW_LITE_MICRO_TARGET_
 set(TENSORFLOW_LITE_MICRO_PATH "${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro")
 set(TENSORFLOW_LITE_MICRO_GENDIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow/)
 
-set(CMSIS_DSP_MAKEFILE_INC ${CMAKE_CURRENT_SOURCE_DIR}/scripts/make/cmsis_dsp.inc)
+
 set(ETHOS_EVAL_TARGET_MAKEFILE_INC ${CMAKE_CURRENT_SOURCE_DIR}/scripts/make/cortex_m_ethos_eval_makefile.inc)
 
 if (TARGET_PLATFORM STREQUAL native)
@@ -127,3 +127,5 @@ add_custom_target(tensorflow_build ALL
 # Create library
 add_library(tensorflow-lite-micro STATIC IMPORTED)
 add_dependencies(tensorflow-lite-micro tensorflow_build)
+set_property(TARGET tensorflow-lite-micro PROPERTY IMPORTED_LOCATION
+             "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME}")

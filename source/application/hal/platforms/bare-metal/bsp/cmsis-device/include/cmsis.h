@@ -17,7 +17,9 @@
 #ifndef BAREMETAL_CMSIS_H
 #define BAREMETAL_CMSIS_H
 
-#include "ARMCM55.h"  /* Cortex M system header file from CMSIS. */
+#if defined(CPU_HEADER_FILE)
+#include CPU_HEADER_FILE /* Cortex M system header file from CMSIS. */
+#endif /* CPU_HEADER_FILE */
 #include "irqs.h"     /* Interrupt definitions file. */
 
 /* Addition to template functions should be mentioned here. */

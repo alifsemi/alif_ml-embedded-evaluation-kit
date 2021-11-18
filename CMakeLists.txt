@@ -28,7 +28,7 @@ message(STATUS "Build type is set to ${CMAKE_BUILD_TYPE}")
 # Set language standards. TensorFlow Lite requires
 # std=c++11.
 set(CMAKE_C_STANDARD   99)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 # Make the standard a requirement => prevent fallback to previous
 # supported standard
@@ -159,8 +159,8 @@ if (${CMAKE_CROSSCOMPILING})
     set(CMSIS_HEADERS
         ${CMSIS_DSP_INC_DIR}
         ${CMSIS_CORE_INC_DIR}
-        ${CMSIS_SRC_PATH}/Device/ARM/ARMCM55/Include
-        ${CMSIS_SRC_PATH}/Device/ARM/ARMCM55/Include/Template)
+        ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
+        ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include/Template)
 endif ()
 
 # If we need NPU libraries:
