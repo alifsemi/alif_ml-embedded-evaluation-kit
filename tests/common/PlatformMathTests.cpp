@@ -140,7 +140,7 @@ TEST_CASE("Test SqrtF32")
 {
     /*Test  Constants: */
     std::vector<float> inputA{0,1,2,9,M_PI};
-    uint32_t len = inputA.size();
+    size_t len = inputA.size();
     std::vector<float> expectedResult{0, 1, 1.414213562, 3, 1.772453851 };
 
     for (size_t i=0; i < len; i++){
@@ -538,13 +538,13 @@ TEST_CASE("Test FFT32")
                                                              expected_result_random};
     arm::app::math::FftInstance fftInstance;
     /* Iterate over each of the input vectors, calculate FFT and compare with corresponding expected_results vectors */
-    for (int j=0; j < input_vectors.size(); j++) {
+    for (size_t j = 0; j < input_vectors.size(); j++) {
         uint16_t fftLen = input_vectors[j].size();
         arm::app::math::MathUtils::FftInitF32(fftLen, fftInstance);
         arm::app::math::MathUtils::FftF32(input_vectors[j], output_vectors[j], fftInstance);
 
         float tolerance = 10e-4;
-        for (size_t i=0; i < fftLen/2; i++) {
+        for (size_t i = 0; i < fftLen/2; i++) {
             CHECK (output_vectors[j][i] ==
             Approx(expected_results_vectors[j][i]).margin(tolerance));
 
@@ -586,11 +586,11 @@ TEST_CASE("Test ComplexMagnitudeSquaredF32")
     /*Test  Constants: */
     std::vector<float> input
             {0.0, 0.0, 0.5, 0.5,1,1};
-    int inputLen = input.size();
+    size_t inputLen = input.size();
 
     std::vector<float> expectedResult
             {0.0, 0.5, 2,};
-    int outputLen = inputLen/2;
+    size_t outputLen = inputLen/2;
     std::vector<float>output(outputLen);
 
     /* Pass pointers to input/output vectors as this function over-writes the first half

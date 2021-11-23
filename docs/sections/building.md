@@ -119,9 +119,9 @@ along with the network inputs.
 It also builds TensorFlow Lite for Microcontrollers library, Arm® *Ethos™-U* NPU driver library, and the CMSIS-DSP library
 from sources.
 
-The build script is parameterized to support different options. Default values for build parameters build the
-applications for all use-cases where the Arm® *Corstone™-300* design can execute on an MPS3 FPGA or the Fixed Virtual
-Platform (FVP).
+The build script is parameterized to support different options (see [common_user_options.cmake](../../scripts/cmake/common_user_options.cmake)).
+Default values for these parameters configure the build for all use-cases to be executed on an MPS3 FPGA or the Fixed Virtual
+Platform (FVP) implementation of the Arm® *Corstone™-300* design.
 
 The build parameters are:
 

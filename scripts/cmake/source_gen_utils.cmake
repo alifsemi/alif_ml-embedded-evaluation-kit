@@ -218,7 +218,7 @@ function(generate_test_data_code)
                 )
         # no input NPY data found => skip code generation.
         if(NOT input_data_files)
-            message(WARNING "No files were found to generated input data: ${input_dir}")
+            message(WARNING "No files were found to generate input data: ${input_dir}")
             break()
         endif()
 

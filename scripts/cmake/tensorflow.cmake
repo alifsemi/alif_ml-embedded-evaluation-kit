@@ -19,30 +19,16 @@ include(ProcessorCount)
 ProcessorCount(J)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(TENSORFLOW_LITE_MICRO_DEFAULT_BUILD_TYPE "debug")
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O0")
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
-    set(TENSORFLOW_LITE_MICRO_DEFAULT_BUILD_TYPE "release_with_logs")
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O3")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O3")
-elseif (NOT DEFINED TENSORFLOW_LITE_MICRO_BUILD_TYPE)
-    message(WARNING     "TENSORFLOW_LITE_MICRO_BUILD_TYPE is not set.")
-    message(FATAL_ERROR "Build type ${CMAKE_BUILD_TYPE} does not have a corresponding "
-                        "default to set TensorFlow build type")
 endif()
 
-USER_OPTION(TENSORFLOW_LITE_MICRO_BUILD_TYPE "TensorFlow Lite Mirco build type (release/debug etc.)"
-    ${TENSORFLOW_LITE_MICRO_DEFAULT_BUILD_TYPE}
-    STRING)
-
-USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS "Select if TPIP downloads should be cleaned before each build."
-    OFF
-    BOOL)
-
-USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be added to a list of targets"
-    ON
-    BOOL)
+assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
+assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
+assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
     set(TENSORFLOW_LITE_MICRO_TOOLCHAIN "armclang")

@@ -41,13 +41,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_SCRIPTS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
-set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
 
 set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
                         CACHE PATH "Resources directory")
 
 include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
-include(${CMAKE_SCRIPTS_DIR}/util_functions.cmake)
 
 if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     message(FATAL_ERROR "Source and build are in the same directory")
@@ -56,55 +54,20 @@ else()
     message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
 endif()
 
-USER_OPTION(LOG_LEVEL "Log level for the application"
-    LOG_LEVEL_INFO
-    STRING)
+include(${CMAKE_SCRIPTS_DIR}/common_user_options.cmake)
 
-USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the tensor flow directory"
-    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/tensorflow"
-    PATH)
-
-USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: mps3, simple_platform, native"
-    mps3
-    STRING)
-
-USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or none"
-    sse-300
-    STRING)
-
-USER_OPTION(ETHOS_U_NPU_ENABLED "Select if Ethos-U NPU is available for the platform and subsystem"
-    ON
-    BOOL)
-
-USER_OPTION(USE_CASE_BUILD "Optional. Defines the use-case to build from the available sources. By default, all use-cases are built."
-    all
-    STRING)
-
-USER_OPTION(CPU_PROFILE_ENABLED "Output CPU performance profiling information. Should be used only for MPS3 board."
-    OFF
-    BOOL)
-
-if (TARGET_PLATFORM STREQUAL mps3)
-    message(STATUS "Platform: MPS3 FPGA Prototyping Board or FVP")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
-elseif (TARGET_PLATFORM STREQUAL simple_platform)
-    message(STATUS "Platform: Simple platform with minimal peripherals")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
-elseif (TARGET_PLATFORM STREQUAL native)
-    message(STATUS "Platform: Native (Linux based x86_64/aarch64 system)")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake)
-else ()
-    message(FATAL_ERROR "Invalid platform specified: ${TARGET_PLATFORM}")
-endif ()
-
-if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${DEFAULT_TOOLCHAIN_FILE}
-        CACHE FILEPATH "Toolchain file")
-endif()
-message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+# Make sure the following options are defined before proceeding:
+assert_defined(LOG_LEVEL)
+assert_defined(TENSORFLOW_SRC_PATH)
+assert_defined(TARGET_PLATFORM)
+assert_defined(TARGET_SUBSYSTEM)
+assert_defined(ETHOS_U_NPU_ENABLED)
+assert_defined(USE_CASE_BUILD)
+assert_defined(CPU_PROFILE_ENABLED)
+assert_defined(CMAKE_TOOLCHAIN_FILE)
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     21.08
+        VERSION     21.11
         DESCRIPTION "ARM ML Embedded Evaluation Kit for MPS3 FPGA and FastModel")
 
 enforce_compiler_version()
@@ -127,25 +90,13 @@ if (TARGET_PLATFORM STREQUAL native)
 else ()
     set(PLATFORM_SOURCES_CMAKE_FILE ${CMAKE_SCRIPTS_DIR}/bare-metal-sources.cmake)
 
-    USER_OPTION(CMSIS_SRC_PATH
-        "Path to CMSIS-5 sources"
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/cmsis"
-        PATH
-        )
+    assert_defined(CMSIS_SRC_PATH)
 
     if (CMAKE_BUILD_TYPE STREQUAL Debug AND CMAKE_CXX_COMPILER_ID STREQUAL ARMClang)
-        USER_OPTION(ARMCLANG_DEBUG_DWARF_LEVEL
-            "Dwarf conformance level for armclang toolchain"
-            "4" # Default = 4 (Arm-DS etc). For model debugger specify "3"
-            STRING
-            )
-    elseif (DEFINED ARMCLANG_DEBUG_DWARF_LEVEL)
-        message(WARNING "ARMCLANG_DEBUG_DWARF_LEVEL definition is unsupported"
-                        "within current configuration. Removing definition...")
-        unset(ARMCLANG_DEBUG_DWARF_LEVEL CACHE)
+        assert_defined(ARMCLANG_DEBUG_DWARF_LEVEL)
     endif()
-
 endif ()
+
 message(STATUS "Including ${PLATFORM_SOURCES_CMAKE_FILE}")
 include(${PLATFORM_SOURCES_CMAKE_FILE})
 
@@ -167,17 +118,9 @@ endif ()
 if (ETHOS_U_NPU_ENABLED)
 
     message(STATUS "Using ARM Ethos-U NPU - adding core-driver and timing-adapter-driver includes and libraries")
-    USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
-        "Path to Ethos-U NPU timing adapter sources"
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-software/drivers/timing_adapter"
-        PATH
-        )
 
-    USER_OPTION(ETHOS_U_NPU_DRIVER_SRC_PATH
-        "Path to Ethos-U NPU core driver sources"
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/core-driver"
-        PATH
-        )
+    assert_defined(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH)
+    assert_defined(ETHOS_U_NPU_DRIVER_SRC_PATH)
 
     include_directories("${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH}/include/")
 

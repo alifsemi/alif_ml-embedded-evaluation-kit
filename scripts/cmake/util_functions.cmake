@@ -84,6 +84,15 @@ function(USER_OPTION name description default type)
 
 endfunction()
 
+
+# Function to check if a variable is defined, and throw
+# an error if it is not.
+function(assert_defined var_name)
+    if (NOT DEFINED ${var_name})
+        message(FATAL_ERROR "ERROR: ${var_name} is undefined!")
+    endif()
+endfunction()
+
 # Function to get the path type for a variable
 # Args:
 #   path_var[in]:           path variable for which the cmake path type is requested

@@ -40,29 +40,9 @@ set(ETHOS_U_NPU_FLAG                           "-DARM_NPU=1")
 
 if (ETHOS_U_NPU_ENABLED)
 
-    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
-        "U55"
-        STRING)
-
-    if ((ETHOS_U_NPU_ID STREQUAL U55) OR (ETHOS_U_NPU_ID STREQUAL U65))
-        if (ETHOS_U_NPU_ID STREQUAL U55)
-            set(DEFAULT_NPU_MEM_MODE    "Shared_Sram")
-            set(DEFAULT_NPU_CONFIG_ID     "H128")
-        elseif(ETHOS_U_NPU_ID STREQUAL U65)
-            set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
-            set(DEFAULT_NPU_CONFIG_ID     "Y256")
-        endif()
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID}")
-    endif ()
-
-    USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
-        "${DEFAULT_NPU_MEM_MODE}"
-        STRING)
-
-    USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
-        "${DEFAULT_NPU_CONFIG_ID}"
-        STRING)
+    assert_defined(ETHOS_U_NPU_ID)
+    assert_defined(ETHOS_U_NPU_MEMORY_MODE)
+    assert_defined(ETHOS_U_NPU_CONFIG_ID)
 
     if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
 
@@ -140,11 +120,9 @@ if (ETHOS_U_NPU_ENABLED)
     else ()
         set(DEFAULT_TA_CONFIG_FILE_PATH "${CMAKE_SCRIPTS_DIR}/timing_adapter/ta_config_u65_high_end.cmake")
     endif ()
-    USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
-            ${DEFAULT_TA_CONFIG_FILE_PATH}
-            FILEPATH)
 
     # must be included after target subsystem CMake file
+    assert_defined(TA_CONFIG_FILE)
     include(${TA_CONFIG_FILE})
 endif()
 
