@@ -62,6 +62,7 @@ add_compile_options(
 add_compile_options(
     -funsigned-char
     -fno-function-sections
+    -fdata-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
 # Arch compile options:
@@ -88,12 +89,13 @@ add_link_options(
     -mlittle-endian
     --specs=nosys.specs
     --stats
+    "SHELL:-Xlinker --gc-sections"
     "$<$<CONFIG:RELEASE>:--no-debug>")
 
 # Function to add a map file output for the linker to dump diagnostic information to.
 function(add_target_map_file TARGET_NAME MAP_FILE_PATH)
     target_link_options(${TARGET_NAME} PUBLIC
-        -Xlinker -Map=${MAP_FILE_PATH})
+        "SHELL:-Xlinker -Map=${MAP_FILE_PATH}")
 endfunction()
 
 # Function to add linker option to use the chosen linker script.

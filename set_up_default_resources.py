@@ -134,8 +134,8 @@ NPUConfig = namedtuple('NPUConfig',['config_name',
                                     'ethos_u_npu_id',
                                     'ethos_u_config_id'])
 
-# The default internal SRAM size for Corstone-300 implementation on MPS3
-mps3_max_sram_sz = 4 * 1024 * 1024 # 4 MiB
+# The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
+mps3_max_sram_sz = 2 * 1024 * 1024 # 2 MiB (2 banks of 1 MiB each)
 
 
 def call_command(command: str) -> str:

@@ -5,6 +5,7 @@ Changes in 21.11
     * Added Noise Reduction use case.
     * Updated support for Arm GNU Embedded Toolchain 10.3-2021.07 and Arm Compiler 6.17.
     * Documentation updates.
+    * Changes to support AN552 design - the new Arm® Corstone™-300 implementation.
 
 Changes in 21.08
     * Support for 21.05 Ethos-U component (core-software, core-driver, Vela 3.0.0).

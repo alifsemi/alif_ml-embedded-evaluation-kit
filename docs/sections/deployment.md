@@ -22,7 +22,7 @@ Both implement the Arm® *Corstone™-300* design. For further information, plea
 The FVP is available publicly from the following page:
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-Please ensure that you download the correct archive from the list under `Arm Corstone-300`. You need the one which:
+Please ensure that you download the correct archive from the list under Arm® *Corstone™-300*. You need the one which:
 
 - Emulates MPS3 board and *not* for MPS2 FPGA board,
 - Contains support for Arm® *Ethos™-U55*.
@@ -158,24 +158,31 @@ For more information on getting started with an MPS3 board, please refer to:
 ### Deployment on MPS3 board
 
 > **Note:**: These instructions are valid only if the evaluation is being done using the MPS3 FPGA platform using
-> `SSE-300`.
+> an Arm® *Corstone™-300* implementation.
 
 To run the application on MPS3 platform, you must first ensure that the platform has been set up using the correct
 configuration.
 
-For details on platform set-up, please see the relevant documentation. For the Arm `Corstone-300`, the PDF is available
-here: [Arm Developer](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/DAI0547B_SSE300_PLUS_U55_FPGA_for_mps3.pdf?revision=d088d931-03c7-40e4-9045-31ed8c54a26f&la=en&hash=F0C7837C8ACEBC3A0CF02D871B3A6FF93E09C6B8).
+For details on platform set-up, please see the relevant documentation. For the Arm® Corstone™-300 implementation
+`AN552`, the document is available here: [Arm Developer](https://developer.arm.com/documentation/dai0552/).
 
-For the MPS3 board, instead of loading the `axf` file directly, copy the executable blobs generated under the
-`sectors/<use_case>` subdirectory to the micro SD card located on the board. Also, the `sectors/images.txt` file is used
-by the MPS3 to understand which memory regions the blobs must be loaded into.
+For the MPS3 FPGA board, instead of loading the `axf` file directly, copy the executable blobs generated under the
+`sectors/<use_case>` subdirectory to the micro SD card located on the board. Also, the `sectors/images.txt` file is
+used by the MPS3 to understand which memory regions the blobs must be loaded into.
 
 Once the USB A to USB B cable between the MPS3 and the development machine is connected, and the MPS3 board powered on,
 the board enumerates as a mass storage device over this USB connection.
 
 Depending on the version of the board you are using, there might be two devices listed. The device named `V2M-MPS3`, or
-`V2MMPS3`, which is the `SD card`. Note that if `V2M-MPS3` or `V2MMPS3` device is not listed, you may need to enable USB
-connection from the board. You can do this by opening a serial connection to the first serial port and issuing a `usb_on` command.
+`V2MMPS3` is the `SD card`. Note that if `V2M-MPS3` or `V2MMPS3` device is not listed, you may need to enable USB
+connection from the board. You can do this by opening a serial connection to the first serial port (as specified in
+point 3 in the instructions below) and issuing a `usb_on` command at the prompt:
+
+```commandline
+Cmd> usb_on
+Enabling debug USB...
+USB Serial Number = 5000123456789
+```
 
 If the `axf` or `elf` file is within the ITCM load size limit, it can be copied into the FPGA memory directly without
 having to break it down into separate load region-specific blobs. However, if the neural network models exceed this
@@ -196,21 +203,23 @@ size, you must use the following approach:
     cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/
     ```
 
-    Note that the `itcm.bin` and `ddr.bin` files correspond to the part of the application residing in the first and second load region respectively,
-    as defined in the [scatter file](../../source/application/hal/platforms/bare-metal/bsp/mem_layout/mps3-sse-300.sct).
+    Note that the `itcm.bin` and `ddr.bin` files correspond to the part of the application residing in the first and
+    second load region respectively, as defined in the
+    [scatter file](../../source/application/hal/platforms/bare-metal/bsp/mem_layout/mps3-sse-300.sct).
 
 2. The `./bin/sectors/images.txt` file must be copied over to the MPS3. The exact location for the destination depends
    on the version of the MPS3 board and the application note for the bit file in use.
 
-   For example, the revision C of the MPS3 board hardware uses an application note directory named `AN547`, to replace the
+   For example, the revision C of the MPS3 board hardware uses an application note directory named `AN552`, to replace the
    `images.txt` file, like so:
 
     ```commandline
-    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN547/images.txt
+    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN552/images.txt
     ```
 
 3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0`. This can be typically done using
-   minicom, screen, or Putty application. Make sure the flow control setting is switched off:
+   `minicom`, `screen`, or `Putty` applications. Make sure the configuration is set to 115200 8/N/1 and that the
+   flow control setting is switched off:
 
     ```commandline
     minicom --D /dev/ttyUSB0
@@ -238,10 +247,12 @@ size, you must use the following approach:
     ```
 
     ```log
-    Rebooting...Disabling debug USB..Board rebooting...
+    Rebooting...
+    Disabling debug USB..
+    Board rebooting...
 
-    ARM V2M-MPS3 Firmware v1.3.2
-    Build Date: Apr 20 2018
+    ARM V2M-MPS3 Firmware v1.5.1
+    Build Date: Jun  2 2021
 
     Powering up system...
     Switching on main power...
@@ -252,40 +263,37 @@ size, you must use the following approach:
     FPGA memory locations. For example:
 
     ```log
-    Reading images file \MB\HBI0309C\AN547\images.txt
+    Reading images file \MB\HBI0309C\AN552\images.txt
     Writing File \SOFTWARE\itcm.bin to Address 0x00000000
-
-    ............
-
+    ......
     File \SOFTWARE\itcm.bin written to memory address 0x00000000
     Image loaded from \SOFTWARE\itcm.bin
-    Writing File \SOFTWARE\ddr.bin to Address 0x08000000
-
-    ..........................................................................
-
-
-    File \SOFTWARE\ddr.bin written to memory address 0x08000000
+    Writing File \SOFTWARE\ddr.bin to Address 0x0C000000
+    .......................................................................................................................................................................
+    File \SOFTWARE\ddr.bin written to memory address 0x0C000000
     Image loaded from \SOFTWARE\ddr.bin
     ```
 
-6. When the reboot from previous step is completed, issue a reset command on the command prompt:
+6. If the reboot from previous step completes without starting the application, issue a reset command:
 
     ``` commandline
     $ Cmd> reset
     ```
 
-    This triggers the application to start, and the output becomes visible on the second serial connection.
+    This should trigger the application to start, and the output should be visible on the second serial
+    connection. By default, the FPGA configuration should start the application as soon as it is loaded
+    into the memory and the above command should not be required.
 
-7. On the second serial port, the output is similar to that in section 2.2, is visible, like so:
+7. On the second serial port the output should show the standard output and error streams from the
+   application deployed. For example:
 
     ```log
-    INFO - Setting up system tick IRQ (for NPU)
     INFO - V2M-MPS3 revision C
-    INFO - Application Note AN540, Revision B
-    INFO - FPGA build 1
-    INFO - Core clock has been set to: 32000000 Hz
-    INFO - CPU ID: 0x410fd220
-    INFO - CPU: Cortex-M55 r0p0
+    INFO - Application Note AN552, Revision B
+    INFO - MPS3 build 2
+    INFO - MPS3 core clock has been set to: 32000000Hz
+    INFO - CPU ID: 0x411fd220
+    INFO - CPU: Cortex-M55 r1p0
     ...
     ```
 

@@ -868,7 +868,7 @@ void RNNoiseProcess::InverseTransform(vec1D32F& out, vec1D32F& fftXIn) {
     }
 
     constexpr uint32_t numFFt = 2 * FRAME_SIZE;
-    static_assert(numFFt != 0);
+    static_assert(numFFt != 0, "numFFt cannot be 0!");
 
     vec1D32F fftOut = vec1D32F(x.size(), 0);
     math::MathUtils::FftF32(x,fftOut, m_fftInstCmplx);

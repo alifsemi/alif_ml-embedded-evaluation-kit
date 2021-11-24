@@ -37,12 +37,16 @@ Before starting the setup process, please make sure that you have:
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
-  - An MPS3 board loaded with Arm® Corstone™-300 reference package (`AN547`) from:
+  - An MPS3 board loaded with Arm® Corstone™-300 reference package (`AN552`) from:
     <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>. You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
     application.
   - `Arm Corstone-300` based FVP for MPS3 is available from:
     <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>.
+
+> **NOTE**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
+> notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built
+> for MPS3 target should work on both FPGA packages.
 
 ### Additional reading
 

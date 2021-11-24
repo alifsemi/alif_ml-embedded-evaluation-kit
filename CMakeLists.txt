@@ -234,6 +234,7 @@ foreach(use_case ${USE_CASES})
     if (${SRC_USE_CASE} STREQUAL "")
         message(FATAL_ERROR "Failed to find sources for ${use_case}!")
     endif ()
+
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 

@@ -16,15 +16,15 @@
  */
 
 __STACK_SIZE = 0x00060000;
-__HEAP_SIZE  = 0x000f0000;
+__HEAP_SIZE  = 0x000C0000;
 
 /* System memory brief */
 MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00080000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00080000
-  BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00200000
-  SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00400000
+  BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00100000
+  SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00200000
   DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
 
   /* Dynamic load regions declared for use by FVP only

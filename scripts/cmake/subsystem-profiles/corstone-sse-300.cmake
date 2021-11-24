@@ -21,9 +21,9 @@
 ###################################################################################################
 set(ITCM_SIZE             "0x00080000" CACHE STRING "ITCM size:       512 kiB")
 set(DTCM_BLK_SIZE         "0x00020000" CACHE STRING "DTCM size:       128 kiB, 4 banks")
-set(BRAM_SIZE             "0x00200000" CACHE STRING "BRAM size:         2 MiB")
-set(ISRAM0_SIZE           "0x00200000" CACHE STRING "ISRAM0 size:       2 MiB")
-set(ISRAM1_SIZE           "0x00200000" CACHE STRING "ISRAM1 size:       2 MiB")
+set(BRAM_SIZE             "0x00100000" CACHE STRING "BRAM size:         1 MiB")
+set(ISRAM0_SIZE           "0x00100000" CACHE STRING "ISRAM0 size:       1 MiB")
+set(ISRAM1_SIZE           "0x00100000" CACHE STRING "ISRAM1 size:       1 MiB")
 set(QSPI_SRAM_SIZE        "0x00800000" CACHE STRING "QSPI Flash size:   8 MiB")
 set(DDR4_BLK_SIZE         "0x10000000" CACHE STRING "DDR4 block size: 256 MiB")
 
@@ -37,7 +37,7 @@ set(DTCM1_BASE_NS         "0x20020000" CACHE STRING "Data TCM block 1 Non-Secure
 set(DTCM2_BASE_NS         "0x20040000" CACHE STRING "Data TCM block 2 Non-Secure base address")
 set(DTCM3_BASE_NS         "0x20060000" CACHE STRING "Data TCM block 3 Non-Secure base address")
 set(ISRAM0_BASE_NS        "0x21000000" CACHE STRING "Internal SRAM Area Non-Secure base address")
-set(ISRAM1_BASE_NS        "0x21200000" CACHE STRING "Internal SRAM Area Non-Secure base address")
+set(ISRAM1_BASE_NS        "0x21100000" CACHE STRING "Internal SRAM Area Non-Secure base address")
 set(QSPI_SRAM_BASE_NS     "0x28000000" CACHE STRING "QSPI SRAM Non-Secure base address")
 set(DDR4_BLK0_BASE_NS     "0x60000000" CACHE STRING "DDR4 block 0 Non-Secure base address")
 set(DDR4_BLK1_BASE_NS     "0x80000000" CACHE STRING "DDR4 block 1 Non-Secure base address")
@@ -51,7 +51,7 @@ set(DTCM1_BASE_S          "0x30020000" CACHE STRING "Data TCM block 1 Secure bas
 set(DTCM2_BASE_S          "0x30040000" CACHE STRING "Data TCM block 2 Secure base address")
 set(DTCM3_BASE_S          "0x30060000" CACHE STRING "Data TCM block 3 Secure base address")
 set(ISRAM0_BASE_S         "0x31000000" CACHE STRING "Internal SRAM Area Secure base address")
-set(ISRAM1_BASE_S         "0x31200000" CACHE STRING "Internal SRAM Area Secure base address")
+set(ISRAM1_BASE_S         "0x31100000" CACHE STRING "Internal SRAM Area Secure base address")
 set(DDR4_BLK0_BASE_S      "0x70000000" CACHE STRING "DDR4 block 0 Secure base address")
 set(DDR4_BLK1_BASE_S      "0x90000000" CACHE STRING "DDR4 block 1 Secure base address")
 set(DDR4_BLK2_BASE_S      "0xB0000000" CACHE STRING "DDR4 block 2 Secure base address")
@@ -60,11 +60,11 @@ set(DDR4_BLK3_BASE_S      "0xD0000000" CACHE STRING "DDR4 block 3 Secure base ad
 ###################################################################################################
 #                              Application specific config                                        #
 ###################################################################################################
+set(APP_NOTE               "AN552")
+set(DESIGN_NAME            "Arm Corstone-300 - ${APP_NOTE}" CACHE STRING "Design name")
 
-# This parameter is based on the linker/scatter script for SSE-300. Do not change this parameter
-# in isolation.
-set(DESIGN_NAME            "Arm Corstone-300 (SSE-300)" CACHE STRING "Design name")
-
+# The following parameter is based on the linker/scatter script for SSE-300.
+# Do not change this parameter in isolation.
 # SRAM size reserved for activation buffers
 math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 
@@ -258,7 +258,7 @@ set(SPI3_IRQn                     "54" CACHE STRING " SPI 3 Interrupt (Shield 0)
 set(SPI4_IRQn                     "55" CACHE STRING " SPI 4 Interrupt (Sheild 1)            ")
 
 if (ETHOS_U_NPU_ENABLED)
-set(EthosU_IRQn                   "56" CACHE STRING " Ethos-U55 Interrupt                  ")
+set(EthosU_IRQn                   "56" CACHE STRING " Ethos-U55 Interrupt                   ")
 endif ()
 
 set(GPIO0_IRQn                    "69" CACHE STRING " GPIO 0 Combined Interrupt             ")

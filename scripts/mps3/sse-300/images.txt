@@ -1,6 +1,7 @@
 TITLE: Arm MPS3 FPGA prototyping board Images Configuration File
 
-; MCC mapping for Corstone-300 MPS3 bitfile package AN547
+; MCC mapping for Corstone-300 MPS3 bitfile package AN547 and
+; AN552
 ; +-------------+---------------+-------------------------------+
 ; | FPGA addr   | MCC addr      |  Region                       |
 ; +-------------+---------------+-------------------------------+

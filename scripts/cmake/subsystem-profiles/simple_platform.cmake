@@ -24,9 +24,9 @@
 ###################################################################################################
 set(ITCM_SIZE             "0x00080000" CACHE STRING "ITCM size:       512 kiB")
 set(DTCM_BLK_SIZE         "0x00020000" CACHE STRING "DTCM size:       128 kiB, 4 banks")
-set(BRAM_SIZE             "0x00200000" CACHE STRING "BRAM size:         2 MiB")
-set(ISRAM0_SIZE           "0x00200000" CACHE STRING "ISRAM0 size:       2 MiB")
-set(ISRAM1_SIZE           "0x00200000" CACHE STRING "ISRAM1 size:       2 MiB")
+set(BRAM_SIZE             "0x00100000" CACHE STRING "BRAM size:         1 MiB")
+set(ISRAM0_SIZE           "0x00100000" CACHE STRING "ISRAM0 size:       1 MiB")
+set(ISRAM1_SIZE           "0x00100000" CACHE STRING "ISRAM1 size:       1 MiB")
 set(DDR4_BLK_SIZE         "0x10000000" CACHE STRING "DDR4 block size: 256 MiB")
 
 ###################################################################################################
@@ -39,7 +39,7 @@ set(DTCM1_BASE_NS         "0x20020000" CACHE STRING "Data TCM block 1 Non-Secure
 set(DTCM2_BASE_NS         "0x20040000" CACHE STRING "Data TCM block 2 Non-Secure base address")
 set(DTCM3_BASE_NS         "0x20060000" CACHE STRING "Data TCM block 3 Non-Secure base address")
 set(ISRAM0_BASE_NS        "0x21000000" CACHE STRING "Internal SRAM Area Non-Secure base address")
-set(ISRAM1_BASE_NS        "0x21200000" CACHE STRING "Internal SRAM Area Non-Secure base address")
+set(ISRAM1_BASE_NS        "0x21100000" CACHE STRING "Internal SRAM Area Non-Secure base address")
 set(QSPI_SRAM_BASE_NS     "0x28000000" CACHE STRING "QSPI SRAM Non-Secure base address")
 set(DDR4_BLK0_BASE_NS     "0x60000000" CACHE STRING "DDR4 block 0 Non-Secure base address")
 set(DDR4_BLK1_BASE_NS     "0x80000000" CACHE STRING "DDR4 block 1 Non-Secure base address")
@@ -53,7 +53,7 @@ set(DTCM1_BASE_S          "0x30020000" CACHE STRING "Data TCM block 1 Secure bas
 set(DTCM2_BASE_S          "0x30040000" CACHE STRING "Data TCM block 2 Secure base address")
 set(DTCM3_BASE_S          "0x30060000" CACHE STRING "Data TCM block 3 Secure base address")
 set(ISRAM0_BASE_S         "0x31000000" CACHE STRING "Internal SRAM Area Secure base address")
-set(ISRAM1_BASE_S         "0x31200000" CACHE STRING "Internal SRAM Area Secure base address")
+set(ISRAM1_BASE_S         "0x31100000" CACHE STRING "Internal SRAM Area Secure base address")
 set(DDR4_BLK0_BASE_S      "0x70000000" CACHE STRING "DDR4 block 0 Secure base address")
 set(DDR4_BLK1_BASE_S      "0x90000000" CACHE STRING "DDR4 block 1 Secure base address")
 set(DDR4_BLK2_BASE_S      "0xB0000000" CACHE STRING "DDR4 block 2 Secure base address")

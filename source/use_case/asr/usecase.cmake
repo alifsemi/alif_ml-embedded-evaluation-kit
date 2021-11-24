@@ -71,7 +71,7 @@ generate_labels_code(
 
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00400000
+    0x00200000
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)

@@ -41,27 +41,28 @@ have definitions that describe the memory regions and the peripheral base addres
 See the example for Arm® *Corstone™-300* description file [corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake). For the discussion on this page, it is useful to note the following definitions:
 
 ```
-set(ISRAM0_SIZE           "0x00200000" CACHE STRING "ISRAM0 size:       2 MiB")
-set(ISRAM1_SIZE           "0x00200000" CACHE STRING "ISRAM1 size:       2 MiB")
+set(ISRAM0_SIZE           "0x00100000" CACHE STRING "ISRAM0 size:       1 MiB")
+set(ISRAM1_SIZE           "0x00100000" CACHE STRING "ISRAM1 size:       1 MiB")
 ...
 # SRAM size reserved for activation buffers
 math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 ```
-This will set `ACTIVATION_BUF_SRAM_SZ` to be **4 MiB** for Arm® *Corstone™-300* target platform.
+This will set `ACTIVATION_BUF_SRAM_SZ` to be **2 MiB** for Arm® *Corstone™-300* target platform.
 As mentioned in the comments within the file, this size is directly linked to the size mentioned
 in the linker scripts, and therefore, it should not be changed without corresponding changes
-in the linker script too. For example, a snippet from the scatter file for Corstone™-300 shows:
+in the linker script too. For example, a snippet from the scatter file for Arm® *Corstone™-300*
+shows:
 
 ```
 ;-----------------------------------------------------
-; SSE-300's internal SRAM of 4MiB - reserved for
-; activation buffers.
+; FPGA internal SRAM of 2MiB - reserved for activation
+; buffers.
 ; This region should have 3 cycle read latency from
 ; both Cortex-M55 and Ethos-U NPU
 ;-----------------------------------------------------
-isram.bin       0x31000000  UNINIT ALIGN 16 0x00400000
+isram.bin       0x31000000  UNINIT ALIGN 16 0x00200000
 {
-  ...
+    ...
 }
 ```
 If the usable size of the internal SRAM was to be increased/decreased, the change should be
@@ -73,16 +74,13 @@ Other than the obvious link between the linker script and the target profile des
 CMake files, there are other parameters linked to what the reserved space for activation
 buffers is. These are:
 
-- The file [default_vela.ini](../../scripts/vela/default_vela.ini) contains a parameter called
-  `arena_cache_size` under `Shared_Sram` memory mode. For example:
+- The file [set_up_default_resources.py](../../set_up_default_resources.py) contains a
+  parameter called `mps3_max_sram_sz`:
   ```
-  [Memory_Mode.Shared_Sram]
-  const_mem_area=Axi1
-  arena_mem_area=Axi0
-  cache_mem_area=Axi0
-  arena_cache_size=4194304
+  # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
+  mps3_max_sram_sz = 2 * 1024 * 1024 # 2 MiB (2 banks of 1 MiB each)
   ```
-  This size of **4 MiB** here is provided here to allow the default vela optimisation process to
+  This size of **2 MiB** here is provided here to allow the default vela optimisation process to
   use this size as a hint for the available SRAM size for use by the CPU and the NPU.
 
 - In every `usecase.cmake` file (present within each use case's source directory), there is
