@@ -2,6 +2,7 @@
 
 - [Building the ML embedded code sample applications from sources](./building.md#building-the-ml-embedded-code-sample-applications-from-sources)
   - [Build prerequisites](./building.md#build-prerequisites)
+    - [Third-party build prerequisites](./building.md#third-party-build-prerequisites)
   - [Build options](./building.md#build-options)
   - [Build process](./building.md#build-process)
     - [Preparing build environment](./building.md#preparing-build-environment)
@@ -93,6 +94,16 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     python3 -m venv
     ```
 
+- The build system uses external Python libraries during the building process. Please make sure that the latest pip and libsndfile versions are installed.
+
+  ```commandline
+  pip3 --version
+  ```
+
+  ```log
+  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.6)
+  ```
+
 - Make
 
     ```commandline
@@ -110,6 +121,17 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 - Access to the internet to download the third-party dependencies, specifically: TensorFlow Lite Micro, Arm®
   *Ethos™-U55* NPU driver, and CMSIS. Instructions for downloading these are listed under:
   [preparing build environment](./building.md#preparing-build-environment).
+
+### Third-party build prerequisites
+
+- The following software is needed by TensorFlow Lite Micro.
+
+  - xxd
+  - unzip
+  - Python Pillow
+
+> **Note:** Due to the fast paced nature of development, this list might not be exhaustive.
+Please refer to Tensorflow Lite Micro documentation for more info.
 
 ## Build options
 
@@ -337,6 +359,10 @@ Additional command line arguments supported by this script are:
     - `ethos-u55-256`
     - `ethos-u65-256`
     - `ethos-u65-512`
+- `--make-jobs`: Specifies the number of concurrent jobs to use for compilation.
+The default value is equal to the number of cores in the system.
+Lowering this value can be useful in case of limited resources.
+- `--make-verbose`: Make the compile process verbose. This is equal to run ```make VERBOSE=1```. 
 
 To build for *Ethos™-U55* 32 MAC configuration, using `Arm Compiler`, run:
 

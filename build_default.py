@@ -20,19 +20,43 @@ import subprocess
 import shutil
 import multiprocessing
 import logging
+import threading
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from set_up_default_resources import set_up_resources, \
                                      get_default_npu_config_from_name, \
                                      valid_npu_config_names, \
                                      default_npu_config_names
 
+class PipeLogging(threading.Thread):
+
+    def __init__(self, log_level):
+        threading.Thread.__init__(self)
+        self.logLevel = log_level
+        self.fileRead, self.fileWrite = os.pipe()
+        self.pipeIn = os.fdopen(self.fileRead)
+        self.daemon = False
+        self.start()
+
+    def fileno(self):
+        return self.fileWrite
+
+    def run(self):
+        for line in iter(self.pipeIn.readline, ''):
+            logging.log(self.logLevel, line.strip('\n'))
+
+        self.pipeIn.close()
+
+    def close(self):
+        os.close(self.fileWrite)
 
 def run(toolchain: str,
         download_resources: bool,
         run_vela_on_models: bool,
-        npu_config_name: str):
+        npu_config_name: str,
+        make_jobs: int,
+        make_verbose: bool):
     """
     Run the helpers scripts.
 
@@ -82,6 +106,8 @@ def run(toolchain: str,
             except Exception as e:
                 logging.error('Failed to delete %s. Reason: %s' % (filepath, e))
 
+    logpipe = PipeLogging(logging.INFO)
+
     os.chdir(build_dir)
     cmake_toolchain_file = os.path.join(current_file_dir, "scripts", "cmake",
                                         "toolchains", toolchain_file_name)
@@ -92,19 +118,21 @@ def run(toolchain: str,
                      f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}")
 
     logging.info(cmake_command)
-    state = subprocess.run(cmake_command, shell=True, stdout=subprocess.PIPE,
+    state = subprocess.run(cmake_command, shell=True, stdout=logpipe,
                            stderr=subprocess.STDOUT)
-    logging.info(state.stdout.decode('utf-8'))
 
-    make_command = f"make -j{multiprocessing.cpu_count()}"
+    make_command = f"make -j{make_jobs}" 
+    if make_verbose :
+        make_command += " VERBOSE=1"
     logging.info(make_command)
-    state = subprocess.run(make_command, shell=True, stdout=subprocess.PIPE,
+    state = subprocess.run(make_command, shell=True, stdout=logpipe,
                            stderr=subprocess.STDOUT)
-    logging.info(state.stdout.decode('utf-8'))
+
+    logpipe.close()
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("--toolchain", default="gnu",
                         help="""
                         Specify the toolchain to use (Arm or GNU).
@@ -120,6 +148,12 @@ if __name__ == '__main__':
                         help=f"""Arm Ethos-U configuration to build for. Choose from:
                         {valid_npu_config_names}""",
                         default=default_npu_config_names[0])
+    parser.add_argument("--make-jobs",
+                        help="Number of jobs to run with make",
+                        default=multiprocessing.cpu_count())
+    parser.add_argument("--make-verbose",
+                        help="Make runs with VERBOSE=1",
+                        action='store_true')
     args = parser.parse_args()
 
     logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG,
@@ -129,4 +163,6 @@ if __name__ == '__main__':
     run(args.toolchain.lower(),
         not args.skip_download,
         not args.skip_vela,
-        args.npu_config_name)
+        args.npu_config_name,
+        args.make_jobs,
+        args.make_verbose)
