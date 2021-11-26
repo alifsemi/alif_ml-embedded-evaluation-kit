@@ -73,6 +73,10 @@ if (TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
     list(APPEND MAKE_TARGETS_LIST "clean")
 endif()
 
+if (ETHOS_U_NPU_ID)
+    string(TOLOWER ${ETHOS_U_NPU_ID} ETHOSU_ARCH)
+endif()
+
 # Primary target
 list(APPEND MAKE_TARGETS_LIST "microlite")
 message(STATUS "TensorFlow Lite Micro build to be called for these targets: ${MAKE_TARGETS_LIST}")
@@ -90,6 +94,7 @@ add_custom_target(tensorflow_build ALL
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
         ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}
         CMSIS_PATH=${CMSIS_SRC_PATH}
+        ETHOSU_ARCH=${ETHOSU_ARCH}
 
         # Conditional arguments
         $<$<BOOL:${ARMCLANG_DEBUG_DWARF_LEVEL}>:ARMCLANG_DEBUG_DWARF_LEVEL=${ARMCLANG_DEBUG_DWARF_LEVEL}>

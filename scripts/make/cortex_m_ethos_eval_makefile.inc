@@ -139,6 +139,7 @@ ifeq ($(TARGET),$(filter $(TARGET), cortex_m_ethos_eval))
     -fomit-frame-pointer \
     -MD \
     -DCPU_CORTEX_$(CORE)=1 \
+    -DETHOSU_ARCH=${ETHOSU_ARCH} \
     $(TARGET_SPECIFIC_FLAGS)
 
   # Common + C/C++ flags

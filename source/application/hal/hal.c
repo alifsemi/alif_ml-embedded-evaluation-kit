@@ -283,7 +283,6 @@ static int arm_npu_init(void)
                                     driver_version.patch);
     info("\tMACs/cc:    %"PRIu32"\n", (uint32_t)(1 << hw_info.cfg.macs_per_cc));
     info("\tCmd stream: v%"PRIu32"\n", hw_info.cfg.cmd_stream_version);
-    info("\tSHRAM size: %"PRIu32"\n", hw_info.cfg.shram_size);
 
     return 0;
 }
