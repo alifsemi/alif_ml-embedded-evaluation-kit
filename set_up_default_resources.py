@@ -233,7 +233,7 @@ def set_up_resources(run_vela_on_models=False,
             call_command(command)
         os.chdir(current_file_dir)
     # 1.3 Make sure to have all the requirement
-    requirements = ["ethos-u-vela==3.1.0"]
+    requirements = ["ethos-u-vela==3.2.0"]
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
     for req in requirements:
