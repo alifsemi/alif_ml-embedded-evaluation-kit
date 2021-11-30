@@ -136,7 +136,8 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/kws
+    --output-dir=resources_downloaded/kws \
+    --arena-cache-size=2097152
 mv resources_downloaded/kws/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws/ds_cnn_clustered_int8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws/ds_cnn_clustered_int8.tflite \
@@ -152,7 +153,8 @@ mv resources_downloaded/kws/ds_cnn_clustered_int8_vela.tflite resources_download
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/kws_asr
+    --output-dir=resources_downloaded/kws_asr \
+    --arena-cache-size=2097152
 mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded/kws_asr/wav2letter_int8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/wav2letter_int8.tflite \
@@ -168,7 +170,8 @@ mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/kws_asr
+    --output-dir=resources_downloaded/kws_asr \
+    --arena-cache-size=2097152
 mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite \
@@ -184,7 +187,8 @@ mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_down
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/inference_runner
+    --output-dir=resources_downloaded/inference_runner \
+    --arena-cache-size=2097152
 mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_downloaded/inference_runner/dnn_s_quantized_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/inference_runner/dnn_s_quantized.tflite \
@@ -200,7 +204,8 @@ mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_d
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/img_class
+    --output-dir=resources_downloaded/img_class \
+    --arena-cache-size=2097152
 mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite \
@@ -216,7 +221,8 @@ mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resource
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/asr
+    --output-dir=resources_downloaded/asr \
+    --arena-cache-size=2097152
 mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr/wav2letter_int8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
@@ -232,7 +238,8 @@ mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/ad
+    --output-dir=resources_downloaded/ad \
+    --arena-cache-size=2097152
 mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad_medium_int8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/ad/ad_medium_int8.tflite \
@@ -248,7 +255,8 @@ mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/ad
+    --output-dir=resources_downloaded/ad \
+    --arena-cache-size=2097152
 mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/vww/vww4_128_128_INT8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/vww/vww4_128_128_INT8.tflite \
@@ -264,7 +272,8 @@ mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/v
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
-    --output-dir=resources_downloaded/ad
+    --output-dir=resources_downloaded/ad \
+    --arena-cache-size=2097152
 mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downloaded/noise_reduction/rnnoise_INT8_vela_H128.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/noise_reduction/rnnoise_INT8.tflite \

@@ -22,7 +22,7 @@ import fnmatch
 import logging
 import sys
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 from urllib.error import URLError
 from collections import namedtuple
 
@@ -132,7 +132,8 @@ NPUConfig = namedtuple('NPUConfig',['config_name',
                                     'memory_mode',
                                     'system_config',
                                     'ethos_u_npu_id',
-                                    'ethos_u_config_id'])
+                                    'ethos_u_config_id',
+                                    'arena_cache_size'])
 
 # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
 mps3_max_sram_sz = 2 * 1024 * 1024 # 2 MiB (2 banks of 1 MiB each)
@@ -157,14 +158,19 @@ def call_command(command: str) -> str:
     return log
 
 
-def get_default_npu_config_from_name(config_name: str) -> NPUConfig:
+def get_default_npu_config_from_name(config_name: str, arena_cache_size: int = 0) -> NPUConfig:
     """
     Gets the file suffix for the tflite file from the
     `accelerator_config` string.
 
     Parameters:
     ----------
-    config_name (str):   Ethos-U NPU configuration from valid_npu_config_names
+    config_name (str):      Ethos-U NPU configuration from valid_npu_config_names
+
+    arena_cache_size (int): Specifies arena cache size in bytes. If a value
+                            greater than 0 is provided, this will be taken
+                            as the cache size. If 0, the default values, as per
+                            the NPU config requirements, are used.
 
     Returns:
     -------
@@ -182,6 +188,13 @@ def get_default_npu_config_from_name(config_name: str) -> NPUConfig:
     prefix_ids = ["H", "Y"]
     memory_modes = ["Shared_Sram", "Dedicated_Sram"]
     system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
+    memory_modes_arena = {
+        # For shared SRAM memory mode, we use the MPS3 SRAM size by default
+        "Shared_Sram"    : mps3_max_sram_sz if arena_cache_size <= 0 else arena_cache_size,
+        # For dedicated SRAM memory mode, we do no override the arena size. This is expected to
+        # be defined in the vela configuration file instead.
+        "Dedicated_Sram" : None if arena_cache_size <= 0 else arena_cache_size
+    }
 
     for i in range(len(strings_ids)):
         if config_name.startswith(strings_ids[i]):
@@ -190,22 +203,26 @@ def get_default_npu_config_from_name(config_name: str) -> NPUConfig:
                               memory_mode=memory_modes[i],
                               system_config=system_configs[i],
                               ethos_u_npu_id=processor_ids[i],
-                              ethos_u_config_id=npu_config_id)
+                              ethos_u_config_id=npu_config_id,
+                              arena_cache_size=memory_modes_arena[memory_modes[i]])
 
     return None
 
 
-def set_up_resources(run_vela_on_models=False,
-                     additional_npu_config_names=[],
-                     arena_cache_size=mps3_max_sram_sz):
+def set_up_resources(run_vela_on_models: bool = False,
+                     additional_npu_config_names: list = [],
+                     arena_cache_size: int = 0):
     """
     Helpers function that retrieve the output from a command.
 
     Parameters:
     ----------
-    run_vela_on_models (bool):    Specifies if run vela on downloaded models.
-    additional_npu_config_names(list): list of strings of Ethos-U NPU configs.
-    arena_cache_size(int):    Specifies arena cache size in bytes.
+    run_vela_on_models (bool):  Specifies if run vela on downloaded models.
+    additional_npu_config_names(list):  list of strings of Ethos-U NPU configs.
+    arena_cache_size (int): Specifies arena cache size in bytes. If a value
+                            greater than 0 is provided, this will be taken
+                            as the cache size. If 0, the default values, as per
+                            the NPU config requirements, are used.
     """
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.abspath(os.path.join(current_file_dir, "resources_downloaded"))
@@ -301,11 +318,13 @@ def set_up_resources(run_vela_on_models=False,
         config_names = list(set(default_npu_config_names + additional_npu_config_names))
 
         # Get npu config tuple for each config name in a list:
-        npu_configs = [get_default_npu_config_from_name(name) for name in config_names]
+        npu_configs = [get_default_npu_config_from_name(name, arena_cache_size) for name in config_names]
 
         logging.info(f'All models will be optimised for these configs:')
         for config in npu_configs:
             logging.info(config)
+
+        optimisation_skipped = False
 
         for model in models:
             output_dir = os.path.dirname(model)
@@ -313,6 +332,11 @@ def set_up_resources(run_vela_on_models=False,
             vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
 
             for config in npu_configs:
+                vela_command_arena_cache_size = ""
+
+                if config.arena_cache_size:
+                    vela_command_arena_cache_size = f"--arena-cache-size={config.arena_cache_size}"
+
                 vela_command = (f". {env_activate} && vela {model} " +
                        f"--accelerator-config={config.config_name} " +
                        "--optimise Performance " +
@@ -320,7 +344,7 @@ def set_up_resources(run_vela_on_models=False,
                        f"--memory-mode={config.memory_mode} " +
                        f"--system-config={config.system_config} " +
                        f"--output-dir={output_dir} " +
-                       f"--arena-cache-size={arena_cache_size} ")
+                       f"{vela_command_arena_cache_size}")
 
                 # we want the name to include the configuration suffix. For example: vela_H128,
                 # vela_Y512 etc.
@@ -330,6 +354,7 @@ def set_up_resources(run_vela_on_models=False,
 
                 if os.path.isfile(new_vela_optimised_model_path):
                     logging.info(f"File {new_vela_optimised_model_path} exists, skipping optimisation.")
+                    optimisation_skipped = True
                     continue
 
                 call_command(vela_command)
@@ -337,6 +362,12 @@ def set_up_resources(run_vela_on_models=False,
                 # rename default vela model
                 os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
                 logging.info(f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}.")
+
+
+        # If any optimisation was skipped, show how to regenerate:
+        if optimisation_skipped:
+            logging.warning("One or more optimisations were skipped.")
+            logging.warning(f"To optimise all the models, please remove the directory {download_dir}.")
 
 
 if __name__ == '__main__':
@@ -349,10 +380,13 @@ if __name__ == '__main__':
                         {valid_npu_config_names}""",
                         default=[], action="append")
     parser.add_argument("--arena-cache-size",
-                        help="Arena cache size in bytes",
+                        help="Arena cache size in bytes (if overriding the defaults)",
                         type=int,
-                        default=mps3_max_sram_sz)
+                        default=0)
     args = parser.parse_args()
+
+    if args.arena_cache_size < 0:
+        raise ArgumentTypeError('Arena cache size cannot not be less than 0')
 
     logging.basicConfig(filename='log_build_default.log', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))

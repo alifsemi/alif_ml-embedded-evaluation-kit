@@ -318,21 +318,32 @@ for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for t
 > **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
 
-If you need to optimize the models for a different Ethos-U configuration, you can pass a
-list of additional configurations for Vela compiler. For example, to optimize the downloaded models
-for *Ethos™-U55* 32 MAC configuration and *Ethos™-U65* 512 MAC configuration, you can choose to run:
+Additional command line arguments supported by this script are:
 
-```sh
-python3 ./set_up_default_resources.py \
-  --additional-ethos-u-config-name ethos-u55-32 \
-  --additional-ethos-u-config-name ethos-u65-512
-```
-> **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128` and `ethosu-u65-256`.
+- `--additional-ethos-u-config-name`: if you need to optimize the models for a different Ethos-U configuration,
+  you can pass a list of additional configurations for Vela compiler. For example, to optimize the downloaded models
+  for *Ethos™-U55* 32 MAC configuration and *Ethos™-U65* 512 MAC configuration, you can choose to run:
+
+  ```sh
+  python3 ./set_up_default_resources.py \
+    --additional-ethos-u-config-name ethos-u55-32 \
+    --additional-ethos-u-config-name ethos-u65-512
+  ```
+
+  > **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128` and `ethosu-u65-256`.
+
+- `--arena-cache-size`: the size of the arena cache memory area, in bytes.
+  The default value is:
+  - the internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552,
+  when optimizing for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU.
+  - the default value specified in the Vela configuration file  [default_vela.ini](../../scripts/vela/default_vela.ini),
+  when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
 ### Building for default configuration
 
 A helper script `build_default.py` is provided to configure and build all the applications. It configures the project
-with default settings i.e., for `mps3` target, `sse-300` subsystem and *Ethos-U55* timing-adapter settings. Under the hood, it invokes all the necessary
+with default settings i.e., for `mps3` target, `sse-300` subsystem and *Ethos-U55* timing-adapter settings.
+Under the hood, it invokes all the necessary
 CMake commands that are described in the next sections.
 
 If using the `Arm GNU embedded toolchain`, execute:
@@ -353,16 +364,16 @@ Additional command line arguments supported by this script are:
 - `--skip-vela`: Do not run Vela optimizer on downloaded models.
 - `--npu-config-name`: Arm Ethos-U configuration to build for. The default value is
     `ethos-u55-128`. Valid values are:
-    - `ethos-u55-32`
-    - `ethos-u55-64`
-    - `ethos-u55-128`
-    - `ethos-u55-256`
-    - `ethos-u65-256`
-    - `ethos-u65-512`
+  - `ethos-u55-32`
+  - `ethos-u55-64`
+  - `ethos-u55-128`
+  - `ethos-u55-256`
+  - `ethos-u65-256`
+  - `ethos-u65-512`
 - `--make-jobs`: Specifies the number of concurrent jobs to use for compilation.
 The default value is equal to the number of cores in the system.
 Lowering this value can be useful in case of limited resources.
-- `--make-verbose`: Make the compile process verbose. This is equal to run ```make VERBOSE=1```. 
+- `--make-verbose`: Make the compile process verbose. This is equal to run ```make VERBOSE=1```.
 
 To build for *Ethos™-U55* 32 MAC configuration, using `Arm Compiler`, run:
 
