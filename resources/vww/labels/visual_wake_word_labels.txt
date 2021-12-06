@@ -1,2 +1,2 @@
-not person
-person
+Person detected: No
+Person detected: Yes
