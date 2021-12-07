@@ -23,7 +23,7 @@
 #include <catch.hpp>
 #include <hal.h>
 #include <Profiler.hpp>
-#include <iostream>
+
 #define PLATFORM \
 hal_platform    platform; \
 data_acq_module data_acq; \
@@ -177,8 +177,8 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
             std::vector<int16_t> runtime(g_FrameLength);
             std::memcpy(runtime.data(), &memDump[startOfLastInfOut], oneInferenceOutSizeBytes);
 
-            /* Margin of 22 is 0.03% error. */
-            REQUIRE_THAT(golden, Catch::Matchers::Approx(runtime).margin(22));
+            /* Margin of 43 is 0.07% error. */
+            REQUIRE_THAT(golden, Catch::Matchers::Approx(runtime).margin(43));
         }
         ++infIndex;
     }

@@ -78,13 +78,13 @@ namespace rnn {
     /* Public constants */
     public:
         static constexpr uint32_t FRAME_SIZE_SHIFT{2};
-        static constexpr uint32_t FRAME_SIZE{480};
+        static constexpr uint32_t FRAME_SIZE{512};
         static constexpr uint32_t WINDOW_SIZE{2 * FRAME_SIZE};
         static constexpr uint32_t FREQ_SIZE{FRAME_SIZE + 1};
 
-        static constexpr uint32_t PITCH_MIN_PERIOD{60};
-        static constexpr uint32_t PITCH_MAX_PERIOD{768};
-        static constexpr uint32_t PITCH_FRAME_SIZE{960};
+        static constexpr uint32_t PITCH_MIN_PERIOD{64};
+        static constexpr uint32_t PITCH_MAX_PERIOD{820};
+        static constexpr uint32_t PITCH_FRAME_SIZE{1024};
         static constexpr uint32_t PITCH_BUF_SIZE{PITCH_MAX_PERIOD + PITCH_FRAME_SIZE};
 
         static constexpr uint32_t NB_BANDS{22};

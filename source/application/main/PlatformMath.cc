@@ -225,7 +225,7 @@ namespace math {
 #if ARM_DSP_AVAILABLE
             if (fftInstance.m_optimisedOptionAvailable) {
                 fftOutput = input; /* Complex function works in-place */
-                arm_cfft_f32(&fftInstance.m_instanceComplex, fftOutput.data(), 0, 0);
+                arm_cfft_f32(&fftInstance.m_instanceComplex, fftOutput.data(), 0, 1);
                 return;
             }
 #endif /* ARM_DSP_AVAILABLE */

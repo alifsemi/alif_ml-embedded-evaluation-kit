@@ -53,8 +53,8 @@ USER_OPTION(${use_case}_AUDIO_RES_TYPE "Specify re-sampling algorithm to use. By
     kaiser_best
     STRING)
 
-USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples to use. Default is 480, if the audio is shorter it will be automatically padded."
-    480
+USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples to use. Default is 512, if the audio is shorter it will be automatically padded."
+    512
     STRING)
 
 # Generate input files from audio wav files
@@ -69,8 +69,8 @@ generate_audio_code(${${use_case}_FILE_PATH} ${SRC_GEN_DIR} ${INC_GEN_DIR}
 
 set(EXTRA_MODEL_CODE
     "/* Model parameters for ${use_case} */"
-    "extern const int        g_FrameLength         = 480"
-    "extern const int        g_FrameStride         = 480"
+    "extern const int        g_FrameLength         = 512"
+    "extern const int        g_FrameStride         = 512"
     "extern const uint32_t   g_NumInputFeatures    = 42*1"  # Single time-step input of 42 features.
     )
 
