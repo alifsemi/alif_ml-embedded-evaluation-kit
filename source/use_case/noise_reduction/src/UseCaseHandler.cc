@@ -215,6 +215,18 @@ namespace app {
             profiler.PrintProfilingResult();
             IncrementAppCtxClipIdx(ctx);
 
+            std::string clearString{' '};
+            platform.data_psn->present_data_text(
+                    clearString.c_str(), clearString.size(),
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
+
+            std::string completeMsg{"Inference complete!"};
+
+            /* Display message on the LCD - inference complete. */
+            platform.data_psn->present_data_text(
+                    completeMsg.c_str(), completeMsg.size(),
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
+
         } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
 
         return true;

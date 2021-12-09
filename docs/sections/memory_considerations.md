@@ -145,7 +145,7 @@ Evaluation kit supports all the *Ethos-U* NPU memory modes:
 |   *Ethos™-U65*   |    `Dedicated_Sram`    |         `Shared_Sram`          |
 
 For further information on the default settings, please refer to: [default_vela.ini](../../scripts/vela/default_vela.ini).
-
+To use the other supported memory modes refer to [vela.ini](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/refs/tags/3.2.0/vela.ini).
 For *Ethos-U55* NPU, the system SRAM can also be used to store the neural network model along with the `tensor arena`.
 Vela supports optimizing the model for this configuration with its `Sram_Only` memory mode.
 Although the Vela settings for this configurations suggests that only AXI0 bus is used, when compiling the model
@@ -155,14 +155,13 @@ a warning is generated, for example:
 vela \
   --accelerator-config=ethos-u55-128 \
   --optimise Performance \
-  --config scripts/vela/default_vela.ini
+  --config scripts/vela/vela.ini
   --memory-mode=Sram_Only
   --system-config=Ethos_U55_High_End_Embedded
   ds_cnn_clustered_int8.tflite
 
 Info: Changing const_mem_area from Sram to OnChipFlash. This will use the same characteristics as Sram.
 ```
-
 This means that the  neural network model is always placed in the flash region. In this case, timing adapters for the
 AXI buses are set the same values to mimic both bandwidth and latency characteristics of a SRAM memory device.
 See [Ethos-U55 NPU timing adapter default configuration](../../scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake).

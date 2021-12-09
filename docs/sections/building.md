@@ -57,8 +57,8 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     ```
 
-> **Note:** If required, add the compiler to the path:
->
+> **Note:** If required, add the compiler to the path (can be added to ~/.bashrc to be set permanently):
+> 
 > `export PATH=/path/to/armclang/bin:$PATH` OR `export PATH=/path/to/gcc-arm-none-eabi-toolchain/bin:$PATH`
 
 - If you are using the proprietary Arm Compiler, ensure that the compiler license has been correctly configured.
