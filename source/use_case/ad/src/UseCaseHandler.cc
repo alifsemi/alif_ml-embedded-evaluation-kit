@@ -68,8 +68,6 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        platform.data_psn->clear(COLOR_BLACK);
-
         auto& model = ctx.Get<Model&>("model");
 
         /* If the request has a valid size, set the audio index */
@@ -114,6 +112,8 @@ namespace app {
         auto audioDataStride = nMelSpecVectorsInAudioStride * frameStride;
 
         do {
+            platform.data_psn->clear(COLOR_BLACK);
+
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 
             /* Get the output index to look at based on id in the filename. */

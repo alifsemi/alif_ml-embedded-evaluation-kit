@@ -101,6 +101,8 @@ namespace app {
 
         /* Loop to process audio clips. */
         do {
+            platform.data_psn->clear(COLOR_BLACK);
+
             /* Get current audio clip index. */
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 

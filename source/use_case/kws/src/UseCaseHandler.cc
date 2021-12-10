@@ -75,8 +75,6 @@ namespace app {
             (arm::app::DsCnnModel::ms_inputRowsIdx > arm::app::DsCnnModel::ms_inputColsIdx)?
              arm::app::DsCnnModel::ms_inputRowsIdx : arm::app::DsCnnModel::ms_inputColsIdx);
 
-        platform.data_psn->clear(COLOR_BLACK);
-
         auto& model = ctx.Get<Model&>("model");
 
         /* If the request has a valid size, set the audio index. */
@@ -137,6 +135,8 @@ namespace app {
         const float secondsPerSample = 1.0/audio::DsCnnMFCC::ms_defaultSamplingFreq;
 
         do {
+            platform.data_psn->clear(COLOR_BLACK);
+
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 
             /* Creating a mfcc features sliding window for the data required for 1 inference. */

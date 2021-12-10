@@ -50,8 +50,6 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 70;
 
-
-        platform.data_psn->clear(COLOR_BLACK);
         time_t infTimeMs = 0;
 
         auto& model = ctx.Get<Model&>("model");
@@ -87,6 +85,7 @@ namespace app {
         std::vector<ClassificationResult> results;
 
         do {
+            platform.data_psn->clear(COLOR_BLACK);
 
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};

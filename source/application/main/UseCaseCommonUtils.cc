@@ -118,17 +118,9 @@ bool image::PresentInferenceResult(hal_platform &platform,
                 dataPsnTxtStartX2, rowIdx2, 0);
         rowIdx2 += dataPsnTxtYIncr;
 
-        if(profilingEnabled)
-        {
-            info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n", i, results[i].m_labelIdx,
-                 results[i].m_normalisedVal, results[i].m_label.c_str());
-        }
-        else
-        {
-            info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n", i,
-                    results[i].m_labelIdx, results[i].m_normalisedVal,
-                    results[i].m_label.c_str());
-        }
+        info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n", i,
+            results[i].m_labelIdx, results[i].m_normalisedVal,
+            results[i].m_label.c_str());
     }
 
     return true;

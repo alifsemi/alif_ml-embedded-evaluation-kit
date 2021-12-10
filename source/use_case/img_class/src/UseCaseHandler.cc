@@ -52,8 +52,6 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        platform.data_psn->clear(COLOR_BLACK);
-
         auto& model = ctx.Get<Model&>("model");
 
         /* If the request has a valid size, set the image index. */
@@ -89,6 +87,8 @@ namespace app {
         std::vector<ClassificationResult> results;
 
         do {
+            platform.data_psn->clear(COLOR_BLACK);
+
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};
 

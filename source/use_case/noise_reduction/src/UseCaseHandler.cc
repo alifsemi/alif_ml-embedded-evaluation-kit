@@ -64,8 +64,6 @@ namespace app {
         std::reference_wrapper<size_t> memDumpBytesWritten = std::ref(*pMemDumpBytesWritten);
 
         auto& platform = ctx.Get<hal_platform&>("platform");
-        platform.data_psn->clear(COLOR_BLACK);
-
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         /* Get model reference. */
@@ -106,6 +104,8 @@ namespace app {
             audioFileAccessorFunc = ctx.Get<std::function<const char*(const uint32_t)>>("featureFileNames");
         }
         do{
+            platform.data_psn->clear(COLOR_BLACK);
+
             auto startDumpAddress = memDumpBaseAddr + memDumpBytesWritten;
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 
@@ -211,7 +211,7 @@ namespace app {
 
             DumpDenoisedAudioFooter(memDumpBaseAddr + memDumpBytesWritten, memDumpMaxLen - memDumpBytesWritten);
 
-            info("Final results:\n");
+            info("All inferences for audio clip complete.\n");
             profiler.PrintProfilingResult();
             IncrementAppCtxClipIdx(ctx);
 
