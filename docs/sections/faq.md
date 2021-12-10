@@ -42,3 +42,17 @@ parameter. Check that the path is correct, clean the build folder and re-run the
 However, when running code samples on Corstone-300 FVP, active CPU cycles should not be used for any performance analysis or interpretation.
 The Cortex-M part of the Fast Model **is not** cycle accurate or approximate, meanwhile NPU (Ethos-U) part **is** cycle approximate.
 If you need to interpret cycles for Cortex-M part, you need to use FPGA system (based on MPS3) or cycle accurate modelling environment.
+
+----
+
+**Q: I changed the model for a use case but when running the application, tensor allocation fails with an error that an op for a
+builtin opcode could not be found and the application failed to get registration from that op code.**
+
+**A:** If you change the default model for a use case to a new model then you should update the corresponding
+*<model_name>Model.cc* source file to include any new operators that this model has.
+
+For example, if you changed the **img_class** model you would need to modify the **arm::app::MobileNetModel::EnlistOperations()**
+function in *source/use_case/img_class/src/MobileNetModel.cc* to enlist any new operators in the model.
+
+Don't forget to also increment the **ms_maxOpCnt** variable in the corresponding header file
+(e.g. *source/use_case/img_class/include/MobileNetModel.hpp* if we are changing **img_class**).
