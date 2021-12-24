@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DsCnnMfcc.hpp"
+#include "MicroNetKwsMfcc.hpp"
 
 #include <algorithm>
 #include <catch.hpp>
@@ -93,17 +93,17 @@ const std::vector<float> testWavMfcc {
     -22.67135, -0.61615, 2.07233, 0.58137, 1.01655, 0.85816, 0.46039, 0.03393, 1.16511, 0.0072,
 };
 
-arm::app::audio::DsCnnMFCC GetMFCCInstance() {
-    const int sampFreq = arm::app::audio::DsCnnMFCC::ms_defaultSamplingFreq;
+arm::app::audio::MicroNetMFCC GetMFCCInstance() {
+    const int sampFreq = arm::app::audio::MicroNetMFCC::ms_defaultSamplingFreq;
     const int frameLenMs = 40;
     const int frameLenSamples = sampFreq * frameLenMs * 0.001;
     const int numMfccFeats = 10;
 
-   return arm::app::audio::DsCnnMFCC(numMfccFeats, frameLenSamples);
+   return arm::app::audio::MicroNetMFCC(numMfccFeats, frameLenSamples);
 }
 
 template <class T>
-void TestQuntisedMFCC() {
+void TestQuantisedMFCC() {
     const float quantScale = 1.1088106632232666;
     const int quantOffset = 95;
     std::vector<T> mfccOutput = GetMFCCInstance().MfccComputeQuant<T>(testWav, quantScale, quantOffset);
@@ -118,9 +118,9 @@ void TestQuntisedMFCC() {
         REQUIRE(quantizedTestWavMfcc  == Approx(mfccOutput[i]).margin(0));
     }
 }
-template void TestQuntisedMFCC<int8_t>();
-template void TestQuntisedMFCC<uint8_t>();
-template void TestQuntisedMFCC<int16_t>();
+template void TestQuantisedMFCC<int8_t>();
+template void TestQuantisedMFCC<uint8_t>();
+template void TestQuantisedMFCC<int16_t>();
 
 TEST_CASE("MFCC calculation test")
 {
@@ -141,16 +141,16 @@ TEST_CASE("MFCC calculation test")
 
     SECTION("int8_t")
     {
-        TestQuntisedMFCC<int8_t>();
+        TestQuantisedMFCC<int8_t>();
     }
 
     SECTION("uint8_t")
     {
-        TestQuntisedMFCC<uint8_t>();
+        TestQuantisedMFCC<uint8_t>();
     }
 
     SECTION("MFCC quant calculation test - int16_t")
     {
-        TestQuntisedMFCC<int16_t>();
+        TestQuantisedMFCC<int16_t>();
     }
 }

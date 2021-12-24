@@ -45,7 +45,7 @@ USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples
 
 # Generate kws labels file:
 USER_OPTION(${use_case}_LABELS_TXT_FILE_KWS "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/ds_cnn_labels.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/micronet_kws_labels.txt
     FILEPATH)
 
 # Generate asr labels file:
@@ -67,10 +67,10 @@ USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD_ASR "Specify the score threshold [
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
     set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
 else()
-    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8.tflite)
+    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/kws_micronet_m.tflite)
     set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)
 endif()
 
@@ -134,7 +134,7 @@ generate_labels_code(
         INPUT           "${${use_case}_LABELS_TXT_FILE_KWS}"
         DESTINATION_SRC ${SRC_GEN_DIR}
         DESTINATION_HDR ${INC_GEN_DIR}
-        OUTPUT_FILENAME "Labels_dscnn"
+        OUTPUT_FILENAME "Labels_micronetkws"
         NAMESPACE       "arm" "app" "kws"
 )
 

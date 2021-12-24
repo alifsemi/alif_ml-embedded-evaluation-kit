@@ -44,7 +44,7 @@ By default, the KWS model is run purely on the CPU and **not** on the *Ethos-U55
 
 #### Keyword Spotting Preprocessing
 
-The `DS-CNN` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
+The `MicroNet` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
 specific way before performing an inference.
 
 Therefore, this section aims to provide an overview of the feature extraction process used.
@@ -455,43 +455,30 @@ What the preceding choices do:
 
 4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
 
-    ```log
+   ```log
+    INFO - Model info:
     INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 490 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   1
-    INFO -    2:  49
-    INFO -    3:  10
+    INFO - 		0:   1
+    INFO - 		1:  49
+    INFO - 		2:  10
+    INFO - 		3:   1
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 1.107164
-    INFO - ZeroPoint[0] = 95
+    INFO - Scale[0] = 0.201095
+    INFO - ZeroPoint[0] = -5
     INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 12 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:  12
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 12 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:  12
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 123616
-    INFO - Number of operators: 16
-    INFO -  Operator 0: RESHAPE
-    INFO -  Operator 1: CONV_2D
-    INFO -  Operator 2: DEPTHWISE_CONV_2D
-    INFO -  Operator 3: CONV_2D
-    INFO -  Operator 4: DEPTHWISE_CONV_2D
-    INFO -  Operator 5: CONV_2D
-    INFO -  Operator 6: DEPTHWISE_CONV_2D
-    INFO -  Operator 7: CONV_2D
-    INFO -  Operator 8: DEPTHWISE_CONV_2D
-    INFO -  Operator 9: CONV_2D
-    INFO -  Operator 10: DEPTHWISE_CONV_2D
-    INFO -  Operator 11: CONV_2D
-    INFO -  Operator 12: AVERAGE_POOL_2D
-    INFO -  Operator 13: RESHAPE
-    INFO -  Operator 14: FULLY_CONNECTED
-    INFO -  Operator 15: SOFTMAX
+    INFO - Scale[0] = 0.056054
+    INFO - ZeroPoint[0] = -54
+    INFO - Activation buffer (a.k.a tensor arena) size used: 127068
+    INFO - Number of operators: 1
+    INFO -  Operator 0: ethos-u
+   
     INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 11544 bytes with dimensions
@@ -511,9 +498,9 @@ What the preceding choices do:
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.003906
     INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 809808
+    INFO - Activation buffer (a.k.a tensor arena) size used: 4184332
     INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
+    INFO - Operator 0: ethos-u
     ```
 
 5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
@@ -534,27 +521,31 @@ INFO - KWS audio data window size 16000
 INFO - Running KWS inference on audio clip 0 => yes_no_go_stop.wav
 INFO - Inference 1/7
 INFO - For timestamp: 0.000000 (inference #: 0); threshold: 0.900000
-INFO -          label @ 0: yes, score: 0.996094
+INFO -          label @ 0: yes, score: 0.997407
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 217385
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 82607
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 59608
-INFO - NPU ACTIVE cycles: 680611
-INFO - NPU IDLE cycles: 561
-INFO - NPU TOTAL cycles: 681172
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 132130
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 48252
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 17544
+INFO - NPU ACTIVE cycles: 413814
+INFO - NPU IDLE cycles: 358
+INFO - NPU TOTAL cycles: 414172
 INFO - Keyword spotted
 INFO - Inference 1/2
 INFO - Inference 2/2
-INFO - Result for inf 0: no gow
-INFO - Result for inf 1:  stoppe
-INFO - Final result: no gow stoppe
+INFO - Result for inf 0: no go
+INFO - Result for inf 1:  stop
+INFO - Final result: no go stop
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 13520864
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 2841970
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 2717670
-INFO - NPU ACTIVE cycles: 28909309
-INFO - NPU IDLE cycles: 863
-INFO - NPU TOTAL cycles: 28910172
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 8895431
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 1890168
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 1740069
+INFO - NPU ACTIVE cycles: 30164330
+INFO - NPU IDLE cycles: 342
+INFO - NPU TOTAL cycles: 30164672
+INFO - Main loop terminated.
+INFO - program terminating...
+INFO - releasing platform Arm Corstone-300 (SSE-300)
+
 ```
 
 It can take several minutes to complete one inference run. The average time is around 2-3 minutes.
@@ -567,22 +558,21 @@ The profiling section of the log shows that for the ASR inference:
 
 - *Ethos-U* PMU report:
 
-  - 28,910,172 total cycle: The number of NPU cycles.
+  - 30,164,672 total cycle: The number of NPU cycles.
 
-  - 28,909,309 active cycles: The number of NPU cycles that were used for computation.
+  - 30,164,330 active cycles: The number of NPU cycles that were used for computation.
 
-  - 863 idle cycles: The number of cycles for which the NPU was idle.
+  - 342 idle cycles: The number of cycles for which the NPU was idle.
 
-  - 13,520,864 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where
+  - 8,895,431 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where
     the *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
-  - 2,841,970 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
+  - 1,890,168 AXI0 write beats: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 2,717,670 AXI1 read beats: The number of AXI beats with read transactions from the AXI1 bus. AXI1 is the bus where
+  - 1,740,069 AXI1 read beats: The number of AXI beats with read transactions from the AXI1 bus. AXI1 is the bus where
     the *Ethos-U55* NPU reads the model. So, read-only.
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
   model is not cycle-approximate or cycle-accurate.
 
-> **Note:** In this example, the KWS inference does *not* use the *Ethos-U55* and only runs on the CPU. Therefore, `0`
-> Active NPU cycles are shown.
+

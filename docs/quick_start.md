@@ -84,11 +84,11 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3
     --output ./resources_downloaded/img_class/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/testing_output/MobilenetV2/Predictions/Reshape_11/0.npy \
     --output ./resources_downloaded/img_class/ofm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite \
-    --output ./resources_downloaded/kws/ds_cnn_clustered_int8.tflite
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_input/input_2/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/kws_micronet_m.tflite \
+    --output ./resources_downloaded/kws/kws_micronet_m.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_input/input/0.npy \
     --output ./resources_downloaded/kws/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/kws/ofm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/wav2letter_pruned_int8.tflite \
     --output ./resources_downloaded/kws_asr/wav2letter_pruned_int8.tflite
@@ -96,11 +96,11 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59d
     --output ./resources_downloaded/kws_asr/asr/ifm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_output/Identity_int8/0.npy \
     --output ./resources_downloaded/kws_asr/asr/ofm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite \
-    --output ./resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_input/input_2/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/kws_micronet_m.tflite \
+    --output ./resources_downloaded/kws_asr/kws_micronet_m.tflite
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_input/input/0.npy \
     --output ./resources_downloaded/kws_asr/kws/ifm0.npy
-curl -L https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy \
+curl -L https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/kws_asr/kws/ofm0.npy
 curl -L https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite \
     --output ./resources_downloaded/noise_reduction/rnnoise_INT8.tflite
@@ -131,22 +131,22 @@ curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c
 curl -L https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/testing_output/Identity/0.npy \
     --output ./resources_downloaded/vww/ofm0.npy
 
-. resources_downloaded/env/bin/activate && vela resources_downloaded/kws/ds_cnn_clustered_int8.tflite \
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws/kws_micronet_m.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/kws \
     --arena-cache-size=2097152
-mv resources_downloaded/kws/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws/ds_cnn_clustered_int8_vela_H128.tflite
+mv resources_downloaded/kws/kws_micronet_m.tflite resources_downloaded/kws/kws_micronet_m_vela_H128.tflite
 
-. resources_downloaded/env/bin/activate && vela resources_downloaded/kws/ds_cnn_clustered_int8.tflite \
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws/kws_micronet_m.tflite \
     --accelerator-config=ethos-u65-256 \
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Dedicated_Sram \
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/kws
-mv resources_downloaded/kws/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws/ds_cnn_clustered_int8_vela_Y256.tflite
+mv resources_downloaded/kws/kws_micronet_vela.tflite resources_downloaded/kws/kws_micronet_m_vela_Y256.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \
@@ -165,22 +165,22 @@ mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded
     --output-dir=resources_downloaded/kws_asr
 mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded/kws_asr/wav2letter_int8_vela_Y256.tflite
 
-. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite \
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/kws_micronet_m.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Shared_Sram \
     --system-config=Ethos_U55_High_End_Embedded \
     --output-dir=resources_downloaded/kws_asr \
     --arena-cache-size=2097152
-mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela_H128.tflite
+mv resources_downloaded/kws_asr/kws_micronet_m.tflite_vela.tflite resources_downloaded/kws_asr/kws_micronet_m.tflite_vela_H128.tflite
 
-. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/ds_cnn_clustered_int8.tflite \
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/kws_micronet_m.tflite \
     --accelerator-config=ethos-u65-256 \
     --optimise Performance --config scripts/vela/default_vela.ini \
     --memory-mode=Dedicated_Sram \
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/kws_asr
-mv resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela.tflite resources_downloaded/kws_asr/ds_cnn_clustered_int8_vela_Y256.tflite
+mv resources_downloaded/kws_asr/kws_micronet_m.tflite_vela.tflite resources_downloaded/kws_asr/kws_micronet_m.tflite_vela_Y256.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/inference_runner/dnn_s_quantized.tflite \
     --accelerator-config=ethos-u55-128 \

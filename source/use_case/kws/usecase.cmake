@@ -20,7 +20,7 @@ USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or pat
     PATH_OR_FILE)
 
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/ds_cnn_labels.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/micronet_kws_labels.txt
     FILEPATH)
 
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
@@ -48,7 +48,7 @@ USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples
     STRING)
 
 USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0, 1.0) that must be applied to the inference results for a label to be deemed valid."
-    0.9
+    0.7
     STRING)
 
 # Generate input files
@@ -73,10 +73,11 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     0x00100000
     STRING)
 
+
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
 else()
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/ds_cnn_clustered_int8.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/kws_micronet_m.tflite)
 endif()
 
 set(EXTRA_MODEL_CODE

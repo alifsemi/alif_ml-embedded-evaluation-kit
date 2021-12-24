@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DsCnnMfcc.hpp"
+#include "MicroNetKwsMfcc.hpp"
 
 #include <algorithm>
 #include <catch.hpp>
@@ -93,13 +93,13 @@ const std::vector<float> testWavMfcc {
     -22.67135, -0.61615, 2.07233, 0.58137, 1.01655, 0.85816, 0.46039, 0.03393, 1.16511, 0.0072,
 };
 
-arm::app::audio::DsCnnMFCC GetMFCCInstance() {
-    const int sampFreq = arm::app::audio::DsCnnMFCC::ms_defaultSamplingFreq;
+arm::app::audio::MicroNetKwsMFCC GetMFCCInstance() {
+    const int sampFreq = arm::app::audio::MicroNetKwsMFCC::ms_defaultSamplingFreq;
     const int frameLenMs = 40;
     const int frameLenSamples = sampFreq * frameLenMs * 0.001;
     const int numMfccFeats = 10;
 
-   return arm::app::audio::DsCnnMFCC(numMfccFeats, frameLenSamples);
+   return arm::app::audio::MicroNetKwsMFCC(numMfccFeats, frameLenSamples);
 }
 
 template <class T>

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DsCnnModel.hpp"
+#include "MicroNetKwsModel.hpp"
 #include "hal.h"
 #include "TestData_kws.hpp"
 #include "TensorFlowLiteMicro.hpp"
@@ -72,8 +72,8 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
     }
 }
 
-TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]") {
-    arm::app::DsCnnModel model{};
+TEST_CASE("Running random inference with Tflu and MicroNetKwsModel Int8", "[MicroNetKws]") {
+    arm::app::MicroNetKwsModel model{};
 
     REQUIRE_FALSE(model.IsInited());
     REQUIRE(model.Init());
@@ -82,14 +82,14 @@ TEST_CASE("Running random inference with Tflu and DsCnnModel Int8", "[DS_CNN]") 
     REQUIRE(RunInferenceRandom(model));
 }
 
-TEST_CASE("Running inference with Tflu and DsCnnModel Uint8", "[DS_CNN]") {
+TEST_CASE("Running inference with Tflu and MicroNetKwsModel Int8", "[MicroNetKws]") {
     REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
     for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
         const int8_t* input_goldenFV = get_ifm_data_array(i);
         const int8_t* output_goldenFV = get_ofm_data_array(i);
 
         DYNAMIC_SECTION("Executing inference with re-init") {
-            arm::app::DsCnnModel model{};
+            arm::app::MicroNetKwsModel model{};
 
             REQUIRE_FALSE(model.IsInited());
             REQUIRE(model.Init());

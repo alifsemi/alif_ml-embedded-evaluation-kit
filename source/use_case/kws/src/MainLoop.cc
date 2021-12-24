@@ -16,7 +16,7 @@
  */
 #include "InputFiles.hpp"           /* For input audio clips. */
 #include "Classifier.hpp"           /* Classifier. */
-#include "DsCnnModel.hpp"           /* Model class for running inference. */
+#include "MicroNetKwsModel.hpp"     /* Model class for running inference. */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "Labels.hpp"               /* For label strings. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
@@ -49,7 +49,7 @@ static void DisplayMenu()
 
 void main_loop(hal_platform& platform)
 {
-    arm::app::DsCnnModel model;  /* Model wrapper object. */
+    arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
     /* Load the model. */
     if (!model.Init()) {

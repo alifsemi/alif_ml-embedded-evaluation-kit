@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DsCnnModel.hpp"
+#include "MicroNetKwsModel.hpp"
 #include "Wav2LetterModel.hpp"
 
 #include <catch.hpp>
@@ -22,8 +22,8 @@
 /* Skip this test, Wav2LetterModel if not Vela optimized but only from ML-zoo will fail. */
 TEST_CASE("Init two Models", "[.]")
 {
-    arm::app::DsCnnModel model1;
-    arm::app::DsCnnModel model2;
+    arm::app::MicroNetKwsModel model1;
+    arm::app::MicroNetKwsModel model2;
 
     /* Ideally we should load the wav2letter model here, but there is
      * none available to run on native (ops not supported on unoptimised

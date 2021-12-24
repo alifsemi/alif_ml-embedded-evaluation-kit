@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DsCnnModel.hpp"
+#include "MicroNetKwsModel.hpp"
 
 #include "hal.h"
 
@@ -27,21 +27,18 @@ namespace kws {
 } /* namespace app */
 } /* namespace arm */
 
-const tflite::MicroOpResolver& arm::app::DsCnnModel::GetOpResolver()
+const tflite::MicroOpResolver& arm::app::MicroNetKwsModel::GetOpResolver()
 {
     return this->m_opResolver;
 }
 
-bool arm::app::DsCnnModel::EnlistOperations()
+bool arm::app::MicroNetKwsModel::EnlistOperations()
 {
     this->m_opResolver.AddAveragePool2D();
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddDepthwiseConv2D();
     this->m_opResolver.AddFullyConnected();
     this->m_opResolver.AddRelu();
-    this->m_opResolver.AddSoftmax();
-    this->m_opResolver.AddQuantize();
-    this->m_opResolver.AddDequantize();
     this->m_opResolver.AddReshape();
 
 #if defined(ARM_NPU)
@@ -56,12 +53,12 @@ bool arm::app::DsCnnModel::EnlistOperations()
     return true;
 }
 
-const uint8_t* arm::app::DsCnnModel::ModelPointer()
+const uint8_t* arm::app::MicroNetKwsModel::ModelPointer()
 {
     return arm::app::kws::GetModelPointer();
 }
 
-size_t arm::app::DsCnnModel::ModelSize()
+size_t arm::app::MicroNetKwsModel::ModelSize()
 {
     return arm::app::kws::GetModelLen();
 }

@@ -35,7 +35,7 @@ void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults
     }
 
     arm::app::Classifier classifier;
-    REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 5));
+    REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 5, true));
     REQUIRE(5 == resultVec.size());
 
     for (size_t i = 0; i < resultVec.size(); ++i) {
@@ -50,7 +50,7 @@ TEST_CASE("Common classifier")
         TfLiteTensor* outputTens = nullptr;
         std::vector <arm::app::ClassificationResult> resultVec;
         arm::app::Classifier classifier;
-        REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 5));
+        REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 5, true));
     }
 
     SECTION("Test classification results")

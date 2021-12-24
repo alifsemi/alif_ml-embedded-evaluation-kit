@@ -32,12 +32,14 @@ namespace app {
          *                             populated by this function.
          * @param[in]   labels         Labels vector to match classified classes
          * @param[in]   topNCount      Number of top classifications to pick.
+         * @param[in]   use_softmax    Whether softmax scaling should be applied to model output.
          * @return      true if successful, false otherwise.
          **/
         bool GetClassificationResults(
                 TfLiteTensor* outputTensor,
                 std::vector<ClassificationResult>& vecResults,
-                const std::vector <std::string>& labels, uint32_t topNCount) override;
+                const std::vector <std::string>& labels, uint32_t topNCount,
+                bool use_softmax = false) override;
 
     private:
 

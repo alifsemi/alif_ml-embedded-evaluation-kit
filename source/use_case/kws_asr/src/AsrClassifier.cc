@@ -73,8 +73,9 @@ template bool arm::app::AsrClassifier::GetTopResults<int8_t>(TfLiteTensor* tenso
 bool arm::app::AsrClassifier::GetClassificationResults(
             TfLiteTensor* outputTensor,
             std::vector<ClassificationResult>& vecResults,
-            const std::vector <std::string>& labels, uint32_t topNCount)
+            const std::vector <std::string>& labels, uint32_t topNCount, bool use_softmax)
 {
+        UNUSED(use_softmax);
         vecResults.clear();
 
         constexpr int minTensorDims = static_cast<int>(

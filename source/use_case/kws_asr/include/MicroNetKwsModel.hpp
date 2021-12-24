@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef KWS_ASR_DSCNNMODEL_HPP
-#define KWS_ASR_DSCNNMODEL_HPP
+#ifndef KWS_ASR_MICRONETMODEL_HPP
+#define KWS_ASR_MICRONETMODEL_HPP
 
 #include "Model.hpp"
 
@@ -33,12 +33,11 @@ namespace kws {
 
 namespace arm {
 namespace app {
-
-    class DsCnnModel : public Model {
+    class MicroNetKwsModel : public Model {
     public:
         /* Indices for the expected model - based on input and output tensor shapes */
-        static constexpr uint32_t ms_inputRowsIdx = 2;
-        static constexpr uint32_t ms_inputColsIdx = 3;
+        static constexpr uint32_t ms_inputRowsIdx = 1;
+        static constexpr uint32_t ms_inputColsIdx = 2;
         static constexpr uint32_t ms_outputRowsIdx = 2;
         static constexpr uint32_t ms_outputColsIdx = 3;
 
@@ -55,7 +54,7 @@ namespace app {
 
     private:
         /* Maximum number of individual operations that can be enlisted. */
-        static constexpr int ms_maxOpCnt = 10;
+        static constexpr int ms_maxOpCnt = 7;
 
         /* A mutable op resolver instance. */
         tflite::MicroMutableOpResolver<ms_maxOpCnt> m_opResolver;
@@ -64,4 +63,4 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-#endif /* KWS_DSCNNMODEL_HPP */
+#endif /* KWS_ASR_MICRONETMODEL_HPP */

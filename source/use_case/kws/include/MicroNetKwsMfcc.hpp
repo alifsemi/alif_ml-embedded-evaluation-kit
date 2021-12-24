@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef KWS_ASR_DSCNN_MFCC_HPP
-#define KWS_ASR_DSCNN_MFCC_HPP
+#ifndef KWS_MICRONET_MFCC_HPP
+#define KWS_MICRONET_MFCC_HPP
 
 #include "Mfcc.hpp"
 
@@ -23,8 +23,8 @@ namespace arm {
 namespace app {
 namespace audio {
 
-    /* Class to provide DS-CNN specific MFCC calculation requirements. */
-    class DsCnnMFCC : public MFCC {
+    /* Class to provide MicroNet specific MFCC calculation requirements. */
+    class MicroNetKwsMFCC : public MFCC {
 
     public:
         static constexpr uint32_t  ms_defaultSamplingFreq = 16000;
@@ -33,19 +33,18 @@ namespace audio {
         static constexpr uint32_t  ms_defaultMelHiFreq    =  4000;
         static constexpr bool      ms_defaultUseHtkMethod =  true;
 
-
-        explicit DsCnnMFCC(const size_t numFeats, const size_t frameLen)
+        explicit MicroNetKwsMFCC(const size_t numFeats, const size_t frameLen)
             :  MFCC(MfccParams(
                         ms_defaultSamplingFreq, ms_defaultNumFbankBins,
                         ms_defaultMelLoFreq, ms_defaultMelHiFreq,
                         numFeats, frameLen, ms_defaultUseHtkMethod))
         {}
-        DsCnnMFCC()  = delete;
-        ~DsCnnMFCC() = default;
+        MicroNetKwsMFCC()  = delete;
+        ~MicroNetKwsMFCC() = default;
     };
 
 } /* namespace audio */
 } /* namespace app */
 } /* namespace arm */
 
-#endif /* KWS_ASR_DSCNN_MFCC_HPP */
+#endif /* KWS_MICRONET_MFCC_HPP */

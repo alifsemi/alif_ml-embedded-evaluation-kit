@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 #include "PlatformMath.hpp"
+#include <algorithm>
+#include <numeric>
 
 #if 0 == ARM_DSP_AVAILABLE
     #include <cmath>
@@ -288,6 +290,24 @@ namespace math {
         }
 #endif /* ARM_DSP_AVAILABLE */
         return true;
+    }
+
+    void MathUtils::SoftmaxF32(std::vector<float>& vec)
+    {
+        /* Fix for numerical stability and apply exp. */
+        auto start = vec.begin();
+        auto end = vec.end();
+
+        float maxValue = *std::max_element(start, end);
+        for (auto it = start; it != end; ++it) {
+            *it = std::exp((*it) - maxValue);
+        }
+
+        float sumExp = std::accumulate(start, end, 0.0f);
+
+        for (auto it = start; it != end; ++it) {
+            *it = (*it)/sumExp;
+        }
     }
 
 } /* namespace math */

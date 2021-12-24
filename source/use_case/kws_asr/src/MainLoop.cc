@@ -16,11 +16,11 @@
  */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "InputFiles.hpp"           /* For input images. */
-#include "Labels_dscnn.hpp"         /* For DS-CNN label strings. */
+#include "Labels_micronetkws.hpp"   /* For MicroNetKws label strings. */
 #include "Labels_wav2letter.hpp"    /* For Wav2Letter label strings. */
 #include "Classifier.hpp"           /* KWS classifier. */
 #include "AsrClassifier.hpp"        /* ASR classifier. */
-#include "DsCnnModel.hpp"           /* KWS model class for running inference. */
+#include "MicroNetKwsModel.hpp"     /* KWS model class for running inference. */
 #include "Wav2LetterModel.hpp"      /* ASR model class for running inference. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
@@ -69,7 +69,7 @@ static uint32_t GetOutputInnerLen(const arm::app::Model& model,
 void main_loop(hal_platform& platform)
 {
     /* Model wrapper objects. */
-    arm::app::DsCnnModel kwsModel;
+    arm::app::MicroNetKwsModel kwsModel;
     arm::app::Wav2LetterModel asrModel;
 
     /* Load the models. */
@@ -81,7 +81,7 @@ void main_loop(hal_platform& platform)
     /* Initialise the asr model using the same allocator from KWS
      * to re-use the tensor arena. */
     if (!asrModel.Init(kwsModel.GetAllocator())) {
-        printf_err("Failed to initalise ASR model\n");
+        printf_err("Failed to initialise ASR model\n");
         return;
     }
 
@@ -137,7 +137,7 @@ void main_loop(hal_platform& platform)
     caseContext.Set<const std::vector <std::string>&>("kwslabels", kwsLabels);
 
     /* Index of the kws outputs we trigger ASR on. */
-    caseContext.Set<uint32_t>("keywordindex", 2);
+    caseContext.Set<uint32_t>("keywordindex", 9 );
 
     /* Loop. */
     bool executionSuccessful = true;

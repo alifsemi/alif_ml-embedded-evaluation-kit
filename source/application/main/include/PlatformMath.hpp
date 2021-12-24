@@ -161,7 +161,14 @@ namespace math {
                                                float* ptrDst,
                                                const uint32_t dstLen);
 
+        /**
+        * @brief       Scales output scores for an arbitrary number of classes so
+        *              that they sum to 1, allowing output to be expressed as a probability.
+        * @param[in]   vector Vector of floats modified in-place
+        */
+        static void SoftmaxF32(std::vector<float>& vec);
     };
+
 } /* namespace math */
 } /* namespace app */
 } /* namespace arm */

@@ -56,12 +56,12 @@ json_uc_res = [{
     },
     {
         "use_case_name": "kws",
-        "resources": [{"name": "ds_cnn_clustered_int8.tflite",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite"},
-                      {"name": "ifm0.npy",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_input/input_2/0.npy"},
+        "resources": [{"name": "ifm0.npy",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_input/input/0.npy"},
                       {"name": "ofm0.npy",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy"}]
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_output/Identity/0.npy"},
+                      {"name": "kws_micronet_m.tflite",
+                       "url": " https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/kws_micronet_m.tflite"}]
     },
      {
         "use_case_name": "vww",
@@ -80,12 +80,12 @@ json_uc_res = [{
                        "url": "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_input/input_2_int8/0.npy"},
                       {"sub_folder": "asr", "name": "ofm0.npy",
                        "url": "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/testing_output/Identity_int8/0.npy"},
-                      {"name": "ds_cnn_clustered_int8.tflite",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/ds_cnn_clustered_int8.tflite"},
                       {"sub_folder": "kws", "name": "ifm0.npy",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_input/input_2/0.npy"},
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_input/input/0.npy"},
                       {"sub_folder": "kws", "name": "ofm0.npy",
-                       "url": "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/ds_cnn_large/tflite_clustered_int8/testing_output/Identity/0.npy"}]
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/testing_output/Identity/0.npy"},
+                      {"name": "kws_micronet_m.tflite",
+                       "url": "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/kws_micronet_m.tflite"}]
     },
     {
         "use_case_name": "noise_reduction",
@@ -303,8 +303,8 @@ def set_up_resources(run_vela_on_models: bool = False,
     # 3. Run vela on models in resources_downloaded
     # New models will have same name with '_vela' appended.
     # For example:
-    #   original model:  ds_cnn_clustered_int8.tflite
-    # after vela model:  ds_cnn_clustered_int8_vela_H128.tflite
+    # original model:    kws_micronet_m.tflite
+    # after vela model:  kws_micronet_m_vela_H128.tflite
     #
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.

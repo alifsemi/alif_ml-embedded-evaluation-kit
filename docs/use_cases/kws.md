@@ -23,7 +23,7 @@ Use-case code could be found in the following directory: [source/use_case/kws](.
 
 ### Preprocessing and feature extraction
 
-The `DS-CNN` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
+The `MicroNet` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
 specific way before performing an inference.
 
 Therefore, this section aims to provide an overview of the feature extraction process used.
@@ -62,7 +62,7 @@ used.
 ### Postprocessing
 
 After an inference is complete, the word with the highest detected probability is output to console. Providing that the
-probability is larger than a threshold value. The default is set to `0.9`.
+probability is larger than a threshold value. The default is set to `0.7`.
 
 If multiple inferences are performed for an audio clip, then multiple results are output.
 
@@ -107,7 +107,7 @@ In addition to the already specified build option in the main documentation, the
   this number, then it is padded with zeros. The default value is `16000`.
 
 - `kws_MODEL_SCORE_THRESHOLD`: Threshold value that must be applied to the inference results for a label to be deemed
-  valid. Goes from 0.00 to 1.0. The default is `0.9`.
+  valid. Goes from 0.00 to 1.0. The default is `0.7`.
 
 - `kws_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it is set
   to 2MiB and is enough for most models
@@ -247,7 +247,7 @@ For further information: [Optimize model with Vela compiler](../sections/buildin
 
 To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
 associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
-provided `ds_cnn_labels.txt` file for an example.
+provided `micronet_kws_labels.txt` file for an example.
 
 Then, you must set `kws_MODEL_TFLITE_PATH` to the location of the Vela processed model file and `kws_LABELS_TXT_FILE`to
 the location of the associated labels file.
@@ -369,24 +369,24 @@ What the preceding choices do:
     INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 490 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   1
-    INFO -    2:  49
-    INFO -    3:  10
+    INFO - 		0:   1
+    INFO - 		1:  49
+    INFO - 		2:  10
+    INFO - 		3:   1
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 1.107164
-    INFO - ZeroPoint[0] = 95
+    INFO - Scale[0] = 0.201095
+    INFO - ZeroPoint[0] = -5
     INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 12 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:  12
+    INFO - 	tensor type is INT8
+    INFO - 	tensor occupies 12 bytes with dimensions
+    INFO - 		0:   1
+    INFO - 		1:  12
     INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 72848
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
+    INFO - Scale[0] = 0.056054
+    INFO - ZeroPoint[0] = -54
+    INFO - Activation buffer (a.k.a tensor arena) size used: 127068
+    INFO - Number of operators: 0
+    INFO - 	Operator 0: ethos-u
     ```
 
 5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
@@ -405,18 +405,21 @@ Please select the first menu option to execute inference on the first file.
 
 The following example illustrates the output for classification:
 
-```logINFO - Running inference on audio clip 0 => down.wav
+```log
+
+INFO - Running inference on audio clip 0 => down.wav
 INFO - Inference 1/1
 INFO - Final results:
 INFO - Total number of inferences: 1
-INFO - For timestamp: 0.000000 (inference #: 0); label: down, score: 0.996094; threshold: 0.900000
+INFO - For timestamp: 0.000000 (inference #: 0); label: down, score: 0.986182; threshold: 0.700000
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 217385
-INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 82607
-INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 59608
-INFO - NPU ACTIVE cycles: 680611
-INFO - NPU IDLE cycles: 561
-INFO - NPU TOTAL cycles: 681172
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 132130
+INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 48252
+INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 17544
+INFO - NPU ACTIVE cycles: 413814
+INFO - NPU IDLE cycles: 358
+INFO - NPU TOTAL cycles: 414172
+
 ```
 
 On most systems running Fast Model, each inference takes under 30 seconds.
@@ -425,22 +428,22 @@ The profiling section of the log shows that for this inference:
 
 - *Ethos-U* PMU report:
 
-  - 681,172 total cycle: The number of NPU cycles.
+  - 414,172 total cycle: The number of NPU cycles.
 
-  - 680,611 active cycles: The number of NPU cycles that were used for computation.
+  - 413,814 active cycles: The number of NPU cycles that were used for computation.
 
-  - 561 idle cycles: The number of cycles for which the NPU was idle.
+  - 358 idle cycles: The number of cycles for which the NPU was idle.
 
-  - 217,385 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where the
+  - 132,130 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where the
     *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
-  - 82,607 write cycles: The number of AXI beats with write transactions to AXI0 bus.
+  - 48,252 write cycles: The number of AXI beats with write transactions to AXI0 bus.
 
-  - 59,608 AXI1 read beats: The number of AXI beats with read transactions from the AXI1 bus. AXI1 is the bus where the
+  - 17,544 AXI1 read beats: The number of AXI beats with read transactions from the AXI1 bus. AXI1 is the bus where the
     *Ethos-U* NPU reads the model. So, read-only.
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
   model is not cycle-approximate or cycle-accurate.
 
-> **Note:** The application prints the highest confidence score and the associated label from the `ds_cnn_labels.txt`
+> **Note:** The application prints the highest confidence score and the associated label from the `micronet_kws_labels.txt`
 > file.
