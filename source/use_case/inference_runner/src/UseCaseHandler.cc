@@ -157,6 +157,7 @@ bool RunInferenceHandler(ApplicationContext& ctx)
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     info("Final results:\n");
+    info("Total number of inferences: 1\n");
     profiler.PrintProfilingResult();
 
 #if VERIFY_TEST_OUTPUT

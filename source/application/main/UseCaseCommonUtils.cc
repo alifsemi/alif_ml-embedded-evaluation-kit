@@ -58,10 +58,11 @@ bool image::PresentInferenceResult(hal_platform &platform,
 }
 
 
-bool image::PresentInferenceResult(hal_platform &platform,
-                                        const std::vector<arm::app::ClassificationResult> &results,
-                                        bool profilingEnabled,
-                                        const time_t infTimeMs)
+bool image::PresentInferenceResult(
+    hal_platform &platform,
+    const std::vector<arm::app::ClassificationResult> &results,
+    bool profilingEnabled,
+    const time_t infTimeMs)
 {
     constexpr uint32_t dataPsnTxtStartX1 = 150;
     constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -71,15 +72,13 @@ bool image::PresentInferenceResult(hal_platform &platform,
 
     constexpr uint32_t dataPsnTxtYIncr = 16;  /* Row index increment. */
 
-    if(profilingEnabled)
-    {
+    if (profilingEnabled) {
         platform.data_psn->set_text_color(COLOR_YELLOW);
 
         /* If profiling is enabled, and the time is valid. */
         info("Final results:\n");
         info("Total number of inferences: 1\n");
-        if (infTimeMs)
-        {
+        if (infTimeMs) {
             std::string strInf =
                     std::string{"Inference: "} +
                     std::to_string(infTimeMs) +
@@ -95,8 +94,7 @@ bool image::PresentInferenceResult(hal_platform &platform,
     uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
     uint32_t rowIdx2 = dataPsnTxtStartY2;
 
-    if(!profilingEnabled)
-    {
+    if (!profilingEnabled) {
         info("Final results:\n");
         info("Total number of inferences: 1\n");
     }
