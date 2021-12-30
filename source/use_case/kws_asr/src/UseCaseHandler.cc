@@ -240,7 +240,7 @@ namespace app {
                 );
 
             /* Keyword detected. */
-            if (kwsClassificationResult[0].m_labelIdx == ctx.Get<uint32_t>("keywordindex")) {
+            if (kwsClassificationResult[0].m_label == ctx.Get<const std::string&>("triggerkeyword")) {
                 output.asrAudioStart = inferenceWindow + kwsAudioDataWindowSize;
                 output.asrAudioSamples = get_audio_array_size(currentIndex) -
                                         (audioDataSlider.NextWindowStartIndex() -

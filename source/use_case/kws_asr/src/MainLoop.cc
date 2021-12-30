@@ -136,8 +136,15 @@ void main_loop(hal_platform& platform)
     caseContext.Set<const std::vector <std::string>&>("asrlabels", asrLabels);
     caseContext.Set<const std::vector <std::string>&>("kwslabels", kwsLabels);
 
-    /* Index of the kws outputs we trigger ASR on. */
-    caseContext.Set<uint32_t>("keywordindex", 9 );
+    /* KWS keyword that triggers ASR and associated checks */
+    std::string triggerKeyword = std::string("yes");
+    if (std::find(kwsLabels.begin(), kwsLabels.end(), triggerKeyword) != kwsLabels.end()) {
+        caseContext.Set<const std::string &>("triggerkeyword", triggerKeyword);
+    }
+    else {
+        printf_err("Selected trigger keyword not found in labels file\n");
+        return;
+    }
 
     /* Loop. */
     bool executionSuccessful = true;
