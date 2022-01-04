@@ -113,7 +113,7 @@ def main(args):
     ifm_array_names = []
     ofm_array_names = []
 
-    add_usecase_fname = ("_" + args.usecase) if (args.usecase is not "") else ""
+    add_usecase_fname = ("_" + args.usecase) if (args.usecase != "") else ""
     header_filename = "TestData" + add_usecase_fname + ".hpp"
     common_cc_filename = "TestData" + add_usecase_fname + ".cc"
 
