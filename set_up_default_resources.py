@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +53,11 @@ json_uc_res = [{
                        "url": "https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/testing_input/tfl.quantize/0.npy"},
                       {"name": "ofm0.npy",
                        "url": "https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/testing_output/MobilenetV2/Predictions/Reshape_11/0.npy"}]
+    },
+    {
+        "use_case_name": "object_detection",
+        "resources": [{"name": "yolo-fastest_192_face_v4.tflite",
+                       "url": "https://github.com/emza-vs/ModelZoo/blob/v1.0/object_detection/yolo-fastest_192_face_v4.tflite?raw=true"}]
     },
     {
         "use_case_name": "kws",
