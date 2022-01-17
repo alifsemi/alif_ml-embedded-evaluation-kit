@@ -147,6 +147,6 @@ endfunction()
 # Function to assert the compiler version
 function(enforce_compiler_version)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MIN_GCC_VERSION})
-        message( FATAL_ERROR "arm-none-eabi-gcc version must be ${MIN_GCC_VERSION} or greater to support ${CMAKE_SYSTEM_PROCESSOR} architecture." )
+        message( FATAL_ERROR "arm-none-eabi-gcc version must be ${MIN_GCC_VERSION} or greater." )
     endif()
 endfunction()

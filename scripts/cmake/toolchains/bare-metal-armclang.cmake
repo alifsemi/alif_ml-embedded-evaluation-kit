@@ -25,7 +25,7 @@ set(CMAKE_ASM_COMPILER_AR           armar)
 set(CMAKE_CROSSCOMPILING            true)
 set(CMAKE_SYSTEM_NAME               Generic)
 
-set(MIN_ARM_CLANG_VERSION           6.15)
+set(MIN_ARM_CLANG_VERSION           6.16)
 
 # Skip compiler test execution
 set(CMAKE_C_COMPILER_WORKS          1)
@@ -133,6 +133,6 @@ endfunction()
 # Function to assert the compiler version
 function(enforce_compiler_version)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MIN_ARM_CLANG_VERSION})
-        message( FATAL_ERROR "Arm compiler version must be ${MIN_ARM_CLANG_VERSION} or greater to support ${CMAKE_SYSTEM_PROCESSOR} architecture." )
+        message( FATAL_ERROR "Arm compiler version must be ${MIN_ARM_CLANG_VERSION} or greater." )
     endif()
 endfunction()
