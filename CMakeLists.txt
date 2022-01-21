@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2021 - 2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -170,12 +170,18 @@ file(GLOB_RECURSE SRC_HAL
 # by each platform's cmake include file
 list(APPEND SRC_HAL ${SRC_PLAT_HAL})
 
+# Profiler
+if (NOT DEFINED PROFILER_DIR)
+    set(PROFILER_DIR ${SRC_PATH}/application/profiler)
+endif ()
+
 # Include directories:
-set(APPLICATION_INCLUDE_DIRS
+list(APPEND APPLICATION_INCLUDE_DIRS
     ${HAL_DIR}/include
     ${SRC_PATH}/application/tensorflow-lite-micro/include
     ${SRC_PATH}/application/main/include
     ${PLAT_INCLUDE_DIRS}
+    ${PROFILER_DIR}/include
     )
 
 file(GLOB_RECURSE SRC_APPLICATION
@@ -185,6 +191,9 @@ file(GLOB_RECURSE SRC_APPLICATION
     "${SRC_PATH}/application/main/**/*.cc"
     "${SRC_PATH}/application/main/**/*.cpp"
     "${SRC_PATH}/application/main/**/*.c"
+    "${PROFILER_DIR}/*.cc"
+    "${PROFILER_DIR}/*.cpp"
+    "${PROFILER_DIR}/*.c"
     )
 list(FILTER SRC_APPLICATION EXCLUDE REGEX ".*main\\.c.*$")
 
@@ -218,6 +227,11 @@ if (NOT ${CMAKE_CROSSCOMPILING})
         INSTALL_COMMAND ""
         )
 endif ()
+
+list(APPEND APPLICATION_LIBS
+        ${TENSORFLOW_LIBRARY}
+        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:${ETHOS_U_NPU_LIBS}>
+        $<$<BOOL:${CMSIS_DSP_LIB}>:${CMSIS_DSP_LIB}>)
 
 message(STATUS "Building use-cases: ${USE_CASES}.")
 foreach(use_case ${USE_CASES})
@@ -322,10 +336,7 @@ foreach(use_case ${USE_CASES})
         endif()
     endif()
 
-    target_link_libraries(${UC_LIB_NAME} PUBLIC
-        ${TENSORFLOW_LIBRARY}
-        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:${ETHOS_U_NPU_LIBS}>
-        $<$<BOOL:${CMSIS_DSP_LIB}>:${CMSIS_DSP_LIB}>)
+    target_link_libraries(${UC_LIB_NAME} PUBLIC ${APPLICATION_LIBS})
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${PLAT_RETARGET_SOURCE})
 
