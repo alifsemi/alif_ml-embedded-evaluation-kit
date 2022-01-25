@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022  Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,32 +57,6 @@ namespace image{
    **/
   bool PresentInferenceResult(hal_platform & platform,
     const std::vector < arm::app::ClassificationResult > & results);
-
-
-  /**
-   * @brief           Presents inference results along with the inference time using the data presentation
-   *                  object.
-   * @param[in]       platform    Reference to the hal platform object.
-   * @param[in]       results     Vector of classification results to be displayed.
-   * @param[in]       results     Inference time in ms.
-   * @return          true if successful, false otherwise.
-   **/
-  bool PresentInferenceResult(hal_platform & platform,
-    const std::vector < arm::app::ClassificationResult > & results,
-      const time_t infTimeMs);
-
-  /**
-  * @brief           Presents inference results along with the inference time using the data presentation
-  *                  object.
-  * @param[in]       platform    Reference to the hal platform object.
-  * @param[in]       results     Vector of classification results to be displayed.
-  * @param[in]       results     Inference time in ms.
-  * @return          true if successful, false otherwise.
-  **/
-  bool PresentInferenceResult(hal_platform & platform,
-                              const std::vector < arm::app::ClassificationResult > & results,
-                              bool profilingEnabled,
-                              const time_t infTimeMs = 0);
   }
 
 /**

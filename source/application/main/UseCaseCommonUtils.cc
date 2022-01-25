@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022  Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,25 +44,10 @@ void image::ConvertImgToInt8(void* data, const size_t kMaxImageSize)
     }
 }
 
-bool image::PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::ClassificationResult>& results)
-{
-    return PresentInferenceResult(platform, results, false);
-}
-
-bool image::PresentInferenceResult(hal_platform &platform,
-                                   const std::vector<arm::app::ClassificationResult> &results,
-                                   const time_t infTimeMs)
-{
-    return PresentInferenceResult(platform, results, true, infTimeMs);
-}
-
 
 bool image::PresentInferenceResult(
     hal_platform &platform,
-    const std::vector<arm::app::ClassificationResult> &results,
-    bool profilingEnabled,
-    const time_t infTimeMs)
+    const std::vector<arm::app::ClassificationResult> &results)
 {
     constexpr uint32_t dataPsnTxtStartX1 = 150;
     constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -72,32 +57,14 @@ bool image::PresentInferenceResult(
 
     constexpr uint32_t dataPsnTxtYIncr = 16;  /* Row index increment. */
 
-    if (profilingEnabled) {
-        platform.data_psn->set_text_color(COLOR_YELLOW);
-
-        /* If profiling is enabled, and the time is valid. */
-        info("Final results:\n");
-        info("Total number of inferences: 1\n");
-        if (infTimeMs) {
-            std::string strInf =
-                    std::string{"Inference: "} +
-                    std::to_string(infTimeMs) +
-                    std::string{"ms"};
-            platform.data_psn->present_data_text(
-                    strInf.c_str(), strInf.size(),
-                    dataPsnTxtStartX1, dataPsnTxtStartY1, 0);
-        }
-    }
     platform.data_psn->set_text_color(COLOR_GREEN);
 
     /* Display each result. */
     uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
     uint32_t rowIdx2 = dataPsnTxtStartY2;
 
-    if (!profilingEnabled) {
-        info("Final results:\n");
-        info("Total number of inferences: 1\n");
-    }
+    info("Final results:\n");
+    info("Total number of inferences: 1\n");
 
     for (uint32_t i = 0; i < results.size(); ++i) {
         std::string resultStr =
