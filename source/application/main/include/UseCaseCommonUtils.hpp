@@ -57,7 +57,15 @@ namespace image{
    **/
   bool PresentInferenceResult(hal_platform & platform,
     const std::vector < arm::app::ClassificationResult > & results);
-  }
+
+  /**
+   * @brief       Converts RGB image to grayscale.
+   * @param[in]   srcPtr   Pointer to RGB source image.
+   * @param[out]  dstPtr   Pointer to grayscale destination image.
+   * @param[in]   imgSz    Destination image size.
+   **/
+  void RgbToGrayscale(const uint8_t *srcPtr, uint8_t *dstPtr, const size_t dstImgSz);
+}
 
 /**
    * @brief           Helper function to increment current input feature vector index.

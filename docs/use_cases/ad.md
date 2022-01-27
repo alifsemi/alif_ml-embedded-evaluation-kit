@@ -23,7 +23,7 @@ Use-case code could be found in the following directory: [source/use_case/ad](..
 
 ### Preprocessing and feature extraction
 
-The Anomaly Detection model that is used with the Code Samples andexpects audio data to be preprocessed in a specific
+The Anomaly Detection model that is used with the Code Samples and expects audio data to be preprocessed in a specific
 way before performing an inference.
 
 Therefore, this section provides an overview of the feature extraction process used.

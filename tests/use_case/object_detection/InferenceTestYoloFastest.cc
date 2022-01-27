@@ -21,22 +21,52 @@
 #include "DetectorPostProcessing.hpp"
 #include "InputFiles.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "DetectionUseCaseUtils.hpp"
-#include "ExpectedObjectDetectionResults.hpp"
 
 #include <catch.hpp>
 
+void GetExpectedResults(std::vector<std::vector<arm::app::object_detection::DetectionResult>> &expected_results)
+{
+    /* Img1
+    0)  (0.999246) -> Detection box: {x=89,y=17,w=41,h=56}
+    1)  (0.995367) -> Detection box: {x=27,y=81,w=48,h=53}
+    */
+    expected_results.push_back({
+        arm::app::object_detection::DetectionResult(0.99,89,17,41,56),
+        arm::app::object_detection::DetectionResult(0.99,27,81,48,53)
+    });
+    /* Img2
+    0)  (0.998107) -> Detection box: {x=87,y=35,w=53,h=64}
+    */
+    expected_results.push_back({
+        arm::app::object_detection::DetectionResult(0.99,87,35,53,64)
+    });
+    /* Img3
+    0)  (0.999244) -> Detection box: {x=105,y=73,w=58,h=66}
+    1)  (0.985984) -> Detection box: {x=34,y=40,w=70,h=95}
+    */
+    expected_results.push_back({
+        arm::app::object_detection::DetectionResult(0.99,105,73,58,66),
+        arm::app::object_detection::DetectionResult(0.98,34,40,70,95)
+    });
+    /* Img4
+    0)  (0.993294) -> Detection box: {x=22,y=43,w=39,h=53}
+    1)  (0.992021) -> Detection box: {x=63,y=60,w=38,h=45}
+    */
+    expected_results.push_back({
+        arm::app::object_detection::DetectionResult(0.99,22,43,39,53),
+        arm::app::object_detection::DetectionResult(0.99,63,60,38,45)
+    });
+}
 
 bool RunInference(arm::app::Model& model, const uint8_t imageData[])
 {
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < (INPUT_IMAGE_WIDTH*INPUT_IMAGE_HEIGHT) ?
-                            inputTensor->bytes :
-                            (INPUT_IMAGE_WIDTH*INPUT_IMAGE_HEIGHT);
+    const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
+                            inputTensor->bytes : IMAGE_DATA_SIZE;
 
-    arm::app::RgbToGrayscale(imageData,inputTensor->data.uint8,INPUT_IMAGE_WIDTH,INPUT_IMAGE_HEIGHT);            
+    image::RgbToGrayscale(imageData,inputTensor->data.uint8,copySz);
 
     if(model.IsDataSigned()){
         convertImgIoInt8(inputTensor->data.data, copySz);
@@ -46,51 +76,48 @@ bool RunInference(arm::app::Model& model, const uint8_t imageData[])
 }
 
 template<typename T>
-void TestInference(int imageIdx, arm::app::Model& model, T tolerance) {
+void TestInferenceDetectionResults(int imageIdx, arm::app::Model& model, T tolerance) {
 
-    info("Entering TestInference for image %d \n", imageIdx);
-
-    std::vector<arm::app::DetectionResult> results;
+    std::vector<arm::app::object_detection::DetectionResult> results;
     auto image = get_img_array(imageIdx);
+
+    TfLiteIntArray* inputShape = model.GetInputShape(0);
+    auto nCols = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
+    auto nRows = inputShape->data[arm::app::YoloFastestModel::ms_inputRowsIdx];
 
     REQUIRE(RunInference(model, image));
 
 
-    TfLiteTensor* output_arr[2] = {nullptr,nullptr};
-    output_arr[0] = model.GetOutputTensor(0);
-    output_arr[1] = model.GetOutputTensor(1);
-    
-    for (int i =0; i < 2; i++) {
-        REQUIRE(output_arr[i]);    
+    std::vector<TfLiteTensor*> output_arr{model.GetOutputTensor(0), model.GetOutputTensor(1)};
+    for (size_t i =0; i < output_arr.size(); i++) {
+        REQUIRE(output_arr[i]);
         REQUIRE(tflite::GetTensorData<T>(output_arr[i]));
     }
 
-    RunPostProcessing(NULL,output_arr,results);
-    
-    info("Got %ld boxes \n",results.size());
-      
-    std::vector<std::vector<arm::app::DetectionResult>> expected_results;
-    get_expected_ut_results(expected_results);
-    
-    /*validate got the same number of boxes */
-    REQUIRE(results.size() == expected_results[imageIdx].size());
-    
-    
-    for (int i=0; i < (int)results.size(); i++) {
-    
-        info("%" PRIu32 ")  (%f) -> %s {x=%d,y=%d,w=%d,h=%d}\n", (int)i, 
-                 results[i].m_normalisedVal, "Detection box:",
-               results[i].m_x0, results[i].m_y0, results[i].m_w, results[i].m_h );
+    arm::app::object_detection::DetectorPostprocessing postp;
+    postp.RunPostProcessing(
+        nullptr,
+        nRows,
+        nCols,
+        output_arr[0],
+        output_arr[1],
+        results);
 
-        /*validate confidence and box dimensions */
-        REQUIRE(fabs(results[i].m_normalisedVal - expected_results[imageIdx][i].m_normalisedVal) < 0.1);
+    std::vector<std::vector<arm::app::object_detection::DetectionResult>> expected_results;
+    GetExpectedResults(expected_results);
+
+    /* Validate got the same number of boxes */
+    REQUIRE(results.size() == expected_results[imageIdx].size());
+
+
+    for (int i=0; i < (int)results.size(); i++) {
+        /* Validate confidence and box dimensions */
+        REQUIRE(std::abs(results[i].m_normalisedVal - expected_results[imageIdx][i].m_normalisedVal) < 0.1);
         REQUIRE(static_cast<int>(results[i].m_x0) == Approx(static_cast<int>((T)expected_results[imageIdx][i].m_x0)).epsilon(tolerance));
         REQUIRE(static_cast<int>(results[i].m_y0) == Approx(static_cast<int>((T)expected_results[imageIdx][i].m_y0)).epsilon(tolerance));
         REQUIRE(static_cast<int>(results[i].m_w) == Approx(static_cast<int>((T)expected_results[imageIdx][i].m_w)).epsilon(tolerance));
         REQUIRE(static_cast<int>(results[i].m_h) == Approx(static_cast<int>((T)expected_results[imageIdx][i].m_h)).epsilon(tolerance));
     }
-    
-    
 }
 
 
@@ -105,7 +132,7 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
         REQUIRE(model.IsInited());
 
         for (uint32_t i = 0 ; i < NUMBER_OF_FILES; ++i) {
-            TestInference<uint8_t>(i, model, 1);
+            TestInferenceDetectionResults<uint8_t>(i, model, 1);
         }
     }
 
@@ -118,7 +145,7 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
             REQUIRE(model.Init());
             REQUIRE(model.IsInited());
 
-            TestInference<uint8_t>(i, model, 1);
+            TestInferenceDetectionResults<uint8_t>(i, model, 1);
         }
     }
 }

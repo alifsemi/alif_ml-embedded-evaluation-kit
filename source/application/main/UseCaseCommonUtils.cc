@@ -91,6 +91,20 @@ bool image::PresentInferenceResult(
     return true;
 }
 
+void image::RgbToGrayscale(const uint8_t *srcPtr, uint8_t *dstPtr, const size_t dstImgSz)
+{
+    float R=0.299;
+    float G=0.587;
+    float B=0.114;
+    for (size_t i = 0; i < dstImgSz; ++i, srcPtr += 3) {
+        uint32_t  int_gray = R * (*srcPtr) +
+                             G * (*(srcPtr + 1)) +
+                             B * (*(srcPtr + 2));
+        *dstPtr++ = int_gray <= std::numeric_limits<uint8_t>::max() ?
+                        int_gray : std::numeric_limits<uint8_t>::max();
+    }
+}
+
 void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCase)
 {
 #if NUMBER_OF_FILES > 0

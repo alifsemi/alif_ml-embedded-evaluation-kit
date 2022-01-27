@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,31 +20,41 @@
 
 namespace arm {
 namespace app {
+namespace object_detection {
 
     /**
      * @brief   Class representing a single detection result.
      */
     class DetectionResult {
     public:
-        double  m_normalisedVal{0.0};
-        int     m_x0{0};
-        int     m_y0{0};
-        int     m_w{0};
-        int     m_h{0};
-       
-        DetectionResult() = default;
-        ~DetectionResult() = default;
-        
+        /**
+         * @brief       Constructor
+         * @param[in]   normalisedVal   Result normalized value
+         * @param[in]   x0              Top corner x starting point
+         * @param[in]   y0              Top corner y starting point
+         * @param[in]   w               Detection result width
+         * @param[in]   h               Detection result height
+         **/
         DetectionResult(double normalisedVal,int x0,int y0, int w,int h) :
                 m_normalisedVal(normalisedVal),
                 m_x0(x0),
                 m_y0(y0),
                 m_w(w),
-                m_h(h) 
+                m_h(h)
             {
             }
+
+        DetectionResult() = default;
+        ~DetectionResult() = default;
+
+        double  m_normalisedVal{0.0};
+        int     m_x0{0};
+        int     m_y0{0};
+        int     m_w{0};
+        int     m_h{0};
     };
 
+} /* namespace object_detection */
 } /* namespace app */
 } /* namespace arm */
 

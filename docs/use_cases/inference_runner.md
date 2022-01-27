@@ -59,7 +59,7 @@ following:
 
 - `inference_runner_DYNAMIC_MEM_LOAD_ENABLED`: This can be set to ON or OFF, to allow dynamic model load capability for use with MPS3 FVPs. See section [Building with dynamic model load capability](./inference_runner.md#building-with-dynamic-model-load-capability) below for more details.
 
-To build **ONLY** the Inference Runner example application, add `-DUSE_CASE_BUILD=inferece_runner` to the `cmake`
+To build **ONLY** the Inference Runner example application, add `-DUSE_CASE_BUILD=inference_runner` to the `cmake`
 command line, as specified in: [Building](../documentation.md#Building).
 
 ### Build process
@@ -199,7 +199,7 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-Once completed the building step, the application binary `ethos-u-infernce_runner.axf` can be found in the `build/bin`
+Once completed the building step, the application binary `ethos-u-inference_runner.axf` can be found in the `build/bin`
 folder.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
@@ -287,9 +287,11 @@ cmake .. \
 ```
 
 Once the configuration completes, running:
+
 ```commandline
 make -j
 ```
+
 will build the application that will expect the neural network model and the IFM to be loaded into
 specific addresses. These addresses are defined in
 [corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake) for the MPS3
@@ -314,6 +316,7 @@ binary blob.
   --data /path/to/custom-ifm.bin@0x92000000 \
   --dump cpu0=/path/to/output.bin@Memory:0x93000000,1024
 ```
+
 The above command will dump a 1KiB (1024 bytes) file with output tensors as a binary blob after it
 has consumed the model and IFM data provided by the file paths specified and the inference is
 executed successfully.

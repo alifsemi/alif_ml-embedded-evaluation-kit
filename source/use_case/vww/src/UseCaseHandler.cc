@@ -50,8 +50,6 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 70;
 
-        time_t infTimeMs = 0;
-
         auto& model = ctx.Get<Model&>("model");
 
         /* If the request has a valid size, set the image index. */
@@ -78,9 +76,13 @@ namespace app {
             return false;
         }
         TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols = inputShape->data[2];
-        const uint32_t nRows = inputShape->data[1];
-        const uint32_t nChannels = (inputShape->size == 4) ? inputShape->data[3] : 1;
+        const uint32_t nCols = inputShape->data[arm::app::VisualWakeWordModel::ms_inputColsIdx];
+        const uint32_t nRows = inputShape->data[arm::app::VisualWakeWordModel::ms_inputRowsIdx];
+        if (arm::app::VisualWakeWordModel::ms_inputChannelsIdx >= static_cast<uint32_t>(inputShape->size)) {
+            printf_err("Invalid channel index.\n");
+            return false;
+        }
+        const uint32_t nChannels = inputShape->data[arm::app::VisualWakeWordModel::ms_inputChannelsIdx];
 
         std::vector<ClassificationResult> results;
 
@@ -163,7 +165,11 @@ namespace app {
             return false;
         }
 
-        const uint32_t nChannels = (inputTensor->dims->size == 4) ? inputTensor->dims->data[3] : 1;
+        if (arm::app::VisualWakeWordModel::ms_inputChannelsIdx >= static_cast<uint32_t>(inputTensor->dims->size)) {
+            printf_err("Invalid channel index.\n");
+            return false;
+        }
+        const uint32_t nChannels = inputTensor->dims->data[arm::app::VisualWakeWordModel::ms_inputChannelsIdx];
 
         const uint8_t* srcPtr = get_img_array(imIdx);
         auto* dstPtr = static_cast<uint8_t *>(inputTensor->data.data);
@@ -172,11 +178,7 @@ namespace app {
              * Visual Wake Word model accepts only one channel =>
              * Convert image to grayscale here
              **/
-            for (size_t i = 0; i < copySz; ++i, srcPtr += 3) {
-                *dstPtr++ = 0.2989*(*srcPtr) +
-                            0.587*(*(srcPtr+1)) +
-                            0.114*(*(srcPtr+2));
-            }
+            image::RgbToGrayscale(srcPtr, dstPtr, copySz);
         } else {
             memcpy(inputTensor->data.data, srcPtr, copySz);
         }
@@ -186,4 +188,4 @@ namespace app {
     }
 
 } /* namespace app */
-} /* namespace arm */   
+} /* namespace arm */

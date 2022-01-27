@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 #include "DetectionResult.hpp"
-//include "Detector.hpp"
+#include "DetectorPostProcessing.hpp"
 #include "hal.h"
 #include "YoloFastestModel.hpp"
 #include "UseCaseHandler.hpp"
@@ -25,7 +25,6 @@
 
 TEST_CASE("Model info")
 {
-printf("Entering Model info \n");
     /* Model wrapper object. */
     arm::app::YoloFastestModel model;
 
@@ -43,7 +42,6 @@ printf("Entering Model info \n");
 
 TEST_CASE("Inference by index")
 {
-printf("Entering Inference by index \n");
     hal_platform    platform;
     data_acq_module data_acq;
     data_psn_module data_psn;
@@ -67,17 +65,15 @@ printf("Entering Inference by index \n");
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
+    arm::app::object_detection::DetectorPostprocessing postp;
+    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, false));
-
-    auto results = caseContext.Get<std::vector<arm::app::DetectionResult>>("results");
-
 }
 
 
 TEST_CASE("Inference run all images")
 {
-    printf("Entering Inference run all images \n");
     hal_platform    platform;
     data_acq_module data_acq;
     data_psn_module data_psn;
@@ -101,15 +97,15 @@ TEST_CASE("Inference run all images")
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
+    arm::app::object_detection::DetectorPostprocessing postp;
+    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, true));
-    
 }
 
 
 TEST_CASE("List all images")
 {
-printf("Entering List all images \n");
     hal_platform    platform;
     data_acq_module data_acq;
     data_psn_module data_psn;

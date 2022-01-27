@@ -22,20 +22,24 @@ USER_OPTION(${use_case}_FILE_PATH "Directory with custom image files to use, or 
 USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
     192
     STRING)
-    
-add_compile_definitions(DISPLAY_RGB_IMAGE=1)
-add_compile_definitions(INPUT_IMAGE_WIDTH=${${use_case}_IMAGE_SIZE})
-add_compile_definitions(INPUT_IMAGE_HEIGHT=${${use_case}_IMAGE_SIZE})
-add_compile_definitions(ORIGINAL_IMAGE_WIDTH=${${use_case}_IMAGE_SIZE})
-add_compile_definitions(ORIGINAL_IMAGE_HEIGHT=${${use_case}_IMAGE_SIZE})
 
+USER_OPTION(${use_case}_ANCHOR_1 "First anchor array estimated during training."
+    "{38, 77, 47, 97, 61, 126}"
+    STRING)
+
+USER_OPTION(${use_case}_ANCHOR_2 "Second anchor array estimated during training."
+    "{14, 26, 19, 37, 28, 55 }"
+    STRING)
+
+USER_OPTION(${use_case}_CHANNELS_IMAGE_DISPLAYED "Channels' image displayed on the LCD. Select 1 if grayscale, 3 if RGB."
+    3
+    BOOL)
 
 # Generate input files
 generate_images_code("${${use_case}_FILE_PATH}"
                      ${SRC_GEN_DIR}
                      ${INC_GEN_DIR}
                      "${${use_case}_IMAGE_SIZE}")
-
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
     0x00082000
@@ -47,6 +51,19 @@ else()
     set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/yolo-fastest_192_face_v4.tflite)
 endif()
 
+set(${use_case}_ORIGINAL_IMAGE_SIZE
+    ${${use_case}_IMAGE_SIZE}
+    CACHE STRING
+    "Original image size - for the post processing step to upscale the box co-ordinates.")
+
+set(EXTRA_MODEL_CODE
+    "extern const int originalImageSize = ${${use_case}_ORIGINAL_IMAGE_SIZE};"
+    "extern const int channelsImageDisplayed = ${${use_case}_CHANNELS_IMAGE_DISPLAYED};"
+    "/* NOTE: anchors are different for any given input model size, estimated during training phase */"
+    "extern const float anchor1[] = ${${use_case}_ANCHOR_1};"
+    "extern const float anchor2[] = ${${use_case}_ANCHOR_2};"
+    )
+
 USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
@@ -56,4 +73,5 @@ USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the eval
 generate_tflite_code(
     MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
     DESTINATION ${SRC_GEN_DIR}
+    EXPRESSIONS ${EXTRA_MODEL_CODE}
     )

@@ -33,12 +33,10 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Object Detection use-case
 specifies:
 
-- `object_detection_MODEL_TFLITE_PATH` - The path to the NN model file in the `TFLite` format. The model is then processed and
+- `object_detection_MODEL_TFLITE_PATH` - The path to the NN model file in the *TFLite* format. The model is then processed and
   included in the application `axf` file. The default value points to one of the delivered set of models.
-
-    Note that the parameters `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with
-    the chosen model. In other words:
-
+  Note that the parameters `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with
+  the chosen model. In other words:
   - If `ETHOS_U_NPU_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
     falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
   - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
@@ -47,17 +45,21 @@ specifies:
 - `object_detection_FILE_PATH`: The path to the directory containing the images, or a path to a single image file, that is to
    be used in the application. The default value points to the `resources/object_detection/samples` folder containing the
    delivered set of images.
-
-    For further information, please refer to: [Add custom input data section](./object_detection.md#add-custom-input).
+   For further information, please refer to: [Add custom input data section](./object_detection.md#add-custom-input).
 
 - `object_detection_IMAGE_SIZE`: The NN model requires input images to be of a specific size. This parameter defines the size
-  of the image side in pixels. Images are considered squared. The default value is `224`, which is what the supplied
-  *MobilenetV2-1.0* model expects.
+  of the image side in pixels. Images are considered squared. The default value is `192`, which is what the supplied
+  *YOLO Fastest* model expects.
 
-- `object_detection_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it
-  is set to 2MiB and is enough for most models.
+- `object_detection_ANCHOR_1`: First anchor  array estimated during *YOLO Fastest* model training.
 
-- `USE_CASE_BUILD`: is set to `object_detection` to only build this example.
+- `object_detection_ANCHOR_2`: Second anchor array estimated during *YOLO Fastest* model training.
+
+- `object_detection_CHANNELS_IMAGE_DISPLAYED`: The user can decide if display the image on the LCD screen in grayscale or RGB.
+  This parameter defines the number of channel to use: 1 for grayscale, 3 for RGB. The default value is `3`.
+
+- `object_detection_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model.
+  By default, it is set to 2MiB and is enough for most models.
 
 To build **ONLY** the Object Detection example application, add `-DUSE_CASE_BUILD=object_detection` to the `cmake` command
 line, as specified in: [Building](../documentation.md#Building).
@@ -67,7 +69,7 @@ line, as specified in: [Building](../documentation.md#Building).
 > **Note:** This section describes the process for configuring the build for the *MPS3: SSE-300*. To build for a
 > different target platform, please refer to: [Building](../documentation.md#Building).
 
-Create a build directory and navigate inside, like so:
+To **only** build the `object_detection` example, create a build directory, and then navigate inside.
 
 ```commandline
 mkdir build_object_detection && cd build_object_detection
@@ -80,7 +82,7 @@ build **only** Object Detection application to run on the *Ethos-U55* Fast Model
 cmake ../ -DUSE_CASE_BUILD=object_detection
 ```
 
-To configure a build that can be debugged using Arm DS specify the build type as `Debug` and then use the `Arm Compiler`
+To configure a build that can be debugged using Arm DS, we specify the build type as `Debug` and use the `Arm Compiler`
 toolchain file:
 
 ```commandline
@@ -135,8 +137,8 @@ The `bin` folder contains the following files:
 - `sectors/object_detection`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
 
-- `sectors/images.txt`: Tells the FPGA which memory regions to use for loading the binaries in the `sectors/..`
-  folder.
+- `Images-object_detection.txt`: Tells the FPGA which memory regions to use for loading the binaries
+  in the `sectors/...` folder.
 
 ### Add custom input
 
@@ -188,28 +190,25 @@ of any image does not match `IMAGE_SIZE`, then it is rescaled and padded so that
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `object_detection_MODEL_TFLITE_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
 
 For further information: [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
 
-Then, you must set `object_detection_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
-`object_detection_LABELS_TXT_FILE` to the location of the associated labels file.
-
 For example:
 
 ```commandline
 cmake .. \
     -Dobject_detection_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
-    -Dobject_detection_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=object_detection
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `object_detection_MODEL_TFLITE_PATH` is converted to C++ files during the CMake configuration stage. They are then compiled into
+The `.tflite` model file pointed to by `object_detection_MODEL_TFLITE_PATH` is converted to
+C++ files during the CMake configuration stage. They are then compiled into
 the application for performing inference with.
 
 The log from the configuration stage tells you what model path and labels file have been used, for example:
@@ -217,11 +216,8 @@ The log from the configuration stage tells you what model path and labels file h
 ```log
 -- User option object_detection_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
--- User option object_detection_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
-...
 -- Using <path/to/custom_model_after_vela.tflite>
-++ Converting custom_model_after_vela.tflite to\
-custom_model_after_vela.tflite.cc
+++ Converting custom_model_after_vela.tflite to custom_model_after_vela.tflite.cc
 ...
 ```
 
@@ -251,15 +247,14 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-The pre-built application binary `ethos-u-object_detection.axf` can be found in the `bin/mps3-sse-300` folder of the delivery
-package.
+The pre-built application binary `ethos-u-object_detection.axf` can be
+found in the `bin/mps3-sse-300` folder of the delivery package.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
-./bin/mps3-sse-300/ethos-u-object_detection.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-object_detection.axf
 ```
 
 A log output appears on the terminal:
@@ -302,19 +297,19 @@ What the preceding choices do:
     > **Note:** Please make sure to select image index from within the range of supplied audio clips during application
     > build. By default, a pre-built application has four images, with indexes from `0` to `3`.
 
-3. Run detection on all ifm4: Triggers sequential inference executions on all built-in images.
+3. Run detection on all ifm: Triggers sequential inference executions on all built-in images.
 
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
+4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes. For example:
 
     ```log
-    INFO - Model info:
+    INFO - Allocating tensors
     INFO - Model INPUT tensors:
-    INFO -  tensor type is UINT8
-    INFO -  tensor occupies 150528 bytes with dimensions
+    INFO -  tensor type is INT8
+    INFO -  tensor occupies 36864 bytes with dimensions
     INFO -    0:   1
-    INFO -    1: 224
-    INFO -    2: 224
-    INFO -    3:   3
+    INFO -    1: 192
+    INFO -    2: 192
+    INFO -    3:   1
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.003921
     INFO - ZeroPoint[0] = -128
@@ -340,7 +335,8 @@ What the preceding choices do:
     INFO - Activation buffer (a.k.a tensor arena) size used: 443992
     INFO - Number of operators: 3
     INFO -  Operator 0: ethos-u
-   
+    INFO -  Operator 1: RESIZE_NEAREST_NEIGHBOR
+    INFO -  Operator 2: ethos-u
     ```
 
 5. List Images: Prints a list of pair image indexes. The original filenames are embedded in the application, like so:

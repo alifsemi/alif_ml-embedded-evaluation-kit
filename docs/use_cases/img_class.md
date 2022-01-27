@@ -321,7 +321,7 @@ What the preceding choices do:
     ```log
     INFO - Model info:
     INFO - Model INPUT tensors:
-    INFO -  tensor type is UINT8
+    INFO -  tensor type is INT8
     INFO -  tensor occupies 150528 bytes with dimensions
     INFO -    0:   1
     INFO -    1: 224
@@ -338,10 +338,10 @@ What the preceding choices do:
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.03906
     INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 1510012
+    INFO - Activation buffer (a.k.a tensor arena) size used: 1510004
     INFO - Number of operators: 1
     INFO -  Operator 0: ethos-u
-   
+
     ```
 
 5. List Images: Prints a list of pair image indexes. The original filenames are embedded in the application, like so:

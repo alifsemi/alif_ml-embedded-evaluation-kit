@@ -14,13 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"                    /* Brings in platform definitions. */
-#include "InputFiles.hpp"           /* For input images. */
-#include "YoloFastestModel.hpp"     /* Model class for running inference. */
-#include "UseCaseHandler.hpp"       /* Handlers for different user options. */
-#include "UseCaseCommonUtils.hpp"   /* Utils functions. */
-#include "DetectionUseCaseUtils.hpp"   /* Utils functions specific to object detection. */
+#include "hal.h"                      /* Brings in platform definitions. */
+#include "InputFiles.hpp"             /* For input images. */
+#include "YoloFastestModel.hpp"       /* Model class for running inference. */
+#include "UseCaseHandler.hpp"         /* Handlers for different user options. */
+#include "UseCaseCommonUtils.hpp"     /* Utils functions. */
+#include "DetectorPostProcessing.hpp" /* Post-processing class. */
 
+
+static void DisplayDetectionMenu()
+{
+    printf("\n\n");
+    printf("User input required\n");
+    printf("Enter option number from:\n\n");
+    printf("  %u. Run detection on next ifm\n", common::MENU_OPT_RUN_INF_NEXT);
+    printf("  %u. Run detection ifm at chosen index\n", common::MENU_OPT_RUN_INF_CHOSEN);
+    printf("  %u. Run detection on all ifm\n", common::MENU_OPT_RUN_INF_ALL);
+    printf("  %u. Show NN model info\n", common::MENU_OPT_SHOW_MODEL_INFO);
+    printf("  %u. List ifm\n\n", common::MENU_OPT_LIST_IFM);
+    printf("  Choice: ");
+    fflush(stdout);
+}
 
 void main_loop(hal_platform& platform)
 {
@@ -40,8 +54,10 @@ void main_loop(hal_platform& platform)
     caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
+    arm::app::object_detection::DetectorPostprocessing postp;
+    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
 
-    
+
     /* Loop. */
     bool executionSuccessful = true;
     constexpr bool bUseMenu = NUMBER_OF_FILES > 1 ? true : false;

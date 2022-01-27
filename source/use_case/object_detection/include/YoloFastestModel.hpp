@@ -19,6 +19,11 @@
 
 #include "Model.hpp"
 
+extern const int originalImageSize;
+extern const int channelsImageDisplayed;
+extern const float anchor1[];
+extern const float anchor2[];
+
 namespace arm {
 namespace app {
 
