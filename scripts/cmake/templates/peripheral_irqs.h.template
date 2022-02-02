@@ -32,7 +32,7 @@
 #cmakedefine S32K_TIMER_IRQn            (@S32K_TIMER_IRQn@)  /* S32K Timer Interrupt                  */
 #cmakedefine TIMER0_IRQn                (@TIMER0_IRQn@)  /* TIMER 0 Interrupt                     */
 #cmakedefine TIMER1_IRQn                (@TIMER1_IRQn@)  /* TIMER 1 Interrupt                     */
-#cmakedefine DUALTIMER_IRQn             (@DUALTIMER_IRQn@)  /* Dual Timer Interrupt                  */
+#cmakedefine TIMER2_IRQn                (@TIMER2_IRQn@)  /* TIMER 2 Interrupt                    */
 #cmakedefine MPC_IRQn                   (@MPC_IRQn@)  /* MPC Combined (@Secure@) Interrupt       */
 #cmakedefine PPC_IRQn                   (@PPC_IRQn@)  /* PPC Combined (@Secure@) Interrupt       */
 #cmakedefine MSC_IRQn                   (@MSC_IRQn@)  /* MSC Combined (@Secure@) Interrput       */

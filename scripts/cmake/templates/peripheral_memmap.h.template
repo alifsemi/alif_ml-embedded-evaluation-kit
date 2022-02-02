@@ -31,10 +31,10 @@
 #cmakedefine CMSDK_GPIO2_BASE         (@CMSDK_GPIO2_BASE@)       /* User GPIO 2 Base Address   */
 #cmakedefine CMSDK_GPIO3_BASE         (@CMSDK_GPIO3_BASE@)       /* User GPIO 3 Base Address   */
 
-#cmakedefine AHB_USER0_BASE           (@AHB_USER0_BASE@)       /* AHB USER 0 Base Address (4KB) */
-#cmakedefine AHB_USER1_BASE           (@AHB_USER1_BASE@)       /* AHB USER 1 Base Address (4KB)*/
-#cmakedefine AHB_USER2_BASE           (@AHB_USER2_BASE@)       /* AHB USER 2 Base Address (4KB)*/
-#cmakedefine AHB_USER3_BASE           (@AHB_USER3_BASE@)       /* AHB USER 3 Base Address (4KB)*/
+#cmakedefine FMC_CMDSK_GPIO_BASE0        (@FMC_CMDSK_GPIO_BASE0@)       /* FMC_CMDSK_GPIO_BASE 0 Base Address (4KB) */
+#cmakedefine FMC_CMDSK_GPIO_BASE1        (@FMC_CMDSK_GPIO_BASE1@)       /* FMC_CMDSK_GPIO_BASE 1 Base Address (4KB)*/
+#cmakedefine FMC_CMDSK_GPIO_BASE2        (@FMC_CMDSK_GPIO_BASE2@)       /* FMC_CMDSK_GPIO_BASE 2 Base Address (4KB)*/
+#cmakedefine FMC_USER_AHB_BASE           (@FMC_USER_AHB_BASE@)          /* FMC_USER_AHB_BASE     Base Address (4KB)*/
 
 #cmakedefine DMA0_BASE                (@DMA0_BASE@)       /* DMA0 (4KB) */
 #cmakedefine DMA1_BASE                (@DMA1_BASE@)       /* DMA1 (4KB) */
