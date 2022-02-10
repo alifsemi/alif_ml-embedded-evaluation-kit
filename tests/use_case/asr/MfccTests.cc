@@ -135,15 +135,6 @@ template void TestQuantisedMFCC<int16_t>();
 
 TEST_CASE("MFCC calculation")
 {
-    hal_platform    platform;
-    data_acq_module dataAcq;
-    data_psn_module dataPsn;
-    platform_timer  timer;
-
-    /* Initialise the HAL and platform. */
-    hal_init(&platform, &dataAcq, &dataPsn, &timer);
-    hal_platform_init(&platform);
-
     SECTION("FP32")
     {
         auto mfccOutput = GetMFCCInstance().MfccCompute(testWav1);

@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 #include "MicroNetKwsModel.hpp"
-
-#include "hal.h"
+#include "log_macros.h"
 
 namespace arm {
 namespace app {

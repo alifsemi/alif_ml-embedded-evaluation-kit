@@ -16,7 +16,7 @@
  */
 #include "YoloFastestModel.hpp"
 
-#include "hal.h"
+#include "log_macros.h"
 
 const tflite::MicroOpResolver& arm::app::YoloFastestModel::GetOpResolver()
 {

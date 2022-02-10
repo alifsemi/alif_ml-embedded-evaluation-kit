@@ -29,8 +29,6 @@ endif()
 
 message(STATUS "Assessing common user options...")
 
-set(CMAKE_TOOLCHAIN_DIR ${CMAKE_CURRENT_LIST_DIR}/toolchains)
-set(DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../dependencies)
 include(${CMAKE_CURRENT_LIST_DIR}/util_functions.cmake)
 
 USER_OPTION(LOG_LEVEL "Log level for the application"
@@ -143,22 +141,3 @@ if (NOT TARGET_PLATFORM STREQUAL native)
                 FILEPATH)
     endif()
 endif()
-
-if (TARGET_PLATFORM STREQUAL mps3)
-    message(STATUS "Platform: MPS3 FPGA Prototyping Board or FVP")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
-elseif (TARGET_PLATFORM STREQUAL simple_platform)
-    message(STATUS "Platform: Simple platform with minimal peripherals")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake)
-elseif (TARGET_PLATFORM STREQUAL native)
-    message(STATUS "Platform: Native (Linux based x86_64/aarch64 system)")
-    set(DEFAULT_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake)
-else ()
-    message(FATAL_ERROR "Invalid platform specified: ${TARGET_PLATFORM}")
-endif ()
-
-if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${DEFAULT_TOOLCHAIN_FILE}
-        CACHE FILEPATH "Toolchain file")
-endif()
-message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")

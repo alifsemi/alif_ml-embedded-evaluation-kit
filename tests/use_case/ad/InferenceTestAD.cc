@@ -20,7 +20,7 @@
 
 #include "AdModel.hpp"
 #include "TestData_ad.hpp"
-#include "hal.h"
+#include "log_macros.h"
 #include "TensorFlowLiteMicro.hpp"
 
 #ifndef AD_FEATURE_VEC_DATA_SIZE

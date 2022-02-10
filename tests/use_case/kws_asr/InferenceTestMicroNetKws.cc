@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 #include "MicroNetKwsModel.hpp"
-#include "hal.h"
 #include "TestData_kws.hpp"
 #include "TensorFlowLiteMicro.hpp"
 

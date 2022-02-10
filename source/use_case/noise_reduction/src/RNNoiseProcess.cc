@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 #include "RNNoiseProcess.hpp"
+#include "log_macros.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstring>

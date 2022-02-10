@@ -23,6 +23,7 @@
 #include "InputFiles.hpp"            /* Generated audio clip header. */
 #include "Wav2LetterPreprocess.hpp"  /* Pre-processing class. */
 #include "Wav2LetterPostprocess.hpp" /* Post-processing class. */
+#include "log_macros.h"
 
 enum opcodes
 {

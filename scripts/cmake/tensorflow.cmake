@@ -43,7 +43,7 @@ set(TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT "${TENSORFLOW_LITE_MICRO_TARGET_
 
 set(TENSORFLOW_LITE_MICRO_PATH "${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro")
 set(TENSORFLOW_LITE_MICRO_GENDIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow/)
-
+set(TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME "libtensorflow-microlite.a")
 
 set(ETHOS_EVAL_TARGET_MAKEFILE_INC ${CMAKE_CURRENT_SOURCE_DIR}/scripts/make/cortex_m_ethos_eval_makefile.inc)
 
@@ -64,6 +64,22 @@ else()
     file(COPY ${ETHOS_EVAL_TARGET_MAKEFILE_INC}
         DESTINATION ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/targets/)
 endif()
+
+#TODO: this thing fails the TF build, when the driver is compiled, fatal error: 'ethosETHOSU_ARCH_interface.h' file not found
+#if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
+#    set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
+#    set(TENSORFLOW_LITE_MICRO_TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR}${CPU_FEATURES})
+#    if(ETHOS_U_NPU_ENABLED)
+#        # Arm Ethos-U55 NPU is the co-processor for ML workload:
+#        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
+#    endif()
+#
+#    set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")
+#
+#else()
+#    set(TENSORFLOW_LITE_MICRO_TARGET "linux")
+#    set(TENSORFLOW_LITE_MICRO_TARGET_ARCH x86_64)
+#endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
     list(APPEND MAKE_TARGETS_LIST "clean_downloads")
@@ -93,10 +109,9 @@ add_custom_target(tensorflow_build ALL
         TARGET_ARCH=${TENSORFLOW_LITE_MICRO_TARGET_ARCH}
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
         ETHOSU_ARCH=${ETHOSU_ARCH}
-
+        ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}
+        CMSIS_PATH=${CMSIS_SRC_PATH}
         # Conditional arguments
-        $<$<NOT:$<STREQUAL:${TARGET_PLATFORM},"native">>:ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}>
-        $<$<NOT:$<STREQUAL:${TARGET_PLATFORM},"native">>:CMSIS_PATH=${CMSIS_SRC_PATH}>
         $<$<BOOL:${ARMCLANG_DEBUG_DWARF_LEVEL}>:ARMCLANG_DEBUG_DWARF_LEVEL=${ARMCLANG_DEBUG_DWARF_LEVEL}>
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}>:CORE_OPTIMIZATION_LEVEL=${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}>
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>:KERNEL_OPTIMIZATION_LEVEL=${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>
@@ -116,7 +131,18 @@ add_custom_target(tensorflow_build ALL
     WORKING_DIRECTORY ${TENSORFLOW_SRC_PATH})
 
 # Create library
+
 add_library(tensorflow-lite-micro STATIC IMPORTED)
+
 add_dependencies(tensorflow-lite-micro tensorflow_build)
+
 set_property(TARGET tensorflow-lite-micro PROPERTY IMPORTED_LOCATION
              "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME}")
+
+target_include_directories(tensorflow-lite-micro
+    INTERFACE
+    ${TENSORFLOW_SRC_PATH})
+
+target_compile_definitions(tensorflow-lite-micro
+    INTERFACE
+    TF_LITE_STATIC_MEMORY)

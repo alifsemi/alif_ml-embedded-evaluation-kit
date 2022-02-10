@@ -21,6 +21,7 @@
 #include "Wav2LetterMfcc.hpp"
 #include "AudioUtils.hpp"
 #include "DataStructures.hpp"
+#include "log_macros.h"
 
 namespace arm {
 namespace app {

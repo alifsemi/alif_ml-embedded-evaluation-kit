@@ -21,8 +21,9 @@
 #include "MobileNetModel.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
+#include "log_macros.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 using ImgClassClassifier = arm::app::Classifier;
 
@@ -108,7 +109,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Run inference over this image. */
             info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
@@ -121,12 +122,12 @@ namespace app {
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             auto& classifier = ctx.Get<ImgClassClassifier&>("classifier");
             classifier.GetClassificationResults(outputTensor, results,
                                                 ctx.Get<std::vector <std::string>&>("labels"),
-                                                5);
+                                                5, false);
 
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);

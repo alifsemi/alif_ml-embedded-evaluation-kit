@@ -21,6 +21,7 @@
 #include "MobileNetModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
+#include "log_macros.h"
 
 using ImgClassClassifier = arm::app::Classifier;
 

@@ -30,6 +30,7 @@
 #include "AsrResult.hpp"
 #include "AsrClassifier.hpp"
 #include "OutputDecode.hpp"
+#include "log_macros.h"
 
 
 using KwsClassifier = arm::app::Classifier;

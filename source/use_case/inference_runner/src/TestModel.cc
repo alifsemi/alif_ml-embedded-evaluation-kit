@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 #include "TestModel.hpp"
-
-#include "hal.h"
+#include "log_macros.h"
 
 const tflite::AllOpsResolver& arm::app::TestModel::GetOpResolver()
 {

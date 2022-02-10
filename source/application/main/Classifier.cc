@@ -16,15 +16,16 @@
  */
 #include "Classifier.hpp"
 
-#include "hal.h"
 #include "TensorFlowLiteMicro.hpp"
+#include "PlatformMath.hpp"
+#include "log_macros.h"
 
 #include <vector>
 #include <string>
 #include <set>
 #include <cstdint>
-#include <inttypes.h>
-#include "PlatformMath.hpp"
+#include <cinttypes>
+
 
 namespace arm {
 namespace app {

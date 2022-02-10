@@ -204,18 +204,18 @@ def get_default_npu_config_from_name(config_name: str, arena_cache_size: int = 0
     for i in range(len(strings_ids)):
         if config_name.startswith(strings_ids[i]):
             npu_config_id = config_name.replace(strings_ids[i], prefix_ids[i])
-            return  NPUConfig(config_name=config_name,
-                              memory_mode=memory_modes[i],
-                              system_config=system_configs[i],
-                              ethos_u_npu_id=processor_ids[i],
-                              ethos_u_config_id=npu_config_id,
-                              arena_cache_size=memory_modes_arena[memory_modes[i]])
+            return NPUConfig(config_name=config_name,
+                             memory_mode=memory_modes[i],
+                             system_config=system_configs[i],
+                             ethos_u_npu_id=processor_ids[i],
+                             ethos_u_config_id=npu_config_id,
+                             arena_cache_size=memory_modes_arena[memory_modes[i]])
 
     return None
 
 
 def set_up_resources(run_vela_on_models: bool = False,
-                     additional_npu_config_names: list = [],
+                     additional_npu_config_names: list = (),
                      arena_cache_size: int = 0):
     """
     Helpers function that retrieve the output from a command.

@@ -15,19 +15,14 @@
  * limitations under the License.
  */
 #include "Model.hpp"
+#include "log_macros.h"
 
-#include "hal.h"
-
-#include <cstdint>
-#include <inttypes.h>
+#include <cinttypes>
 
 /* Initialise the model */
 arm::app::Model::~Model()
 {
-    if (this->m_pInterpreter) {
-        delete this->m_pInterpreter;
-    }
-
+   delete this->m_pInterpreter;
     /**
      * No clean-up function available for allocator in TensorFlow Lite Micro yet.
      **/
@@ -222,7 +217,7 @@ void arm::app::Model::LogInterpreterInfo()
 
         tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(),
                                           this->m_pErrorReporter, &reg);
-        std::string opName{""};
+        std::string opName;
 
         if (reg) {
             if (tflite::BuiltinOperator_CUSTOM == reg->builtin_code) {
@@ -262,7 +257,7 @@ bool arm::app::Model::ContainsEthosUOperator() const
         auto builtin_code = tflite::GetBuiltinCode(opcode);
         if ((builtin_code == tflite::BuiltinOperator_CUSTOM) &&
             ( nullptr != opcode->custom_code()) &&
-            ( 0 == std::string(opcode->custom_code()->c_str()).compare("ethos-u")))
+            ( "ethos-u" == std::string(opcode->custom_code()->c_str())))
         {
             return true;
         }
@@ -350,11 +345,7 @@ bool arm::app::Model::ShowModelInfoHandler()
     info("Model info:\n");
     this->LogInterpreterInfo();
 
-#if defined(ARM_NPU)
-    info("Use of Arm uNPU is enabled\n");
-#else   /* ARM_NPU */
-    info("Use of Arm uNPU is disabled\n");
-#endif  /* ARM_NPU */
+    info("The model is optimised for Ethos-U NPU: %s.\n", this->ContainsEthosUOperator()? "yes": "no");
 
     return true;
 }

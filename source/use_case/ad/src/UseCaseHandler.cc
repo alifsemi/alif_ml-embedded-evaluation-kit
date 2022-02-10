@@ -24,6 +24,7 @@
 #include "AudioUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "AdPostProcessing.hpp"
+#include "log_macros.h"
 
 namespace arm {
 namespace app {

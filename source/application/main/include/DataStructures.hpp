@@ -17,8 +17,6 @@
 #ifndef DATA_STRUCTURES_HPP
 #define DATA_STRUCTURES_HPP
 
-#include "hal.h"
-
 #include <iterator>
 
 namespace arm {
@@ -50,7 +48,7 @@ namespace app {
         Array2d(unsigned rows, unsigned cols): m_rows(rows), m_cols(cols)
         {
             if (rows == 0 || cols == 0) {
-                printf_err("Array2d constructor has 0 size.\n");
+                printf("Array2d constructor has 0 size.\n");
                 m_data = nullptr;
                 return;
             }

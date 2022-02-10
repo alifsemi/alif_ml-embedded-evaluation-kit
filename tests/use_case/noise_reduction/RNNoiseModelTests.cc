@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 #include "RNNoiseModel.hpp"
-#include "hal.h"
 #include "TensorFlowLiteMicro.hpp"
 #include "TestData_noise_reduction.hpp"
 

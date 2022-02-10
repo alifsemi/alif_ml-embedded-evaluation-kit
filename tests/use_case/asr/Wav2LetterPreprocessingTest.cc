@@ -17,7 +17,6 @@
 #include "Wav2LetterPreprocess.hpp"
 
 #include <limits>
-#include <algorithm>
 #include <catch.hpp>
 
 constexpr uint32_t numMfccFeatures = 13;
@@ -97,14 +96,6 @@ void PopulateTestWavVector(std::vector<int16_t>& vec)
 
 TEST_CASE("Preprocessing calculation INT8")
 {
-    /* Initialise the HAL and platform. */
-    hal_platform    platform;
-    data_acq_module data_acq;
-    data_psn_module data_psn;
-    platform_timer  timer;
-    hal_init(&platform, &data_acq, &data_psn, &timer);
-    hal_platform_init(&platform);
-
     /* Constants. */
     const uint32_t  windowLen       = 512;
     const uint32_t  windowStride    = 160;
@@ -135,7 +126,7 @@ TEST_CASE("Preprocessing calculation INT8")
     REQUIRE(prep.Invoke(testWav.data(), testWav.size(), &tensor));
 
     /* Wrap the tensor with a std::vector for ease. */
-    int8_t * tensorData = tflite::GetTensorData<int8_t>(&tensor);
+    auto* tensorData = tflite::GetTensorData<int8_t>(&tensor);
     std::vector <int8_t> vecResults =
         std::vector<int8_t>(tensorData, tensorData + tensor.bytes);
 

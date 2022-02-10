@@ -20,6 +20,7 @@
 #include "RNNoiseModel.hpp"         /* Model class for running inference. */
 #include "InputFiles.hpp"           /* For input audio clips. */
 #include "RNNoiseProcess.hpp"       /* Pre-processing class */
+#include "log_macros.h"
 
 enum opcodes
 {

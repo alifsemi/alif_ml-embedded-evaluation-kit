@@ -24,6 +24,7 @@
 #include "AudioUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "KwsResult.hpp"
+#include "log_macros.h"
 
 #include <vector>
 #include <functional>

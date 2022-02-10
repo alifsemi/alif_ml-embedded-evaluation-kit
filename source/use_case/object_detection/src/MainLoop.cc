@@ -20,7 +20,7 @@
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
 #include "DetectorPostProcessing.hpp" /* Post-processing class. */
-
+#include "log_macros.h"
 
 static void DisplayDetectionMenu()
 {

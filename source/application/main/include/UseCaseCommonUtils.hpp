@@ -24,7 +24,7 @@
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "Classifier.hpp"           /* Classifier. */
 #include "InputFiles.hpp"
-#include <inttypes.h>
+#include <cinttypes>
 
 
 /* Helper macro to convert RGB888 to RGB565 format. */
@@ -33,8 +33,8 @@
                                      ((B8>>3) & 0x1F))
 
 constexpr uint16_t COLOR_BLACK  = 0;
-constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0, 255,  0); // 2016;
-constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255, 255,  0); // 65504;
+constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0u, 255u,  0u); // 2016;
+constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255u, 255u,  0u); // 65504;
 
 
 void DisplayCommonMenu();
@@ -72,7 +72,7 @@ namespace image{
    * @param[in,out]   ctx       Pointer to the application context object.
    * @param[in]       useCase   Use case name
    **/
-void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCase);
+void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, const std::string& useCase);
 
 /**
    * @brief           Helper function to set the input feature map index.
@@ -81,7 +81,7 @@ void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCas
    * @param[in]       ctxIfmName   Input Feature Map name
    * @return          true if index is set, false otherwise.
    **/
-bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, std::string ctxIfmName);
+bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, const std::string& ctxIfmName);
 
 
 namespace common {

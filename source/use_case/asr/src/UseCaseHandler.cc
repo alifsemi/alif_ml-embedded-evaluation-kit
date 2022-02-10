@@ -27,6 +27,7 @@
 #include "Wav2LetterPreprocess.hpp"
 #include "Wav2LetterPostprocess.hpp"
 #include "OutputDecode.hpp"
+#include "log_macros.h"
 
 namespace arm {
 namespace app {

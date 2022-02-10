@@ -30,7 +30,6 @@ set(MIN_ARM_CLANG_VERSION           6.16)
 # Skip compiler test execution
 set(CMAKE_C_COMPILER_WORKS          1)
 set(CMAKE_CXX_COMPILER_WORKS        1)
-set(PLATFORM_HAL                    1)
 
 if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_SYSTEM_PROCESSOR      cortex-m55)
@@ -76,7 +75,6 @@ add_compile_options(
 
 # Compile definitions:
 add_compile_definitions(
-    PLATFORM_HAL=${PLATFORM_HAL}
     CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
     $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
     $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
@@ -105,14 +103,14 @@ function(add_target_map_file TARGET_NAME MAP_FILE_PATH)
 endfunction()
 
 # Function to add linker option to use the chosen linker script (scatter file).
-function(add_linker_script SCRIPT_DIR SCRIPT_NAME)
-    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.sct
-        CACHE STRING "Linker script path")
+function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
+    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.sct)
     if (NOT EXISTS ${LINKER_SCRIPT_PATH})
         message(FATAL_ERROR "Scatter file not found: ${LINKER_SCRIPT_PATH}")
     endif()
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
-    add_link_options(--scatter=${LINKER_SCRIPT_PATH})
+    target_link_options(${TARGET_NAME} PUBLIC
+        --scatter=${LINKER_SCRIPT_PATH})
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

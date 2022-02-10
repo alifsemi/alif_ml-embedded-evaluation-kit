@@ -19,9 +19,6 @@ set(CMAKE_C_COMPILER            gcc)
 set(CMAKE_C_LINKER_PREFERENCE   gcc)
 set(CMAKE_CXX_LINKER_PREFERENCE gcc)
 
-# Platform specific directory:
-set(PLATFORM_HAL                3)
-
 # Warning compiler definitions:
 add_compile_options(
     -Wsign-compare
@@ -38,7 +35,6 @@ add_compile_options(
 add_compile_options(
     -fPIC
     -pthread
-    -DPLATFORM_HAL=${PLATFORM_HAL}
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>")
 
 # Linker options

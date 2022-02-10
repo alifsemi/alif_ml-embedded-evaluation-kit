@@ -18,7 +18,7 @@
 #define ASR_WAV2LETTER_POSTPROCESS_HPP
 
 #include "TensorFlowLiteMicro.hpp" /* TensorFlow headers. */
-#include "hal.h"    /* stdout facility. */
+#include "log_macros.h"
 
 namespace arm {
 namespace app {

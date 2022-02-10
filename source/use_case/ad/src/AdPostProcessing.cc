@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 #include "AdPostProcessing.hpp"
-
-#include "hal.h"
+#include "log_macros.h"
 
 #include <numeric>
 #include <cmath>

@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 #include "VisualWakeWordModel.hpp"
-
-#include "hal.h"
+#include "log_macros.h"
 
 const tflite::MicroOpResolver& arm::app::VisualWakeWordModel::GetOpResolver()
 {

@@ -19,6 +19,7 @@
 #include "AdModel.hpp"              /* Model class for running inference */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options */
+#include "log_macros.h"
 
 enum opcodes
 {

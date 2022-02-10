@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 #include "MicroNetKwsModel.hpp"
-#include "hal.h"
 #include "TestData_kws.hpp"
 #include "TensorFlowLiteMicro.hpp"
 
@@ -92,7 +91,7 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MicroNetKwsModel int
         const int8_t* input_goldenFV = get_ifm_data_array(i);;
         const int8_t* output_goldenFV = get_ofm_data_array(i);
 
-        DYNAMIC_SECTION("Executing inference with re-init")
+        DYNAMIC_SECTION("Executing inference with re-init " << i)
         {
             arm::app::MicroNetKwsModel model{};
 

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 #include "Profiler.hpp"
+#include "log_macros.h"
 
 #include <cstring>
-#include <iomanip>
 
 namespace arm {
 namespace app {

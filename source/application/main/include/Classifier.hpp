@@ -50,7 +50,7 @@ namespace app {
             TfLiteTensor* outputTensor,
             std::vector<ClassificationResult>& vecResults,
             const std::vector <std::string>& labels, uint32_t topNCount,
-            bool use_softmax = false);
+            bool use_softmax);
 
         /**
         * @brief       Populate the elements of the Classification Result object.

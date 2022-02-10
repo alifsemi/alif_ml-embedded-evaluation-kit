@@ -16,8 +16,6 @@
  */
 #include "TensorFlowLiteMicro.hpp"
 
-#include "hal.h"
-
 void PrintTensorFlowVersion()
 {}
 

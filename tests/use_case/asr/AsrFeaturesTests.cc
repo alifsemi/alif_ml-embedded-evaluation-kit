@@ -16,9 +16,9 @@
  */
 #include "DataStructures.hpp"
 #include "AsrGoldenFeatures.hpp"
-#include "hal.h"
-#include "TensorFlowLiteMicro.hpp"
 #include "Wav2LetterPreprocess.hpp"
+
+#include "log_macros.h"
 
 #include <catch.hpp>
 #include <random>

@@ -20,6 +20,7 @@
 \****************************************************************************/
 
 #include "hal.h"                    /* our hardware abstraction api */
+#include "log_macros.h"
 #include "TensorFlowLiteMicro.hpp"  /* our inference logic api */
 
 #include <cstdio>

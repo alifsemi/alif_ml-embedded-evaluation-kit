@@ -14,16 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cmath>
-#include <algorithm>
-
-#include "UseCaseHandler.hpp"
 #include "hal.h"
+#include "UseCaseHandler.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "AudioUtils.hpp"
 #include "InputFiles.hpp"
 #include "RNNoiseModel.hpp"
 #include "RNNoiseProcess.hpp"
+#include "log_macros.h"
+
+#include <cmath>
+#include <algorithm>
 
 namespace arm {
 namespace app {

@@ -16,7 +16,7 @@
  */
 #include "AsrClassifier.hpp"
 
-#include "hal.h"
+#include "log_macros.h"
 #include "TensorFlowLiteMicro.hpp"
 #include "Wav2LetterModel.hpp"
 

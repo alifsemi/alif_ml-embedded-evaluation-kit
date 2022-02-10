@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 #include "Mfcc.hpp"
-
 #include "PlatformMath.hpp"
+#include "log_macros.h"
 
 #include <cfloat>
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace arm {
 namespace app {

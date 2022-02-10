@@ -21,6 +21,7 @@
 #include "Labels.hpp"               /* For label strings. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
+#include "log_macros.h"
 
 using KwsClassifier = arm::app::Classifier;
 

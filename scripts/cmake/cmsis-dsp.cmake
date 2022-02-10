@@ -17,12 +17,7 @@
 
 # CMSIS-DSP library CMake helper script.
 
-# 1. We should be cross-compiling (non-native target)
-if (TARGET_PLATFORM STREQUAL native)
-    message(FATAL_ERROR "No CMSIS-DSP support for native target.")
-endif()
-
-# 2. Check if CMSIS sources have been defined
+# Check if CMSIS sources have been defined
 if (NOT DEFINED CMSIS_SRC_PATH)
     message(FATAL_ERROR "CMSIS path should be defined for CMSIS-DSP library to be built")
 endif()

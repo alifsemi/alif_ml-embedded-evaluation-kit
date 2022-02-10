@@ -26,6 +26,7 @@
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "Wav2LetterPreprocess.hpp" /* ASR pre-processing class. */
 #include "Wav2LetterPostprocess.hpp"/* ASR post-processing class. */
+#include "log_macros.h"
 
 using KwsClassifier = arm::app::Classifier;
 

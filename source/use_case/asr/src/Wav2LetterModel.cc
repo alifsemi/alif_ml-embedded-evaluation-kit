@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 #include "Wav2LetterModel.hpp"
+#include "log_macros.h"
 
-#include "hal.h"
 
 const tflite::MicroOpResolver& arm::app::Wav2LetterModel::GetOpResolver()
 {

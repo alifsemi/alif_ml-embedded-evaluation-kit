@@ -18,7 +18,6 @@
 #define KWS_ASR_WAV2LET_POSTPROC_HPP
 
 #include "TensorFlowLiteMicro.hpp" /* TensorFlow headers */
-#include "hal.h"    /* stdout facility */
 
 namespace arm {
 namespace app {

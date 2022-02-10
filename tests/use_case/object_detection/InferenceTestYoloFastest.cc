@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"
+#include "log_macros.h"
 #include "ImageUtils.hpp"
 #include "YoloFastestModel.hpp"
 #include "TensorFlowLiteMicro.hpp"

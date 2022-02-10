@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 #include "AdMelSpectrogram.hpp"
-
 #include "PlatformMath.hpp"
+#include "log_macros.h"
 
 #include <cfloat>
 

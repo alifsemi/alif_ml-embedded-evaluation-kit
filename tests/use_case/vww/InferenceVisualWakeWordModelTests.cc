@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-#include "hal.h"
 #include "ImageUtils.hpp"
 #include "TestData_vww.hpp"
 #include "VisualWakeWordModel.hpp"

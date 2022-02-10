@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"
 #include "ImageUtils.hpp"
 #include "MobileNetModel.hpp"
 #include "TensorFlowLiteMicro.hpp"

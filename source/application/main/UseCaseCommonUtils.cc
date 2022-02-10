@@ -16,7 +16,9 @@
  */
 #include "UseCaseCommonUtils.hpp"
 #include "InputFiles.hpp"
-#include <inttypes.h>
+#include "log_macros.h"
+
+#include <cinttypes>
 
 
 void DisplayCommonMenu()
@@ -74,7 +76,7 @@ bool image::PresentInferenceResult(
 
         platform.data_psn->present_data_text(
                 resultStr.c_str(), resultStr.size(),
-                dataPsnTxtStartX1, rowIdx1, 0);
+                dataPsnTxtStartX1, rowIdx1, false);
         rowIdx1 += dataPsnTxtYIncr;
 
         resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
@@ -105,7 +107,7 @@ void image::RgbToGrayscale(const uint8_t *srcPtr, uint8_t *dstPtr, const size_t 
     }
 }
 
-void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCase)
+void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, const std::string& useCase)
 {
 #if NUMBER_OF_FILES > 0
     auto curImIdx = ctx.Get<uint32_t>(useCase);
@@ -122,7 +124,7 @@ void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, std::string useCas
 #endif /* NUMBER_OF_FILES > 0 */
 }
 
-bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, std::string ctxIfmName)
+bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, const std::string& ctxIfmName)
 {
 #if NUMBER_OF_FILES > 0
     if (idx >= NUMBER_OF_FILES) {
@@ -192,7 +194,7 @@ void DumpTensor(const TfLiteTensor* tensor, const size_t lineBreakForNumElements
     }
 
     const uint32_t tensorSz = tensor->bytes;
-    const uint8_t* tensorData = tflite::GetTensorData<uint8_t>(tensor);
+    const auto* tensorData = tflite::GetTensorData<uint8_t>(tensor);
 
     DumpTensorData(tensorData, tensorSz, lineBreakForNumElements);
 }

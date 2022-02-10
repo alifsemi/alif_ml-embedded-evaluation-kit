@@ -19,6 +19,7 @@
 #include "TestModel.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
+#include "log_macros.h"
 
 #include <cstdlib>
 

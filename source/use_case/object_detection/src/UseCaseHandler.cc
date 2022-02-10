@@ -20,8 +20,9 @@
 #include "UseCaseCommonUtils.hpp"
 #include "DetectorPostProcessing.hpp"
 #include "hal.h"
+#include "log_macros.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace arm {
 namespace app {
@@ -151,7 +152,8 @@ namespace app {
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
 #if VERIFY_TEST_OUTPUT
-            arm::app::DumpTensor(outputTensor);
+            arm::app::DumpTensor(modelOutput0);
+            arm::app::DumpTensor(modelOutput1);
 #endif /* VERIFY_TEST_OUTPUT */
 
             if (!PresentInferenceResult(platform, results)) {

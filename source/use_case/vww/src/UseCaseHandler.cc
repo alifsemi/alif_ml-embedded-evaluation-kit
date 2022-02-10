@@ -20,6 +20,7 @@
 #include "InputFiles.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
+#include "log_macros.h"
 
 #include <algorithm>
 
@@ -133,7 +134,8 @@ namespace app {
 
             auto& classifier = ctx.Get<Classifier&>("classifier");
             classifier.GetClassificationResults(outputTensor, results,
-                                                ctx.Get<std::vector <std::string>&>("labels"), 1);
+                                                ctx.Get<std::vector <std::string>&>("labels"), 1,
+                                                false);
 
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);

@@ -198,15 +198,6 @@ template void TestQuntisedMelSpec<int16_t>();
 
 TEST_CASE("Mel Spec calculation") {
 
-    hal_platform    platform;
-    data_acq_module dataAcq;
-    data_psn_module dataPsn;
-    platform_timer  timer;
-
-    /* Initialise the HAL and platform */
-    hal_init(&platform, &dataAcq, &dataPsn, &timer);
-    hal_platform_init(&platform);
-
     SECTION("FP32") {
         auto melSpecOutput = GetMelSpecInstance().ComputeMelSpec(testWav1);
         REQUIRE_THAT( melSpecOutput, Catch::Approx( testWavMelSpec ).margin(0.1) );

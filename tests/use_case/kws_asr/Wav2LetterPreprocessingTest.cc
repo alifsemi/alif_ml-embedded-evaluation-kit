@@ -97,13 +97,6 @@ void PopulateTestWavVector(std::vector<int16_t>& vec)
 
 TEST_CASE("Preprocessing calculation INT8")
 {
-    /* Initialise the HAL and platform. */
-    hal_platform    platform;
-    data_acq_module data_acq;
-    data_psn_module data_psn;
-    platform_timer  timer;
-    hal_init(&platform, &data_acq, &data_psn, &timer);
-    hal_platform_init(&platform);
 
     /* Constants. */
     const uint32_t  windowLen       = 512;

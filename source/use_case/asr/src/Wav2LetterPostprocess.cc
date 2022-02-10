@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 #include "Wav2LetterPostprocess.hpp"
-
 #include "Wav2LetterModel.hpp"
-
+#include "log_macros.h"
 
 namespace arm {
 namespace app {
