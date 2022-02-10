@@ -72,8 +72,7 @@ def run(toolchain: str,
 
     # 1. Make sure the toolchain is supported, and set the right one here
     supported_toolchain_ids = ["gnu", "arm"]
-    assert (toolchain in supported_toolchain_ids,
-        f"Toolchain must be from {supported_toolchain_ids}")
+    assert toolchain in supported_toolchain_ids, f"Toolchain must be from {supported_toolchain_ids}"
     if toolchain == "arm":
         toolchain_file_name = "bare-metal-armclang.cmake"
     elif toolchain == "gnu":

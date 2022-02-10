@@ -74,6 +74,10 @@ assert_defined(USE_CASE_BUILD)
 assert_defined(CPU_PROFILE_ENABLED)
 assert_defined(CMAKE_TOOLCHAIN_FILE)
 
+if(POLICY CMP0123)
+    cmake_policy(SET CMP0123 NEW)
+endif()
+
 project(arm_ml_embedded_evaluation_kit
         VERSION     21.11.1
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
