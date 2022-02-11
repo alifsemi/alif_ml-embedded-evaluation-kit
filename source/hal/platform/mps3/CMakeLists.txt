@@ -33,7 +33,7 @@ endif()
 # 2. Set the platform cmake descriptor file
 if (NOT DEFINED PLATFORM_CMAKE_DESCRIPTOR_FILE)
     set(PLATFORM_CMAKE_DESCRIPTOR_FILE
-        cmake/subsystem-profiles/corstone-sse-300.cmake
+        cmake/subsystem-profiles/${TARGET_SUBSYSTEM}.cmake
         CACHE PATH
         "Platform's CMake descriptor file path")
 endif()

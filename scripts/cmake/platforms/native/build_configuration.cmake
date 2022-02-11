@@ -15,25 +15,30 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-set(TEST_TPIP ${DOWNLOAD_DEP_DIR}/test)
-
-file(MAKE_DIRECTORY ${TEST_TPIP})
-set(TEST_TPIP_INCLUDE ${TEST_TPIP}/include)
-file(MAKE_DIRECTORY ${TEST_TPIP_INCLUDE})
-
-ExternalProject_Add(catch2-headers
-        URL https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
-        DOWNLOAD_NO_EXTRACT 1
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND bash -c "cp -R <DOWNLOAD_DIR>/catch.hpp ${TEST_TPIP_INCLUDE}"
-        INSTALL_COMMAND "")
-
 function(set_platform_global_defaults)
     message(STATUS "Platform: Native (Linux based x86_64/aarch64 system)")
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
+
+    set(TEST_TPIP ${DOWNLOAD_DEP_DIR}/test)
+
+    file(MAKE_DIRECTORY ${TEST_TPIP})
+    set(TEST_TPIP_INCLUDE ${TEST_TPIP}/include)
+    file(MAKE_DIRECTORY ${TEST_TPIP_INCLUDE})
+
+    ExternalProject_Add(catch2-headers
+            URL https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+            DOWNLOAD_NO_EXTRACT 1
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ${CMAKE_COMMAND} -E copy <DOWNLOAD_DIR>/catch.hpp ${TEST_TPIP_INCLUDE}
+            INSTALL_COMMAND "")
+
+    add_library(catch2 INTERFACE)
+    target_include_directories(catch2
+            INTERFACE
+            ${TEST_TPIP_INCLUDE})
 
 endfunction()
 
@@ -98,16 +103,10 @@ function(platform_custom_post_build)
 
         set(TEST_TARGET_NAME "${CMAKE_PROJECT_NAME}-${use_case}-tests")
         add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})
-        target_include_directories(${TEST_TARGET_NAME} PUBLIC
-                ${TEST_TPIP_INCLUDE} ${TEST_RESOURCES_INCLUDE})
-        target_link_libraries(${TEST_TARGET_NAME} PUBLIC ${UC_LIB_NAME})
+        target_include_directories(${TEST_TARGET_NAME} PRIVATE ${TEST_RESOURCES_INCLUDE})
+        target_link_libraries(${TEST_TARGET_NAME} PRIVATE ${UC_LIB_NAME} catch2)
         target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)
-
-        add_dependencies(
-                "${TEST_TARGET_NAME}"
-                "catch2-headers"
-        )
     endif ()
 endfunction()

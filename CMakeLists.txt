@@ -57,7 +57,8 @@ else()
 endif()
 
 include(${CMAKE_SCRIPTS_DIR}/common_user_options.cmake)
-include(${CMAKE_SCRIPTS_DIR}/platforms/${TARGET_PLATFORM}/build_configuration.cmake)
+
+add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
 
 set_platform_global_defaults()
 
@@ -88,9 +89,6 @@ set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
-if (CPU_PROFILE_ENABLED)
-    set(PROFILING_OPT "${PROFILING_OPT} -DCPU_PROFILE_ENABLED")
-endif()
 # We include log target
 add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log)
 
@@ -147,6 +145,8 @@ else()
     set(USE_CASES ${USE_CASE_BUILD})
 endif()
 
+list(REMOVE_ITEM USE_CASES "" ${EXCLUDED_USE_CASES})
+message(STATUS "Use-cases excluded by platform configuration: ${EXCLUDED_USE_CASES}")
 message(STATUS "Building use-cases: ${USE_CASES}.")
 foreach(use_case ${USE_CASES})
 
@@ -219,6 +219,10 @@ foreach(use_case ${USE_CASES})
     # Set the activation buffer size
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
             "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
+
+    # Set the CPU profiling defintiion
+    target_compile_definitions(${UC_LIB_NAME} PRIVATE
+            $<$<BOOL:${CPU_PROFILE_ENABLED}>:CPU_PROFILE_ENABLED>)
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log

@@ -174,3 +174,20 @@ function(download_file_from_modelzoo model_zoo_version file_sub_path download_pa
     endif()
 
 endfunction()
+
+function(add_platform_build_configuration)
+
+    set(oneValueArgs TARGET_PLATFORM)
+    cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
+    message(STATUS "Searching for ${PARSED_TARGET_PLATFORM} build configuration")
+    list(APPEND PLATFORM_BUILD_CONFIG_DIRS ${CMAKE_SCRIPTS_DIR}/platforms)
+
+    FIND_PATH(PLATFORM_BUILD_CONFIG
+            NAMES build_configuration.cmake
+            PATH_SUFFIXES ${PARSED_TARGET_PLATFORM}
+            PATHS ${PLATFORM_BUILD_CONFIG_DIRS}
+            )
+
+    message(STATUS "Found build configuration: ${PLATFORM_BUILD_CONFIG}")
+    include(${PLATFORM_BUILD_CONFIG}/build_configuration.cmake)
+endfunction()

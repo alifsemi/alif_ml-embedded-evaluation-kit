@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2021 - 2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,22 +64,6 @@ else()
     file(COPY ${ETHOS_EVAL_TARGET_MAKEFILE_INC}
         DESTINATION ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/targets/)
 endif()
-
-#TODO: this thing fails the TF build, when the driver is compiled, fatal error: 'ethosETHOSU_ARCH_interface.h' file not found
-#if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
-#    set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
-#    set(TENSORFLOW_LITE_MICRO_TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR}${CPU_FEATURES})
-#    if(ETHOS_U_NPU_ENABLED)
-#        # Arm Ethos-U55 NPU is the co-processor for ML workload:
-#        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
-#    endif()
-#
-#    set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")
-#
-#else()
-#    set(TENSORFLOW_LITE_MICRO_TARGET "linux")
-#    set(TENSORFLOW_LITE_MICRO_TARGET_ARCH x86_64)
-#endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
     list(APPEND MAKE_TARGETS_LIST "clean_downloads")
