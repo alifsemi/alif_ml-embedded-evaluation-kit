@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ bool RunInference(arm::app::Model& model, const int8_t* imageData)
     memcpy(inputTensor->data.data, imageData, copySz);
 
     if(model.IsDataSigned()){
-        convertImgIoInt8(inputTensor->data.data, copySz);
+        arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
     }
 
     return model.RunInference();

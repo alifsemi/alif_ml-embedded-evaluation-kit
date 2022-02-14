@@ -24,29 +24,9 @@
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "Classifier.hpp"           /* Classifier. */
 #include "InputFiles.hpp"
-#include <cinttypes>
-
-
-/* Helper macro to convert RGB888 to RGB565 format. */
-#define RGB888_TO_RGB565(R8,G8,B8)  ((((R8>>3) & 0x1F) << 11) |     \
-                                     (((G8>>2) & 0x3F) << 5)  |     \
-                                     ((B8>>3) & 0x1F))
-
-constexpr uint16_t COLOR_BLACK  = 0;
-constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0u, 255u,  0u); // 2016;
-constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255u, 255u,  0u); // 65504;
 
 
 void DisplayCommonMenu();
-
-namespace image{
-
-  /**
-  * @brief           Helper function to convert a UINT8 image to INT8 format.
-  * @param[in,out]   data            Pointer to the data start.
-  * @param[in]       kMaxImageSize   Total number of pixels in the image.
-  **/
-  void ConvertImgToInt8(void * data, size_t kMaxImageSize);
 
   /**
    * @brief           Presents inference results using the data presentation
@@ -55,17 +35,9 @@ namespace image{
    * @param[in]       results     Vector of classification results to be displayed.
    * @return          true if successful, false otherwise.
    **/
-  bool PresentInferenceResult(hal_platform & platform,
-    const std::vector < arm::app::ClassificationResult > & results);
+bool PresentInferenceResult(hal_platform& platform,
+                            const std::vector<arm::app::ClassificationResult>& results);
 
-  /**
-   * @brief       Converts RGB image to grayscale.
-   * @param[in]   srcPtr   Pointer to RGB source image.
-   * @param[out]  dstPtr   Pointer to grayscale destination image.
-   * @param[in]   imgSz    Destination image size.
-   **/
-  void RgbToGrayscale(const uint8_t *srcPtr, uint8_t *dstPtr, const size_t dstImgSz);
-}
 
 /**
    * @brief           Helper function to increment current input feature vector index.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@
 #include "hal.h"
 #include "InputFiles.hpp"
 #include "AudioUtils.hpp"
+#include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "MicroNetKwsModel.hpp"
 #include "MicroNetKwsMfcc.hpp"

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "UseCaseCommonUtils.hpp"
+#include "ImageUtils.hpp"
 #include "InputFiles.hpp"
 #include "log_macros.h"
 
@@ -35,19 +36,10 @@ void DisplayCommonMenu()
     fflush(stdout);
 }
 
-void image::ConvertImgToInt8(void* data, const size_t kMaxImageSize)
-{
-    auto* tmp_req_data = static_cast<uint8_t *>(data);
-    auto* tmp_signed_req_data = static_cast<int8_t *>(data);
-
-    for (size_t i = 0; i < kMaxImageSize; i++) {
-        tmp_signed_req_data[i] = (int8_t) (
-            (int32_t) (tmp_req_data[i]) - 128);
-    }
-}
 
 
-bool image::PresentInferenceResult(
+
+bool PresentInferenceResult(
     hal_platform &platform,
     const std::vector<arm::app::ClassificationResult> &results)
 {
@@ -93,19 +85,6 @@ bool image::PresentInferenceResult(
     return true;
 }
 
-void image::RgbToGrayscale(const uint8_t *srcPtr, uint8_t *dstPtr, const size_t dstImgSz)
-{
-    float R=0.299;
-    float G=0.587;
-    float B=0.114;
-    for (size_t i = 0; i < dstImgSz; ++i, srcPtr += 3) {
-        uint32_t  int_gray = R * (*srcPtr) +
-                             G * (*(srcPtr + 1)) +
-                             B * (*(srcPtr + 2));
-        *dstPtr++ = int_gray <= std::numeric_limits<uint8_t>::max() ?
-                        int_gray : std::numeric_limits<uint8_t>::max();
-    }
-}
 
 void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, const std::string& useCase)
 {

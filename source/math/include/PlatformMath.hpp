@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@
 
 /* See if ARM DSP functions can be used. */
 #if defined(ARM_MATH_DSP)
-
     #include "arm_math.h"
     #define M_PI    (PI)
 #else
@@ -127,8 +126,8 @@ namespace math {
          * @param[out]  output   Pre-allocated buffer to be populated with
          *                       natural log values of each input element.
          */
-        static void VecLogarithmF32(std::vector <float>& input,
-                                    std::vector <float>& output);
+        static void VecLogarithmF32(std::vector<float>& input,
+                                    std::vector<float>& output);
 
         /**
          * @brief       Computes the dot product of two 1D floating point
@@ -165,6 +164,13 @@ namespace math {
         * @param[in]   vector Vector of floats modified in-place
         */
         static void SoftmaxF32(std::vector<float>& vec);
+
+        /**
+        * @brief       Calculate the Sigmoid function of the given value.
+        * @param[in]   x   Value to apply Sigmoid to.
+        * @return      Sigmoid value of the input.
+        */
+        static float SigmoidF32(float x);
     };
 
 } /* namespace math */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@
 #include "Classifier.hpp"
 #include "InputFiles.hpp"
 #include "MobileNetModel.hpp"
+#include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
@@ -136,7 +137,7 @@ namespace app {
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            if (!image::PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(platform, results)) {
                 return false;
             }
 

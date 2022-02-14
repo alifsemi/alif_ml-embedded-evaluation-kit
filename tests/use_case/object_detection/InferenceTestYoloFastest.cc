@@ -66,10 +66,10 @@ bool RunInference(arm::app::Model& model, const uint8_t imageData[])
     const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
                             inputTensor->bytes : IMAGE_DATA_SIZE;
 
-    image::RgbToGrayscale(imageData,inputTensor->data.uint8,copySz);
+    arm::app::image::RgbToGrayscale(imageData,inputTensor->data.uint8,copySz);
 
     if(model.IsDataSigned()){
-        convertImgIoInt8(inputTensor->data.data, copySz);
+        arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
     }
 
     return model.RunInference();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -301,6 +301,11 @@ namespace math {
         for (auto it = start; it != end; ++it) {
             *it = (*it)/sumExp;
         }
+    }
+
+    float MathUtils::SigmoidF32(float x)
+    {
+        return 1.f/(1.f + std::exp(-x));
     }
 
 } /* namespace math */

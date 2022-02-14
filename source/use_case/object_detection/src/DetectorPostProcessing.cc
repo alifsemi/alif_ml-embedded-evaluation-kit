@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "DetectorPostProcessing.hpp"
+#include "PlatformMath.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -75,7 +76,7 @@ void DetectorPostprocessing::RunPostProcessing(
     int originalImageWidth = originalImageSize;
     int originalImageHeight = originalImageSize;
 
-    std::forward_list<Detection> detections;
+    std::forward_list<image::Detection> detections;
     GetNetworkBoxes(net, originalImageWidth, originalImageHeight, m_threshold, detections);
 
     /* Do nms */
@@ -124,15 +125,11 @@ void DetectorPostprocessing::RunPostProcessing(
     }
 }
 
-float DetectorPostprocessing::Sigmoid(float x)
-{
-    return 1.f/(1.f + exp(-x));
-}
 
-void DetectorPostprocessing::InsertTopNDetections(std::forward_list<Detection>& detections, Detection& det)
+void DetectorPostprocessing::InsertTopNDetections(std::forward_list<image::Detection>& detections, image::Detection& det)
 {
-    std::forward_list<Detection>::iterator it;
-    std::forward_list<Detection>::iterator last_it;
+    std::forward_list<image::Detection>::iterator it;
+    std::forward_list<image::Detection>::iterator last_it;
     for ( it = detections.begin(); it != detections.end(); ++it ) {
         if(it->objectness > det.objectness)
             break;
@@ -144,11 +141,11 @@ void DetectorPostprocessing::InsertTopNDetections(std::forward_list<Detection>& 
     }
 }
 
-void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int imageHeight, float threshold, std::forward_list<Detection>& detections)
+void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int imageHeight, float threshold, std::forward_list<image::Detection>& detections)
 {
     int numClasses = net.numClasses;
     int num = 0;
-    auto det_objectness_comparator = [](Detection& pa, Detection& pb) {
+    auto det_objectness_comparator = [](image::Detection& pa, image::Detection& pb) {
         return pa.objectness < pb.objectness;
     };
     for (size_t i = 0; i < net.branches.size(); ++i) {
@@ -162,10 +159,10 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
 
                     /* Objectness score */
                     int bbox_obj_offset = h * width * channel + w * channel + anc * (numClasses + 5) + 4;
-                    float objectness = Sigmoid(((float)net.branches[i].modelOutput[bbox_obj_offset] - net.branches[i].zeroPoint) * net.branches[i].scale);
+                    float objectness = math::MathUtils::SigmoidF32(((float)net.branches[i].modelOutput[bbox_obj_offset] - net.branches[i].zeroPoint) * net.branches[i].scale);
 
                     if(objectness > threshold) {
-                        Detection det;
+                        image::Detection det;
                         det.objectness = objectness;
                         /* Get bbox prediction data for each anchor, each feature point */
                         int bbox_x_offset = bbox_obj_offset -4;
@@ -183,8 +180,8 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
                         float bbox_x, bbox_y;
 
                         /* Eliminate grid sensitivity trick involved in YOLOv4 */
-                        bbox_x = Sigmoid(det.bbox.x);
-                        bbox_y = Sigmoid(det.bbox.y);
+                        bbox_x = math::MathUtils::SigmoidF32(det.bbox.x);
+                        bbox_y = math::MathUtils::SigmoidF32(det.bbox.y);
                         det.bbox.x = (bbox_x + w) / width;
                         det.bbox.y = (bbox_y + h) / height;
 
@@ -192,7 +189,7 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
                         det.bbox.h = exp(det.bbox.h) * net.branches[i].anchor[anc*2+1] / net.inputHeight;
 
                         for (int s = 0; s < numClasses; s++) {
-                            float sig = Sigmoid(((float)net.branches[i].modelOutput[bbox_scores_offset + s] - net.branches[i].zeroPoint) * net.branches[i].scale)*objectness;
+                            float sig = math::MathUtils::SigmoidF32(((float)net.branches[i].modelOutput[bbox_scores_offset + s] - net.branches[i].zeroPoint) * net.branches[i].scale)*objectness;
                             det.prob.emplace_back((sig > threshold) ? sig : 0);
                         }
 
@@ -219,81 +216,6 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
     }
     if(num > net.topN)
         num -=1;
-}
-
-float DetectorPostprocessing::Calculate1DOverlap(float x1Center, float width1, float x2Center, float width2)
-{
-    float left_1 = x1Center - width1/2;
-    float left_2 = x2Center - width2/2;
-    float leftest = left_1 > left_2 ? left_1 : left_2;
-
-    float right_1 = x1Center + width1/2;
-    float right_2 = x2Center + width2/2;
-    float rightest = right_1 < right_2 ? right_1 : right_2;
-
-    return rightest - leftest;
-}
-
-float DetectorPostprocessing::CalculateBoxIntersect(Box& box1, Box& box2)
-{
-    float width = Calculate1DOverlap(box1.x, box1.w, box2.x, box2.w);
-    if (width < 0) {
-        return 0;
-    }
-    float height = Calculate1DOverlap(box1.y, box1.h, box2.y, box2.h);
-    if (height < 0) {
-        return 0;
-    }
-
-    float total_area = width*height;
-    return total_area;
-}
-
-float DetectorPostprocessing::CalculateBoxUnion(Box& box1, Box& box2)
-{
-    float boxes_intersection = CalculateBoxIntersect(box1, box2);
-    float boxes_union = box1.w * box1.h + box2.w * box2.h - boxes_intersection;
-    return boxes_union;
-}
-
-
-float DetectorPostprocessing::CalculateBoxIOU(Box& box1, Box& box2)
-{
-    float boxes_intersection = CalculateBoxIntersect(box1, box2);
-    if (boxes_intersection == 0) {
-        return 0;
-    }
-
-    float boxes_union = CalculateBoxUnion(box1, box2);
-    if (boxes_union == 0) {
-        return 0;
-    }
-
-    return boxes_intersection / boxes_union;
-}
-
-void DetectorPostprocessing::CalculateNMS(std::forward_list<Detection>& detections, int classes, float iouThreshold)
-{
-    int idxClass{0};
-    auto CompareProbs = [idxClass](Detection& prob1, Detection& prob2) {
-        return prob1.prob[idxClass] > prob2.prob[idxClass];
-    };
-
-    for (idxClass = 0; idxClass < classes; ++idxClass) {
-        detections.sort(CompareProbs);
-
-        for (std::forward_list<Detection>::iterator it=detections.begin(); it != detections.end(); ++it) {
-            if (it->prob[idxClass] == 0) continue;
-            for (std::forward_list<Detection>::iterator itc=std::next(it, 1); itc != detections.end(); ++itc) {
-                if (itc->prob[idxClass] == 0) {
-                    continue;
-                }
-                if (CalculateBoxIOU(it->bbox, itc->bbox) > iouThreshold) {
-                    itc->prob[idxClass] = 0;
-                }
-            }
-        }
-    }
 }
 
 void DetectorPostprocessing::DrawBoxOnImage(uint8_t* imgIn, int imWidth, int imHeight, int boxX,int boxY, int boxWidth, int boxHeight)

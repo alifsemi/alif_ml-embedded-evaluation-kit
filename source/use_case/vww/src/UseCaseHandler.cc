@@ -18,6 +18,7 @@
 #include "VisualWakeWordModel.hpp"
 #include "Classifier.hpp"
 #include "InputFiles.hpp"
+#include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
@@ -144,7 +145,7 @@ namespace app {
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            if (!image::PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(platform, results)) {
                 return false;
             }
 

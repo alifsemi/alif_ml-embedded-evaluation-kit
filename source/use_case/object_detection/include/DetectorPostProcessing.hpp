@@ -18,6 +18,7 @@
 #define DETECTOR_POST_PROCESSING_HPP
 
 #include "UseCaseCommonUtils.hpp"
+#include "ImageUtils.hpp"
 #include "DetectionResult.hpp"
 #include "YoloFastestModel.hpp"
 
@@ -43,20 +44,6 @@ namespace object_detection {
         int numClasses;
         std::vector<Branch> branches;
         int topN;
-    };
-
-
-    struct Box {
-        float x;
-        float y;
-        float w;
-        float h;
-    };
-
-    struct Detection {
-        Box bbox;
-        std::vector<float> prob;
-        float objectness;
     };
 
     /**
@@ -99,18 +86,11 @@ namespace object_detection {
         int   m_topN;       /* TopN */
 
         /**
-         * @brief       Calculate the Sigmoid function of the give value.
-         * @param[in]   x   Value.
-         * @return      Sigmoid value of the input.
-         **/
-        float Sigmoid(float x);
-
-        /**
          * @brief       Insert the given Detection in the list.
          * @param[in]   detections   List of detections.
          * @param[in]   det          Detection to be inserted.
          **/
-        void InsertTopNDetections(std::forward_list<Detection>& detections, Detection& det);
+        void InsertTopNDetections(std::forward_list<image::Detection>& detections, image::Detection& det);
 
         /**
          * @brief        Given a Network calculate the detection boxes.
@@ -124,49 +104,7 @@ namespace object_detection {
                              int imageWidth,
                              int imageHeight,
                              float threshold,
-                             std::forward_list<Detection>& detections);
-
-        /**
-         * @brief       Calculate the 1D overlap.
-         * @param[in]   x1Center   First center point.
-         * @param[in]   width1     First width.
-         * @param[in]   x2Center   Second center point.
-         * @param[in]   width2     Second width.
-         * @return      The overlap between the two lines.
-         **/
-        float Calculate1DOverlap(float x1Center, float width1, float x2Center, float width2);
-
-        /**
-         * @brief       Calculate the intersection between the two given boxes.
-         * @param[in]   box1   First box.
-         * @param[in]   box2   Second box.
-         * @return      The intersection value.
-         **/
-        float CalculateBoxIntersect(Box& box1, Box& box2);
-
-        /**
-         * @brief       Calculate the union between the two given boxes.
-         * @param[in]   box1   First box.
-         * @param[in]   box2   Second box.
-         * @return      The two given boxes union value.
-         **/
-        float CalculateBoxUnion(Box& box1, Box& box2);
-        /**
-         * @brief       Calculate the intersection over union between the two given boxes.
-         * @param[in]   box1   First box.
-         * @param[in]   box2   Second box.
-         * @return      The intersection over union value.
-         **/
-        float CalculateBoxIOU(Box& box1, Box& box2);
-
-        /**
-         * @brief       Calculate the Non-Maxima suppression on the given detection boxes.
-         * @param[in]   detections    Detection boxes.
-         * @param[in]   classes       Number of classes.
-         * @param[in]   iouThreshold  Intersection over union threshold.
-         * @return      true or false based on execution success.
-         **/
-        void  CalculateNMS(std::forward_list<Detection>& detections, int classes, float iouThreshold);
+                             std::forward_list<image::Detection>& detections);
 
         /**
          * @brief       Draw on the given image a bounding box starting at (boxX, boxY).
