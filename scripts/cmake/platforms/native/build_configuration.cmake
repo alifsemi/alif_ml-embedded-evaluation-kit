@@ -39,6 +39,7 @@ function(set_platform_global_defaults)
     target_include_directories(catch2
             INTERFACE
             ${TEST_TPIP_INCLUDE})
+    add_dependencies(catch2 catch2-headers)
 
 endfunction()
 

@@ -98,19 +98,19 @@ add_subdirectory(${SRC_PATH}/math ${CMAKE_BINARY_DIR}/math)
 # We include the hal target
 add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal)
 
+# Add the profiler target
+if (NOT DEFINED PROFILER_DIR)
+    set(PROFILER_DIR ${SRC_PATH}/profiler)
+endif ()
+add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
+
 # Include the tensorflow build target
 include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
-
-# Profiler
-if (NOT DEFINED PROFILER_DIR)
-    set(PROFILER_DIR ${SRC_PATH}/application/profiler)
-endif ()
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
     ${SRC_PATH}/application/tensorflow-lite-micro/include
-    ${SRC_PATH}/application/main/include
-    ${PROFILER_DIR}/include)
+    ${SRC_PATH}/application/main/include)
 
 # Source files for application module:
 file(GLOB_RECURSE SRC_APPLICATION
@@ -122,9 +122,6 @@ file(GLOB_RECURSE SRC_APPLICATION
     "${SRC_PATH}/application/main/**/*.c"
     "${SRC_PATH}/application/tensorflow-lite-micro/**/*.cc"
     "${SRC_PATH}/application/tensorflow-lite-micro/*.cc"
-    "${PROFILER_DIR}/*.cc"
-    "${PROFILER_DIR}/*.cpp"
-    "${PROFILER_DIR}/*.c"
     )
 list(FILTER SRC_APPLICATION EXCLUDE REGEX ".*main\\.c.*$")
 set(SRC_MAIN "${SRC_PATH}/application/main/Main.cc")
@@ -228,9 +225,8 @@ foreach(use_case ${USE_CASES})
         log
         arm_math
         hal
-        tensorflow-lite-micro
-        $<$<BOOL:${APPLICATION_EXTRA_LIBS}>:${APPLICATION_EXTRA_LIBS}>
-        )
+        profiler
+        tensorflow-lite-micro)
 
     add_executable(${TARGET_NAME} ${SRC_MAIN})
 
