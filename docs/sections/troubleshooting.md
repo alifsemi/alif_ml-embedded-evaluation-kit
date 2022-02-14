@@ -5,6 +5,7 @@
   - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
+  - [Errors when cloning the repository](/troubleshooting.md#errors-when-cloning-the-repository)
 
 ## Inference results are incorrect for my custom files
 
@@ -84,5 +85,30 @@ ERROR: Command errored out with exit status 1: /venv/bin/python -u -c 'import sy
 ```
 
 To solve this issue install libpython3 on the system.
+
+## Errors when cloning the repository
+
+If you see following errors when cloning the repository:
+
+- ```log
+  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/': server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+  ```
+
+  We suggest to update to the lastest common CA certificates:
+
+  ```commandline
+  sudo apt-get update
+  sudo apt-get install ca-certificates
+  ```
+
+- ```log
+  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/': error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
+  ```
+
+  We suggest to export the `CURL_SSL_BACKEND` variable as `secure-transport`:
+
+  ```commandline
+  export CURL_SSL_BACKEND="secure-transport"
+  ```
 
 Next section of the documentation: [Appendix](appendix.md).

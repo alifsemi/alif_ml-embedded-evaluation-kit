@@ -272,7 +272,7 @@ by an external agent. This loading capability also extends to the input data for
 This feature depends on these addresses to be specified in target platform's CMake description and, by
 default, is available for use on the MPS3 FVP platform.
 
-> **NOTE**: The application built with this support will not work on the FPGA. This capability is only
+> **Note:**: The application built with this support will not work on the FPGA. This capability is only
 > provided for use with the FVP, to make it easier to try different ML workloads without having to build
 > the applications with different TFLite files baked into the application statically.
 > Also, this feature is not available for `native` target.
@@ -305,7 +305,7 @@ the command below loads a custom model at address `0x90000000`, a custom input f
 and when the FVP exits, it dumps a file named `output.bin` with the output tensors consolidated into a
 binary blob.
 
-> **NOTE** The CMake profile for the target should also give an indication of the maximum sizes for
+> **Note:** The CMake profile for the target should also give an indication of the maximum sizes for
 > each of the regions. This is also mentioned in the linker scripts for the same target. For MPS3,
 > the model size can be a maximum of 32MiB. The IFM and OFM spaces are both reserved as 16MiB sections.
 
@@ -324,7 +324,7 @@ If the size of the output tensors is unknown before running the FVP, it can be r
 parameter to check the size of the output first by looking at the application log. Alternatively, a
 size of 16MiB will dump the whole reserved section for the OFM to a file.
 
-> **NOTE**: When there are multiple input tensors, the application is set up to iterate over all of
+> **Note:**: When there are multiple input tensors, the application is set up to iterate over all of
 > them and populate each of them, in sequence, with the required amount of data. The sequence in which
 > these tensors are populated is governed by the index assigned to them within the TensorFlow Lite Micro
 > framework. So, the input binary blob should be a consolidated file containing data for all the input

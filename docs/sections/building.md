@@ -32,7 +32,7 @@ This section assumes that you are using an **x86 Linux** build machine.
 
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
-- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.15, or higher, is installed and available
+- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.16, or higher, is installed and available
   on the path. Test the compiler by running:
 
     ```commandline
@@ -40,8 +40,8 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```
 
     ```log
-    Product: ARM Compiler 6.15 Professional
-    Component: ARM Compiler 6.15
+    Product: ARM Compiler 6.16 Professional
+    Component: ARM Compiler 6.16
     ```
 
   Alternatively, use:
@@ -58,12 +58,12 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```
 
 > **Note:** If required, add the compiler to the path (can be added to ~/.bashrc to be set permanently):
-> 
+>
 > `export PATH=/path/to/armclang/bin:$PATH` OR `export PATH=/path/to/gcc-arm-none-eabi-toolchain/bin:$PATH`
 
 - If you are using the proprietary Arm Compiler, ensure that the compiler license has been correctly configured.
 
-- CMake version 3.15 or above is installed and available on the path. Test CMake by running:
+- CMake version 3.15.6 or above is installed and available on the path. Test CMake by running:
 
     ```commandline
     cmake --version
@@ -183,7 +183,7 @@ The build parameters are:
   - `Dedicated_Sram` (default for *Ethos-U65* NPU)
   - `Sram_Only`
 
-  >**Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
+  > **Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
   > for *Ethos-U65* NPU and `Sram_Only` only for Ethos-U55* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
@@ -241,8 +241,8 @@ chosen configuration.
   DS and other tools which can interpret the latest DWARF format. To allow debugging using the Model Debugger from Arm
   Fast Model Tools Suite, this argument can be used to pass DWARF format version as "3".
 
-  >**Note:** This option is only available when the CMake project is configured with the `-DCMAKE_BUILD_TYPE=Debug`
-  >argument. Also, the same dwarf format is used for building TensorFlow Lite Micro library.
+  > **Note:** This option is only available when the CMake project is configured with the `-DCMAKE_BUILD_TYPE=Debug`
+  > argument. Also, the same dwarf format is used for building TensorFlow Lite Micro library.
 
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
@@ -371,8 +371,8 @@ Additional command line arguments supported by this script are:
   - `ethos-u65-256`
   - `ethos-u65-512`
 - `--make-jobs`: Specifies the number of concurrent jobs to use for compilation.
-The default value is equal to the number of cores in the system.
-Lowering this value can be useful in case of limited resources.
+  The default value is equal to the number of cores in the system.
+  Lowering this value can be useful in case of limited resources.
 - `--make-verbose`: Make the compile process verbose. This is equal to run ```make VERBOSE=1```.
 
 To build for *Ethos™-U55* 32 MAC configuration, using `Arm Compiler`, run:

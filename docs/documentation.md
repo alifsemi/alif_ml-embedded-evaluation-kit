@@ -33,7 +33,7 @@ Before starting the setup process, please make sure that you have:
 - At least one of the following toolchains:
   - GNU Arm Embedded toolchain (version 10.2.1 or above) -
   [GNU Arm Embedded toolchain downloads](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-  - Arm Compiler (version 6.15 or above) with a valid license -
+  - Arm Compiler (version 6.16 or above) with a valid license -
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
@@ -44,7 +44,7 @@ Before starting the setup process, please make sure that you have:
   - `Arm Corstone-300` based FVP for MPS3 is available from:
     <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>.
 
-> **NOTE**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
+> **Note:**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
 > notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built
 > for MPS3 target should work on both FPGA packages.
 
