@@ -1,3 +1,6 @@
+
+***NOTE: The default branch for this repository is now the main branch, the master branch is deprecated, and will be removed after 22.05 release. Please ensure any changes are added to the main branch.***
+
 # Arm® ML embedded evaluation kit
 
 This repository is for building and deploying Machine Learning (ML) applications targeted for Arm® Cortex®-M and Arm®
@@ -176,7 +179,7 @@ In order to be merged a patch needs to:
 
 Prior to submitting a patch for review please make sure that all build variants works and unit tests pass.
 Contributions go through testing at the continuous integration system. All builds, tests and checks must pass before a
-contribution gets merged to the master branch.
+contribution gets merged to the main branch.
 
 ## Communication
 
@@ -198,4 +201,4 @@ Application input data sample files are provided under their original license:
 | [Keyword Spotting and Automatic Speech Recognition Samples](./resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
 | [Visual Wake Word Samples](./resources/vww/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
 | [Noise Reduction Samples](./resources/noise_reduction/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <https://datashare.ed.ac.uk/handle/10283/2791/> |
-| [Object Detection Samples](./resources/object_detection/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> | 
+| [Object Detection Samples](./resources/object_detection/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
