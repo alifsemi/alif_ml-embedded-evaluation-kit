@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -283,7 +283,7 @@ void GLCD_Bitmap(unsigned int x, unsigned int y,
     wr_dat_stop();
 }
 
-void GLCD_Image(void *data, const uint32_t width,
+void GLCD_Image(const void *data, const uint32_t width,
     const uint32_t height, const uint32_t channels,
     const uint32_t pos_x, const uint32_t pos_y,
     const uint32_t downsample_factor)

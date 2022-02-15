@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ typedef struct data_presentation_module {
     int (* system_init)(void);  /**< pointer to init function */
 
     /** Pointer to the image presentation function */
-    int (* present_data_image)(uint8_t *data, const uint32_t width,
+    int (* present_data_image)(const uint8_t *data, const uint32_t width,
         const uint32_t height, const uint32_t channels,
         const uint32_t pos_x, const uint32_t pos_y,
         const uint32_t downsample_factor);

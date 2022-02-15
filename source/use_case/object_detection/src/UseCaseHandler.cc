@@ -35,7 +35,21 @@ namespace app {
      * @return          true if successful, false otherwise.
      **/
     static bool PresentInferenceResult(hal_platform& platform,
-                                    const std::vector<arm::app::object_detection::DetectionResult>& results);
+                                       const std::vector<arm::app::object_detection::DetectionResult>& results);
+
+    /**
+     * @brief           Draw boxes directly on the LCD for all detected objects.
+     * @param[in]       platform           Reference to the hal platform object.
+     * @param[in]       results            Vector of detection results to be displayed.
+     * @param[in]       imageStartX        X coordinate where the image starts on the LCD.
+     * @param[in]       imageStartY        Y coordinate where the image starts on the LCD.
+     * @param[in]       imgDownscaleFactor How much image has been downscaled on LCD.
+     **/
+    static void DrawDetectionBoxes(hal_platform& platform,
+                                   const std::vector<arm::app::object_detection::DetectionResult>& results,
+                                   uint32_t imgStartX,
+                                   uint32_t imgStartY,
+                                   uint32_t imgDownscaleFactor);
 
     /* Object detection classification handler. */
     bool ObjectDetectionHandler(ApplicationContext& ctx, uint32_t imgIndex, bool runAll)
@@ -97,18 +111,12 @@ namespace app {
             const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
                                 inputTensor->bytes : IMAGE_DATA_SIZE;
 
-            /* Copy of the image used for presentation, original images are read-only */
-            std::vector<uint8_t> g_image_buffer(nCols*nRows*channelsImageDisplayed);
-            if (nPresentationChannels == 3) {
-                memcpy(g_image_buffer.data(),curr_image, nCols * nRows * channelsImageDisplayed);
-            } else {
-                image::RgbToGrayscale(curr_image, g_image_buffer.data(), nCols * nRows);
-            }
+            /* Convert to gray scale and populate input tensor. */
             image::RgbToGrayscale(curr_image, dstPtr, copySz);
 
-            /* Display this image on the LCD. */
+            /* Display original image on the LCD. */
             platform.data_psn->present_data_image(
-                g_image_buffer.data(),
+                curr_image,
                 nCols, nRows, nPresentationChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
@@ -119,7 +127,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Run inference over this image. */
             info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
@@ -132,24 +140,21 @@ namespace app {
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Detector post-processing*/
             std::vector<object_detection::DetectionResult> results;
             TfLiteTensor* modelOutput0 = model.GetOutputTensor(0);
             TfLiteTensor* modelOutput1 = model.GetOutputTensor(1);
             postp.RunPostProcessing(
-                g_image_buffer.data(),
                 nRows,
                 nCols,
                 modelOutput0,
                 modelOutput1,
                 results);
 
-            platform.data_psn->present_data_image(
-                g_image_buffer.data(),
-                nCols, nRows, nPresentationChannels,
-                dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
+            /* Draw boxes. */
+            DrawDetectionBoxes(platform, results, dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
 #if VERIFY_TEST_OUTPUT
             arm::app::DumpTensor(modelOutput0);
@@ -186,6 +191,35 @@ namespace app {
         }
 
         return true;
+    }
+
+    static void DrawDetectionBoxes(hal_platform& platform,
+                                   const std::vector<arm::app::object_detection::DetectionResult>& results,
+                                   uint32_t imgStartX,
+                                   uint32_t imgStartY,
+                                   uint32_t imgDownscaleFactor)
+    {
+        uint32_t lineThickness = 1;
+
+        for (const auto& result: results) {
+            /* Top line. */
+            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+                    imgStartY + result.m_y0/imgDownscaleFactor,
+                    result.m_w/imgDownscaleFactor, lineThickness, COLOR_GREEN);
+            /* Bot line. */
+            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+                    imgStartY + (result.m_y0 + result.m_h)/imgDownscaleFactor - lineThickness,
+                    result.m_w/imgDownscaleFactor, lineThickness, COLOR_GREEN);
+
+            /* Left line. */
+            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+                    imgStartY + result.m_y0/imgDownscaleFactor,
+                    lineThickness, result.m_h/imgDownscaleFactor, COLOR_GREEN);
+            /* Right line. */
+            platform.data_psn->present_box(imgStartX + (result.m_x0 + result.m_w)/imgDownscaleFactor - lineThickness,
+                    imgStartY + result.m_y0/imgDownscaleFactor,
+                    lineThickness, result.m_h/imgDownscaleFactor, COLOR_GREEN);
+        }
     }
 
 } /* namespace app */

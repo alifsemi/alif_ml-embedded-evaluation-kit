@@ -17,7 +17,6 @@
 #include "DetectorPostProcessing.hpp"
 #include "PlatformMath.hpp"
 
-#include <algorithm>
 #include <cmath>
 
 namespace arm {
@@ -36,7 +35,6 @@ DetectorPostprocessing::DetectorPostprocessing(
 {}
 
 void DetectorPostprocessing::RunPostProcessing(
-    uint8_t* imgIn,
     uint32_t imgRows,
     uint32_t imgCols,
     TfLiteTensor* modelOutput0,
@@ -117,9 +115,6 @@ void DetectorPostprocessing::RunPostProcessing(
                 tmpResult.m_h = boxHeight;
 
                 resultsOut.push_back(tmpResult);
-
-                /* TODO: Instead of draw on the image, return the boxes and draw on the LCD */
-                DrawBoxOnImage(imgIn, originalImageWidth, originalImageHeight, boxX, boxY, boxWidth, boxHeight);;
             }
         }
     }
@@ -159,7 +154,10 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
 
                     /* Objectness score */
                     int bbox_obj_offset = h * width * channel + w * channel + anc * (numClasses + 5) + 4;
-                    float objectness = math::MathUtils::SigmoidF32(((float)net.branches[i].modelOutput[bbox_obj_offset] - net.branches[i].zeroPoint) * net.branches[i].scale);
+                    float objectness = math::MathUtils::SigmoidF32(
+                            (static_cast<float>(net.branches[i].modelOutput[bbox_obj_offset])
+                            - net.branches[i].zeroPoint
+                            ) * net.branches[i].scale);
 
                     if(objectness > threshold) {
                         image::Detection det;
@@ -171,11 +169,10 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
                         int bbox_h_offset = bbox_x_offset + 3;
                         int bbox_scores_offset = bbox_x_offset + 5;
 
-                        det.bbox.x = ((float)net.branches[i].modelOutput[bbox_x_offset] - net.branches[i].zeroPoint) * net.branches[i].scale;
-                        det.bbox.y = ((float)net.branches[i].modelOutput[bbox_y_offset] - net.branches[i].zeroPoint) * net.branches[i].scale;
-                        det.bbox.w = ((float)net.branches[i].modelOutput[bbox_w_offset] - net.branches[i].zeroPoint) * net.branches[i].scale;
-                        det.bbox.h = ((float)net.branches[i].modelOutput[bbox_h_offset] - net.branches[i].zeroPoint) * net.branches[i].scale;
-
+                        det.bbox.x = (static_cast<float>(net.branches[i].modelOutput[bbox_x_offset]) - net.branches[i].zeroPoint) * net.branches[i].scale;
+                        det.bbox.y = (static_cast<float>(net.branches[i].modelOutput[bbox_y_offset]) - net.branches[i].zeroPoint) * net.branches[i].scale;
+                        det.bbox.w = (static_cast<float>(net.branches[i].modelOutput[bbox_w_offset]) - net.branches[i].zeroPoint) * net.branches[i].scale;
+                        det.bbox.h = (static_cast<float>(net.branches[i].modelOutput[bbox_h_offset]) - net.branches[i].zeroPoint) * net.branches[i].scale;
 
                         float bbox_x, bbox_y;
 
@@ -185,11 +182,14 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
                         det.bbox.x = (bbox_x + w) / width;
                         det.bbox.y = (bbox_y + h) / height;
 
-                        det.bbox.w = exp(det.bbox.w) * net.branches[i].anchor[anc*2] / net.inputWidth;
-                        det.bbox.h = exp(det.bbox.h) * net.branches[i].anchor[anc*2+1] / net.inputHeight;
+                        det.bbox.w = std::exp(det.bbox.w) * net.branches[i].anchor[anc*2] / net.inputWidth;
+                        det.bbox.h = std::exp(det.bbox.h) * net.branches[i].anchor[anc*2+1] / net.inputHeight;
 
                         for (int s = 0; s < numClasses; s++) {
-                            float sig = math::MathUtils::SigmoidF32(((float)net.branches[i].modelOutput[bbox_scores_offset + s] - net.branches[i].zeroPoint) * net.branches[i].scale)*objectness;
+                            float sig = math::MathUtils::SigmoidF32(
+                                    (static_cast<float>(net.branches[i].modelOutput[bbox_scores_offset + s]) -
+                                    net.branches[i].zeroPoint) * net.branches[i].scale
+                                    ) * objectness;
                             det.prob.emplace_back((sig > threshold) ? sig : 0);
                         }
 
@@ -216,53 +216,6 @@ void DetectorPostprocessing::GetNetworkBoxes(Network& net, int imageWidth, int i
     }
     if(num > net.topN)
         num -=1;
-}
-
-void DetectorPostprocessing::DrawBoxOnImage(uint8_t* imgIn, int imWidth, int imHeight, int boxX,int boxY, int boxWidth, int boxHeight)
-{
-    auto CheckAndFixOffset = [](int im_width,int im_height,int& offset) {
-        if ( (offset) >= im_width*im_height*channelsImageDisplayed) {
-            offset = im_width * im_height * channelsImageDisplayed -1;
-        }
-        else if ( (offset) < 0) {
-            offset = 0;
-        }
-    };
-
-    /* Consistency checks */
-    if (!imgIn) {
-        return;
-    }
-
-    int offset=0;
-    for (int i=0; i < boxWidth; i++) {
-        /* Draw two horizontal lines */
-        for (int line=0; line < 2; line++) {
-            /*top*/
-            offset =(i + (boxY + line)*imWidth + boxX) * channelsImageDisplayed; /* channelsImageDisplayed for rgb or grayscale*/
-            CheckAndFixOffset(imWidth,imHeight,offset);
-            imgIn[offset] = 0xFF;
-            /*bottom*/
-            offset = (i + (boxY + boxHeight - line)*imWidth + boxX) * channelsImageDisplayed;
-            CheckAndFixOffset(imWidth,imHeight,offset);
-            imgIn[offset] = 0xFF;
-        }
-    }
-
-    for (int i=0; i < boxHeight; i++) {
-        /* Draw two vertical lines */
-        for (int line=0; line < 2; line++) {
-            /*left*/
-            offset = ((i + boxY)*imWidth + boxX + line)*channelsImageDisplayed;
-            CheckAndFixOffset(imWidth,imHeight,offset);
-            imgIn[offset] = 0xFF;
-            /*right*/
-            offset = ((i + boxY)*imWidth + boxX + boxWidth - line)*channelsImageDisplayed;
-            CheckAndFixOffset(imWidth,imHeight, offset);
-            imgIn[offset] = 0xFF;
-        }
-    }
-
 }
 
 } /* namespace object_detection */

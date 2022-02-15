@@ -59,21 +59,19 @@ namespace object_detection {
          * @param[in]   numClasses    Number of classes.
          * @param[in]   topN          Top N for each class.
          **/
-        DetectorPostprocessing(float threshold = 0.5f,
-                                float nms = 0.45f,
-                                int numClasses = 1,
-                                int topN = 0);
+        explicit DetectorPostprocessing(float threshold = 0.5f,
+                                        float nms = 0.45f,
+                                        int numClasses = 1,
+                                        int topN = 0);
 
         /**
-         * @brief       Post processing part of Yolo object detection CNN.
-         * @param[in]   imgIn        Pointer to the input image,detection bounding boxes drown on it.
+         * @brief       Post processing part of YOLO object detection CNN.
          * @param[in]   imgRows      Number of rows in the input image.
          * @param[in]   imgCols      Number of columns in the input image.
          * @param[in]   modelOutput  Output tensors after CNN invoked.
          * @param[out]  resultsOut   Vector of detected results.
          **/
-        void RunPostProcessing(uint8_t* imgIn,
-                               uint32_t imgRows,
+        void RunPostProcessing(uint32_t imgRows,
                                uint32_t imgCols,
                                TfLiteTensor* modelOutput0,
                                TfLiteTensor* modelOutput1,

@@ -96,7 +96,6 @@ void TestInferenceDetectionResults(int imageIdx, arm::app::Model& model, T toler
 
     arm::app::object_detection::DetectorPostprocessing postp;
     postp.RunPostProcessing(
-        nullptr,
         nRows,
         nCols,
         output_arr[0],
