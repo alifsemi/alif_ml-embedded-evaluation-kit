@@ -84,14 +84,6 @@ if (NOT TARGET_PLATFORM STREQUAL native)
         "${DEPENDENCY_ROOT_DIR}/cmsis"
         PATH)
 
-    if (CMAKE_BUILD_TYPE STREQUAL Debug)
-        # For use with Arm compiler:
-        USER_OPTION(ARMCLANG_DEBUG_DWARF_LEVEL
-            "Dwarf conformance level for armclang toolchain"
-            "4" # Default = 4 (Arm-DS etc). For model debugger specify "3"
-            STRING)
-    endif()
-
     # If we need NPU libraries:
     if (ETHOS_U_NPU_ENABLED)
         USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH

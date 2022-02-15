@@ -234,16 +234,6 @@ chosen configuration.
 - `TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS`: Optional parameter to enable wiping out `TPIP` downloads from TensorFlow
   source tree prior to each build. Disabled by default.
 
-- `ARMCLANG_DEBUG_DWARF_LEVEL`: When the CMake build type is specified as `Debug` and when the `armclang` toolchain is
-  being used to build for a *Cortex-M* CPU target, this optional argument can be set to specify the `DWARF` format.
-
-  By default, this is set to 4 and is synonymous with passing `-g` flag to the compiler. This is compatible with Arm
-  DS and other tools which can interpret the latest DWARF format. To allow debugging using the Model Debugger from Arm
-  Fast Model Tools Suite, this argument can be used to pass DWARF format version as "3".
-
-  > **Note:** This option is only available when the CMake project is configured with the `-DCMAKE_BUILD_TYPE=Debug`
-  > argument. Also, the same dwarf format is used for building TensorFlow Lite Micro library.
-
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
 Also, when setting any of the CMake configuration parameters that expect a directory, or file, path, **use absolute
@@ -450,20 +440,6 @@ cmake \
     -G "Eclipse CDT4 - Unix Makefiles" \
     -DCMAKE_ECLIPSE_VERSION=4.15 \
     ml-embedded-evaluation-kit
-```
-
-#### Working with model debugger from Arm Fast Model Tools
-
-To configure a build that can be debugged using a tool that only supports the `DWARF format 3`, such as *Modeldebugger*,
-you can use:
-
-```commandline
-cmake .. \
-    -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-300 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DARMCLANG_DEBUG_DWARF_LEVEL=3
 ```
 
 #### Configuring with custom TPIP dependencies
