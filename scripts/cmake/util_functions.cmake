@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,7 +152,7 @@ endfunction()
 # Function to download a files from the Arm Model Zoo
 # Arguments:
 #   model_zoo_version: hash of the Arm Model Zoo commit to use
-#   file_sub_path: subpath within the model zoo respository
+#   file_sub_path: subpath within the model zoo repository
 #   download_path: location where this file is to be downloaded (path including filename)
 function(download_file_from_modelzoo model_zoo_version file_sub_path download_path)
 
@@ -190,4 +190,25 @@ function(add_platform_build_configuration)
 
     message(STATUS "Found build configuration: ${PLATFORM_BUILD_CONFIG}")
     include(${PLATFORM_BUILD_CONFIG}/build_configuration.cmake)
+endfunction()
+
+function(check_update_public_resources resource_downloaded_dir)
+
+    string(JOIN "/" FILE_URL ${resource_downloaded_dir})
+    execute_process(
+            COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/py/check_update_resources_downloaded.py
+            --resource_downloaded_dir ${resource_downloaded_dir}
+            --setup_script_path ${CMAKE_SOURCE_DIR}/set_up_default_resources.py
+            RESULT_VARIABLE return_code
+    )
+    if (NOT return_code EQUAL "0")
+        if (NOT return_code EQUAL "1")
+            # Return code equal to 2 or else means an error in the resources_downloaded folder
+            message(FATAL_ERROR "Resources downloaded error, please run: set_up_default_resources.py")
+        else()
+            # Return code equal to 1 means that resources_downloaded need to be updated
+            message(FATAL_ERROR "Resources downloaded need to be updated, please run: set_up_default_resources.py --clean")
+        endif()
+    endif ()
+
 endfunction()

@@ -58,6 +58,9 @@ endif()
 
 include(${CMAKE_SCRIPTS_DIR}/common_user_options.cmake)
 
+# Check if the resources_downloaded needs update
+check_update_public_resources(${RESOURCES_DIR})
+
 add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
 
 set_platform_global_defaults()
