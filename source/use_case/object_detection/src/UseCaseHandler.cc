@@ -95,7 +95,6 @@ namespace app {
 
         const uint32_t nCols = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
         const uint32_t nRows = inputShape->data[arm::app::YoloFastestModel::ms_inputRowsIdx];
-        const uint32_t nPresentationChannels = channelsImageDisplayed;
 
         /* Get pre/post-processing objects. */
         auto& postp = ctx.Get<object_detection::DetectorPostprocessing&>("postprocess");
@@ -114,10 +113,10 @@ namespace app {
             /* Convert to gray scale and populate input tensor. */
             image::RgbToGrayscale(curr_image, dstPtr, copySz);
 
-            /* Display original image on the LCD. */
+            /* Display image on the LCD. */
             platform.data_psn->present_data_image(
-                curr_image,
-                nCols, nRows, nPresentationChannels,
+                (channelsImageDisplayed == 3) ? curr_image : dstPtr,
+                nCols, nRows, channelsImageDisplayed,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
             /* If the data is signed. */
