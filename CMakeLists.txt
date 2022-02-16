@@ -221,10 +221,6 @@ foreach(use_case ${USE_CASES})
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
             "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
-    # Set the CPU profiling defintiion
-    target_compile_definitions(${UC_LIB_NAME} PRIVATE
-            $<$<BOOL:${CPU_PROFILE_ENABLED}>:CPU_PROFILE_ENABLED>)
-
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log
         arm_math

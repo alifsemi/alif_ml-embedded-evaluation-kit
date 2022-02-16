@@ -34,6 +34,10 @@ target_include_directories(profiler PUBLIC include)
 # Profiling API depends on the logging interface and the HAL library.
 target_link_libraries(profiler PRIVATE log hal)
 
+# Set the CPU profiling defintiion
+target_compile_definitions(profiler PUBLIC
+        $<$<BOOL:${CPU_PROFILE_ENABLED}>:CPU_PROFILE_ENABLED>)
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " profiler)
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
