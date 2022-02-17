@@ -14,11 +14,13 @@
     - [Running Object Detection](./object_detection.md#running-object-detection)
 
 ## Introduction
-
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Object Detection example.
-
-This use-case example solves the classical computer vision problem of Object Detection. The ML sample was developed
-using the *YOLO Fastest* model that was trained on the *Wider* dataset.
+Object Detection is a classical computer vision use case in which specific objects need to be identified and located
+within a full frame. In this specific example the model was trained for face detection. The ML sample was developed
+using the *YOLO Fastest* model.  To adopt the model for low power / low memory systems the input images to the model
+are monochrome images. The model was trained on the *Wider* dataset (after conversion from RGB to monochrome)
+and on *Emza Visual-Sense* dataset [www.emza-vs.com](www.emza-vs.com).
+The model makes detection faces in size of 20x20 pixels and above. 
 
 Use-case code could be found in the following directory:[source/use_case/object_detection](../../source/use_case/object_detection).
 
