@@ -86,19 +86,25 @@ The repository has the following structure:
 ├── resources
 ├── /resources_downloaded/
 ├── scripts
+│   ├── platforms
+│   │   ├── mps3
+│   │   ├── native
+│   │   └── simple_platform
 │   └── ...
 ├── source
 │   ├── application
-│   │ ├── hal
-│   │ ├── main
-│   │ └── tensorflow-lite-micro
+│   │   ├── main
+│   │   └── tensorflow-lite-micro
+│   ├── hal
+│   ├── log
+│   ├── math
+│   ├── profiler
 │   └── use_case
-│     └── <usecase_name>
-│          ├── include
-│          ├── src
-│          └── usecase.cmake
+│       └── <usecase_name>
+│           ├── include
+│           ├── src
+│           └── usecase.cmake
 ├── tests
-│   └── ...
 └── CMakeLists.txt
 ```
 
@@ -118,6 +124,13 @@ What these folders contain:
 
 - `scripts`: Build and source generation scripts.
 
+- `scripts/cmake/platforms`: Platform build configuration scripts `build_configuration.cmake` are located here. 
+   These scripts are adding platform sources into the application build stream. The script has 2 functions:
+   * `set_platform_global_defaults` - to set platform source locations and other build options.
+   * `platform_custom_post_build` - to execute specific post build steps. For example, MPS3 board related script adds
+                                    board specific `images.txt` file creation and calls bin generation command. 
+                                    Native profile related script compiles unit-tests.
+
 - `source`: C/C++ sources for the platform and ML applications.
   > **Note:** Common code related to the `Ethos-U` NPU software framework resides in *application* subfolder.
 
@@ -125,16 +138,23 @@ What these folders contain:
 
   - `application`: All sources that form the *core* of the application. The `use-case` part of the sources depend on the
     sources themselves, such as:
-
-    - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform agnostic API to access hardware
-      platform-specific functions.
-
     - `main`: Contains the main function and calls to platform initialization logic to set up things before launching
       the main loop. Also contains sources common to all use-case implementations.
 
     - `tensorflow-lite-micro`: Contains abstraction around TensorFlow Lite Micro API. This abstraction implements common
       functions to initialize a neural network model, run an inference, and access inference results.
+  
+  - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform agnostic API to access hardware
+    platform-specific functions.
 
+  - `log`: Common to all code logging macros managing log levels.
+  
+  - `math`: Math functions to be used in ML pipelines. Some of them use CMSIS DSP for optimized execution on Arm CPUs.
+     It is a separate CMake project that is built into a static library `libarm_math.a`.         
+  
+  - `profiler`: profiling utilities code to collect and output cycle counts and PMU information.
+    It is a separate CMake project that is built into a static library `libprofiler.a`.
+        
   - `use_case`: Contains the ML use-case specific logic. Stored as a separate subfolder, it helps isolate the
     ML-specific application logic. With the assumption that the `application` performs the required setup for logic to
     run. It also makes it easier to add a new use-case block.
@@ -145,29 +165,27 @@ The HAL has the following structure:
 
 ```tree
 hal
-├── hal.c
+├── cmsis_device
+│   └── ...
+├── components
+│   └── ...
 ├── include
-│   └── ...
-└── platforms
-    ├── bare-metal
-    │   ├── bsp
-    │   │   ├── bsp-core
-    │   │   │   └── include
-    │   │   ├── bsp-packs
-    │   │   │   └── mps3
-    │   │   ├── cmsis-device
-    │   │   ├── include
-    │   │   └── mem_layout
-    │   ├── data_acquisition
-    │   ├── data_presentation
-    │   │   ├── data_psn.c
-    │   │   └── lcd
-    │   │       └── include
-    │   ├── images
-    │   ├── timer
-    │   └── utils
-    └── native
+│   └── ...
+├── platform
+│   ├── mps3
+│   └── simple
+├── profiles
+│   ├── bare-metal
+│   │   ├── bsp
+│   │   ├── data_acquisition
+│   │   ├── data_presentation
+│   │   ├── timer
+│   │   └── utils
+│   └── native
+├── CMakeLists.txt
+└── hal.c
 ```
+HAL is built as a separate project into a static library `libhal.a`. It is linked with use-case executable.
 
 What these folders contain:
 
@@ -176,33 +194,37 @@ What these folders contain:
     > **Note:** the files here and lower in the hierarchy have been written in C and this layer is a clean C/ + boundary
     > in the sources.
 
-- `platforms/bare-metal/data_acquisition`\
-  `platforms/bare-metal/data_presentation`\
-  `platforms/bare-metal/timer`\
-  `platforms/bare-metal/utils`:
+- `cmsis_device` has a common startup code for Cortex-M based systems. The package defines interrupt vector table and
+  handlers. Reset handler - starting point of our application - is also defined here. This entry point is responsible
+  for the set-up before calling the user defined "main" function in the higher-level `application` logic.
+  It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
+  through `CMSIS_SRC_PATH` variable.
+  The static library is used by platform code.
+   
+- `components` directory contains drivers code for different devices used in platforms. Such as UART, LCD and others.
+  A platform can include those as sources in a build to enable usage of corresponding HW devices. Most of the use-cases
+  use UART and LCD, thus if you want to run default ML use-cases on a custom platform, you will have to add 
+  implementation for your devices here (or re-use existing code if it is compatible with your platform).
 
-  These folders contain the bare-metal HAL support layer and platform initialization helpers. Function calls are routed
+- `platform/mps3`\
+  `platform/simple`:
+  These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral 
+  memory map, system registers, system specific timer implementation and other. 
+  Platform is built from selected components and configured cmsis device. The platform could be used with different
+  profiles. Profile is included into the platform build based on `PLATFORM_PROFILE` build parameter.
+  Platform code is a separate CMake project and it is built into a static library `libplatform-drivers.a`. It is linked 
+  into HAL library.
+
+- `profiles/bare-metal`\
+  `profiles/native`:
+  As mentioned before, profiles are added into platform build. Currently we support bare-metal and native profiles.    
+  bare-metal contains the HAL support layer and platform initialization helpers. Function calls are routed
   to platform-specific logic at this level. For example, for data presentation, an `lcd` module has been used. This
-  `lcd` module wraps the LCD driver calls for the actual hardware (for example, MPS3).
-
-- `platforms/bare-metal/bsp/bsp-packs`: The core low-level drivers (written in C) for the platform reside. For supplied
-  examples, this happens to be an MPS3 board. However, support can be added here for other platforms. The functions
-  defined in this space are wired to the higher-level functions under HAL and is like those in the
-  `platforms/bare-metal/` level).
-
-- `platforms/bare-metal/bsp/bsp-packs/mps3/include`\
-  `platforms/bare-metal/bsp/bsp-packs/mps3`: Contains the peripheral (LCD, UART, and timer) drivers specific to MPS3
-  board.
-
-- `platforms/bare-metal/bsp/bsp-core`\
-  `platforms/bare-metal/bsp/include`: Contains the BSP core sources common to all BSPs and includes a UART header.
-  However, the implementation of this is platform-specific, while the API is common. Also "re-targets" the standard
+  `lcd` module wraps the LCD driver calls for the actual hardware (for example, MPS3). Also "re-targets" the standard
   output and error streams to the UART block.
 
-- `platforms/bare-metal/bsp/cmsis-device`: Contains the CMSIS template implementation for the CPU and also device
-  initialization routines. It is also where the system interrupts are set up and the handlers are overridden. The main
-  entry point of a bare-metal application most likely resides in this space. This entry point is responsible for the
-  set-up before calling the user defined "main" function in the higher-level `application` logic.
+  Native profile allows to build application to be executed on a build machine, i.e. x86. It bypasses and stubs platform
+  devices replacing them with standard C or C++ library calls.
 
 - `platforms/bare-metal/bsp/mem_layout`: Contains the platform-specific linker scripts.
 
@@ -233,8 +255,11 @@ For detailed information, see: [Optimize model with Vela compiler](./sections/bu
 
 ## Building
 
-This section describes how to build the code sample applications from sources and includes illustrating the build
-options and the process.
+This section explains the build process and intra-project dependencies, describes how to build the code sample 
+applications from sources and includes illustrating the build options and the process.
+
+The following graph of source modules aims to explain better intra-project code and build execution dependencies.
+![intra-project dependencies](./media/build_graph.png)
 
 The project can be built for MPS3 FPGA and FVP emulating MPS3. Using default values for configuration parameters builds
 executable models that support the *Ethos-U* NPU.
@@ -304,6 +329,7 @@ For further information, please see:
   - [Reading user input from console](./sections/customizing.md#reading-user-input-from-console)
   - [Output to MPS3 LCD](./sections/customizing.md#output-to-mps3-lcd)
   - [Building custom use-case](./sections/customizing.md#building-custom-use_case)
+  - [Adding custom platform support](./sections/customizing.md#adding-custom-platform-support)
 
 ## Testing and benchmarking
 
