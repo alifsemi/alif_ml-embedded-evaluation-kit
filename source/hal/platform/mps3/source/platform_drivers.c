@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "system_init.h"
 
-#include <string.h>
-#include <inttypes.h>
+#include "platform_drivers.h"
 
-#if defined(MPS3_PLATFORM)
+#include "uart_stdout.h"    /* stdout over UART. */
+#include "log_macros.h"     /* Logging functions */
+#include "device_mps3.h"    /* FPGA level definitions and functions. */
+
+#include <string.h>         /* For strncpy */
+
+/**
+ * @brief   Checks if the platform is valid by checking
+ *          the CPU ID for the FPGA implementation against
+ *          the register from the CPU core.
+ * @return  0 if successful, 1 otherwise
+ */
+static int verify_platform(void);
+
+int platform_init(void)
+{
+    int err = 0;
+
+    SystemCoreClockUpdate();    /* From start up code */
+
+    /* UART init - will enable valid use of printf (stdout
+     * re-directed at this UART (UART0) */
+    UartStdOutInit();
+
+    if (0 != (err = verify_platform())) {
+        return err;
+    }
+
+    /** TODO: Add ARM NPU and TA init here */
+    return 0;
+}
+
+void platform_release(void)
+{
+    __disable_irq();
+}
+
+void platform_name(char* name, size_t size)
+{
+    strncpy(name, DESIGN_NAME, size);
+}
+
 #define CREATE_MASK(msb, lsb)           (int)(((1U << ((msb) - (lsb) + 1)) - 1) << (lsb))
 #define MASK_BITS(arg, msb, lsb)        (int)((arg) & CREATE_MASK(msb, lsb))
 #define EXTRACT_BITS(arg, msb, lsb)     (int)(MASK_BITS(arg, msb, lsb) >> (lsb))
-#endif /* MPS3_PLATFORM */
 
-int system_init(void)
+static int verify_platform(void)
 {
-#if defined(MPS3_PLATFORM)
     uint32_t id = 0;
     uint32_t fpgaid = 0;
     uint32_t apnote = 0;
@@ -38,14 +75,9 @@ int system_init(void)
 
     /* Initialise the LEDs as the switches are */
     MPS3_FPGAIO->LED = MPS3_FPGAIO->SWITCHES & 0xFF;
-#endif
 
-    /* UART init - will enable valid use of printf (stdout
-     * re-directed at this UART (UART0) */
-    UartStdOutInit();
-    info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
+    info("Processor internal clock: %" PRIu32 "Hz\n", GetMPS3CoreClock());
 
-#if defined(MPS3_PLATFORM)
     /* Get revision information from various registers */
     rev = MPS3_SCC->CFG_REG4;
     fpgaid = MPS3_SCC->SCC_ID;
@@ -92,23 +124,8 @@ int system_init(void)
             EXTRACT_BITS(id, 7, 4), EXTRACT_BITS(id, 23, 20),
             EXTRACT_BITS(id, 3, 0));
     }
-#else /* MPS3_PLATFORM */
-
-    info("%s: complete\n", __FUNCTION__);
-    return 0;
-#endif /* MPS3_PLATFORM */
 
     /* If the CPU is anything other than M33 or M55, we return 1 */
     printf_err("CPU mismatch!\n");
     return 1;
-}
-
-void system_release(void)
-{
-    __disable_irq();
-}
-
-void system_name(char* name, size_t size)
-{
-    strncpy(name, DESIGN_NAME, size);
 }

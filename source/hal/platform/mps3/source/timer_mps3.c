@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,18 @@
 #include "log_macros.h"
 #include "device_mps3.h"
 
-#include <inttypes.h>
+static uint64_t cpu_cycle_count = 0;    /* 64-bit cpu cycle counter */
+
+/**
+ * @brief   Gets the system tick triggered cycle counter for the CPU.
+ * @return  64-bit counter value.
+ **/
+static uint64_t Get_SysTick_Cycle_Count(void);
+
+/**
+ * SysTick initialisation
+ */
+static int Init_SysTick(void);
 
 void timer_reset(void)
 {
@@ -110,4 +121,53 @@ void start_cycle_counter(void)
 void stop_cycle_counter(void)
 {
     /* Nothing to do for FPGA */
+}
+
+void SysTick_Handler(void)
+{
+    /* Increment the cycle counter based on load value. */
+    cpu_cycle_count += SysTick->LOAD + 1;
+}
+
+/**
+ * Gets the current SysTick derived counter value
+ */
+static uint64_t Get_SysTick_Cycle_Count(void)
+{
+    uint32_t systick_val;
+
+    NVIC_DisableIRQ(SysTick_IRQn);
+    systick_val = SysTick->VAL & SysTick_VAL_CURRENT_Msk;
+    NVIC_EnableIRQ(SysTick_IRQn);
+
+    return cpu_cycle_count + (SysTick->LOAD - systick_val);
+}
+
+/**
+ * SysTick initialisation
+ */
+static int Init_SysTick(void)
+{
+    const uint32_t ticks_10ms = GetMPS3CoreClock()/100 + 1;
+    int err = 0;
+
+    /* Reset CPU cycle count value. */
+    cpu_cycle_count = 0;
+
+    /* Changing configuration for sys tick => guard from being
+     * interrupted. */
+    NVIC_DisableIRQ(SysTick_IRQn);
+
+    /* SysTick init - this will enable interrupt too. */
+    err = SysTick_Config(ticks_10ms);
+
+    /* Enable interrupt again. */
+    NVIC_EnableIRQ(SysTick_IRQn);
+
+    /* Wait for SysTick to kick off */
+    while (!err && !SysTick->VAL) {
+        __NOP();
+    }
+
+    return err;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 #define TIMER_MPS3_H
 
 #include <stdint.h>
-#include <time.h>
 
 /* Container for timestamp up-counters. */
 typedef struct _mps3_time_counter {
@@ -47,7 +46,7 @@ base_time_counter get_time_counter(void);
  * @brief       Gets the duration elapsed between two counters in milliseconds.
  * @param[in]   start   Pointer to base_time_counter value at start time.
  * @param[in]   end     Pointer to base_time_counter value at end.
- * @returns     Difference in milliseconds between the two give counters 
+ * @returns     Difference in milliseconds between the two give counters
  *              expressed as an unsigned integer.
  **/
 uint32_t get_duration_milliseconds(base_time_counter *start,
@@ -57,7 +56,7 @@ uint32_t get_duration_milliseconds(base_time_counter *start,
  * @brief       Gets the duration elapsed between two counters in microseconds.
  * @param[in]   start   Pointer to base_time_counter value at start time.
  * @param[in]   end     Pointer to base_time_counter value at end.
- * @returns     Difference in microseconds between the two give counters 
+ * @returns     Difference in microseconds between the two give counters
  *              expressed as an unsigned integer.
  **/
 uint32_t get_duration_microseconds(base_time_counter *start,
@@ -82,5 +81,10 @@ void start_cycle_counter(void);
  * @brief   Stops cycle counting mechanism, if required by the platform.
  **/
 void stop_cycle_counter(void);
+
+/**
+ * @brief   System tick interrupt handler.
+ **/
+void SysTick_Handler(void);
 
 #endif /* TIMER_MPS3_H */

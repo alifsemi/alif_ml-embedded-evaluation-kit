@@ -17,6 +17,7 @@
 #include "lcd_img.h"
 
 #include "bsp.h"
+#include "log_macros.h"
 
 #include <string.h>
 #include <assert.h>

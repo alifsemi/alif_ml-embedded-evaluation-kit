@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "system_init.h"
 
+#include "platform_drivers.h"
+
+#include "uart_stdout.h"
 #include <string.h>
 
-int system_init(void)
+int platform_init(void)
 {
+    SystemCoreClockUpdate();    /* From start up code */
+
+    /* UART init - will enable valid use of printf (stdout
+     * re-directed at this UART (UART0) */
+    UartStdOutInit();
+
+    info("%s: complete\n", __FUNCTION__);
+
+    /** TODO: Add ARM NPU and TA init here */
     return 0;
 }
 
-void system_release(void)
-{}
-
-void system_name(char* name, size_t size)
+void platform_release(void)
 {
-    strncpy(name, "native", size);
+    __disable_irq();
+}
+
+void platform_name(char* name, size_t size)
+{
+    strncpy(name, DESIGN_NAME, size);
 }

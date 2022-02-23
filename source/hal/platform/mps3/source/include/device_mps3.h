@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@
 extern "C" {
 #endif
 
-#include "cmsis.h"      /* CMSIS device header. */
 #include "smm_mps3.h"   /* Memory map for MPS3. */
 
 #include <stdio.h>

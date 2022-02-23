@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,6 @@
 #define PLATFORM_DRIVERS_H
 
 #include "log_macros.h"     /* Logging related helpers. */
-
-/* Platform components */
-#include "timer_mps3.h"     /* Timer functions. */
-#include "cmsis.h"          /* For CPU related defintiions */
-#include "glcd_mps3.h"      /* LCD functions. */
-
-/** Platform definitions. TODO: These should be removed. */
-#include "peripheral_memmap.h"  /* Peripheral memory map definitions. */
-#include "peripheral_irqs.h"    /* IRQ numbers for this platform. */
 
 /**
  * @brief   Initialises the platform components.

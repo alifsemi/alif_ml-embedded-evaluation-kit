@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +21,9 @@
 
 #include <inttypes.h>
 
-extern uint32_t GetSystemCoreClock(void);
-
 uint32_t GetMPS3CoreClock(void)
 {
-    const uint32_t default_clock = GetSystemCoreClock();
+    const uint32_t default_clock = 32000000 /* 32 MHz clock */;
     static int warned_once = 0;
     if (0 != MPS3_SCC->CFG_ACLK) {
         if (default_clock != MPS3_SCC->CFG_ACLK) {

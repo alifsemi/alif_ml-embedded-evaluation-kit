@@ -22,6 +22,7 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
+    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/native" PARENT_SCOPE)
     set(TEST_TPIP ${DOWNLOAD_DEP_DIR}/test)
 
     file(MAKE_DIRECTORY ${TEST_TPIP})

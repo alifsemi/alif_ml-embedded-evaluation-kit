@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"            /* API */
+#include "hal.h"                /* API */
 
-#include "hal_config.h"     /* HAL configuration */
-#include "system_init.h"
-#include "log_macros.h"
+#include "hal_config.h"         /* HAL configuration */
+#include "platform_drivers.h"   /* Platform drivers */
+#include "log_macros.h"         /* Logging macros */
 
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #if defined(ARM_NPU)
 
@@ -71,9 +72,9 @@ int hal_init(hal_platform* platform, data_acq_module* data_acq,
     platform->data_acq  = data_acq;
     platform->data_psn  = data_psn;
     platform->timer     = timer;
-    platform->platform_init     = system_init;
-    platform->platform_release  = system_release;
-    system_name(platform->plat_name, sizeof(platform->plat_name));
+    platform->platform_init     = platform_init;
+    platform->platform_release  = platform_release;
+    platform_name(platform->plat_name, sizeof(platform->plat_name));
 
     return 0;
 }

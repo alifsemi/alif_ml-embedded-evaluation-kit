@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +17,9 @@
 #ifndef SMM_MPS3_H
 #define SMM_MPS3_H
 
-#include "cmsis.h"                  /* Device specific header file. */
+#include "cmsis.h"                  /* For CPU related defintiions */
 #include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
+
 
 #if defined ( __CC_ARM   )
 #pragma anon_unions

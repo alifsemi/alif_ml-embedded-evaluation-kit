@@ -15,35 +15,42 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-#######################################################
-# Profiling library                                   #
-#######################################################
+#########################################################
+#    Native target platform support library             #
+#########################################################
 
-project(profiler
-        DESCRIPTION "Profiling API for applications."
-        LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.15.6)
 
-add_library(profiler STATIC)
+set(PLATFORM_DRIVERS_TARGET platform-drivers)
 
-target_sources(profiler
-        PRIVATE
-        Profiler.cc)
+project(${PLATFORM_DRIVERS_TARGET}
+    DESCRIPTION     "Platform drivers library for native target"
+    LANGUAGES       C CXX)
 
-target_include_directories(profiler PUBLIC include)
-
-# Set the CPU profiling defintiion
-if (CPU_PROFILE_ENABLED)
-    target_compile_definitions(profiler PRIVATE CPU_PROFILE_ENABLED)
+# We should not be cross-compiling
+if (${CMAKE_CROSSCOMPILING})
+    message(FATAL_ERROR "Native drivers not available when cross-compiling.")
 endif()
 
-# Profiling API depends on the logging interface and the HAL library.
-target_link_libraries(profiler PRIVATE log hal)
 
-# Set the CPU profiling defintiion
-target_compile_definitions(profiler PUBLIC
-        $<$<BOOL:${CPU_PROFILE_ENABLED}>:CPU_PROFILE_ENABLED>)
+# Create static library
+add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
 
+## Include directories - public
+target_include_directories(${PLATFORM_DRIVERS_TARGET}
+    PUBLIC
+    include)
+
+## Platform sources
+target_sources(${PLATFORM_DRIVERS_TARGET}
+    PRIVATE
+    source/platform_drivers.c)
+
+# Add dependencies:
+target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC log)
+
+# Display status:
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " profiler)
+message(STATUS "Library                                : " ${PLATFORM_DRIVERS_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "*******************************************************")

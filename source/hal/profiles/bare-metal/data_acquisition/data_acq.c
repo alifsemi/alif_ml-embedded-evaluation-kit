@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,8 @@
 #include "data_acq.h"
 
 #include "bsp.h"
+#include "log_macros.h"
+#include "uart_stdout.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -31,7 +33,6 @@
 static int get_uart_user_input(char* user_input, int size)
 {
     if (true != GetLine(user_input, size - 1)) {
-        printf_err("invalid input\n");
         return 1;
     }
     return 0;

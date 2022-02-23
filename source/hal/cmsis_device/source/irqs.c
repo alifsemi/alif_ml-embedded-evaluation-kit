@@ -25,8 +25,6 @@ extern "C"
 #include <stdio.h>
 #include <inttypes.h>
 
-static uint64_t cpu_cycle_count = 0;
-
 /**
  * External references
  */
@@ -165,24 +163,9 @@ __attribute__((weak)) void PendSV_Handler(void)
 /**
  * @brief   System tick interrupt handler.
  **/
-void SysTick_Handler(void)
+__attribute__((weak)) void SysTick_Handler(void)
 {
-    /* Increment the cycle counter based on load value. */
-    cpu_cycle_count += SysTick->LOAD + 1;
-}
-
-/**
- * Gets the current SysTick derived counter value
- */
-uint64_t Get_SysTick_Cycle_Count(void)
-{
-    uint32_t systick_val;
-
-    NVIC_DisableIRQ(SysTick_IRQn);
-    systick_val = SysTick->VAL & SysTick_VAL_CURRENT_Msk;
-    NVIC_EnableIRQ(SysTick_IRQn);
-
-    return cpu_cycle_count + (SysTick->LOAD - systick_val);
+    DEFAULT_IRQ_HANDLER_CALL();
 }
 
 /**
@@ -218,43 +201,11 @@ irq_vec_type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 112 -  128 */
 };
 
-/**
- * SysTick initialisation
- */
-int Init_SysTick(void)
-{
-    const uint32_t ticks_10ms = GetSystemCoreClock()/100 + 1;
-    int err = 0;
-
-    /* Reset CPU cycle count value. */
-    cpu_cycle_count = 0;
-
-    /* Changing configuration for sys tick => guard from being
-     * interrupted. */
-    NVIC_DisableIRQ(SysTick_IRQn);
-
-    /* SysTick init - this will enable interrupt too. */
-    err = SysTick_Config(ticks_10ms);
-
-    /* Enable interrupt again. */
-    NVIC_EnableIRQ(SysTick_IRQn);
-
-    /* Wait for SysTick to kick off */
-    while (!err && !SysTick->VAL) {
-        __NOP();
-    }
-
-    return err;
-}
-
 /* Reset handler - starting point of our application. */
 __attribute__((used)) void Reset_Handler(void)
 {
     /* Initialise system. */
     SystemInit();
-
-    /* Configure the system tick. */
-    Init_SysTick();
 
     /* cmsis supplied entry point. */
     __PROGRAM_START();

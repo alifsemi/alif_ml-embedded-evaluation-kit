@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NATIVE_SYSTEM_INIT_H
-#define NATIVE_SYSTEM_INIT_H
 
-#include <stddef.h>
-/**
- * @brief  Platform initialisation for native platform.
- **/
-int system_init(void);
+#include "platform_drivers.h"
 
-/**
- * @brief  Platform release for native platform.
- **/
-void system_release(void);
+#include <string.h>
 
-/**
- * @brief       Returns the name of the platform.
- * @param[out]  name Platform name string.
- * @param[in]   size Name string length.
- */
-void system_name(char* name, size_t size);
+int platform_init(void)
+{
+    return 0;
+}
 
-#endif /* NATIVE_SYSTEM_INIT_H */
+void platform_release(void)
+{}
+
+void platform_name(char* name, size_t size)
+{
+    strncpy(name, "native", size);
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  */
 #ifndef STUBS_SIMPLE_PLATFORM_H
 #define STUBS_SIMPLE_PLATFORM_H
+
+#include <stdint.h>
 
 /****************************************************************************/
 /*              Definitions and stub functions for modules currently        */
@@ -58,10 +60,10 @@ void GLCD_Bitmap(unsigned int x,  unsigned int y,
  * @param[in] downsample_factor   factor by which the image
  *                                is downsampled by.
  */
-void GLCD_Image(void *data, const unsigned int width,
-                const unsigned int height, const unsigned int channels,
-                const unsigned int pos_x, const unsigned int pos_y,
-                const unsigned int downsample_factor);
+void GLCD_Image(const void *data, const uint32_t width,
+                const uint32_t height, const uint32_t channels,
+                const uint32_t pos_x, const uint32_t pos_y,
+                const uint32_t downsample_factor);
 
 /**
  * @brief      Clear display

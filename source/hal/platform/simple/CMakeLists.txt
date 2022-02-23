@@ -72,7 +72,8 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
 target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
     source/stubs_glcd.c
-    source/timer_simple_platform.c)
+    source/timer_simple_platform.c
+    source/platform_drivers.c)
 
 ## Platform component: uart
 target_sources(${PLATFORM_DRIVERS_TARGET}

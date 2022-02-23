@@ -43,8 +43,7 @@ set(PLATFORM_PROFILE_DIR    profiles/${PLATFORM_PROFILE})
 target_include_directories(${HAL_TARGET}
     PUBLIC
     include
-    ${PLATFORM_PROFILE_DIR}/timer/include
-    ${PLATFORM_PROFILE_DIR}/utils/include)
+    ${PLATFORM_PROFILE_DIR}/timer/include)
 
 ## Common sources for all profiles
 target_sources(${HAL_TARGET}
@@ -52,8 +51,7 @@ target_sources(${HAL_TARGET}
     hal.c
     ${PLATFORM_PROFILE_DIR}/data_presentation/data_psn.c
     ${PLATFORM_PROFILE_DIR}/data_acquisition/data_acq.c
-    ${PLATFORM_PROFILE_DIR}/timer/platform_timer.c
-    ${PLATFORM_PROFILE_DIR}/utils/system_init.c)
+    ${PLATFORM_PROFILE_DIR}/timer/platform_timer.c)
 
 if (DEFINED VERIFY_TEST_OUTPUT)
     message(STATUS "Test output verification flag is: ${VERIFY_TEST_OUTPUT}")
@@ -61,12 +59,13 @@ if (DEFINED VERIFY_TEST_OUTPUT)
         VERIFY_TEST_OUTPUT=${VERIFY_TEST_OUTPUT})
 endif ()
 
+if (NOT DEFINED PLATFORM_DRIVERS_DIR)
+    message(FATAL_ERROR "PLATFORM_DRIVERS_DIR need to be defined for this target")
+endif()
+
+
 ############################ bare-metal profile #############################
 if (PLATFORM_PROFILE STREQUAL bare-metal)
-
-    if (NOT DEFINED PLATFORM_DRIVERS_DIR)
-        message(FATAL_ERROR "PLATFORM_DRIVERS_DIR need to be defined for this target")
-    endif()
 
     ## Additional include directories - public
     target_include_directories(${HAL_TARGET}
@@ -95,15 +94,6 @@ if (PLATFORM_PROFILE STREQUAL bare-metal)
 
     # Add dependencies for platform_driver first, in case they are needed by it.
     add_subdirectory(cmsis_device ${CMAKE_BINARY_DIR}/cmsis_device)
-
-    # Add platform-drivers target
-    add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
-
-    # Link time library targets:
-    target_link_libraries(${HAL_TARGET}
-        PUBLIC
-        log
-        platform-drivers)
 
     # If Ethos-U is enabled, we need the driver library too
     if (ETHOS_U_NPU_ENABLED)
@@ -172,6 +162,7 @@ if (PLATFORM_PROFILE STREQUAL bare-metal)
 
 ############################   native profile   #############################
 elseif (PLATFORM_PROFILE STREQUAL native)
+
     ## Additional include directories - private
     target_include_directories(${HAL_TARGET}
         PRIVATE
@@ -187,12 +178,16 @@ elseif (PLATFORM_PROFILE STREQUAL native)
         PUBLIC
         PLATFORM_HAL=PLATFORM_UNKNOWN_LINUX_OS
         ACTIVATION_BUF_SRAM_SZ=0)
-
-    target_link_libraries(${HAL_TARGET}
-        PUBLIC
-        log)
-
 endif()
+
+# Add platform-drivers target
+add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
+
+# Link time library targets:
+target_link_libraries(${HAL_TARGET}
+    PUBLIC
+    log
+    platform-drivers)
 
 # Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

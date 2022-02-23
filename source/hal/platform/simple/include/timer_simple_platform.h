@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,5 +50,10 @@ void start_cycle_counter(void);
  * @brief   Stops cycle counting mechanism, if required by the platform.
  */
 void stop_cycle_counter(void);
+
+/**
+ * @brief   System tick interrupt handler.
+ **/
+void SysTick_Handler(void);
 
 #endif /* TIMER_SIMPLE_PLATFORM_H */

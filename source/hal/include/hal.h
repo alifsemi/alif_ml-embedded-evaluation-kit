@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@
  * will also need to be aware of the API exposed by data acquisition and
  * data presentation modules.
  */
-#include "hal_config.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -32,19 +32,6 @@ typedef void (*const irq_vec_type)(void);
  **/
 extern void Reset_Handler(void);
 
-/**
- * @brief   Gets the system tick triggered cycle counter for the CPU.
- * @return  64-bit counter value.
- **/
-extern uint64_t Get_SysTick_Cycle_Count(void);
-
-/**
- * @brief   Initialises the system tick registers.
- * @return  Error code return from sys tick configuration function
- *          (0 = no error).
- **/
-extern int Init_SysTick(void);
-
 #ifdef __cplusplus
 }
 #endif

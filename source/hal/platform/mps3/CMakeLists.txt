@@ -70,27 +70,38 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
     include
     ${SOURCE_GEN_DIR})
 
+## Include directories - private
+target_include_directories(${PLATFORM_DRIVERS_TARGET}
+    PRIVATE
+    source/include)
+
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
     source/device_mps3.c
-    source/timer_mps3.c)
+    source/timer_mps3.c
+    source/platform_drivers.c)
+
+## Directory for additional compnents required by MPS3:
+if (NOT DEFINED COMPONENTS_DIR)
+    set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
+endif()
 
 ## Platform component: uart
 target_sources(${PLATFORM_DRIVERS_TARGET}
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../components/uart_cmsdk/uart_cmsdk.c)
+        ${COMPONENTS_DIR}/uart_cmsdk/uart_cmsdk.c)
 target_include_directories(${PLATFORM_DRIVERS_TARGET}
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../components/uart_cmsdk/include)
+        ${COMPONENTS_DIR}/uart_cmsdk/include)
 
 ## Platform component: LCD
 target_sources(${PLATFORM_DRIVERS_TARGET}
         PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../components/lcd_mps3/glcd_mps3.c)
+        ${COMPONENTS_DIR}/lcd_mps3/glcd_mps3.c)
 target_include_directories(${PLATFORM_DRIVERS_TARGET}
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../components/lcd_mps3/include)
+        ${COMPONENTS_DIR}/lcd_mps3/include)
 
 ## This target provides the following definitions for MPS3 specific behaviour
 ## TODO: We should aim to remove this now with platform refactoring..
@@ -100,13 +111,11 @@ target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
     ACTIVATION_BUF_SRAM_SZ=${ACTIVATION_BUF_SRAM_SZ}
     $<$<BOOL:TA_CONFIG_FILE>:TIMING_ADAPTER_AVAILABLE>)
 
-# 5. Add dependencies:
-
+# Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
-        cmsis_device
-        log)
+    log cmsis_device)
 
-# 6 Display status:
+# Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${PLATFORM_DRIVERS_TARGET})
