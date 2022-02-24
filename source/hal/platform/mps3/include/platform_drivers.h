@@ -22,7 +22,7 @@
 
 /* Platform components */
 #include "timer_mps3.h"     /* Timer functions. */
-#include "cmsis.h"          /* For CPU related defintiions */
+#include "RTE_components.h" /* For CPU related defintiions */
 #include "glcd_mps3.h"      /* LCD functions. */
 
 /** Platform definitions. TODO: These should be removed. */

@@ -50,8 +50,12 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
 ## Sources
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    source/cmsis.c
-    source/irqs.c)
+    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/system_${ARM_CPU}.c
+    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/startup_${ARM_CPU}.c)
+
+# Device definition needs to be set, is checked in source files to include correct header
+target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
+
 
 # Tell linker that reset interrupt handler is our entry point
 target_link_options(

@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+#include "platform_drivers.h"           /* Platform drivers */
 #include "data_acq.h"                   /* Data acquisition abstraction */
 #include "data_psn.h"                   /* Data presentation abstraction */
 #include "timer.h"                      /* Timer/profiler API */

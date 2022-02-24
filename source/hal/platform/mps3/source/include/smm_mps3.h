@@ -17,9 +17,9 @@
 #ifndef SMM_MPS3_H
 #define SMM_MPS3_H
 
-#include "cmsis.h"                  /* For CPU related defintiions */
 #include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
 
+#include "RTE_components.h"
 
 #if defined ( __CC_ARM   )
 #pragma anon_unions

@@ -23,7 +23,7 @@
 /* Platform components */
 #include "stubs/glcd.h"             /* LCD stubs to support use cases that use LCD */
 #include "timer_simple_platform.h"  /* timer implementation */
-#include "cmsis.h"                  /* For CPU related defintiions */
+#include "RTE_components.h"         /* For CPU related defintiions */
 
 /** Platform definitions. TODO: These should be removed. */
 #include "peripheral_memmap.h"  /* Peripheral memory map definitions. */

@@ -17,7 +17,7 @@
 #include "timer_simple_platform.h"
 
 #include "log_macros.h"     /* Logging macros */
-#include "cmsis.h"          /* For CPU related defintiions */
+#include "RTE_components.h" /* For CPU related defintiions */
 
 #include <inttypes.h>
 
