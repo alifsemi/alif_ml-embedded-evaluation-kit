@@ -93,7 +93,8 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     python3 -m venv
     ```
 
-- The build system uses external Python libraries during the building process. Please make sure that the latest pip and libsndfile versions are installed.
+- The build system uses external Python libraries during the building process. Please make sure that the latest pip and
+  libsndfile versions are installed.
 
   ```commandline
   pip3 --version
@@ -186,16 +187,19 @@ The build parameters are:
   > for *Ethos-U65* NPU and `Sram_Only` only for Ethos-U55* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
-For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
-should be used. For Ethos-U65, it defaults to `Y256` instead. However, the user can override these
-defaults to a configuration ID from `H32`, `H64`, `H256` and `Y512`.
+  For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
+  should be used. For Ethos-U65, it defaults to `Y256` instead. However, the user can override these
+  defaults to a configuration ID from `H32`, `H64`, `H256` and `Y512`.
 
   > **Note:** This ID is only used to choose which tflite file path is to be used by the CMake
-configuration for all the use cases. If the user has overridden use-case specific model path
-parameter `ETHOS_U_NPU_CONFIG_ID` parameter will become irrelevant for that use-case. Also, the
-model files for the chosen `ETHOS_U_NPU_CONFIG_ID` are expected to exist in the default locations.
-See [Fetching resource files](./building.md#fetching-resource-files) for details on how to do this for your
-chosen configuration.
+  > configuration for all the use cases. If the user has overridden use-case specific model path
+  > parameter `ETHOS_U_NPU_CONFIG_ID` parameter will become irrelevant for that use-case. Also, the
+  > model files for the chosen `ETHOS_U_NPU_CONFIG_ID` are expected to exist in the default locations.
+  > See [Fetching resource files](./building.md#fetching-resource-files) for details on how to do this for your
+  > chosen configuration.
+
+- `ETHOS_U_NPU_CACHE_SIZE`: The *Ethos-U* NPU cache size used if the *Ethos-U* NPU processor selected with the option
+  `ETHOS_U_NPU_ID` is `U65`. Default value is 393216 (see [default_vela.ini](../../scripts/vela/default_vela.ini) ).
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
   set to false, but can be turned on for FPGA targets. The the FVP and the CPU core cycle counts are not meaningful and
@@ -302,7 +306,8 @@ python3 ./set_up_default_resources.py
 ```
 
 This fetches every model into the `resources_downloaded` directory. It also optimizes the models using the Vela compiler
-for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
+for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
+Arm® *Ethos™-U65* NPU.
 
 > **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
@@ -319,13 +324,14 @@ Additional command line arguments supported by this script are:
     --additional-ethos-u-config-name ethos-u65-512
   ```
 
-  > **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128` and `ethosu-u65-256`.
+  > **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128`
+  > and `ethosu-u65-256`.
 
 - `--arena-cache-size`: the size of the arena cache memory area, in bytes.
   The default value is:
   - the internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552,
   when optimizing for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU.
-  - the default value specified in the Vela configuration file  [default_vela.ini](../../scripts/vela/default_vela.ini),
+  - the default value specified in the Vela configuration file [default_vela.ini](../../scripts/vela/default_vela.ini),
   when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
 ### Building for default configuration
@@ -499,7 +505,7 @@ make -j4
 
 To see compilation and link details, add `VERBOSE=1`.
 
-Results of the build are placed under `build/bin` folder, for example:
+Results of the build are placed underÂ `build/bin`Â folder, for example:
 
 ```tree
 bin
@@ -522,7 +528,8 @@ Where for each implemented use-case under the `source/use-case` directory, the f
 
 - `ethos-u-<use-case name>.htm`: Human readable file containing the call graph of application functions.
 
-- `sectors/<use-case>`: Folder containing the built application. Split into files for loading into different FPGA memory regions.
+- `sectors/<use-case>`: Folder containing the built application. Split into files for loading into different FPGA
+  memory regions.
 
 - `images.txt`: Tells the FPGA which memory regions to use for loading the binaries in the `sectors/..`
   folder.
@@ -564,16 +571,18 @@ The CMake build framework allows the parameters to control the behavior of each 
 
 - `PULSE_OFF`: The number of cycles where addresses are blocked. The default value is `5100`.
 
-- `BWCAP`: Maximum number of 64-bit words transferred per pulse cycle. A pulse cycle is defined by `PULSE_ON` and `PULSE_OFF`. `0`
-  is inferred as infinite and the default value is `625`.
+- `BWCAP`: Maximum number of 64-bit words transferred per pulse cycle. A pulse cycle is defined by `PULSE_ON`
+  and `PULSE_OFF`. `0` is inferred as infinite and the default value is `625`.
 
-  > **Note:** The bandwidth cap `BWCAP` operates on the transaction level and, because of its simple implementation, the accuracy is limited.
+  > **Note:** The bandwidth cap `BWCAP` operates on the transaction level and, because of its simple implementation,
+  > the accuracy is limited.
   > When set to a small value it allows only a small number of transactions for each pulse cycle.
-  > Once the counter has reached or exceeded the configured cap, no transactions will be allowed before the next pulse cycle.
-  > In order to minimize this effect some possible solutions are:
+  > Once the counter has reached or exceeded the configured cap, no transactions will be allowed before the next pulse
+  > cycle. In order to minimize this effect some possible solutions are:
   >
-  >- scale up all the parameters to a reasonably large value.
-  >- scale up `BWCAP` as a multiple of the burst length (in this case bulk traffic will not face rounding errors in the bandwidth cap).
+  > - scale up all the parameters to a reasonably large value.
+  > - scale up `BWCAP` as a multiple of the burst length (in this case bulk traffic will not face rounding errors in
+  >   the bandwidth cap).
 
 - `MODE`: Timing adapter operation mode. Default value is `0`.
 
@@ -750,8 +759,8 @@ The Vela command contains the following:
 
 - `--accelerator-config`: Specifies the accelerator configuration to use between `ethos-u55-256`, `ethos-u55-128`,
   `ethos-u55-64`, `ethos-u55-32`, `ethos-u65-256`, and `ethos-u65-512`.
-- `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising the SRAM
-  usage whereas the Performance strategy optimises the neural network for maximal performance.
+- `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising
+  the SRAM usage whereas the Performance strategy optimises the neural network for maximal performance.
   Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
 - `--config`: Specifies the path to the Vela configuration file. The format of the file is a Python ConfigParser `.ini`
     file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).

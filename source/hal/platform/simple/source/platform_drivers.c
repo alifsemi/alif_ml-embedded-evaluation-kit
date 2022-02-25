@@ -20,6 +20,15 @@
 #include "uart_stdout.h"
 #include <string.h>
 
+#if defined(ARM_NPU)
+#include "ethosu_npu_init.h"
+
+#if defined(TIMING_ADAPTER_AVAILABLE)
+#include "ethosu_ta_init.h"
+#endif /* TIMING_ADAPTER_AVAILABLE */
+
+#endif /* ARM_NPU */
+
 int platform_init(void)
 {
     SystemCoreClockUpdate();    /* From start up code */
@@ -30,7 +39,30 @@ int platform_init(void)
 
     info("%s: complete\n", __FUNCTION__);
 
-    /** TODO: Add ARM NPU and TA init here */
+#if defined(ARM_NPU)
+
+    int state;
+
+    /* If the platform has timing adapter blocks along with Ethos-U core
+     * block, initialise them here. */
+#if defined(TIMING_ADAPTER_AVAILABLE)
+    int err;
+
+    if (0 != (err = arm_ethosu_timing_adapter_init())) {
+        return err;
+    }
+#endif /* TIMING_ADAPTER_AVAILABLE */
+
+    /* If Arm Ethos-U NPU is to be used, we initialise it here */
+    if (0 != (state = arm_ethosu_npu_init())) {
+        return state;
+    }
+
+#endif /* ARM_NPU */
+
+    /* Print target design info */
+    info("Target system design: %s\n", DESIGN_NAME);
+
     return 0;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,8 @@
  */
 #include "data_psn.h"
 
-#include "bsp.h"
 #include "lcd_img.h"
+#include "platform_drivers.h"
 
 #include <assert.h>
 #include <string.h>

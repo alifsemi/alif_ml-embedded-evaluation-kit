@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BSP_H
-#define BSP_H
+#ifndef ETHOS_U_TA_INIT_H
+#define ETHOS_U_TA_INIT_H
 
-#include "platform_drivers.h"
+#if defined(ARM_NPU) && defined(TIMING_ADAPTER_AVAILABLE)
 
-#if defined(ARM_NPU)
-#include "ethosu_mem_config.h"
-#endif /* defined(ARM_NPU) */
+/**
+ * @brief   Initialises the Arm Ethos-U NPU timing adapter
+ * @return  0 if successful, error code otherwise
+ **/
+int arm_ethosu_timing_adapter_init(void);
 
-#endif /* BSP_H */
+#endif /* ARM_NPU && TIMING_ADAPTER_AVAILABLE */
+
+#endif /* ETHOS_U_TA_INIT_H */

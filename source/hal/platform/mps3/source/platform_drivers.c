@@ -23,6 +23,15 @@
 
 #include <string.h>         /* For strncpy */
 
+#if defined(ARM_NPU)
+#include "ethosu_npu_init.h"
+
+#if defined(TIMING_ADAPTER_AVAILABLE)
+#include "ethosu_ta_init.h"
+#endif /* TIMING_ADAPTER_AVAILABLE */
+
+#endif /* ARM_NPU */
+
 /**
  * @brief   Checks if the platform is valid by checking
  *          the CPU ID for the FPGA implementation against
@@ -45,7 +54,30 @@ int platform_init(void)
         return err;
     }
 
-    /** TODO: Add ARM NPU and TA init here */
+#if defined(ARM_NPU)
+
+#if defined(TIMING_ADAPTER_AVAILABLE)
+    /* If the platform has timing adapter blocks along with Ethos-U core
+     * block, initialise them here. */
+    if (0 != (err = arm_ethosu_timing_adapter_init()))
+    {
+        return err;
+    }
+#endif /* TIMING_ADAPTER_AVAILABLE */
+
+    int state;
+
+    /* If Arm Ethos-U NPU is to be used, we initialise it here */
+    if (0 != (state = arm_ethosu_npu_init()))
+    {
+        return state;
+    }
+
+#endif /* ARM_NPU */
+
+    /* Print target design info */
+    info("Target system design: %s\n", DESIGN_NAME);
+
     return 0;
 }
 

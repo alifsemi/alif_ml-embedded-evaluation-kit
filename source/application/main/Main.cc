@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,9 +35,8 @@ __ASM(" .global __ARM_use_no_argv\n");
 static void print_application_intro()
 {
     info("%s\n", PRJ_DES_STR);
-    info("Target system design: %s\n", DESIGN_NAME);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
-    info("Copyright (C) ARM Ltd 2021. All rights reserved.\n\n");
+    info("Copyright (C) ARM Ltd 2021-2022. All rights reserved.\n\n");
 }
 
 int main ()
@@ -68,4 +67,3 @@ int main ()
     hal_platform_release(&platform);
     return 0;
 }
-

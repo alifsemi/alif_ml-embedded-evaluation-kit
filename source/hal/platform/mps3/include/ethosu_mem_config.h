@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef ETHOS_U_NPU_MEM_CONFIG_H
 #define ETHOS_U_NPU_MEM_CONFIG_H
 
@@ -28,7 +29,11 @@
 #endif /* ETHOS_U_NPU_MEMORY_MODE */
 
 #if (ETHOS_U_NPU_MEMORY_MODE==ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM)
-    #define ETHOS_U_CACHE_BUF_SZ    (393216U)    /* See vela doc? for reference? */
+    #ifndef ETHOS_U_NPU_CACHE_SIZE
+        #define ETHOS_U_CACHE_BUF_SZ                (393216U)  /* See vela doc for reference */
+    #else
+        #define ETHOS_U_CACHE_BUF_SZ                ETHOS_U_NPU_CACHE_SIZE
+    #endif /* ETHOS_U_NPU_CACHE_SIZE */
 #else
     #define ETHOS_U_CACHE_BUF_SZ    (0U)
 #endif /* CACHE_BUF_SZ */

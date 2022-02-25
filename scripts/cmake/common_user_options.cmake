@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,10 +105,15 @@ if (NOT TARGET_PLATFORM STREQUAL native)
         if ((ETHOS_U_NPU_ID STREQUAL U55) OR (ETHOS_U_NPU_ID STREQUAL U65))
             if (ETHOS_U_NPU_ID STREQUAL U55)
                 set(DEFAULT_NPU_MEM_MODE    "Shared_Sram")
-                set(DEFAULT_NPU_CONFIG_ID     "H128")
+                set(DEFAULT_NPU_CONFIG_ID   "H128")
             elseif(ETHOS_U_NPU_ID STREQUAL U65)
                 set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
-                set(DEFAULT_NPU_CONFIG_ID     "Y256")
+                set(DEFAULT_NPU_CONFIG_ID   "Y256")
+                set(DEFAULT_NPU_CACHE_SIZE  "393216")
+
+                USER_OPTION(ETHOS_U_NPU_CACHE_SIZE "Arm Ethos-U65 NPU Cache Size"
+                    "${DEFAULT_NPU_CACHE_SIZE}"
+                    STRING)
             endif()
         else ()
             message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID}")

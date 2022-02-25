@@ -67,11 +67,6 @@ endif()
 ############################ bare-metal profile #############################
 if (PLATFORM_PROFILE STREQUAL bare-metal)
 
-    ## Additional include directories - public
-    target_include_directories(${HAL_TARGET}
-        PUBLIC
-        ${PLATFORM_PROFILE_DIR}/bsp/include)
-
     ## Additional include directories - private
     target_include_directories(${HAL_TARGET}
         PRIVATE
@@ -94,71 +89,6 @@ if (PLATFORM_PROFILE STREQUAL bare-metal)
 
     # Add dependencies for platform_driver first, in case they are needed by it.
     add_subdirectory(cmsis_device ${CMAKE_BINARY_DIR}/cmsis_device)
-
-    # If Ethos-U is enabled, we need the driver library too
-    if (ETHOS_U_NPU_ENABLED)
-
-        if (NOT DEFINED ETHOS_U_NPU_DRIVER_SRC_PATH)
-            message(FATAL_ERROR "ETHOS_U_NPU_DRIVER_SRC_PATH should"
-                    " be defined when ETHOS_U_NPU_ENABLED=${ETHOS_U_NPU_ENABLED}")
-        endif()
-
-        # Timing adapter, should, in theory be part of platform-drivers. For now
-        # limiting the scope of refactoring - but in future, TA should not be
-        # needed if not available on the target platform.
-        if (NOT DEFINED ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH)
-            message(FATAL_ERROR "ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH should"
-                    " be defined when ETHOS_U_NPU_ENABLED=${ETHOS_U_NPU_ENABLED}")
-        endif()
-
-        target_compile_definitions(${HAL_TARGET}
-            PUBLIC
-            ARM_NPU)
-
-        # For the driver, we need to provide the CMSIS_PATH variable
-        set(CMSIS_PATH ${CMSIS_SRC_PATH} CACHE PATH "Path to CMSIS directory")
-        add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
-        add_subdirectory(${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH} ${CMAKE_BINARY_DIR}/timing-adapter)
-
-        target_link_libraries(${HAL_TARGET}
-            PUBLIC
-            ethosu_core_driver
-            timing_adapter)
-
-        if (NOT DEFINED ETHOS_U_NPU_ID)
-            set(ETHOS_U_NPU_ID U55)
-        endif()
-
-        if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
-            set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
-        endif()
-
-        if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-            if (ETHOS_U_NPU_ID STREQUAL U55)
-                set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
-            else ()
-                message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
-            endif ()
-
-        elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
-            # Shared Sram can be used for Ethos-U55 and Ethos-U65
-            set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
-
-        elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-            # Dedicated Sram is used only for Ethos-U65
-            if (ETHOS_U_NPU_ID STREQUAL U65)
-                set(ETHOS_U_NPU_MEMORY_MODE_FLAG  "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM")
-            else ()
-                message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
-            endif ()
-        else ()
-            message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
-        endif ()
-
-        target_compile_definitions(${HAL_TARGET}
-            PUBLIC
-            ${ETHOS_U_NPU_MEMORY_MODE_FLAG})
-    endif()
 
 ############################   native profile   #############################
 elseif (PLATFORM_PROFILE STREQUAL native)

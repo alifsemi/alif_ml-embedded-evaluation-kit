@@ -62,10 +62,9 @@ INFO -  Arch:       v1.0.6
 INFO -  Driver:     v0.16.0
 INFO -  MACs/cc:    128
 INFO -  Cmd stream: v0
-INFO -  SHRAM size: 24
-INFO - Arm Corstone-300 (SSE-300) platform initialised
-INFO - ARM ML Embedded Evaluation Kit for MPS3 FPGA and FastModel
-INFO - Target system design: Arm Corstone-300 (SSE-300)
+INFO - Target system design: Arm Corstone-300 - AN552
+INFO - Arm Corstone-300 - AN552 platform initialised
+INFO - ARM ML Embedded Evaluation Kit
 ```
 
 ## Problem installing Vela
@@ -73,15 +72,25 @@ INFO - Target system design: Arm Corstone-300 (SSE-300)
 During Vela installation, part of the package is compiled and requires libpython3.
 If the system lacks this dependency the following error will occur:
 
-```shell
- x86_64-linux-gnu-gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O2 -Wall -g -fstack-protector-strong -Wformat -Werror=format-security -g -fwrapv -O2 -g -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION -I/venv/include -I/usr/include/python3.8 -I/venv/lib/python3.8/site-packages/numpy/core/include -c ethosu/mlw_codec/mlw_codecmodule.c -o build/temp.linux-x86_64-3.8/ethosu/mlw_codec/mlw_codecmodule.o
+```log
+ x86_64-linux-gnu-gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O2 -Wall -g
+  -fstack-protector-strong -Wformat -Werror=format-security -g -fwrapv -O2 -g -fstack-protector-strong
+  -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION
+  -I/venv/include -I/usr/include/python3.8 -I/venv/lib/python3.8/site-packages/numpy/core/include
+  -c ethosu/mlw_codec/mlw_codecmodule.c -o build/temp.linux-x86_64-3.8/ethosu/mlw_codec/mlw_codecmodule.o
     ethosu/mlw_codec/mlw_codecmodule.c:20:10: fatal error: Python.h: No such file or directory
        20 | #include <Python.h>
           |          ^~~~~~~~~~
     compilation terminated.
     error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
     ----------------------------------------
-ERROR: Command errored out with exit status 1: /venv/bin/python -u -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"'; __file__='"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-externally-managed --compile --install-headers /venv/include/site/python3.8/ethos-u-vela Check the logs for full command output.
+ERROR: Command errored out with exit status 1: /venv/bin/python -u -c
+'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"'
+; __file__='"'"'/tmp/pip-install-4rmoh7va/ethos-u-vela/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)
+(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))'
+install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-externally-managed
+--compile --install-headers
+/venv/include/site/python3.8/ethos-u-vela Check the logs for full command output.
 ```
 
 To solve this issue install libpython3 on the system.
@@ -91,10 +100,11 @@ To solve this issue install libpython3 on the system.
 If you see following errors when cloning the repository:
 
 - ```log
-  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/': server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+   fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+   server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
   ```
 
-  We suggest to update to the lastest common CA certificates:
+  We suggest to update to the latest common CA certificates:
 
   ```commandline
   sudo apt-get update
@@ -102,7 +112,8 @@ If you see following errors when cloning the repository:
   ```
 
 - ```log
-  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/': error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
+  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+  error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
   ```
 
   We suggest to export the `CURL_SSL_BACKEND` variable as `secure-transport`:

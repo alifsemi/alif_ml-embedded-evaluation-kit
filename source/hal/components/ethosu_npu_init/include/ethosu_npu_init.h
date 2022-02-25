@@ -14,25 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BAREMETAL_TIMER_H
-#define BAREMETAL_TIMER_H
+#ifndef ETHOS_U_NPU_INIT_H
+#define ETHOS_U_NPU_INIT_H
 
-#include "platform_drivers.h"
+#if defined(ARM_NPU)
 
-#include <stdint.h>
-#include <time.h>
+/**
+ * @brief   Initialises the Arm Ethos-U NPU
+ * @return  0 if successful, error code otherwise
+ **/
+int arm_ethosu_npu_init(void);
 
-typedef struct bm_time_counter {
-    base_time_counter       counter;
-
-#if defined (ARM_NPU)
-    uint64_t                npu_total_ccnt;
-    uint32_t                npu_idle_ccnt;
-    uint32_t                npu_axi0_read_beats;
-    uint32_t                npu_axi0_write_beats;
-    uint32_t                npu_axi1_read_beats;
 #endif /* ARM_NPU */
 
-} time_counter;
-
-#endif /* BAREMETAL_TIMER_H */
+#endif /* ETHOS_U_NPU_INIT_H */
