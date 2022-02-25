@@ -1,14 +1,16 @@
+# Arm Virtual Hardware
+
 - [Overview](./arm_virtual_hardware.md#overview)
   - [Getting started](./arm_virtual_hardware.md#getting-started)
 
-# Overview
+## Overview
 
 Arm® Virtual Hardware is an accurate representation of a physical System on Chip and runs as a simple application in a Linux environment for easy
 scalability in the cloud and removes dependency from silicon availability. Powered by Amazon Web Services (AWS), developers can launch Amazon Machine Image
 (AMI) running as a virtual server in the cloud. The Arm Virtual Hardware is configured with the Corstone™-300 MPS3 based Fixed Virtual Platform (FVP),
 compiler and other tools.
 
-## Getting started
+### Getting started
 
 To take advantage of Arm Virtual Hardware, you would need to have an AWS account and follow the steps below:
 

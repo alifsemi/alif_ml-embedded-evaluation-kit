@@ -88,7 +88,6 @@ Also see:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos-u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, it is highly advised to clean the build directory and re-run
@@ -301,7 +300,7 @@ Choice:
     INFO - Added ethos-u support to op resolver
     INFO - Creating allocator using tensor arena in SRAM
     INFO - Allocating tensors
-    INFO - Model INPUT tensors: 
+    INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 16384 bytes with dimensions
     INFO -          0:   1
@@ -311,7 +310,7 @@ Choice:
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.008138
     INFO - ZeroPoint[0] = -70
-    INFO - Model OUTPUT tensors: 
+    INFO - Model OUTPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 2 bytes with dimensions
     INFO -          0:   1

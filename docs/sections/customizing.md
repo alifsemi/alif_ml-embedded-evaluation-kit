@@ -733,16 +733,19 @@ The next section of the documentation covers: [Testing and benchmarking](testing
 
 ## Adding custom platform support
 
-Platform build configuration script `build_configuration.cmake` is the main build entry point for platform sources. 
+Platform build configuration script `build_configuration.cmake` is the main build entry point for platform sources.
 It is used by top level CMakeLists.txt script to add a platform into the public build stream.
 Platform build configuration script must have 2 functions:
- * `set_platform_global_defaults` - to set platform source locations and other build options.
- * `platform_custom_post_build` - to execute specific post build steps.
- 
+
+- `set_platform_global_defaults` - to set platform source locations and other build options.
+- `platform_custom_post_build` - to execute specific post build steps.
+
 The function `set_platform_global_defaults` must set `PLATFORM_DRIVERS_DIR` variable
-```
+
+```cmake
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
 ```
+
 location of the platform library sources.
 
 > **Convention:**  The default search path for platform build configuration scripts is in `scripts/cmake/platforms`.
@@ -750,49 +753,55 @@ location of the platform library sources.
 > build option. For example:
 > `scripts/cmake/platforms/my_platform` results in having `my_platform` as a `TARGET_PLATFORM` option for the build.
 
-The function `platform_custom_post_build` could be used to add platform specific post use-case application build steps. 
+The function `platform_custom_post_build` could be used to add platform specific post use-case application build steps.
 
-Repository's root level CMakeLists.txt calls common utility function `add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})` 
-to add given target platform to the build stream. The function finds the script and includes 
-`build_configuration.cmake` file. After that public build can invoke
-* `set_platform_global_defaults`
-* `platform_custom_post_build`
+Repository's root level CMakeLists.txt calls common utility function `add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})`
+to add given target platform to the build stream. The function finds the script and includes
+`build_configuration.cmake` file. After that public build can invoke:
+
+- `set_platform_global_defaults`
+- `platform_custom_post_build`
+
 for a specified platform.
 
-New platform sources, that are pointed to by `PLATFORM_DRIVERS_DIR` variable, could be placed anywhere, conventional location 
+New platform sources, that are pointed to by `PLATFORM_DRIVERS_DIR` variable, could be placed anywhere, conventional location
 is `source/hal/platform`. Platform must be a separate CMake project with CMakeLists.txt script and build into a static
 library `libplatform-drivers.a`.
 HAL expects platform to have `platfrom_drivers.h`  header file with required interfaces for included peripherals.
 
 If the new platform uses existing cmsis device project then it should be linked with it like this:
-```
+
+```cmake
     target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC cmsis_device)
 ```
+
 Cmsis device exposes an entry point `--entry Reset_Handler` as a link interface.
 
 If the new platform defines custom cmsis device and has custom application entry point,
 it must tell linker about it like this:
-```
+
+```cmake
     target_link_options(${PLATFORM_DRIVERS_TARGET} INTERFACE --entry <custom handler name>)
 ```
 
 Most of the ML use-case applications use UART and LCD, thus it is a hard requirement to implement at least stubs for
-those. UART driver must implement functions from `uart_stdout.h` header. LCD driver must provide implementation for 
+those. UART driver must implement functions from `uart_stdout.h` header. LCD driver must provide implementation for
 functions declared in `glcd_mps3.h` header. For stubs examples, please, see simple platform sources.
 
-If the new platform does not use UART, it is possible to run application with semi-hosting enabled - printf 
-statements will be shown in the host machine console. Please, comment out all content of the 
+If the new platform does not use UART, it is possible to run application with semi-hosting enabled - printf
+statements will be shown in the host machine console. Please, comment out all content of the
 `source/hal/profiles/bare-metal/bsp/retarget.c` file in this case.
 
 Examples of the UART and LCD drivers implementation could be found here: `source/hal/components`.
 
-Linker scripts for armclang and GCC should be added. The location of the files is on your discretion. The new 
+Linker scripts for armclang and GCC should be added. The location of the files is on your discretion. The new
 platform build configuration script must add it in the `platform_custom_post_build` function like this:
-```
+
+```cmake
     add_linker_script(
             ${PARSED_TARGET_NAME}                  # Target
             ${CMAKE_SCRIPTS_DIR}/platforms/mps3    # linker scripts directory path
             ${LINKER_SCRIPT_NAME})                 # Name of the file without suffix
 ```
 
-Please see existing platforms sources and build scripts for more details. 
+Please see existing platforms sources and build scripts for more details.

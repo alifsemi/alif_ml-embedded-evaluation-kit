@@ -14,13 +14,14 @@
     - [Running Object Detection](./object_detection.md#running-object-detection)
 
 ## Introduction
+
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Object Detection example.
 Object Detection is a classical computer vision use case in which specific objects need to be identified and located
 within a full frame. In this specific example the model was trained for face detection. The ML sample was developed
 using the *YOLO Fastest* model.  To adopt the model for low power / low memory systems the input images to the model
 are monochrome images. The model was trained on the *Wider* dataset (after conversion from RGB to monochrome)
-and on *Emza Visual-Sense* dataset [www.emza-vs.com](www.emza-vs.com).
-The model makes detection faces in size of 20x20 pixels and above. 
+and on *Emza Visual-Sense* dataset <www.emza-vs.com>.
+The model makes detection faces in size of 20x20 pixels and above.
 
 Use-case code could be found in the following directory:[source/use_case/object_detection](../../source/use_case/object_detection).
 
@@ -99,7 +100,6 @@ For further information, please refer to:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run

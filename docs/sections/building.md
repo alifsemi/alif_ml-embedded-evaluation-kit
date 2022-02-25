@@ -14,7 +14,6 @@
       - [Using GNU Arm Embedded toolchain](./building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
-      - [Working with model debugger from Arm Fast Model Tools](./building.md#working-with-model-debugger-from-arm-fast-model-tools)
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)

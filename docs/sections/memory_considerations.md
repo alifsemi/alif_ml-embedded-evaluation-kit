@@ -40,20 +40,21 @@ have definitions that describe the memory regions and the peripheral base addres
 
 See the example for Arm® *Corstone™-300* description file [corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake). For the discussion on this page, it is useful to note the following definitions:
 
-```
+```cmake
 set(ISRAM0_SIZE           "0x00100000" CACHE STRING "ISRAM0 size:       1 MiB")
 set(ISRAM1_SIZE           "0x00100000" CACHE STRING "ISRAM1 size:       1 MiB")
 ...
 # SRAM size reserved for activation buffers
 math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 ```
+
 This will set `ACTIVATION_BUF_SRAM_SZ` to be **2 MiB** for Arm® *Corstone™-300* target platform.
 As mentioned in the comments within the file, this size is directly linked to the size mentioned
 in the linker scripts, and therefore, it should not be changed without corresponding changes
 in the linker script too. For example, a snippet from the scatter file for Arm® *Corstone™-300*
 shows:
 
-```
+```log
 ;-----------------------------------------------------
 ; FPGA internal SRAM of 2MiB - reserved for activation
 ; buffers.
@@ -65,6 +66,7 @@ isram.bin       0x31000000  UNINIT ALIGN 16 0x00200000
     ...
 }
 ```
+
 If the usable size of the internal SRAM was to be increased/decreased, the change should be
 made in both the linker script as well as the `corstone-300.cmake` definition.
 
@@ -76,10 +78,12 @@ buffers is. These are:
 
 - The file [set_up_default_resources.py](../../set_up_default_resources.py) contains a
   parameter called `mps3_max_sram_sz`:
-  ```
+
+  ```python
   # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
   mps3_max_sram_sz = 2 * 1024 * 1024 # 2 MiB (2 banks of 1 MiB each)
   ```
+
   This size of **2 MiB** here is provided here to allow the default vela optimisation process to
   use this size as a hint for the available SRAM size for use by the CPU and the NPU.
 
@@ -162,6 +166,7 @@ vela \
 
 Info: Changing const_mem_area from Sram to OnChipFlash. This will use the same characteristics as Sram.
 ```
+
 This means that the  neural network model is always placed in the flash region. In this case, timing adapters for the
 AXI buses are set the same values to mimic both bandwidth and latency characteristics of a SRAM memory device.
 See [Ethos-U55 NPU timing adapter default configuration](../../scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake).

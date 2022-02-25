@@ -59,7 +59,7 @@ then `100x22`, representing the gain values to apply to each of the 100 windows.
 These output gain values can then be applied to each corresponding window of the noisy audio clip,
 producing a cleaner output.
 
-For more information please refer to the original paper: 
+For more information please refer to the original paper:
 [A Hybrid DSP/Deep Learning Approach to Real-Time Full-Band Speech Enhancement](https://arxiv.org/pdf/1709.08243.pdf)
 
 ## Post-processing
@@ -95,7 +95,7 @@ Dumps 1 MiB worth of data from address `0x80000000` to the file `output.bin`.
 ### Dumping post-processed results for all inferences
 
 The Noise Reduction application uses the memory address specified by
-`noise_reduction_MEM_DUMP_BASE_ADDR` as a buffer to store post-processed results from all inferences. 
+`noise_reduction_MEM_DUMP_BASE_ADDR` as a buffer to store post-processed results from all inferences.
 The maximum size of this buffer is set by the parameter
 `noise_reduction_MEM_DUMP_LEN` which defaults to 1 MiB.
 
@@ -114,7 +114,7 @@ INFO - Copied 960 bytes to 0x8001fa54
 ```
 
 In the preceding output we can see that it starts at the default address of
-`0x80000000` where some header information is dumped. Then, after the first inference 960 bytes 
+`0x80000000` where some header information is dumped. Then, after the first inference 960 bytes
 (480 INT16 values) are written to the first address after the dumped header `0x80000014`.
 Each inference afterward will then write another 960 bytes to the next address and so on until all inferences
 are complete.
@@ -153,15 +153,15 @@ case adds:
   WAV file, to be used in the application. The default value points to the
   `resources/noise_reduction/samples` folder containing the delivered set of audio clips.
 
-- `noise_reduction_AUDIO_RATE`: The input data sampling rate. Each audio file from `noise_reduction_FILE_PATH` is 
+- `noise_reduction_AUDIO_RATE`: The input data sampling rate. Each audio file from `noise_reduction_FILE_PATH` is
   preprocessed during the build to match the NN model input requirements. The default value is `48000`.
 
 - `noise_reduction_AUDIO_MONO`: If set to `ON`, then the audio data is converted to mono. The default value is `ON`.
 
-- `noise_reduction_AUDIO_OFFSET`: Begins loading audio data and starts from this specified offset, defined in seconds. 
+- `noise_reduction_AUDIO_OFFSET`: Begins loading audio data and starts from this specified offset, defined in seconds.
   The default value is set to `0`.
 
-- `noise_reduction_AUDIO_DURATION`: The length of the audio data to be used in the application in seconds. 
+- `noise_reduction_AUDIO_DURATION`: The length of the audio data to be used in the application in seconds.
   The default is `0`, meaning that the whole audio file is used.
 
 - `noise_reduction_AUDIO_MIN_SAMPLES`: Minimum number of samples required by the network model. If the audio clip is shorter than
@@ -208,7 +208,6 @@ For more notes, please refer to:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
 > **Note:** If you are rebuilding with changed parameters values, it is highly advised that you
@@ -255,7 +254,7 @@ Based on the preceding output, the files contain the following information:
 ### Add custom input
 
 To run with inputs different to the ones supplied, the parameter `noise_reduction_FILE_PATH` can be
-pointed to a WAV file, or a directory containing WAV files. Once you have a directory with WAV files, 
+pointed to a WAV file, or a directory containing WAV files. Once you have a directory with WAV files,
 run the following command:
 
 ```commandline
@@ -285,7 +284,7 @@ cmake .. \
 > **Note** Changing the neural network model often also requires the pre-processing implementation
 > to be changed. Please refer to:
 > [How the default neural network model works](./noise_reduction.md#how-the-default-neural-network-model-works).
-
+>
 > **Note:** Before re-running the CMake command, clean the build directory.
 
 The `.tflite` model file, which is pointed to by `noise_reduction_MODEL_TFLITE_PATH`, is converted
@@ -380,7 +379,7 @@ Choice:
     > **Note:** Select the index in the range of supplied WAVs during application build. By default,
     the pre-built application has three files and indexes from 0-2.
 
-3. “Run noise reduction on all WAVs”: Triggers sequential processing and inference executions on 
+3. “Run noise reduction on all WAVs”: Triggers sequential processing and inference executions on
    all baked-in WAV files.
 
 4. “Show NN model info”: Prints information about the model data type, including the input and
@@ -418,7 +417,7 @@ Choice:
     INFO - Quant dimension: 0
     INFO - Scale[0] = 0.007843
     INFO - ZeroPoint[0] = -1
-    INFO - Model OUTPUT tensors: 
+    INFO - Model OUTPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 96 bytes with dimensions
     INFO -          0:   1
@@ -493,7 +492,7 @@ INFO - Copied 960 bytes to 0x8001fa54
 INFO - Output memory dump of 130580 bytes written at address 0x80000000
 INFO - Final results:
 INFO - Profile for Inference:
-INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 530 
+INFO - NPU AXI0_RD_DATA_BEAT_RECEIVED beats: 530
 INFO - NPU AXI0_WR_DATA_BEAT_WRITTEN beats: 376
 INFO - NPU AXI1_RD_DATA_BEAT_RECEIVED beats: 13911
 INFO - NPU ACTIVE cycles: 103870
@@ -503,7 +502,7 @@ INFO - NPU TOTAL cycles: 104514
 
 > **Note:** When running Fast Model, each inference can take several seconds on most systems.
 
-Each inference dumps the post processed output to memory. For further information, please refer to: 
+Each inference dumps the post processed output to memory. For further information, please refer to:
 [Dumping post processed results for all inferences](./noise_reduction.md#dumping-post_processed-results-for-all-inferences).
 
 The profiling section of the log shows that for this inference:

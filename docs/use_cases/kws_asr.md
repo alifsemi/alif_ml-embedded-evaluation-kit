@@ -241,7 +241,6 @@ For further information, please refer to:
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
 - [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
-- [Working with model debugger from Arm Fast Model Tools](../sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
@@ -478,7 +477,7 @@ What the preceding choices do:
     INFO - Activation buffer (a.k.a tensor arena) size used: 127068
     INFO - Number of operators: 1
     INFO -  Operator 0: ethos-u
-   
+
     INFO - Model INPUT tensors:
     INFO -  tensor type is INT8
     INFO -  tensor occupies 11544 bytes with dimensions
@@ -574,5 +573,3 @@ The profiling section of the log shows that for the ASR inference:
 
 - For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
   model is not cycle-approximate or cycle-accurate.
-
-

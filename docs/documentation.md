@@ -124,11 +124,11 @@ What these folders contain:
 
 - `scripts`: Build and source generation scripts.
 
-- `scripts/cmake/platforms`: Platform build configuration scripts `build_configuration.cmake` are located here. 
+- `scripts/cmake/platforms`: Platform build configuration scripts `build_configuration.cmake` are located here.
    These scripts are adding platform sources into the application build stream. The script has 2 functions:
-   * `set_platform_global_defaults` - to set platform source locations and other build options.
-   * `platform_custom_post_build` - to execute specific post build steps. For example, MPS3 board related script adds
-                                    board specific `images.txt` file creation and calls bin generation command. 
+  - `set_platform_global_defaults` - to set platform source locations and other build options.
+  - `platform_custom_post_build` - to execute specific post build steps. For example, MPS3 board related script adds
+                                    board specific `images.txt` file creation and calls bin generation command.
                                     Native profile related script compiles unit-tests.
 
 - `source`: C/C++ sources for the platform and ML applications.
@@ -143,18 +143,18 @@ What these folders contain:
 
     - `tensorflow-lite-micro`: Contains abstraction around TensorFlow Lite Micro API. This abstraction implements common
       functions to initialize a neural network model, run an inference, and access inference results.
-  
+
   - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform agnostic API to access hardware
     platform-specific functions.
 
   - `log`: Common to all code logging macros managing log levels.
-  
+
   - `math`: Math functions to be used in ML pipelines. Some of them use CMSIS DSP for optimized execution on Arm CPUs.
-     It is a separate CMake project that is built into a static library `libarm_math.a`.         
-  
+     It is a separate CMake project that is built into a static library `libarm_math.a`.
+
   - `profiler`: profiling utilities code to collect and output cycle counts and PMU information.
     It is a separate CMake project that is built into a static library `libprofiler.a`.
-        
+
   - `use_case`: Contains the ML use-case specific logic. Stored as a separate subfolder, it helps isolate the
     ML-specific application logic. With the assumption that the `application` performs the required setup for logic to
     run. It also makes it easier to add a new use-case block.
@@ -185,6 +185,7 @@ hal
 ├── CMakeLists.txt
 └── hal.c
 ```
+
 HAL is built as a separate project into a static library `libhal.a`. It is linked with use-case executable.
 
 What these folders contain:
@@ -200,24 +201,24 @@ What these folders contain:
   It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
   through `CMSIS_SRC_PATH` variable.
   The static library is used by platform code.
-   
+
 - `components` directory contains drivers code for different devices used in platforms. Such as UART, LCD and others.
   A platform can include those as sources in a build to enable usage of corresponding HW devices. Most of the use-cases
-  use UART and LCD, thus if you want to run default ML use-cases on a custom platform, you will have to add 
+  use UART and LCD, thus if you want to run default ML use-cases on a custom platform, you will have to add
   implementation for your devices here (or re-use existing code if it is compatible with your platform).
 
 - `platform/mps3`\
   `platform/simple`:
-  These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral 
-  memory map, system registers, system specific timer implementation and other. 
+  These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral
+  memory map, system registers, system specific timer implementation and other.
   Platform is built from selected components and configured cmsis device. The platform could be used with different
   profiles. Profile is included into the platform build based on `PLATFORM_PROFILE` build parameter.
-  Platform code is a separate CMake project and it is built into a static library `libplatform-drivers.a`. It is linked 
+  Platform code is a separate CMake project and it is built into a static library `libplatform-drivers.a`. It is linked
   into HAL library.
 
 - `profiles/bare-metal`\
   `profiles/native`:
-  As mentioned before, profiles are added into platform build. Currently we support bare-metal and native profiles.    
+  As mentioned before, profiles are added into platform build. Currently we support bare-metal and native profiles.
   bare-metal contains the HAL support layer and platform initialization helpers. Function calls are routed
   to platform-specific logic at this level. For example, for data presentation, an `lcd` module has been used. This
   `lcd` module wraps the LCD driver calls for the actual hardware (for example, MPS3). Also "re-targets" the standard
@@ -255,7 +256,7 @@ For detailed information, see: [Optimize model with Vela compiler](./sections/bu
 
 ## Building
 
-This section explains the build process and intra-project dependencies, describes how to build the code sample 
+This section explains the build process and intra-project dependencies, describes how to build the code sample
 applications from sources and includes illustrating the build options and the process.
 
 The following graph of source modules aims to explain better intra-project code and build execution dependencies.
@@ -278,7 +279,6 @@ For further information, please see:
       - [Using GNU Arm embedded toolchain](./sections/building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./sections/building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./sections/building.md#generating-project-for-arm-development-studio)
-      - [Working with model debugger from Arm Fast Model Tools](./sections/building.md#working-with-model-debugger-from-arm-fast-model-tools)
       - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
