@@ -49,6 +49,10 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
 
 ## Sources
 target_sources(${CMSIS_DEVICE_TARGET}
+        PUBLIC
+        source/handlers.c)
+
+target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/system_${ARM_CPU}.c
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/startup_${ARM_CPU}.c)
