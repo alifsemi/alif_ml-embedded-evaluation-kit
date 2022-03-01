@@ -196,9 +196,9 @@ function(check_update_public_resources resource_downloaded_dir)
 
     string(JOIN "/" FILE_URL ${resource_downloaded_dir})
     execute_process(
-            COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/py/check_update_resources_downloaded.py
+            COMMAND python3 ${SCRIPTS_DIR}/py/check_update_resources_downloaded.py
             --resource_downloaded_dir ${resource_downloaded_dir}
-            --setup_script_path ${CMAKE_SOURCE_DIR}/set_up_default_resources.py
+            --setup_script_path ${SCRIPTS_DIR}/../set_up_default_resources.py
             RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")

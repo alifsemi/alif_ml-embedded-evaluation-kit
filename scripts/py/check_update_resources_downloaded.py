@@ -60,12 +60,20 @@ def check_update_resources_downloaded(
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument(
-        "--resource_downloaded_dir", help="Resources downloaded directory.", type=str
-    )
+        "--resource_downloaded_dir",
+        help="Resources downloaded directory.",
+        type=str,
+        required=True)
     parser.add_argument(
-        "--setup_script_path", help="Path to set_up_default_resources.py.", type=str
-    )
+        "--setup_script_path",
+        help="Path to set_up_default_resources.py.",
+        type=str,
+        required=True)
     args = parser.parse_args()
+
+    # Check validity of script path
+    if not os.path.isfile(args.setup_script_path):
+        raise ValueError(f'Invalid script path: {args.setup_script_path}')
 
     # Check if the repo root directory is a git repository
     root_file_dir = os.path.dirname(os.path.abspath(args.setup_script_path))
