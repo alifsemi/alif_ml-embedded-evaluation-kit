@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if !defined(USE_SEMIHOSTING)
 
 #include "uart_stdout.h"
 
@@ -266,3 +267,5 @@ int ferror(FILE *f)
 }
 
 #endif /* #ifndef ferror */
+
+#endif /* !defined(USE_SEMIHOSTING) */

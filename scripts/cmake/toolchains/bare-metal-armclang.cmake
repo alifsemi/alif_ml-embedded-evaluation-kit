@@ -96,6 +96,12 @@ add_link_options(
     --xref
     "$<$<CONFIG:RELEASE>:--no_debug>")
 
+function(configure_semihosting TARGET_NAME SEMIHOSTING)
+    if (${SEMIHOSTING})
+        target_compile_definitions(${TARGET_NAME} PUBLIC USE_SEMIHOSTING)
+    endif()
+endfunction()
+
 # Function to add a map file output for the linker to dump diagnostic information to.
 function(add_target_map_file TARGET_NAME MAP_FILE_PATH)
     target_link_options(${TARGET_NAME} PUBLIC

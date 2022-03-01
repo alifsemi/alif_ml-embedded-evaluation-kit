@@ -56,12 +56,17 @@ target_sources(${CMSIS_DEVICE_TARGET}
 # Device definition needs to be set, is checked in source files to include correct header
 target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
 
-
 # Tell linker that reset interrupt handler is our entry point
 target_link_options(
     ${CMSIS_DEVICE_TARGET}
     INTERFACE
     --entry Reset_Handler)
+
+# Check if semihosting configuration is available
+if (COMMAND configure_semihosting)
+    option(USE_SEMIHOSTING "Enable/disable semihosting option" OFF)
+    configure_semihosting(${CMSIS_DEVICE_TARGET} ${USE_SEMIHOSTING})
+endif()
 
 # 4 Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

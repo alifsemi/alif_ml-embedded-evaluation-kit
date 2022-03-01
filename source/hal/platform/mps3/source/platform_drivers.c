@@ -17,9 +17,9 @@
 
 #include "platform_drivers.h"
 
-#include "uart_stdout.h"    /* stdout over UART. */
 #include "log_macros.h"     /* Logging functions */
 #include "device_mps3.h"    /* FPGA level definitions and functions. */
+#include "uart_stdout.h"    /* stdout over UART. */
 
 #include <string.h>         /* For strncpy */
 
