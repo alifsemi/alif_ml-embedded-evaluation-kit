@@ -17,7 +17,7 @@
 
 #include "ethosu_npu_init.h"
 
-#include "RTE_components.h"         /* For CPU related defintiions */
+#include "RTE_Components.h"         /* For CPU related defintiions */
 #include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
 #include "peripheral_irqs.h"        /* IRQ numbers for this platform. */
 #include "log_macros.h"             /* Logging functions */

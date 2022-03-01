@@ -18,7 +18,7 @@
 #define TIMER_SIMPLE_PLATFORM_H
 #include <stdint.h>
 
-#include "RTE_components.h"
+#include "RTE_Components.h"
 
 /* Container for timestamp for simple platform. */
 typedef struct _generic_time_counter {

@@ -15,9 +15,28 @@
 #  limitations under the License.
 import json
 import os
-import subprocess
 import sys
+import hashlib
 from argparse import ArgumentParser
+
+
+def get_md5sum_for_file(filepath: str) -> str:
+    """
+    Function to calculate md5sum for contents of a given file.
+
+    Parameters:
+    ----------
+    filepath (string):  Path to the required file.
+
+    Returns:
+    -------
+    Hex digest represented as string.
+    """
+    md5_sum = hashlib.md5()
+    with open(filepath, mode='rb') as f:
+        buf = f.read()
+        md5_sum.update(buf)
+    return md5_sum.hexdigest()
 
 
 def check_update_resources_downloaded(
@@ -40,20 +59,25 @@ def check_update_resources_downloaded(
         with open(metadata_file_path) as metadata_json:
 
             metadata_dict = json.load(metadata_json)
-            set_up_script_hash = metadata_dict["set_up_script_hash"]
-            command = f"git log -1 --pretty=tformat:%H  {set_up_script_path}"
+            md5_key = 'set_up_script_md5sum'
+            set_up_script_md5sum_metadata = ''
 
-            proc = subprocess.run(
-                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
-            )
-            git_commit_hash = proc.stdout.decode("utf-8").strip("\n")
-            proc.check_returncode()
+            if md5_key in metadata_dict.keys():
+                set_up_script_md5sum_metadata = metadata_dict["set_up_script_md5sum"]
 
-            if set_up_script_hash == git_commit_hash:
+            set_up_script_md5sum_current = get_md5sum_for_file(set_up_script_path)
+
+            if set_up_script_md5sum_current == set_up_script_md5sum_metadata:
                 return 0
+
             # Return code 1 if the resources need to be refreshed.
+            print('Error: hash mismatch!')
+            print(f'Metadata: {set_up_script_md5sum_metadata}')
+            print(f'Current : {set_up_script_md5sum_current}')
             return 1
+
     # Return error code 2 if the file doesn't exists.
+    print(f'Error: could not find {metadata_file_path}')
     return 2
 
 
@@ -75,18 +99,8 @@ if __name__ == "__main__":
     if not os.path.isfile(args.setup_script_path):
         raise ValueError(f'Invalid script path: {args.setup_script_path}')
 
-    # Check if the repo root directory is a git repository
-    root_file_dir = os.path.dirname(os.path.abspath(args.setup_script_path))
-    is_git_repo = os.path.exists(os.path.join(root_file_dir, ".git"))
-
-    # if we have a git repo then check the resources are downloaded,
-    # otherwise it's considered a prerequisite to have run
-    # the set_up_default_resources.py
-    status = (
-        check_update_resources_downloaded(
-            args.resource_downloaded_dir, args.setup_script_path
-        )
-        if is_git_repo
-        else 0
-    )
+    # Check the resources are downloaded as expected
+    status = check_update_resources_downloaded(
+                args.resource_downloaded_dir,
+                args.setup_script_path)
     sys.exit(status)

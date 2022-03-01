@@ -64,8 +64,7 @@ target_link_options(
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)
-    option(USE_SEMIHOSTING "Enable/disable semihosting option" OFF)
-    configure_semihosting(${CMSIS_DEVICE_TARGET} ${USE_SEMIHOSTING})
+    configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
 endif()
 
 # 4 Display status:

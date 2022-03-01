@@ -27,6 +27,7 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from collections import namedtuple
 from urllib.error import URLError
+from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 
 
 json_uc_res = [
@@ -356,6 +357,8 @@ def set_up_resources(
                             greater than 0 is provided, this will be taken
                             as the cache size. If 0, the default values, as per
                             the NPU config requirements, are used.
+    check_clean_folder (bool): Indicates whether the resources folder needs to
+                               be checked for updates and cleaned.
     """
     # Paths
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -369,14 +372,8 @@ def set_up_resources(
     metadata_dict = dict()
     vela_version = "3.2.0"
 
-    # Check if the current directory is a git repository
-    is_git_repo = os.path.exists(os.path.join(current_file_dir, ".git"))
-    git_commit_hash = ""
-    setup_script_hash_changed = False
-    if is_git_repo:
-        # If the current directory is a git script then extract the set_up_default_resorces.py hash
-        command = f"git log -1 --pretty=tformat:%H  {os.path.abspath(__file__)}"
-        git_commit_hash = call_command(command, False)
+    setup_script_hash_verified = False
+    setup_script_hash = get_md5sum_for_file(os.path.abspath(__file__))
 
     try:
         #   1.1 Does the download dir exist?
@@ -398,11 +395,9 @@ def set_up_resources(
                         remove_tree_dir(download_dir)
                         metadata_dict = dict()
                     else:
-                        # Check if the set_up_default_resorces.py has changed from last setup, only if this is a git repo
-                        if is_git_repo:
-                            setup_script_hash_changed = not (
-                                metadata_dict["set_up_script_hash"] == git_commit_hash
-                            )
+                        # Check if the set_up_default_resorces.py has changed from last setup
+                        setup_script_hash_verified = (
+                            metadata_dict.get('set_up_script_md5sum') == setup_script_hash)
         else:
             raise
 
@@ -444,7 +439,7 @@ def set_up_resources(
         except OSError as e:
             if e.errno == errno.EEXIST:
                 # The usecase_name download dir exist
-                if setup_script_hash_changed:
+                if check_clean_folder and not setup_script_hash_verified:
                     for idx, metadata_uc_url_prefix in enumerate(
                         [
                             f
@@ -588,7 +583,7 @@ def set_up_resources(
     # 4. Collect and write metadata
     logging.info("Collecting and write metadata.")
     metadata_dict["ethosu_vela_version"] = vela_version
-    metadata_dict["set_up_script_hash"] = git_commit_hash.strip("\n")
+    metadata_dict["set_up_script_md5sum"] = setup_script_hash.strip("\n")
     metadata_dict["resources_info"] = json_uc_res
 
     with open(metadata_file_path, "w") as metadata_file:

@@ -19,7 +19,7 @@
 
 #include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
 
-#include "RTE_components.h"
+#include "RTE_Components.h"
 
 #if defined ( __CC_ARM   )
 #pragma anon_unions
