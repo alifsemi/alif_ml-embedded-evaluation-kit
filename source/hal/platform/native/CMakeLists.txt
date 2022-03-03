@@ -21,7 +21,7 @@
 
 cmake_minimum_required(VERSION 3.15.6)
 
-set(PLATFORM_DRIVERS_TARGET platform-drivers)
+set(PLATFORM_DRIVERS_TARGET platform_drivers)
 
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for native target"

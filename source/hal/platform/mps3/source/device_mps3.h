@@ -14,13 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ETHOS_U_TA_INIT_H
-#define ETHOS_U_TA_INIT_H
+#ifndef DEVICE_MPS3_H
+#define DEVICE_MPS3_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+#include <stdint.h>
 
 /**
- * @brief   Initialises the Arm Ethos-U NPU timing adapter
- * @return  0 if successful, error code otherwise
+ * @brief   Gets the core clock set for MPS3.
+ * @return  Clock value in Hz.
  **/
-int arm_ethosu_timing_adapter_init(void);
+uint32_t GetMPS3CoreClock(void);
 
-#endif /* ETHOS_U_TA_INIT_H */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* DEVICE_MPS3_H */

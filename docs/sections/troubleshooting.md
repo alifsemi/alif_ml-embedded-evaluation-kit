@@ -5,7 +5,7 @@
   - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [Errors when cloning the repository](/troubleshooting.md#errors-when-cloning-the-repository)
+  - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
 
 ## Inference results are incorrect for my custom files
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,8 @@
 #include "log_macros.h"
 #include "font_9x15_h.h"
 #include "smm_mps3.h"
+
+#include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
 
 /*-------------- CLCD Controller Internal Register addresses ----------------*/
 #define CHAR_COM        ((volatile unsigned int *)(CLCD_CONFIG_BASE + 0x000))

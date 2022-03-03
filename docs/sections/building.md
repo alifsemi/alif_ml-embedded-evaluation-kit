@@ -226,6 +226,8 @@ The build parameters are:
 - `ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH`: The path to timing adapter sources. The default value points to the
   `timing_adapter` dependencies folder.
 
+- `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED`: Specifies if the *Ethos-U* timing adapter is enabled.
+
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
   the timing adapter build is enabled. Default for Ethos-U55 NPU is
   [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake),

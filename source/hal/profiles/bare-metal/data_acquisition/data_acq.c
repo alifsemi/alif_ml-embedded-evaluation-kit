@@ -32,7 +32,7 @@
  **/
 static int get_uart_user_input(char* user_input, int size)
 {
-    if (true != GetLine(user_input, size - 1)) {
+    if (1 != GetLine(user_input, size - 1)) {
         return 1;
     }
     return 0;

@@ -19,8 +19,6 @@
 
 #include "log_macros.h"                 /* Logging functions */
 
-#if defined(TIMING_ADAPTER_AVAILABLE)
-
 #include "timing_adapter.h"             /* Arm Ethos-U timing adapter driver header */
 #include "timing_adapter_settings.h"    /* Arm Ethos-U timing adapter settings */
 
@@ -82,5 +80,3 @@ int arm_ethosu_timing_adapter_init(void)
 
     return 0;
 }
-
-#endif /* TIMING_ADAPTER_AVAILABLE */

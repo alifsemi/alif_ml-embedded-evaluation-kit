@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 
 #include "log_macros.h"
 #include "device_mps3.h"
+#include "smm_mps3.h"   /* Memory map for MPS3. */
 
 static uint64_t cpu_cycle_count = 0;    /* 64-bit cpu cycle counter */
 

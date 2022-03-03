@@ -108,6 +108,7 @@ For more details see full documentation:
   - [Testing and benchmarking](./docs/documentation.md#testing-and-benchmarking)
   - [Troubleshooting](./docs/documentation.md#troubleshooting)
   - [Appendix](./docs/documentation.md#appendix)
+  - [FAQ](./docs/documentation.md#faq)
 
 ## Contribution guidelines
 

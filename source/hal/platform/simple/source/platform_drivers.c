@@ -23,9 +23,9 @@
 #if defined(ARM_NPU)
 #include "ethosu_npu_init.h"
 
-#if defined(TIMING_ADAPTER_AVAILABLE)
+#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
 #include "ethosu_ta_init.h"
-#endif /* TIMING_ADAPTER_AVAILABLE */
+#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
 #endif /* ARM_NPU */
 
@@ -45,13 +45,13 @@ int platform_init(void)
 
     /* If the platform has timing adapter blocks along with Ethos-U core
      * block, initialise them here. */
-#if defined(TIMING_ADAPTER_AVAILABLE)
+#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
     int err;
 
     if (0 != (err = arm_ethosu_timing_adapter_init())) {
         return err;
     }
-#endif /* TIMING_ADAPTER_AVAILABLE */
+#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
     /* If Arm Ethos-U NPU is to be used, we initialise it here */
     if (0 != (state = arm_ethosu_npu_init())) {

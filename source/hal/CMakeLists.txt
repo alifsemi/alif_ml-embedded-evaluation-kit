@@ -108,16 +108,18 @@ elseif (PLATFORM_PROFILE STREQUAL native)
         PUBLIC
         PLATFORM_HAL=PLATFORM_UNKNOWN_LINUX_OS
         ACTIVATION_BUF_SRAM_SZ=0)
+else()
+    message(FATAL_ERROR "PLATFORM_PROFILE ${PLATFORM_PROFILE} not supported")
 endif()
 
-# Add platform-drivers target
+# Add platform_drivers target
 add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 
 # Link time library targets:
 target_link_libraries(${HAL_TARGET}
     PUBLIC
     log
-    platform-drivers)
+    platform_drivers)
 
 # Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

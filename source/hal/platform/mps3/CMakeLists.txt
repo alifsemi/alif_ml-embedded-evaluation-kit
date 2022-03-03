@@ -20,7 +20,7 @@
 #########################################################
 
 cmake_minimum_required(VERSION 3.15.6)
-set(PLATFORM_DRIVERS_TARGET platform-drivers)
+set(PLATFORM_DRIVERS_TARGET platform_drivers)
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for MPS3 FPGA/FVP targets"
     LANGUAGES       C CXX ASM)
@@ -54,15 +54,13 @@ configure_file("${MEM_PROFILE_TEMPLATE}" "${SOURCE_GEN_DIR}/peripheral_memmap.h"
 configure_file("${IRQ_PROFILE_TEMPLATE}" "${SOURCE_GEN_DIR}/peripheral_irqs.h")
 configure_file("${MEM_REGIONS_TEMPLATE}" "${SOURCE_GEN_DIR}/mem_regions.h")
 
-# If a TA config file is provided, we generate a settings file
-if (DEFINED TA_CONFIG_FILE)
-    include(${TA_CONFIG_FILE})
-    set(TA_SETTINGS_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/templates/timing_adapter_settings.template)
-    configure_file("${TA_SETTINGS_TEMPLATE}" "${SOURCE_GEN_DIR}/timing_adapter_settings.h")
-endif()
-
 # 4. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
+
+## Include directories - private
+target_include_directories(${PLATFORM_DRIVERS_TARGET}
+    PRIVATE
+    source)
 
 ## Include directories - public
 target_include_directories(${PLATFORM_DRIVERS_TARGET}
@@ -70,129 +68,61 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
     include
     ${SOURCE_GEN_DIR})
 
-## Include directories - private
-target_include_directories(${PLATFORM_DRIVERS_TARGET}
-    PRIVATE
-    source/include)
-
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
     source/device_mps3.c
     source/timer_mps3.c
-    source/platform_drivers.c)
+    source/platform_drivers.c
+    source/glcd_mps3.c)
 
 ## Directory for additional components required by MPS3:
 if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
 endif()
 
-## Platform component: uart
-target_sources(${PLATFORM_DRIVERS_TARGET}
-        PRIVATE
-        ${COMPONENTS_DIR}/uart_cmsdk/uart_cmsdk.c)
-target_include_directories(${PLATFORM_DRIVERS_TARGET}
-        PUBLIC
-        ${COMPONENTS_DIR}/uart_cmsdk/include)
-
-## Platform component: LCD
-target_sources(${PLATFORM_DRIVERS_TARGET}
-        PRIVATE
-        ${COMPONENTS_DIR}/lcd_mps3/glcd_mps3.c)
-target_include_directories(${PLATFORM_DRIVERS_TARGET}
-        PUBLIC
-        ${COMPONENTS_DIR}/lcd_mps3/include)
-
 ## This target provides the following definitions for MPS3 specific behaviour
 ## TODO: We should aim to remove this now with platform refactoring..
 target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
     MPS3_PLATFORM
-    ACTIVATION_BUF_SRAM_SZ=${ACTIVATION_BUF_SRAM_SZ}
-    $<$<BOOL:TA_CONFIG_FILE>:TIMING_ADAPTER_AVAILABLE>)
+    ACTIVATION_BUF_SRAM_SZ=${ACTIVATION_BUF_SRAM_SZ})
+
+## Platform component: uart
+add_subdirectory(${DEPENDENCY_ROOT_DIR}/core-platform/drivers/uart ${CMAKE_BINARY_DIR}/uart)
 
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
-    log cmsis_device)
+    log
+    cmsis_device
+    ethosu_uart_cmsdk_apb)
 
 # If Ethos-U is enabled, we need the driver library too
 if (ETHOS_U_NPU_ENABLED)
-
-
-    ## Platform component: Ethos-U initialization
-    target_sources(${PLATFORM_DRIVERS_TARGET}
-            PRIVATE
-            ${COMPONENTS_DIR}/ethosu_npu_init/ethosu_npu_init.c)
-    target_include_directories(${PLATFORM_DRIVERS_TARGET}
-            PUBLIC
-            ${COMPONENTS_DIR}/ethosu_npu_init/include)
-
-    ## Platform component: Ethos-U timing apadpter initialization
-    target_sources(${PLATFORM_DRIVERS_TARGET}
-            PRIVATE
-            ${COMPONENTS_DIR}/ethosu_ta_init/ethosu_ta_init.c)
-    target_include_directories(${PLATFORM_DRIVERS_TARGET}
-            PUBLIC
-            ${COMPONENTS_DIR}/ethosu_ta_init/include)
-
-    if (NOT DEFINED ETHOS_U_NPU_DRIVER_SRC_PATH)
-        message(FATAL_ERROR "ETHOS_U_NPU_DRIVER_SRC_PATH should"
-                " be defined when ETHOS_U_NPU_ENABLED=${ETHOS_U_NPU_ENABLED}")
-    endif()
-
-    # Timing adapter
-    if (NOT DEFINED ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH)
-        message(FATAL_ERROR "ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH should"
-                " be defined when ETHOS_U_NPU_ENABLED=${ETHOS_U_NPU_ENABLED}")
-    endif()
 
     target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
         PUBLIC
         ARM_NPU)
 
-    # For the driver, we need to provide the CMSIS_PATH variable
-    set(CMSIS_PATH ${CMSIS_SRC_PATH} CACHE PATH "Path to CMSIS directory")
-    add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
-    add_subdirectory(${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH} ${CMAKE_BINARY_DIR}/timing-adapter)
+    ## Platform component: Ethos-U initialization
+    add_subdirectory(${COMPONENTS_DIR}/ethosu_npu_init ${CMAKE_BINARY_DIR}/ethosu_npu_init)
 
     target_link_libraries(${PLATFORM_DRIVERS_TARGET}
         PUBLIC
-        ethosu_core_driver
-        timing_adapter)
+        ethosu_npu_init_component)
 
-    if (NOT DEFINED ETHOS_U_NPU_ID)
-        set(ETHOS_U_NPU_ID U55)
+    if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+        ## Platform component: Ethos-U timing adapter initialization
+        add_subdirectory(${COMPONENTS_DIR}/ethosu_ta_init ${CMAKE_BINARY_DIR}/ethosu_ta_init)
+
+        target_link_libraries(${PLATFORM_DRIVERS_TARGET}
+            PUBLIC
+            ethosu_ta_init_component)
+        target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
+            PUBLIC
+            ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
     endif()
 
-    if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
-        set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
-    endif()
-
-    if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-        if (ETHOS_U_NPU_ID STREQUAL U55)
-            set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
-        else ()
-            message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
-        endif ()
-
-    elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
-        # Shared Sram can be used for Ethos-U55 and Ethos-U65
-        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
-
-    elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-        # Dedicated Sram is used only for Ethos-U65
-        if (ETHOS_U_NPU_ID STREQUAL U65)
-            list(APPEND ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM" "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}")
-        else ()
-            message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
-        endif ()
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
-    endif ()
-
-    target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
-        PUBLIC
-        ${ETHOS_U_NPU_MEMORY_MODE_FLAG})
 endif()
 
 # 5. Display status:

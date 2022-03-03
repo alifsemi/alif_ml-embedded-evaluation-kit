@@ -57,7 +57,7 @@
 #define ROTATE180   1               /* 1 to rotate the screen for 180 deg. */
 #endif
 
-/*------------------------- Speed dependant settings -------------------------*/
+/*------------------------- Speed dependent settings -------------------------*/
 
 /* If processor works on high frequency delay has to be increased, it can be
    increased by factor 2^N by this constant. */
@@ -66,10 +66,10 @@
 /*---------------------- Graphic LCD size definitions ------------------------*/
 #if (LANDSCAPE == 1)
    #define GLCD_WIDTH       320                 /* Screen Width (in pixels). */
-   #define GLCD_HEIGHT      240                 /* Screen Hight (in pixels). */
+   #define GLCD_HEIGHT      240                 /* Screen Height (in pixels). */
 #else
    #define GLCD_WIDTH       240                 /* Screen Width (in pixels). */
-   #define GLCD_HEIGHT      320                 /* Screen Hight (in pixels). */
+   #define GLCD_HEIGHT      320                 /* Screen Height (in pixels). */
 #endif
 
 #define BPP                 16                  /* Bits per pixel.           */

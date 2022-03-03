@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,6 +63,13 @@ extern FILEHANDLE _open(const char * /*name*/, int /*openmode*/);
 const char __stdin_name[] __attribute__((aligned(4)))  = "STDIN";
 const char __stdout_name[] __attribute__((aligned(4))) = "STDOUT";
 const char __stderr_name[] __attribute__((aligned(4))) = "STDERR";
+
+__attribute__((noreturn)) static void UartEndSimulation(int code)
+{
+    UartPutc((char) 0x4);  // End of simulation
+    UartPutc((char) code); // Exit code
+    while(1);
+}
 
 void _ttywrch(int ch) {
     (void)fputc(ch, stdout);

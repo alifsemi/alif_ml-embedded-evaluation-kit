@@ -21,14 +21,16 @@
 #include "device_mps3.h"    /* FPGA level definitions and functions. */
 #include "uart_stdout.h"    /* stdout over UART. */
 
+#include "smm_mps3.h"   /* Memory map for MPS3. */
+
 #include <string.h>         /* For strncpy */
 
 #if defined(ARM_NPU)
 #include "ethosu_npu_init.h"
 
-#if defined(TIMING_ADAPTER_AVAILABLE)
+#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
 #include "ethosu_ta_init.h"
-#endif /* TIMING_ADAPTER_AVAILABLE */
+#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
 #endif /* ARM_NPU */
 
@@ -56,14 +58,14 @@ int platform_init(void)
 
 #if defined(ARM_NPU)
 
-#if defined(TIMING_ADAPTER_AVAILABLE)
+#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
     /* If the platform has timing adapter blocks along with Ethos-U core
      * block, initialise them here. */
     if (0 != (err = arm_ethosu_timing_adapter_init()))
     {
         return err;
     }
-#endif /* TIMING_ADAPTER_AVAILABLE */
+#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
     int state;
 

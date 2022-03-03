@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Auto-generated file
+// ** DO NOT EDIT **
+
+#ifndef TIMING_ADAPTER_SETTINGS_H
+#define TIMING_ADAPTER_SETTINGS_H
+
+#cmakedefine TA0_BASE       (@TA0_BASE@)
+#cmakedefine TA1_BASE       (@TA1_BASE@)
+
+/* Timing adapter settings for AXI0 */
+#if defined(TA0_BASE)
+
+#define TA0_MAXR           (@TA0_MAXR@)
+#define TA0_MAXW           (@TA0_MAXW@)
+#define TA0_MAXRW          (@TA0_MAXRW@)
+#define TA0_RLATENCY       (@TA0_RLATENCY@)
+#define TA0_WLATENCY       (@TA0_WLATENCY@)
+#define TA0_PULSE_ON       (@TA0_PULSE_ON@)
+#define TA0_PULSE_OFF      (@TA0_PULSE_OFF@)
+#define TA0_BWCAP          (@TA0_BWCAP@)
+#define TA0_PERFCTRL       (@TA0_PERFCTRL@)
+#define TA0_PERFCNT        (@TA0_PERFCNT@)
+#define TA0_MODE           (@TA0_MODE@)
+#define TA0_HISTBIN        (@TA0_HISTBIN@)
+#define TA0_HISTCNT        (@TA0_HISTCNT@)
+
+#endif /* defined(TA0_BASE) */
+
+/* Timing adapter settings for AXI1 */
+#if defined(TA1_BASE)
+
+#define TA1_MAXR           (@TA1_MAXR@)
+#define TA1_MAXW           (@TA1_MAXW@)
+#define TA1_MAXRW          (@TA1_MAXRW@)
+#define TA1_RLATENCY       (@TA1_RLATENCY@)
+#define TA1_WLATENCY       (@TA1_WLATENCY@)
+#define TA1_PULSE_ON       (@TA1_PULSE_ON@)
+#define TA1_PULSE_OFF      (@TA1_PULSE_OFF@)
+#define TA1_BWCAP          (@TA1_BWCAP@)
+#define TA1_PERFCTRL       (@TA1_PERFCTRL@)
+#define TA1_PERFCNT        (@TA1_PERFCNT@)
+#define TA1_MODE           (@TA1_MODE@)
+#define TA1_HISTBIN        (@TA1_HISTBIN@)
+#define TA1_HISTCNT        (@TA1_HISTCNT@)
+
+#endif /* defined(TA1_BASE) */
+
+#endif /* TIMING_ADAPTER_SETTINGS_H */

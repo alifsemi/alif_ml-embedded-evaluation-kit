@@ -133,8 +133,14 @@ if (NOT TARGET_PLATFORM STREQUAL native)
             set(DEFAULT_TA_CONFIG_FILE_PATH "${CMAKE_CURRENT_LIST_DIR}/timing_adapter/ta_config_u65_high_end.cmake")
         endif ()
 
-        USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
-                ${DEFAULT_TA_CONFIG_FILE_PATH}
-                FILEPATH)
+        USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED "Specifies if the Ethos-U timing adapter is enabled"
+            ON
+            BOOL)
+
+        if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+            USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
+                    ${DEFAULT_TA_CONFIG_FILE_PATH}
+                    FILEPATH)
+        endif()
     endif()
 endif()
