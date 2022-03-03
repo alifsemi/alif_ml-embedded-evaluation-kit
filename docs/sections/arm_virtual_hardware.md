@@ -18,12 +18,20 @@ To take advantage of Arm Virtual Hardware, you would need to have an AWS account
  2. Go to the AWS Marketplace and search for [Arm Virtual Hardware](https://aws.amazon.com/marketplace/pp/prodview-urbpq7yo5va7g).
  3. Subscribe to the Arm Virtual Hardware Amazon Machine Image.
  4. Launch the AWS instance.
- 5. If you want to access the Arm Virtual Hardware AWS instance via ssh, at the moment of creating the instance you would need to generate a *.pem* key.
- You could then access the AWS instance over ssh: `$ ssh -i <mykey.pem> ubuntu@<ec2-ip-address>`.
 
+
+ To access the Arm Virtual Hardware AWS instance via ssh, accept the prompt  to generate a *.pem* key while creating the instance or add it later.
+ You can then access the AWS instance over ssh: `$ ssh -i <mykey.pem> ubuntu@<ec2-ip-address>`. 
+ It may be necessary to change the permissions for mykey.pem with `$ chmod 400 mykey.pem`.
+
+
+### Useful Links
 Note that you can register to receive free AWS credits to use Arm Virtual Hardware from [here](https://www.arm.com/company/contact-us/virtual-hardware).
 
 You can find more information about Arm Virtual Hardware [here](https://arm-software.github.io/VHT/main/overview/html/index.html).
 
 Once you have access to the AWS instance, we recommend starting from the [quick start guide](../quick_start.md#Quick-start-example-ML-application) in order to get familiar
 with the ml-embedded-evaluation-kit. Note that on the AWS instance, the FVP is available under `/opt/FVP_Corstone_SSE-300`.
+
+In order to view the FVP window when launching on the AWS instance a VNC is required.
+See relevant section [here](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-linux-2-install-gui/).
