@@ -19,7 +19,7 @@ extern "C"
 {
 #endif
 
-#include "RTE_components.h"
+#include "RTE_Components.h"
 
 #include <stdio.h>
 #include <inttypes.h>
