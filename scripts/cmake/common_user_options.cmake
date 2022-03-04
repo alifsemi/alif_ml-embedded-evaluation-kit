@@ -88,7 +88,7 @@ if (NOT TARGET_PLATFORM STREQUAL native)
     if (ETHOS_U_NPU_ENABLED)
         USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
             "Path to Ethos-U NPU timing adapter sources"
-            "${DEPENDENCY_ROOT_DIR}/core-software/drivers/timing_adapter"
+            "${DEPENDENCY_ROOT_DIR}/core-platform/drivers/timing_adapter"
             PATH
             )
 

@@ -54,7 +54,7 @@ else()
     if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
         set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
-        string(TOLOWER ${ETHOS_U_NPU_ID} ETHOSU_ARCH)
+        set(ETHOS_U_NPU_ID "u55")  # Currently only u55 is supported by TFLite Micro.
     endif()
 
     set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")
@@ -66,10 +66,6 @@ endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
     list(APPEND MAKE_TARGETS_LIST "clean")
-endif()
-
-if (ETHOS_U_NPU_ID)
-    string(TOLOWER ${ETHOS_U_NPU_ID} ETHOSU_ARCH)
 endif()
 
 # Primary target
@@ -89,7 +85,7 @@ add_custom_target(tensorflow_build ALL
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
         CMSIS_PATH=${CMSIS_SRC_PATH}
         # Conditional arguments
-        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${ETHOSU_ARCH}>
+        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${ETHOS_U_NPU_ID}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_LIBS=$<TARGET_FILE:ethosu_core_driver>>
 

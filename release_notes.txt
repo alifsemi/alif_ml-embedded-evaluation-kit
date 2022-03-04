@@ -1,3 +1,12 @@
+Changes in 22.02
+    * Support for 22.02 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.3.0, CMSIS, TensorFlow Lite Micro).
+    * Added Object Detection use case.
+    * Replace DSCNN with MicroNet for KWS and KWS_ASR use cases.
+    * Increase minimum requirements of CMake to 3.15.6, armclang to 6.16 and Python to 3.8
+    * Initial restructuring of repository sources.
+    * Documentation updates.
+    * Various minor bug fixes.
+
 Changes in 21.11
     * Support for 21.11 Ethos-U component and dependencies (core-software, core-driver, Vela 3.2.0, CMSIS, TensorFlow Lite).
     * Added dynamic load support for FVP for inference runner use-case.

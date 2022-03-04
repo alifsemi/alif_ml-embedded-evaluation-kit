@@ -7,6 +7,6 @@
 [submodule "dependencies/core_driver"]
 	path = dependencies/core-driver
 	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-driver
-[submodule "dependencies/core-software"]
-	path = dependencies/core-software
-	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-software
+[submodule "dependencies/core-platform"]
+	path = dependencies/core-platform
+	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-platform

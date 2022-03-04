@@ -76,14 +76,14 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 >
 > `export PATH=/path/to/cmake/bin:$PATH`
 
-- Python 3.6 or above is installed. Check your current installed version of Python by running:
+- Python 3.8 or above is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
     ```
 
     ```log
-    Python 3.6.8
+    Python 3.8.12
     ```
 
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
@@ -101,7 +101,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   ```
 
   ```log
-  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.6)
+  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.8)
   ```
 
 - Make
@@ -309,7 +309,7 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU.
 
-> **Note:** This script requires Python version 3.6 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
+> **Note:** This script requires Python version 3.8 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
 
 Additional command line arguments supported by this script are:

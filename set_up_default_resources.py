@@ -370,7 +370,7 @@ def set_up_resources(
     )
 
     metadata_dict = dict()
-    vela_version = "3.2.0"
+    vela_version = "3.3.0"
 
     setup_script_hash_verified = False
     setup_script_hash = get_md5sum_for_file(os.path.abspath(__file__))

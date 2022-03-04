@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +25,10 @@ import tempfile
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-tf = "https://github.com/tensorflow/tflite-micro/archive/f75696cb9e7e5cc06761af2a83f7df0e5e975363.zip"
-cmsis = "https://github.com/ARM-software/CMSIS_5/archive/1fab31865cd538f12d1f74b760939404771603e3.zip"
-ethos_u_core_sw = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-software.git/snapshot/ethos-u-core-software-21.11.tar.gz"
-ethos_u_core_driver = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-21.11.tar.gz"
-
+tf = "https://github.com/tensorflow/tflite-micro/archive/1a0287fc5fa81fa6aa1dcfb0c5b2e01f74164393.zip"
+cmsis = "https://github.com/ARM-software/CMSIS_5/archive/9b5df640c777563919affb4e9201c96c657adbb2.zip"
+ethos_u_core_driver = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.02.tar.gz"
+ethos_u_core_platform = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.02.tar.gz"
 
 def download(url_file: str, post_process=None):
     with urlopen(url_file) as response, tempfile.NamedTemporaryFile() as temp:
@@ -69,12 +68,12 @@ def main(dependencies_path: str):
     download(cmsis,
              lambda file: unzip(file.name,
                                 to_path=os.path.join(dependencies_path, "cmsis")))
-    download(ethos_u_core_sw,
-             lambda file: untar(file.name,
-                                to_path=os.path.join(dependencies_path, "core-software")))
     download(ethos_u_core_driver,
              lambda file: untar(file.name,
                                 to_path=os.path.join(dependencies_path, "core-driver")))
+    download(ethos_u_core_platform,
+             lambda file: untar(file.name,
+                                to_path=os.path.join(dependencies_path, "core-platform")))
     download(tf,
              lambda file: unzip(file.name,
                                 to_path=os.path.join(dependencies_path, "tensorflow")))
