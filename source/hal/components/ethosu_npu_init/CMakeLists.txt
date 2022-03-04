@@ -32,6 +32,45 @@ endif()
 
 # For the driver, we need to provide the CMSIS_PATH variable
 set(CMSIS_PATH ${CMSIS_SRC_PATH} CACHE PATH "Path to CMSIS directory")
+
+# Driver needs to know what MAC configuration to build for.
+if(ETHOS_U_NPU_CONFIG_ID MATCHES "^[A-Z]([0-9]+$)")
+    set(ETHOSU_MACS ${CMAKE_MATCH_1})
+else()
+    message(FATAL_ERROR "Couldn't work out Ethos-U number of MACS from ${ETHOS_U_NPU_CONFIG_ID}")
+endif()
+set(ETHOSU_TARGET_NPU_CONFIG
+        "ethos-${ETHOS_U_NPU_ID}-${ETHOSU_MACS}" CACHE STRING "Target Ethos-U configuration for driver.")
+
+## Memory mode target definition
+if (NOT DEFINED ETHOS_U_NPU_ID)
+    set(ETHOS_U_NPU_ID U55)
+endif()
+
+if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
+    set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
+endif()
+
+if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
+    if (ETHOS_U_NPU_ID STREQUAL U55)
+        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
+    else ()
+        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
+    endif ()
+elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
+    # Shared Sram can be used for Ethos-U55 and Ethos-U65
+    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
+elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
+    # Dedicated Sram is used only for Ethos-U65
+    if (ETHOS_U_NPU_ID STREQUAL U65)
+        list(APPEND ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM" "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}")
+    else ()
+        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
+    endif ()
+else ()
+    message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
+endif ()
+
 add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
 
 # Create static library
@@ -53,39 +92,6 @@ target_link_libraries(${ETHOS_U_NPU_INIT_COMPONENT} PUBLIC
     cmsis_device
     ethosu_core_driver
     log)
-
-## Memory mode target definition
-if (NOT DEFINED ETHOS_U_NPU_ID)
-    set(ETHOS_U_NPU_ID U55)
-endif()
-
-if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
-    set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
-endif()
-
-if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-    if (ETHOS_U_NPU_ID STREQUAL U55)
-        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
-    endif ()
-
-elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
-    # Shared Sram can be used for Ethos-U55 and Ethos-U65
-    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
-
-elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-    # Dedicated Sram is used only for Ethos-U65
-    if (ETHOS_U_NPU_ID STREQUAL U65)
-        list(APPEND ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM" "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}")
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
-    endif ()
-
-else ()
-    message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
-
-endif ()
 
 target_compile_definitions(${ETHOS_U_NPU_INIT_COMPONENT}
     PUBLIC
