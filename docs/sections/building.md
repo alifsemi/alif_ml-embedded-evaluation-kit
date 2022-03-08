@@ -184,7 +184,7 @@ The build parameters are:
   - `Sram_Only`
 
   > **Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
-  > for *Ethos-U65* NPU and `Sram_Only` only for Ethos-U55* NPU.
+  > for *Ethos-U65* NPU and `Sram_Only` only for *Ethos-U55* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
   For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
@@ -259,7 +259,7 @@ The build process uses three major steps:
     - Some files such as neural network models, network inputs, and output labels are automatically converted into C/C++
       arrays, see: [Automatic file generation](./building.md#automatic-file-generation).
 
-3. Build the application.\
+3. Build the application.
    Application and third-party libraries are now built. For further information, see:
    [Building the configured project](./building.md#building-the-configured-project).
 
@@ -271,12 +271,12 @@ Certain third-party sources are required to be present on the development machin
 repository to link against.
 
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
-2. [Ethos-U55 NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
+2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+4. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
->
 
 To pull the submodules:
 
@@ -290,7 +290,7 @@ This downloads all of the required components and places them in a tree, like so
 dependencies
     ├── cmsis
     ├── core-driver
-    ├── core-software
+    ├── core-platform
     └── tensorflow
 ```
 
@@ -391,7 +391,7 @@ mkdir build && cd build
 #### Using GNU Arm Embedded toolchain
 
 On Linux, if using `Arm GNU embedded toolchain`, execute the following command to build the application to run on the
-Arm® *Ethos™-U55* NPU when providing only the mandatory arguments for CMake configuration:
+Arm® *Ethos™-U* NPU when providing only the mandatory arguments for CMake configuration:
 
 ```commandline
 cmake ../

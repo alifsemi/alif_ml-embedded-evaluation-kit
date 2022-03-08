@@ -249,8 +249,7 @@ Pre-built application binary ethos-u-vww.axf can be found in the bin/mps3-sse-30
 package. Assuming the install location of the FVP was set to ~/FVP_install_location, the simulation can be started by:
 
 ```commandline
-$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
-./bin/mps3-sse-300/ethos-u-vww.axf
+$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-vww.axf
 ```
 
 A log output should appear on the terminal:

@@ -346,8 +346,7 @@ Assuming that the install location of the FVP was set to `~/FVP_install_location
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
-./bin/mps3-sse-300/ethos-u-asr.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-asr.axf
 ```
 
 A log output appears on the terminal:

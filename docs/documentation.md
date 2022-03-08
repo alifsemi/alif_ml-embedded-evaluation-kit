@@ -203,10 +203,12 @@ What these folders contain:
   through `CMSIS_SRC_PATH` variable.
   The static library is used by platform code.
 
-- `components` directory contains drivers code for different devices used in platforms. Such as UART, LCD and others.
-  A platform can include those as sources in a build to enable usage of corresponding HW devices. Most of the use-cases
-  use UART and LCD, thus if you want to run default ML use-cases on a custom platform, you will have to add
-  implementation for your devices here (or re-use existing code if it is compatible with your platform).
+- `components` directory contains drivers for different modules that can be reused for different platforms.
+  These contain common functions for Arm Ethos-U NPU initialization, timing adapter block helpers and others.
+  Each component produces a static library that could potentially be linked into the platform library to enable
+  usage of corresponding modules from the platform sources. For example, most of the use-cases use NPU and
+  timing adapter initialization. If you want to run default ML use-cases on a custom platform, you could re-use
+  existing code from this directory provided it is compatible with your platform.
 
 - `platform/mps3`\
   `platform/simple`:
@@ -228,18 +230,22 @@ What these folders contain:
   Native profile allows to build application to be executed on a build machine, i.e. x86. It bypasses and stubs platform
   devices replacing them with standard C or C++ library calls.
 
-- `platforms/bare-metal/bsp/mem_layout`: Contains the platform-specific linker scripts.
-
 ## Models and resources
 
-The models used in the use-cases implemented in this project can be downloaded from: [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo).
+The models used in the use-cases implemented in this project can be downloaded from:
 
-- [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)
-- [MicroNet for Keyword Spotting](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)
-- [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8)
-- [MicroNet for Anomaly Detection](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8)
-- [MicroNet for Visual Wake Word](https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)
-- [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite)
+- [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo) ( [Apache 2.0 License](https://github.com/ARM-software/ML-zoo/blob/master/LICENSE) )
+
+  - [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)
+  - [MicroNet for Keyword Spotting](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)
+  - [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8)
+  - [MicroNet for Anomaly Detection](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8)
+  - [MicroNet for Visual Wake Word](https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)
+  - [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite)
+
+- [Emza Visual Sense ModelZoo](https://github.com/emza-vs/ModelZoo) ( [Apache 2.0 License](https://github.com/emza-vs/ModelZoo/blob/v1.0/LICENSE) )
+
+  - [YOLO Fastest](https://github.com/emza-vs/ModelZoo/blob/v1.0/object_detection/yolo-fastest_192_face_v4.tflite)
 
 When using *Ethos-U* NPU backend, Vela compiler optimizes the the NN model. However, if not and it is supported by
 TensorFlow Lite Micro, then it falls back on the CPU and execute.

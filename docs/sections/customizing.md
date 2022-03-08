@@ -21,7 +21,7 @@
 This section describes how to implement a custom Machine Learning application running on Arm® *Corstone™-300* based FVP
 or on the Arm® MPS3 FPGA prototyping board.
 
-the Arm® *Ethos™-U55* code sample software project offers a way to incorporate more use-case code into the existing
+The Arm® *Ethos™-U* code sample software project offers a way to incorporate more use-case code into the existing
 infrastructure. It also provides a build system that automatically picks up added functionality and produces
 corresponding executable for each use-case. This is achieved by following certain configuration and code implementation
 conventions.
@@ -679,7 +679,7 @@ in the root of your use-case. However, the name of the file is not important.
 > - `use_case` – The name of the current use-case.
 > - `UC_SRC` – A list of use-case sources.
 > - `UC_INCLUDE` – The path to the use-case headers.
-> - `ETHOS_U_NPU_ENABLED` – The flag indicating if the current build supports Ethos-U55.
+> - `ETHOS_U_NPU_ENABLED` – The flag indicating if the current build supports *Ethos™-U* NPU.
 > - `TARGET_PLATFORM` – The target platform being built for.
 > - `TARGET_SUBSYSTEM` – If target platform supports multiple subsystems, this is the name of the subsystem.
 > - All standard build options.
@@ -691,9 +691,9 @@ so:
 
 ```cmake
 if (ETHOS_U_NPU_ENABLED)
-  set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_uint8_vela_${DEFAULT_NPU_CONFIG_ID}.tflite)
+  set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_vela_${DEFAULT_NPU_CONFIG_ID}.tflite)
 else()
-  set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_uint8.tflite)
+  set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel.tflite)
 endif()
 ```
 

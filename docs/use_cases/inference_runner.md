@@ -205,8 +205,7 @@ Assuming that the install location of the FVP was set to `~/FVP_install_location
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
-./bin/mps3-sse-300/ethos-u-inference_runner.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mps3-sse-300/ethos-u-inference_runner.axf
 ```
 
 A log output appears on the terminal:
@@ -309,8 +308,8 @@ binary blob.
 > the model size can be a maximum of 32MiB. The IFM and OFM spaces are both reserved as 16MiB sections.
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a \
-  ./bin/ethos-u-inference_runner.axf \
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
+  -a ./bin/ethos-u-inference_runner.axf \
   --data /path/to/custom-model.tflite@0x90000000 \
   --data /path/to/custom-ifm.bin@0x92000000 \
   --dump cpu0=/path/to/output.bin@Memory:0x93000000,1024

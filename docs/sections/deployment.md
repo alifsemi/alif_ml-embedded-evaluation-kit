@@ -25,7 +25,7 @@ The FVP is available publicly from the following page:
 Please ensure that you download the correct archive from the list under Arm® *Corstone™-300*. You need the one which:
 
 - Emulates MPS3 board and *not* for MPS2 FPGA board,
-- Contains support for Arm® *Ethos™-U55*.
+- Contains support for Arm® *Ethos™-U55* and *Ethos-U65* processors.
 
 ### Setting up the MPS3 Arm Corstone-300 FVP
 

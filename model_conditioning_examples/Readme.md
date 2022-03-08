@@ -12,7 +12,7 @@
 ## Introduction
 
 This folder contains short example scripts that demonstrate some methods available in TensorFlow to condition your model
-in preparation for deployment on Arm Ethos NPU.
+in preparation for deployment on Arm® Ethos™ NPU.
 
 These scripts will cover three main topics:
 
@@ -22,7 +22,7 @@ These scripts will cover three main topics:
 
 The objective of these scripts is not to be a single source of knowledge on everything related to model conditioning.
 Instead the aim is to provide the reader with a quick starting point that demonstrates some commonly used tools that
-will enable models to run on Arm Ethos NPU and also optimize them to enable maximum performance from the Arm Ethos NPU.
+will enable models to run on Arm® Ethos-U NPU and also optimize them to enable maximum performance from the Arm® Ethos-U NPU.
 
 Links to more in-depth guides available on the TensorFlow website are provided in the [references](#references) section
 in this Readme.
@@ -54,8 +54,8 @@ The produced TensorFlow Lite model files will be saved in a `conditioned_models`
 
 ## Quantization
 
-Most machine learning models are trained using 32bit floating point precision. However, Arm Ethos NPU performs
-calculations in 8bit integer precision. As a result, it is required that any model you wish to deploy on Arm Ethos NPU is
+Most machine learning models are trained using 32bit floating point precision. However, Arm® Ethos-U NPU performs
+calculations in 8bit integer precision. As a result, it is required that any model you wish to deploy on Arm® Ethos-U NPU is
 first fully quantized to 8bits.
 
 TensorFlow provides two methods of quantization and the scripts in this folder will demonstrate these:
@@ -94,7 +94,7 @@ Quantizing your model can result in accuracy drops depending on your model. Howe
 drop when using post-training quantization is usually minimal. After post-training quantization is complete you will
 have a fully quantized TensorFlow Lite model.
 
-If you are targetting an Arm Ethos-U55 NPU then the output TensorFlow Lite file will also need to be passed through the Vela
+If you are targetting an Arm® Ethos-U NPU then the output TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used.
 
 ### Quantization aware training
@@ -117,7 +117,7 @@ As well as simulating quantization and adjusting weights, the ranges for variabl
 model can be fully quantized afterwards. Once you have finished quantization aware training the TensorFlow Lite converter is
 used to produce a fully quantized TensorFlow Lite model.
 
-If you are targetting an Arm Ethos-U55 NPU then the output TensorFlow Lite file will also need to be passed through the Vela
+If you are targetting an Arm® Ethos-U NPU then the output TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used.
 
 ## Weight pruning
@@ -128,7 +128,7 @@ calculations so are safe to be removed or 'pruned' from the model. This is accom
 values to 0, resulting in a sparse model.
 
 Compression algorithms can then take advantage of this to reduce model size in memory, which can be very important when
-deploying on small embedded systems. Moreover, Arm Ethos NPU can take advantage of model sparsity to further accelerate
+deploying on small embedded systems. Moreover, Arm® Ethos-U NPU can take advantage of model sparsity to further accelerate
 execution of a model.
 
 Training with weight pruning will force your model to have a certain percentage of its weights set (or 'pruned') to 0
@@ -139,9 +139,9 @@ is desired.
 
 Weight pruning can be further combined with quantization so you have a model that is both pruned and quantized, meaning
 that the memory saving affects of both can be combined. Quantization then allows the model to be used with
-Arm Ethos NPU.
+Arm® Ethos-U NPU.
 
-If you are targetting an Arm Ethos-U55 NPU then the output TensorFlow Lite file will also need to be passed through the Vela
+If you are targetting an Arm® Ethos-U NPU then the output TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used.
 
 ## Weight clustering
@@ -158,9 +158,9 @@ better adjusted to the reduced precision.
 
 Weight clustering can be further combined with quantization so you have a model that is both clustered and quantized,
 meaning that the memory saving affects of both can be combined. Quantization then allows the model to be used with
-Arm Ethos NPU.
+Arm® Ethos-U NPU.
 
-If you are targetting an Arm Ethos-U55 NPU then the output TensorFlow Lite file will also need to be passed through the Vela
+If you are targetting an Arm® Ethos-U NPU then the output TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used (see [Optimize model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler)).
 
 ## References

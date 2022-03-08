@@ -42,7 +42,7 @@ It shows that the configuration of the Vela compiled `.tflite` file doesn't matc
 The Vela configuration parameter `accelerator-config` used for producing the .`tflite` file that is used
 while building the application should match the MACs configuration that the FVP is emulating.
 For example, if the `accelerator-config` from the Vela command was `ethos-u55-128`, the FVP should be emulating the
-128 MACs configuration of the Ethos-U55 block(default FVP configuration). If the `accelerator-config` used was
+128 MACs configuration of the Ethos™-U55 block(default FVP configuration). If the `accelerator-config` used was
 `ethos-u55-256`, the FVP must be executed with additional command line parameter to instruct it to emulate the
 256 MACs configuration instead.
 
@@ -56,8 +56,8 @@ logged over UART. These include the MACs/cc configuration of the FVP.
 INFO - MPS3 core clock has been set to: 32000000Hz
 INFO - CPU ID: 0x410fd220
 INFO - CPU: Cortex-M55 r0p0
-INFO - Ethos-U55 device initialised
-INFO - Ethos-U55 version info:
+INFO - Ethos-U device initialised
+INFO - Ethos-U version info:
 INFO -  Arch:       v1.0.6
 INFO -  Driver:     v0.16.0
 INFO -  MACs/cc:    128
