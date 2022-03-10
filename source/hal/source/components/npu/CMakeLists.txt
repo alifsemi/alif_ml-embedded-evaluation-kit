@@ -71,8 +71,42 @@ else ()
     message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
 endif ()
 
+# Include the build for Ethos-U driver
 add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
 
+# For Ethos-U driver, we need to override the default region configs
+# Region numbers are decided by Vela and they do not need to conform to set rules.
+# Traditionally they have been used as:
+#
+# Region 0: Weights and biases (and const tensors)
+# Region 1: IFM/OFM/Calculation buffers (tensor arena)
+# Region 2: Ethos-U'd dedicated cache region (fast cache memory)
+#
+# NOTE: The above scheme is completely dependent on Vela and could potentially
+#       change.
+#
+# Common definitions:
+# For Ethos-U55/U65, Region configs are set as:
+#   0 or 1 = AXI0
+#   2 or 3 = AXI1
+target_compile_definitions(ethosu_core_driver PRIVATE
+    NPU_QCONFIG=3       # AXI1=M1 for U55/U65
+    NPU_REGIONCFG_0=3   # AXI1=M1 for U55/U65
+    NPU_REGIONCFG_2=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_3=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_4=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_5=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_6=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_7=1)  # AXI0=M0 for U55/U65
+
+# Definitions relevant for all NPUs but depend on memory mode
+if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
+    target_compile_definitions(ethosu_core_driver PRIVATE
+        NPU_REGIONCFG_1=3)   # AXI1=M1 for U55/U65
+else()
+    target_compile_definitions(ethosu_core_driver PRIVATE
+        NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
+endif()
 # Create static library
 add_library(${ETHOS_U_NPU_INIT_COMPONENT} STATIC)
 
