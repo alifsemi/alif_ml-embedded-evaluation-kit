@@ -4,8 +4,10 @@
   - [Inference results are incorrect for my custom files](./troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
   - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
-  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
   - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
+  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
+  - [No matching distribution found for ethos-u-vela==3.3.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+    - [How to update Python3 package to 3.8 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
 
 ## Inference results are incorrect for my custom files
 
@@ -67,6 +69,33 @@ INFO - Arm Corstone-300 - AN552 platform initialised
 INFO - ARM ML Embedded Evaluation Kit
 ```
 
+## Errors when cloning the repository
+
+If you see following errors when cloning the repository:
+
+- ```log
+   fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+   server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+  ```
+
+  We suggest to update to the latest common CA certificates:
+
+  ```commandline
+  sudo apt-get update
+  sudo apt-get install ca-certificates
+  ```
+
+- ```log
+  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+  error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
+  ```
+
+  We suggest to export the `CURL_SSL_BACKEND` variable as `secure-transport`:
+
+  ```commandline
+  export CURL_SSL_BACKEND="secure-transport"
+  ```
+
 ## Problem installing Vela
 
 During Vela installation, part of the package is compiled and requires libpython3.
@@ -95,31 +124,81 @@ install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-ex
 
 To solve this issue install libpython3 on the system.
 
-## Errors when cloning the repository
+## No matching distribution found for ethos-u-vela
 
-If you see following errors when cloning the repository:
+Vela 3.3.0 increases Python requirement to at least version 3.8, if not installed on your system the following error will occur:
 
-- ```log
-   fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
-   server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
-  ```
+```log
+python3 -m pip install ethos-u-vela==3.3.0
+ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.3.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
+ERROR: No matching distribution found for ethos-u-vela==3.3.0
+```
 
-  We suggest to update to the latest common CA certificates:
+Ensure that the minimum Python 3.8 requirement is installed and it's the default version.
+Check your current installed version of Python by running:
 
-  ```commandline
-  sudo apt-get update
-  sudo apt-get install ca-certificates
-  ```
+```commandline
+python3 --version
+```
 
-- ```log
-  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
-  error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
-  ```
+### How to update Python3 package to newer version
 
-  We suggest to export the `CURL_SSL_BACKEND` variable as `secure-transport`:
+1. Check your current installed version of Python by running:
 
-  ```commandline
-  export CURL_SSL_BACKEND="secure-transport"
-  ```
+   ```commandline
+   python3 --version
+   ```
+
+   For example:
+
+   ```log
+   Python 3.6.9
+   ```
+
+2. Install the Python 3.8 packages necessary on the system:
+
+   ```commandline
+   sudo apt-get install python3.8 python3.8-venv libpython3.8 libpython3.8-dev
+   ```
+
+3. Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
+
+   ```commandline
+   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+   ```
+
+4. At the prompt, update the configuration by selecting Python3.8 as the chosen default alternative:
+
+   ```commandline
+   sudo update-alternatives --config python3
+   ```
+
+5. Python3.8 is now set as default you can check it by running:
+
+   ```commandline
+   python3 --version
+   ```
+
+   ```log
+   Python 3.8.0
+   ```
+
+> **Note:** After updating to from Python3.6 Python3.8 it may happen that the `gnome-terminal` or the relative
+> shortcuts doesn't work anymore.
+> If when opening it from XTerm with `gnome-terminal` the following error appear:
+>
+> ```log
+> Traceback (most recent call last):
+>   File "/usr/bin/gnome-terminal", line 9, in <module>
+>     from gi.repository import GLib, Gio
+>   File "/usr/lib/python3/dist-packages/gi/__init__.py", line 42, in <module>
+>     from . import _gi
+> ImportError: cannot import name '_gi' from partially initialized module 'gi' (most likely due to a circular import)
+> (/usr/lib/python3/dist-packages/gi/> __init__.py)
+> ```
+>
+> Modify the `gnome-terminal` script located in `/usr/bin/` and changing the environment (first line of the script)
+> from `#!/usr/bin/python3` to `#!/usr/bin/python3.6`.
 
 Next section of the documentation: [Appendix](appendix.md).

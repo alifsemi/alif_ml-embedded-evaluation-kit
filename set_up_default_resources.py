@@ -27,6 +27,7 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from collections import namedtuple
 from urllib.error import URLError
+
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 
 
@@ -345,7 +346,7 @@ def set_up_resources(
     additional_npu_config_names: list = (),
     arena_cache_size: int = 0,
     check_clean_folder: bool = False,
-    additional_requirements_file: str = ''
+    additional_requirements_file: str = "",
 ):
     """
     Helpers function that retrieve the output from a command.
@@ -375,6 +376,18 @@ def set_up_resources(
 
     metadata_dict = dict()
     vela_version = "3.3.0"
+    py3_major_version_minimum = 3  # Python > 3.8 is required
+    py3_minor_version_minimum = 8
+
+    # Is Python minimum requirement matched?
+    py3_version = sys.version_info
+    if (
+        py3_version.major < py3_major_version_minimum
+        or py3_version.minor < py3_minor_version_minimum
+    ):
+        raise Exception(
+            "ERROR: Python3.8+ is required, please see the documentation on how to update it."
+        )
 
     setup_script_hash_verified = False
     setup_script_hash = get_md5sum_for_file(os.path.abspath(__file__))
@@ -401,7 +414,9 @@ def set_up_resources(
                     else:
                         # Check if the set_up_default_resorces.py has changed from last setup
                         setup_script_hash_verified = (
-                            metadata_dict.get('set_up_script_md5sum') == setup_script_hash)
+                            metadata_dict.get("set_up_script_md5sum")
+                            == setup_script_hash
+                        )
         else:
             raise
 
@@ -628,8 +643,12 @@ if __name__ == "__main__":
         "--requirements-file",
         help="Path to requirements.txt file to install additional packages",
         type=str,
-        default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             'scripts', 'py', 'requirements.txt')
+        default=os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "scripts",
+            "py",
+            "requirements.txt",
+        ),
     )
 
     args = parser.parse_args()
@@ -648,5 +667,5 @@ if __name__ == "__main__":
         args.additional_ethos_u_config_name,
         args.arena_cache_size,
         args.clean,
-        args.requirements_file
+        args.requirements_file,
     )

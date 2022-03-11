@@ -7,11 +7,11 @@ This documentation assumes that you are using an Arm® *Ethos™-U55* NPU, it is
 sharing SRAM with the Arm® *Cortex®-M55*.
 
 The FVP is also available via Arm Virtual Hardware (AVH) hosted on AWS. This quick start guide can also be executed on an AVH instance
-but requires creation of an AWS account and basic configuration outlined [here](./arm_virtual_hardware.md).
+but requires creation of an AWS account and basic configuration outlined [here](./sections/arm_virtual_hardware.md#getting-started).
 
 To get started quickly, please follow these steps:
 
-1. First, verify that you have installed [the required prerequisites](sections/building.md#Build-prerequisites).
+1. First, verify that you have installed [the required prerequisites](sections/building.md#build-prerequisites).
 
 2. Clone the *Ethos-U* evaluation kit repository:
 
@@ -47,16 +47,16 @@ To get started quickly, please follow these steps:
     ./build_default.py --toolchain arm
     ```
 
-5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#Deployment). In quick
+5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
    start guide, we use the keyword spotting application and the FVP.
 
     Change directory to generated cmake build folder which contains the .axf file output from step 4 in it's `bin`
-    subdirectory. Launch the application by passing the axf to the FVP you downloaded when installing the prerequisites. 
+    subdirectory. Launch the application by passing the axf to the FVP you downloaded when installing the prerequisites.
     Alternatively, from the root directory add `<cmake-build-your_config>` to the path to the axf and use one of the
     following commands:
 
     ```commandline
-   From auto-generated (or custom) build directory: 
+   From auto-generated (or custom) build directory:
    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
    From root directory:
    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf

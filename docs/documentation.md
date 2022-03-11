@@ -367,8 +367,10 @@ For further information, please see:
   - [Inference results are incorrect for my custom files](./sections/troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
   - [The application does not work with my custom model](./sections/troubleshooting.md#the-application-does-not-work-with-my-custom-model)
   - [NPU configuration mismatch error when running inference](./sections/troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
-  - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
   - [Errors when cloning the repository](./sections/troubleshooting.md#errors-when-cloning-the-repository)
+  - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
+  - [No matching distribution found for ethos-u-vela==3.3.0](./sections/troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+    - [How to update Python3 package to newer version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
 
 ## Appendix
 

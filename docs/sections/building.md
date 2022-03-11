@@ -86,6 +86,10 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     Python 3.8.12
     ```
 
+  > **Note:** If you have an older version of Python installed (< 3.8) see the
+  > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  > for instruction on how to update it.
+
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
   environment module is installed by running:
 
