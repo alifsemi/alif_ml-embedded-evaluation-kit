@@ -145,7 +145,7 @@ What these folders contain:
     - `tensorflow-lite-micro`: Contains abstraction around TensorFlow Lite Micro API. This abstraction implements common
       functions to initialize a neural network model, run an inference, and access inference results.
 
-  - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform agnostic API to access hardware
+  - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform-agnostic API to access hardware
     platform-specific functions.
 
   - `log`: Common to all code logging macros managing log levels.
@@ -166,69 +166,73 @@ The HAL has the following structure:
 
 ```tree
 hal
-├── cmsis_device
-│   └── ...
-├── components
-│   └── ...
-├── include
-│   └── ...
-├── platform
-│   ├── mps3
-│   └── simple
-├── profiles
-│   ├── bare-metal
-│   │   ├── bsp
-│   │   ├── data_acquisition
-│   │   ├── data_presentation
-│   │   ├── timer
-│   │   └── utils
-│   └── native
 ├── CMakeLists.txt
-└── hal.c
+├── include
+│   ├── data_acq.h
+│   ├── data_psn.h
+│   ├── hal.h
+│   └── timer.h
+└── source
+    ├── components
+    │   ├── cmsis_device
+    │   ├── lcd
+    │   ├── npu
+    │   ├── npu_ta
+    │   └── stdout
+    ├── platform
+    │   ├── mps3
+    │   ├── native
+    │   └── simple
+    ├── profiles
+    │   ├── bare-metal
+    │   └── native
+    ├── data_acq.c
+    ├── data_psn.c
+    └── hal.c
 ```
 
 HAL is built as a separate project into a static library `libhal.a`. It is linked with use-case executable.
 
 What these folders contain:
 
-- The folders `include` and `hal.c` contain the HAL top-level platform API and data acquisition, data presentation, and
+- The folders `include` and `source/hal.c` contain the HAL top-level platform API and data acquisition, data presentation, and
   timer interfaces.
     > **Note:** the files here and lower in the hierarchy have been written in C and this layer is a clean C/ + boundary
     > in the sources.
 
-- `cmsis_device` has a common startup code for Cortex-M based systems. The package defines interrupt vector table and
-  handlers. Reset handler - starting point of our application - is also defined here. This entry point is responsible
-  for the set-up before calling the user defined "main" function in the higher-level `application` logic.
-  It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
-  through `CMSIS_SRC_PATH` variable.
-  The static library is used by platform code.
-
-- `components` directory contains drivers for different modules that can be reused for different platforms.
-  These contain common functions for Arm Ethos-U NPU initialization, timing adapter block helpers and others.
+- `source/components` directory contains API and implementations for different modules that can be reused for different
+  platforms. These contain common functions for Arm Ethos-U NPU initialization, timing adapter block helpers and others.
   Each component produces a static library that could potentially be linked into the platform library to enable
   usage of corresponding modules from the platform sources. For example, most of the use-cases use NPU and
-  timing adapter initialization. If you want to run default ML use-cases on a custom platform, you could re-use
-  existing code from this directory provided it is compatible with your platform.
+  timing adapter initialization. Similarly, the LCD component provides a standard LCD API used by HAL and propagated
+  up the hierarchy. Two static library targets are provided for the LCD module - one with stubbed implementation and the
+  other which can drive the LCD on an Arm MPS3 target. If you want to run default ML use-cases on a custom platform, you
+  could re-use existing code from this directory provided it is compatible with your platform.
 
-- `platform/mps3`\
-  `platform/simple`:
+- `source/components/cmsis_device` has a common startup code for Cortex-M based systems. The package defines interrupt vector table and
+    handlers. Reset handler - starting point of our application - is also defined here. This entry point is responsible
+    for the set-up before calling the user defined "main" function in the higher-level `application` logic.
+    It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
+    through `CMSIS_SRC_PATH` variable.
+    The static library is used by platform code. 
+
+- `source/platform/mps3`\
+  `source/platform/simple`:
   These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral
   memory map, system registers, system specific timer implementation and other.
   Platform is built from selected components and configured cmsis device. The platform could be used with different
   profiles. Profile is included into the platform build based on `PLATFORM_PROFILE` build parameter.
-  Platform code is a separate CMake project and it is built into a static library `libplatform-drivers.a`. It is linked
+  Platform code is a separate CMake project, and it is built into a static library `libplatform-drivers.a`. It is linked
   into HAL library.
 
-- `profiles/bare-metal`\
-  `profiles/native`:
-  As mentioned before, profiles are added into platform build. Currently we support bare-metal and native profiles.
+- `source/profiles/bare-metal`\
+  `source/profiles/native`:
+  As mentioned before, profiles are added into platform build. Currently, we support bare-metal and native profiles.
   bare-metal contains the HAL support layer and platform initialization helpers. Function calls are routed
-  to platform-specific logic at this level. For example, for data presentation, an `lcd` module has been used. This
-  `lcd` module wraps the LCD driver calls for the actual hardware (for example, MPS3). Also "re-targets" the standard
-  output and error streams to the UART block.
+  to platform-specific logic at this level.
 
-  Native profile allows to build application to be executed on a build machine, i.e. x86. It bypasses and stubs platform
-  devices replacing them with standard C or C++ library calls.
+  Native profile allows the built application to be executed on the build (native) machine, i.e. x86. It bypasses and
+  stubs platform devices replacing them with standard C or C++ library calls.
 
 ## Models and resources
 

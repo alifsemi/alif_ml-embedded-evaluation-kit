@@ -258,13 +258,23 @@ endfunction()
 # outlined above.
 ##############################################################################
 function(setup_source_generator)
+
+    # If a virtual env has been created in the resources_downloaded directory,
+    # use it for source generator. Else, fall back to creating a virtual env
+    # in the current build directory.
+    if (EXISTS ${RESOURCES_DIR}/env)
+        set(DEFAULT_VENV_DIR ${RESOURCES_DIR}/env)
+    else()
+        set(DEFAULT_VENV_DIR ${CMAKE_BINARY_DIR}/venv)
+    endif()
+
     if (${CMAKE_HOST_WIN32})
-#        windows python3 has python.exe
+        # Windows Python3 is python.exe
         set(PY_EXEC python)
-        set(PYTHON ${CMAKE_BINARY_DIR}/pyenv/Scripts/${PY_EXEC})
+        set(PYTHON ${DEFAULT_VENV_DIR}/Scripts/${PY_EXEC})
     else()
         set(PY_EXEC python3)
-        set(PYTHON ${CMAKE_BINARY_DIR}/pyenv/bin/${PY_EXEC})
+        set(PYTHON ${DEFAULT_VENV_DIR}/bin/${PY_EXEC})
     endif()
     set(PYTHON ${PYTHON} PARENT_SCOPE)
 
@@ -276,7 +286,7 @@ function(setup_source_generator)
     message(STATUS "Configuring python environment at ${PYTHON}")
 
     execute_process(
-        COMMAND ${PY_EXEC} -m venv ${CMAKE_BINARY_DIR}/pyenv
+        COMMAND ${PY_EXEC} -m venv ${DEFAULT_VENV_DIR}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code STREQUAL "0")

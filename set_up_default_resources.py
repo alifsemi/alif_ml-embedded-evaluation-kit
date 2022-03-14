@@ -345,6 +345,7 @@ def set_up_resources(
     additional_npu_config_names: list = (),
     arena_cache_size: int = 0,
     check_clean_folder: bool = False,
+    additional_requirements_file: str = ''
 ):
     """
     Helpers function that retrieve the output from a command.
@@ -359,6 +360,9 @@ def set_up_resources(
                             the NPU config requirements, are used.
     check_clean_folder (bool): Indicates whether the resources folder needs to
                                be checked for updates and cleaned.
+    additional_requirements_file (str): Path to a requirements.txt file if
+                                        additional packages need to be
+                                        installed.
     """
     # Paths
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -419,7 +423,7 @@ def set_up_resources(
             call_command(command)
         os.chdir(current_file_dir)
 
-    # 1.3 Make sure to have all the requirement
+    # 1.3 Make sure to have all the requirements
     requirements = [f"ethos-u-vela=={vela_version}"]
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
@@ -427,6 +431,11 @@ def set_up_resources(
         if req not in packages:
             command = f"{env_python} -m pip install {req}"
             call_command(command)
+
+    # 1.4 Install additional requirements, if a valid file has been provided
+    if additional_requirements_file and os.path.isfile(additional_requirements_file):
+        command = f"{env_python} -m pip install -r {additional_requirements_file}"
+        call_command(command)
 
     # 2. Download models
     logging.info("Downloading resources.")
@@ -615,10 +624,21 @@ if __name__ == "__main__":
         help="Clean the disctory and optimize the downloaded resources",
         action="store_true",
     )
+    parser.add_argument(
+        "--requirements-file",
+        help="Path to requirements.txt file to install additional packages",
+        type=str,
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             'scripts', 'py', 'requirements.txt')
+    )
+
     args = parser.parse_args()
 
     if args.arena_cache_size < 0:
         raise ArgumentTypeError("Arena cache size cannot not be less than 0")
+
+    if not os.path.isfile(args.requirements_file):
+        raise ArgumentTypeError(f"Invalid requirements file: {args.requirements_file}")
 
     logging.basicConfig(filename="log_build_default.log", level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
@@ -628,4 +648,5 @@ if __name__ == "__main__":
         args.additional_ethos_u_config_name,
         args.arena_cache_size,
         args.clean,
+        args.requirements_file
     )

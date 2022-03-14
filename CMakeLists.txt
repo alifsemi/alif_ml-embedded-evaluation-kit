@@ -42,10 +42,11 @@ set(CMAKE_SCRIPTS_DIR   ${SCRIPTS_DIR}/cmake)
 set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
 set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
 set(DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
+set(CORE_PLATFORM_DIR   ${DEPENDENCY_ROOT_DIR}/core-platform)
 
 set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
                         CACHE PATH "Resources directory")
-set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/platform)
+set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/source/platform)
 
 include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
 
