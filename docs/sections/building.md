@@ -732,6 +732,9 @@ After compiling, your custom model has now replaced the default one in the appli
 > <https://pypi.org/project/ethos-u-vela/>.
 > The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
+> **Note:** Using the 22.02 versions of software dependencies will require Vela to be at least version 3.3.0
+> or you may encounter issues when trying to run applications on different variants of Ethos-U.
+
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.
 
