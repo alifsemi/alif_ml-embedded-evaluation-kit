@@ -21,12 +21,12 @@ from the cpp files.
 import datetime
 import glob
 import math
-import os
+from pathlib import Path
+from argparse import ArgumentParser
 
 import numpy as np
-from os import path
-from argparse import ArgumentParser
 from jinja2 import Environment, FileSystemLoader
+
 from gen_utils import AudioUtils
 
 parser = ArgumentParser()
@@ -45,7 +45,7 @@ parser.add_argument("--license_template", type=str, help="Header template file",
 parser.add_argument("-v", "--verbosity", action="store_true")
 args = parser.parse_args()
 
-env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
@@ -54,7 +54,7 @@ def write_hpp_file(header_filepath, cc_filepath, header_template_file, num_audio
     print(f"++ Generating {header_filepath}")
 
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
                                  year=datetime.datetime.now().year)
     env.get_template('AudioClips.hpp.template').stream(common_template_header=hdr,
@@ -77,8 +77,8 @@ def write_individual_audio_cc_file(clip_dirpath, clip_filename,
                                    cc_filename, header_template_file, array_name,
                                    sampling_rate_value, mono_value, offset_value,
                                    duration_value, res_type_value, min_len):
-    print(f"++ Converting {clip_filename} to {path.basename(cc_filename)}")
-    audio_filepath = path.join(clip_dirpath, clip_filename)
+    print(f"++ Converting {clip_filename} to {Path(cc_filename).name}")
+    audio_filepath = Path(clip_dirpath) / clip_filename
     clip_data, samplerate = AudioUtils.load_resample_audio_clip(audio_filepath,
                                                                 sampling_rate_value, mono_value,
                                                                 offset_value, duration_value,
@@ -90,7 +90,7 @@ def write_individual_audio_cc_file(clip_dirpath, clip_filename,
                         np.iinfo(np.int16).max).flatten().astype(np.int16)
 
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
                                  file_name=clip_filename,
                                  year=datetime.datetime.now().year)
@@ -114,25 +114,24 @@ def main(args):
     audioclip_array_names = []
     header_filename = "InputFiles.hpp"
     common_cc_filename = "InputFiles.cc"
-    header_filepath = path.join(args.header_folder_path, header_filename)
-    common_cc_filepath = path.join(args.source_folder_path, common_cc_filename)
+    header_filepath = Path(args.header_folder_path) / header_filename
+    common_cc_filepath = Path(args.source_folder_path) / common_cc_filename
 
-    if os.path.isdir(args.audio_path):
-        filepaths = sorted(glob.glob(path.join(args.audio_path, '**/*.wav'), recursive=True))
-    elif os.path.isfile(args.audio_path):
+    if Path(args.audio_path).is_dir():
+        filepaths = sorted(glob.glob(str(Path(args.audio_path) / '**/*.wav'), recursive=True))
+    elif Path(args.audio_path).is_file():
         filepaths = [args.audio_path]
     else:
         raise OSError("Directory or file does not exist.")
 
     for filepath in filepaths:
-        filename = path.basename(filepath)
-        clip_dirpath = path.dirname(filepath)
+        filename = Path(filepath).name
+        clip_dirpath = Path(filepath).parent
         try:
             audioclip_filenames.append(filename)
 
             # Save the cc file
-            cc_filename = path.join(args.source_folder_path,
-                                    (filename.rsplit(".")[0]).replace(" ", "_") + ".cc")
+            cc_filename = Path(args.source_folder_path) / (Path(filename).stem.replace(" ", "_") + ".cc")
             array_name = "audio" + str(audioclip_idx)
             array_size = write_individual_audio_cc_file(clip_dirpath, filename, cc_filename, args.license_template, array_name,
                                                         args.sampling_rate, args.mono, args.offset,

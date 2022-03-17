@@ -22,8 +22,9 @@ this script to be called as part of the build framework to auto-generate the
 cpp file with labels that can be used in the application without modification.
 """
 import datetime
-import os
+from pathlib import Path
 from argparse import ArgumentParser
+
 from jinja2 import Environment, FileSystemLoader
 
 parser = ArgumentParser()
@@ -42,7 +43,7 @@ parser.add_argument("--license_template", type=str, help="Header template file",
 
 args = parser.parse_args()
 
-env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
@@ -57,19 +58,18 @@ def main(args):
         raise Exception(f"no labels found in {args.label_file}")
 
     header_template = env.get_template(args.license_template)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
-                                 file_name=os.path.basename(args.labels_file),
+                                 file_name=Path(args.labels_file).name,
                                  year=datetime.datetime.now().year)
 
-    hpp_filename = os.path.join(args.header_folder_path, args.output_file_name + ".hpp")
+    hpp_filename = Path(args.header_folder_path) / (args.output_file_name + ".hpp")
     env.get_template('Labels.hpp.template').stream(common_template_header=hdr,
-                                                   filename=(args.output_file_name).upper(),
+                                                   filename=args.output_file_name.upper(),
                                                    namespaces=args.namespaces) \
         .dump(str(hpp_filename))
 
-
-    cc_filename = os.path.join(args.source_folder_path, args.output_file_name + ".cc")
+    cc_filename = Path(args.source_folder_path) / (args.output_file_name + ".cc")
     env.get_template('Labels.cc.template').stream(common_template_header=hdr,
                                                   labels=labels,
                                                   labelsSize=len(labels),

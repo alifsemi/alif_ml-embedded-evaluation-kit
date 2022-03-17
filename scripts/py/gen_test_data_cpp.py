@@ -39,18 +39,18 @@ parser.add_argument("-v", "--verbosity", action="store_true")
 
 args = parser.parse_args()
 
-env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
 
 def write_hpp_file(header_filename, cc_file_path, header_template_file, num_ifms, num_ofms,
                    ifm_array_names, ifm_sizes, ofm_array_names, ofm_sizes, iofm_data_type):
-    header_file_path = os.path.join(args.header_folder_path, header_filename)
+    header_file_path = Path(args.header_folder_path) / header_filename
 
     print(f"++ Generating {header_file_path}")
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
                                  year=datetime.datetime.now().year)
     env.get_template('TestData.hpp.template').stream(common_template_header=hdr,
@@ -74,15 +74,15 @@ def write_hpp_file(header_filename, cc_file_path, header_template_file, num_ifms
 
 
 def write_individual_cc_file(filename, cc_filename, header_filename, header_template_file, array_name, iofm_data_type):
-    print(f"++ Converting {filename} to {os.path.basename(cc_filename)}")
+    print(f"++ Converting {filename} to {cc_filename.name}")
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
-                                 file_name=os.path.basename(filename),
+                                 file_name=filename,
                                  year=datetime.datetime.now().year)
 
     # Convert the image and write it to the cc file
-    fm_data = (np.load(os.path.join(args.data_folder_path, filename))).flatten()
+    fm_data = (np.load(Path(args.data_folder_path) / filename)).flatten()
     type(fm_data.dtype)
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(fm_data, math.ceil(len(fm_data) / 20)))
@@ -104,8 +104,8 @@ def get_npy_vec_size(filename: str) -> int:
     Return:
         size in bytes
     """
-    data = np.load(os.path.join(args.data_folder_path, filename))
-    return (data.size * data.dtype.itemsize)
+    data = np.load(Path(args.data_folder_path) / filename)
+    return data.size * data.dtype.itemsize
 
 
 def main(args):
@@ -126,7 +126,7 @@ def main(args):
 
     iofm_data_type = "int8_t"
     if ifms_count > 0:
-        iofm_data_type = "int8_t" if (np.load(os.path.join(args.data_folder_path, "ifm0.npy")).dtype == np.int8) else "uint8_t"
+        iofm_data_type = "int8_t" if (np.load(Path(args.data_folder_path) / "ifm0.npy").dtype == np.int8) else "uint8_t"
 
     ifm_sizes = []
     ofm_sizes = []
@@ -136,7 +136,7 @@ def main(args):
         base_name = "ifm" + str(idx)
         filename = base_name+".npy"
         array_name = base_name + add_usecase_fname
-        cc_filename = os.path.join(args.source_folder_path, array_name + ".cc")
+        cc_filename = Path(args.source_folder_path) / (array_name + ".cc")
         ifm_array_names.append(array_name)
         write_individual_cc_file(filename, cc_filename, header_filename, args.license_template, array_name, iofm_data_type)
         ifm_sizes.append(get_npy_vec_size(filename))
@@ -146,12 +146,12 @@ def main(args):
         base_name = "ofm" + str(idx)
         filename = base_name+".npy"
         array_name = base_name + add_usecase_fname
-        cc_filename = os.path.join(args.source_folder_path, array_name + ".cc")
+        cc_filename = Path(args.source_folder_path) / (array_name + ".cc")
         ofm_array_names.append(array_name)
         write_individual_cc_file(filename, cc_filename, header_filename, args.license_template, array_name, iofm_data_type)
         ofm_sizes.append(get_npy_vec_size(filename))
 
-    common_cc_filepath = os.path.join(args.source_folder_path, common_cc_filename)
+    common_cc_filepath = Path(args.source_folder_path) / common_cc_filename
     write_hpp_file(header_filename, common_cc_filepath, args.license_template,
                    ifms_count, ofms_count, ifm_array_names, ifm_sizes, ofm_array_names, ofm_sizes, iofm_data_type)
 

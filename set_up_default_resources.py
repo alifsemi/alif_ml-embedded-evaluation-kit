@@ -27,6 +27,7 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from collections import namedtuple
 from urllib.error import URLError
+from pathlib import Path
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 
@@ -278,7 +279,7 @@ def get_default_npu_config_from_name(
     config_name: str, arena_cache_size: int = 0
 ) -> NPUConfig:
     """
-    Gets the file suffix for the tflite file from the
+    Gets the file suffix for the TFLite file from the
     `accelerator_config` string.
 
     Parameters:
@@ -309,10 +310,10 @@ def get_default_npu_config_from_name(
     memory_modes = ["Shared_Sram", "Dedicated_Sram"]
     system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
     memory_modes_arena = {
-        # For shared SRAM memory mode, we use the MPS3 SRAM size by default
+        # For shared SRAM memory mode, we use the MPS3 SRAM size by default.
         "Shared_Sram": mps3_max_sram_sz if arena_cache_size <= 0 else arena_cache_size,
-        # For dedicated SRAM memory mode, we do no override the arena size. This is expected to
-        # be defined in the vela configuration file instead.
+        # For dedicated SRAM memory mode, we do not override the arena size. This is expected to
+        # be defined in the Vela configuration file instead.
         "Dedicated_Sram": None if arena_cache_size <= 0 else arena_cache_size,
     }
 
@@ -333,9 +334,9 @@ def get_default_npu_config_from_name(
 
 def remove_tree_dir(dir_path):
     try:
-        # Remove the full directory
+        # Remove the full directory.
         shutil.rmtree(dir_path)
-        # Re-create an empty one
+        # Re-create an empty one.
         os.mkdir(dir_path)
     except Exception as e:
         logging.error(f"Failed to delete {dir_path}.")
@@ -343,7 +344,7 @@ def remove_tree_dir(dir_path):
 
 def set_up_resources(
     run_vela_on_models: bool = False,
-    additional_npu_config_names: list = (),
+    additional_npu_config_names: tuple = (),
     arena_cache_size: int = 0,
     check_clean_folder: bool = False,
     additional_requirements_file: str = "",
@@ -365,14 +366,10 @@ def set_up_resources(
                                         additional packages need to be
                                         installed.
     """
-    # Paths
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    download_dir = os.path.abspath(
-        os.path.join(current_file_dir, "resources_downloaded")
-    )
-    metadata_file_path = os.path.join(
-        download_dir, "resources_downloaded_metadata.json"
-    )
+    # Paths.
+    current_file_dir = Path(__file__).parent.resolve()
+    download_dir = current_file_dir / "resources_downloaded"
+    metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
     vela_version = "3.3.0"
@@ -390,17 +387,17 @@ def set_up_resources(
         )
 
     setup_script_hash_verified = False
-    setup_script_hash = get_md5sum_for_file(os.path.abspath(__file__))
+    setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
 
     try:
         #   1.1 Does the download dir exist?
-        os.mkdir(download_dir)
+        download_dir.mkdir()
     except OSError as e:
         if e.errno == errno.EEXIST:
             logging.info("'resources_downloaded' directory exists.")
             # Check and clean?
-            if check_clean_folder and os.path.isfile(metadata_file_path):
-                with open(metadata_file_path) as (metadata_file):
+            if check_clean_folder and metadata_file_path.is_file():
+                with open(metadata_file_path) as metadata_file:
                     metadata_dict = json.load(metadata_file)
                     vela_in_metadata = metadata_dict["ethosu_vela_version"]
                     if vela_in_metadata != vela_version:
@@ -421,15 +418,12 @@ def set_up_resources(
             raise
 
     # 1.2 Does the virtual environment exist?
-    env_python = str(
-        os.path.abspath(os.path.join(download_dir, "env", "bin", "python3"))
-    )
-    env_activate = str(
-        os.path.abspath(os.path.join(download_dir, "env", "bin", "activate"))
-    )
-    if not os.path.isdir(os.path.join(download_dir, "env")):
+    env_python = str(download_dir / "env" / "bin" / "python3")
+    env_activate = str(download_dir / "env" / "bin" / "activate")
+
+    if not (download_dir / "env").is_dir():
         os.chdir(download_dir)
-        # Create the virtual environment
+        # Create the virtual environment.
         command = "python3 -m venv env"
         call_command(command)
         commands = ["pip install --upgrade pip", "pip install --upgrade setuptools"]
@@ -459,10 +453,10 @@ def set_up_resources(
         res_url_prefix = uc["url_prefix"]
         try:
             #  Does the usecase_name download dir exist?
-            os.mkdir(os.path.join(download_dir, use_case_name))
+            (download_dir / use_case_name).mkdir()
         except OSError as e:
             if e.errno == errno.EEXIST:
-                # The usecase_name download dir exist
+                # The usecase_name download dir exist.
                 if check_clean_folder and not setup_script_hash_verified:
                     for idx, metadata_uc_url_prefix in enumerate(
                         [
@@ -473,7 +467,7 @@ def set_up_resources(
                     ):
                         if metadata_uc_url_prefix != res_url_prefix[idx]:
                             logging.info(f"Removing {use_case_name} resources.")
-                            remove_tree_dir(os.path.join(download_dir, use_case_name))
+                            remove_tree_dir(download_dir / use_case_name)
                             break
             elif e.errno != errno.EEXIST:
                 logging.error(f"Error creating {use_case_name} directory.")
@@ -492,9 +486,7 @@ def set_up_resources(
             if "sub_folder" in res:
                 try:
                     #  Does the usecase_name/sub_folder download dir exist?
-                    os.mkdir(
-                        os.path.join(download_dir, use_case_name, res["sub_folder"])
-                    )
+                    (download_dir / use_case_name / res["sub_folder"]).mkdir()
                 except OSError as e:
                     if e.errno != errno.EEXIST:
                         logging.error(
@@ -503,9 +495,9 @@ def set_up_resources(
                         raise
                 sub_folder = res["sub_folder"]
 
-            res_dst = os.path.join(download_dir, use_case_name, sub_folder, res_name)
+            res_dst = download_dir / use_case_name / sub_folder / res_name
 
-            if os.path.isfile(res_dst):
+            if res_dst.is_file():
                 logging.info(f"File {res_dst} exists, skipping download.")
             else:
                 try:
@@ -526,11 +518,9 @@ def set_up_resources(
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.
     if run_vela_on_models is True:
-        config_file = os.path.join(
-            current_file_dir, "scripts", "vela", "default_vela.ini"
-        )
+        config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
         models = [
-            os.path.join(dirpath, f)
+            Path(dirpath) / f
             for dirpath, dirnames, files in os.walk(download_dir)
             for f in fnmatch.filter(files, "*.tflite")
             if "vela" not in f
@@ -552,9 +542,9 @@ def set_up_resources(
         optimisation_skipped = False
 
         for model in models:
-            output_dir = os.path.dirname(model)
+            output_dir = model.parent
             # model name after compiling with vela is an initial model name + _vela suffix
-            vela_optimised_model_path = str(model).replace(".tflite", "_vela.tflite")
+            vela_optimised_model_path = model.parent / (model.stem + "_vela.tflite")
 
             for config in npu_configs:
                 vela_command_arena_cache_size = ""
@@ -575,14 +565,12 @@ def set_up_resources(
                     + f"{vela_command_arena_cache_size}"
                 )
 
-                # we want the name to include the configuration suffix. For example: vela_H128,
+                # We want the name to include the configuration suffix. For example: vela_H128,
                 # vela_Y512 etc.
                 new_suffix = "_vela_" + config.ethos_u_config_id + ".tflite"
-                new_vela_optimised_model_path = vela_optimised_model_path.replace(
-                    "_vela.tflite", new_suffix
-                )
+                new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
 
-                if os.path.isfile(new_vela_optimised_model_path):
+                if new_vela_optimised_model_path.is_file():
                     logging.info(
                         f"File {new_vela_optimised_model_path} exists, skipping optimisation."
                     )
@@ -591,8 +579,8 @@ def set_up_resources(
 
                 call_command(vela_command)
 
-                # rename default vela model
-                os.rename(vela_optimised_model_path, new_vela_optimised_model_path)
+                # Rename default vela model.
+                vela_optimised_model_path.rename(new_vela_optimised_model_path)
                 logging.info(
                     f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}."
                 )
@@ -636,19 +624,14 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--clean",
-        help="Clean the disctory and optimize the downloaded resources",
+        help="Clean the directory and optimize the downloaded resources",
         action="store_true",
     )
     parser.add_argument(
         "--requirements-file",
         help="Path to requirements.txt file to install additional packages",
         type=str,
-        default=os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "scripts",
-            "py",
-            "requirements.txt",
-        ),
+        default=Path(__file__).parent.resolve() / 'scripts' / 'py' / 'requirements.txt'
     )
 
     args = parser.parse_args()
@@ -656,7 +639,7 @@ if __name__ == "__main__":
     if args.arena_cache_size < 0:
         raise ArgumentTypeError("Arena cache size cannot not be less than 0")
 
-    if not os.path.isfile(args.requirements_file):
+    if not Path(args.requirements_file).is_file():
         raise ArgumentTypeError(f"Invalid requirements file: {args.requirements_file}")
 
     logging.basicConfig(filename="log_build_default.log", level=logging.DEBUG)

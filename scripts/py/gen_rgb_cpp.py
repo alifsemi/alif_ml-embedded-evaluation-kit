@@ -21,10 +21,10 @@ from the cpp files.
 import datetime
 import glob
 import math
-import os
-import numpy as np
-
+from pathlib import Path
 from argparse import ArgumentParser
+
+import numpy as np
 from PIL import Image, UnidentifiedImageError
 from jinja2 import Environment, FileSystemLoader
 
@@ -37,7 +37,7 @@ parser.add_argument("--license_template", type=str, help="Header template file",
                     default="header_template.txt")
 args = parser.parse_args()
 
-env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
@@ -46,7 +46,7 @@ def write_hpp_file(header_file_path, cc_file_path, header_template_file, num_ima
                    image_array_names, image_size):
     print(f"++ Generating {header_file_path}")
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
                                  year=datetime.datetime.now().year)
     env.get_template('Images.hpp.template').stream(common_template_header=hdr,
@@ -63,12 +63,12 @@ def write_hpp_file(header_file_path, cc_file_path, header_template_file, num_ima
 
 def write_individual_img_cc_file(image_filename, cc_filename, header_template_file, original_image,
                                  image_size, array_name):
-    print(f"++ Converting {image_filename} to {os.path.basename(cc_filename)}")
+    print(f"++ Converting {image_filename} to {cc_filename.name}")
 
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
-                                 file_name=os.path.basename(image_filename),
+                                 file_name=image_filename,
                                  year=datetime.datetime.now().year)
     # IFM size
     ifm_width = image_size[0]
@@ -104,16 +104,15 @@ def main(args):
     image_filenames = []
     image_array_names = []
 
-
-    if os.path.isdir(args.image_path):
-        filepaths = sorted(glob.glob(os.path.join(args.image_path, '**/*.*'), recursive=True))
-    elif os.path.isfile(args.image_path):
+    if Path(args.image_path).is_dir():
+        filepaths = sorted(glob.glob(str(Path(args.image_path) / '**/*.*'), recursive=True))
+    elif Path(args.image_path).is_file():
         filepaths = [args.image_path]
     else:
         raise OSError("Directory or file does not exist.")
 
     for filepath in filepaths:
-        filename = os.path.basename(filepath)
+        filename = Path(filepath).name
 
         try:
             original_image = Image.open(filepath).convert("RGB")
@@ -124,8 +123,7 @@ def main(args):
         image_filenames.append(filename)
 
         # Save the cc file
-        cc_filename = os.path.join(args.source_folder_path,
-                                   (filename.rsplit(".")[0]).replace(" ", "_") + ".cc")
+        cc_filename = Path(args.source_folder_path) / (Path(filename).stem.replace(" ", "_") + ".cc")
         array_name = "im" + str(image_idx)
         image_array_names.append(array_name)
         write_individual_img_cc_file(filename, cc_filename, args.license_template,
@@ -135,9 +133,9 @@ def main(args):
         image_idx = image_idx + 1
 
     header_filename = "InputFiles.hpp"
-    header_filepath = os.path.join(args.header_folder_path, header_filename)
+    header_filepath = Path(args.header_folder_path) / header_filename
     common_cc_filename = "InputFiles.cc"
-    common_cc_filepath = os.path.join(args.source_folder_path, common_cc_filename)
+    common_cc_filepath = Path(args.source_folder_path) / common_cc_filename
 
     if len(image_filenames) > 0:
         write_hpp_file(header_filepath, common_cc_filepath, args.license_template,

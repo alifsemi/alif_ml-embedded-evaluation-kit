@@ -22,6 +22,7 @@ import sys
 import threading
 from argparse import ArgumentDefaultsHelpFormatter
 from argparse import ArgumentParser
+from pathlib import Path
 
 from set_up_default_resources import default_npu_config_names
 from set_up_default_resources import get_default_npu_config_from_name
@@ -70,7 +71,7 @@ def run(
     npu_config_name(str)     :    Ethos-U NPU configuration name. See "valid_npu_config_names"
     """
 
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    current_file_dir = Path(__file__).parent.resolve()
 
     # 1. Make sure the toolchain is supported, and set the right one here
     supported_toolchain_ids = ["gnu", "arm"]
@@ -88,6 +89,7 @@ def run(
         set_up_resources(
             run_vela_on_models=run_vela_on_models,
             additional_npu_config_names=[npu_config_name],
+            additional_requirements_file=current_file_dir / "scripts" / "py" / "requirements.txt"
         )
 
     # 3. Build default configuration
@@ -95,20 +97,17 @@ def run(
     target_platform = "mps3"
     target_subsystem = "sse-300"
     ethos_u_cfg = get_default_npu_config_from_name(npu_config_name)
-    build_dir = os.path.join(
-        current_file_dir,
-        f"cmake-build-{target_platform}-{target_subsystem}-{npu_config_name}-{toolchain}",
-    )
+    build_dir = current_file_dir / f"cmake-build-{target_platform}-{target_subsystem}-{npu_config_name}-{toolchain}"
+
     try:
-        os.mkdir(build_dir)
+        build_dir.mkdir()
     except FileExistsError:
-        # Directory already exists, clean it
-        for filename in os.listdir(build_dir):
-            filepath = os.path.join(build_dir, filename)
+        # Directory already exists, clean it.
+        for filepath in build_dir.iterdir():
             try:
-                if os.path.isfile(filepath) or os.path.islink(filepath):
-                    os.unlink(filepath)
-                elif os.path.isdir(filepath):
+                if filepath.is_file() or filepath.is_symlink():
+                    filepath.unlink()
+                elif filepath.is_dir():
                     shutil.rmtree(filepath)
             except Exception as e:
                 logging.error(f"Failed to delete {filepath}. Reason: {e}")
@@ -116,9 +115,8 @@ def run(
     logpipe = PipeLogging(logging.INFO)
 
     os.chdir(build_dir)
-    cmake_toolchain_file = os.path.join(
-        current_file_dir, "scripts", "cmake", "toolchains", toolchain_file_name
-    )
+    cmake_toolchain_file = current_file_dir / "scripts" / "cmake" / "toolchains" / toolchain_file_name
+
     cmake_command = (
         f"cmake .. -DTARGET_PLATFORM={target_platform}"
         + f" -DTARGET_SUBSYSTEM={target_subsystem}"
@@ -149,9 +147,9 @@ if __name__ == "__main__":
         "--toolchain",
         default="gnu",
         help="""
-                        Specify the toolchain to use (Arm or GNU).
-                        Options are [gnu, arm]; default is gnu.
-                        """,
+            Specify the toolchain to use (Arm or GNU).
+            Options are [gnu, arm]; default is gnu.
+            """,
     )
     parser.add_argument(
         "--skip-download",
@@ -166,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
-                        {valid_npu_config_names}""",
+            {valid_npu_config_names}""",
         default=default_npu_config_names[0],
     )
     parser.add_argument(

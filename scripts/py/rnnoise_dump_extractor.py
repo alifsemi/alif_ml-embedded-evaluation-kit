@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 """
 This script can be used with the noise reduction use case to save
 the dumped noise reduced audio to a wav file.
@@ -20,13 +19,14 @@ the dumped noise reduced audio to a wav file.
 Example use:
 python rnnoise_dump_extractor.py --dump_file output.bin --output_dir ./denoised_wavs/
 """
+
 import soundfile as sf
 import numpy as np
 
 import argparse
 from os import path
-
 import struct
+
 
 def extract(fp, output_dir, export_npy):
     while True:
@@ -47,12 +47,14 @@ def extract(fp, output_dir, export_npy):
         if export_npy:
             output_file_name += ".npy"
             pack_format = "{}h".format(int(audio_clip_length/2))
-            npdata = np.array(struct.unpack(pack_format,audio_clip)).astype(np.int16)
+            npdata = np.array(struct.unpack(pack_format, audio_clip)).astype(np.int16)
             np.save(output_file_name, npdata)
             print("{} written to disk".format(output_file_name))
 
+
 def main(args):
     extract(args.dump_file, args.output_dir, args.export_npy)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dump_file", type=argparse.FileType('rb'), help="Dump file with audio files to extract.", required=True)
@@ -60,6 +62,5 @@ parser.add_argument("--output_dir", help="Output directory, Warning: Duplicated 
 parser.add_argument("--export_npy", help="Export the audio buffer in NumPy format", action="store_true")
 args = parser.parse_args()
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main(args)
-

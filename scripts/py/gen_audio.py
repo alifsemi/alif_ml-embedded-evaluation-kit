@@ -36,6 +36,7 @@ parser.add_argument("--min_samples", type=int, help="Minimum sample number.", de
 parser.add_argument("-v", "--verbosity", action="store_true")
 args = parser.parse_args()
 
+
 def main(args):
     audio_data, samplerate = AudioUtils.load_resample_audio_clip(args.audio_path,
                                                 args.sampling_rate,
@@ -43,6 +44,7 @@ def main(args):
                                                 args.duration, args.res_type,
                                                 args.min_samples)
     sf.write(path.join(args.output_dir, path.basename(args.audio_path)), audio_data, samplerate)
+
 
 if __name__ == '__main__':
     main(args)

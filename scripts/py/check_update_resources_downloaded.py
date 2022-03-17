@@ -13,11 +13,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import json
-import os
 import sys
 import hashlib
 from argparse import ArgumentParser
+from pathlib import Path
 
 
 def get_md5sum_for_file(filepath: str) -> str:
@@ -51,11 +52,9 @@ def check_update_resources_downloaded(
     set_up_script_path (string):       Specifies the path to set_up_default_resources.py file.
     """
 
-    metadata_file_path = os.path.join(
-        resource_downloaded_dir, "resources_downloaded_metadata.json"
-    )
+    metadata_file_path = Path(resource_downloaded_dir) / "resources_downloaded_metadata.json"
 
-    if os.path.isfile(metadata_file_path):
+    if metadata_file_path.is_file():
         with open(metadata_file_path) as metadata_json:
 
             metadata_dict = json.load(metadata_json)
@@ -95,8 +94,8 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    # Check validity of script path
-    if not os.path.isfile(args.setup_script_path):
+    # Check validity of script path.
+    if not Path(args.setup_script_path).is_file():
         raise ValueError(f'Invalid script path: {args.setup_script_path}')
 
     # Check the resources are downloaded as expected

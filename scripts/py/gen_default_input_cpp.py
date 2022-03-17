@@ -17,9 +17,9 @@
 Utility script to generate the minimum InputFiles.hpp and cpp files required by an application.
 """
 import datetime
-import os
-
+from pathlib import Path
 from argparse import ArgumentParser
+
 from jinja2 import Environment, FileSystemLoader
 
 parser = ArgumentParser()
@@ -28,7 +28,7 @@ parser.add_argument("--license_template", type=str, help="Header template file",
                     default="header_template.txt")
 args = parser.parse_args()
 
-env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
@@ -36,7 +36,7 @@ env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__)
 def write_hpp_file(header_file_path, header_template_file):
     print(f"++ Generating {header_file_path}")
     header_template = env.get_template(header_template_file)
-    hdr = header_template.render(script_name=os.path.basename(__file__),
+    hdr = header_template.render(script_name=Path(__file__).name,
                                  gen_time=datetime.datetime.now(),
                                  year=datetime.datetime.now().year)
     env.get_template('default.hpp.template').stream(common_template_header=hdr) \
@@ -45,7 +45,7 @@ def write_hpp_file(header_file_path, header_template_file):
 
 def main(args):
     header_filename = "InputFiles.hpp"
-    header_filepath = os.path.join(args.header_folder_path, header_filename)
+    header_filepath = Path(args.header_folder_path) / header_filename
     write_hpp_file(header_filepath, args.license_template)
 
 
