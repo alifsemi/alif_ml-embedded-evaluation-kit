@@ -21,7 +21,7 @@
 cmake_minimum_required(VERSION 3.15.6)
 
 set(CMSIS_DEVICE_TARGET cmsis_device)
-set(CPU_HEADER_TARGET cmsis_device_cpu_header)
+set(CPU_HEADER_TARGET rte_components)
 
 project(${CMSIS_DEVICE_TARGET}
     DESCRIPTION     "Generic CMSIS start up file for Cortex-M targets"

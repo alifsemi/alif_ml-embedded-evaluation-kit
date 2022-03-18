@@ -205,7 +205,7 @@ size, you must use the following approach:
 
     Note that the `itcm.bin` and `ddr.bin` files correspond to the part of the application residing in the first and
     second load region respectively, as defined in the
-    [scatter file](../../source/application/hal/platforms/bare-metal/bsp/mem_layout/mps3-sse-300.sct).
+    [scatter file](../../scripts/cmake/platforms/mps3/mps3-sse-300.sct).
 
 2. The `./bin/sectors/images.txt` file must be copied over to the MPS3. The exact location for the destination depends
    on the version of the MPS3 board and the application note for the bit file in use.

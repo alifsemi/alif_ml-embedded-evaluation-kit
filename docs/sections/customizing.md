@@ -755,9 +755,13 @@ location of the platform library sources.
 
 The function `platform_custom_post_build` could be used to add platform specific post use-case application build steps.
 
-Repository's root level CMakeLists.txt calls common utility function `add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})`
-to add given target platform to the build stream. The function finds the script and includes
-`build_configuration.cmake` file. After that public build can invoke:
+Repository's root level CMakeLists.txt calls common utility function
+
+```cmake
+add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
+```
+to add given target platform to the build stream. The function finds the script and includes `build_configuration.cmake`
+file. After that public build can invoke:
 
 - `set_platform_global_defaults`
 - `platform_custom_post_build`
@@ -784,18 +788,60 @@ it must tell linker about it like this:
     target_link_options(${PLATFORM_DRIVERS_TARGET} INTERFACE --entry <custom handler name>)
 ```
 
-Most of the ML use-case applications use UART and LCD, thus it is a hard requirement to implement at least stubs for
-those. UART driver must implement functions from `uart_stdout.h` header. LCD driver must provide implementation for
-functions declared in `glcd_mps3.h` header. For stubs examples, please, see simple platform sources.
+Most of the ML use-case applications use UART driven standard output (stdout), and LCD. It is therefore a hard
+requirement to implement at least stubs for those. LCD driver must provide implementation for functions declared in
+`lcd_img.h` header. The LCD component under HAL sources provides an implementation for MPS3's LCD peripheral as well
+as a stub. The application linking to the library produced by LCD has a choice of picking either target. For example,
+the MPS3 platform implementation has:
 
-If the new platform does not use UART, it is possible to run application with semi-hosting enabled - printf
-statements will be shown in the host machine console. Please, comment out all content of the
-`source/hal/profiles/bare-metal/bsp/retarget.c` file in this case.
+```cmake
+target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
+    <other libs>
+    lcd_mps3)
+```
+The implementation for simple platform on the other hand has:
+```cmake
+target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
+    <other libs>
+    lcd_stubs)
+```
 
-Examples of the UART and LCD drivers implementation could be found here: `source/hal/components`.
+The standard output (stdout) component follows the same convention. It can expose three targets:
 
-Linker scripts for armclang and GCC should be added. The location of the files is on your discretion. The new
-platform build configuration script must add it in the `platform_custom_post_build` function like this:
+- `stdout_retarget_cmsdk`
+- `stdout_retarget_pl011`
+- `stdout`
+
+The first two targets use the UART (pulling in `CMSDK UART` and `PL011 UART` drivers respectively). The third
+implementation relies on standard C or overridden implementation of `fgets` function and can be thought of as stubs
+for platforms that do not need to use UART driven stdout (and stderr) streams. It is also possible to run applications
+with semi-hosting enabled - `printf` statements will be shown in the host machine console, typically via a debugger.
+To facilitate this, the CMake toolchain files expose a function called `configure_semihosting`.  For supported targets
+semi-hosting is disabled by default, as mentioned in the `cmsis_device` target CMake file.
+
+```cmake
+configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
+```
+
+Other re-usable component is the NPU. It wraps the Arm Ethos-U NPU driver sources with functions that can be called
+from the platform initialisation routine. In addition to general utility functions, this component also provides
+**cache invalidation overrides** for the `weak` implementations available in the driver. This is useful for custom
+targets that use the data cache for the target CPU (typically enabled somewhere in the start-up code for the system).
+The driver will call these functions for invalidating data cache (memory regions the NPU has written to).
+
+> **Note**: To do the Arm Ethos-U interrupt set up, the NPU component should be provided with the base address of the
+> NPU as well as the IRQ number wired to the CPU. To set this up, the NPU component relies on the system specific
+> header files made available by the CMake interface target provided by the `cmsis_device` CMake project. If this
+> target is not used by the new custom platform implementation, the NPU component target must be given access to an
+> "RTE_Components.h" header in some way. This header should pull in the required definitions for functions like
+> `SCB_InvalidateDCache` and `NVIC_SetVector`. The pre-processor definitions like `__DCACHE_PRESENT` are also expected
+> to be exposed via the same header.
+
+Examples of the standard output, LCD and NPU components can be found here: `source/hal/source/components`.
+
+Linker scripts for Arm Compiler and GNU embedded toolchain should be added. The location of the files is
+on your discretion. The new platform build configuration script must add it in the `platform_custom_post_build`
+function like this:
 
 ```cmake
     add_linker_script(

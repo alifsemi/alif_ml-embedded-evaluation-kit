@@ -20,8 +20,8 @@
 #########################################################
 
 cmake_minimum_required(VERSION 3.15.6)
-set(ETHOS_U_NPU_INIT_COMPONENT ethos_u_npu)
-project(${ETHOS_U_NPU_INIT_COMPONENT}
+set(ETHOS_U_NPU_COMPONENT ethos_u_npu)
+project(${ETHOS_U_NPU_COMPONENT}
     DESCRIPTION     "Ethos-U NPU initialization library"
     LANGUAGES       C CXX ASM)
 
@@ -108,27 +108,41 @@ else()
         NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
 endif()
 # Create static library
-add_library(${ETHOS_U_NPU_INIT_COMPONENT} STATIC)
+add_library(${ETHOS_U_NPU_COMPONENT} STATIC)
 
 ## Include directories - public
-target_include_directories(${ETHOS_U_NPU_INIT_COMPONENT}
+target_include_directories(${ETHOS_U_NPU_COMPONENT}
     PUBLIC
     include
     ${SOURCE_GEN_DIR})
 
 ## Component sources
-target_sources(${ETHOS_U_NPU_INIT_COMPONENT}
+target_sources(${ETHOS_U_NPU_COMPONENT}
     PRIVATE
     ethosu_npu_init.c
     ethosu_cpu_cache.c)
 
 ## Add dependencies:
-target_link_libraries(${ETHOS_U_NPU_INIT_COMPONENT} PUBLIC
-    cmsis_device_cpu_header
+target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC
     ethosu_core_driver
     log)
 
-target_compile_definitions(${ETHOS_U_NPU_INIT_COMPONENT}
+## If the rte_components target has been defined, include it as a dependency here. This component
+## gives access to certain CPU related functions and definitions that should come from the CMSIS
+## or custom system setup and boot implementation files.
+## If the component is not defined as a target, a dependency for this target should be added by
+## the project importing this one.
+if (TARGET rte_components)
+    target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC
+        rte_components)
+else()
+    message(WARNING
+            "rte_components target not defined."
+            "${ETHOS_U_NPU_COMPONENT} will need to be provided access to"
+            "RTE_Compnents.h header to include CPU specific definitions.")
+endif()
+
+target_compile_definitions(${ETHOS_U_NPU_COMPONENT}
     PUBLIC
     ARM_NPU
     ${ETHOS_U_NPU_MEMORY_MODE_FLAG})
@@ -136,5 +150,5 @@ target_compile_definitions(${ETHOS_U_NPU_INIT_COMPONENT}
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${ETHOS_U_NPU_INIT_COMPONENT})
+message(STATUS "Library                                : " ${ETHOS_U_NPU_COMPONENT})
 message(STATUS "*******************************************************")
