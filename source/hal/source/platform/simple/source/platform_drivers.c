@@ -30,6 +30,14 @@
 #include "ethosu_ta_init.h"
 #endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
+#if defined(ETHOS_U_BASE_ADDR)
+    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
+        #error "NPU component configured with incorrect NPU base address."
+    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE == ETHOS_U_BASE_ADDR) */
+#else
+    #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
+#endif /* defined(ETHOS_U_BASE_ADDR) */
+
 #endif /* ARM_NPU */
 
 int platform_init(void)

@@ -31,6 +31,11 @@ project(${ETHOS_U_NPU_TA_COMPONENT}
     LANGUAGES       C CXX ASM)
 
 # Checks
+## Source generated Source path check
+if (NOT DEFINED SOURCE_GEN_DIR)
+    set(SOURCE_GEN_DIR ${CMAKE_BINARY_DIR}/generated/ta)
+endif()
+
 ## If a TA config file is provided, we generate a settings file
 if (DEFINED TA_CONFIG_FILE)
     include(${TA_CONFIG_FILE})

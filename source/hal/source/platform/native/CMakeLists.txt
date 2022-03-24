@@ -45,11 +45,6 @@ target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
     source/platform_drivers.c)
 
-## Platform definitions:
-target_compile_definitions(${PLATFORM_DRIVERS_TARGET}
-    PUBLIC
-    ACTIVATION_BUF_SRAM_SZ=0)
-
 ## Platform component directory
 if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)

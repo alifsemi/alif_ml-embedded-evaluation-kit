@@ -50,11 +50,6 @@
     #define ACTIVATION_BUF_SZ       0x00200000
 #endif  /* ACTIVATION_BUF_SZ */
 
-#ifndef ACTIVATION_BUF_SRAM_SZ
-    #warning  "ACTIVATION_BUF_SRAM_SZ needs to be defined. Using default value = 0"
-    #define ACTIVATION_BUF_SRAM_SZ  0x00000000
-#endif /* ACTIVATION_BUF_SRAM_SZ */
-
 /* IFM section name. */
 #define IFM_BUF_SECTION             section("ifm")
 

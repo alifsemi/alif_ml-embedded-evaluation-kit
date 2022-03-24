@@ -291,9 +291,7 @@ make -j
 ```
 
 will build the application that will expect the neural network model and the IFM to be loaded into
-specific addresses. These addresses are defined in
-[corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake) for the MPS3
-target.
+specific addresses. The default values for these addresses are defined in the use-case CMake file.
 
 ### Running the FVP with dynamic model loading
 

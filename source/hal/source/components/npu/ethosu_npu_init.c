@@ -18,8 +18,6 @@
 #include "ethosu_npu_init.h"
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
-#include "peripheral_memmap.h"      /* Peripheral memory map definitions. */
-#include "peripheral_irqs.h"        /* IRQ numbers for this platform. */
 #include "log_macros.h"             /* Logging functions */
 
 #include "ethosu_mem_config.h"      /* Arm Ethos-U memory config */
@@ -62,7 +60,7 @@ static void arm_ethosu_npu_irq_handler(void)
  **/
 static void arm_ethosu_npu_irq_init(void)
 {
-    const IRQn_Type ethosu_irqnum = (IRQn_Type)EthosU_IRQn;
+    const IRQn_Type ethosu_irqnum = (IRQn_Type)ETHOS_U_IRQN;
 
     /* Register the EthosU IRQ handler in our vector table.
      * Note, this handler comes from the EthosU driver */
@@ -83,15 +81,15 @@ int arm_ethosu_npu_init(void)
     arm_ethosu_npu_irq_init();
 
     /* Initialise Ethos-U device */
-    const void *ethosu_base_address = (void *)(SEC_ETHOS_U_NPU_BASE);
+    const void *ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
 
     if (0 != (err = ethosu_init(
                   &ethosu_drv,            /* Ethos-U driver device pointer */
                   ethosu_base_address,    /* Ethos-U NPU's base address. */
                   get_cache_arena(),      /* Pointer to fast mem area - NULL for U55. */
                   get_cache_arena_size(), /* Fast mem region size. */
-                  1,                      /* Security enable. */
-                  1)))                    /* Privilege enable. */
+                  ETHOS_U_SEC_ENABLED,    /* Security enable. */
+                  ETHOS_U_PRIV_ENABLED))) /* Privilege enable. */
     {
         printf_err("failed to initialise Ethos-U device\n");
         return err;

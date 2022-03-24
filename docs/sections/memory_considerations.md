@@ -35,24 +35,18 @@ The Arm® *Ethos™-U* NPU requests these Read and Write transactions over the f
 
 ## Memory available on the target platform
 
-Embedded target platforms supported have a description in the form of CMake files. These files
-have definitions that describe the memory regions and the peripheral base addresses.
+All embedded target platforms supported have platform specific header files that contain memory and other definitions.
+For example, MPS3 target header files can be found under the HAL sources' platform subdirectory and contains the
+following definitions:
 
-See the example for Arm® *Corstone™-300* description file [corstone-sse-300.cmake](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake). For the discussion on this page, it is useful to note the following definitions:
-
-```cmake
-set(ISRAM0_SIZE           "0x00100000" CACHE STRING "ISRAM0 size:       1 MiB")
-set(ISRAM1_SIZE           "0x00100000" CACHE STRING "ISRAM1 size:       1 MiB")
-...
-# SRAM size reserved for activation buffers
-math(EXPR ACTIVATION_BUF_SRAM_SZ "${ISRAM0_SIZE} + ${ISRAM1_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+```c
+#define ISRAM0_SIZE           (0x00100000)     /* ISRAM0 size */
+#define ISRAM1_SIZE           (0x00100000)     /* ISRAM1 size */
 ```
 
-This will set `ACTIVATION_BUF_SRAM_SZ` to be **2 MiB** for Arm® *Corstone™-300* target platform.
-As mentioned in the comments within the file, this size is directly linked to the size mentioned
-in the linker scripts, and therefore, it should not be changed without corresponding changes
-in the linker script too. For example, a snippet from the scatter file for Arm® *Corstone™-300*
-shows:
+As these SRAM banks are being used for holding the tensor arena, the total size should be limited to **2 MiB** for
+Arm® *Corstone™-300* target platform. This size is directly linked to the size mentioned in the linker scripts. See
+snippet from the scatter file for Arm® *Corstone™-300* below:
 
 ```log
 ;-----------------------------------------------------
@@ -67,8 +61,15 @@ isram.bin       0x31000000  UNINIT ALIGN 16 0x00200000
 }
 ```
 
-If the usable size of the internal SRAM was to be increased/decreased, the change should be
-made in both the linker script as well as the `corstone-300.cmake` definition.
+When not using the Arm Ethos-U NPU at all or using only Arm Ethos-U55 in `Shared_Sram` or `Sram_Only` modes, the limit
+in the linker script (and the platform memory definition header file) is applicable.
+
+However, for `Dedicated_Sram` memory mode (applies only for Arm Ethos-U65), the tensor arena will not sit in this
+SRAM space and therefore, the use case can be allowed to have larger `${use_case}_ACTIVATION_BUF_SZ`. See next section
+for more details on this.
+
+For custom requirements (like always placing the tensor arena in DDR), the user can change the `BufAttributes.hpp` file
+along with the linker scripts.
 
 ### Parameters linked to SRAM size definitions
 
@@ -89,8 +90,8 @@ buffers is. These are:
 
 - In every `usecase.cmake` file (present within each use case's source directory), there is
   a parameter called `${use_case}_ACTIVATION_BUF_SZ` set to a fixed value by default. This
-  default value should be less than the `ACTIVATION_BUF_SRAM_SZ` if the activation buffer needs
-  to be reserved in the target platform's SRAM region.
+  default value should be less than, or equal to, the available SRAM on the target platform if
+  the activation buffer needs to be reserved in the target platform's SRAM region.
 
 ## Understanding memory usage from Vela output
 
@@ -185,13 +186,8 @@ The evaluation kit uses the name `activation buffer` for the `tensor arena` in t
 Every use-case application has a corresponding `<use_case_name>_ACTIVATION_BUF_SZ` parameter that governs the maximum
 available size of the `activation buffer` for that particular use-case.
 
-The linker script is set up to place this memory region in SRAM for *Ethos-U55* and in flash for *Ethos-U65*.
-Every target platform has a profile definition in the form of a `CMake` file.
-
-For further information and an example, please refer to: [Corstone-300 profile](../../scripts/cmake/subsystem-profiles/corstone-sse-300.cmake).
-
-The parameter `ACTIVATION_BUF_SRAM_SZ` defines the maximum SRAM size available for the platform. This is propagated
-through the build system.
+The linker script is set up to place this memory region in SRAM for *Ethos-U55* or in flash for *Ethos-U65* (following
+the default memory modes of `Shared_Sram` and `Dedicated_Sram` respectively).
 
 The neural network model is always placed in the flash region (even in case of `Sram_Only` memory mode as mentioned earlier).
 

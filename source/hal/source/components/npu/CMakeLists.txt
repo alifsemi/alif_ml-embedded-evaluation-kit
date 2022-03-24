@@ -33,6 +33,12 @@ endif()
 # For the driver, we need to provide the CMSIS_PATH variable
 set(CMSIS_PATH ${CMSIS_SRC_PATH} CACHE PATH "Path to CMSIS directory")
 
+# Definitions that will be set.
+set(ETHOS_U_BASE_ADDR    "0x58102000"    CACHE STRING "Ethos-U NPU base address")
+set(ETHOS_U_IRQN         "56"            CACHE STRING "Ethos-U NPU Interrupt")
+set(ETHOS_U_SEC_ENABLED  "1"             CACHE STRING "Ethos-U NPU Security enable")
+set(ETHOS_U_PRIV_ENABLED "1"             CACHE STRING "Ethos-U NPU Privilege enable")
+
 # Driver needs to know what MAC configuration to build for.
 if(ETHOS_U_NPU_CONFIG_ID MATCHES "^[A-Z]([0-9]+$)")
     set(ETHOSU_MACS ${CMAKE_MATCH_1})
@@ -145,7 +151,11 @@ endif()
 target_compile_definitions(${ETHOS_U_NPU_COMPONENT}
     PUBLIC
     ARM_NPU
-    ${ETHOS_U_NPU_MEMORY_MODE_FLAG})
+    ${ETHOS_U_NPU_MEMORY_MODE_FLAG}
+    ETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR}
+    ETHOS_U_IRQN=${ETHOS_U_IRQN}
+    ETHOS_U_SEC_ENABLED=${ETHOS_U_SEC_ENABLED}
+    ETHOS_U_PRIV_ENABLED=${ETHOS_U_PRIV_ENABLED})
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

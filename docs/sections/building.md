@@ -911,16 +911,7 @@ For example, the generated utility functions for image classification are:
 These headers are generated using Python templates, that are located in `scripts/py/templates/*.template`:
 
 ```tree
-scripts/
-├── cmake
-│   ├── ...
-│   ├── subsystem-profiles
-│   │   └── corstone-sse-300.cmake
-│   ├── templates
-│   │   ├── mem_regions.h.template
-│   │   ├── peripheral_irqs.h.template
-│   │   └── peripheral_memmap.h.template
-│   └── ...
+scripts
 └── py
     ├── <generation scripts>
     ├── requirements.txt
@@ -1000,21 +991,10 @@ generate_tflite_code(
 > )
 > ```
 
-In addition to input file conversions, the correct platform, or system, profile is selected, in
-`scripts/cmake/subsystem-profiles/*.cmake`. It is based on `TARGET_SUBSYSTEM` build option and the variables set are
-used to generate memory region sizes, base addresses and IRQ numbers, respectively used to generate the `mem_region.h`,
-`peripheral_irqs.h`, and `peripheral_memmap.h` headers.
-
-Templates from `scripts/cmake/templates/*.template` are used to generate the header files.
-
 After the build, the files generated in the build folder are:
 
 ```tree
 build/generated/
-├── bsp
-│   ├── mem_regions.h
-│   ├── peripheral_irqs.h
-│   └── peripheral_memmap.h
 ├── <use_case_name1>
 │   ├── include
 │   │   ├── InputFiles.hpp

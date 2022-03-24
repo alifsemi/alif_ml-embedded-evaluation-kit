@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,29 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Auto-generated file
-// ** DO NOT EDIT **
 
 #ifndef PERIPHERAL_MEMMAP_H
 #define PERIPHERAL_MEMMAP_H
 
-#cmakedefine DESIGN_NAME              "@DESIGN_NAME@"
+#define DESIGN_NAME              "Simple platform"
 
 /******************************************************************************/
 /*                         Peripheral memory map                              */
 /******************************************************************************/
-#cmakedefine PL011_UART0_BASE         (@PL011_UART0_BASE@)       /* PL011 UART0 Base Address */
+#define PL011_UART0_BASE           (0x49303000)    /* PL011 UART0 Base Address */
 
-#cmakedefine ETHOS_U_NPU_BASE           (@ETHOS_U_NPU_BASE@)    /* Ethos-U NPU base address*/
-#cmakedefine ETHOS_U_NPU_TA0_BASE       (@ETHOS_U_NPU_TA0_BASE@)    /* Ethos-U NPU's timing adapter 0 base address */
-#cmakedefine ETHOS_U_NPU_TA1_BASE       (@ETHOS_U_NPU_TA1_BASE@)    /* Ethos-U NPU's timing adapter 1 base address */
+#define ETHOS_U_NPU_BASE           (0x48102000)    /* Ethos-U NPU base address*/
+#define ETHOS_U_NPU_TA0_BASE       (0x48103000)    /* Ethos-U NPU's timing adapter 0 base address */
+#define ETHOS_U_NPU_TA1_BASE       (0x48103200)    /* Ethos-U NPU's timing adapter 1 base address */
 
 /******************************************************************************/
 /*                      Secure Peripheral memory map                          */
 /******************************************************************************/
 
-#cmakedefine SEC_ETHOS_U_NPU_BASE       (@SEC_ETHOS_U_NPU_BASE@)   /* Ethos-U NPU base address*/
-#cmakedefine SEC_ETHOS_U_NPU_TA0_BASE   (@SEC_ETHOS_U_NPU_TA0_BASE@)   /* Ethos-U NPU's timing adapter 0 base address */
-#cmakedefine SEC_ETHOS_U_NPU_TA1_BASE   (@SEC_ETHOS_U_NPU_TA1_BASE@)   /* Ethos-U NPU's timing adapter 1 base address */
+#define SEC_ETHOS_U_NPU_BASE       (0x58102000)   /* Ethos-U NPU base address*/
+#define SEC_ETHOS_U_NPU_TA0_BASE   (0x58103000)   /* Ethos-U NPU's timing adapter 0 base address */
+#define SEC_ETHOS_U_NPU_TA1_BASE   (0x58103200)   /* Ethos-U NPU's timing adapter 1 base address */
 
 #endif /* PERIPHERAL_MEMMAP_H */
