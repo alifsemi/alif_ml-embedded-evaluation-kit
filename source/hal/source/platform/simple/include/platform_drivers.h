@@ -23,7 +23,8 @@
 /* Platform components */
 #include "RTE_Components.h"         /* For CPU related defintiions */
 #include "timer_simple_platform.h"  /* timer implementation */
-#include "user_input.h"             /* User input function */
+#include "platform_pmu.h"           /* PMU definitions and API */
+#include "user_input.h"             /* User input functions */
 #include "lcd_img.h"                /* LCD functions */
 
 /**

@@ -21,6 +21,7 @@
 #include "log_macros.h"     /* Logging related helpers. */
 #include "lcd_img.h"        /* LCD functions */
 #include "user_input.h"     /* User input function */
+#include "timer_native.h"   /* Native platform timer/profiler support */
 
 /**
  * @brief   Initialises the platform components.

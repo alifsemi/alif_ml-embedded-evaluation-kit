@@ -17,10 +17,17 @@
 #ifndef TIMER_MPS3_H
 #define TIMER_MPS3_H
 
+#include "platform_pmu.h"
+
 #include <stdint.h>
+#include <stdbool.h>
+
+#if defined (ARM_NPU)
+    #include "ethosu_profiler.h"    /* Arm Ethos-U NPU profiling functions. */
+#endif /* defined (ARM_NPU) */
 
 /* Container for timestamp up-counters. */
-typedef struct _mps3_time_counter {
+typedef struct mps3_pmu_counters_ {
     uint32_t    counter_1Hz;
     uint32_t    counter_100Hz;
 
@@ -29,65 +36,24 @@ typedef struct _mps3_time_counter {
 
     /* Running at processor core's internal clock rate, triggered by SysTick. */
     uint64_t    counter_systick;
-} base_time_counter;
+} mps3_pmu_counters;
 
+/**
+ * @brief   Resets the counters.
+ */
+void platform_reset_counters(void);
+
+/**
+ * @brief   Gets the current counter values.
+ * @returns A populated instance of pmu_counters struct.
+ **/
+pmu_counters platform_get_counters(void);
 
 /**
  * @brief  Gets the MPS3 core clock
  * @return Clock rate in Hz expressed as 32 bit unsigned integer.
  */
 uint32_t get_mps3_core_clock(void);
-
-/**
- * @brief   Resets the counters.
- */
-void timer_reset(void);
-
-/**
- * @brief   Gets the current counter values.
- * @returns Mps3 timer counter.
- **/
-base_time_counter get_time_counter(void);
-
-/**
- * @brief       Gets the duration elapsed between two counters in milliseconds.
- * @param[in]   start   Pointer to base_time_counter value at start time.
- * @param[in]   end     Pointer to base_time_counter value at end.
- * @returns     Difference in milliseconds between the two give counters
- *              expressed as an unsigned integer.
- **/
-uint32_t get_duration_milliseconds(base_time_counter *start,
-                                   base_time_counter *end);
-
-/**
- * @brief       Gets the duration elapsed between two counters in microseconds.
- * @param[in]   start   Pointer to base_time_counter value at start time.
- * @param[in]   end     Pointer to base_time_counter value at end.
- * @returns     Difference in microseconds between the two give counters
- *              expressed as an unsigned integer.
- **/
-uint32_t get_duration_microseconds(base_time_counter *start,
-                                   base_time_counter *end);
-
-/**
- * @brief       Gets the cycle counts elapsed between start and end.
- * @param[in]   start   Pointer to base_time_counter value at start time.
- * @param[in]   end     Pointer to base_time_counter value at end.
- * @return      Difference in counter values as 32 bit unsigned integer.
- **/
-uint64_t get_cycle_count_diff(base_time_counter *start,
-                              base_time_counter *end);
-
-/**
- * @brief   Enables or triggers cycle counting mechanism, if required
- *          by the platform.
- **/
-void start_cycle_counter(void);
-
-/**
- * @brief   Stops cycle counting mechanism, if required by the platform.
- **/
-void stop_cycle_counter(void);
 
 /**
  * @brief   System tick interrupt handler.

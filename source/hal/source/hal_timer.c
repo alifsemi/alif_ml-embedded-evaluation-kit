@@ -14,25 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BAREMETAL_TIMER_H
-#define BAREMETAL_TIMER_H
-
+#include "timer.h"
+#include "log_macros.h"
 #include "platform_drivers.h"
 
-#include <stdint.h>
-#include <time.h>
+#include <assert.h>
+#include <string.h>
+#include <inttypes.h>
 
-typedef struct bm_time_counter {
-    base_time_counter       counter;
+/**
+ * @brief       Initialiser for HAL timer.
+ * @param[in]   timer  Platform timer to initialize.
+ **/
+void init_timer(platform_timer* timer)
+{
+    assert(timer);
+    memset(timer, 0, sizeof(*timer));
 
-#if defined (ARM_NPU)
-    uint64_t                npu_total_ccnt;
-    uint32_t                npu_idle_ccnt;
-    uint32_t                npu_axi0_read_beats;
-    uint32_t                npu_axi0_write_beats;
-    uint32_t                npu_axi1_read_beats;
-#endif /* ARM_NPU */
+    timer->reset = platform_reset_counters;
+    timer->get_counters = platform_get_counters;
 
-} time_counter;
-
-#endif /* BAREMETAL_TIMER_H */
+    timer->reset();
+    timer->inited = 1;
+}

@@ -126,7 +126,8 @@ target_include_directories(${ETHOS_U_NPU_COMPONENT}
 target_sources(${ETHOS_U_NPU_COMPONENT}
     PRIVATE
     ethosu_npu_init.c
-    ethosu_cpu_cache.c)
+    ethosu_cpu_cache.c
+    ethosu_profiler.c)
 
 ## Add dependencies:
 target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC

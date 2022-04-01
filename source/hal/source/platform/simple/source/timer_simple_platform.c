@@ -16,8 +16,8 @@
  */
 #include "timer_simple_platform.h"
 
-#include "log_macros.h"     /* Logging macros */
-#include "RTE_Components.h" /* For CPU related defintiions */
+#include "log_macros.h"     /* Logging macros. */
+#include "RTE_Components.h" /* CPU definitions and functions. */
 
 #include <inttypes.h>
 
@@ -35,43 +35,83 @@ static uint64_t Get_SysTick_Cycle_Count(void);
  */
 static int Init_SysTick(void);
 
+/**
+ * @brief Adds one PMU counter to the counters' array
+ * @param value Value of the counter
+ * @param name  Name for the given counter
+ * @param unit  Unit for the "value"
+ * @param counters Pointer to the counter struct - the one to be populated.
+ * @return true if successfully added, false otherwise
+ */
+static bool add_pmu_counter(
+        uint64_t value,
+        const char* name,
+        const char* unit,
+        pmu_counters* counters);
 
-base_time_counter get_time_counter(void)
-{
-    base_time_counter t = {
-        .counter_systick = Get_SysTick_Cycle_Count()
-    };
-    debug("counter_systick: %" PRIu64 "\n", t.counter_systick);
-    return t;
-}
-
-void timer_reset(void)
+void platform_reset_counters(void)
 {
     if (0 != Init_SysTick()) {
         printf_err("Failed to initialise system tick config\n");
+        return;
     }
+
+#if defined(ARM_NPU)
+    ethosu_pmu_init();
+#endif /* defined (ARM_NPU) */
+
     debug("system tick config ready\n");
 }
 
-uint64_t get_cycle_count_diff(base_time_counter *start,
-                              base_time_counter *end)
+pmu_counters platform_get_counters(void)
 {
-    if (start->counter_systick > end->counter_systick) {
-        warn("start > end; counter might have overflown\n");
+    pmu_counters platform_counters = {
+        .num_counters = 0,
+        .initialised = true
+    };
+    uint32_t i = 0;
+
+#if defined (ARM_NPU)
+    ethosu_pmu_counters npu_counters = ethosu_get_pmu_counters();
+    for (i = 0; i < ETHOSU_PMU_NCOUNTERS; ++i) {
+        add_pmu_counter(
+                npu_counters.npu_evt_counters[i].counter_value,
+                npu_counters.npu_evt_counters[i].name,
+                npu_counters.npu_evt_counters[i].unit,
+                &platform_counters);
     }
-    return end->counter_systick - start->counter_systick;
-}
+    for (i = 0; i < ETHOSU_DERIVED_NCOUNTERS; ++i) {
+        add_pmu_counter(
+                npu_counters.npu_derived_counters[i].counter_value,
+                npu_counters.npu_derived_counters[i].name,
+                npu_counters.npu_derived_counters[i].unit,
+                &platform_counters);
+    }
+    add_pmu_counter(
+            npu_counters.npu_total_ccnt,
+            "NPU TOTAL",
+            "cycles",
+            &platform_counters);
+#endif /* defined (ARM_NPU) */
 
-void start_cycle_counter(void)
-{
-    /* Add any custom requirement for this platform here */
-}
+#if defined(CPU_PROFILE_ENABLED)
+    add_pmu_counter(
+            Get_SysTick_Cycle_Count(),
+            "CPU TOTAL",
+            "cycles",
+            &platform_counters);
+#endif /* defined(CPU_PROFILE_ENABLED) */
 
-void stop_cycle_counter(void)
-{
-    /* Add any custom requirement for this platform here */
-}
+#if !defined(CPU_PROFILE_ENABLED)
+    UNUSED(Get_SysTick_Cycle_Count);
+#if !defined(ARM_NPU)
+    UNUSED(add_pmu_counter);
+    UNUSED(i);
+#endif /* !defined(ARM_NPU) */
+#endif /* !defined(CPU_PROFILE_ENABLED) */
 
+    return platform_counters;
+}
 
 void SysTick_Handler(void)
 {
@@ -120,4 +160,21 @@ static int Init_SysTick(void)
     }
 
     return err;
+}
+
+static bool add_pmu_counter(uint64_t value,
+                            const char* name,
+                            const char* unit,
+                            pmu_counters* counters)
+{
+    const uint32_t idx = counters->num_counters;
+    if (idx < NUM_PMU_COUNTERS) {
+        counters->counters[idx].value = value;
+        counters->counters[idx].name = name;
+        counters->counters[idx].unit = unit;
+        ++counters->num_counters;
+        return true;
+    }
+    printf_err("Failed to add PMU counter!\n");
+    return false;
 }

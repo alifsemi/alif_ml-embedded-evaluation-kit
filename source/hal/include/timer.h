@@ -17,54 +17,20 @@
 #ifndef HAL_TIMER_H
 #define HAL_TIMER_H
 
-#include "platform_timer.h"
-
-/** Struct for describing the capabilities available for
- * the timer provided by HAL */
-typedef struct _platform_timer_capability {
-    uint32_t npu_cycles:    1;
-    uint32_t cpu_cycles:    1;
-    uint32_t duration_ms:   1;
-    uint32_t duration_us:   1;
-} timer_capability;
+#include "platform_drivers.h"  /* Platform package API */
+#include "user_input.h"        /* PMU structs and API */
 
 /* Structure to hold a platform specific timer implementation */
 typedef struct _platform_timer {
-    int inited;                 /**< initialised or not */
-    timer_capability cap;       /**< capability of this timer */
-
-    /* reset the timer */
-    void (* reset)(void);
-
-    /* Gets the current time counter. */
-    time_counter (* get_time_counter)(void);
-
-    /* Gets the duration in milliseconds. */
-    time_t (* get_duration_ms)(time_counter *start, time_counter *end);
-
-    /* Gets duration in microseconds. */
-    time_t (* get_duration_us)(time_counter *start, time_counter *end);
-
-    /* Gets difference in CPU cycle counts. */
-    uint64_t (* get_cpu_cycle_diff)(time_counter *start, time_counter *end);
-
-    /* Gets the difference in terms of cycle counts for collected pmu counters. */
-    int (* get_npu_cycles_diff)(time_counter *start, time_counter *end,
-                                uint64_t* pmu_counters_values, size_t size);
-
-    /* Wraps get_time_counter function with additional profiling
-     * initialisation, if required. */
-    time_counter (* start_profiling)(void);
-
-    /* Wraps get_time_counter function along with additional instructions when
-     * profiling ends, if required. */
-    time_counter (* stop_profiling)(void);
+    int inited;                           /**< Initialised or not. */
+    void (* reset)(void);                 /**< Reset the timer. */
+    pmu_counters (* get_counters)(void);  /**< Gets the current time counter. */
 
 } platform_timer;
 
 /**
  * @brief   Initialise the timer available for the platform.
  **/
-void init_timer(platform_timer *timer);
+void init_timer(platform_timer* timer);
 
 #endif /* HAL_TIMER_H */

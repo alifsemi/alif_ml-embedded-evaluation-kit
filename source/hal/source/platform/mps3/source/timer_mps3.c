@@ -32,7 +32,28 @@ static uint64_t Get_SysTick_Cycle_Count(void);
  */
 static int Init_SysTick(void);
 
-void timer_reset(void)
+/**
+ * @brief Adds one PMU counter to the counters' array
+ * @param value Value of the counter
+ * @param name  Name for the given counter
+ * @param unit  Unit for the "value"
+ * @param counters Pointer to the counter struct - the one to be populated.
+ * @return true if successfully added, false otherwise
+ */
+static bool add_pmu_counter(
+        uint64_t value,
+        const char* name,
+        const char* unit,
+        pmu_counters* counters);
+
+/**
+ * @brief Gets the evaluated millisecond timestamp from the given MPS3 counter struct.
+ * @param mps3_counters     Pointer to the MPS3 counters.
+ * @return microseconds timestamp as 32 bit unsigned integer.
+ */
+static uint32_t get_tstamp_milliseconds(mps3_pmu_counters* mps3_counters);
+
+void platform_reset_counters(void)
 {
     MPS3_FPGAIO->CLK1HZ   = 0;
     MPS3_FPGAIO->CLK100HZ = 0;
@@ -42,85 +63,93 @@ void timer_reset(void)
         printf_err("Failed to initialise system tick config\n");
     }
     debug("system tick config ready\n");
+
+#if defined (ARM_NPU)
+    ethosu_pmu_init();
+#endif /* defined (ARM_NPU) */
 }
 
-base_time_counter get_time_counter(void)
+pmu_counters platform_get_counters(void)
 {
-    base_time_counter t = {
-        .counter_1Hz        = MPS3_FPGAIO->CLK1HZ,
-        .counter_100Hz      = MPS3_FPGAIO->CLK100HZ,
-        .counter_fpga       = MPS3_FPGAIO->COUNTER,
-        .counter_systick    = Get_SysTick_Cycle_Count()
+    pmu_counters platform_counters = {
+        .num_counters = 0,
+        .initialised = true
     };
-    debug("Timestamp:\n");
-    debug("\tCounter 1 Hz:   %" PRIu32 "\n", t.counter_1Hz);
-    debug("\tCounter 100 Hz: %" PRIu32 "\n", t.counter_100Hz);
-    debug("\tCounter FPGA:   %" PRIu32 "\n", t.counter_fpga);
-    debug("\tCounter CPU:    %" PRIu64 "\n", t.counter_systick);
-    return t;
+    uint32_t i = 0;
+
+#if defined (ARM_NPU)
+    ethosu_pmu_counters npu_counters = ethosu_get_pmu_counters();
+    for (i = 0; i < ETHOSU_PMU_NCOUNTERS; ++i) {
+        add_pmu_counter(
+            npu_counters.npu_evt_counters[i].counter_value,
+            npu_counters.npu_evt_counters[i].name,
+            npu_counters.npu_evt_counters[i].unit,
+            &platform_counters);
+    }
+    for (i = 0; i < ETHOSU_DERIVED_NCOUNTERS; ++i) {
+        add_pmu_counter(
+            npu_counters.npu_derived_counters[i].counter_value,
+            npu_counters.npu_derived_counters[i].name,
+            npu_counters.npu_derived_counters[i].unit,
+            &platform_counters);
+    }
+    add_pmu_counter(
+        npu_counters.npu_total_ccnt,
+        "NPU TOTAL",
+        "cycles",
+        &platform_counters);
+#endif /* defined (ARM_NPU) */
+
+#if defined(CPU_PROFILE_ENABLED)
+    mps3_pmu_counters mps3_counters = {
+            .counter_1Hz        = MPS3_FPGAIO->CLK1HZ,
+            .counter_100Hz      = MPS3_FPGAIO->CLK100HZ,
+            .counter_fpga       = MPS3_FPGAIO->COUNTER,
+            .counter_systick    = Get_SysTick_Cycle_Count()
+    };
+
+    add_pmu_counter(
+            mps3_counters.counter_systick,
+            "CPU TOTAL",
+            "cycles",
+            &platform_counters);
+
+    add_pmu_counter(
+            get_tstamp_milliseconds(&mps3_counters),
+            "DURATION",
+            "milliseconds",
+            &platform_counters);
+#endif /* defined(CPU_PROFILE_ENABLED) */
+
+#if !defined(CPU_PROFILE_ENABLED)
+    UNUSED(get_tstamp_milliseconds);
+    UNUSED(Get_SysTick_Cycle_Count);
+#if !defined(ARM_NPU)
+    UNUSED(add_pmu_counter);
+    UNUSED(i);
+#endif /* !defined(ARM_NPU) */
+#endif /* !defined(CPU_PROFILE_ENABLED) */
+
+    return platform_counters;
 }
 
-/**
- * Please note, that there are no checks for overflow in this function => if
- * the time elapsed has been big (in days) this could happen and is currently
- * not handled.
- **/
-uint32_t get_duration_milliseconds(base_time_counter *start,
-                                   base_time_counter *end)
+uint32_t get_mps3_core_clock(void)
 {
-    uint32_t time_elapsed = 0;
-    if (end->counter_100Hz > start->counter_100Hz) {
-        time_elapsed = (end->counter_100Hz - start->counter_100Hz) * 10;
-    } else {
-        time_elapsed = (end->counter_1Hz - start->counter_1Hz) * 1000 +
-            ((0xFFFFFFFF - start->counter_100Hz) + end->counter_100Hz + 1) * 10;
+    const uint32_t default_clock = 32000000 /* 32 MHz clock */;
+    static int warned_once = 0;
+    if (0 != MPS3_SCC->CFG_ACLK) {
+        if (default_clock != MPS3_SCC->CFG_ACLK) {
+            warn("System clock is different to the MPS3 config set clock.\n");
+        }
+        return MPS3_SCC->CFG_ACLK;
     }
 
-    /* If the time elapsed is less than 100ms, use microseconds count to be
-     * more precise */
-    if (time_elapsed < 100) {
-        debug("Using the microsecond function instead..\n");
-        return get_duration_microseconds(start, end)/1000;
+    if (!warned_once) {
+        warn("MPS3_SCC->CFG_ACLK reads 0. Assuming default clock of %" PRIu32 "\n",
+             default_clock);
+        warned_once = 1;
     }
-
-    return time_elapsed;
-}
-
-/**
- * Like the microsecond counterpart, this function could return wrong results when
- * the counter (MAINCLK) overflows. There are no overflow counters available.
- **/
-uint32_t get_duration_microseconds(base_time_counter *start,
-                                   base_time_counter *end)
-{
-    const int divisor = get_mps3_core_clock()/1000000;
-    uint32_t time_elapsed = 0;
-    if (end->counter_fpga > start->counter_fpga) {
-        time_elapsed = (end->counter_fpga - start->counter_fpga)/divisor;
-    } else {
-        time_elapsed = ((0xFFFFFFFF - end->counter_fpga)
-            + start->counter_fpga + 1)/divisor;
-    }
-    return time_elapsed;
-}
-
-uint64_t get_cycle_count_diff(base_time_counter *start,
-                              base_time_counter *end)
-{
-    if (start->counter_systick > end->counter_systick) {
-        warn("start > end; counter might have overflown\n");
-    }
-    return end->counter_systick - start->counter_systick;
-}
-
-void start_cycle_counter(void)
-{
-    /* Nothing to do for FPGA */
-}
-
-void stop_cycle_counter(void)
-{
-    /* Nothing to do for FPGA */
+    return default_clock;
 }
 
 void SysTick_Handler(void)
@@ -173,21 +202,30 @@ static int Init_SysTick(void)
     return err;
 }
 
-uint32_t get_mps3_core_clock(void)
+static bool add_pmu_counter(uint64_t value,
+                            const char* name,
+                            const char* unit,
+                            pmu_counters* counters)
 {
-    const uint32_t default_clock = 32000000 /* 32 MHz clock */;
-    static int warned_once = 0;
-    if (0 != MPS3_SCC->CFG_ACLK) {
-        if (default_clock != MPS3_SCC->CFG_ACLK) {
-            warn("System clock is different to the MPS3 config set clock.\n");
-        }
-        return MPS3_SCC->CFG_ACLK;
-    }
+    const uint32_t idx = counters->num_counters;
+    if (idx < NUM_PMU_COUNTERS) {
+        counters->counters[idx].value = value;
+        counters->counters[idx].name = name;
+        counters->counters[idx].unit = unit;
+        ++counters->num_counters;
 
-    if (!warned_once) {
-        warn("MPS3_SCC->CFG_ACLK reads 0. Assuming default clock of %" PRIu32 "\n",
-            default_clock);
-        warned_once = 1;
+        debug("%s: %" PRIu64 " %s\n", name, value, unit);
+        return true;
     }
-    return default_clock;
+    printf_err("Failed to add PMU counter!\n");
+    return false;
+}
+
+static uint32_t get_tstamp_milliseconds(mps3_pmu_counters* mps3_counters)
+{
+    const uint32_t divisor = get_mps3_core_clock() / 1000;
+    if (mps3_counters->counter_100Hz > 100) {
+        return (mps3_counters->counter_100Hz * 10);
+    }
+    return (mps3_counters->counter_systick/divisor);
 }

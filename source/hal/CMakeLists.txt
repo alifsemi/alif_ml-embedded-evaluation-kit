@@ -30,20 +30,10 @@ project(${HAL_TARGET}
 # Create static library
 add_library(${HAL_TARGET} STATIC)
 
-# Select which profile needs to be used:
-if (${CMAKE_CROSSCOMPILING})
-    set(PLATFORM_PROFILE bare-metal)
-else()
-    set(PLATFORM_PROFILE native)
-endif()
-
-set(PLATFORM_PROFILE_DIR    source/profiles/${PLATFORM_PROFILE})
-
 ## Common include directories - public
 target_include_directories(${HAL_TARGET}
     PUBLIC
-    include
-    ${PLATFORM_PROFILE_DIR}/timer/include)
+    include)
 
 ## Common sources for all profiles
 target_sources(${HAL_TARGET}
@@ -51,7 +41,7 @@ target_sources(${HAL_TARGET}
     source/hal.c
     source/data_psn.c
     source/data_acq.c
-    ${PLATFORM_PROFILE_DIR}/timer/platform_timer.c)
+    source/hal_timer.c)
 
 if (DEFINED VERIFY_TEST_OUTPUT)
     message(STATUS "Test output verification flag is: ${VERIFY_TEST_OUTPUT}")

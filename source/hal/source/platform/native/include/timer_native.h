@@ -14,18 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef NATIVE_TIMER_H
+#define NATIVE_TIMER_H
+
+#include "platform_pmu.h"
 
 #include <stdint.h>
 #include <time.h>
 
-/* Container for time struct */
-typedef struct _time_counter {
-    /* Current POSIX time in secs. */
-    time_t current_secs;
-    /* Nanoseconds expired in current second. */
-    time_t current_nsecs;
-} time_counter;
+/**
+ * @brief   Resets the counters.
+ */
+void platform_reset_counters(void);
 
-#endif /* TIMER_H */
+/**
+ * @brief   Gets the current counter values.
+ * @returns A populated instance of pmu_counters struct.
+ **/
+pmu_counters platform_get_counters(void);
+
+#endif /* NATIVE_TIMER_H */

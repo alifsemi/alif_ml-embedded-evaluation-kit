@@ -45,14 +45,7 @@ namespace app {
 
     /** A single profiling unit definition. */
     struct ProfilingUnit {
-        uint64_t npuCycles = 0;
-        uint64_t activeNpuCycles = 0;
-        uint64_t idleNpuCycles = 0;
-        uint64_t axi0writes = 0;
-        uint64_t axi0reads = 0;
-        uint64_t axi1reads = 0;
-        uint64_t cpuCycles = 0;
-        time_t time = 0;
+        pmu_counters counters;
     };
 
     /* A collection of profiling units. */
@@ -108,8 +101,8 @@ namespace app {
 
     private:
         ProfilingMap    m_series;                /* Profiling series map. */
-        time_counter    m_tstampSt{};            /* Container for a current starting timestamp. */
-        time_counter    m_tstampEnd{};           /* Container for a current ending timestamp. */
+        pmu_counters    m_tstampSt{};            /* Container for a current starting timestamp. */
+        pmu_counters    m_tstampEnd{};           /* Container for a current ending timestamp. */
         hal_platform *  m_pPlatform = nullptr;   /* Platform pointer - to get the timer. */
 
         bool            m_started = false;       /* Indicates profiler has been started. */
@@ -125,7 +118,7 @@ namespace app {
          * @param[in]   name    Name for the profiling unit series to be
          *                      appended to.
          **/
-        void AddProfilingUnit(time_counter start, time_counter end,
+        void AddProfilingUnit(pmu_counters start, pmu_counters end,
                               const std::string& name);
     };
 

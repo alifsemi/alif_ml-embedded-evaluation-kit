@@ -42,13 +42,13 @@ int arm_ethosu_timing_adapter_init(void)
         .histbin = TA0_HISTBIN,
         .histcnt = TA0_HISTCNT};
 
-    if (0 != ta_init(&ta_0, TA0_BASE))
-    {
+    if (0 != ta_init(&ta_0, TA0_BASE)) {
         printf_err("TA0 initialisation failed\n");
         return 1;
     }
 
     ta_set_all(&ta_0, &ta_0_settings);
+    info("TA0 values set\n");
 #endif /* defined (TA0_BASE) */
 
 #if defined(TA1_BASE)
@@ -76,6 +76,7 @@ int arm_ethosu_timing_adapter_init(void)
     }
 
     ta_set_all(&ta_1, &ta_1_settings);
+    info("TA1 values set\n");
 #endif /* defined (TA1_BASE) */
 
     return 0;

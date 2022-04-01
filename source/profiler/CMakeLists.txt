@@ -31,17 +31,8 @@ target_sources(profiler
 
 target_include_directories(profiler PUBLIC include)
 
-# Set the CPU profiling defintiion
-if (CPU_PROFILE_ENABLED)
-    target_compile_definitions(profiler PRIVATE CPU_PROFILE_ENABLED)
-endif()
-
 # Profiling API depends on the logging interface and the HAL library.
 target_link_libraries(profiler PRIVATE log hal)
-
-# Set the CPU profiling defintiion
-target_compile_definitions(profiler PUBLIC
-        $<$<BOOL:${CPU_PROFILE_ENABLED}>:CPU_PROFILE_ENABLED>)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

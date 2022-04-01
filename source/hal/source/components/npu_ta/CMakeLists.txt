@@ -36,6 +36,10 @@ if (NOT DEFINED SOURCE_GEN_DIR)
     set(SOURCE_GEN_DIR ${CMAKE_BINARY_DIR}/generated/ta)
 endif()
 
+# Base address definitions for the two timing adapters (platform should override these):
+set(TA0_BASE            "0x58103000"    CACHE STRING "Ethos-U NPU timing adapter 0")
+set(TA1_BASE            "0x58103200"    CACHE STRING "Ethos-U NPU timing adapter 1")
+
 ## If a TA config file is provided, we generate a settings file
 if (DEFINED TA_CONFIG_FILE)
     include(${TA_CONFIG_FILE})

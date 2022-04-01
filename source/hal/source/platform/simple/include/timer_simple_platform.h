@@ -16,42 +16,25 @@
  */
 #ifndef TIMER_SIMPLE_PLATFORM_H
 #define TIMER_SIMPLE_PLATFORM_H
+
+#include "platform_pmu.h"
+
+#if defined (ARM_NPU)
+    #include "ethosu_profiler.h"    /* Arm Ethos-U NPU profiling functions. */
+#endif /* defined (ARM_NPU) */
+
 #include <stdint.h>
-
-#include "RTE_Components.h"
-
-/* Container for timestamp for simple platform. */
-typedef struct _generic_time_counter {
-    uint64_t    counter_systick;
-} base_time_counter;
 
 /**
  * @brief   Resets the counters.
  */
-void timer_reset(void);
+void platform_reset_counters(void);
 
 /**
  * @brief   Gets the current counter values.
- * @returns counter struct.
+ * @returns A populated instance of pmu_counters struct.
  **/
-base_time_counter get_time_counter(void);
-
-/**
- * @brief   Gets the cycle counts elapsed between start and end.
- * @return  difference in counter values as 32 bit unsigned integer.
- */
-uint64_t get_cycle_count_diff(base_time_counter *start, base_time_counter *end);
-
-/**
- * @brief   Enables or triggers cycle counting mechanism, if required
- *          by the platform.
- */
-void start_cycle_counter(void);
-
-/**
- * @brief   Stops cycle counting mechanism, if required by the platform.
- */
-void stop_cycle_counter(void);
+pmu_counters platform_get_counters(void);
 
 /**
  * @brief   System tick interrupt handler.

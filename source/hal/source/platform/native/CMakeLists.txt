@@ -43,7 +43,8 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
-    source/platform_drivers.c)
+    source/platform_drivers.c
+    source/timer_native.c)
 
 ## Platform component directory
 if (NOT DEFINED COMPONENTS_DIR)
@@ -57,10 +58,14 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
+## Platform component: PMU
+add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
     log
+    platform_pmu
     stdout
     lcd_stubs)
 

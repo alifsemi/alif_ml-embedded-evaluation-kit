@@ -206,7 +206,7 @@ The build parameters are:
   `ETHOS_U_NPU_ID` is `U65`. Default value is 393216 (see [default_vela.ini](../../scripts/vela/default_vela.ini) ).
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
-  set to false, but can be turned on for FPGA targets. The the FVP and the CPU core cycle counts are not meaningful and
+  set to false, but can be turned on for FPGA targets. The FVP and the CPU core cycle counts are **not** meaningful and
   are not to be used.
 
 - `LOG_LEVEL`: Sets the verbosity level for the output of the application over `UART`, or `stdout`. Valid values are:

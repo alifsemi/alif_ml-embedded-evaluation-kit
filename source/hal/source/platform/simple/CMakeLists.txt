@@ -31,13 +31,18 @@ if (NOT ${CMAKE_CROSSCOMPILING})
 endif()
 
 # Define target specific values here (before adding the components)
-set(UART0_BASE          "0x49303000"    CACHE STRING "UART base address")
-set(UART0_BAUDRATE      "115200"        CACHE STRING "UART baudrate")
-set(SYSTEM_CORE_CLOCK   "25000000"      CACHE STRING "System peripheral clock (Hz)")
-set(ETHOS_U_BASE_ADDR   "0x58102000"    CACHE STRING "Ethos-U NPU base address")
-set(ETHOS_U_IRQN        "56"            CACHE STRING "Ethos-U55 Interrupt")
+set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
+set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
+set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
+set(ETHOS_U_BASE_ADDR    "0x58102000"   CACHE STRING "Ethos-U NPU base address")
+set(ETHOS_U_IRQN         "56"           CACHE STRING "Ethos-U55 Interrupt")
 set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
 set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
+
+if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+    set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
+    set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+endif()
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
@@ -69,12 +74,21 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
+## Platform component: PMU
+add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         cmsis_device
         log
+        platform_pmu
         lcd_stubs
         $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)
+
+# Set the CPU profiling definition
+if (CPU_PROFILE_ENABLED)
+    target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC CPU_PROFILE_ENABLED)
+endif()
 
 # If Ethos-U is enabled, we need the driver library too
 if (ETHOS_U_NPU_ENABLED)
