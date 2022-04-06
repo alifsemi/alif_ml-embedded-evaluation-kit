@@ -53,11 +53,10 @@ namespace app {
     /**
      * @brief           Presents kws inference results using the data presentation
      *                  object.
-     * @param[in]       platform    reference to the hal platform object
      * @param[in]       results     vector of classification results to be displayed
      * @return          true if successful, false otherwise
      **/
-    static bool PresentInferenceResult(hal_platform& platform, std::vector<arm::app::kws::KwsResult>& results);
+    static bool PresentInferenceResult(std::vector<arm::app::kws::KwsResult>& results);
 
     /**
      * @brief           Presents asr inference results using the data presentation
@@ -66,7 +65,7 @@ namespace app {
      * @param[in]       results     vector of classification results to be displayed
      * @return          true if successful, false otherwise
      **/
-    static bool PresentInferenceResult(hal_platform& platform, std::vector<arm::app::asr::AsrResult>& results);
+    static bool PresentInferenceResult(std::vector<arm::app::asr::AsrResult>& results);
 
     /**
      * @brief Returns a function to perform feature calculation and populates input tensor data with
@@ -186,9 +185,8 @@ namespace app {
         std::vector<arm::app::kws::KwsResult> kwsResults;
 
         /* Display message on the LCD - inference running. */
-        auto& platform = ctx.Get<hal_platform&>("platform");
         std::string str_inf{"Running KWS inference... "};
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                             str_inf.c_str(), str_inf.size(),
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
@@ -258,11 +256,11 @@ namespace app {
 
         /* Erase. */
         str_inf = std::string(str_inf.size(), ' ');
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                             str_inf.c_str(), str_inf.size(),
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
-        if (!PresentInferenceResult(platform, kwsResults)) {
+        if (!PresentInferenceResult(kwsResults)) {
             return output;
         }
 
@@ -285,8 +283,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
         auto& profiler = ctx.Get<Profiler&>("profiler");
-        auto& platform = ctx.Get<hal_platform&>("platform");
-        platform.data_psn->clear(COLOR_BLACK);
+        hal_lcd_clear(COLOR_BLACK);
 
         /* Get model reference. */
         auto& asrModel = ctx.Get<Model&>("asrmodel");
@@ -356,7 +353,7 @@ namespace app {
 
         /* Display message on the LCD - inference running. */
         std::string str_inf{"Running ASR inference... "};
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                 str_inf.c_str(), str_inf.size(),
                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
@@ -407,11 +404,11 @@ namespace app {
 
             /* Erase */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                         str_inf.c_str(), str_inf.size(),
                         dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
         }
-        if (!PresentInferenceResult(platform, asrResults)) {
+        if (!PresentInferenceResult(asrResults)) {
             return false;
         }
 
@@ -423,8 +420,7 @@ namespace app {
     /* Audio inference classification handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
-        auto& platform = ctx.Get<hal_platform&>("platform");
-        platform.data_psn->clear(COLOR_BLACK);
+        hal_lcd_clear(COLOR_BLACK);
 
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
@@ -457,14 +453,13 @@ namespace app {
     }
 
 
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       std::vector<arm::app::kws::KwsResult>& results)
+    static bool PresentInferenceResult(std::vector<arm::app::kws::KwsResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
 
-        platform.data_psn->set_text_color(COLOR_GREEN);
+        hal_lcd_set_text_color(COLOR_GREEN);
 
         /* Display each result. */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -484,7 +479,7 @@ namespace app {
                     std::string{"s: "} + topKeyword + std::string{" ("} +
                     std::to_string(static_cast<int>(score * 100)) + std::string{"%)"};
 
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                         resultStr.c_str(), resultStr.size(),
                         dataPsnTxtStartX1, rowIdx1, 0);
             rowIdx1 += dataPsnTxtYIncr;
@@ -502,13 +497,13 @@ namespace app {
         return true;
     }
 
-    static bool PresentInferenceResult(hal_platform& platform, std::vector<arm::app::asr::AsrResult>& results)
+    static bool PresentInferenceResult(std::vector<arm::app::asr::AsrResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 80;
         constexpr bool allow_multiple_lines = true;
 
-        platform.data_psn->set_text_color(COLOR_GREEN);
+        hal_lcd_set_text_color(COLOR_GREEN);
 
         /* Results from multiple inferences should be combined before processing. */
         std::vector<arm::app::ClassificationResult> combinedResults;
@@ -528,7 +523,7 @@ namespace app {
 
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                     finalResultStr.c_str(), finalResultStr.size(),
                     dataPsnTxtStartX1, dataPsnTxtStartY1, allow_multiple_lines);
 

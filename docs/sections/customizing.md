@@ -28,8 +28,7 @@ conventions.
 
 The following sign indicates the important conventions to apply:
 
-> **Convention:** The code is developed using `C++11` and `C99` standards. This is then governed by TensorFlow Lite for
-> Microcontrollers framework.
+> **Convention:** The code is developed using `C++14` and `C99` standards.
 
 ## Software project description
 
@@ -98,20 +97,16 @@ The HAL is represented by the following interfaces. To access them, include the 
   |--------------------|----------------------------------------------------------------------------------------------|
   |  `inited`            |  Initialization flag. Is set after the `platform_init()` function is called.                   |
   |  `plat_name`         |  Platform name. it is set to `mps3-bare` for MPS3 build and `FVP` for Fast Model build.      |
-  |  `data_acq`          |  Pointer to data acquisition module responsible for user interaction and other data collection for the application logic.               |
-  |  `data_psn`          |  Pointer to data presentation module responsible for data output through components available in the selected platform: `LCD --` for MPS3, `console --` for Fast Model. |
   |  `timer`             |  Pointer to platform timer implementation (see `platform_timer`)                               |
   |  `platform_init`     |  Pointer to platform initialization function.                                                |
   |  `platform_release`  |  Pointer to platform release function                                                        |
 
-- `hal_init` function: Initializes the HAL structure based on the compile time configuration. This must be called before
+- `hal_init` function: Initializes the HAL structure based on the compile-time configuration. This must be called before
     any other function in this API.
 
   |  Parameter name  | Description|
   |------------------|-----------------------------------------------------|
   |  `platform`        | Pointer to a pre-allocated `hal_platform` struct.   |
-  |  `data_acq`        | Pointer to a pre-allocated data acquisition module  |
-  |  `data_psn`        | Pointer to a pre-allocated data presentation module |
   |  `timer`           | Pointer to a pre-allocated timer module             |
   |  `return`          | Zero returned if successful, an error code is returned if unsuccessful.            |
 
@@ -128,28 +123,6 @@ The HAL is represented by the following interfaces. To access them, include the 
   | Parameter name  | Description                                                         |
   | ----------------| ------------------------------------------------------------------- |
   |  `platform`       | Pointer to a pre-allocated and initialized `hal_platform` struct.   |
-
-- `data_acq_module` structure: Structure to encompass the data acquisition module and linked methods.
-
-  | Attribute name | Description                                        |
-  |----------------|----------------------------------------------------|
-  | `inited`        | Initialization flag. Is set after the `system_init ()` function is called. |
-  | `system_name`    | Channel name. It is set to `UART` for MPS3 build and Fast Model builds.   |
-  | `system_init`    | Pointer to data acquisition module initialization function. The pointer is set according to the platform selected during the build. This function is called by the platform initialization routines. |
-  | `get_input`      | Pointer to a function reading user input. The pointer is set according to the selected platform during the build. For MPS3 and Fast Model environments, the function reads data from UART.   |
-
-- `data_psn_module` structure: Structure to encompass the data presentation module and associated methods.
-
-  | Attribute name     | Description                                    |
-  |--------------------|------------------------------------------------|
-  | `inited`             | Initialization flag. It is set after the `system_init ()` function is called. |
-  | `system_name`        | System component name used to present data. It is set to `lcd` for the MPS3 build and to `log_psn` for the Fast Model build. For Fast Model, the console output of the data summary replaces all pixel drawing functions.  |
-  | `system_init`        | Pointer to data presentation module initialization function. The pointer is set according to the platform selected during the build. This function is called by the platform initialization routines. |
-  | `present_data_image` | Pointer to a function to draw an image. The pointer is set according to the selected platform during the build. For MPS3, the image is drawn on the LCD. For Fast Model, the image summary is printed in the UART (coordinates, channel info, downsample factor). |
-  | `present_data_text`  | Pointer to a function to print a text. The pointer is set according to the selected platform during the build. For MPS3, the text is drawn on the LCD. For Fast Model, the text is printed in the UART. |
-  | `present_box`        | Pointer to a function to draw a rectangle. The pointer is set according to the selected platform during the build. For MPS3, the image is drawn on the LCD. For Fast Model, the image summary is printed in the UART. |
-  | `clear`              | Pointer to a function to clear the output. The pointer is set according to the selected platform during the build. For MPS3, the function clears the LCD. For Fast Model, nothing happens. |
-  | `set_text_color`     | Pointer to a function to set text color for the next call of `present_data_text()` function. The pointer is set according to the selected platform during the build. For MPS3, the function sets the color for the text printed on the LCD. For Fast Model, nothing happens. |
 
 - `platform_timer` structure: The structure to hold a platform-specific timer implementation.
 
@@ -175,12 +148,10 @@ int main ()
 {
 
   hal_platform platform;
-  data_acq_module dataAcq;
-  data_psn_module dataPsn;
   platform_timer timer;
 
   /* Initialise the HAL and platform */
-  hal_init(&platform, &dataAcq, &dataPsn, &timer);
+  hal_init(&platform, &timer);
   hal_platform_init(&platform);
 
   ...
@@ -608,22 +579,23 @@ However, for clarity, here is the full list of available functions:
 
 ## Reading user input from console
 
-The platform data acquisition module uses the `get_input` function to read the keyboard input from the UART. It can be
-used as follows:
+The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to 
+expose a function called `hal_get_user_input`. 
 
 ```C++
 char ch_input[128];
-platform.data_acq->get_input(ch_input, sizeof(ch_input));
+hal_get_user_input(ch_input, sizeof(ch_input));
 ```
 
-The function is blocked until a user provides an input.
+The function intends to block until a line has been provided. For embedded targets, this call might be redirected to get
+input from a UART block. For the host targets, this will just be a call to the C standard library instead.
 
 ## Output to MPS3 LCD
 
-The platform presentation module has functions to print text or an image to the board LCD. For example:
+The HAL exposes LCD functions to print text or an image to the board LCD. For example:
 
-- `present_data_text`
-- `present_data_image`
+- `hal_lcd_display_text`
+- `hal_lcd_display_image`
 
 Text presentation function has the following signature:
 
@@ -640,7 +612,7 @@ Here is an example that prints "Hello world" on the LCD screen:
 
 ```C++
 std::string hello("Hello world");
-platform.data_psn->present_data_text(hello.c_str(), hello.size(), 10, 35, 0);
+hal_lcd_display_text(hello.c_str(), hello.size(), 10, 35, 0);
 ```
 
 The image presentation function has the following signature:
@@ -653,14 +625,15 @@ The image presentation function has the following signature:
 - `const uint32_t pos_y`: The y coordinate of the first pixel.
 - `const uint32_t downsample_factor`: The factor by which the image is to be downsampled.
 
-For example, the following code snippet visualizes an input tensor data for `MobileNet v2 224`, by downsampling it
-twice:
+For example, the following code snippet visualizes an input tensor data for `MobileNet v2 224`, by down-sampling it
+by a factor of two:
 
 ```C++
-platform.data_psn->present_data_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
+hal_lcd_display_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
-Please refer to the [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api) section for more data presentation functions.
+Please refer to the [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api) section for more
+LCD related functions.
 
 ## Building custom use-case
 

@@ -26,10 +26,8 @@
 
 #define PLATFORM \
 hal_platform    platform; \
-data_acq_module data_acq; \
-data_psn_module data_psn; \
 platform_timer  timer;    \
-hal_init(&platform, &data_acq, &data_psn, &timer); \
+hal_init(&platform, &timer); \
 hal_platform_init(&platform);
 
 #define CONTEXT \

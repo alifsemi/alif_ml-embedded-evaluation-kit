@@ -64,8 +64,6 @@ namespace app {
             pMemDumpBytesWritten = ctx.Get<size_t*>("MEM_DUMP_BYTE_WRITTEN");
         }
         std::reference_wrapper<size_t> memDumpBytesWritten = std::ref(*pMemDumpBytesWritten);
-
-        auto& platform = ctx.Get<hal_platform&>("platform");
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         /* Get model reference. */
@@ -106,7 +104,7 @@ namespace app {
             audioFileAccessorFunc = ctx.Get<std::function<const char*(const uint32_t)>>("featureFileNames");
         }
         do{
-            platform.data_psn->clear(COLOR_BLACK);
+            hal_lcd_clear(COLOR_BLACK);
 
             auto startDumpAddress = memDumpBaseAddr + memDumpBytesWritten;
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
@@ -158,7 +156,7 @@ namespace app {
                 std::string str_inf{"Running inference... "};
 
                 /* Display message on the LCD - inference running. */
-                platform.data_psn->present_data_text(
+                hal_lcd_display_text(
                             str_inf.c_str(), str_inf.size(),
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
@@ -191,7 +189,7 @@ namespace app {
 
                 /* Erase. */
                 str_inf = std::string(str_inf.size(), ' ');
-                platform.data_psn->present_data_text(
+                hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
@@ -218,14 +216,14 @@ namespace app {
             IncrementAppCtxClipIdx(ctx);
 
             std::string clearString{' '};
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                     clearString.c_str(), clearString.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             std::string completeMsg{"Inference complete!"};
 
             /* Display message on the LCD - inference complete. */
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                     completeMsg.c_str(), completeMsg.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 

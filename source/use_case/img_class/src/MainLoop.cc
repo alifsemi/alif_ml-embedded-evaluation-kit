@@ -60,7 +60,7 @@ void main_loop(hal_platform& platform)
         int menuOption = common::MENU_OPT_RUN_INF_NEXT;
         if (bUseMenu) {
             DisplayCommonMenu();
-            menuOption = arm::app::ReadUserInputAsInt(platform);
+            menuOption = arm::app::ReadUserInputAsInt();
             printf("\n");
         }
         switch (menuOption) {
@@ -70,7 +70,7 @@ void main_loop(hal_platform& platform)
             case common::MENU_OPT_RUN_INF_CHOSEN: {
                 printf("    Enter the image index [0, %d]: ", NUMBER_OF_FILES-1);
                 fflush(stdout);
-                auto imgIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt(platform));
+                auto imgIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt());
                 executionSuccessful = ClassifyImageHandler(caseContext, imgIndex, false);
                 break;
             }

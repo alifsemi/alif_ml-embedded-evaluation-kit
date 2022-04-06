@@ -23,13 +23,8 @@
 #include <assert.h>
 #include <string.h>
 
-int hal_init(hal_platform* platform, data_acq_module* data_acq,
-    data_psn_module* data_psn, platform_timer* timer)
+int hal_init(hal_platform* platform, platform_timer* timer)
 {
-    assert(platform && data_acq && data_psn);
-
-    platform->data_acq  = data_acq;
-    platform->data_psn  = data_psn;
     platform->timer     = timer;
     platform->platform_init     = platform_init;
     platform->platform_release  = platform_release;
@@ -59,46 +54,33 @@ int hal_platform_init(hal_platform* platform)
         return state;
     }
 
-    /* Initialise the data acquisition module */
-    if (0 != (state = data_acq_channel_init(platform->data_acq))) {
-        if (!platform->data_acq->inited) {
-            printf_err("Failed to initialise data acq module: %s\n",
-                platform->data_acq->system_name);
-        }
-        hal_platform_release(platform);
+    /* Initialise LCD */
+    if (0 != (state = hal_lcd_init())) {
+        printf_err("hal_lcd_init failed\n");
         return state;
     }
 
-    /* Initialise the presentation module */
-    if (0 != (state = data_psn_system_init(platform->data_psn))) {
-        printf_err("Failed to initialise data psn module: %s\n",
-            platform->data_psn->system_name);
-        data_acq_channel_release(platform->data_acq);
-        hal_platform_release(platform);
-        return state;
-    }
-
-    /* Followed by the timer module */
+    /* Initialise the timer module */
     init_timer(platform->timer);
 
     info("%s platform initialised\n", platform->plat_name);
-    debug("Using %s module for data acquisition\n",
-            platform->data_acq->system_name);
-    debug("Using %s module for data presentation\n",
-        platform->data_psn->system_name);
-
     platform->inited = !state;
-
     return state;
 }
 
 void hal_platform_release(hal_platform *platform)
 {
     assert(platform && platform->platform_release);
-    data_acq_channel_release(platform->data_acq);
-    data_psn_system_release(platform->data_psn);
 
     hal_platform_clear(platform);
     info("Releasing platform %s\n", platform->plat_name);
     platform->platform_release();
+}
+
+bool hal_get_user_input(char* user_input, int size)
+{
+    if (1 != GetLine(user_input, size - 1)) {
+        return true;
+    }
+    return false;
 }

@@ -116,7 +116,6 @@ static void DumpOutputs(const Model& model, const char* message)
 
 bool RunInferenceHandler(ApplicationContext& ctx)
 {
-    auto& platform = ctx.Get<hal_platform&>("platform");
     auto& profiler = ctx.Get<Profiler&>("profiler");
     auto& model = ctx.Get<Model&>("model");
 
@@ -143,9 +142,8 @@ bool RunInferenceHandler(ApplicationContext& ctx)
     std::string str_inf{"Running inference... "};
 
     /* Display message on the LCD - inference running. */
-    platform.data_psn->present_data_text(
-                            str_inf.c_str(), str_inf.size(),
-                            dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+    hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
+                         dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     if (!RunInference(model, profiler)) {
         return false;
@@ -153,7 +151,7 @@ bool RunInferenceHandler(ApplicationContext& ctx)
 
     /* Erase. */
     str_inf = std::string(str_inf.size(), ' ');
-    platform.data_psn->present_data_text(
+    hal_lcd_display_text(
                             str_inf.c_str(), str_inf.size(),
                             dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 

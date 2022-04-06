@@ -36,13 +36,10 @@ namespace app {
     /**
      * @brief           Presents inference results using the data presentation
      *                  object.
-     * @param[in]       platform    Reference to the hal platform object.
      * @param[in]       results     Vector of classification results to be displayed.
      * @return          true if successful, false otherwise.
      **/
-    static bool PresentInferenceResult(
-                    hal_platform& platform,
-                    const std::vector<arm::app::asr::AsrResult>& results);
+    static bool PresentInferenceResult(const std::vector<arm::app::asr::AsrResult>& results);
 
     /* Audio inference classification handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
@@ -50,8 +47,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        auto& platform = ctx.Get<hal_platform&>("platform");
-        platform.data_psn->clear(COLOR_BLACK);
+        hal_lcd_clear(COLOR_BLACK);
 
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
@@ -103,7 +99,7 @@ namespace app {
 
         /* Loop to process audio clips. */
         do {
-            platform.data_psn->clear(COLOR_BLACK);
+            hal_lcd_clear(COLOR_BLACK);
 
             /* Get current audio clip index. */
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
@@ -136,7 +132,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
@@ -192,13 +188,13 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             ctx.Set<std::vector<arm::app::asr::AsrResult>>("results", results);
 
-            if (!PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(results)) {
                 return false;
             }
 
@@ -212,14 +208,13 @@ namespace app {
     }
 
 
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::asr::AsrResult>& results)
+    static bool PresentInferenceResult(const std::vector<arm::app::asr::AsrResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 60;
         constexpr bool allow_multiple_lines = true;
 
-        platform.data_psn->set_text_color(COLOR_GREEN);
+        hal_lcd_set_text_color(COLOR_GREEN);
 
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
@@ -243,7 +238,7 @@ namespace app {
         /* Get the decoded result for the combined result. */
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                             finalResultStr.c_str(), finalResultStr.size(),
                             dataPsnTxtStartX1, dataPsnTxtStartY1,
                             allow_multiple_lines);

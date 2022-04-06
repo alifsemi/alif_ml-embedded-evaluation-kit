@@ -168,27 +168,23 @@ The HAL has the following structure:
 hal
 ├── CMakeLists.txt
 ├── include
-│   ├── data_acq.h
-│   ├── data_psn.h
-│   ├── hal.h
-│   └── timer.h
+│     ├── hal.h
+│     ├── hal_lcd.h
+│     └── timer.h
 └── source
     ├── components
-    │   ├── cmsis_device
-    │   ├── lcd
-    │   ├── npu
-    │   ├── npu_ta
-    │   └── stdout
-    ├── platform
-    │   ├── mps3
-    │   ├── native
-    │   └── simple
-    ├── profiles
-    │   ├── bare-metal
-    │   └── native
-    ├── data_acq.c
-    ├── data_psn.c
-    └── hal.c
+    │     ├── cmsis_device
+    │     ├── lcd
+    │     ├── npu
+    │     ├── npu_ta
+    │     ├── platform_pmu
+    │     └── stdout
+    ├── hal.c
+    ├── hal_timer.c
+    └── platform
+        ├── mps3
+        ├── native
+        └── simple
 ```
 
 HAL is built as a separate project into a static library `libhal.a`. It is linked with use-case executable.
@@ -220,19 +216,8 @@ What these folders contain:
   `source/platform/simple`:
   These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral
   memory map, system registers, system specific timer implementation and other.
-  Platform is built from selected components and configured cmsis device. The platform could be used with different
-  profiles. Profile is included into the platform build based on `PLATFORM_PROFILE` build parameter.
-  Platform code is a separate CMake project, and it is built into a static library `libplatform-drivers.a`. It is linked
-  into HAL library.
-
-- `source/profiles/bare-metal`\
-  `source/profiles/native`:
-  As mentioned before, profiles are added into platform build. Currently, we support bare-metal and native profiles.
-  bare-metal contains the HAL support layer and platform initialization helpers. Function calls are routed
-  to platform-specific logic at this level.
-
-  Native profile allows the built application to be executed on the build (native) machine, i.e. x86. It bypasses and
-  stubs platform devices replacing them with standard C or C++ library calls.
+  Platform is built from selected components and configured cmsis device. It is a separate CMake project, and is 
+  built into a static library `libplatform-drivers.a`. It is linked into HAL library.
 
 ## Models and resources
 

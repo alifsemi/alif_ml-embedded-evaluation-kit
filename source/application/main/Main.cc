@@ -42,12 +42,10 @@ static void print_application_intro()
 int main ()
 {
     hal_platform    platform;
-    data_acq_module dataAcq;
-    data_psn_module dataPsn;
     platform_timer  timer;
 
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &dataAcq, &dataPsn, &timer);
+    hal_init(&platform, &timer);
 
     if (0 == hal_platform_init(&platform)) {
         /* Application information, UART should have been initialised. */

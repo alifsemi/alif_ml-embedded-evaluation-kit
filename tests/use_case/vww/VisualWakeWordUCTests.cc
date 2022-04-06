@@ -42,12 +42,10 @@ TEST_CASE("Model info")
 TEST_CASE("Inference by index")
 {
     hal_platform    platform;
-    data_acq_module data_acq;
-    data_psn_module data_psn;
     platform_timer  timer;
 
     /* Initialise the HAL and platform */
-    hal_init(&platform, &data_acq, &data_psn, &timer);
+    hal_init(&platform, &timer);
     hal_platform_init(&platform);
 
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
@@ -79,12 +77,10 @@ TEST_CASE("Inference by index")
 TEST_CASE("Inference run all images")
 {
     hal_platform    platform;
-    data_acq_module data_acq;
-    data_psn_module data_psn;
     platform_timer  timer;
 
     /* Initialise the HAL and platform */
-    hal_init(&platform, &data_acq, &data_psn, &timer);
+    hal_init(&platform, &timer);
     hal_platform_init(&platform);
 
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
@@ -112,12 +108,10 @@ TEST_CASE("Inference run all images")
 TEST_CASE("List all images")
 {
     hal_platform    platform;
-    data_acq_module data_acq;
-    data_psn_module data_psn;
     platform_timer  timer;
 
     /* Initialise the HAL and platform */
-    hal_init(&platform, &data_acq, &data_psn, &timer);
+    hal_init(&platform, &timer);
     hal_platform_init(&platform);
 
     arm::app::VisualWakeWordModel model;    /* model wrapper object */

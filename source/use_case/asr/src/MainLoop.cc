@@ -121,7 +121,7 @@ void main_loop(hal_platform& platform)
         int menuOption = MENU_OPT_RUN_INF_NEXT;
         if (bUseMenu) {
             DisplayMenu();
-            menuOption = arm::app::ReadUserInputAsInt(platform);
+            menuOption = arm::app::ReadUserInputAsInt();
             printf("\n");
         }
         switch (menuOption) {
@@ -136,7 +136,7 @@ void main_loop(hal_platform& platform)
                        NUMBER_OF_FILES-1);
                 fflush(stdout);
                 auto clipIndex = static_cast<uint32_t>(
-                                    arm::app::ReadUserInputAsInt(platform));
+                                    arm::app::ReadUserInputAsInt());
                 executionSuccessful = ClassifyAudioHandler(caseContext,
                                                            clipIndex,
                                                            false);

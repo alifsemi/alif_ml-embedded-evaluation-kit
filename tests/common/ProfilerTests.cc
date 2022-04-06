@@ -26,12 +26,10 @@
 TEST_CASE("Common: Test Profiler")
 {
     hal_platform    platform;
-    data_acq_module data_acq {};
-    data_psn_module data_psn {};
     platform_timer  timer {};
 
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &data_acq, &data_psn, &timer);
+    hal_init(&platform, &timer);
     hal_platform_init(&platform);
 
     /* An invalid profiler shouldn't be of much use */

@@ -28,20 +28,18 @@
 extern "C" {
 #endif
 
-#include "platform_drivers.h"           /* Platform drivers */
-#include "data_acq.h"                   /* Data acquisition abstraction */
-#include "data_psn.h"                   /* Data presentation abstraction */
-#include "timer.h"                      /* Timer/profiler API */
+#include "platform_drivers.h"   /* Platform drivers */
+#include "timer.h"              /* Timer/profiler API */
+#include "hal_lcd.h"            /* LCD functions */
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 /* Structure to define a platform context to be used by the application */
 typedef struct hal_platform_context {
     int inited;                         /**< initialised */
     char plat_name[64];                 /**< name of this platform */
-    data_acq_module * data_acq;         /**< data acquisition module pointer */
-    data_psn_module * data_psn;         /**< data presentation module pointer */
-    platform_timer *  timer;            /**< timer */
+    platform_timer* timer;              /**< timer */
     int (* platform_init)();            /**< pointer to platform initialisation function */
     void (* platform_release)();        /**< pointer to platform release function */
 } hal_platform;
@@ -50,13 +48,10 @@ typedef struct hal_platform_context {
  * @brief           Initialise the HAL structure based on compile time config. This
  *                  should be called before any other function in this API.
  * @param[in,out]   platform    Pointer to a pre-allocated platform struct.
- * @param[in,out]   data_acq    Pointer to a pre-allocated data acquisition module.
- * @param[in,out]   data_psn    Pointer to a pre-allocated data presentation module.
  * @param[in,out]   timer       Pointer to a pre-allocated timer module.
  * @return          0 if successful, error code otherwise.
  **/
-int hal_init(hal_platform *platform, data_acq_module *data_acq,
-    data_psn_module *data_psn, platform_timer *timer);
+int hal_init(hal_platform* platform, platform_timer* timer);
 
 
 /**
@@ -66,7 +61,7 @@ int hal_init(hal_platform *platform, data_acq_module *data_acq,
  *                          platform structure.
  * @return      0 if successful, error code otherwise.
  **/
-int hal_platform_init(hal_platform *platform);
+int hal_platform_init(hal_platform* platform);
 
 
 /**
@@ -74,7 +69,15 @@ int hal_platform_init(hal_platform *platform);
  * @param[in]   platform    pointer to a pre-allocated and initialised
  *                          platform structure.
  **/
-void hal_platform_release(hal_platform *platform);
+void hal_platform_release(hal_platform* platform);
+
+/**
+ * @brief       Gets user input from the stdin interface.
+ * @param[out]  user_input  Pointer to a buffer where the input will be stored.
+ * @param[in]   size        Buffer size in bytes.
+ * @return      True if successful, false otherwise.
+ */
+bool hal_get_user_input(char* user_input, int size);
 
 #ifdef __cplusplus
 }

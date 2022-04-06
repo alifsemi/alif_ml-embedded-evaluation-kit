@@ -31,12 +31,10 @@ void DisplayCommonMenu();
   /**
    * @brief           Presents inference results using the data presentation
    *                  object.
-   * @param[in]       platform    Reference to the hal platform object.
    * @param[in]       results     Vector of classification results to be displayed.
    * @return          true if successful, false otherwise.
    **/
-bool PresentInferenceResult(hal_platform& platform,
-                            const std::vector<arm::app::ClassificationResult>& results);
+bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results);
 
 
 /**
@@ -82,10 +80,9 @@ namespace app {
 
     /**
      * @brief           Read input and return as an integer.
-     * @param[in]       platform   Reference to the hal platform object.
      * @return          Integer value corresponding to the user input.
      **/
-    int ReadUserInputAsInt(hal_platform& platform);
+    int ReadUserInputAsInt();
 
 #if VERIFY_TEST_OUTPUT
     /**

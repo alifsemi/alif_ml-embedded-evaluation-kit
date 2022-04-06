@@ -39,8 +39,6 @@ target_include_directories(${HAL_TARGET}
 target_sources(${HAL_TARGET}
     PRIVATE
     source/hal.c
-    source/data_psn.c
-    source/data_acq.c
     source/hal_timer.c)
 
 if (DEFINED VERIFY_TEST_OUTPUT)

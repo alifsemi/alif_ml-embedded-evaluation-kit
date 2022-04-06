@@ -35,16 +35,14 @@ using KwsClassifier = arm::app::Classifier;
 namespace arm {
 namespace app {
 
-   
+
     /**
      * @brief           Presents inference results using the data presentation
      *                  object.
-     * @param[in]       platform    Reference to the hal platform object.
      * @param[in]       results     Vector of classification results to be displayed.
      * @return          true if successful, false otherwise.
      **/
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::kws::KwsResult>& results);
+    static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results);
 
     /**
      * @brief Returns a function to perform feature calculation and populates input tensor data with
@@ -68,7 +66,6 @@ namespace app {
     /* Audio inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
-        auto& platform = ctx.Get<hal_platform&>("platform");
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnTxtInfStartX = 20;
@@ -137,7 +134,7 @@ namespace app {
         const float secondsPerSample = 1.0/audio::MicroNetKwsMFCC::ms_defaultSamplingFreq;
 
         do {
-            platform.data_psn->clear(COLOR_BLACK);
+            hal_lcd_clear(COLOR_BLACK);
 
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 
@@ -171,7 +168,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
             info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex,
@@ -223,13 +220,13 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             ctx.Set<std::vector<arm::app::kws::KwsResult>>("results", results);
 
-            if (!PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(results)) {
                 return false;
             }
 
@@ -238,61 +235,6 @@ namespace app {
             IncrementAppCtxIfmIdx(ctx,"clipIndex");
 
         } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
-
-        return true;
-    }
-
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::kws::KwsResult>& results)
-    {
-        constexpr uint32_t dataPsnTxtStartX1 = 20;
-        constexpr uint32_t dataPsnTxtStartY1 = 30;
-        constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
-
-        platform.data_psn->set_text_color(COLOR_GREEN);
-        info("Final results:\n");
-        info("Total number of inferences: %zu\n", results.size());
-
-        /* Display each result */
-        uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
-
-        for (uint32_t i = 0; i < results.size(); ++i) {
-
-            std::string topKeyword{"<none>"};
-            float score = 0.f;
-            if (!results[i].m_resultVec.empty()) {
-                topKeyword = results[i].m_resultVec[0].m_label;
-                score = results[i].m_resultVec[0].m_normalisedVal;
-            }
-
-            std::string resultStr =
-                std::string{"@"} + std::to_string(results[i].m_timeStamp) +
-                std::string{"s: "} + topKeyword + std::string{" ("} +
-                std::to_string(static_cast<int>(score * 100)) + std::string{"%)"};
-
-            platform.data_psn->present_data_text(
-                                    resultStr.c_str(), resultStr.size(),
-                                    dataPsnTxtStartX1, rowIdx1, false);
-            rowIdx1 += dataPsnTxtYIncr;
-
-            if (results[i].m_resultVec.empty()) {
-                info("For timestamp: %f (inference #: %" PRIu32
-                     "); label: %s; threshold: %f\n",
-                     results[i].m_timeStamp, results[i].m_inferenceNumber,
-                     topKeyword.c_str(),
-                     results[i].m_threshold);
-            } else {
-                for (uint32_t j = 0; j < results[i].m_resultVec.size(); ++j) {
-                    info("For timestamp: %f (inference #: %" PRIu32
-                         "); label: %s, score: %f; threshold: %f\n",
-                         results[i].m_timeStamp,
-                         results[i].m_inferenceNumber,
-                         results[i].m_resultVec[j].m_label.c_str(),
-                         results[i].m_resultVec[j].m_normalisedVal,
-                         results[i].m_threshold);
-                }
-            }
-        }
 
         return true;
     }
@@ -342,6 +284,60 @@ namespace app {
                 featureCache[index - featuresOverlapIndex] = std::move(features);
             }
         };
+    }
+
+    static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results)
+    {
+        constexpr uint32_t dataPsnTxtStartX1 = 20;
+        constexpr uint32_t dataPsnTxtStartY1 = 30;
+        constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
+
+        hal_lcd_set_text_color(COLOR_GREEN);
+        info("Final results:\n");
+        info("Total number of inferences: %zu\n", results.size());
+
+        /* Display each result */
+        uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
+
+        for (uint32_t i = 0; i < results.size(); ++i) {
+
+            std::string topKeyword{"<none>"};
+            float score = 0.f;
+            if (!results[i].m_resultVec.empty()) {
+                topKeyword = results[i].m_resultVec[0].m_label;
+                score = results[i].m_resultVec[0].m_normalisedVal;
+            }
+
+            std::string resultStr =
+                    std::string{"@"} + std::to_string(results[i].m_timeStamp) +
+                    std::string{"s: "} + topKeyword + std::string{" ("} +
+                    std::to_string(static_cast<int>(score * 100)) + std::string{"%)"};
+
+            hal_lcd_display_text(
+                    resultStr.c_str(), resultStr.size(),
+                    dataPsnTxtStartX1, rowIdx1, false);
+            rowIdx1 += dataPsnTxtYIncr;
+
+            if (results[i].m_resultVec.empty()) {
+                info("For timestamp: %f (inference #: %" PRIu32
+                             "); label: %s; threshold: %f\n",
+                     results[i].m_timeStamp, results[i].m_inferenceNumber,
+                     topKeyword.c_str(),
+                     results[i].m_threshold);
+            } else {
+                for (uint32_t j = 0; j < results[i].m_resultVec.size(); ++j) {
+                    info("For timestamp: %f (inference #: %" PRIu32
+                                 "); label: %s, score: %f; threshold: %f\n",
+                         results[i].m_timeStamp,
+                         results[i].m_inferenceNumber,
+                         results[i].m_resultVec[j].m_label.c_str(),
+                         results[i].m_resultVec[j].m_normalisedVal,
+                         results[i].m_threshold);
+                }
+            }
+        }
+
+        return true;
     }
 
     template std::function<void (std::vector<int16_t>&, size_t , bool, size_t)>

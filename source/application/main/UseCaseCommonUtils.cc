@@ -36,12 +36,7 @@ void DisplayCommonMenu()
     fflush(stdout);
 }
 
-
-
-
-bool PresentInferenceResult(
-    hal_platform &platform,
-    const std::vector<arm::app::ClassificationResult> &results)
+bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult> &results)
 {
     constexpr uint32_t dataPsnTxtStartX1 = 150;
     constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -51,7 +46,7 @@ bool PresentInferenceResult(
 
     constexpr uint32_t dataPsnTxtYIncr = 16;  /* Row index increment. */
 
-    platform.data_psn->set_text_color(COLOR_GREEN);
+    hal_lcd_set_text_color(COLOR_GREEN);
 
     /* Display each result. */
     uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -66,13 +61,13 @@ bool PresentInferenceResult(
                 std::to_string(results[i].m_labelIdx) +
                 " (" + std::to_string(results[i].m_normalisedVal) + ")";
 
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                 resultStr.c_str(), resultStr.size(),
                 dataPsnTxtStartX1, rowIdx1, false);
         rowIdx1 += dataPsnTxtYIncr;
 
         resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                 resultStr.c_str(), resultStr.size(),
                 dataPsnTxtStartX2, rowIdx2, 0);
         rowIdx2 += dataPsnTxtYIncr;
@@ -134,12 +129,12 @@ bool RunInference(arm::app::Model& model, Profiler& profiler)
     return runInf;
 }
 
-int ReadUserInputAsInt(hal_platform& platform)
+int ReadUserInputAsInt()
 {
     char chInput[128];
     memset(chInput, 0, sizeof(chInput));
 
-    platform.data_acq->get_input(chInput, sizeof(chInput));
+    hal_get_user_input(chInput, sizeof(chInput));
     return atoi(chInput);
 }
 
@@ -181,7 +176,6 @@ void DumpTensor(const TfLiteTensor* tensor, const size_t lineBreakForNumElements
 bool ListFilesHandler(ApplicationContext& ctx)
 {
     auto& model = ctx.Get<Model&>("model");
-    auto& platform = ctx.Get<hal_platform&>("platform");
 
     constexpr uint32_t dataPsnTxtStartX = 20;
     constexpr uint32_t dataPsnTxtStartY = 40;
@@ -192,12 +186,12 @@ bool ListFilesHandler(ApplicationContext& ctx)
     }
 
     /* Clear the LCD */
-    platform.data_psn->clear(COLOR_BLACK);
+    hal_lcd_clear(COLOR_BLACK);
 
     /* Show the total number of embedded files. */
     std::string strNumFiles = std::string{"Total Number of Files: "} +
                                std::to_string(NUMBER_OF_FILES);
-    platform.data_psn->present_data_text(strNumFiles.c_str(),
+    hal_lcd_display_text(strNumFiles.c_str(),
                                          strNumFiles.size(),
                                          dataPsnTxtStartX,
                                          dataPsnTxtStartY,
@@ -210,7 +204,7 @@ bool ListFilesHandler(ApplicationContext& ctx)
         for (uint32_t i = 0; i < NUMBER_OF_FILES; ++i, yVal += dataPsnTxtYIncr) {
 
             std::string currentFilename{get_filename(i)};
-            platform.data_psn->present_data_text(currentFilename.c_str(),
+            hal_lcd_display_text(currentFilename.c_str(),
                                                  currentFilename.size(),
                                                  dataPsnTxtStartX, yVal, false);
 

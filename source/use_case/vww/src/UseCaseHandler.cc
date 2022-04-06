@@ -42,7 +42,6 @@ namespace app {
     /* Image inference classification handler. */
     bool ClassifyImageHandler(ApplicationContext &ctx, uint32_t imgIndex, bool runAll)
     {
-        auto& platform = ctx.Get<hal_platform &>("platform");
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
@@ -89,7 +88,7 @@ namespace app {
         std::vector<ClassificationResult> results;
 
         do {
-            platform.data_psn->clear(COLOR_BLACK);
+            hal_lcd_clear(COLOR_BLACK);
 
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};
@@ -98,7 +97,7 @@ namespace app {
             LoadImageIntoTensor(ctx.Get<uint32_t>("imgIndex"), inputTensor);
 
             /* Display this image on the LCD. */
-            platform.data_psn->present_data_image(
+            hal_lcd_display_image(
                 static_cast<uint8_t *>(inputTensor->data.data),
                 nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
@@ -115,7 +114,7 @@ namespace app {
             }
 
             /* Display message on the LCD - inference running. */
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
@@ -129,7 +128,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                                 str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
@@ -145,7 +144,7 @@ namespace app {
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            if (!PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(results)) {
                 return false;
             }
 

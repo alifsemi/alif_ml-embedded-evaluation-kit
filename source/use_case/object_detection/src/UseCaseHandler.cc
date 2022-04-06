@@ -30,31 +30,27 @@ namespace app {
     /**
      * @brief           Presents inference results along using the data presentation
      *                  object.
-     * @param[in]       platform           Reference to the hal platform object.
      * @param[in]       results            Vector of detection results to be displayed.
      * @return          true if successful, false otherwise.
      **/
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::object_detection::DetectionResult>& results);
+    static bool PresentInferenceResult(const std::vector<arm::app::object_detection::DetectionResult>& results);
 
     /**
      * @brief           Draw boxes directly on the LCD for all detected objects.
-     * @param[in]       platform           Reference to the hal platform object.
      * @param[in]       results            Vector of detection results to be displayed.
      * @param[in]       imageStartX        X coordinate where the image starts on the LCD.
      * @param[in]       imageStartY        Y coordinate where the image starts on the LCD.
      * @param[in]       imgDownscaleFactor How much image has been downscaled on LCD.
      **/
-    static void DrawDetectionBoxes(hal_platform& platform,
-                                   const std::vector<arm::app::object_detection::DetectionResult>& results,
-                                   uint32_t imgStartX,
-                                   uint32_t imgStartY,
-                                   uint32_t imgDownscaleFactor);
+    static void DrawDetectionBoxes(
+            const std::vector<arm::app::object_detection::DetectionResult>& results,
+           uint32_t imgStartX,
+           uint32_t imgStartY,
+           uint32_t imgDownscaleFactor);
 
     /* Object detection classification handler. */
     bool ObjectDetectionHandler(ApplicationContext& ctx, uint32_t imgIndex, bool runAll)
     {
-        auto& platform = ctx.Get<hal_platform&>("platform");
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
@@ -64,7 +60,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        platform.data_psn->clear(COLOR_BLACK);
+        hal_lcd_clear(COLOR_BLACK);
 
         auto& model = ctx.Get<Model&>("model");
 
@@ -114,7 +110,7 @@ namespace app {
             image::RgbToGrayscale(curr_image, dstPtr, copySz);
 
             /* Display image on the LCD. */
-            platform.data_psn->present_data_image(
+            hal_lcd_display_image(
                 (channelsImageDisplayed == 3) ? curr_image : dstPtr,
                 nCols, nRows, channelsImageDisplayed,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
@@ -125,7 +121,7 @@ namespace app {
             }
 
             /* Display message on the LCD - inference running. */
-            platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
                                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Run inference over this image. */
@@ -138,7 +134,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(str_inf.c_str(), str_inf.size(),
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
                                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Detector post-processing*/
@@ -153,14 +149,14 @@ namespace app {
                 results);
 
             /* Draw boxes. */
-            DrawDetectionBoxes(platform, results, dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
+            DrawDetectionBoxes(results, dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
 #if VERIFY_TEST_OUTPUT
             arm::app::DumpTensor(modelOutput0);
             arm::app::DumpTensor(modelOutput1);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            if (!PresentInferenceResult(platform, results)) {
+            if (!PresentInferenceResult(results)) {
                 return false;
             }
 
@@ -173,11 +169,9 @@ namespace app {
         return true;
     }
 
-
-    static bool PresentInferenceResult(hal_platform& platform,
-                                       const std::vector<arm::app::object_detection::DetectionResult>& results)
+    static bool PresentInferenceResult(const std::vector<arm::app::object_detection::DetectionResult>& results)
     {
-        platform.data_psn->set_text_color(COLOR_GREEN);
+        hal_lcd_set_text_color(COLOR_GREEN);
 
         /* If profiling is enabled, and the time is valid. */
         info("Final results:\n");
@@ -192,8 +186,7 @@ namespace app {
         return true;
     }
 
-    static void DrawDetectionBoxes(hal_platform& platform,
-                                   const std::vector<arm::app::object_detection::DetectionResult>& results,
+    static void DrawDetectionBoxes(const std::vector<arm::app::object_detection::DetectionResult>& results,
                                    uint32_t imgStartX,
                                    uint32_t imgStartY,
                                    uint32_t imgDownscaleFactor)
@@ -202,20 +195,20 @@ namespace app {
 
         for (const auto& result: results) {
             /* Top line. */
-            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+            hal_lcd_display_box(imgStartX + result.m_x0/imgDownscaleFactor,
                     imgStartY + result.m_y0/imgDownscaleFactor,
                     result.m_w/imgDownscaleFactor, lineThickness, COLOR_GREEN);
             /* Bot line. */
-            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+            hal_lcd_display_box(imgStartX + result.m_x0/imgDownscaleFactor,
                     imgStartY + (result.m_y0 + result.m_h)/imgDownscaleFactor - lineThickness,
                     result.m_w/imgDownscaleFactor, lineThickness, COLOR_GREEN);
 
             /* Left line. */
-            platform.data_psn->present_box(imgStartX + result.m_x0/imgDownscaleFactor,
+            hal_lcd_display_box(imgStartX + result.m_x0/imgDownscaleFactor,
                     imgStartY + result.m_y0/imgDownscaleFactor,
                     lineThickness, result.m_h/imgDownscaleFactor, COLOR_GREEN);
             /* Right line. */
-            platform.data_psn->present_box(imgStartX + (result.m_x0 + result.m_w)/imgDownscaleFactor - lineThickness,
+            hal_lcd_display_box(imgStartX + (result.m_x0 + result.m_w)/imgDownscaleFactor - lineThickness,
                     imgStartY + result.m_y0/imgDownscaleFactor,
                     lineThickness, result.m_h/imgDownscaleFactor, COLOR_GREEN);
         }

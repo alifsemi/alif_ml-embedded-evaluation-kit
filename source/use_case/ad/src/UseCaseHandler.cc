@@ -33,12 +33,11 @@ namespace app {
     /**
      * @brief           Presents inference results using the data presentation
      *                  object.
-     * @param[in]       platform    reference to the hal platform object
      * @param[in]       result      average sum of classification results
      * @param[in]       threshold   if larger than this value we have an anomaly
      * @return          true if successful, false otherwise
      **/
-    static bool PresentInferenceResult(hal_platform& platform, float result, float threshold);
+    static bool PresentInferenceResult(float result, float threshold);
 
     /**
      * @brief Returns a function to perform feature calculation and populates input tensor data with
@@ -64,7 +63,6 @@ namespace app {
     /* Vibration classification handler */
     bool ClassifyVibrationHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
-        auto& platform = ctx.Get<hal_platform&>("platform");
         auto& profiler = ctx.Get<Profiler&>("profiler");
 
         constexpr uint32_t dataPsnTxtInfStartX = 20;
@@ -114,7 +112,7 @@ namespace app {
         auto audioDataStride = nMelSpecVectorsInAudioStride * frameStride;
 
         do {
-            platform.data_psn->clear(COLOR_BLACK);
+            hal_lcd_clear(COLOR_BLACK);
 
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
 
@@ -153,7 +151,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                     str_inf.c_str(), str_inf.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
             info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex, get_filename(currentIndex));
@@ -202,12 +200,12 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            platform.data_psn->present_data_text(
+            hal_lcd_display_text(
                     str_inf.c_str(), str_inf.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             ctx.Set<float>("result", result);
-            if (!PresentInferenceResult(platform, result, scoreThreshold)) {
+            if (!PresentInferenceResult(result, scoreThreshold)) {
                 return false;
             }
 
@@ -221,13 +219,13 @@ namespace app {
     }
 
 
-    static bool PresentInferenceResult(hal_platform& platform, float result, float threshold)
+    static bool PresentInferenceResult(float result, float threshold)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment */
 
-        platform.data_psn->set_text_color(COLOR_GREEN);
+        hal_lcd_set_text_color(COLOR_GREEN);
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -242,7 +240,7 @@ namespace app {
             anomalyResult += std::string("Everything fine, no anomaly detected!");
         }
 
-        platform.data_psn->present_data_text(
+        hal_lcd_display_text(
                 anomalyScore.c_str(), anomalyScore.size(),
                 dataPsnTxtStartX1, rowIdx1, false);
 
