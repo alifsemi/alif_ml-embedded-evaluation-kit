@@ -24,6 +24,7 @@
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "Classifier.hpp"           /* Classifier. */
 #include "InputFiles.hpp"
+#include "BaseProcessing.hpp"
 
 
 void DisplayCommonMenu();
@@ -106,6 +107,67 @@ namespace app {
      * @return      true or false based on event being handled.
      **/
     bool ListFilesHandler(ApplicationContext& ctx);
+
+    /**
+     * @brief   Use case runner class that will handle calling pre-processing,
+     *          inference and post-processing.
+     *          After constructing an instance of this class the user can call
+     *          PreProcess(), RunInference() and PostProcess() to perform inference.
+     */
+    class UseCaseRunner {
+
+    private:
+        BasePreProcess* m_preProcess;
+        BasePostProcess* m_postProcess;
+        Model* m_model;
+
+    public:
+        explicit UseCaseRunner(BasePreProcess* preprocess, BasePostProcess* postprocess, Model* model)
+        : m_preProcess{preprocess},
+          m_postProcess{postprocess},
+          m_model{model}
+          {};
+
+        /**
+         * @brief       Runs pre-processing as defined by PreProcess object within the runner.
+         *              Templated for the input data type.
+         * @param[in]   inputData    Pointer to the data that inference will be performed on.
+         * @param[in]   inputSize    Size of the input data that inference will be performed on.
+         * @return      true if successful, false otherwise.
+         **/
+        template<typename T>
+        bool PreProcess(T* inputData, size_t inputSize) {
+            if (!this->m_preProcess->DoPreProcess(inputData, inputSize)) {
+                printf_err("Pre-processing failed.");
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * @brief       Runs inference with the Model object within the runner.
+         * @return      true if successful, false otherwise.
+         **/
+        bool RunInference() {
+            if (!this->m_model->RunInference()) {
+                printf_err("Inference failed.");
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * @brief       Runs post-processing as defined by PostProcess object within the runner.
+         * @return      true if successful, false otherwise.
+         **/
+        bool PostProcess() {
+            if (!this->m_postProcess->DoPostProcess()) {
+                printf_err("Post-processing failed.");
+                return false;
+            }
+            return true;
+        }
+    };
 
 } /* namespace app */
 } /* namespace arm */
