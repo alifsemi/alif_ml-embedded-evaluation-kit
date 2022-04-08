@@ -39,7 +39,7 @@ target_include_directories(${HAL_TARGET}
 target_sources(${HAL_TARGET}
     PRIVATE
     source/hal.c
-    source/hal_timer.c)
+    source/hal_pmu.c)
 
 if (DEFINED VERIFY_TEST_OUTPUT)
     message(STATUS "Test output verification flag is: ${VERIFY_TEST_OUTPUT}")

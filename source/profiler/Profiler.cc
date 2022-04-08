@@ -21,28 +21,27 @@
 
 namespace arm {
 namespace app {
-    Profiler::Profiler(hal_platform* platform, const char* name = "Unknown")
-    : m_name(name)
-    {
-        if (platform && platform->inited) {
-            this->m_pPlatform = platform;
-            this->Reset();
-        } else {
-            printf_err("Profiler %s initialised with invalid platform\n",
-                this->m_name.c_str());
-        }
-    }
+    Profiler::Profiler()
+        : Profiler("Unknown")
+    {}
+
+    Profiler::Profiler(const char* name)
+        : m_name(name)
+    {}
 
     bool Profiler::StartProfiling(const char* name)
     {
         if (name) {
             this->SetName(name);
         }
-        if (this->m_pPlatform && !this->m_started) {
-            this->m_pPlatform->timer->reset();
-            this->m_tstampSt = this->m_pPlatform->timer->get_counters();
-            this->m_started = true;
-            return true;
+        if (!this->m_started) {
+            hal_pmu_reset();
+            this->m_tstampSt.initialised = false;
+            hal_pmu_get_counters(&this->m_tstampSt);
+            if (this->m_tstampSt.initialised) {
+                this->m_started = true;
+                return true;
+            }
         }
         printf_err("Failed to start profiler %s\n", this->m_name.c_str());
         return false;
@@ -50,13 +49,17 @@ namespace app {
 
     bool Profiler::StopProfiling()
     {
-        if (this->m_pPlatform && this->m_started) {
-            this->m_tstampEnd = this->m_pPlatform->timer->get_counters();
+        if (this->m_started) {
+            this->m_tstampEnd.initialised = false;
+            hal_pmu_get_counters(&this->m_tstampEnd);
             this->m_started = false;
-
-            this->AddProfilingUnit(this->m_tstampSt, this->m_tstampEnd, this->m_name);
-
-            return true;
+            if (this->m_tstampEnd.initialised) {
+                this->AddProfilingUnit(
+                    this->m_tstampSt,
+                    this->m_tstampEnd,
+                    this->m_name);
+                return true;
+            }
         }
         printf_err("Failed to stop profiler %s\n", this->m_name.c_str());
         return false;
@@ -160,11 +163,6 @@ namespace app {
     void Profiler::AddProfilingUnit(pmu_counters start, pmu_counters end,
                                     const std::string& name)
     {
-        if (!this->m_pPlatform) {
-            printf_err("Invalid platform\n");
-            return;
-        }
-
         struct ProfilingUnit unit = {
             .counters = end
         };

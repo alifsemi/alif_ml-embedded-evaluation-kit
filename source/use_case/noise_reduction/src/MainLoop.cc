@@ -56,7 +56,7 @@ static bool SetAppCtxClipIdx(arm::app::ApplicationContext& ctx, uint32_t idx)
     return true;
 }
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     arm::app::RNNoiseModel model;  /* Model wrapper object. */
 
@@ -71,10 +71,8 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "noise_reduction"};
+    arm::app::Profiler profiler{"noise_reduction"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<uint32_t>("numInputFeatures", g_NumInputFeatures);
     caseContext.Set<uint32_t>("frameLength", g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", g_FrameStride);

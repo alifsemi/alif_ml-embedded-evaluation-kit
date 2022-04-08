@@ -48,7 +48,7 @@ static void DisplayMenu()
     fflush(stdout);
 }
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
@@ -61,10 +61,8 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "kws"};
+    arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
     caseContext.Set<int>("frameLength", g_FrameLength);

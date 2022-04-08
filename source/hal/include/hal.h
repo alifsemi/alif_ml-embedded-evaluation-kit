@@ -29,47 +29,25 @@ extern "C" {
 #endif
 
 #include "platform_drivers.h"   /* Platform drivers */
-#include "timer.h"              /* Timer/profiler API */
+#include "hal_pmu.h"              /* Timer/profiler API */
 #include "hal_lcd.h"            /* LCD functions */
 
 #include <inttypes.h>
 #include <stdbool.h>
 
-/* Structure to define a platform context to be used by the application */
-typedef struct hal_platform_context {
-    int inited;                         /**< initialised */
-    char plat_name[64];                 /**< name of this platform */
-    platform_timer* timer;              /**< timer */
-    int (* platform_init)();            /**< pointer to platform initialisation function */
-    void (* platform_release)();        /**< pointer to platform release function */
-} hal_platform;
-
-/**
- * @brief           Initialise the HAL structure based on compile time config. This
- *                  should be called before any other function in this API.
- * @param[in,out]   platform    Pointer to a pre-allocated platform struct.
- * @param[in,out]   timer       Pointer to a pre-allocated timer module.
- * @return          0 if successful, error code otherwise.
- **/
-int hal_init(hal_platform* platform, platform_timer* timer);
-
-
 /**
  * @brief       Initialise the HAL platform. This will go and initialise all the
  *              modules on the platform the application requires to run.
- * @param[in]   platform    Pointer to a pre-allocated and initialised
- *                          platform structure.
- * @return      0 if successful, error code otherwise.
+ * @return      True if successful, false otherwise.
  **/
-int hal_platform_init(hal_platform* platform);
+bool hal_platform_init(void);
 
 
 /**
  * @brief       Release the HAL platform. This should release resources acquired.
- * @param[in]   platform    pointer to a pre-allocated and initialised
  *                          platform structure.
  **/
-void hal_platform_release(hal_platform* platform);
+void hal_platform_release(void);
 
 /**
  * @brief       Gets user input from the stdin interface.

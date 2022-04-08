@@ -24,17 +24,12 @@
 #include <hal.h>
 #include <Profiler.hpp>
 
-#define PLATFORM \
-hal_platform    platform; \
-platform_timer  timer;    \
-hal_init(&platform, &timer); \
-hal_platform_init(&platform);
+#define PLATFORM    hal_platform_init();
 
 #define CONTEXT \
 arm::app::ApplicationContext caseContext; \
-arm::app::Profiler profiler{&platform, "noise_reduction"}; \
+arm::app::Profiler profiler{"noise_reduction"}; \
 caseContext.Set<arm::app::Profiler&>("profiler", profiler); \
-caseContext.Set<hal_platform&>("platform", platform); \
 caseContext.Set<arm::app::RNNoiseModel&>("model", model);
 
 TEST_CASE("Verify output tensor memory dump")

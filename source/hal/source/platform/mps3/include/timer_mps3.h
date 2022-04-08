@@ -44,10 +44,10 @@ typedef struct mps3_pmu_counters_ {
 void platform_reset_counters(void);
 
 /**
- * @brief   Gets the current counter values.
- * @returns A populated instance of pmu_counters struct.
+ * @brief       Gets the current counter values.
+ * @param[out]  Pointer to a pmu_counters object.
  **/
-pmu_counters platform_get_counters(void);
+void platform_get_counters(pmu_counters* counters);
 
 /**
  * @brief  Gets the MPS3 core clock

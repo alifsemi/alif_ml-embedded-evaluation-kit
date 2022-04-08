@@ -170,7 +170,7 @@ hal
 ├── include
 │     ├── hal.h
 │     ├── hal_lcd.h
-│     └── timer.h
+│     └── hal_pmu.h
 └── source
     ├── components
     │     ├── cmsis_device
@@ -180,7 +180,7 @@ hal
     │     ├── platform_pmu
     │     └── stdout
     ├── hal.c
-    ├── hal_timer.c
+    ├── hal_pmu.c
     └── platform
         ├── mps3
         ├── native

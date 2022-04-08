@@ -63,12 +63,10 @@ void platform_reset_counters(void)
     debug("system tick config ready\n");
 }
 
-pmu_counters platform_get_counters(void)
+void platform_get_counters(pmu_counters* counters)
 {
-    pmu_counters platform_counters = {
-        .num_counters = 0,
-        .initialised = true
-    };
+    counters->num_counters = 0;
+    counters->initialised = true;
     uint32_t i = 0;
 
 #if defined (ARM_NPU)
@@ -78,20 +76,20 @@ pmu_counters platform_get_counters(void)
                 npu_counters.npu_evt_counters[i].counter_value,
                 npu_counters.npu_evt_counters[i].name,
                 npu_counters.npu_evt_counters[i].unit,
-                &platform_counters);
+                counters);
     }
     for (i = 0; i < ETHOSU_DERIVED_NCOUNTERS; ++i) {
         add_pmu_counter(
                 npu_counters.npu_derived_counters[i].counter_value,
                 npu_counters.npu_derived_counters[i].name,
                 npu_counters.npu_derived_counters[i].unit,
-                &platform_counters);
+                counters);
     }
     add_pmu_counter(
             npu_counters.npu_total_ccnt,
             "NPU TOTAL",
             "cycles",
-            &platform_counters);
+            counters);
 #endif /* defined (ARM_NPU) */
 
 #if defined(CPU_PROFILE_ENABLED)
@@ -99,7 +97,7 @@ pmu_counters platform_get_counters(void)
             Get_SysTick_Cycle_Count(),
             "CPU TOTAL",
             "cycles",
-            &platform_counters);
+            counters);
 #endif /* defined(CPU_PROFILE_ENABLED) */
 
 #if !defined(CPU_PROFILE_ENABLED)
@@ -109,8 +107,6 @@ pmu_counters platform_get_counters(void)
     UNUSED(i);
 #endif /* !defined(ARM_NPU) */
 #endif /* !defined(CPU_PROFILE_ENABLED) */
-
-    return platform_counters;
 }
 
 void SysTick_Handler(void)

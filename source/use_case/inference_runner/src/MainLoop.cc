@@ -26,7 +26,7 @@ enum opcodes
     MENU_OPT_SHOW_MODEL_INFO,        /* Show model info. */
 };
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     arm::app::TestModel model;  /* Model wrapper object. */
 
@@ -39,10 +39,8 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "inference_runner"};
+    arm::app::Profiler profiler{"inference_runner"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
 

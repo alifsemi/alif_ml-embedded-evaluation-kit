@@ -91,52 +91,14 @@ use-cases, sources are in the `use-case` subfolder.
 
 The HAL is represented by the following interfaces. To access them, include the `hal.h` header.
 
-- `hal_platform` structure: Defines a platform context to be used by the application.
-
-  |  Attribute name    | Description |
-  |--------------------|----------------------------------------------------------------------------------------------|
-  |  `inited`            |  Initialization flag. Is set after the `platform_init()` function is called.                   |
-  |  `plat_name`         |  Platform name. it is set to `mps3-bare` for MPS3 build and `FVP` for Fast Model build.      |
-  |  `timer`             |  Pointer to platform timer implementation (see `platform_timer`)                               |
-  |  `platform_init`     |  Pointer to platform initialization function.                                                |
-  |  `platform_release`  |  Pointer to platform release function                                                        |
-
-- `hal_init` function: Initializes the HAL structure based on the compile-time configuration. This must be called before
-    any other function in this API.
-
-  |  Parameter name  | Description|
-  |------------------|-----------------------------------------------------|
-  |  `platform`        | Pointer to a pre-allocated `hal_platform` struct.   |
-  |  `timer`           | Pointer to a pre-allocated timer module             |
-  |  `return`          | Zero returned if successful, an error code is returned if unsuccessful.            |
-
 - `hal_platform_init` function: Initializes the HAL platform and every module on the platform that the application
   requires to run.
 
-  | Parameter name  | Description                                                         |
-  | ----------------| ------------------------------------------------------------------- |
-  | `platform`        | Pointer to a pre-allocated and initialized `hal_platform` struct.   |
-  | `return`          | zero if successful, error code otherwise.                           |
+  | Parameter name  | Description                          |
+  |--------------------------------------| ------------------------------------------------------------------- |
+  | `return`          | true if successful, false otherwise. |
 
 - `hal_platform_release` function Releases the HAL platform and any acquired resources.
-
-  | Parameter name  | Description                                                         |
-  | ----------------| ------------------------------------------------------------------- |
-  |  `platform`       | Pointer to a pre-allocated and initialized `hal_platform` struct.   |
-
-- `platform_timer` structure: The structure to hold a platform-specific timer implementation.
-
-  | Attribute name      | Description                                    |
-  |---------------------|------------------------------------------------|
-  |  `inited`             |  Initialization flag. It is set after the timer is initialized by the `hal_platform_init` function. |
-  |  `reset`              |  Pointer to a function to reset a timer. |
-  |  `get_time_counter`   |  Pointer to a function to get current time counter. |
-  |  `get_duration_ms`    |  Pointer to a function to calculate duration between two time-counters in milliseconds. |
-  |  `get_duration_us`    |  Pointer to a function to calculate duration between two time-counters in microseconds |
-  |  `get_cpu_cycle_diff` |  Pointer to a function to calculate duration between two time-counters in *Cortex-M55* cycles. |
-  |  `get_npu_cycle_diff` |  Pointer to a function to calculate duration between two time-counters in *Ethos-U* cycles. Available only when project is configured with `ETHOS_U_NPU_ENABLED` set. |
-  |  `start_profiling`    |  If necessary, wraps the `get_time_counter` function with another profiling initialization, if necessary. |
-  |  `stop_profiling`     |  If necessary, wraps the `get_time_counter` function along with more instructions when profiling ends. |
 
 An example of the API initialization in the main function:
 
@@ -146,20 +108,13 @@ An example of the API initialization in the main function:
 int main ()
 
 {
-
-  hal_platform platform;
-  platform_timer timer;
-
   /* Initialise the HAL and platform */
-  hal_init(&platform, &timer);
-  hal_platform_init(&platform);
+  hal_platform_init();
 
   ...
 
-  hal_platform_release(&platform);
-
+  hal_platform_release();
   return 0;
-
 }
 ```
 
@@ -168,13 +123,12 @@ int main ()
 Code samples application main function delegates the use-case logic execution to the main loop function that must be
 implemented for each custom ML scenario.
 
-Main loop function takes the initialized `hal_platform` structure pointer as an argument.
-
 The main loop function has external linkage and the main executable for the use-case references the function defined in
 the use-case code.
 
 ```C++
-void main_loop(hal_platform& platform){
+void main_loop()
+{
 
 ...
 
@@ -198,17 +152,16 @@ For example:
 #include "hal.h"
 #include "AppContext.hpp"
 
-void main_loop(hal_platform& platform) {
-
+void main_loop()
+{
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<uint32_t>("counter", 0);
 
     /* loop */
-  while (true) {
-    // do something, pass application context down the call stack
-  }
+    while (true) {
+        // do something, pass application context down the call stack
+    }
 }
 ```
 
@@ -230,7 +183,8 @@ It uses platform timer to get system timing information.
 An example of it in use:
 
 ```C++
-Profiler profiler{&platform, "Inference"};
+/* A named profiler instance */
+Profiler profiler{"Inference"};
 
 profiler.StartProfiling();
 // Code running inference to profile
@@ -331,7 +285,7 @@ Now define the `main_loop` function with the signature described in [Main loop f
 #include "hal.h"
 #include "log_macros.h"
 
-void main_loop(hal_platform& platform) {
+void main_loop() {
   printf("Hello world!");
 }
 ```
@@ -474,7 +428,7 @@ The following code adds inference invocation to the main loop function:
 #include "HelloWorldModel.hpp"
 #include "log_macros.h"
 
-  void main_loop(hal_platform& platform) {
+  void main_loop() {
 
   /* model wrapper object */
   arm::app::HelloWorldModel model;
@@ -549,7 +503,7 @@ To add profiling for the *Ethos-U*, include a `Profiler.hpp` header and invoke b
 For example:
 
 ```C++
-Profiler profiler{&platform, "Inference"};
+Profiler profiler{"Inference"};
 
 profiler.StartProfiling();
 model.RunInference();

@@ -48,6 +48,9 @@
  */
 static int verify_platform(void);
 
+/** Platform name */
+static const char* s_platform_name = DESIGN_NAME;
+
 int platform_init(void)
 {
     int err = 0;
@@ -82,8 +85,7 @@ int platform_init(void)
 #endif /* ARM_NPU */
 
     /* Print target design info */
-    info("Target system design: %s\n", DESIGN_NAME);
-
+    info("Target system design: %s\n", s_platform_name);
     return 0;
 }
 
@@ -92,9 +94,9 @@ void platform_release(void)
     __disable_irq();
 }
 
-void platform_name(char* name, size_t size)
+const char* platform_name(void)
 {
-    strncpy(name, DESIGN_NAME, size);
+    return s_platform_name;
 }
 
 #define CREATE_MASK(msb, lsb)           (int)(((1U << ((msb) - (lsb) + 1)) - 1) << (lsb))

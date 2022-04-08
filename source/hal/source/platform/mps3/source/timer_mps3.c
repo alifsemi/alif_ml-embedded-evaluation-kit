@@ -20,6 +20,8 @@
 #include "smm_mps3.h"   /* Memory map for MPS3. */
 
 static uint64_t cpu_cycle_count = 0;    /* 64-bit cpu cycle counter */
+static const char* unit_cycles = "cycles";
+static const char* unit_ms = "milliseconds";
 
 /**
  * @brief   Gets the system tick triggered cycle counter for the CPU.
@@ -69,12 +71,10 @@ void platform_reset_counters(void)
 #endif /* defined (ARM_NPU) */
 }
 
-pmu_counters platform_get_counters(void)
+void platform_get_counters(pmu_counters* counters)
 {
-    pmu_counters platform_counters = {
-        .num_counters = 0,
-        .initialised = true
-    };
+    counters->num_counters = 0;
+    counters->initialised = true;
     uint32_t i = 0;
 
 #if defined (ARM_NPU)
@@ -84,20 +84,20 @@ pmu_counters platform_get_counters(void)
             npu_counters.npu_evt_counters[i].counter_value,
             npu_counters.npu_evt_counters[i].name,
             npu_counters.npu_evt_counters[i].unit,
-            &platform_counters);
+            counters);
     }
     for (i = 0; i < ETHOSU_DERIVED_NCOUNTERS; ++i) {
         add_pmu_counter(
             npu_counters.npu_derived_counters[i].counter_value,
             npu_counters.npu_derived_counters[i].name,
             npu_counters.npu_derived_counters[i].unit,
-            &platform_counters);
+            counters);
     }
     add_pmu_counter(
         npu_counters.npu_total_ccnt,
         "NPU TOTAL",
-        "cycles",
-        &platform_counters);
+        unit_cycles,
+        counters);
 #endif /* defined (ARM_NPU) */
 
 #if defined(CPU_PROFILE_ENABLED)
@@ -111,14 +111,14 @@ pmu_counters platform_get_counters(void)
     add_pmu_counter(
             mps3_counters.counter_systick,
             "CPU TOTAL",
-            "cycles",
-            &platform_counters);
+            unit_cycles,
+            counters);
 
     add_pmu_counter(
             get_tstamp_milliseconds(&mps3_counters),
             "DURATION",
-            "milliseconds",
-            &platform_counters);
+            unit_ms,
+            counters);
 #endif /* defined(CPU_PROFILE_ENABLED) */
 
 #if !defined(CPU_PROFILE_ENABLED)
@@ -129,8 +129,6 @@ pmu_counters platform_get_counters(void)
     UNUSED(i);
 #endif /* !defined(ARM_NPU) */
 #endif /* !defined(CPU_PROFILE_ENABLED) */
-
-    return platform_counters;
 }
 
 uint32_t get_mps3_core_clock(void)

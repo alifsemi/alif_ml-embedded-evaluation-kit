@@ -14,23 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef HAL_TIMER_H
-#define HAL_TIMER_H
+#include "hal_pmu.h"
+#include "platform_drivers.h"
 
-#include "platform_drivers.h"  /* Platform package API */
-#include "user_input.h"        /* PMU structs and API */
+void hal_pmu_init(void)
+{
+    platform_reset_counters();
+}
 
-/* Structure to hold a platform specific timer implementation */
-typedef struct _platform_timer {
-    int inited;                           /**< Initialised or not. */
-    void (* reset)(void);                 /**< Reset the timer. */
-    pmu_counters (* get_counters)(void);  /**< Gets the current time counter. */
+void hal_pmu_reset(void)
+{
+    platform_reset_counters();
+}
 
-} platform_timer;
-
-/**
- * @brief   Initialise the timer available for the platform.
- **/
-void init_timer(platform_timer* timer);
-
-#endif /* HAL_TIMER_H */
+void hal_pmu_get_counters(pmu_counters* counters)
+{
+    platform_get_counters(counters);
+}

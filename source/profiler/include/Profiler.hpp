@@ -62,13 +62,12 @@ namespace app {
     public:
         /**
          * @brief       Constructor for profiler.
-         * @param[in]   platform   Pointer to a valid, initialised hal platform.
          * @param[in]   name       A friendly name for this profiler.
          **/
-        Profiler(hal_platform* platform, const char* name);
+        Profiler(const char* name);
 
-        /** Block the default constructor. */
-        Profiler() = delete;
+        /** Default constructor. */
+        Profiler();
 
         /** Default destructor. */
         ~Profiler() = default;
@@ -103,10 +102,7 @@ namespace app {
         ProfilingMap    m_series;                /* Profiling series map. */
         pmu_counters    m_tstampSt{};            /* Container for a current starting timestamp. */
         pmu_counters    m_tstampEnd{};           /* Container for a current ending timestamp. */
-        hal_platform *  m_pPlatform = nullptr;   /* Platform pointer - to get the timer. */
-
         bool            m_started = false;       /* Indicates profiler has been started. */
-
         std::string     m_name;                  /* Name given to this profiler. */
 
         /**

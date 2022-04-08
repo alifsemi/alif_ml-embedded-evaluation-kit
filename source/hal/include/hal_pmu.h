@@ -14,26 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "timer.h"
-#include "log_macros.h"
-#include "platform_drivers.h"
+#ifndef HAL_PMU_H
+#define HAL_PMU_H
 
-#include <assert.h>
-#include <string.h>
-#include <inttypes.h>
+#include "platform_pmu.h"
 
 /**
- * @brief       Initialiser for HAL timer.
- * @param[in]   timer  Platform timer to initialize.
+ * @brief   Initialise the PMU available for the platform.
  **/
-void init_timer(platform_timer* timer)
-{
-    assert(timer);
-    memset(timer, 0, sizeof(*timer));
+void hal_pmu_init(void);
 
-    timer->reset = platform_reset_counters;
-    timer->get_counters = platform_get_counters;
+/**
+ * @brief   Resets the counters.
+ */
+void hal_pmu_reset(void);
 
-    timer->reset();
-    timer->inited = 1;
-}
+/**
+ * @brief       Gets the current counter values.
+ * @param[out]  Pointer to a pmu_counters object.
+ **/
+void hal_pmu_get_counters(pmu_counters* counters);
+
+#endif /* HAL_PMU_H */

@@ -43,12 +43,8 @@ TEST_CASE("Model info")
 
 TEST_CASE("Inference by index")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MicroNetKwsModel model;
@@ -59,9 +55,8 @@ TEST_CASE("Inference by index")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "kws"};
+    arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<int>("frameLength", g_FrameLength);  /* 640 sample length for MicroNetKws. */
     caseContext.Set<int>("frameStride", g_FrameStride);  /* 320 sample stride for MicroNetKws. */
@@ -120,12 +115,8 @@ TEST_CASE("Inference by index")
 
 TEST_CASE("Inference run all clips")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MicroNetKwsModel model;
@@ -136,9 +127,8 @@ TEST_CASE("Inference run all clips")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "kws"};
+    arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
     caseContext.Set<int>("frameLength", g_FrameLength);  /* 640 sample length for MicroNet. */
@@ -156,12 +146,8 @@ TEST_CASE("Inference run all clips")
 
 TEST_CASE("List all audio clips")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
-    /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+   /* Initialise the HAL and platform. */
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MicroNetKwsModel model;
@@ -172,7 +158,6 @@ TEST_CASE("List all audio clips")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
 
     REQUIRE(arm::app::ListFilesHandler(caseContext));

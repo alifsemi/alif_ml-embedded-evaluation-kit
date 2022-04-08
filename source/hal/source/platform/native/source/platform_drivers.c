@@ -19,6 +19,8 @@
 
 #include <string.h>
 
+static const char* s_platform_name = "native";
+
 int platform_init(void)
 {
     return 0;
@@ -27,7 +29,7 @@ int platform_init(void)
 void platform_release(void)
 {}
 
-void platform_name(char* name, size_t size)
+const char* platform_name(void)
 {
-    strncpy(name, "native", size);
+    return s_platform_name;
 }

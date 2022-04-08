@@ -43,12 +43,8 @@ TEST_CASE("Model info")
 
 TEST_CASE("Inference by index", "[.]")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MobileNetModel model;
@@ -59,9 +55,8 @@ TEST_CASE("Inference by index", "[.]")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "img_class"};
+    arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
     arm::app::Classifier classifier;    /* Classifier wrapper object. */
@@ -81,12 +76,8 @@ TEST_CASE("Inference by index", "[.]")
 
 TEST_CASE("Inference run all images", "[.]")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MobileNetModel model;
@@ -97,9 +88,8 @@ TEST_CASE("Inference run all images", "[.]")
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "img_class"};
+    arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
     arm::app::Classifier classifier;    /* classifier wrapper object. */
@@ -115,12 +105,8 @@ TEST_CASE("Inference run all images", "[.]")
 
 TEST_CASE("List all images")
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
     /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
+    hal_platform_init();
 
     /* Model wrapper object. */
     arm::app::MobileNetModel model;
@@ -130,8 +116,6 @@ TEST_CASE("List all images")
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
-
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
 
     REQUIRE(arm::app::ListFilesHandler(caseContext));

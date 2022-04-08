@@ -38,10 +38,9 @@ int platform_init(void);
 void platform_release(void);
 
 /**
- * @brief   Sets the platform name.
- * @param[out] name     Name of the platform to be set
- * @param[in]  size     Size of the input buffer
+ * @brief   Gets the platform name.
+ * @return  Pointer to the name
  */
-void platform_name(char* name, size_t size);
+const char* platform_name(void);
 
 #endif /* PLATFORM_DRIVERS_H */

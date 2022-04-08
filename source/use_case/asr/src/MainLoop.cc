@@ -65,7 +65,7 @@ static uint32_t GetOutputContextLen(const arm::app::Model& model,
 static uint32_t GetOutputInnerLen(const arm::app::Model& model,
                                   uint32_t outputCtxLen);
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     arm::app::Wav2LetterModel model;  /* Model wrapper object. */
 
@@ -99,9 +99,8 @@ void main_loop(hal_platform& platform)
     GetLabelsVector(labels);
     arm::app::AsrClassifier classifier;  /* Classifier wrapper object. */
 
-    arm::app::Profiler profiler{&platform, "asr"};
+    arm::app::Profiler profiler{"asr"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
     caseContext.Set<uint32_t>("frameLength", g_FrameLength);

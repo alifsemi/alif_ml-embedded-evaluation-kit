@@ -22,6 +22,8 @@
 
 extern struct ethosu_driver ethosu_drv;     /* Default Arm Ethos-U NPU device driver object */
 static ethosu_pmu_counters npu_counters;    /* NPU counter local instance */
+static const char* unit_beats = "beats";
+static const char* unit_cycles = "cycles";
 
 /**
  * @brief Gets the npu counter instance to be used.
@@ -59,29 +61,29 @@ void ethosu_pmu_init(void)
     counters->npu_evt_counters[0].event_type = ETHOSU_PMU_NPU_IDLE;
     counters->npu_evt_counters[0].event_mask = ETHOSU_PMU_CNT1_Msk;
     counters->npu_evt_counters[0].name = "NPU IDLE";
-    counters->npu_evt_counters[0].unit = "cycles";
+    counters->npu_evt_counters[0].unit = unit_cycles;
 
     counters->npu_evt_counters[1].event_type = ETHOSU_PMU_AXI0_RD_DATA_BEAT_RECEIVED;
     counters->npu_evt_counters[1].event_mask = ETHOSU_PMU_CNT2_Msk;
     counters->npu_evt_counters[1].name = "NPU AXI0_RD_DATA_BEAT_RECEIVED";
-    counters->npu_evt_counters[1].unit = "beats";
+    counters->npu_evt_counters[1].unit = unit_beats;
 
     counters->npu_evt_counters[2].event_type = ETHOSU_PMU_AXI0_WR_DATA_BEAT_WRITTEN;
     counters->npu_evt_counters[2].event_mask = ETHOSU_PMU_CNT3_Msk;
     counters->npu_evt_counters[2].name = "NPU AXI0_WR_DATA_BEAT_WRITTEN";
-    counters->npu_evt_counters[2].unit = "beats";
+    counters->npu_evt_counters[2].unit = unit_beats;
 
     counters->npu_evt_counters[3].event_type = ETHOSU_PMU_AXI1_RD_DATA_BEAT_RECEIVED;
     counters->npu_evt_counters[3].event_mask = ETHOSU_PMU_CNT4_Msk;
     counters->npu_evt_counters[3].name = "NPU AXI1_RD_DATA_BEAT_RECEIVED";
-    counters->npu_evt_counters[3].unit = "beats";
+    counters->npu_evt_counters[3].unit = unit_beats;
 #else /* ETHOSU_PMU_NCOUNTERS >= 4 */
     #error "NPU PMU expects a minimum of 4 available event triggered counters!"
 #endif /* ETHOSU_PMU_NCOUNTERS >= 4 */
 
 #if ETHOSU_DERIVED_NCOUNTERS >= 1
     counters->npu_derived_counters[0].name = "NPU ACTIVE";
-    counters->npu_derived_counters[0].unit = "cycles";
+    counters->npu_derived_counters[0].unit = unit_cycles;
 #endif /* ETHOSU_DERIVED_NCOUNTERS >= 1 */
 
     for (i = 0; i < ETHOSU_PMU_NCOUNTERS; ++i) {

@@ -67,7 +67,7 @@ static uint32_t GetOutputContextLen(const arm::app::Model& model,
 static uint32_t GetOutputInnerLen(const arm::app::Model& model,
                                   uint32_t outputCtxLen);
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     /* Model wrapper objects. */
     arm::app::MicroNetKwsModel kwsModel;
@@ -104,10 +104,8 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "kws_asr"};
+    arm::app::Profiler profiler{"kws_asr"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("kwsmodel", kwsModel);
     caseContext.Set<arm::app::Model&>("asrmodel", asrModel);
     caseContext.Set<uint32_t>("clipIndex", 0);

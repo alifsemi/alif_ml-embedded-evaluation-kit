@@ -25,7 +25,7 @@
 
 #include <cstdio>
 
-extern void main_loop(hal_platform& platform);
+extern void main_loop();
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __ASM(" .global __ARM_use_no_argv\n");
@@ -41,13 +41,7 @@ static void print_application_intro()
 
 int main ()
 {
-    hal_platform    platform;
-    platform_timer  timer;
-
-    /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-
-    if (0 == hal_platform_init(&platform)) {
+    if (hal_platform_init()) {
         /* Application information, UART should have been initialised. */
         print_application_intro();
 
@@ -55,13 +49,13 @@ int main ()
         PrintTensorFlowVersion();
 
         /* Run the application. */
-        main_loop(platform);
+        main_loop();
     }
 
     /* This is unreachable without errors. */
     info("program terminating...\n");
 
     /* Release platform. */
-    hal_platform_release(&platform);
+    hal_platform_release();
     return 0;
 }

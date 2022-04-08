@@ -25,22 +25,16 @@
 
 TEST_CASE("Common: Test Profiler")
 {
-    hal_platform    platform;
-    platform_timer  timer {};
+    hal_platform_init();
 
-    /* Initialise the HAL and platform. */
-    hal_init(&platform, &timer);
-    hal_platform_init(&platform);
-
-    /* An invalid profiler shouldn't be of much use */
-    SECTION("Test invalid profiler") {
-        arm::app::Profiler profilerInvalid{nullptr, "test_invalid"};
-        REQUIRE(false == profilerInvalid.StartProfiling());
-        REQUIRE(false == profilerInvalid.StopProfiling());
+    SECTION("Test default construction") {
+        arm::app::Profiler profiler{};
+        REQUIRE(true == profiler.StartProfiling());
+        REQUIRE(true == profiler.StopProfiling());
     }
 
     SECTION("Test valid profiler") {
-        arm::app::Profiler profilerValid{&platform, "test_valid"};
+        arm::app::Profiler profilerValid{"test_valid"};
         REQUIRE(true == profilerValid.StartProfiling());
         REQUIRE(true == profilerValid.StopProfiling());
         std::vector<arm::app::ProfileResult> results;
@@ -57,7 +51,7 @@ TEST_CASE("Common: Test Profiler")
     }
 
     SECTION("Test multiple profilers") {
-        arm::app::Profiler profilerValid{&platform, "one"};
+        arm::app::Profiler profilerValid{"one"};
         REQUIRE(true == profilerValid.StartProfiling());
         REQUIRE(true == profilerValid.StopProfiling());
 
@@ -78,7 +72,7 @@ TEST_CASE("Common: Test Profiler")
 #if defined (CPU_PROFILE_ENABLED)
     SECTION("Test CPU profiler") {
 
-        arm::app::Profiler profilerCPU{&platform, "test cpu"};
+        arm::app::Profiler profilerCPU{"test cpu"};
         std::vector<arm::app::ProfileResult> results;
         profilerCPU.StartProfiling();
         profilerCPU.StopProfiling();

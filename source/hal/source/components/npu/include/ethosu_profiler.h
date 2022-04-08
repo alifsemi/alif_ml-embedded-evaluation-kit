@@ -29,14 +29,14 @@ typedef struct npu_event_counter_ {
     enum ethosu_pmu_event_type event_type;
     uint32_t event_mask;
     uint32_t counter_value;
-    char* unit;
-    char* name;
+    const char* unit;
+    const char* name;
 } npu_evt_counter;
 
 typedef struct npu_derived_counter_ {
     uint32_t counter_value;
-    char* unit;
-    char* name;
+    const char* unit;
+    const char* name;
 } npu_derived_counter;
 
 typedef struct ethosu_pmu_counters_ {

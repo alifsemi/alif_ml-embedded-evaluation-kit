@@ -36,7 +36,7 @@ static void DisplayDetectionMenu()
     fflush(stdout);
 }
 
-void main_loop(hal_platform& platform)
+void main_loop()
 {
     arm::app::YoloFastestModel model;  /* Model wrapper object. */
 
@@ -49,9 +49,8 @@ void main_loop(hal_platform& platform)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    arm::app::Profiler profiler{&platform, "object_detection"};
+    arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<hal_platform&>("platform", platform);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
     arm::app::object_detection::DetectorPostprocessing postp;

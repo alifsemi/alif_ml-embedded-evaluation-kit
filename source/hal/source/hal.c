@@ -19,62 +19,29 @@
 #include "platform_drivers.h"   /* Platform drivers */
 #include "log_macros.h"         /* Logging macros */
 
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-
-int hal_init(hal_platform* platform, platform_timer* timer)
+bool hal_platform_init(void)
 {
-    platform->timer     = timer;
-    platform->platform_init     = platform_init;
-    platform->platform_release  = platform_release;
-    platform_name(platform->plat_name, sizeof(platform->plat_name));
-
-    return 0;
-}
-
-/**
- * @brief  Local helper function to clean the slate for current platform.
- **/
-static void hal_platform_clear(hal_platform* platform)
-{
-    assert(platform);
-    platform->inited = 0;
-}
-
-int hal_platform_init(hal_platform* platform)
-{
-    int state;
-    assert(platform && platform->platform_init);
-    hal_platform_clear(platform);
-
     /* Initialise platform */
-    if (0 != (state = platform->platform_init())) {
-        printf_err("Failed to initialise platform %s\n", platform->plat_name);
-        return state;
+    if (0 != platform_init()) {
+        printf_err("Failed to initialise platform %s\n", platform_name());
+        return false;
     }
 
     /* Initialise LCD */
-    if (0 != (state = hal_lcd_init())) {
+    if (0 != hal_lcd_init()) {
         printf_err("hal_lcd_init failed\n");
-        return state;
+        return false;
     }
 
-    /* Initialise the timer module */
-    init_timer(platform->timer);
+    /* Initialise PMU */
+    hal_pmu_init();
 
-    info("%s platform initialised\n", platform->plat_name);
-    platform->inited = !state;
-    return state;
+    return true;
 }
 
-void hal_platform_release(hal_platform *platform)
+void hal_platform_release(void)
 {
-    assert(platform && platform->platform_release);
-
-    hal_platform_clear(platform);
-    info("Releasing platform %s\n", platform->plat_name);
-    platform->platform_release();
+    platform_release();
 }
 
 bool hal_get_user_input(char* user_input, int size)

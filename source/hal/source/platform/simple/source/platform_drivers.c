@@ -40,6 +40,9 @@
 
 #endif /* ARM_NPU */
 
+/* Platform name */
+static const char* s_platform_name = DESIGN_NAME;
+
 int platform_init(void)
 {
     SystemCoreClockUpdate();    /* From start up code */
@@ -72,7 +75,7 @@ int platform_init(void)
 #endif /* ARM_NPU */
 
     /* Print target design info */
-    info("Target system design: %s\n", DESIGN_NAME);
+    info("Target system design: %s\n", s_platform_name);
 
     return 0;
 }
@@ -82,7 +85,7 @@ void platform_release(void)
     __disable_irq();
 }
 
-void platform_name(char* name, size_t size)
+const char* platform_name(void)
 {
-    strncpy(name, DESIGN_NAME, size);
+    return s_platform_name;
 }
