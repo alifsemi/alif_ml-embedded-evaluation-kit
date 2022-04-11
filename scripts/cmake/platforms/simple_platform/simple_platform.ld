@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00060000;
+__STACK_SIZE = 0x00008000;
 __HEAP_SIZE  = 0x000C0000;
 
 /* System memory brief */

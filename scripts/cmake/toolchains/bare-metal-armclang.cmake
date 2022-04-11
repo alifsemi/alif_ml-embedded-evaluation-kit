@@ -84,14 +84,21 @@ add_compile_definitions(
 add_link_options(${CPU_LINK_OPT})
 set(CMAKE_ASM_FLAGS "${CPU_LINK_OPT}")
 
+set(ARMCLANG_INFO_STR "sizes,totals,unused,veneers,summarysizes")
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    # For debug builds, we can add stack information too:
+    set(ARMCLANG_INFO_STR "${ARMCLANG_INFO_STR},stack,summarystack")
+endif()
+
 # Warnings to be ignored:
 # L6314W = No section matches pattern
 # L6439W = Multiply defined Global Symbol
 add_link_options(
     --diag_suppress=L6439W,L6314W
-    --info sizes,totals,unused,veneers
+    --info ${ARMCLANG_INFO_STR}
     --strict
     --callgraph
+    --no_exceptions
     --load_addr_map_info
     --xref
     "$<$<CONFIG:RELEASE>:--no_debug>")

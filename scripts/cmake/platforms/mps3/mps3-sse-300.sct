@@ -16,10 +16,12 @@
 ; *************************************************************
 ; ***       Scatter-Loading Description File                ***
 ; *************************************************************
-; Please see docs/sections/appendix.md for memory mapping information.
+; Please see docs/sections/appendix.md for memory mapping
+; information.
 ;
-; Note: Ethos-U NPU can access BRAM, internal SRAM and the DDR sections => activation buffers and
-;       the model should only be placed in those regions.
+; Note: Ethos-U NPU can access BRAM, internal SRAM and the DDR
+;       sections => activation buffers and the model should
+;       only be placed in those regions.
 ;
 ;---------------------------------------------------------
 ; First load region (ITCM)
@@ -40,23 +42,23 @@ LOAD_REGION_0       0x00000000                  0x00080000
     }
 
     ;-----------------------------------------------------
-    ; 128kiB of 512kiB DTCM is used for any other RW or ZI
+    ; 384kiB of 512kiB DTCM is used for any other RW or ZI
     ; data. Note: this region is internal to the Cortex-M
     ; CPU.
     ;-----------------------------------------------------
-    dtcm.bin        0x20000000                  0x00020000
+    dtcm.bin        0x20000000                  0x00060000
     {
         ; Any R/W and/or zero initialised data
         .ANY(+RW +ZI)
     }
 
     ;-----------------------------------------------------
-    ; 384kiB of stack space within the DTCM region. See
+    ; 32 kiB of stack space within the DTCM region. See
     ; `dtcm.bin` for the first section. Note: by virtue of
     ; being part of DTCM, this region is only accessible
-    ; from Cortex-M55.
+    ; from Cortex-M55. We use the last DTCM bank
     ;-----------------------------------------------------
-    ARM_LIB_STACK   0x20020000 EMPTY ALIGN 8    0x00060000
+    ARM_LIB_STACK   0x20060000 EMPTY ALIGN 8    0x00008000
     {}
 
     ;-----------------------------------------------------
