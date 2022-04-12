@@ -40,6 +40,15 @@ set(ETHOS_U_SEC_ENABLED  "1"             CACHE STRING "Ethos-U NPU Security enab
 set(ETHOS_U_PRIV_ENABLED "1"             CACHE STRING "Ethos-U NPU Privilege enable")
 
 # Driver needs to know what MAC configuration to build for.
+if (NOT DEFINED ETHOS_U_NPU_CONFIG_ID)
+    set(ETHOS_U_NPU_CONFIG_ID "H128")
+endif()
+
+## Memory mode target definition
+if (NOT DEFINED ETHOS_U_NPU_ID)
+    set(ETHOS_U_NPU_ID U55)
+endif()
+
 if(ETHOS_U_NPU_CONFIG_ID MATCHES "^[A-Z]([0-9]+$)")
     set(ETHOSU_MACS ${CMAKE_MATCH_1})
 else()
@@ -47,11 +56,6 @@ else()
 endif()
 set(ETHOSU_TARGET_NPU_CONFIG
         "ethos-${ETHOS_U_NPU_ID}-${ETHOSU_MACS}" CACHE STRING "Target Ethos-U configuration for driver.")
-
-## Memory mode target definition
-if (NOT DEFINED ETHOS_U_NPU_ID)
-    set(ETHOS_U_NPU_ID U55)
-endif()
 
 if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
     set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
@@ -79,6 +83,14 @@ endif ()
 
 # Include the build for Ethos-U driver
 add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
+
+## Logging utilities:
+if (NOT TARGET log)
+    if (NOT DEFINED LOG_PROJECT_DIR)
+        message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
+    endif()
+    add_subdirectory(${LOG_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
+endif()
 
 # For Ethos-U driver, we need to override the default region configs
 # Region numbers are decided by Vela and they do not need to conform to set rules.

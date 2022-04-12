@@ -98,6 +98,8 @@ void platform_get_counters(pmu_counters* counters)
         "NPU TOTAL",
         unit_cycles,
         counters);
+#else
+    UNUSED(i);
 #endif /* defined (ARM_NPU) */
 
 #if defined(CPU_PROFILE_ENABLED)
@@ -126,7 +128,6 @@ void platform_get_counters(pmu_counters* counters)
     UNUSED(Get_SysTick_Cycle_Count);
 #if !defined(ARM_NPU)
     UNUSED(add_pmu_counter);
-    UNUSED(i);
 #endif /* !defined(ARM_NPU) */
 #endif /* !defined(CPU_PROFILE_ENABLED) */
 }

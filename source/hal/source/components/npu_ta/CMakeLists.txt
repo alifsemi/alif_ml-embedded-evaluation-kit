@@ -53,7 +53,16 @@ if (NOT DEFINED ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH)
             " be defined when ETHOS_U_NPU_ENABLED=${ETHOS_U_NPU_ENABLED}")
 endif()
 
+## TA driver
 add_subdirectory(${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH} ${CMAKE_BINARY_DIR}/timing_adapter)
+
+## Logging utilities:
+if (NOT TARGET log)
+    if (NOT DEFINED LOG_PROJECT_DIR)
+        message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
+    endif()
+    add_subdirectory(${LOG_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
+endif()
 
 # Create static library
 add_library(${ETHOS_U_NPU_TA_COMPONENT} STATIC)

@@ -22,7 +22,6 @@
 cmake_minimum_required(VERSION 3.15.6)
 
 set(HAL_TARGET hal)
-
 project(${HAL_TARGET}
     DESCRIPTION     "HAL library"
     LANGUAGES       C CXX)

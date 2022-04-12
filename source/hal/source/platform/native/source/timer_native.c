@@ -20,8 +20,6 @@ extern "C" {
 
 #include "timer_native.h"
 
-#include "log_macros.h"
-
 #include <time.h>
 #include <string.h>
 

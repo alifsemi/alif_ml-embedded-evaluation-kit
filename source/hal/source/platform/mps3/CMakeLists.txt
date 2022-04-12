@@ -85,6 +85,14 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
+## Logging utilities:
+if (NOT TARGET log)
+    if (NOT DEFINED LOG_PROJECT_DIR)
+        message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
+    endif()
+    add_subdirectory(${LOG_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
+endif()
+
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log

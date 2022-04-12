@@ -52,6 +52,14 @@ target_compile_definitions(${LCD_MPS3_COMPONENT_TARGET}
     PRIVATE
     CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE})
 
+## Logging utilities:
+if (NOT TARGET log)
+    if (NOT DEFINED LOG_PROJECT_DIR)
+        message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
+    endif()
+    add_subdirectory(${LOG_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
+endif()
+
 ## Add dependencies
 target_link_libraries(${LCD_MPS3_COMPONENT_TARGET} PUBLIC
     ${LCD_IFACE_TARGET}
