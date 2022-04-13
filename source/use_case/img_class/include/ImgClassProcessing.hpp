@@ -32,8 +32,19 @@ namespace app {
     class ImgClassPreProcess : public BasePreProcess {
 
     public:
+        /**
+         * @brief       Constructor
+         * @param[in]   model   Pointer to the the Image classification Model object.
+         **/
         explicit ImgClassPreProcess(Model* model);
 
+        /**
+         * @brief       Should perform pre-processing of 'raw' input image data and load it into
+         *              TFLite Micro input tensors ready for inference
+         * @param[in]   input      Pointer to the data that pre-processing will work on.
+         * @param[in]   inputSize  Size of the input data.
+         * @return      true if successful, false otherwise.
+         **/
         bool DoPreProcess(const void* input, size_t inputSize) override;
     };
 
@@ -50,10 +61,22 @@ namespace app {
         std::vector<ClassificationResult>& m_results;
 
     public:
+        /**
+         * @brief       Constructor
+         * @param[in]   classifier   Classifier object used to get top N results from classification.
+         * @param[in]   model        Pointer to the the Image classification Model object.
+         * @param[in]   labels       Vector of string labels to identify each output of the model.
+         * @param[in]   results      Vector of classification results to store decoded outputs.
+         **/
         ImgClassPostProcess(Classifier& classifier, Model* model,
                             const std::vector<std::string>& labels,
                             std::vector<ClassificationResult>& results);
 
+        /**
+         * @brief       Should perform post-processing of the result of inference then populate
+         *              populate classification result data for any later use.
+         * @return      true if successful, false otherwise.
+         **/
         bool DoPostProcess() override;
     };
 

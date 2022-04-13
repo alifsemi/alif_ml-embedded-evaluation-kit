@@ -23,6 +23,9 @@ namespace app {
 
     ImgClassPreProcess::ImgClassPreProcess(Model* model)
     {
+        if (!model->IsInited()) {
+            printf_err("Model is not initialised!.\n");
+        }
         this->m_model = model;
     }
 
@@ -35,7 +38,7 @@ namespace app {
         auto input = static_cast<const uint8_t*>(data);
         TfLiteTensor* inputTensor = this->m_model->GetInputTensor(0);
 
-        memcpy(inputTensor->data.data, input, inputSize);
+        std::memcpy(inputTensor->data.data, input, inputSize);
         debug("Input tensor populated \n");
 
         if (this->m_model->IsDataSigned()) {
@@ -52,6 +55,9 @@ namespace app {
              m_labels{labels},
              m_results{results}
     {
+        if (!model->IsInited()) {
+            printf_err("Model is not initialised!.\n");
+        }
         this->m_model = model;
     }
 

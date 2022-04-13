@@ -37,6 +37,12 @@ namespace app {
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model = ctx.Get<Model&>("model");
+        /* If the request has a valid size, set the image index as it might not be set. */
+        if (imgIndex < NUMBER_OF_FILES) {
+            if (!SetAppCtxIfmIdx(ctx, imgIndex, "imgIndex")) {
+                return false;
+            }
+        }
         auto initialImIdx = ctx.Get<uint32_t>("imgIndex");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 2;
@@ -46,12 +52,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        /* If the request has a valid size, set the image index. */
-        if (imgIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, imgIndex, "imgIndex")) {
-                return false;
-            }
-        }
+
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -102,7 +103,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Select the image to run inference with. */
             info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
@@ -129,7 +130,7 @@ namespace app {
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);

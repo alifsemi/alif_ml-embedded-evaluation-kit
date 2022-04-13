@@ -67,7 +67,7 @@ TEST_CASE("Inference by index")
 
     auto checker = [&](uint32_t audioIndex, std::vector<uint32_t> labelIndex)
     {
-        caseContext.Set<uint32_t>("audioIndex", audioIndex);
+        caseContext.Set<uint32_t>("clipIndex", audioIndex);
 
         std::vector<std::string> labels;
         GetLabelsVector(labels);
