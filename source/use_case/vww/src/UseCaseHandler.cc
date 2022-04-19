@@ -22,27 +22,23 @@
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
-
-#include <algorithm>
+#include "VisualWakeWordProcessing.hpp"
 
 namespace arm {
 namespace app {
 
-    /**
-    * @brief            Helper function to load the current image into the input
-    *                   tensor.
-    * @param[in]        imIdx         Image index (from the pool of images available
-    *                                 to the application).
-    * @param[out]       inputTensor   Pointer to the input tensor to be populated.
-    * @return           true if tensor is loaded, false otherwise.
-    **/
-    static bool LoadImageIntoTensor(uint32_t imIdx,
-                                     TfLiteTensor *inputTensor);
-
-    /* Image inference classification handler. */
+    /* Visual Wake Word inference handler. */
     bool ClassifyImageHandler(ApplicationContext &ctx, uint32_t imgIndex, bool runAll)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
+        auto& model = ctx.Get<Model&>("model");
+        /* If the request has a valid size, set the image index. */
+        if (imgIndex < NUMBER_OF_FILES) {
+            if (!SetAppCtxIfmIdx(ctx, imgIndex,"imgIndex")) {
+                return false;
+            }
+        }
+        auto initialImgIdx = ctx.Get<uint32_t>("imgIndex");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
         constexpr uint32_t dataPsnImgStartX = 10;
@@ -51,31 +47,22 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 70;
 
-        auto& model = ctx.Get<Model&>("model");
-
-        /* If the request has a valid size, set the image index. */
-        if (imgIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, imgIndex,"imgIndex")) {
-                return false;
-            }
-        }
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
         }
 
-        auto curImIdx = ctx.Get<uint32_t>("imgIndex");
-
-        TfLiteTensor *outputTensor = model.GetOutputTensor(0);
-        TfLiteTensor *inputTensor = model.GetInputTensor(0);
+        TfLiteTensor* inputTensor = model.GetInputTensor(0);
 
         if (!inputTensor->dims) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 3) {
-            printf_err("Input tensor dimension should be >= 3\n");
+        } else if (inputTensor->dims->size < 4) {
+            printf_err("Input tensor dimension should be = 4\n");
             return false;
         }
+
+        /* Get input shape for displaying the image. */
         TfLiteIntArray* inputShape = model.GetInputShape(0);
         const uint32_t nCols = inputShape->data[arm::app::VisualWakeWordModel::ms_inputColsIdx];
         const uint32_t nRows = inputShape->data[arm::app::VisualWakeWordModel::ms_inputRowsIdx];
@@ -83,9 +70,19 @@ namespace app {
             printf_err("Invalid channel index.\n");
             return false;
         }
-        const uint32_t nChannels = inputShape->data[arm::app::VisualWakeWordModel::ms_inputChannelsIdx];
+
+        /* We expect RGB images to be provided. */
+        const uint32_t displayChannels = 3;
+
+        /* Set up pre and post-processing. */
+        VisualWakeWordPreProcess preprocess = VisualWakeWordPreProcess(&model);
 
         std::vector<ClassificationResult> results;
+        VisualWakeWordPostProcess postprocess = VisualWakeWordPostProcess(
+                ctx.Get<Classifier&>("classifier"), &model,
+                ctx.Get<std::vector<std::string>&>("labels"), results);
+
+        UseCaseRunner runner = UseCaseRunner(&preprocess, &postprocess, &model);
 
         do {
             hal_lcd_clear(COLOR_BLACK);
@@ -93,54 +90,55 @@ namespace app {
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};
 
-            /* Copy over the data. */
-            LoadImageIntoTensor(ctx.Get<uint32_t>("imgIndex"), inputTensor);
+            const uint8_t* imgSrc = get_img_array(ctx.Get<uint32_t>("imgIndex"));
+            if (nullptr == imgSrc) {
+                printf_err("Failed to get image index %" PRIu32 " (max: %u)\n", ctx.Get<uint32_t>("imgIndex"),
+                           NUMBER_OF_FILES - 1);
+                return false;
+            }
 
             /* Display this image on the LCD. */
             hal_lcd_display_image(
-                static_cast<uint8_t *>(inputTensor->data.data),
-                nCols, nRows, nChannels,
+                imgSrc,
+                nCols, nRows, displayChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
-            /* Vww model preprocessing is image conversion from uint8 to [0,1] float values,
-             * then quantize them with input quantization info. */
-            QuantParams inQuantParams = GetTensorQuantParams(inputTensor);
-
-            auto* req_data = static_cast<uint8_t *>(inputTensor->data.data);
-            auto* signed_req_data = static_cast<int8_t *>(inputTensor->data.data);
-            for (size_t i = 0; i < inputTensor->bytes; i++) {
-                auto i_data_int8 = static_cast<int8_t>(((static_cast<float>(req_data[i]) / 255.0f) / inQuantParams.scale) + inQuantParams.offset);
-                signed_req_data[i] = std::min<int8_t>(INT8_MAX, std::max<int8_t>(i_data_int8, INT8_MIN));
-            }
-
             /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(
-                                str_inf.c_str(), str_inf.size(),
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Run inference over this image. */
             info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
                 get_filename(ctx.Get<uint32_t>("imgIndex")));
 
-            if (!RunInference(model, profiler)) {
+            const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
+                                 inputTensor->bytes : IMAGE_DATA_SIZE;
+
+            /* Run the pre-processing, inference and post-processing. */
+            if (!runner.PreProcess(imgSrc, imgSz)) {
+                return false;
+            }
+
+            profiler.StartProfiling("Inference");
+            if (!runner.RunInference()) {
+                return false;
+            }
+            profiler.StopProfiling();
+
+            if (!runner.PostProcess()) {
                 return false;
             }
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
-                                str_inf.c_str(), str_inf.size(),
-                                dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-
-            auto& classifier = ctx.Get<Classifier&>("classifier");
-            classifier.GetClassificationResults(outputTensor, results,
-                                                ctx.Get<std::vector <std::string>&>("labels"), 1,
-                                                false);
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
+                                 dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);
 
 #if VERIFY_TEST_OUTPUT
+            TfLiteTensor* outputTensor = model.GetOutputTensor(0);
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
@@ -149,43 +147,11 @@ namespace app {
             }
 
             profiler.PrintProfilingResult();
+
             IncrementAppCtxIfmIdx(ctx,"imgIndex");
 
-        } while (runAll && ctx.Get<uint32_t>("imgIndex") != curImIdx);
+        } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImgIdx);
 
-        return true;
-    }
-
-    static bool LoadImageIntoTensor(const uint32_t imIdx,
-                                     TfLiteTensor *inputTensor)
-    {
-        const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
-                                inputTensor->bytes : IMAGE_DATA_SIZE;
-        if (imIdx >= NUMBER_OF_FILES) {
-            printf_err("invalid image index %" PRIu32 " (max: %u)\n", imIdx,
-                       NUMBER_OF_FILES - 1);
-            return false;
-        }
-
-        if (arm::app::VisualWakeWordModel::ms_inputChannelsIdx >= static_cast<uint32_t>(inputTensor->dims->size)) {
-            printf_err("Invalid channel index.\n");
-            return false;
-        }
-        const uint32_t nChannels = inputTensor->dims->data[arm::app::VisualWakeWordModel::ms_inputChannelsIdx];
-
-        const uint8_t* srcPtr = get_img_array(imIdx);
-        auto* dstPtr = static_cast<uint8_t *>(inputTensor->data.data);
-        if (1 == nChannels) {
-            /**
-             * Visual Wake Word model accepts only one channel =>
-             * Convert image to grayscale here
-             **/
-            image::RgbToGrayscale(srcPtr, dstPtr, copySz);
-        } else {
-            memcpy(inputTensor->data.data, srcPtr, copySz);
-        }
-
-        debug("Image %" PRIu32 " loaded\n", imIdx);
         return true;
     }
 

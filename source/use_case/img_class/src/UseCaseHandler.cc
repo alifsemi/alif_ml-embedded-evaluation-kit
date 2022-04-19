@@ -43,7 +43,7 @@ namespace app {
                 return false;
             }
         }
-        auto initialImIdx = ctx.Get<uint32_t>("imgIndex");
+        auto initialImgIdx = ctx.Get<uint32_t>("imgIndex");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 2;
         constexpr uint32_t dataPsnImgStartX = 10;
@@ -62,8 +62,8 @@ namespace app {
         if (!inputTensor->dims) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 3) {
-            printf_err("Input tensor dimension should be >= 3\n");
+        } else if (inputTensor->dims->size < 4) {
+            printf_err("Input tensor dimension should be = 4\n");
             return false;
         }
 
@@ -148,7 +148,7 @@ namespace app {
 
             IncrementAppCtxIfmIdx(ctx,"imgIndex");
 
-        } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImIdx);
+        } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImgIdx);
 
         return true;
     }
