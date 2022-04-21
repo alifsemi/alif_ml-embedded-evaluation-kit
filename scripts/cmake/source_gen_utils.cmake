@@ -277,6 +277,7 @@ function(setup_source_generator)
         set(PYTHON ${DEFAULT_VENV_DIR}/bin/${PY_EXEC})
     endif()
     set(PYTHON ${PYTHON} PARENT_SCOPE)
+    set(PYTHON_VENV ${DEFAULT_VENV_DIR} PARENT_SCOPE)
 
     if (EXISTS ${PYTHON})
         message(STATUS "Using existing python at ${PYTHON}")

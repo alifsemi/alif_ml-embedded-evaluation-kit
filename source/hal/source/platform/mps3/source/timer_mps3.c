@@ -126,7 +126,9 @@ void platform_get_counters(pmu_counters* counters)
 #if !defined(CPU_PROFILE_ENABLED)
     UNUSED(get_tstamp_milliseconds);
     UNUSED(Get_SysTick_Cycle_Count);
+    UNUSED(unit_ms);
 #if !defined(ARM_NPU)
+    UNUSED(unit_cycles);
     UNUSED(add_pmu_counter);
 #endif /* !defined(ARM_NPU) */
 #endif /* !defined(CPU_PROFILE_ENABLED) */

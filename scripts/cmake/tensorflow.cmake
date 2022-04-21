@@ -72,11 +72,18 @@ endif()
 list(APPEND MAKE_TARGETS_LIST "microlite")
 message(STATUS "TensorFlow Lite Micro build to be called for these targets: ${MAKE_TARGETS_LIST}")
 
+# Add virtual environment's Python directory path to the system path.
+# NOTE: This path is passed to the TensorFlow Lite Micro's make env
+# as it depends on some basic Python packages (like Pillow) installed
+# and the system-wide Python installation might not have them.
+set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
+
 # Commands and targets
 add_custom_target(tensorflow_build ALL
 
     # Command to build the TensorFlow Lite Micro library
-    COMMAND make -j${J} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
+    COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
+        make -j${J} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
         TARGET_TOOLCHAIN_ROOT=${TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT}
         TOOLCHAIN=${TENSORFLOW_LITE_MICRO_TOOLCHAIN}
         GENDIR=${TENSORFLOW_LITE_MICRO_GENDIR}
