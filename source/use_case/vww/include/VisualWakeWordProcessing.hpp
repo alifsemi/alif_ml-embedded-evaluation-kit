@@ -34,9 +34,9 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   model   Pointer to the the Image classification Model object.
+         * @param[in]   inputTensor   Pointer to the TFLite Micro input Tensor.
          **/
-        explicit VisualWakeWordPreProcess(Model* model);
+        explicit VisualWakeWordPreProcess(TfLiteTensor* inputTensor);
 
         /**
          * @brief       Should perform pre-processing of 'raw' input image data and load it into
@@ -46,6 +46,9 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
         bool DoPreProcess(const void* input, size_t inputSize) override;
+
+    private:
+        TfLiteTensor* m_inputTensor;
     };
 
     /**
@@ -56,6 +59,7 @@ namespace app {
     class VisualWakeWordPostProcess : public BasePostProcess {
 
     private:
+        TfLiteTensor* m_outputTensor;
         Classifier& m_vwwClassifier;
         const std::vector<std::string>& m_labels;
         std::vector<ClassificationResult>& m_results;
@@ -63,19 +67,20 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   classifier   Classifier object used to get top N results from classification.
-         * @param[in]   model        Pointer to the VWW classification Model object.
-         * @param[in]   labels       Vector of string labels to identify each output of the model.
-         * @param[out]  results      Vector of classification results to store decoded outputs.
+         * @param[in]   outputTensor   Pointer to the TFLite Micro output Tensor.
+         * @param[in]   classifier     Classifier object used to get top N results from classification.
+         * @param[in]   model          Pointer to the VWW classification Model object.
+         * @param[in]   labels         Vector of string labels to identify each output of the model.
+         * @param[out]  results        Vector of classification results to store decoded outputs.
          **/
-        VisualWakeWordPostProcess(Classifier& classifier, Model* model,
+        VisualWakeWordPostProcess(TfLiteTensor* outputTensor, Classifier& classifier,
                 const std::vector<std::string>& labels,
                 std::vector<ClassificationResult>& results);
 
         /**
-         * @brief       Should perform post-processing of the result of inference then
-         *              populate classification result data for any later use.
-         * @return      true if successful, false otherwise.
+         * @brief    Should perform post-processing of the result of inference then
+         *           populate classification result data for any later use.
+         * @return   true if successful, false otherwise.
          **/
         bool DoPostProcess() override;
     };

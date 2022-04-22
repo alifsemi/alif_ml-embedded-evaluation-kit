@@ -111,8 +111,8 @@ TEST_CASE("Preprocessing calculation INT8")
             tensorVec.data(), dims, quantScale, quantOffset, "preprocessedInput");
 
     /* Initialise pre-processing module. */
-    arm::app::ASRPreProcess prep{&inputTensor,
-        numMfccFeatures, numMfccVectors, mfccWindowLen, mfccWindowStride};
+    arm::app::AsrPreProcess prep{&inputTensor,
+                                 numMfccFeatures, numMfccVectors, mfccWindowLen, mfccWindowStride};
 
     /* Invoke pre-processing. */
     REQUIRE(prep.DoPreProcess(testWav.data(), testWav.size()));

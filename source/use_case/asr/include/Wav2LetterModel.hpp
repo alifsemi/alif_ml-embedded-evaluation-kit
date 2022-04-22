@@ -36,6 +36,7 @@ namespace app {
         static constexpr uint32_t ms_outputRowsIdx = 2;
         static constexpr uint32_t ms_outputColsIdx = 3;
 
+        /* Model specific constants. */
         static constexpr uint32_t ms_blankTokenIdx   = 28;
         static constexpr uint32_t ms_numMfccFeatures = 13;
 

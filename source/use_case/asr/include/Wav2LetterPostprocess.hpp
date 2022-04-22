@@ -30,23 +30,24 @@ namespace app {
      * @brief   Helper class to manage tensor post-processing for "wav2letter"
      *          output.
      */
-    class ASRPostProcess : public BasePostProcess {
+    class AsrPostProcess : public BasePostProcess {
     public:
         bool m_lastIteration = false;   /* Flag to set if processing the last set of data for a clip. */
 
         /**
          * @brief           Constructor
-         * @param[in]       outputTensor       Pointer to the output Tensor.
+         * @param[in]       outputTensor       Pointer to the TFLite Micro output Tensor.
+         * @param[in]       classifier         Object used to get top N results from classification.
          * @param[in]       labels             Vector of string labels to identify each output of the model.
-         * @param[in/out]   result            Vector of classification results to store decoded outputs.
+         * @param[in/out]   result             Vector of classification results to store decoded outputs.
          * @param[in]       outputContextLen   Left/right context length for output tensor.
          * @param[in]       blankTokenIdx      Index in the labels that the "Blank token" takes.
          * @param[in]       reductionAxis      The axis that the logits of each time step is on.
          **/
-        ASRPostProcess(AsrClassifier& classifier, TfLiteTensor* outputTensor,
-                const std::vector<std::string>& labels, asr::ResultVec& result,
-                uint32_t outputContextLen,
-                uint32_t blankTokenIdx, uint32_t reductionAxis);
+        AsrPostProcess(TfLiteTensor* outputTensor, AsrClassifier& classifier,
+                       const std::vector<std::string>& labels, asr::ResultVec& result,
+                       uint32_t outputContextLen,
+                       uint32_t blankTokenIdx, uint32_t reductionAxis);
 
         /**
          * @brief    Should perform post-processing of the result of inference then

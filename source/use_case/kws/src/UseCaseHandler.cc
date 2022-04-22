@@ -34,13 +34,12 @@ using KwsClassifier = arm::app::Classifier;
 namespace arm {
 namespace app {
 
-
     /**
      * @brief           Presents KWS inference results.
      * @param[in]       results     Vector of KWS classification results to be displayed.
      * @return          true if successful, false otherwise.
      **/
-    static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results);
+    static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results);
 
     /* KWS inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
@@ -50,6 +49,7 @@ namespace app {
         const auto mfccFrameLength = ctx.Get<int>("frameLength");
         const auto mfccFrameStride = ctx.Get<int>("frameStride");
         const auto scoreThreshold = ctx.Get<float>("scoreThreshold");
+
         /* If the request has a valid size, set the audio index. */
         if (clipIndex < NUMBER_OF_FILES) {
             if (!SetAppCtxIfmIdx(ctx, clipIndex,"clipIndex")) {
@@ -61,16 +61,17 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
         constexpr int minTensorDims = static_cast<int>(
-            (arm::app::MicroNetKwsModel::ms_inputRowsIdx > arm::app::MicroNetKwsModel::ms_inputColsIdx)?
-             arm::app::MicroNetKwsModel::ms_inputRowsIdx : arm::app::MicroNetKwsModel::ms_inputColsIdx);
-
+            (MicroNetKwsModel::ms_inputRowsIdx > MicroNetKwsModel::ms_inputColsIdx)?
+             MicroNetKwsModel::ms_inputRowsIdx : MicroNetKwsModel::ms_inputColsIdx);
 
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
         }
 
+        /* Get Input and Output tensors for pre/post processing. */
         TfLiteTensor* inputTensor = model.GetInputTensor(0);
+        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
         if (!inputTensor->dims) {
             printf_err("Invalid input tensor dims\n");
             return false;
@@ -81,22 +82,23 @@ namespace app {
 
         /* Get input shape for feature extraction. */
         TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t numMfccFeatures = inputShape->data[arm::app::MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFrames = inputShape->data[arm::app::MicroNetKwsModel::ms_inputRowsIdx];
 
         /* We expect to be sampling 1 second worth of data at a time.
          * NOTE: This is only used for time stamp calculation. */
         const float secondsPerSample = 1.0 / audio::MicroNetKwsMFCC::ms_defaultSamplingFreq;
 
         /* Set up pre and post-processing. */
-        KWSPreProcess preprocess = KWSPreProcess(&model, numMfccFeatures, mfccFrameLength, mfccFrameStride);
+        KwsPreProcess preProcess = KwsPreProcess(inputTensor, numMfccFeatures, numMfccFrames,
+                                                 mfccFrameLength, mfccFrameStride);
 
         std::vector<ClassificationResult> singleInfResult;
-        KWSPostProcess postprocess = KWSPostProcess(ctx.Get<KwsClassifier &>("classifier"), &model,
+        KwsPostProcess postProcess = KwsPostProcess(outputTensor, ctx.Get<KwsClassifier &>("classifier"),
                                                     ctx.Get<std::vector<std::string>&>("labels"),
                                                     singleInfResult);
 
-        UseCaseRunner runner = UseCaseRunner(&preprocess, &postprocess, &model);
-
+        /* Loop to process audio clips. */
         do {
             hal_lcd_clear(COLOR_BLACK);
 
@@ -106,7 +108,7 @@ namespace app {
             auto audioDataSlider = audio::SlidingWindow<const int16_t>(
                     get_audio_array(currentIndex),
                     get_audio_array_size(currentIndex),
-                    preprocess.m_audioDataWindowSize, preprocess.m_audioDataStride);
+                    preProcess.m_audioDataWindowSize, preProcess.m_audioDataStride);
 
             /* Declare a container to hold results from across the whole audio clip. */
             std::vector<kws::KwsResult> finalResults;
@@ -123,34 +125,34 @@ namespace app {
                 const int16_t* inferenceWindow = audioDataSlider.Next();
 
                 /* The first window does not have cache ready. */
-                preprocess.m_audioWindowIndex = audioDataSlider.Index();
+                preProcess.m_audioWindowIndex = audioDataSlider.Index();
 
                 info("Inference %zu/%zu\n", audioDataSlider.Index() + 1,
                      audioDataSlider.TotalStrides() + 1);
 
                 /* Run the pre-processing, inference and post-processing. */
-                if (!runner.PreProcess(inferenceWindow, audio::MicroNetKwsMFCC::ms_defaultSamplingFreq)) {
+                if (!preProcess.DoPreProcess(inferenceWindow, audio::MicroNetKwsMFCC::ms_defaultSamplingFreq)) {
+                    printf_err("Pre-processing failed.");
                     return false;
                 }
 
-                profiler.StartProfiling("Inference");
-                if (!runner.RunInference()) {
+                if (!RunInference(model, profiler)) {
+                    printf_err("Inference failed.");
                     return false;
                 }
-                profiler.StopProfiling();
 
-                if (!runner.PostProcess()) {
+                if (!postProcess.DoPostProcess()) {
+                    printf_err("Post-processing failed.");
                     return false;
                 }
 
                 /* Add results from this window to our final results vector. */
                 finalResults.emplace_back(kws::KwsResult(singleInfResult,
-                        audioDataSlider.Index() * secondsPerSample * preprocess.m_audioDataStride,
+                        audioDataSlider.Index() * secondsPerSample * preProcess.m_audioDataStride,
                         audioDataSlider.Index(), scoreThreshold));
 
 #if VERIFY_TEST_OUTPUT
-                TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-                arm::app::DumpTensor(outputTensor);
+                DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
             } /* while (audioDataSlider.HasNext()) */
 
@@ -174,7 +176,7 @@ namespace app {
         return true;
     }
 
-    static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results)
+    static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -187,7 +189,7 @@ namespace app {
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
 
-        for (const auto & result : results) {
+        for (const auto& result : results) {
 
             std::string topKeyword{"<none>"};
             float score = 0.f;

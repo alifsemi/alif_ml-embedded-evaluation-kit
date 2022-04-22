@@ -25,9 +25,9 @@
 namespace arm {
 namespace app {
 
-    ASRPreProcess::ASRPreProcess(TfLiteTensor* inputTensor, const uint32_t numMfccFeatures,
-            const uint32_t numFeatureFrames, const uint32_t mfccWindowLen,
-            const uint32_t mfccWindowStride
+    AsrPreProcess::AsrPreProcess(TfLiteTensor* inputTensor, const uint32_t numMfccFeatures,
+                                 const uint32_t numFeatureFrames, const uint32_t mfccWindowLen,
+                                 const uint32_t mfccWindowStride
             ):
             m_mfcc(numMfccFeatures, mfccWindowLen),
             m_inputTensor(inputTensor),
@@ -44,7 +44,7 @@ namespace app {
         }
     }
 
-    bool ASRPreProcess::DoPreProcess(const void* audioData, const size_t audioDataLen)
+    bool AsrPreProcess::DoPreProcess(const void* audioData, const size_t audioDataLen)
     {
         this->m_mfccSlidingWindow = audio::SlidingWindow<const int16_t>(
                 static_cast<const int16_t*>(audioData), audioDataLen,
@@ -82,7 +82,7 @@ namespace app {
         }
 
         /* Compute first and second order deltas from MFCCs. */
-        ASRPreProcess::ComputeDeltas(this->m_mfccBuf, this->m_delta1Buf, this->m_delta2Buf);
+        AsrPreProcess::ComputeDeltas(this->m_mfccBuf, this->m_delta1Buf, this->m_delta2Buf);
 
         /* Standardize calculated features. */
         this->Standarize();
@@ -112,9 +112,9 @@ namespace app {
         return false;
     }
 
-    bool ASRPreProcess::ComputeDeltas(Array2d<float>& mfcc,
-                                   Array2d<float>& delta1,
-                                   Array2d<float>& delta2)
+    bool AsrPreProcess::ComputeDeltas(Array2d<float>& mfcc,
+                                      Array2d<float>& delta1,
+                                      Array2d<float>& delta2)
     {
         const std::vector <float> delta1Coeffs =
             {6.66666667e-02,  5.00000000e-02,  3.33333333e-02,
@@ -167,7 +167,7 @@ namespace app {
         return true;
     }
 
-    void ASRPreProcess::StandardizeVecF32(Array2d<float>& vec)
+    void AsrPreProcess::StandardizeVecF32(Array2d<float>& vec)
     {
         auto mean = math::MathUtils::MeanF32(vec.begin(), vec.totalSize());
         auto stddev = math::MathUtils::StdDevF32(vec.begin(), vec.totalSize(), mean);
@@ -186,14 +186,14 @@ namespace app {
         }
     }
 
-    void ASRPreProcess::Standarize()
+    void AsrPreProcess::Standarize()
     {
-        ASRPreProcess::StandardizeVecF32(this->m_mfccBuf);
-        ASRPreProcess::StandardizeVecF32(this->m_delta1Buf);
-        ASRPreProcess::StandardizeVecF32(this->m_delta2Buf);
+        AsrPreProcess::StandardizeVecF32(this->m_mfccBuf);
+        AsrPreProcess::StandardizeVecF32(this->m_delta1Buf);
+        AsrPreProcess::StandardizeVecF32(this->m_delta2Buf);
     }
 
-    float ASRPreProcess::GetQuantElem(
+    float AsrPreProcess::GetQuantElem(
                 const float     elem,
                 const float     quantScale,
                 const int       quantOffset,

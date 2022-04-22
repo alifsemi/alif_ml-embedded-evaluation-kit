@@ -35,10 +35,10 @@ namespace app {
          * @param[in]   use_softmax    Whether softmax scaling should be applied to model output.
          * @return      true if successful, false otherwise.
          **/
-        bool GetClassificationResults(
-            TfLiteTensor* outputTensor,
-            std::vector<ClassificationResult>& vecResults,
-            const std::vector <std::string>& labels, uint32_t topNCount, bool use_softmax = false) override;
+        bool GetClassificationResults(TfLiteTensor* outputTensor,
+                                      std::vector<ClassificationResult>& vecResults,
+                                      const std::vector<std::string>& labels,
+                                      uint32_t topNCount, bool use_softmax = false) override;
 
     private:
         /**
@@ -54,7 +54,7 @@ namespace app {
         template<typename T>
         bool GetTopResults(TfLiteTensor* tensor,
                            std::vector<ClassificationResult>& vecResults,
-                           const std::vector <std::string>& labels, double scale, double zeroPoint);
+                           const std::vector<std::string>& labels, double scale, double zeroPoint);
     };
 
 } /* namespace app */

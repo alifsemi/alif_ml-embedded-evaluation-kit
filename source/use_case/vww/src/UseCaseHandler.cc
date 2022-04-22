@@ -53,7 +53,7 @@ namespace app {
         }
 
         TfLiteTensor* inputTensor = model.GetInputTensor(0);
-
+        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
         if (!inputTensor->dims) {
             printf_err("Invalid input tensor dims\n");
             return false;
@@ -75,14 +75,12 @@ namespace app {
         const uint32_t displayChannels = 3;
 
         /* Set up pre and post-processing. */
-        VisualWakeWordPreProcess preprocess = VisualWakeWordPreProcess(&model);
+        VisualWakeWordPreProcess preProcess = VisualWakeWordPreProcess(inputTensor);
 
         std::vector<ClassificationResult> results;
-        VisualWakeWordPostProcess postprocess = VisualWakeWordPostProcess(
-                ctx.Get<Classifier&>("classifier"), &model,
+        VisualWakeWordPostProcess postProcess = VisualWakeWordPostProcess(outputTensor,
+                ctx.Get<Classifier&>("classifier"),
                 ctx.Get<std::vector<std::string>&>("labels"), results);
-
-        UseCaseRunner runner = UseCaseRunner(&preprocess, &postprocess, &model);
 
         do {
             hal_lcd_clear(COLOR_BLACK);
@@ -115,17 +113,18 @@ namespace app {
                                  inputTensor->bytes : IMAGE_DATA_SIZE;
 
             /* Run the pre-processing, inference and post-processing. */
-            if (!runner.PreProcess(imgSrc, imgSz)) {
+            if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
+                printf_err("Pre-processing failed.");
                 return false;
             }
 
-            profiler.StartProfiling("Inference");
-            if (!runner.RunInference()) {
+            if (!RunInference(model, profiler)) {
+                printf_err("Inference failed.");
                 return false;
             }
-            profiler.StopProfiling();
 
-            if (!runner.PostProcess()) {
+            if (!postProcess.DoPostProcess()) {
+                printf_err("Post-processing failed.");
                 return false;
             }
 
@@ -138,7 +137,6 @@ namespace app {
             ctx.Set<std::vector<ClassificationResult>>("results", results);
 
 #if VERIFY_TEST_OUTPUT
-            TfLiteTensor* outputTensor = model.GetOutputTensor(0);
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 

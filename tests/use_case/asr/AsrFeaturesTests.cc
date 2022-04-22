@@ -23,19 +23,19 @@
 #include <catch.hpp>
 #include <random>
 
-class TestPreprocess : public arm::app::ASRPreProcess {
+class TestPreprocess : public arm::app::AsrPreProcess {
 public:
 
     static bool ComputeDeltas(arm::app::Array2d<float>& mfcc,
                        arm::app::Array2d<float>& delta1,
                        arm::app::Array2d<float>& delta2)
     {
-        return ASRPreProcess::ComputeDeltas(mfcc, delta1, delta2);
+        return AsrPreProcess::ComputeDeltas(mfcc, delta1, delta2);
     }
 
     static void NormaliseVec(arm::app::Array2d<float>& vec)
     {
-        return ASRPreProcess::StandardizeVecF32(vec);
+        return AsrPreProcess::StandardizeVecF32(vec);
     }
 };
 

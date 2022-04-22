@@ -31,22 +31,22 @@ namespace app {
      * for ASR. */
     using AudioWindow = audio::SlidingWindow<const int16_t>;
 
-    class ASRPreProcess : public BasePreProcess {
+    class AsrPreProcess : public BasePreProcess {
     public:
         /**
          * @brief       Constructor.
          * @param[in]   inputTensor        Pointer to the TFLite Micro input Tensor.
          * @param[in]   numMfccFeatures    Number of MFCC features per window.
+         * @param[in]   numFeatureFrames   Number of MFCC vectors that need to be calculated
+         *                                 for an inference.
          * @param[in]   mfccWindowLen      Number of audio elements to calculate MFCC features per window.
          * @param[in]   mfccWindowStride   Stride (in number of elements) for moving the MFCC window.
-         * @param[in]   mfccWindowStride   Number of MFCC vectors that need to be calculated
-         *                                 for an inference.
          */
-        ASRPreProcess(TfLiteTensor* inputTensor,
-                uint32_t  numMfccFeatures,
-                uint32_t  audioWindowLen,
-                uint32_t  mfccWindowLen,
-                uint32_t  mfccWindowStride);
+        AsrPreProcess(TfLiteTensor* inputTensor,
+                      uint32_t  numMfccFeatures,
+                      uint32_t  numFeatureFrames,
+                      uint32_t  mfccWindowLen,
+                      uint32_t  mfccWindowStride);
 
         /**
          * @brief       Calculates the features required from audio data. This
@@ -130,9 +130,9 @@ namespace app {
             }
 
             /* Populate. */
-            T * outputBufMfcc = outputBuf;
-            T * outputBufD1 = outputBuf + this->m_numMfccFeats;
-            T * outputBufD2 = outputBufD1 + this->m_numMfccFeats;
+            T* outputBufMfcc = outputBuf;
+            T* outputBufD1 = outputBuf + this->m_numMfccFeats;
+            T* outputBufD2 = outputBufD1 + this->m_numMfccFeats;
             const uint32_t ptrIncr = this->m_numMfccFeats * 2;  /* (3 vectors - 1 vector) */
 
             const float minVal = std::numeric_limits<T>::min();
@@ -141,13 +141,13 @@ namespace app {
             /* Need to transpose while copying and concatenating the tensor. */
             for (uint32_t j = 0; j < this->m_numFeatureFrames; ++j) {
                 for (uint32_t i = 0; i < this->m_numMfccFeats; ++i) {
-                    *outputBufMfcc++ = static_cast<T>(ASRPreProcess::GetQuantElem(
+                    *outputBufMfcc++ = static_cast<T>(AsrPreProcess::GetQuantElem(
                             this->m_mfccBuf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
-                    *outputBufD1++ = static_cast<T>(ASRPreProcess::GetQuantElem(
+                    *outputBufD1++ = static_cast<T>(AsrPreProcess::GetQuantElem(
                             this->m_delta1Buf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
-                    *outputBufD2++ = static_cast<T>(ASRPreProcess::GetQuantElem(
+                    *outputBufD2++ = static_cast<T>(AsrPreProcess::GetQuantElem(
                             this->m_delta2Buf(i, j), quantScale,
                             quantOffset, minVal, maxVal));
                 }
