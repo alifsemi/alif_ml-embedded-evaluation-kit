@@ -150,13 +150,28 @@ TEST_CASE("Test SqrtF32")
 
 TEST_CASE("Test MeanF32")
 {
-    /*Test  Constants: */
+    /* Test Constants: */
     std::vector<float> input
         {0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 1.000};
 
     /* Manually calculated mean of above vector */
     float expectedResult = 0.100;
     CHECK (expectedResult == Approx(arm::app::math::MathUtils::MeanF32(input.data(), input.size())));
+
+    /* Mean of 0 */
+    std::vector<float> input2{1, 2, -1, -2};
+    float expectedResult2 = 0.0f;
+    CHECK (expectedResult2 == Approx(arm::app::math::MathUtils::MeanF32(input2.data(), input2.size())));
+
+    /* All 0s */
+    std::vector<float> input3 = std::vector<float>(9, 0);
+    float expectedResult3 = 0.0f;
+    CHECK (expectedResult3 == Approx(arm::app::math::MathUtils::MeanF32(input3.data(), input3.size())));
+
+    /* All 1s */
+    std::vector<float> input4 = std::vector<float>(9, 1);
+    float expectedResult4 = 1.0f;
+    CHECK (expectedResult4 == Approx(arm::app::math::MathUtils::MeanF32(input4.data(), input4.size())));
 }
 
 TEST_CASE("Test StdDevF32")
@@ -184,6 +199,22 @@ TEST_CASE("Test StdDevF32")
     float expectedResult = 0.969589282958136;
 
     CHECK (expectedResult == Approx(output));
+
+    /* All 0s should have 0 std dev. */
+    std::vector<float> input2 = std::vector<float>(4, 0);
+    float expectedResult2 = 0.0f;
+    CHECK (expectedResult2 == Approx(arm::app::math::MathUtils::StdDevF32(input2.data(), input2.size(), 0.0f)));
+
+    /* All 1s should have 0 std dev. */
+    std::vector<float> input3 = std::vector<float>(4, 1);
+    float expectedResult3 = 0.0f;
+    CHECK (expectedResult3 == Approx(arm::app::math::MathUtils::StdDevF32(input3.data(), input3.size(), 1.0f)));
+
+    /* Manually calclualted std value */
+    std::vector<float> input4 {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+    float mean2 = (std::accumulate(input4.begin(), input4.end(), 0.0f))/float(input4.size());
+    float expectedResult4 = 2.872281323;
+    CHECK (expectedResult4 == Approx(arm::app::math::MathUtils::StdDevF32(input4.data(), input4.size(), mean2)));
 }
 
 TEST_CASE("Test FFT32")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,29 +23,19 @@
 #include <catch.hpp>
 #include <random>
 
-class TestPreprocess : public arm::app::audio::asr::Preprocess {
+class TestPreprocess : public arm::app::ASRPreProcess {
 public:
 
     static bool ComputeDeltas(arm::app::Array2d<float>& mfcc,
                        arm::app::Array2d<float>& delta1,
                        arm::app::Array2d<float>& delta2)
     {
-        return Preprocess::ComputeDeltas(mfcc, delta1, delta2);
-    }
-
-    static float GetMean(arm::app::Array2d<float>& vec)
-    {
-        return Preprocess::GetMean(vec);
-    }
-
-    static float GetStdDev(arm::app::Array2d<float>& vec, const float mean)
-    {
-       return Preprocess::GetStdDev(vec, mean);
+        return ASRPreProcess::ComputeDeltas(mfcc, delta1, delta2);
     }
 
     static void NormaliseVec(arm::app::Array2d<float>& vec)
     {
-        return Preprocess::NormaliseVec(vec);
+        return ASRPreProcess::StandardizeVecF32(vec);
     }
 };
 
@@ -124,40 +114,6 @@ TEST_CASE("Floating point asr features calculation", "[ASR]")
             CheckOutputs<float>(goldenDataDelta2,tensorDataDelta2);
         }
 
-    }
-
-    SECTION("Mean")
-    {
-        std::vector<std::vector<float>> mean1vec{{1, 2},
-                                                {-1, -2}};
-        arm::app::Array2d<float> mean1(2,2); /* {{1, 2},{-1, -2}} */
-        populateArray2dWithVectorOfVector(mean1vec, mean1);
-        REQUIRE(0 == Approx(TestPreprocess::GetMean(mean1)));
-
-        arm::app::Array2d<float> mean2(2, 2);
-        std::fill(mean2.begin(), mean2.end(), 0.f);
-        REQUIRE(0 == Approx(TestPreprocess::GetMean(mean2)));
-
-        arm::app::Array2d<float> mean3(3,3);
-        std::fill(mean3.begin(), mean3.end(), 1.f);
-        REQUIRE(1 == Approx(TestPreprocess::GetMean(mean3)));
-    }
-
-    SECTION("Std")
-    {
-        arm::app::Array2d<float> std1(2, 2);
-        std::fill(std1.begin(), std1.end(), 0.f); /* {{0, 0}, {0, 0}} */
-        REQUIRE(0 == Approx(TestPreprocess::GetStdDev(std1, 0)));
-
-        std::vector<std::vector<float>> std2vec{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 0}};
-        arm::app::Array2d<float> std2(2,5);
-        populateArray2dWithVectorOfVector(std2vec, std2);
-        const float mean = TestPreprocess::GetMean(std2);
-        REQUIRE(2.872281323 == Approx(TestPreprocess::GetStdDev(std2, mean)));
-
-        arm::app::Array2d<float> std3(2,2);
-        std::fill(std3.begin(), std3.end(), 1.f); /* std3{{1, 1}, {1, 1}}; */
-        REQUIRE(0 == Approx(TestPreprocess::GetStdDev(std3, 1)));
     }
 
     SECTION("Norm") {

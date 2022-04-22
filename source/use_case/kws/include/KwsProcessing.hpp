@@ -38,7 +38,7 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   model             Pointer to the the KWS Model object.
+         * @param[in]   model             Pointer to the KWS Model object.
          * @param[in]   numFeatures       How many MFCC features to use.
          * @param[in]   mfccFrameLength   Number of audio samples used to calculate one set of MFCC values when
          *                                sliding a window through the audio sample.
@@ -107,24 +107,21 @@ namespace app {
         std::vector<ClassificationResult>& m_results;
 
     public:
-        const float m_scoreThreshold;
         /**
-         * @brief       Constructor
-         * @param[in]   classifier       Classifier object used to get top N results from classification.
-         * @param[in]   model            Pointer to the the Image classification Model object.
-         * @param[in]   labels           Vector of string labels to identify each output of the model.
-         * @param[in]   results          Vector of classification results to store decoded outputs.
-         * @param[in]   scoreThreshold   Predicted model score must be larger than this value to be accepted.
+         * @brief           Constructor
+         * @param[in]       classifier   Classifier object used to get top N results from classification.
+         * @param[in]       model        Pointer to the KWS Model object.
+         * @param[in]       labels       Vector of string labels to identify each output of the model.
+         * @param[in/out]   results      Vector of classification results to store decoded outputs.
          **/
         KWSPostProcess(Classifier& classifier, Model* model,
                        const std::vector<std::string>& labels,
-                       std::vector<ClassificationResult>& results,
-                       float scoreThreshold);
+                       std::vector<ClassificationResult>& results);
 
         /**
-         * @brief       Should perform post-processing of the result of inference then populate
-         *              populate KWS result data for any later use.
-         * @return      true if successful, false otherwise.
+         * @brief    Should perform post-processing of the result of inference then
+         *           populate KWS result data for any later use.
+         * @return   true if successful, false otherwise.
          **/
         bool DoPostProcess() override;
     };

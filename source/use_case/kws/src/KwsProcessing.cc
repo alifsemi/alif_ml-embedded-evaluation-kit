@@ -197,11 +197,10 @@ namespace app {
 
     KWSPostProcess::KWSPostProcess(Classifier& classifier, Model* model,
                                    const std::vector<std::string>& labels,
-                                   std::vector<ClassificationResult>& results, float scoreThreshold)
+                                   std::vector<ClassificationResult>& results)
             :m_kwsClassifier{classifier},
              m_labels{labels},
-             m_results{results},
-             m_scoreThreshold{scoreThreshold}
+             m_results{results}
     {
         if (!model->IsInited()) {
             printf_err("Model is not initialised!.\n");

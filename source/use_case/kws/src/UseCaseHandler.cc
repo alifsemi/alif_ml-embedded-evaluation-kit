@@ -93,7 +93,7 @@ namespace app {
         std::vector<ClassificationResult> singleInfResult;
         KWSPostProcess postprocess = KWSPostProcess(ctx.Get<KwsClassifier &>("classifier"), &model,
                                                     ctx.Get<std::vector<std::string>&>("labels"),
-                                                    singleInfResult, scoreThreshold);
+                                                    singleInfResult);
 
         UseCaseRunner runner = UseCaseRunner(&preprocess, &postprocess, &model);
 
@@ -146,7 +146,7 @@ namespace app {
                 /* Add results from this window to our final results vector. */
                 finalResults.emplace_back(kws::KwsResult(singleInfResult,
                         audioDataSlider.Index() * secondsPerSample * preprocess.m_audioDataStride,
-                        audioDataSlider.Index(), postprocess.m_scoreThreshold));
+                        audioDataSlider.Index(), scoreThreshold));
 
 #if VERIFY_TEST_OUTPUT
                 TfLiteTensor* outputTensor = model.GetOutputTensor(0);

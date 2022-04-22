@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "Wav2LetterMfcc.hpp"
+
 #include "PlatformMath.hpp"
 #include "log_macros.h"
 

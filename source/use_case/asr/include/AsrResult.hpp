@@ -25,7 +25,7 @@ namespace arm {
 namespace app {
 namespace asr {
 
-    using ResultVec = std::vector < arm::app::ClassificationResult >;
+    using ResultVec = std::vector<arm::app::ClassificationResult>;
 
     /* Structure for holding ASR result. */
     class AsrResult {

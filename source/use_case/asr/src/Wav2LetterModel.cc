@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "Wav2LetterModel.hpp"
+
 #include "log_macros.h"
 
 
