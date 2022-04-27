@@ -19,7 +19,6 @@
 #include "YoloFastestModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
-#include "DetectorPostProcessing.hpp" /* Post-processing class. */
 #include "log_macros.h"
 
 static void DisplayDetectionMenu()
@@ -53,9 +52,6 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
-    arm::app::object_detection::DetectorPostprocessing postp;
-    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
-
 
     /* Loop. */
     bool executionSuccessful = true;

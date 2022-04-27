@@ -58,8 +58,6 @@ TEST_CASE("Inference by index")
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
-    arm::app::object_detection::DetectorPostprocessing postp;
-    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, false));
 }
@@ -83,8 +81,6 @@ TEST_CASE("Inference run all images")
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
-    arm::app::object_detection::DetectorPostprocessing postp;
-    caseContext.Set<arm::app::object_detection::DetectorPostprocessing&>("postprocess", postp);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, true));
 }
