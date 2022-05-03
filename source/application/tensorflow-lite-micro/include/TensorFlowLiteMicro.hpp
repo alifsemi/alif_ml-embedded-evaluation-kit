@@ -60,12 +60,25 @@
 namespace arm {
 namespace app {
 
+    /** Struct for quantization parameters. */
     struct QuantParams {
         float   scale   = 1.0;
         int     offset  = 0;
     };
 
+    /**
+     * @brief       Gets the quantization parameters from a tensor
+     * @param[in]   tensor  pointer to the tensor.
+     * @return      QuantParams object.
+     */
     QuantParams GetTensorQuantParams(TfLiteTensor* tensor);
+
+    /**
+     * @brief   String logging functionality expected to be defined
+     *          by TensorFlow Lite Micro's error reporter.
+     * @param[in]   s   Pointer to the string.
+     */
+    extern "C" void DebugLog(const char* s);
 
 } /* namespace app */
 } /* namespace arm */

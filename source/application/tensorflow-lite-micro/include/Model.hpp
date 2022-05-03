@@ -126,7 +126,6 @@ namespace app {
         size_t GetActivationBufferSize();
 
     private:
-        tflite::MicroErrorReporter      m_uErrorReporter;                     /* Error reporter object. */
         tflite::ErrorReporter*          m_pErrorReporter      = nullptr;      /* Pointer to the error reporter. */
         const tflite::Model*            m_pModel              = nullptr;      /* Tflite model pointer. */
         tflite::MicroInterpreter*       m_pInterpreter        = nullptr;      /* Tflite interpreter. */

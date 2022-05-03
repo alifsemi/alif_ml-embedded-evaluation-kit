@@ -32,7 +32,7 @@ arm::app::Model::Model() :
     m_inited (false),
     m_type(kTfLiteNoType)
 {
-    this->m_pErrorReporter = &this->m_uErrorReporter;
+    this->m_pErrorReporter = tflite::GetMicroErrorReporter();
 }
 
 bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
@@ -108,7 +108,6 @@ bool arm::app::Model::Init(tflite::MicroAllocator* allocator)
     TfLiteStatus allocate_status = this->m_pInterpreter->AllocateTensors();
 
     if (allocate_status != kTfLiteOk) {
-        this->m_pErrorReporter->Report("[ERROR] allocateTensors() failed");
         printf_err("tensor allocation failed!\n");
         delete this->m_pInterpreter;
         return false;

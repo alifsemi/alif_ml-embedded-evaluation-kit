@@ -40,3 +40,7 @@ arm::app::QuantParams arm::app::GetTensorQuantParams(TfLiteTensor* tensor)
     return params;
 }
 
+extern "C" void DebugLog(const char* s)
+{
+    puts(s);
+}
