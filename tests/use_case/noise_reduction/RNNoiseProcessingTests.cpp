@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RNNoiseProcess.hpp"
+#include "RNNoiseFeatureProcessor.hpp"
 #include <catch.hpp>
 #include <limits>
 
@@ -208,7 +208,7 @@ TEST_CASE("RNNoise preprocessing calculation test",  "[RNNoise]")
 {
     SECTION("FP32")
     {
-        arm::app::rnn::RNNoiseProcess rnnoiseProcessor;
+        arm::app::rnn::RNNoiseFeatureProcessor rnnoiseProcessor;
         arm::app::rnn::FrameFeatures features;
 
         rnnoiseProcessor.PreprocessFrame(testWav0.data(), testWav0.size(), features);
@@ -223,7 +223,7 @@ TEST_CASE("RNNoise preprocessing calculation test",  "[RNNoise]")
 
 TEST_CASE("RNNoise postprocessing test", "[RNNoise]")
 {
-    arm::app::rnn::RNNoiseProcess rnnoiseProcessor;
+    arm::app::rnn::RNNoiseFeatureProcessor rnnoiseProcessor;
     arm::app::rnn::FrameFeatures p;
     rnnoiseProcessor.PreprocessFrame(testWav0.data(), testWav0.size(), p);
     std::vector<float> denoised(testWav0.size());

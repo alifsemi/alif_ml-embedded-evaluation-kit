@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,13 +93,13 @@ const std::vector<float> testWavMfcc {
     -22.67135, -0.61615, 2.07233, 0.58137, 1.01655, 0.85816, 0.46039, 0.03393, 1.16511, 0.0072,
 };
 
-arm::app::audio::MicroNetMFCC GetMFCCInstance() {
-    const int sampFreq = arm::app::audio::MicroNetMFCC::ms_defaultSamplingFreq;
+arm::app::audio::MicroNetKwsMFCC GetMFCCInstance() {
+    const int sampFreq = arm::app::audio::MicroNetKwsMFCC::ms_defaultSamplingFreq;
     const int frameLenMs = 40;
     const int frameLenSamples = sampFreq * frameLenMs * 0.001;
     const int numMfccFeats = 10;
 
-   return arm::app::audio::MicroNetMFCC(numMfccFeats, frameLenSamples);
+   return arm::app::audio::MicroNetKwsMFCC(numMfccFeats, frameLenSamples);
 }
 
 template <class T>

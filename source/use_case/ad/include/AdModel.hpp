@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,12 @@ namespace arm {
 namespace app {
 
     class AdModel : public Model {
+
+    public:
+        /* Indices for the expected model - based on input tensor shape */
+        static constexpr uint32_t ms_inputRowsIdx = 1;
+        static constexpr uint32_t ms_inputColsIdx = 2;
+
     protected:
         /** @brief   Gets the reference to op resolver interface class */
         const tflite::MicroOpResolver& GetOpResolver() override;

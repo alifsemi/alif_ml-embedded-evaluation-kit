@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RNNoiseProcess.hpp"
+#include "RNNoiseFeatureProcessor.hpp"
 #include "log_macros.h"
 
 #include <algorithm>
@@ -33,7 +33,7 @@ do {                                                \
     }                                               \
 } while(0)
 
-RNNoiseProcess::RNNoiseProcess() :
+RNNoiseFeatureProcessor::RNNoiseFeatureProcessor() :
         m_halfWindow(FRAME_SIZE, 0),
         m_dctTable(NB_BANDS * NB_BANDS),
         m_analysisMem(FRAME_SIZE, 0),
@@ -54,9 +54,9 @@ RNNoiseProcess::RNNoiseProcess() :
     this->InitTables();
 }
 
-void RNNoiseProcess::PreprocessFrame(const float*   audioData,
-                                     const size_t   audioLen,
-                                     FrameFeatures& features)
+void RNNoiseFeatureProcessor::PreprocessFrame(const float*   audioData,
+                                              const size_t   audioLen,
+                                              FrameFeatures& features)
 {
     /* Note audioWindow is modified in place */
     const arrHp aHp {-1.99599, 0.99600 };
@@ -68,7 +68,7 @@ void RNNoiseProcess::PreprocessFrame(const float*   audioData,
     this->ComputeFrameFeatures(audioWindow, features);
 }
 
-void RNNoiseProcess::PostProcessFrame(vec1D32F& modelOutput, FrameFeatures& features, vec1D32F& outFrame)
+void RNNoiseFeatureProcessor::PostProcessFrame(vec1D32F& modelOutput, FrameFeatures& features, vec1D32F& outFrame)
 {
     std::vector<float> outputBands = modelOutput;
     std::vector<float> gain(FREQ_SIZE, 0);
@@ -92,7 +92,7 @@ void RNNoiseProcess::PostProcessFrame(vec1D32F& modelOutput, FrameFeatures& feat
     FrameSynthesis(outFrame, features.m_fftX);
 }
 
-void RNNoiseProcess::InitTables()
+void RNNoiseFeatureProcessor::InitTables()
 {
     constexpr float pi = M_PI;
     constexpr float halfPi = M_PI / 2;
@@ -111,7 +111,7 @@ void RNNoiseProcess::InitTables()
     }
 }
 
-void RNNoiseProcess::BiQuad(
+void RNNoiseFeatureProcessor::BiQuad(
         const arrHp& bHp,
         const arrHp& aHp,
         arrHp& memHpX,
@@ -126,8 +126,8 @@ void RNNoiseProcess::BiQuad(
     }
 }
 
-void RNNoiseProcess::ComputeFrameFeatures(vec1D32F& audioWindow,
-                                          FrameFeatures& features)
+void RNNoiseFeatureProcessor::ComputeFrameFeatures(vec1D32F& audioWindow,
+                                                   FrameFeatures& features)
 {
     this->FrameAnalysis(audioWindow,
                         features.m_fftX,
@@ -264,7 +264,7 @@ void RNNoiseProcess::ComputeFrameFeatures(vec1D32F& audioWindow,
     features.m_featuresVec[NB_BANDS + 3 * NB_DELTA_CEPS + 1] = specVariability / CEPS_MEM - 2.1;
 }
 
-void RNNoiseProcess::FrameAnalysis(
+void RNNoiseFeatureProcessor::FrameAnalysis(
     const vec1D32F& audioWindow,
     vec1D32F& fft,
     vec1D32F& energy,
@@ -289,7 +289,7 @@ void RNNoiseProcess::FrameAnalysis(
     ComputeBandEnergy(fft, energy);
 }
 
-void RNNoiseProcess::ApplyWindow(vec1D32F& x)
+void RNNoiseFeatureProcessor::ApplyWindow(vec1D32F& x)
 {
     if (WINDOW_SIZE != x.size()) {
         printf_err("Invalid size for vector to be windowed\n");
@@ -305,7 +305,7 @@ void RNNoiseProcess::ApplyWindow(vec1D32F& x)
     }
 }
 
-void RNNoiseProcess::ForwardTransform(
+void RNNoiseFeatureProcessor::ForwardTransform(
     vec1D32F& x,
     vec1D32F& fft)
 {
@@ -327,7 +327,7 @@ void RNNoiseProcess::ForwardTransform(
      * first half of the FFT's. The conjugates are not present. */
 }
 
-void RNNoiseProcess::ComputeBandEnergy(const vec1D32F& fftX, vec1D32F& bandE)
+void RNNoiseFeatureProcessor::ComputeBandEnergy(const vec1D32F& fftX, vec1D32F& bandE)
 {
     bandE = vec1D32F(NB_BANDS, 0);
 
@@ -351,7 +351,7 @@ void RNNoiseProcess::ComputeBandEnergy(const vec1D32F& fftX, vec1D32F& bandE)
     bandE[NB_BANDS - 1] *= 2;
 }
 
-void RNNoiseProcess::ComputeBandCorr(const vec1D32F& X, const vec1D32F& P, vec1D32F& bandC)
+void RNNoiseFeatureProcessor::ComputeBandCorr(const vec1D32F& X, const vec1D32F& P, vec1D32F& bandC)
 {
     bandC = vec1D32F(NB_BANDS, 0);
     VERIFY(this->m_eband5ms.size() >= NB_BANDS);
@@ -374,7 +374,7 @@ void RNNoiseProcess::ComputeBandCorr(const vec1D32F& X, const vec1D32F& P, vec1D
     bandC[NB_BANDS - 1] *= 2;
 }
 
-void RNNoiseProcess::DCT(vec1D32F& input, vec1D32F& output)
+void RNNoiseFeatureProcessor::DCT(vec1D32F& input, vec1D32F& output)
 {
     VERIFY(this->m_dctTable.size() >= NB_BANDS * NB_BANDS);
     for (uint32_t i = 0; i < NB_BANDS; ++i) {
@@ -387,7 +387,7 @@ void RNNoiseProcess::DCT(vec1D32F& input, vec1D32F& output)
     }
 }
 
-void RNNoiseProcess::PitchDownsample(vec1D32F& pitchBuf, size_t pitchBufSz) {
+void RNNoiseFeatureProcessor::PitchDownsample(vec1D32F& pitchBuf, size_t pitchBufSz) {
     for (size_t i = 1; i < (pitchBufSz >> 1); ++i) {
         pitchBuf[i] = 0.5 * (
                         0.5 * (this->m_pitchBuf[2 * i - 1] + this->m_pitchBuf[2 * i + 1])
@@ -431,7 +431,7 @@ void RNNoiseProcess::PitchDownsample(vec1D32F& pitchBuf, size_t pitchBufSz) {
     this->Fir5(lpc2, pitchBufSz >> 1, pitchBuf);
 }
 
-int RNNoiseProcess::PitchSearch(vec1D32F& xLp, vec1D32F& y, uint32_t len, uint32_t maxPitch) {
+int RNNoiseFeatureProcessor::PitchSearch(vec1D32F& xLp, vec1D32F& y, uint32_t len, uint32_t maxPitch) {
     uint32_t lag = len + maxPitch;
     vec1D32F xLp4(len >> 2, 0);
     vec1D32F yLp4(lag >> 2, 0);
@@ -488,7 +488,7 @@ int RNNoiseProcess::PitchSearch(vec1D32F& xLp, vec1D32F& y, uint32_t len, uint32
     return 2*bestPitch[0] - offset;
 }
 
-arrHp RNNoiseProcess::FindBestPitch(vec1D32F& xCorr, vec1D32F& y, uint32_t len, uint32_t maxPitch)
+arrHp RNNoiseFeatureProcessor::FindBestPitch(vec1D32F& xCorr, vec1D32F& y, uint32_t len, uint32_t maxPitch)
 {
     float Syy = 1;
     arrHp bestNum {-1, -1};
@@ -527,7 +527,7 @@ arrHp RNNoiseProcess::FindBestPitch(vec1D32F& xCorr, vec1D32F& y, uint32_t len, 
     return bestPitch;
 }
 
-int RNNoiseProcess::RemoveDoubling(
+int RNNoiseFeatureProcessor::RemoveDoubling(
     vec1D32F& pitchBuf,
     uint32_t maxPeriod,
     uint32_t minPeriod,
@@ -679,12 +679,12 @@ int RNNoiseProcess::RemoveDoubling(
     return this->m_lastPeriod;
 }
 
-float RNNoiseProcess::ComputePitchGain(float xy, float xx, float yy)
+float RNNoiseFeatureProcessor::ComputePitchGain(float xy, float xx, float yy)
 {
     return xy / math::MathUtils::SqrtF32(1+xx*yy);
 }
 
-void RNNoiseProcess::AutoCorr(
+void RNNoiseFeatureProcessor::AutoCorr(
     const vec1D32F& x,
     vec1D32F& ac,
     size_t lag,
@@ -711,7 +711,7 @@ void RNNoiseProcess::AutoCorr(
 }
 
 
-void RNNoiseProcess::PitchXCorr(
+void RNNoiseFeatureProcessor::PitchXCorr(
     const vec1D32F& x,
     const vec1D32F& y,
     vec1D32F& xCorr,
@@ -728,7 +728,7 @@ void RNNoiseProcess::PitchXCorr(
 }
 
 /* Linear predictor coefficients */
-void RNNoiseProcess::LPC(
+void RNNoiseFeatureProcessor::LPC(
     const vec1D32F& correlation,
     int32_t p,
     vec1D32F& lpc)
@@ -766,7 +766,7 @@ void RNNoiseProcess::LPC(
     }
 }
 
-void RNNoiseProcess::Fir5(
+void RNNoiseFeatureProcessor::Fir5(
     const vec1D32F &num,
     uint32_t N,
     vec1D32F &x)
@@ -794,7 +794,7 @@ void RNNoiseProcess::Fir5(
     }
 }
 
-void RNNoiseProcess::PitchFilter(FrameFeatures &features, vec1D32F &gain) {
+void RNNoiseFeatureProcessor::PitchFilter(FrameFeatures &features, vec1D32F &gain) {
     std::vector<float> r(NB_BANDS, 0);
     std::vector<float> rf(FREQ_SIZE, 0);
     std::vector<float> newE(NB_BANDS);
@@ -835,7 +835,7 @@ void RNNoiseProcess::PitchFilter(FrameFeatures &features, vec1D32F &gain) {
     }
 }
 
-void RNNoiseProcess::FrameSynthesis(vec1D32F& outFrame, vec1D32F& fftY) {
+void RNNoiseFeatureProcessor::FrameSynthesis(vec1D32F& outFrame, vec1D32F& fftY) {
     std::vector<float> x(WINDOW_SIZE, 0);
     InverseTransform(x, fftY);
     ApplyWindow(x);
@@ -845,7 +845,7 @@ void RNNoiseProcess::FrameSynthesis(vec1D32F& outFrame, vec1D32F& fftY) {
     memcpy((m_synthesisMem.data()), &x[FRAME_SIZE], FRAME_SIZE*sizeof(float));
 }
 
-void RNNoiseProcess::InterpBandGain(vec1D32F& g, vec1D32F& bandE) {
+void RNNoiseFeatureProcessor::InterpBandGain(vec1D32F& g, vec1D32F& bandE) {
     for (size_t i = 0; i < NB_BANDS - 1; i++) {
         int bandSize = (m_eband5ms[i + 1] - m_eband5ms[i]) << FRAME_SIZE_SHIFT;
         for (int j = 0; j < bandSize; j++) {
@@ -855,7 +855,7 @@ void RNNoiseProcess::InterpBandGain(vec1D32F& g, vec1D32F& bandE) {
     }
 }
 
-void RNNoiseProcess::InverseTransform(vec1D32F& out, vec1D32F& fftXIn) {
+void RNNoiseFeatureProcessor::InverseTransform(vec1D32F& out, vec1D32F& fftXIn) {
 
     std::vector<float> x(WINDOW_SIZE * 2);  /* This is complex. */
     vec1D32F newFFT;  /* This is complex. */

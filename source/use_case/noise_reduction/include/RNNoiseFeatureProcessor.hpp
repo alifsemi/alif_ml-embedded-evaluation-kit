@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef RNNOISE_FEATURE_PROCESSOR_HPP
+#define RNNOISE_FEATURE_PROCESSOR_HPP
+
 #include "PlatformMath.hpp"
 #include <cstdint>
 #include <vector>
@@ -47,11 +50,11 @@ namespace rnn {
      *          - https://jmvalin.ca/demo/rnnoise/
      *          - https://arxiv.org/abs/1709.08243
      **/
-    class RNNoiseProcess {
+    class RNNoiseFeatureProcessor {
     /* Public interface */
     public:
-        RNNoiseProcess();
-        ~RNNoiseProcess() = default;
+        RNNoiseFeatureProcessor();
+        ~RNNoiseFeatureProcessor() = default;
 
         /**
          * @brief        Calculates the features from a given audio buffer ready to be sent to RNNoise model.
@@ -328,10 +331,11 @@ namespace rnn {
         const std::array <uint32_t, NB_BANDS> m_eband5ms {
             0,  1,  2,  3,  4,  5,  6,  7,  8, 10,  12,
             14, 16, 20, 24, 28, 34, 40, 48, 60, 78, 100};
-
     };
 
 
 } /* namespace rnn */
-} /* namspace app */
+} /* namespace app */
 } /* namespace arm */
+
+#endif /* RNNOISE_FEATURE_PROCESSOR_HPP */

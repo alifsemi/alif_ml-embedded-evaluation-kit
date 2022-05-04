@@ -24,8 +24,8 @@
 #include "AudioUtils.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "AdPostProcessing.hpp"
 #include "log_macros.h"
+#include "AdProcessing.hpp"
 
 namespace arm {
 namespace app {
@@ -39,32 +39,17 @@ namespace app {
      **/
     static bool PresentInferenceResult(float result, float threshold);
 
-    /**
-     * @brief Returns a function to perform feature calculation and populates input tensor data with
-     * MelSpe data.
-     *
-     * Input tensor data type check is performed to choose correct MFCC feature data type.
-     * If tensor has an integer data type then original features are quantised.
-     *
-     * Warning: mfcc calculator provided as input must have the same life scope as returned function.
-     *
-     * @param[in]           melSpec         MFCC feature calculator.
-     * @param[in,out]       inputTensor     Input tensor pointer to store calculated features.
-     * @param[in]           cacheSize       Size of the feture vectors cache (number of feature vectors).
-     * @param[in]           trainingMean    Training mean.
-     * @return function     function to be called providing audio sample and sliding window index.
-     */
-    static std::function<void (std::vector<int16_t>&, int, bool, size_t, size_t)>
-    GetFeatureCalculator(audio::AdMelSpectrogram&  melSpec,
-                         TfLiteTensor*             inputTensor,
-                         size_t                    cacheSize,
-                         float                     trainingMean);
+    /** @brief      Given a wav file name return AD model output index.
+     *  @param[in]  wavFileName Audio WAV filename.
+     *                          File name should be in format anything_goes_XX_here.wav
+     *                          where XX is the machine ID e.g. 00, 02, 04 or 06
+     *  @return     AD model output index as 8 bit integer.
+    **/
+    static int8_t OutputIndexFromFileName(std::string wavFileName);
 
-    /* Vibration classification handler */
+    /* Anomaly Detection inference handler */
     bool ClassifyVibrationHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
-        auto& profiler = ctx.Get<Profiler&>("profiler");
-
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
@@ -81,8 +66,9 @@ namespace app {
             return false;
         }
 
-        const auto frameLength = ctx.Get<int>("frameLength");
-        const auto frameStride = ctx.Get<int>("frameStride");
+        auto& profiler = ctx.Get<Profiler&>("profiler");
+        const auto melSpecFrameLength = ctx.Get<uint32_t>("frameLength");
+        const auto melSpecFrameStride = ctx.Get<uint32_t>("frameStride");
         const auto scoreThreshold = ctx.Get<float>("scoreThreshold");
         const auto trainingMean = ctx.Get<float>("trainingMean");
         auto startClipIdx = ctx.Get<uint32_t>("clipIndex");
@@ -95,21 +81,13 @@ namespace app {
             return false;
         }
 
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t kNumRows = inputShape->data[1];
-        const uint32_t kNumCols = inputShape->data[2];
+        AdPreProcess preProcess{
+            inputTensor,
+            melSpecFrameLength,
+            melSpecFrameStride,
+            trainingMean};
 
-        audio::AdMelSpectrogram melSpec = audio::AdMelSpectrogram(frameLength);
-        melSpec.Init();
-
-        /* Deduce the data length required for 1 inference from the network parameters. */
-        const uint8_t inputResizeScale = 2;
-        const uint32_t audioDataWindowSize = (((inputResizeScale * kNumCols) - 1) * frameStride) + frameLength;
-
-        /* We are choosing to move by 20 frames across the audio for each inference. */
-        const uint8_t nMelSpecVectorsInAudioStride = 20;
-
-        auto audioDataStride = nMelSpecVectorsInAudioStride * frameStride;
+        AdPostProcess postProcess{outputTensor};
 
         do {
             hal_lcd_clear(COLOR_BLACK);
@@ -122,29 +100,12 @@ namespace app {
                 return false;
             }
 
-            /* Creating a Mel Spectrogram sliding window for the data required for 1 inference.
-             * "resizing" done here by multiplying stride by resize scale. */
-            auto audioMelSpecWindowSlider = audio::SlidingWindow<const int16_t>(
-                    get_audio_array(currentIndex),
-                    audioDataWindowSize, frameLength,
-                    frameStride * inputResizeScale);
-
             /* Creating a sliding window through the whole audio clip. */
             auto audioDataSlider = audio::SlidingWindow<const int16_t>(
-                    get_audio_array(currentIndex),
-                    get_audio_array_size(currentIndex),
-                    audioDataWindowSize, audioDataStride);
-
-            /* Calculate number of the feature vectors in the window overlap region taking into account resizing.
-             * These feature vectors will be reused.*/
-            auto numberOfReusedFeatureVectors = kNumRows - (nMelSpecVectorsInAudioStride / inputResizeScale);
-
-            /* Construct feature calculation function. */
-            auto melSpecFeatureCalc = GetFeatureCalculator(melSpec, inputTensor,
-                                                           numberOfReusedFeatureVectors, trainingMean);
-            if (!melSpecFeatureCalc){
-                return false;
-            }
+                get_audio_array(currentIndex),
+                get_audio_array_size(currentIndex),
+                preProcess.GetAudioWindowSize(),
+                preProcess.GetAudioDataStride());
 
             /* Result is an averaged sum over inferences. */
             float result = 0;
@@ -152,30 +113,18 @@ namespace app {
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
             hal_lcd_display_text(
-                    str_inf.c_str(), str_inf.size(),
-                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-            info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex, get_filename(currentIndex));
+                str_inf.c_str(), str_inf.size(),
+                dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+
+            info("Running inference on audio clip %" PRIu32 " => %s\n",
+                currentIndex, get_filename(currentIndex));
 
             /* Start sliding through audio clip. */
             while (audioDataSlider.HasNext()) {
-                const int16_t *inferenceWindow = audioDataSlider.Next();
+                const int16_t* inferenceWindow = audioDataSlider.Next();
 
-                /* We moved to the next window - set the features sliding to the new address. */
-                audioMelSpecWindowSlider.Reset(inferenceWindow);
-
-                /* The first window does not have cache ready. */
-                bool useCache = audioDataSlider.Index() > 0 && numberOfReusedFeatureVectors > 0;
-
-                /* Start calculating features inside one audio sliding window. */
-                while (audioMelSpecWindowSlider.HasNext()) {
-                    const int16_t *melSpecWindow = audioMelSpecWindowSlider.Next();
-                    std::vector<int16_t> melSpecAudioData = std::vector<int16_t>(melSpecWindow,
-                                                                                 melSpecWindow + frameLength);
-
-                    /* Compute features for this window and write them to input tensor. */
-                    melSpecFeatureCalc(melSpecAudioData, audioMelSpecWindowSlider.Index(),
-                                       useCache, nMelSpecVectorsInAudioStride, inputResizeScale);
-                }
+                preProcess.SetAudioWindowIndex(audioDataSlider.Index());
+                preProcess.DoPreProcess(inferenceWindow, preProcess.GetAudioWindowSize());
 
                 info("Inference %zu/%zu\n", audioDataSlider.Index() + 1,
                      audioDataSlider.TotalStrides() + 1);
@@ -185,13 +134,11 @@ namespace app {
                     return false;
                 }
 
-                /* Use the negative softmax score of the corresponding index as the outlier score */
-                std::vector<float> dequantOutput = Dequantize<int8_t>(outputTensor);
-                Softmax(dequantOutput);
-                result += -dequantOutput[machineOutputIndex];
+                postProcess.DoPostProcess();
+                result += 0 - postProcess.GetOutputValue(machineOutputIndex);
 
 #if VERIFY_TEST_OUTPUT
-                arm::app::DumpTensor(outputTensor);
+                DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
             } /* while (audioDataSlider.HasNext()) */
 
@@ -217,7 +164,6 @@ namespace app {
 
         return true;
     }
-
 
     static bool PresentInferenceResult(float result, float threshold)
     {
@@ -251,148 +197,47 @@ namespace app {
         return true;
     }
 
-    /**
-     * @brief Generic feature calculator factory.
-     *
-     * Returns lambda function to compute features using features cache.
-     * Real features math is done by a lambda function provided as a parameter.
-     * Features are written to input tensor memory.
-     *
-     * @tparam T            feature vector type.
-     * @param inputTensor   model input tensor pointer.
-     * @param cacheSize     number of feature vectors to cache. Defined by the sliding window overlap.
-     * @param compute       features calculator function.
-     * @return              lambda function to compute features.
-     */
-    template<class T>
-    std::function<void (std::vector<int16_t>&, size_t, bool, size_t, size_t)>
-    FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
-                std::function<std::vector<T> (std::vector<int16_t>& )> compute)
+    static int8_t OutputIndexFromFileName(std::string wavFileName)
     {
-        /* Feature cache to be captured by lambda function*/
-        static std::vector<std::vector<T>> featureCache = std::vector<std::vector<T>>(cacheSize);
+        /* Filename is assumed in the form machine_id_00.wav */
+        std::string delimiter = "_";  /* First character used to split the file name up. */
+        size_t delimiterStart;
+        std::string subString;
+        size_t machineIdxInString = 3;  /* Which part of the file name the machine id should be at. */
 
-        return [=](std::vector<int16_t>& audioDataWindow,
-                   size_t index,
-                   bool useCache,
-                   size_t featuresOverlapIndex,
-                   size_t resizeScale)
-        {
-            T *tensorData = tflite::GetTensorData<T>(inputTensor);
-            std::vector<T> features;
-
-            /* Reuse features from cache if cache is ready and sliding windows overlap.
-             * Overlap is in the beginning of sliding window with a size of a feature cache. */
-            if (useCache && index < featureCache.size()) {
-                features = std::move(featureCache[index]);
-            } else {
-                features = std::move(compute(audioDataWindow));
-            }
-            auto size = features.size() / resizeScale;
-            auto sizeBytes = sizeof(T);
-
-            /* Input should be transposed and "resized" by skipping elements. */
-            for (size_t outIndex = 0; outIndex < size; outIndex++) {
-                std::memcpy(tensorData + (outIndex*size) + index, &features[outIndex*resizeScale], sizeBytes);
-            }
-
-            /* Start renewing cache as soon iteration goes out of the windows overlap. */
-            if (index >= featuresOverlapIndex / resizeScale) {
-                featureCache[index - featuresOverlapIndex / resizeScale] = std::move(features);
-            }
-        };
-    }
-
-    template std::function<void (std::vector<int16_t>&, size_t , bool, size_t, size_t)>
-    FeatureCalc<int8_t>(TfLiteTensor* inputTensor,
-                        size_t cacheSize,
-                        std::function<std::vector<int8_t> (std::vector<int16_t>&)> compute);
-
-    template std::function<void (std::vector<int16_t>&, size_t , bool, size_t, size_t)>
-    FeatureCalc<uint8_t>(TfLiteTensor* inputTensor,
-                         size_t cacheSize,
-                         std::function<std::vector<uint8_t> (std::vector<int16_t>&)> compute);
-
-    template std::function<void (std::vector<int16_t>&, size_t , bool, size_t, size_t)>
-    FeatureCalc<int16_t>(TfLiteTensor* inputTensor,
-                         size_t cacheSize,
-                         std::function<std::vector<int16_t> (std::vector<int16_t>&)> compute);
-
-    template std::function<void(std::vector<int16_t>&, size_t, bool, size_t, size_t)>
-    FeatureCalc<float>(TfLiteTensor *inputTensor,
-                       size_t cacheSize,
-                       std::function<std::vector<float>(std::vector<int16_t>&)> compute);
-
-
-    static std::function<void (std::vector<int16_t>&, int, bool, size_t, size_t)>
-    GetFeatureCalculator(audio::AdMelSpectrogram& melSpec, TfLiteTensor* inputTensor, size_t cacheSize, float trainingMean)
-    {
-        std::function<void (std::vector<int16_t>&, size_t, bool, size_t, size_t)> melSpecFeatureCalc;
-
-        TfLiteQuantization quant = inputTensor->quantization;
-
-        if (kTfLiteAffineQuantization == quant.type) {
-
-            auto *quantParams = (TfLiteAffineQuantization *) quant.params;
-            const float quantScale = quantParams->scale->data[0];
-            const int quantOffset = quantParams->zero_point->data[0];
-
-            switch (inputTensor->type) {
-                case kTfLiteInt8: {
-                    melSpecFeatureCalc = FeatureCalc<int8_t>(inputTensor,
-                                                             cacheSize,
-                                                             [=, &melSpec](std::vector<int16_t>& audioDataWindow) {
-                                                                 return melSpec.MelSpecComputeQuant<int8_t>(
-                                                                         audioDataWindow,
-                                                                         quantScale,
-                                                                         quantOffset,
-                                                                         trainingMean);
-                                                             }
-                    );
-                    break;
-                }
-                case kTfLiteUInt8: {
-                    melSpecFeatureCalc = FeatureCalc<uint8_t>(inputTensor,
-                                                              cacheSize,
-                                                              [=, &melSpec](std::vector<int16_t>& audioDataWindow) {
-                                                                  return melSpec.MelSpecComputeQuant<uint8_t>(
-                                                                          audioDataWindow,
-                                                                          quantScale,
-                                                                          quantOffset,
-                                                                          trainingMean);
-                                                              }
-                    );
-                    break;
-                }
-                case kTfLiteInt16: {
-                    melSpecFeatureCalc = FeatureCalc<int16_t>(inputTensor,
-                                                              cacheSize,
-                                                              [=, &melSpec](std::vector<int16_t>& audioDataWindow) {
-                                                                  return melSpec.MelSpecComputeQuant<int16_t>(
-                                                                          audioDataWindow,
-                                                                          quantScale,
-                                                                          quantOffset,
-                                                                          trainingMean);
-                                                              }
-                    );
-                    break;
-                }
-                default:
-                printf_err("Tensor type %s not supported\n", TfLiteTypeGetName(inputTensor->type));
-            }
-
-
-        } else {
-            melSpecFeatureCalc = melSpecFeatureCalc = FeatureCalc<float>(inputTensor,
-                                                                         cacheSize,
-                                                                         [=, &melSpec](
-                                                                                 std::vector<int16_t>& audioDataWindow) {
-                                                                             return melSpec.ComputeMelSpec(
-                                                                                     audioDataWindow,
-                                                                                     trainingMean);
-                                                                         });
+        for (size_t i = 0; i < machineIdxInString; ++i) {
+            delimiterStart = wavFileName.find(delimiter);
+            subString = wavFileName.substr(0, delimiterStart);
+            wavFileName.erase(0, delimiterStart + delimiter.length());
         }
-        return melSpecFeatureCalc;
+
+        /* At this point substring should be 00.wav */
+        delimiter = ".";  /* Second character used to split the file name up. */
+        delimiterStart = subString.find(delimiter);
+        subString = (delimiterStart != std::string::npos) ? subString.substr(0, delimiterStart) : subString;
+
+        auto is_number = [](const std::string& str) ->  bool
+        {
+            std::string::const_iterator it = str.begin();
+            while (it != str.end() && std::isdigit(*it)) ++it;
+            return !str.empty() && it == str.end();
+        };
+
+        const int8_t machineIdx = is_number(subString) ? std::stoi(subString) : -1;
+
+        /* Return corresponding index in the output vector. */
+        if (machineIdx == 0) {
+            return 0;
+        } else if (machineIdx == 2) {
+            return 1;
+        } else if (machineIdx == 4) {
+            return 2;
+        } else if (machineIdx == 6) {
+            return 3;
+        } else {
+            printf_err("%d is an invalid machine index \n", machineIdx);
+            return -1;
+        }
     }
 
 } /* namespace app */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,13 +34,17 @@ namespace arm {
 namespace app {
 
     class Wav2LetterModel : public Model {
-        	
+
     public:
         /* Indices for the expected model - based on input and output tensor shapes */
-        static constexpr uint32_t ms_inputRowsIdx = 1;
-        static constexpr uint32_t ms_inputColsIdx = 2;
+        static constexpr uint32_t ms_inputRowsIdx  = 1;
+        static constexpr uint32_t ms_inputColsIdx  = 2;
         static constexpr uint32_t ms_outputRowsIdx = 2;
         static constexpr uint32_t ms_outputColsIdx = 3;
+
+        /* Model specific constants. */
+        static constexpr uint32_t ms_blankTokenIdx   = 28;
+        static constexpr uint32_t ms_numMfccFeatures = 13;
 
     protected:
         /** @brief   Gets the reference to op resolver interface class. */

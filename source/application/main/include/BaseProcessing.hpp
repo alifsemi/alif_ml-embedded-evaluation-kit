@@ -41,9 +41,6 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
         virtual bool DoPreProcess(const void* input, size_t inputSize) = 0;
-
-    protected:
-        Model* m_model = nullptr;
     };
 
     /**
@@ -62,9 +59,6 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
         virtual bool DoPostProcess() = 0;
-
-    protected:
-        Model* m_model = nullptr;
     };
 
 } /* namespace app */

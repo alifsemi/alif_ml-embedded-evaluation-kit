@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"                    /* Brings in platform definitions. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "RNNoiseModel.hpp"         /* Model class for running inference. */
 #include "InputFiles.hpp"           /* For input audio clips. */
-#include "RNNoiseProcess.hpp"       /* Pre-processing class */
 #include "log_macros.h"
 
 enum opcodes

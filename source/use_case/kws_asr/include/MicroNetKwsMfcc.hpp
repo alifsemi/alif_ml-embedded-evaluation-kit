@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ namespace app {
 namespace audio {
 
     /* Class to provide MicroNet specific MFCC calculation requirements. */
-    class MicroNetMFCC : public MFCC {
+    class MicroNetKwsMFCC : public MFCC {
 
     public:
         static constexpr uint32_t  ms_defaultSamplingFreq = 16000;
@@ -34,14 +34,14 @@ namespace audio {
         static constexpr bool      ms_defaultUseHtkMethod =  true;
 
 
-        explicit MicroNetMFCC(const size_t numFeats, const size_t frameLen)
+        explicit MicroNetKwsMFCC(const size_t numFeats, const size_t frameLen)
             :  MFCC(MfccParams(
                         ms_defaultSamplingFreq, ms_defaultNumFbankBins,
                         ms_defaultMelLoFreq, ms_defaultMelHiFreq,
                         numFeats, frameLen, ms_defaultUseHtkMethod))
         {}
-        MicroNetMFCC()  = delete;
-        ~MicroNetMFCC() = default;
+        MicroNetKwsMFCC()  = delete;
+        ~MicroNetKwsMFCC() = default;
     };
 
 } /* namespace audio */

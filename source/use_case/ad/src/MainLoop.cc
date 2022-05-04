@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hal.h"                    /* Brings in platform definitions */
 #include "InputFiles.hpp"           /* For input data */
 #include "AdModel.hpp"              /* Model class for running inference */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions */
@@ -63,8 +62,8 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<int>("frameLength", g_FrameLength);
-    caseContext.Set<int>("frameStride", g_FrameStride);
+    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
     caseContext.Set<float>("scoreThreshold", g_ScoreThreshold);
     caseContext.Set<float>("trainingMean", g_TrainingMean);
 
