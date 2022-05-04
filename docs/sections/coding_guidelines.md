@@ -25,6 +25,24 @@ Layer (HAL). Both of these languages follow different naming conventions within 
 However, because we also issue function calls to third-party APIs, and they are not guaranteed to follow these
 conventions, the intended outcome could be different for every case.
 
+## Pre-commit formatting
+To help with the adherence of the coding guidelines, we have provided a clang-format file. When commiting, please run 
+the following command, post-staging but pre-commit.
+
+
+  ```Git
+  git-clang-format
+  ```
+
+This will modify the staged changes, to adhere to the guidelines as described in the 
+.clang-format file in the root of the repo. Please note that the clang-format tool must be installed to run this 
+step and can be installed using the following command on Ubuntu: 
+
+  ```
+  sudo apt install clang-format
+  ```
+
+
 ## Language version
 
 For this project, code written in C++ uses a subset of the `C++14` feature set and software may be written using the
