@@ -35,8 +35,9 @@ namespace app {
         /**
          * @brief       Constructor
          * @param[in]   inputTensor   Pointer to the TFLite Micro input Tensor.
+         * @param[in]   rgb2Gray      Convert image from 3 channel RGB to 1 channel grayscale.
          **/
-        explicit VisualWakeWordPreProcess(TfLiteTensor* inputTensor);
+        explicit VisualWakeWordPreProcess(TfLiteTensor* inputTensor, bool rgb2Gray=true);
 
         /**
          * @brief       Should perform pre-processing of 'raw' input image data and load it into
@@ -49,6 +50,7 @@ namespace app {
 
     private:
         TfLiteTensor* m_inputTensor;
+        bool m_rgb2Gray;
     };
 
     /**

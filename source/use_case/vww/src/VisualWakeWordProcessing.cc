@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "VisualWakeWordProcessing.hpp"
+
 #include "ImageUtils.hpp"
 #include "VisualWakeWordModel.hpp"
 #include "log_macros.h"
@@ -22,8 +23,9 @@
 namespace arm {
 namespace app {
 
-    VisualWakeWordPreProcess::VisualWakeWordPreProcess(TfLiteTensor* inputTensor)
-    :m_inputTensor{inputTensor}
+    VisualWakeWordPreProcess::VisualWakeWordPreProcess(TfLiteTensor* inputTensor, bool rgb2Gray)
+    :m_inputTensor{inputTensor},
+     m_rgb2Gray{rgb2Gray}
     {}
 
     bool VisualWakeWordPreProcess::DoPreProcess(const void* data, size_t inputSize)
@@ -34,17 +36,19 @@ namespace app {
 
         auto input = static_cast<const uint8_t*>(data);
 
-        auto unsignedDstPtr = static_cast<uint8_t*>(this->m_inputTensor->data.data);
+        uint8_t* unsignedDstPtr = this->m_inputTensor->data.uint8;
 
-        /* VWW model has one channel input => Convert image to grayscale here.
-         * We expect images to always be RGB. */
-        image::RgbToGrayscale(input, unsignedDstPtr, inputSize);
+        if (this->m_rgb2Gray) {
+            image::RgbToGrayscale(input, unsignedDstPtr, inputSize);
+        } else {
+            std::memcpy(unsignedDstPtr, input, inputSize);
+        }
 
         /* VWW model pre-processing is image conversion from uint8 to [0,1] float values,
          * then quantize them with input quantization info. */
         QuantParams inQuantParams = GetTensorQuantParams(this->m_inputTensor);
 
-        auto signedDstPtr = static_cast<int8_t*>(this->m_inputTensor->data.data);
+        int8_t* signedDstPtr = this->m_inputTensor->data.int8;
         for (size_t i = 0; i < this->m_inputTensor->bytes; i++) {
             auto i_data_int8 = static_cast<int8_t>(
                     ((static_cast<float>(unsignedDstPtr[i]) / 255.0f) / inQuantParams.scale) + inQuantParams.offset
