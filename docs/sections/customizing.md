@@ -323,10 +323,6 @@ class HelloWorldModel: public Model {
     /** @brief   Adds operations to the op resolver instance. */
     bool EnlistOperations() override;
 
-    const uint8_t* ModelPointer() override;
-
-    size_t ModelSize() override;
-
   private:
     /* Maximum number of individual operations that can be enlisted. */
     static constexpr int ms_maxOpCnt = 5;
@@ -428,13 +424,25 @@ The following code adds inference invocation to the main loop function:
 #include "HelloWorldModel.hpp"
 #include "log_macros.h"
 
+  namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+      } /* namespace app */
+  } /* namespace arm */
+  
+  extern uint8_t* GetModelPointer();
+  extern size_t GetModelLen();
+
   void main_loop() {
 
   /* model wrapper object */
   arm::app::HelloWorldModel model;
 
   /* Load the model */
-  if (!model.Init()) {
+  if (!model.Init(arm::app::tensor_arena,
+                    sizeof(arm::app::tensor_arena),
+                    GetModelPointer(),
+                    GetModelLen())) {
     printf_err("failed to initialise model\n");
     return;
   }
@@ -463,7 +471,10 @@ The code snippet has several important blocks:
   arm::app::HelloWorldModel model;
 
   /* Load the model */
-  if (!model.Init()) {
+  if (!model.Init(arm::app::tensor_arena,
+                    sizeof(arm::app::tensor_arena),
+                    GetModelPointer(),
+                    GetModelLen())) {
     printf_err(\"failed to initialise model\\n\");
     return;
   }

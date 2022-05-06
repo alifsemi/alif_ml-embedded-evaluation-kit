@@ -22,6 +22,15 @@
 #include "InputFiles.hpp"
 #include "UseCaseCommonUtils.hpp"
 
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
+
 #include <catch.hpp>
 
 void GetExpectedResults(std::vector<std::vector<arm::app::object_detection::DetectionResult>> &expected_results)
@@ -122,7 +131,10 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
         arm::app::YoloFastestModel model{};
 
         REQUIRE_FALSE(model.IsInited());
-        REQUIRE(model.Init());
+        REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
         REQUIRE(model.IsInited());
 
         for (uint32_t i = 0 ; i < NUMBER_OF_FILES; ++i) {
@@ -136,7 +148,10 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
             arm::app::YoloFastestModel model{};
 
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init());
+            REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInferenceDetectionResults<uint8_t>(i, model, 1);

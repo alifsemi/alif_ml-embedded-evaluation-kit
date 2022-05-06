@@ -21,7 +21,18 @@
 #include "Labels.hpp"               /* For label strings. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
-#include "log_macros.h"
+#include "log_macros.h"             /* Logging functions */
+#include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+
+namespace arm {
+namespace app {
+namespace kws {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    extern uint8_t *GetModelPointer();
+    extern size_t GetModelLen();
+} /* namespace kws */
+} /* namespace app */
+} /* namespace arm */
 
 using KwsClassifier = arm::app::Classifier;
 
@@ -53,10 +64,21 @@ void main_loop()
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
     /* Load the model. */
-    if (!model.Init()) {
+    if (!model.Init(arm::app::kws::tensorArena,
+                    sizeof(arm::app::kws::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }
+
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    if (model.ContainsEthosUOperator()) {
+        printf_err("No driver support for Ethos-U operator found in the model.\n");
+        return;
+    }
+#endif /* ARM_NPU */
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -65,9 +87,9 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<int>("frameLength", g_FrameLength);
-    caseContext.Set<int>("frameStride", g_FrameStride);
-    caseContext.Set<float>("scoreThreshold", g_ScoreThreshold);  /* Normalised score threshold. */
+    caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);
+    caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
+    caseContext.Set<float>("scoreThreshold", arm::app::kws::g_ScoreThreshold);  /* Normalised score threshold. */
 
     KwsClassifier classifier;  /* classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);

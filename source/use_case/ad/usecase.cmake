@@ -15,6 +15,9 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
+# Append the API to use for this use case
+list(APPEND ${use_case}_API_LIST "ad")
+
 USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or path to a single input WAV file, to use in the evaluation application."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
     PATH_OR_FILE)

@@ -18,7 +18,17 @@
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "RNNoiseModel.hpp"         /* Model class for running inference. */
 #include "InputFiles.hpp"           /* For input audio clips. */
-#include "log_macros.h"
+#include "log_macros.h"             /* Logging functions */
+#include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+
+namespace arm {
+    namespace app {
+        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
 
 enum opcodes
 {
@@ -62,10 +72,22 @@ void main_loop()
     constexpr bool bUseMenu = NUMBER_OF_FILES > 1 ? true : false;
 
     /* Load the model. */
-    if (!model.Init()) {
+    if (!model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }
+
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    if (model.ContainsEthosUOperator()) {
+        printf_err("No driver support for Ethos-U operator found in the model.\n");
+        return;
+    }
+#endif /* ARM_NPU */
+
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 

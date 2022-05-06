@@ -14,6 +14,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+# Append the API to use for this use case
+list(APPEND ${use_case}_API_LIST "kws")
 
 USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or path to a single WAV file, to use in the evaluation application."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
@@ -96,4 +98,5 @@ generate_tflite_code(
     MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
     DESTINATION ${SRC_GEN_DIR}
     EXPRESSIONS ${EXTRA_MODEL_CODE}
+    NAMESPACE   "arm" "app" "kws"
 )

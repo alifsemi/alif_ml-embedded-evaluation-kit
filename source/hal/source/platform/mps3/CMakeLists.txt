@@ -41,11 +41,21 @@ if (TARGET_SUBSYSTEM STREQUAL sse-300)
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
+    set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
+    set(DYNAMIC_MODEL_SIZE   "0x02000000"   CACHE STRING "Size of the space reserved for the model")
+
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
         set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
         set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
     endif()
 endif()
+
+math(EXPR IFM_BASE      "${DYNAMIC_MODEL_BASE} + ${DYNAMIC_MODEL_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(DYNAMIC_IFM_BASE    "${IFM_BASE}" CACHE STRING "Base address for IFMs to be loaded")
+set(DYNAMIC_IFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the IFM")
+math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
+set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)

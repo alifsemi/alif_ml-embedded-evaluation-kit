@@ -16,7 +16,11 @@
 #}
 {{common_template_header}}
 
-#include "Model.hpp"
+#include "BufAttributes.hpp"
+
+#include <cstddef>
+#include <cstdint>
+
 {% for header in additional_headers %}
 #include "{{header}}"
 {% endfor %}

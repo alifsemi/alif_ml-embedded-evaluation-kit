@@ -24,12 +24,24 @@
 #include "Classifier.hpp"
 #include "UseCaseCommonUtils.hpp"
 
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
+
 TEST_CASE("Model info")
 {
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
 
     /* Load the model */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;
@@ -46,7 +58,10 @@ TEST_CASE("Inference by index")
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
 
     /* Load the model */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;
@@ -76,7 +91,10 @@ TEST_CASE("Inference run all images")
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
 
     /* Load the model */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;
@@ -102,7 +120,10 @@ TEST_CASE("List all images")
     arm::app::VisualWakeWordModel model;    /* model wrapper object */
 
     /* Load the model */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;

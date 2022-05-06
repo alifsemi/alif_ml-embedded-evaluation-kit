@@ -16,8 +16,24 @@
  */
 #include "MicroNetKwsModel.hpp"
 #include "Wav2LetterModel.hpp"
+#include "BufAttributes.hpp"
 
 #include <catch.hpp>
+
+namespace arm {
+    namespace app {
+        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+
+        namespace asr {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        }
+        namespace kws {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        }
+    } /* namespace app */
+} /* namespace arm */
 
 /* Skip this test, Wav2LetterModel if not Vela optimized but only from ML-zoo will fail. */
 TEST_CASE("Init two Models", "[.]")
@@ -35,13 +51,20 @@ TEST_CASE("Init two Models", "[.]")
     //arm::app::Wav2LetterModel model2;     /* model2. */
 
     /* Load/initialise the first model. */
-    REQUIRE(model1.Init());
+    REQUIRE(model1.Init(arm::app::tensorArena,
+                        sizeof(arm::app::tensorArena),
+                        arm::app::kws::GetModelPointer(),
+                        arm::app::kws::GetModelLen()));
 
     /* Allocator instance should have been created. */
     REQUIRE(nullptr != model1.GetAllocator());
 
     /* Load the second model using the same allocator as model 1. */
-    REQUIRE(model2.Init(model1.GetAllocator()));
+    REQUIRE(model2.Init(arm::app::tensorArena,
+                        sizeof(arm::app::tensorArena),
+                        arm::app::asr::GetModelPointer(),
+                        arm::app::asr::GetModelLen(),
+                        model1.GetAllocator()));
 
     /* Make sure they point to the same allocator object. */
     REQUIRE(model1.GetAllocator() == model2.GetAllocator());

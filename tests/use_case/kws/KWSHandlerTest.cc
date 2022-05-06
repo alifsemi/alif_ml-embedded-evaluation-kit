@@ -24,13 +24,26 @@
 #include "Classifier.hpp"
 #include "UseCaseCommonUtils.hpp"
 
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+        namespace kws {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        }
+    } /* namespace app */
+} /* namespace arm */
+
 TEST_CASE("Model info")
 {
     /* Model wrapper object. */
     arm::app::MicroNetKwsModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -50,7 +63,10 @@ TEST_CASE("Inference by index")
     arm::app::MicroNetKwsModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -58,8 +74,8 @@ TEST_CASE("Inference by index")
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<int>("frameLength", g_FrameLength);  /* 640 sample length for MicroNetKws. */
-    caseContext.Set<int>("frameStride", g_FrameStride);  /* 320 sample stride for MicroNetKws. */
+    caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);  /* 640 sample length for MicroNetKws. */
+    caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);  /* 320 sample stride for MicroNetKws. */
     caseContext.Set<float>("scoreThreshold", 0.5);       /* Normalised score threshold. */
 
     arm::app::Classifier classifier;                     /* classifier wrapper object. */
@@ -122,7 +138,10 @@ TEST_CASE("Inference run all clips")
     arm::app::MicroNetKwsModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -131,8 +150,8 @@ TEST_CASE("Inference run all clips")
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<int>("frameLength", g_FrameLength);  /* 640 sample length for MicroNet. */
-    caseContext.Set<int>("frameStride", g_FrameStride);  /* 320 sample stride for MicroNet. */
+    caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);  /* 640 sample length for MicroNet. */
+    caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);  /* 320 sample stride for MicroNet. */
     caseContext.Set<float>("scoreThreshold", 0.7);       /* Normalised score threshold. */
     arm::app::Classifier classifier;                     /* classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
@@ -153,7 +172,10 @@ TEST_CASE("List all audio clips")
     arm::app::MicroNetKwsModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;

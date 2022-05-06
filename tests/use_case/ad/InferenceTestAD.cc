@@ -22,10 +22,20 @@
 #include "TestData_ad.hpp"
 #include "log_macros.h"
 #include "TensorFlowLiteMicro.hpp"
+#include "BufAttributes.hpp"
 
 #ifndef AD_FEATURE_VEC_DATA_SIZE
 #define AD_IN_FEATURE_VEC_DATA_SIZE (1024)
 #endif /* AD_FEATURE_VEC_DATA_SIZE */
+
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
 
 using namespace test;
 
@@ -84,7 +94,10 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8"
     arm::app::AdModel model{};
 
     REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
     REQUIRE(model.IsInited());
 
     REQUIRE(RunInferenceRandom(model));
@@ -102,7 +115,10 @@ TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdMode
             arm::app::AdModel model{};
 
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init());
+            REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(input_goldenFV, output_goldenFV, model);

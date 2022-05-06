@@ -17,9 +17,19 @@
 #include "RNNoiseModel.hpp"
 #include "TensorFlowLiteMicro.hpp"
 #include "TestData_noise_reduction.hpp"
+#include "BufAttributes.hpp"
 
 #include <catch.hpp>
 #include <random>
+
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
 
 bool RunInference(arm::app::Model& model, std::vector<int8_t> vec,
                     const size_t sizeRequired, const size_t dataInputIndex)
@@ -61,7 +71,10 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and RNNoiseModel 
     arm::app::RNNoiseModel model{};
 
     REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                       sizeof(arm::app::tensorArena),
+                       GetModelPointer(),
+                       GetModelLen()));
     REQUIRE(model.IsInited());
 
     model.ResetGruState();
@@ -114,7 +127,10 @@ void printArray(size_t dataSz, T data){
 TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
 {
     TestRNNoiseModel model{};
-    model.Init();
+    model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen());
 
     auto map = model.GetStateMap();
 
@@ -135,7 +151,10 @@ TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
 TEST_CASE("Test GRU state copy", "[RNNoise]")
 {
     TestRNNoiseModel model{};
-    model.Init();
+    model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen());
     REQUIRE(RunInferenceRandom(model, 0));
 
     auto map = model.GetStateMap();

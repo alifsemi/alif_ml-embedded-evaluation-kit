@@ -24,6 +24,7 @@
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "Classifier.hpp"           /* Classifier. */
 #include "InputFiles.hpp"
+#include "BufAttributes.hpp"        /* Buffer attributes */
 
 
 void DisplayCommonMenu();

@@ -17,9 +17,21 @@
 #include "MicroNetKwsModel.hpp"
 #include "TestData_kws.hpp"
 #include "TensorFlowLiteMicro.hpp"
+#include "BufAttributes.hpp"
 
 #include <catch.hpp>
 #include <random>
+
+namespace arm {
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+
+    namespace kws {
+        extern uint8_t *GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace kws */
+} /* namespace app */
+} /* namespace arm */
 
 using namespace test;
 
@@ -78,7 +90,10 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and MicroNetKwsMo
     arm::app::MicroNetKwsModel model{};
 
     REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
     REQUIRE(model.IsInited());
 
     REQUIRE(RunInferenceRandom(model));
@@ -96,7 +111,10 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MicroNetKwsModel int
             arm::app::MicroNetKwsModel model{};
 
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init());
+            REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::kws::GetModelPointer(),
+                    arm::app::kws::GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(input_goldenFV, output_goldenFV, model);

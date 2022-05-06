@@ -1,3 +1,4 @@
+#----------------------------------------------------------------------------
 #  Copyright (c) 2021 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -12,7 +13,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#----------------------------------------------------------------------------
 
+# Append the API to use for this use case
+list(APPEND ${use_case}_API_LIST "vww")
 
 USER_OPTION(${use_case}_FILE_PATH "Directory with custom image files, or path to a single image file, to use in the evaluation application"
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/

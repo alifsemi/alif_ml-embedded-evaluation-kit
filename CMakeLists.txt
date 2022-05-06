@@ -115,6 +115,9 @@ add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
 # Include the tensorflow build target
 include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
 
+# Add the common API library target (tensorflow-lite-micro target is needed)
+add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common)
+
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
     ${SRC_PATH}/application/tensorflow-lite-micro/include
@@ -125,11 +128,6 @@ file(GLOB_RECURSE SRC_APPLICATION
     "${SRC_PATH}/application/main/*.cc"
     "${SRC_PATH}/application/main/*.cpp"
     "${SRC_PATH}/application/main/*.c"
-    "${SRC_PATH}/application/main/**/*.cc"
-    "${SRC_PATH}/application/main/**/*.cpp"
-    "${SRC_PATH}/application/main/**/*.c"
-    "${SRC_PATH}/application/tensorflow-lite-micro/**/*.cc"
-    "${SRC_PATH}/application/tensorflow-lite-micro/*.cc"
     )
 list(FILTER SRC_APPLICATION EXCLUDE REGEX ".*main\\.c.*$")
 set(SRC_MAIN "${SRC_PATH}/application/main/Main.cc")
@@ -183,6 +181,7 @@ foreach(use_case ${USE_CASES})
     file(GLOB UC_CMAKE_FILE
         "${SRC_USE_CASE}/${use_case}/*.cmake")
 
+    # Include the use case cmake file.
     include(${UC_CMAKE_FILE})
 
     file(GLOB_RECURSE UC_SRC
@@ -207,7 +206,7 @@ foreach(use_case ${USE_CASES})
             "${${use_case}_COMPILE_DEFS}")
     endif()
 
-    set(UC_LIB_NAME lib${TARGET_NAME})
+    set(UC_LIB_NAME ${use_case})
 
     # Consolidated application static lib:
     add_library(${UC_LIB_NAME} STATIC
@@ -218,12 +217,11 @@ foreach(use_case ${USE_CASES})
     target_include_directories(${UC_LIB_NAME} PUBLIC
         ${APPLICATION_INCLUDE_DIRS}
         ${UC_INCLUDE}
-        ${INC_GEN_DIR}
-        ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include)
+        ${INC_GEN_DIR})
 
     # Set the activation buffer size
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
-            "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
+        "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log
@@ -231,6 +229,26 @@ foreach(use_case ${USE_CASES})
         hal
         profiler
         tensorflow-lite-micro)
+
+    # If an API exists for this use case, include the projects here and add to
+    # the library list.
+    foreach(API_TO_USE ${${use_case}_API_LIST})
+
+        # If the required target doesn't yet exist, include the project here:
+        if (NOT TARGET ${API_TO_USE}_api)
+            add_subdirectory(
+                ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
+                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})  # Binary path
+        endif()
+
+        # Check if the target now exists
+        if (TARGET ${API_TO_USE}_api)
+            message(STATUS "Using ${API_TO_USE}_api for ${use_case}")
+            target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_api)
+        else()
+            message(FATAL_ERROR "${API_TO_USE}_api target not found!")
+        endif()
+    endforeach()
 
     add_executable(${TARGET_NAME} ${SRC_MAIN})
 

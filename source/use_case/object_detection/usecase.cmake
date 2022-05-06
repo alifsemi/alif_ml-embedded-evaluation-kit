@@ -14,6 +14,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+# Append the API to use for this use case
+list(APPEND ${use_case}_API_LIST "object_detection")
 
 USER_OPTION(${use_case}_FILE_PATH "Directory with custom image files to use, or path to a single image, in the evaluation application"
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/

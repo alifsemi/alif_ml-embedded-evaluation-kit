@@ -14,6 +14,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+# Append the APIs to use for this use case
+list(APPEND ${use_case}_API_LIST "kws" "asr")
 
 USER_OPTION(${use_case}_FILE_PATH "Directory with WAV files, or path to a single WAV file, to use in the evaluation application."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/

@@ -25,6 +25,7 @@
 #include "MicroNetKwsMfcc.hpp"
 #include "Classifier.hpp"
 #include "KwsResult.hpp"
+#include "Wav2LetterModel.hpp"
 #include "Wav2LetterMfcc.hpp"
 #include "Wav2LetterPreprocess.hpp"
 #include "Wav2LetterPostprocess.hpp"

@@ -23,7 +23,24 @@
 #include "Wav2LetterModel.hpp"      /* ASR model class for running inference. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
-#include "log_macros.h"
+#include "log_macros.h"             /* Logging functions */
+#include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+
+namespace arm {
+namespace app {
+    static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+
+    namespace asr {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    }
+
+    namespace kws {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    }
+} /* namespace app */
+} /* namespace arm */
 
 using KwsClassifier = arm::app::Classifier;
 
@@ -60,20 +77,43 @@ void main_loop()
     arm::app::Wav2LetterModel asrModel;
 
     /* Load the models. */
-    if (!kwsModel.Init()) {
+    if (!kwsModel.Init(arm::app::tensorArena,
+                       sizeof(arm::app::tensorArena),
+                       arm::app::kws::GetModelPointer(),
+                       arm::app::kws::GetModelLen())) {
         printf_err("Failed to initialise KWS model\n");
         return;
     }
 
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    if (kwsModel.ContainsEthosUOperator()) {
+        printf_err("No driver support for Ethos-U operator found in the KWS model.\n");
+        return;
+    }
+#endif /* ARM_NPU */
+
     /* Initialise the asr model using the same allocator from KWS
      * to re-use the tensor arena. */
-    if (!asrModel.Init(kwsModel.GetAllocator())) {
+    if (!asrModel.Init(arm::app::tensorArena,
+                       sizeof(arm::app::tensorArena),
+                       arm::app::asr::GetModelPointer(),
+                       arm::app::asr::GetModelLen(),
+                       kwsModel.GetAllocator())) {
         printf_err("Failed to initialise ASR model\n");
         return;
     } else if (!VerifyTensorDimensions(asrModel)) {
         printf_err("Model's input or output dimension verification failed\n");
         return;
     }
+
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    if (asrModel.ContainsEthosUOperator()) {
+        printf_err("No driver support for Ethos-U operator found in the ASR model.\n");
+        return;
+    }
+#endif /* ARM_NPU */
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;

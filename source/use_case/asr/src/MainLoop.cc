@@ -20,7 +20,18 @@
 #include "UseCaseCommonUtils.hpp"    /* Utils functions. */
 #include "AsrClassifier.hpp"         /* Classifier. */
 #include "InputFiles.hpp"            /* Generated audio clip header. */
-#include "log_macros.h"
+#include "log_macros.h"             /* Logging functions */
+#include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+
+namespace arm {
+namespace app {
+namespace asr {
+    static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    extern uint8_t* GetModelPointer();
+    extern size_t GetModelLen();
+} /* namespace asr */
+} /* namespace app */
+} /* namespace arm */
 
 enum opcodes
 {
@@ -53,13 +64,24 @@ void main_loop()
     arm::app::Wav2LetterModel model;  /* Model wrapper object. */
 
     /* Load the model. */
-    if (!model.Init()) {
+    if (!model.Init(arm::app::asr::tensorArena,
+                    sizeof(arm::app::asr::tensorArena),
+                    arm::app::asr::GetModelPointer(),
+                    arm::app::asr::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     } else if (!VerifyTensorDimensions(model)) {
         printf_err("Model's input or output dimension verification failed\n");
         return;
     }
+
+#if !defined(ARM_NPU)
+    /* If it is not a NPU build check if the model contains a NPU operator */
+    if (model.ContainsEthosUOperator()) {
+        printf_err("No driver support for Ethos-U operator found in the model.\n");
+        return;
+    }
+#endif /* ARM_NPU */
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -71,10 +93,10 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
-    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
-    caseContext.Set<float>("scoreThreshold", g_ScoreThreshold);  /* Score threshold. */
-    caseContext.Set<uint32_t>("ctxLen", g_ctxLen);  /* Left and right context length (MFCC feat vectors). */
+    caseContext.Set<uint32_t>("frameLength", arm::app::asr::g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", arm::app::asr::g_FrameStride);
+    caseContext.Set<float>("scoreThreshold", arm::app::asr::g_ScoreThreshold);  /* Score threshold. */
+    caseContext.Set<uint32_t>("ctxLen", arm::app::asr::g_ctxLen);  /* Left and right context length (MFCC feat vectors). */
     caseContext.Set<const std::vector <std::string>&>("labels", labels);
     caseContext.Set<arm::app::AsrClassifier&>("classifier", classifier);
 

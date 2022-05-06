@@ -24,6 +24,15 @@
 #include <hal.h>
 #include <Profiler.hpp>
 
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
+
 #define PLATFORM    hal_platform_init();
 
 #define CONTEXT \
@@ -38,7 +47,10 @@ TEST_CASE("Verify output tensor memory dump")
     std::vector<uint8_t> memPool(maxMemDumpSz); /* Memory pool */
     arm::app::RNNoiseModel model{};
 
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
     REQUIRE(model.IsInited());
 
     /* Populate the output tensors */
@@ -105,7 +117,10 @@ TEST_CASE("Inference run all clips", "[RNNoise]")
     caseContext.Set<uint32_t>("frameStride", g_FrameStride);
 
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     REQUIRE(arm::app::NoiseReductionHandler(caseContext, true));
 }
@@ -136,7 +151,10 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
     caseContext.Set<uint32_t>("frameStride", g_FrameStride);
     caseContext.Set<uint32_t>("numInputFeatures", g_NumInputFeatures);
     /* Load the model. */
-    REQUIRE(model.Init());
+    REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
 
     size_t oneInferenceOutSizeBytes = g_FrameLength * sizeof(int16_t);
 

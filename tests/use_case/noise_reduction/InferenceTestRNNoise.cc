@@ -17,9 +17,19 @@
 #include "TensorFlowLiteMicro.hpp"
 #include "RNNoiseModel.hpp"
 #include "TestData_noise_reduction.hpp"
+#include "BufAttributes.hpp"
 
 #include <catch.hpp>
 #include <random>
+
+namespace arm {
+    namespace app {
+        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    } /* namespace app */
+} /* namespace arm */
+
+extern uint8_t* GetModelPointer();
+extern size_t GetModelLen();
 
 namespace test {
 namespace rnnoise {
@@ -62,7 +72,10 @@ namespace rnnoise {
         arm::app::RNNoiseModel model{};
 
         REQUIRE_FALSE(model.IsInited());
-        REQUIRE(model.Init());
+        REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
         REQUIRE(model.IsInited());
 
         REQUIRE(RunInferenceRandom(model));
@@ -121,7 +134,10 @@ namespace rnnoise {
             arm::app::RNNoiseModel model{};
 
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init());
+            REQUIRE(model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    GetModelPointer(),
+                    GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(goldenInputFV, goldenOutputFV, model);

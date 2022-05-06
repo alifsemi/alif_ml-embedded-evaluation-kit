@@ -17,10 +17,26 @@
 #include "Wav2LetterPostprocess.hpp"
 #include "Wav2LetterModel.hpp"
 #include "ClassificationResult.hpp"
+#include "BufAttributes.hpp"
 
 #include <algorithm>
 #include <catch.hpp>
 #include <limits>
+
+namespace arm {
+    namespace app {
+        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+
+        namespace asr {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        }
+        namespace kws {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        }
+    } /* namespace app */
+} /* namespace arm */
 
 template <typename T>
 static TfLiteTensor GetTestTensor(
@@ -51,7 +67,10 @@ TEST_CASE("Checking return value")
         const uint32_t outputCtxLen = 5;
         arm::app::AsrClassifier classifier;
         arm::app::Wav2LetterModel model;
-        model.Init();
+        model.Init(arm::app::tensorArena,
+                   sizeof(arm::app::tensorArena),
+                   arm::app::asr::GetModelPointer(),
+                   arm::app::asr::GetModelLen());
         std::vector<std::string> dummyLabels = {"a", "b", "$"};
         const uint32_t blankTokenIdx = 2;
         std::vector<arm::app::ClassificationResult> dummyResult;
@@ -71,7 +90,10 @@ TEST_CASE("Checking return value")
         const uint32_t outputCtxLen = 5;
         arm::app::AsrClassifier classifier;
         arm::app::Wav2LetterModel model;
-        model.Init();
+        model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                   arm::app::asr::GetModelPointer(),
+                   arm::app::asr::GetModelLen());
         std::vector<std::string> dummyLabels = {"a", "b", "$"};
         const uint32_t blankTokenIdx = 2;
         std::vector<arm::app::ClassificationResult> dummyResult;
@@ -102,7 +124,10 @@ TEST_CASE("Postprocessing - erasing required elements")
     std::vector<int> tensorShape = {1, 1, nRows, nCols};
     arm::app::AsrClassifier classifier;
     arm::app::Wav2LetterModel model;
-    model.Init();
+    model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::asr::GetModelPointer(),
+                    arm::app::asr::GetModelLen());
     std::vector<std::string> dummyLabels = {"a", "b", "$"};
     std::vector<arm::app::ClassificationResult> dummyResult;
 
