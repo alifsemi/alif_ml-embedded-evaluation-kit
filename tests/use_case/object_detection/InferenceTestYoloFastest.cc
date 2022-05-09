@@ -25,11 +25,12 @@
 namespace arm {
     namespace app {
         static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+        namespace object_detection {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        } /* namespace object_detection */
     } /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 #include <catch.hpp>
 
@@ -132,9 +133,9 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
 
         REQUIRE_FALSE(model.IsInited());
         REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                           sizeof(arm::app::tensorArena),
+                           arm::app::object_detection::GetModelPointer(),
+                           arm::app::object_detection::GetModelLen()));
         REQUIRE(model.IsInited());
 
         for (uint32_t i = 0 ; i < NUMBER_OF_FILES; ++i) {
@@ -149,9 +150,9 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
 
             REQUIRE_FALSE(model.IsInited());
             REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                               sizeof(arm::app::tensorArena),
+                               arm::app::object_detection::GetModelPointer(),
+                               arm::app::object_detection::GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInferenceDetectionResults<uint8_t>(i, model, 1);

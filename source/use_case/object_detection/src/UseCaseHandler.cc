@@ -27,6 +27,9 @@
 
 namespace arm {
 namespace app {
+    namespace object_detection {
+        extern const int channelsImageDisplayed;
+    } /* namespace object_detection */
 
     /**
      * @brief           Presents inference results along using the data presentation
@@ -122,9 +125,13 @@ namespace app {
 
             /* Display image on the LCD. */
             hal_lcd_display_image(
-                (channelsImageDisplayed == 3) ? currImage : dstPtr,
-                inputImgCols, inputImgRows, channelsImageDisplayed,
-                dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
+                (arm::app::object_detection::channelsImageDisplayed == 3) ? currImage : dstPtr,
+                inputImgCols,
+                inputImgRows,
+                arm::app::object_detection::channelsImageDisplayed,
+                dataPsnImgStartX,
+                dataPsnImgStartY,
+                dataPsnImgDownscaleFactor);
 
             /* Display message on the LCD - inference running. */
             hal_lcd_display_text(str_inf.c_str(), str_inf.size(),

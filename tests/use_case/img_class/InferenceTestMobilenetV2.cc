@@ -25,11 +25,12 @@
 namespace arm {
     namespace app {
         static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+        namespace img_class {
+            extern uint8_t* GetModelPointer();
+            extern size_t GetModelLen();
+        } /* namespace img_class */
     } /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 using namespace test;
 
@@ -78,9 +79,9 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
 
         REQUIRE_FALSE(model.IsInited());
         REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                           sizeof(arm::app::tensorArena),
+                           arm::app::img_class::GetModelPointer(),
+                           arm::app::img_class::GetModelLen()));
         REQUIRE(model.IsInited());
 
         for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
@@ -95,9 +96,9 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
 
             REQUIRE_FALSE(model.IsInited());
             REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                               sizeof(arm::app::tensorArena),
+                               arm::app::img_class::GetModelPointer(),
+                               arm::app::img_class::GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<uint8_t>(i, model, 1);

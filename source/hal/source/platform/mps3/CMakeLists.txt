@@ -25,7 +25,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for MPS3 FPGA/FVP targets"
     LANGUAGES       C CXX ASM)
 
-# 1. We should be cross-compiling (MPS3 taregt only runs Cortex-M targets)
+# 1. We should be cross-compiling (MPS3 target only runs Cortex-M targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
     message(FATAL_ERROR "No ${PLATFORM_DRIVERS_TARGET} support for this target.")
 endif()

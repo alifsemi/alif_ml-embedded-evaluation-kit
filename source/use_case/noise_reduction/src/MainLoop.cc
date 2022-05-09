@@ -22,13 +22,14 @@
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {
-    namespace app {
-        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace rnn {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace rnn */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 enum opcodes
 {
@@ -74,8 +75,8 @@ void main_loop()
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen())) {
+                    arm::app::rnn::GetModelPointer(),
+                    arm::app::rnn::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -85,9 +86,9 @@ void main_loop()
 
     arm::app::Profiler profiler{"noise_reduction"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<uint32_t>("numInputFeatures", g_NumInputFeatures);
-    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
-    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
+    caseContext.Set<uint32_t>("numInputFeatures", arm::app::rnn::g_NumInputFeatures);
+    caseContext.Set<uint32_t>("frameLength", arm::app::rnn::g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", arm::app::rnn::g_FrameStride);
     caseContext.Set<arm::app::RNNoiseModel&>("model", model);
     SetAppCtxClipIdx(caseContext, 0);
 

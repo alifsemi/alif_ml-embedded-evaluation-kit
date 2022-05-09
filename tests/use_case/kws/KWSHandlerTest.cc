@@ -30,7 +30,7 @@ namespace arm {
         namespace kws {
             extern uint8_t* GetModelPointer();
             extern size_t GetModelLen();
-        }
+        } /* namespace kws */
     } /* namespace app */
 } /* namespace arm */
 

@@ -52,5 +52,6 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: true
+NamespaceIndentation: Inner
 ---
 

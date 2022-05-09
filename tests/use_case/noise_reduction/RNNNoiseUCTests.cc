@@ -25,13 +25,14 @@
 #include <Profiler.hpp>
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace rnn {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace rnn */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 #define PLATFORM    hal_platform_init();
 
@@ -48,9 +49,9 @@ TEST_CASE("Verify output tensor memory dump")
     arm::app::RNNoiseModel model{};
 
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::rnn::GetModelPointer(),
+                       arm::app::rnn::GetModelLen()));
     REQUIRE(model.IsInited());
 
     /* Populate the output tensors */
@@ -112,15 +113,15 @@ TEST_CASE("Inference run all clips", "[RNNoise]")
     CONTEXT
 
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<uint32_t>("numInputFeatures", g_NumInputFeatures);
-    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
-    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
+    caseContext.Set<uint32_t>("numInputFeatures", arm::app::rnn::g_NumInputFeatures);
+    caseContext.Set<uint32_t>("frameLength", arm::app::rnn::g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", arm::app::rnn::g_FrameStride);
 
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::rnn::GetModelPointer(),
+                       arm::app::rnn::GetModelLen()));
 
     REQUIRE(arm::app::NoiseReductionHandler(caseContext, true));
 }
@@ -147,22 +148,22 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
 
     caseContext.Set<std::function<const int16_t*(const uint32_t)>>("features", get_audio_array);
     caseContext.Set<std::function<const char* (const uint32_t)>>("featureFileNames", get_test_filename);
-    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
-    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
-    caseContext.Set<uint32_t>("numInputFeatures", g_NumInputFeatures);
+    caseContext.Set<uint32_t>("frameLength", arm::app::rnn::g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", arm::app::rnn::g_FrameStride);
+    caseContext.Set<uint32_t>("numInputFeatures", arm::app::rnn::g_NumInputFeatures);
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::rnn::GetModelPointer(),
+                       arm::app::rnn::GetModelLen()));
 
-    size_t oneInferenceOutSizeBytes = g_FrameLength * sizeof(int16_t);
+    size_t oneInferenceOutSizeBytes = arm::app::rnn::g_FrameLength * sizeof(int16_t);
 
     auto infIndex = 0;
     for (auto numInf: numberOfInferences) {
         DYNAMIC_SECTION("Number of features: "<< numInf) {
             caseContext.Set<uint32_t>("clipIndex", 1);  /* Only getting p232_208.wav for tests. */
-            uint32_t audioSizeInput = numInf*g_FrameLength;
+            uint32_t audioSizeInput = numInf * arm::app::rnn::g_FrameLength;
             caseContext.Set<std::function<uint32_t(const uint32_t)>>("featureSizes",
                                                                      get_golden_input_p232_208_array_size(audioSizeInput));
 
@@ -180,12 +181,13 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
             REQUIRE(arm::app::NoiseReductionHandler(caseContext, false));
 
             /* The expected output after post-processing. */
-            std::vector<int16_t> golden(&ofms[infIndex][0], &ofms[infIndex][0] + g_FrameLength);
+            std::vector<int16_t> golden(&ofms[infIndex][0],
+                                        &ofms[infIndex][0] + arm::app::rnn::g_FrameLength);
 
             size_t startOfLastInfOut = undefMemDumpBytesWritten - oneInferenceOutSizeBytes;
 
             /* The actual result from the usecase handler. */
-            std::vector<int16_t> runtime(g_FrameLength);
+            std::vector<int16_t> runtime(arm::app::rnn::g_FrameLength);
             std::memcpy(runtime.data(), &memDump[startOfLastInfOut], oneInferenceOutSizeBytes);
 
             /* Margin of 43 is 0.07% error. */
@@ -211,7 +213,7 @@ TEST_CASE("Inference by index - several inferences", "[RNNoise]")
     REQUIRE(64757 == totalAudioSize);  /* Checking that the input file is as expected and has not changed. */
 
     /* 3 different inference amounts: 1, 2 and all inferences required to cover total feature set */
-    uint32_t totalInferences = totalAudioSize / g_FrameLength;
+    uint32_t totalInferences                 = totalAudioSize / arm::app::rnn::g_FrameLength;
     std::vector<uint32_t> numberOfInferences = {1, 2, totalInferences};
     testInfByIndex(numberOfInferences);
 }

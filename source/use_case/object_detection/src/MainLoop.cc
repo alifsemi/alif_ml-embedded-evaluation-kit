@@ -23,13 +23,14 @@
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {
-    namespace app {
-        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace object_detection {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace object_detection */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 static void DisplayDetectionMenu()
 {
@@ -52,8 +53,8 @@ void main_loop()
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen())) {
+                    arm::app::object_detection::GetModelPointer(),
+                    arm::app::object_detection::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }

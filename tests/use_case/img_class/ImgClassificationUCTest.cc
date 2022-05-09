@@ -25,13 +25,14 @@
 #include <catch.hpp>
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace img_class {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace img_class */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 TEST_CASE("Model info")
 {
@@ -40,9 +41,9 @@ TEST_CASE("Model info")
 
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::img_class::GetModelPointer(),
+                       arm::app::img_class::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -63,9 +64,9 @@ TEST_CASE("Inference by index", "[.]")
 
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::img_class::GetModelPointer(),
+                       arm::app::img_class::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -99,9 +100,9 @@ TEST_CASE("Inference run all images", "[.]")
 
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::img_class::GetModelPointer(),
+                       arm::app::img_class::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
@@ -131,9 +132,9 @@ TEST_CASE("List all images")
 
     /* Load the model. */
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::img_class::GetModelPointer(),
+                       arm::app::img_class::GetModelLen()));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;

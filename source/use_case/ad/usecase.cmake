@@ -86,4 +86,4 @@ generate_tflite_code(
         MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
         DESTINATION ${SRC_GEN_DIR}
         EXPRESSIONS ${EXTRA_MODEL_CODE}
-)
+        NAMESPACE   "arm" "app" "ad")

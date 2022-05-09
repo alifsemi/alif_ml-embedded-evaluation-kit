@@ -43,45 +43,42 @@ namespace app {
             m_topN(topN)
 {
     /* Init PostProcessing */
-    this->m_net =
-    object_detection::Network {
-        .inputWidth = inputImgCols,
+    this->m_net = object_detection::Network{
+        .inputWidth  = inputImgCols,
         .inputHeight = inputImgRows,
-        .numClasses = numClasses,
-        .branches = {
-            object_detection::Branch {
-                        .resolution = inputImgCols/32,
-                        .numBox = 3,
-                        .anchor = anchor1,
-                        .modelOutput = this->m_outputTensor0->data.int8,
-                        .scale = (static_cast<TfLiteAffineQuantization*>(
-                                this->m_outputTensor0->quantization.params))->scale->data[0],
-                        .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
-                                this->m_outputTensor0->quantization.params))->zero_point->data[0],
-                        .size = this->m_outputTensor0->bytes
-            },
-            object_detection::Branch {
-                    .resolution = inputImgCols/16,
-                    .numBox = 3,
-                    .anchor = anchor2,
-                    .modelOutput = this->m_outputTensor1->data.int8,
-                    .scale = (static_cast<TfLiteAffineQuantization*>(
-                            this->m_outputTensor1->quantization.params))->scale->data[0],
-                    .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
-                            this->m_outputTensor1->quantization.params))->zero_point->data[0],
-                    .size = this->m_outputTensor1->bytes
-            }
-        },
-        .topN = m_topN
-    };
+        .numClasses  = numClasses,
+        .branches =
+            {object_detection::Branch{.resolution  = inputImgCols / 32,
+                                      .numBox      = 3,
+                                      .anchor      = arm::app::object_detection::anchor1,
+                                      .modelOutput = this->m_outputTensor0->data.int8,
+                                      .scale       = (static_cast<TfLiteAffineQuantization*>(
+                                                    this->m_outputTensor0->quantization.params))
+                                                   ->scale->data[0],
+                                      .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
+                                                        this->m_outputTensor0->quantization.params))
+                                                       ->zero_point->data[0],
+                                      .size = this->m_outputTensor0->bytes},
+             object_detection::Branch{.resolution  = inputImgCols / 16,
+                                      .numBox      = 3,
+                                      .anchor      = arm::app::object_detection::anchor2,
+                                      .modelOutput = this->m_outputTensor1->data.int8,
+                                      .scale       = (static_cast<TfLiteAffineQuantization*>(
+                                                    this->m_outputTensor1->quantization.params))
+                                                   ->scale->data[0],
+                                      .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
+                                                        this->m_outputTensor1->quantization.params))
+                                                       ->zero_point->data[0],
+                                      .size = this->m_outputTensor1->bytes}},
+        .topN = m_topN};
     /* End init */
 }
 
 bool DetectorPostProcess::DoPostProcess()
 {
     /* Start postprocessing */
-    int originalImageWidth = originalImageSize;
-    int originalImageHeight = originalImageSize;
+    int originalImageWidth  = arm::app::object_detection::originalImageSize;
+    int originalImageHeight = arm::app::object_detection::originalImageSize;
 
     std::forward_list<image::Detection> detections;
     GetNetworkBoxes(this->m_net, originalImageWidth, originalImageHeight, m_threshold, detections);

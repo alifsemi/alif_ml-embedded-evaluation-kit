@@ -24,13 +24,14 @@
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {
-    namespace app {
-        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace img_class {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace img_class */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 using ImgClassClassifier = arm::app::Classifier;
 
@@ -41,8 +42,8 @@ void main_loop()
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen())) {
+                    arm::app::img_class::GetModelPointer(),
+                    arm::app::img_class::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }

@@ -377,7 +377,7 @@ model.
 ### Define ModelPointer and ModelSize methods
 
 These functions are wrappers around the functions generated in the C++ file containing the neural network model as an
-array. This generation the C++ array from the `.tflite` file, logic needs to be defined in the `usecase.cmake` file for
+array. This logic for generation of the C++ array from the `.tflite` file needs to be defined in the `usecase.cmake` file for
 this `HelloWorld` example.
 
 For more details on `usecase.cmake`, refer to: [Building options](./building.md#build-options).
@@ -391,7 +391,7 @@ Model invokes the `ModelPointer()` function which calls the `GetModelPointer()` 
 data memory address. The `GetModelPointer()` function is generated during the build and can be found in the file
 `build/generated/hello_world/src/<model_file_name>.cc`. The file generated is automatically added to the compilation.
 
-Use the `${use-case}_MODEL_TFLITE_PATH` build parameter to include custom model to the generation, or compilation,
+Use the `${use-case}_MODEL_TFLITE_PATH` build parameter to include custom model in the generation or compilation
 process. Please refer to: [Build options](./building.md#build-options) for further information.
 
 ## Executing inference
@@ -404,9 +404,8 @@ To run an inference successfully, you must use:
 - A main loop function,
 - And some input data.
 
-For the `hello_world` example below, the input array is not populated. However, for real-world scenarios, and before
-compilation and be baked into the application, this data must either be read from an on-board device, or be prepared in
-the form of C++ sources.
+For the `hello_world` example below the input array is not populated. However, for real-world deployment this data must either be read from an on-board device or be prepared in
+the form of C++ sources and baked into the application before compilation.
 
 For example, the image classification application requires extra build steps to generate C++ sources from the provided
 images with `generate_images_code` CMake function.

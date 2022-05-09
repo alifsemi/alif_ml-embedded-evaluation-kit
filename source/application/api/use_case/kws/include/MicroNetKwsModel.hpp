@@ -28,11 +28,6 @@ namespace kws {
     extern const uint32_t g_NumMfcc;
     extern const uint32_t g_NumAudioWins;
 } /* namespace kws */
-} /* namespace app */
-} /* namespace arm */
-
-namespace arm {
-namespace app {
 
     class MicroNetKwsModel : public Model {
     public:

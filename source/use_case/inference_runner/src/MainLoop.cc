@@ -22,17 +22,15 @@
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
-} /* namespace arm */
-
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace inference_runner {
 #if defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE)
 
 static uint8_t* GetModelPointer()
 {
     info("Model pointer: 0x%08x\n", DYNAMIC_MODEL_BASE);
-    return reinterpret_cast<uint8_t *>(DYNAMIC_MODEL_BASE);
+    return reinterpret_cast<uint8_t*>(DYNAMIC_MODEL_BASE);
 }
 
 static size_t GetModelLen()
@@ -49,6 +47,9 @@ extern uint8_t* GetModelPointer();
 extern size_t GetModelLen();
 
 #endif /* defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE) */
+    }  /* namespace inference_runner */
+} /* namespace app */
+} /* namespace arm */
 
 enum opcodes
 {
@@ -63,8 +64,8 @@ void main_loop()
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen())) {
+                    arm::app::inference_runner::GetModelPointer(),
+                    arm::app::inference_runner::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }

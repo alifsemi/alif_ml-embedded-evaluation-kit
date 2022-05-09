@@ -25,11 +25,11 @@
 
 namespace arm {
 namespace app {
-namespace asr {
     static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    extern uint8_t* GetModelPointer();
-    extern size_t GetModelLen();
-} /* namespace asr */
+    namespace asr {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace asr */
 } /* namespace app */
 } /* namespace arm */
 
@@ -64,8 +64,8 @@ void main_loop()
     arm::app::Wav2LetterModel model;  /* Model wrapper object. */
 
     /* Load the model. */
-    if (!model.Init(arm::app::asr::tensorArena,
-                    sizeof(arm::app::asr::tensorArena),
+    if (!model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
                     arm::app::asr::GetModelPointer(),
                     arm::app::asr::GetModelLen())) {
         printf_err("Failed to initialise model\n");

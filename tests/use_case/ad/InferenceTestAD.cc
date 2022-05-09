@@ -29,13 +29,14 @@
 #endif /* AD_FEATURE_VEC_DATA_SIZE */
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace ad {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace ad */
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 using namespace test;
 
@@ -95,9 +96,9 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8"
 
     REQUIRE_FALSE(model.IsInited());
     REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                       sizeof(arm::app::tensorArena),
+                       arm::app::ad::GetModelPointer(),
+                       arm::app::ad::GetModelLen()));
     REQUIRE(model.IsInited());
 
     REQUIRE(RunInferenceRandom(model));
@@ -116,9 +117,9 @@ TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdMode
 
             REQUIRE_FALSE(model.IsInited());
             REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                               sizeof(arm::app::tensorArena),
+                               arm::app::ad::GetModelPointer(),
+                               arm::app::ad::GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(input_goldenFV, output_goldenFV, model);

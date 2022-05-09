@@ -48,7 +48,7 @@ USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the eval
 generate_tflite_code(
     MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
     DESTINATION ${SRC_GEN_DIR}
-)
+    NAMESPACE   "arm" "app" "vww")
 
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)

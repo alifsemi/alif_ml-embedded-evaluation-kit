@@ -19,12 +19,13 @@
 
 #include "Model.hpp"
 
-extern const uint32_t g_NumInputFeatures;
-extern const uint32_t g_FrameLength;
-extern const uint32_t g_FrameStride;
-
 namespace arm {
 namespace app {
+    namespace rnn {
+        extern const uint32_t g_NumInputFeatures;
+        extern const uint32_t g_FrameLength;
+        extern const uint32_t g_FrameStride;
+    } /* namespace rnn */
 
     class RNNoiseModel : public Model {
     public:

@@ -26,11 +26,11 @@
 
 namespace arm {
 namespace app {
-namespace kws {
     static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    extern uint8_t *GetModelPointer();
-    extern size_t GetModelLen();
-} /* namespace kws */
+    namespace kws {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace kws */
 } /* namespace app */
 } /* namespace arm */
 
@@ -64,8 +64,8 @@ void main_loop()
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
     /* Load the model. */
-    if (!model.Init(arm::app::kws::tensorArena,
-                    sizeof(arm::app::kws::tensorArena),
+    if (!model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
                     arm::app::kws::GetModelPointer(),
                     arm::app::kws::GetModelLen())) {
         printf_err("Failed to initialise model\n");

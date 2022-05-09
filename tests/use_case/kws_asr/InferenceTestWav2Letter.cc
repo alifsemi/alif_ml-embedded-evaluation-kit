@@ -23,14 +23,13 @@
 #include <random>
 
 namespace arm {
-    namespace app {
-        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-
-        namespace asr {
-            extern uint8_t* GetModelPointer();
-            extern size_t GetModelLen();
-        }
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace asr {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace asr */
+} /* namespace app */
 } /* namespace arm */
 
 namespace test {

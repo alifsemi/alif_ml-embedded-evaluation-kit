@@ -23,16 +23,17 @@
 #include <random>
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace rnn {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace rnn */
+} /* namespace app */
 } /* namespace arm */
 
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
-
 namespace test {
-namespace rnnoise {
+namespace noise_reduction {
 
     bool RunInference(arm::app::Model& model, const std::vector<std::vector<int8_t>> inData)
     {
@@ -73,9 +74,9 @@ namespace rnnoise {
 
         REQUIRE_FALSE(model.IsInited());
         REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                           sizeof(arm::app::tensorArena),
+                           arm::app::rnn::GetModelPointer(),
+                           arm::app::rnn::GetModelLen()));
         REQUIRE(model.IsInited());
 
         REQUIRE(RunInferenceRandom(model));
@@ -135,14 +136,14 @@ namespace rnnoise {
 
             REQUIRE_FALSE(model.IsInited());
             REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()));
+                               sizeof(arm::app::tensorArena),
+                               arm::app::rnn::GetModelPointer(),
+                               arm::app::rnn::GetModelLen()));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(goldenInputFV, goldenOutputFV, model);
         }
     }
 
-}  /* namespace rnnoise */
+} /* namespace noise_reduction */
 }  /* namespace test */

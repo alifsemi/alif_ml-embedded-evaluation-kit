@@ -19,13 +19,14 @@
 
 #include "Model.hpp"
 
-extern const int g_FrameLength;
-extern const int g_FrameStride;
-extern const float g_ScoreThreshold;
-extern const float g_TrainingMean;
-
 namespace arm {
 namespace app {
+    namespace ad {
+        extern const int g_FrameLength;
+        extern const int g_FrameStride;
+        extern const float g_ScoreThreshold;
+        extern const float g_TrainingMean;
+    } /* namespace ad */
 
     class AdModel : public Model {
 

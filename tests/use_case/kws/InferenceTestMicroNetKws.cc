@@ -25,9 +25,8 @@
 namespace arm {
 namespace app {
     static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-
     namespace kws {
-        extern uint8_t *GetModelPointer();
+        extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
     } /* namespace kws */
 } /* namespace app */

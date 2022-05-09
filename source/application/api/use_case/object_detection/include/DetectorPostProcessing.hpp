@@ -26,7 +26,6 @@
 
 namespace arm {
 namespace app {
-
 namespace object_detection {
 
     struct Branch {

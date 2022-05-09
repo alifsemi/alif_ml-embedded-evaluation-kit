@@ -19,13 +19,16 @@
 
 #include "Model.hpp"
 
-extern const int originalImageSize;
-extern const int channelsImageDisplayed;
-extern const float anchor1[];
-extern const float anchor2[];
-
 namespace arm {
 namespace app {
+    namespace object_detection {
+        extern const int originalImageSize;
+        extern const int channelsImageDisplayed;
+        /* NOTE: anchors are different for any given input model size, estimated during training
+         * phase */
+        extern const float anchor1[];
+        extern const float anchor2[];
+    } /* namespace object_detection */
 
     class YoloFastestModel : public Model {
 

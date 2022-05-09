@@ -22,13 +22,14 @@
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {
-    namespace app {
-        static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-    } /* namespace app */
+namespace app {
+    namespace ad {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace ad */
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+} /* namespace app */
 } /* namespace arm */
-
-extern uint8_t* GetModelPointer();
-extern size_t GetModelLen();
 
 enum opcodes
 {
@@ -53,7 +54,6 @@ static void DisplayMenu()
     fflush(stdout);
 }
 
-
 void main_loop()
 {
     arm::app::AdModel model;  /* Model wrapper object. */
@@ -61,9 +61,8 @@ void main_loop()
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
-                    GetModelPointer(),
-                    GetModelLen()))
-    {
+                    arm::app::ad::GetModelPointer(),
+                    arm::app::ad::GetModelLen())) {
         printf_err("failed to initialise model\n");
         return;
     }
@@ -75,10 +74,10 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
     caseContext.Set<uint32_t>("clipIndex", 0);
-    caseContext.Set<uint32_t>("frameLength", g_FrameLength);
-    caseContext.Set<uint32_t>("frameStride", g_FrameStride);
-    caseContext.Set<float>("scoreThreshold", g_ScoreThreshold);
-    caseContext.Set<float>("trainingMean", g_TrainingMean);
+    caseContext.Set<uint32_t>("frameLength", arm::app::ad::g_FrameLength);
+    caseContext.Set<uint32_t>("frameStride", arm::app::ad::g_FrameStride);
+    caseContext.Set<float>("scoreThreshold", arm::app::ad::g_ScoreThreshold);
+    caseContext.Set<float>("trainingMean", arm::app::ad::g_TrainingMean);
 
     /* Main program loop. */
     bool executionSuccessful = true;
