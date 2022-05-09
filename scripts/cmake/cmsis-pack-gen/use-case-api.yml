@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
+
+#----------------------------------------------------------------------------
+#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#----------------------------------------------------------------------------
+
+# YML file to help generate a CMSIS pack for ml-embedded-eval-kit API.
+# See the CMakeLists.txt in the same directory to see the targets that
+# are included in the pack.
+#
+# Ideal usage: from the root of the repository
+#
+# ml-embedded-eval-kit $ packgen -s ./source/                   \ # Source dir
+#           -v ./scripts/cmake/cmsis-pack-gen/use-case-api.yml  \ # This file's path
+#           -o <path-to>/ml-embedded-eval-kit-pack              \ # Where to generate the ouput
+#           -i <path-to>/tensorflow.tensorflow-lite-micro.pdsc  \ # Tensorflow packs' PDSC file
+#           -i <path-to>/ARM.CMSIS.pdsc                         \ # CMSIS packs' PDSC file
+#
+# The PDSC files are the ones extracted from the downloaded packs (and is optional).
+# packgen and packchk must be installed. See https://github.com/Open-CMSIS-Pack/devtools
+# on how to build these tools.
+
+build:
+  - name: "build-dir"
+    options: "cmake"
+
+packs:
+  - name: "ml-embedded-eval-kit-uc-api"
+    description: "Sample use case APIs derived from ml-embedded-eval-kit"
+    vendor: "ARM"
+    license: ""
+    url: "https://review.mlplatform.org/admin/repos/ml/ethos-u/ml-embedded-evaluation-kit/"
+
+    requirements:
+      packages:
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "0.4.0"}
+        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
+
+    releases:
+      - version: "22.05.0"
+        date: "2022-05-04"
+        description: "Experimental package"
+
+#    @TODO: Add API header names and descriptions here (see placeholder below).
+#    apis:
+#      - name: "Image classification use case API"
+#        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Capiversion: "1.0.0"}
+#        description: "Arm ml-embedded-eval kit example APIs"
+#        files:
+#          - name: "use_case/img_class/include/ImgClassProcessing.hpp"
+#            attributes: {category: header, attr: config, version: "1.0.0"}
+
+    taxonomy:
+      - attributes: {Cclass: "Machine Learning"}
+        description: "Machine Learning software frameworks and libraries"
+      - attributes: {Cgroup: "Evaluation Kit"}
+        description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
+
+    components:
+      - name: log
+        target: log
+        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Log", Cversion: "1.0.0" }
+        description: "Logging header-only utility"
+
+      - name: arm_math
+        target: arm_math
+        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Math", Cversion: "1.0.0" }
+        description: "Math function helpers dependent on CMSIS-DSP."
+
+      - name: common_api
+        target: common_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: API", Cversion: "1.0.0"}
+        description: "Common API"
+
+      - name: ad_api
+        target: ad_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vibration: Anomaly detection", Cversion: "1.0.0"}
+        description: "Anomaly detection use case API."
+        dependencies: common_api
+
+      - name: asr_api
+        target: asr_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Automatic speech recognition", Cversion: "1.0.0"}
+        description: "ASR use case API."
+        dependencies: common_api
+
+      - name: img_class_api
+        target: img_class_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Image classification", Cversion: "1.0.0"}
+        description: "Image classification use case API."
+        dependencies: common_api
+
+      - name: inference_runner_api
+        target: inference_runner_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Generic", Cversion: "1.0.0"}
+        description: "Generic inference runner use case API."
+        dependencies: common_api
+
+      - name: kws_api
+        target: kws_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Keyword spotting", Cversion: "1.0.0"}
+        description: "KWS use case API."
+        dependencies: common_api
+
+      - name: noise_reduction_api
+        target: noise_reduction_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Noise reduction", Cversion: "1.0.0"}
+        description: "RNN Noise use case API."
+        dependencies: common_api
+
+      - name: object_detection_api
+        target: object_detection_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Object detection", Cversion: "1.0.0"}
+        description: "Object detection use case API."
+        dependencies: common_api
+
+      - name: vww_api
+        target: vww_api
+        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Person detection", Cversion: "1.0.0"}
+        description: "Visual wake word use case API."
+        dependencies: common_api
