@@ -102,6 +102,9 @@ namespace app {
         DetectorPostProcess postProcess = DetectorPostProcess(outputTensor0, outputTensor1,
                 results, inputImgRows, inputImgCols);
         do {
+            /* Ensure there are no results leftover from previous inference when running all. */
+            results.clear();
+
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};
 
