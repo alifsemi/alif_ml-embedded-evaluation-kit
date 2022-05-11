@@ -58,14 +58,6 @@ void main_loop()
         return;
     }
 
-#if !defined(ARM_NPU)
-    /* If it is not a NPU build check if the model contains a NPU operator */
-    if (model.ContainsEthosUOperator()) {
-        printf_err("No driver support for Ethos-U operator found in the model.\n");
-        return;
-    }
-#endif /* ARM_NPU */
-
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 

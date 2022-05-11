@@ -85,14 +85,6 @@ void main_loop()
         return;
     }
 
-#if !defined(ARM_NPU)
-    /* If it is not a NPU build check if the model contains a NPU operator */
-    if (kwsModel.ContainsEthosUOperator()) {
-        printf_err("No driver support for Ethos-U operator found in the KWS model.\n");
-        return;
-    }
-#endif /* ARM_NPU */
-
     /* Initialise the asr model using the same allocator from KWS
      * to re-use the tensor arena. */
     if (!asrModel.Init(arm::app::tensorArena,
@@ -106,14 +98,6 @@ void main_loop()
         printf_err("Model's input or output dimension verification failed\n");
         return;
     }
-
-#if !defined(ARM_NPU)
-    /* If it is not a NPU build check if the model contains a NPU operator */
-    if (asrModel.ContainsEthosUOperator()) {
-        printf_err("No driver support for Ethos-U operator found in the ASR model.\n");
-        return;
-    }
-#endif /* ARM_NPU */
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
