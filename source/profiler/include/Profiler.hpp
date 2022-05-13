@@ -34,6 +34,7 @@ namespace app {
         double avrg;
         std::uint64_t min;
         std::uint64_t max;
+        std::uint32_t samplesNum = 0;
     };
 
     /** Profiling results with calculated statistics. */
@@ -48,11 +49,8 @@ namespace app {
         pmu_counters counters;
     };
 
-    /* A collection of profiling units. */
-    using ProfilingSeries = std::vector<arm::app::ProfilingUnit>;
-
-    /* A map for string identifiable profiling series. */
-    using ProfilingMap = std::map<std::string, ProfilingSeries>;
+    /* A map for string identifiable profiling statistics. */
+    using ProfilingStats = std::map<std::string, std::vector<Statistics>>;
 
     /**
      * @brief   A very simple profiler example using the platform timer
@@ -99,23 +97,24 @@ namespace app {
         void SetName(const char* str);
 
     private:
-        ProfilingMap    m_series;                /* Profiling series map. */
-        pmu_counters    m_tstampSt{};            /* Container for a current starting timestamp. */
-        pmu_counters    m_tstampEnd{};           /* Container for a current ending timestamp. */
-        bool            m_started = false;       /* Indicates profiler has been started. */
-        std::string     m_name;                  /* Name given to this profiler. */
+        ProfilingStats     m_profStats;             /* Profiling stats map. */
+        pmu_counters       m_tstampSt{};            /* Container for a current starting timestamp. */
+        pmu_counters       m_tstampEnd{};           /* Container for a current ending timestamp. */
+        bool               m_started = false;       /* Indicates profiler has been started. */
+        std::string        m_name;                  /* Name given to this profiler. */
+
 
         /**
-         * @brief       Appends the profiling unit computed by the "start" and
-         *              "end" timestamps to the profiling series identified by
-         *              the name provided.
+         * @brief       Updates the running average stats with those computed
+         *              by the "start" and "end" timestamps for the profiling
+         *              stats identified by the name provided.
          * @param[in]   start   Starting time-stamp.
          * @param[in]   end     Ending time-stamp.
-         * @param[in]   name    Name for the profiling unit series to be
-         *                      appended to.
+         * @param[in]   name    Name for the profiling running stats series to be
+         *                      updated.
          **/
-        void AddProfilingUnit(pmu_counters start, pmu_counters end,
-                              const std::string& name);
+        void UpdateRunningStats(pmu_counters start, pmu_counters end,
+                                const std::string& name);
     };
 
 } /* namespace app */

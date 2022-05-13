@@ -34,11 +34,18 @@ namespace app {
         if (name) {
             this->SetName(name);
         }
+
         if (!this->m_started) {
             hal_pmu_reset();
             this->m_tstampSt.initialised = false;
             hal_pmu_get_counters(&this->m_tstampSt);
             if (this->m_tstampSt.initialised) {
+                if (this->m_profStats.count(this->m_name) == 0) {
+                    this->m_profStats.insert(
+                            std::pair<std::string, std::vector<Statistics>>(
+                                    this->m_name, std::vector<Statistics>(this->m_tstampSt.num_counters))
+                                    );
+                }
                 this->m_started = true;
                 return true;
             }
@@ -54,7 +61,7 @@ namespace app {
             hal_pmu_get_counters(&this->m_tstampEnd);
             this->m_started = false;
             if (this->m_tstampEnd.initialised) {
-                this->AddProfilingUnit(
+                this->UpdateRunningStats(
                     this->m_tstampSt,
                     this->m_tstampEnd,
                     this->m_name);
@@ -78,46 +85,30 @@ namespace app {
     void Profiler::Reset()
     {
         this->m_started = false;
-        this->m_series.clear();
+        this->m_profStats.clear();
         memset(&this->m_tstampSt, 0, sizeof(this->m_tstampSt));
         memset(&this->m_tstampEnd, 0, sizeof(this->m_tstampEnd));
     }
 
     void calcProfilingStat(uint64_t currentValue,
-                           Statistics& data,
-                           uint32_t samples)
+                           Statistics& data)
     {
         data.total += currentValue;
         data.min = std::min(data.min, currentValue);
         data.max = std::max(data.max, currentValue);
-        data.avrg = ((double)data.total / samples);
+        data.avrg = (static_cast<double>(data.total) / data.samplesNum);
     }
 
     void Profiler::GetAllResultsAndReset(std::vector<ProfileResult>& results)
     {
-        for (const auto& item: this->m_series) {
+        for (const auto& item: this->m_profStats) {
             auto name = item.first;
-            ProfilingSeries series = item.second;
+            std::vector<Statistics> series = item.second;
             ProfileResult result{};
             result.name = item.first;
-            result.samplesNum = series.size();
 
-            std::vector<Statistics> stats(series[0].counters.num_counters);
-            for (size_t i = 0; i < stats.size(); ++i) {
-                stats[i].name = series[0].counters.counters[i].name;
-                stats[i].unit = series[0].counters.counters[i].unit;
-            }
-
-            for(ProfilingUnit& unit: series) {
-                for (size_t i = 0; i < stats.size(); ++i) {
-                    calcProfilingStat(
-                        unit.counters.counters[i].value,
-                        stats[i],
-                        result.samplesNum);
-                }
-            }
-
-            for (Statistics& stat : stats) {
+            for (Statistics& stat : series) {
+                result.samplesNum = stat.samplesNum;
                 result.data.emplace_back(stat);
             }
 
@@ -136,7 +127,7 @@ namespace app {
         std::vector<ProfileResult> results{};
         GetAllResultsAndReset(results);
         for(ProfileResult& result: results) {
-            if (result.data.size()) {
+            if (!result.data.empty()) {
                 info("Profile for %s:\n", result.name.c_str());
                 if (printFullStat) {
                     printStatisticsHeader(result.samplesNum);
@@ -160,15 +151,15 @@ namespace app {
         this->m_name = std::string(str);
     }
 
-    void Profiler::AddProfilingUnit(pmu_counters start, pmu_counters end,
-                                    const std::string& name)
+    void Profiler::UpdateRunningStats(pmu_counters start, pmu_counters end,
+                                      const std::string& name)
     {
         struct ProfilingUnit unit = {
             .counters = end
         };
 
         if (end.num_counters != start.num_counters ||
-                true != end.initialised || true != start.initialised) {
+            !end.initialised || !start.initialised) {
             printf_err("Invalid start or end counters\n");
             return;
         }
@@ -182,7 +173,22 @@ namespace app {
             }
         }
 
-        this->m_series[name].emplace_back(unit);
+        for (size_t i = 0; i < this->m_profStats[name].size(); ++i) {
+            this->m_profStats[name][i].name = unit.counters.counters[i].name;
+            this->m_profStats[name][i].unit = unit.counters.counters[i].unit;
+            ++this->m_profStats[name][i].samplesNum;
+            calcProfilingStat(
+                    unit.counters.counters[i].value,
+                    this->m_profStats[name][i]);
+        }
+
+        ProfileResult result{};
+        result.name = this->m_name;
+        result.samplesNum = this->m_profStats[name][0].samplesNum;
+
+        for (Statistics& stat : this->m_profStats[name]) {
+            result.data.emplace_back(stat);
+        }
     }
 
 } /* namespace app */
