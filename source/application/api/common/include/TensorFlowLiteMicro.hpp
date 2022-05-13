@@ -73,13 +73,6 @@ namespace app {
      */
     QuantParams GetTensorQuantParams(TfLiteTensor* tensor);
 
-    /**
-     * @brief   String logging functionality expected to be defined
-     *          by TensorFlow Lite Micro's error reporter.
-     * @param[in]   s   Pointer to the string.
-     */
-    extern "C" void DebugLog(const char* s);
-
 } /* namespace app */
 } /* namespace arm */
 
@@ -87,5 +80,12 @@ namespace app {
  * @brief Prints the tensor flow version in use to stdout.
  */
 void PrintTensorFlowVersion();
+
+/**
+ * @brief   String logging functionality expected to be defined
+ *          by TensorFlow Lite Micro's error reporter.
+ * @param[in]   s   Pointer to the string.
+ */
+extern "C" void DebugLog(const char* s) __attribute__((__weak__));
 
 #endif /* TENSORFLOW_LITE_MICRO_LOCAL_HPP */

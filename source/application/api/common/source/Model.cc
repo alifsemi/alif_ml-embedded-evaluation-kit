@@ -37,7 +37,7 @@ arm::app::Model::Model() :
 
 bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
                            uint32_t tensorArenaSize,
-                           uint8_t* nnModelAddr,
+                           const uint8_t* nnModelAddr,
                            uint32_t nnModelSize,
                            tflite::MicroAllocator* allocator)
 {

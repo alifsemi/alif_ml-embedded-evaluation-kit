@@ -35,7 +35,7 @@
 
 build:
   - name: "build-dir"
-    options: "cmake"
+    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
@@ -79,11 +79,16 @@ packs:
         target: arm_math
         attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Math", Cversion: "1.0.0" }
         description: "Math function helpers dependent on CMSIS-DSP."
+        conditions:
+          - require: { Cclass: "CMSIS", Cgroup: "DSP"}
 
       - name: common_api
         target: common_api
         attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: API", Cversion: "1.0.0"}
         description: "Common API"
+        dependencies: ["arm_math", "log"]
+        conditions:
+          - require: { Cclass: "Machine Learning", Cgroup: "TensorFlow" }
 
       - name: ad_api
         target: ad_api

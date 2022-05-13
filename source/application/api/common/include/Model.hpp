@@ -74,7 +74,7 @@ namespace app {
         **/
         bool Init(uint8_t* tensorArenaAddr,
                   uint32_t tensorArenaSize,
-                  uint8_t* nnModelAddr,
+                  const uint8_t* nnModelAddr,
                   uint32_t nnModelSize,
                   tflite::MicroAllocator* allocator = nullptr);
 
@@ -133,17 +133,17 @@ namespace app {
         size_t GetActivationBufferSize();
 
     private:
-        tflite::ErrorReporter*          m_pErrorReporter     = nullptr;     /* Pointer to the error reporter. */
-        const tflite::Model*            m_pModel             = nullptr;     /* Tflite model pointer. */
-        tflite::MicroInterpreter*       m_pInterpreter       = nullptr;     /* Tflite interpreter. */
-        tflite::MicroAllocator*         m_pAllocator         = nullptr;     /* Tflite micro allocator. */
-        bool                            m_inited             = false;       /* Indicates whether this object has been initialised. */
-        uint8_t*                        m_modelAddr          = nullptr;     /* Model address */
-        uint32_t                        m_modelSize          = 0;           /* Model size */
+        tflite::ErrorReporter* m_pErrorReporter{nullptr};  /* Pointer to the error reporter. */
+        const tflite::Model* m_pModel{nullptr};            /* Tflite model pointer. */
+        tflite::MicroInterpreter* m_pInterpreter{nullptr}; /* Tflite interpreter. */
+        tflite::MicroAllocator* m_pAllocator{nullptr};     /* Tflite micro allocator. */
+        bool m_inited{false}; /* Indicates whether this object has been initialised. */
+        const uint8_t* m_modelAddr{nullptr}; /* Model address */
+        uint32_t m_modelSize{0};             /* Model size */
 
-        std::vector<TfLiteTensor*>      m_input              = {};           /* Model's input tensor pointers. */
-        std::vector<TfLiteTensor*>      m_output             = {};           /* Model's output tensor pointers. */
-        TfLiteType                      m_type               = kTfLiteNoType;/* Model's data type. */
+        std::vector<TfLiteTensor*> m_input{};  /* Model's input tensor pointers. */
+        std::vector<TfLiteTensor*> m_output{}; /* Model's output tensor pointers. */
+        TfLiteType m_type{kTfLiteNoType};      /* Model's data type. */
     };
 
 } /* namespace app */

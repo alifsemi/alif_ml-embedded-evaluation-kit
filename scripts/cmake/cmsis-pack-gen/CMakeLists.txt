@@ -51,3 +51,12 @@ file(GLOB UC_API_LIST "${API_UC_PROJECT_DIR}/*")
 foreach(API ${UC_API_LIST})
     add_subdirectory(${API} ${CMAKE_BINARY_DIR}/${API})
 endforeach()
+
+# Any custom steps that are required for the CMSIS pack generation flow
+# must be declared here:
+if (CMSIS_PACK_GEN_FLOW)
+    # For CMSIS packs, we need CMSIS DSP definition.
+    # @TODO: Currently, this line is added multiple times to the include file. Uncomment when
+    # packgen is fixed.
+    # add_compile_definitions(arm_math PRIVATE ARM_MATH_DSP)
+endif()
