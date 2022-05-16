@@ -55,6 +55,7 @@ endforeach()
 # Any custom steps that are required for the CMSIS pack generation flow
 # must be declared here:
 if (CMSIS_PACK_GEN_FLOW)
+    target_include_directories(common_api PUBLIC ${TENSORFLOW_SRC_PATH})
     # For CMSIS packs, we need CMSIS DSP definition.
     # @TODO: Currently, this line is added multiple times to the include file. Uncomment when
     # packgen is fixed.

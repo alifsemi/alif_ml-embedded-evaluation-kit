@@ -120,7 +120,6 @@ add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/comm
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
-    ${SRC_PATH}/application/tensorflow-lite-micro/include
     ${SRC_PATH}/application/main/include)
 
 # Source files for application module:
