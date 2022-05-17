@@ -19,7 +19,7 @@
 #           MPS3 platform support library               #
 #########################################################
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 set(PLATFORM_DRIVERS_TARGET platform_drivers)
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for MPS3 FPGA/FVP targets"
@@ -41,8 +41,22 @@ if (TARGET_SUBSYSTEM STREQUAL sse-300)
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
-    set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
-    set(DYNAMIC_MODEL_SIZE   "0x02000000"   CACHE STRING "Size of the space reserved for the model")
+    if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+        set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
+        set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+    endif()
+endif()
+
+# Define target specific base addresses here (before adding the components)
+if (TARGET_SUBSYSTEM STREQUAL sse-310)
+    set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
+    set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
+    set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
+    set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
+    set(ETHOS_U_BASE_ADDR    "0x50004000"   CACHE STRING "Ethos-U NPU base address")
+    set(ETHOS_U_IRQN         "16"           CACHE STRING "Ethos-U55 Interrupt")
+    set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
+    set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
         set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
@@ -50,12 +64,16 @@ if (TARGET_SUBSYSTEM STREQUAL sse-300)
     endif()
 endif()
 
+set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
+set(DYNAMIC_MODEL_SIZE   "0x02000000"   CACHE STRING "Size of the space reserved for the model")
+
 math(EXPR IFM_BASE      "${DYNAMIC_MODEL_BASE} + ${DYNAMIC_MODEL_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 set(DYNAMIC_IFM_BASE    "${IFM_BASE}" CACHE STRING "Base address for IFMs to be loaded")
 set(DYNAMIC_IFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the IFM")
 math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
+
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
@@ -142,4 +160,5 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${PLATFORM_DRIVERS_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "CMAKE_SYSTEM_ARCH                      : " ${CMAKE_SYSTEM_ARCH})
 message(STATUS "*******************************************************")

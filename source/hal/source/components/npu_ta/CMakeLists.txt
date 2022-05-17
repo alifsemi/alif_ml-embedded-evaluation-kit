@@ -24,7 +24,7 @@
 # sweeps on the Arm Ethos-U NPUs. The wrapper library here provides an
 # easy way to add initialisation of the timing adapter block.
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 set(ETHOS_U_NPU_TA_COMPONENT ethos_u_ta)
 project(${ETHOS_U_NPU_TA_COMPONENT}
     DESCRIPTION     "Ethos-U NPU timing adapter initialization library"

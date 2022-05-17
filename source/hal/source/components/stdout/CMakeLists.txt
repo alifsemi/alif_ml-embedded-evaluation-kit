@@ -22,7 +22,7 @@
 # and PL011 UART drivers with retarget functions.       #
 #########################################################
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 
 project(stdout
     DESCRIPTION     "Standard output and err redirection over UART"

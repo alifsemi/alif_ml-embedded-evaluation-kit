@@ -136,7 +136,17 @@ static int verify_platform(void)
     info("CPU ID: 0x%08" PRIx32 "\n", id);
 
     if(EXTRACT_BITS(id, 15, 8) == 0xD2) {
-        if (EXTRACT_BITS(id, 7, 4) == 2) {
+        if (EXTRACT_BITS(id, 7, 4) == 3) {
+            info ("CPU: Cortex-M85 r%dp%d\n\n",
+                  EXTRACT_BITS(id, 23, 20),EXTRACT_BITS(id, 3, 0));
+            /* @TODO: Remove CPU_CORTEX_M55 from here once CMake min version is > 3.21.0 or when
+             * toolchains officially support Cortex-M85. Currently, for CMake versions older than
+             * this, Cortex-M85 is built using Cortex-M55 flags. */
+#if defined (CPU_CORTEX_M55) || defined (ARMv81MML_DSP_DP_MVE_FP) || defined(CPU_CORTEX_M85)
+            /* CPU ID should be "0x_41_0f_d2_30" for Cortex-M85 */
+            return 0;
+#endif /* (CPU_CORTEX_M55) || (ARMv81MML_DSP_DP_MVE_FP) || (CPU_CORTEX_M85) */
+        } else if (EXTRACT_BITS(id, 7, 4) == 2) {
             info ("CPU: Cortex-M55 r%dp%d\n\n",
                 EXTRACT_BITS(id, 23, 20),EXTRACT_BITS(id, 3, 0));
 #if defined (CPU_CORTEX_M55)

@@ -15,6 +15,7 @@
       - [Using Arm Compiler](./building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
+    - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./building.md#building-the-configured-project)
@@ -62,14 +63,14 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
 - If you are using the proprietary Arm Compiler, ensure that the compiler license has been correctly configured.
 
-- CMake version 3.15.6 or above is installed and available on the path. Test CMake by running:
+- CMake version 3.16.3 or above is installed and available on the path. Test CMake by running:
 
     ```commandline
     cmake --version
     ```
 
     ```log
-    cmake version 3.16.2
+    cmake version 3.16.3
     ```
 
 > **Note:** How to add cmake to the path:
@@ -159,6 +160,7 @@ The build parameters are:
 - `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target. For
   both, the MPS3 FVP and the MPS3 FPGA, this must be left to the default value of SSE-300:
   - `sse-300` (default - [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300))
+  - `sse-310` (The FVP is available via Arm Virtual Hardware (AVH) hosted on AWS)
 
 - `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the default toolchain file used for the
   build. All the valid toolchain files are located in the scripts directory. For example, see:
@@ -470,6 +472,24 @@ cmake .. \
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
 > the CMake command.
+
+
+### Configuring the build for MPS3 SSE-310
+
+On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-310`,
+using the default toolchain file for the target as `bare-metal-gcc` and the default *Ethos-U55* timing adapter settings.
+This is equivalent to running:
+
+```commandline
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DTARGET_PLATFORM=mps3 \
+    -DTARGET_SUBSYSTEM=sse-310 \
+    -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake
+```
+
+> **Note:** Only *Ethos-U55* timing adapter settings can be used.
+> *Ethos-U65* is not supported for this subsystem.
 
 ### Configuring native unit-test build
 

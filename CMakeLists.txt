@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 include(ExternalProject)
 
 # Build in release mode by default

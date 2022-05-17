@@ -19,7 +19,7 @@
 #         Ethos-U NPU initialization library            #
 #########################################################
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 set(ETHOS_U_NPU_COMPONENT ethos_u_npu)
 project(${ETHOS_U_NPU_COMPONENT}
     DESCRIPTION     "Ethos-U NPU initialization library"

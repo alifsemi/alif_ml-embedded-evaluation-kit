@@ -30,6 +30,8 @@ static int show_title(void)
     /* LCD title string */
 #if defined(CPU_CORTEX_M55)
     const char* cpu_name = "Arm Cortex-M55";
+#elif defined (ARMv81MML_DSP_DP_MVE_FP)
+    const char* cpu_name = "ARMv8.1-M CPU";
 #else /* defined(CPU_CORTEX_M55) */
     const char* cpu_name = "Arm CPU";
 #endif /* defined(CPU_CORTEX_M55) */

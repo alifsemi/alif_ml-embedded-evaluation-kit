@@ -250,6 +250,8 @@ NPUConfig = namedtuple(
 )
 
 # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
+# The internal SRAM size for Corstone-310 implementation on MPS3 specified by AN555
+# is 4MB, but we are content with the 2MB specified below.
 mps3_max_sram_sz = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
 
 

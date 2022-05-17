@@ -43,7 +43,7 @@ USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: 
     mps3
     STRING)
 
-USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or none"
+USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300, sse-310 or none"
     sse-300
     STRING)
 

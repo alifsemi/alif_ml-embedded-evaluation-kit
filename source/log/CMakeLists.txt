@@ -18,7 +18,7 @@
 #######################################################
 # Header-only logging definitions as an interface lib.#
 #######################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 
 set(BSP_LOGGING_TARGET log)
 
@@ -40,4 +40,5 @@ target_include_directories(${BSP_LOGGING_TARGET} INTERFACE include)
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${BSP_LOGGING_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "CMAKE_SYSTEM_ARCH                      : " ${CMAKE_SYSTEM_ARCH})
 message(STATUS "*******************************************************")

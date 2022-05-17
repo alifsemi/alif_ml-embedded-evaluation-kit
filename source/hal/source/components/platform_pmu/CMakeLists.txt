@@ -18,7 +18,7 @@
 #####################################################################
 #  Interface library for platform performance monitoring unit       #
 #####################################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.16.3)
 
 project(platform_pmu
     DESCRIPTION     "Header/interface for platform PMU"

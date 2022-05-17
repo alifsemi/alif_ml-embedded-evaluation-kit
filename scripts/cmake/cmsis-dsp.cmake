@@ -69,7 +69,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 # 5. Add any custom/conditional flags for compilation or linkage
-if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL cortex-m55)
+if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "cortex-m55" OR "${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")
     target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC
         ARM_MATH_MVEI
         ARM_MATH_DSP

@@ -35,7 +35,10 @@ You can find more information about Arm Virtual Hardware [here](https://arm-soft
 
 Once you have access to the AWS instance, we recommend starting from the
 [quick start guide](../quick_start.md#Quick-start-example-ML-application) in order to get familiar
-with the ml-embedded-evaluation-kit. Note that on the AWS instance, the FVP is available under `/opt/FVP_Corstone_SSE-300`.
+with the ml-embedded-evaluation-kit. Note that on the AWS instance, the FVPs are available under:
+ - `/opt/VHT/VHT_Corstone_SSE-300_Ethos-U55`
+ - `/opt/VHT/VHT_Corstone_SSE-300_Ethos-U65`
+ - `/opt/VHT/VHT_Corstone_SSE-310`
 
 In order to view the FVP window when launching on the AWS instance a VNC is required.
 See relevant section [here](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-linux-2-install-gui/).

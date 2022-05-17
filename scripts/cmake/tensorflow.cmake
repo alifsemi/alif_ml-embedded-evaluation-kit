@@ -50,7 +50,16 @@ if (TARGET_PLATFORM STREQUAL native)
     set(TENSORFLOW_LITE_MICRO_TARGET_ARCH x86_64)
 else()
     set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
-    set(TENSORFLOW_LITE_MICRO_TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR}${CPU_FEATURES})
+
+    if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")
+        # TensorFlow's generic makefile doesn't currently have a flow for Cortex-M85.
+        # We build for Arm Cortex-M55 instead.
+        # @TODO: check with latest TensorFlow package.
+        set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "cortex-m55")
+    else()
+        set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+
     if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
         set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
