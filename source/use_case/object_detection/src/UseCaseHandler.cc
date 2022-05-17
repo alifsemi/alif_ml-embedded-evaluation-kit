@@ -27,9 +27,6 @@
 
 namespace arm {
 namespace app {
-    namespace object_detection {
-        extern const int channelsImageDisplayed;
-    } /* namespace object_detection */
 
     /**
      * @brief           Presents inference results along using the data presentation
@@ -102,8 +99,12 @@ namespace app {
         DetectorPreProcess preProcess = DetectorPreProcess(inputTensor, true, model.IsDataSigned());
 
         std::vector<object_detection::DetectionResult> results;
+        const object_detection::PostProcessParams postProcessParams {
+            inputImgRows, inputImgCols, object_detection::originalImageSize,
+            object_detection::anchor1, object_detection::anchor2
+        };
         DetectorPostProcess postProcess = DetectorPostProcess(outputTensor0, outputTensor1,
-                results, inputImgRows, inputImgCols);
+                results, postProcessParams);
         do {
             /* Ensure there are no results leftover from previous inference when running all. */
             results.clear();

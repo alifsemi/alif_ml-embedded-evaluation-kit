@@ -104,7 +104,11 @@ void TestInferenceDetectionResults(int imageIdx, arm::app::Model& model, T toler
         REQUIRE(tflite::GetTensorData<T>(output_arr[i]));
     }
 
-    arm::app::DetectorPostProcess postp{output_arr[0], output_arr[1], results, nRows, nCols};
+    const arm::app::object_detection::PostProcessParams postProcessParams {
+            nRows, nCols, arm::app::object_detection::originalImageSize,
+            arm::app::object_detection::anchor1, arm::app::object_detection::anchor2
+    };
+    arm::app::DetectorPostProcess postp{output_arr[0], output_arr[1], results, postProcessParams};
     postp.DoPostProcess();
 
     std::vector<std::vector<arm::app::object_detection::DetectionResult>> expected_results;
