@@ -24,31 +24,31 @@ namespace math {
 
     float MathUtils::CosineF32(float radians)
     {
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         return arm_cos_f32(radians);
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         return cosf(radians);
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     float MathUtils::SineF32(float radians)
     {
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         return arm_sin_f32(radians);
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         return sinf(radians);
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     float MathUtils::SqrtF32(float input)
     {
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         float output = 0.f;
         arm_sqrt_f32(input, &output);
         return output;
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         return sqrtf(input);
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     float MathUtils::MeanF32(float* ptrSrc, const uint32_t srcLen)
@@ -57,14 +57,14 @@ namespace math {
             return 0.f;
         }
 
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         float result = 0.f;
         arm_mean_f32(ptrSrc, srcLen, &result);
         return result;
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         float acc = std::accumulate(ptrSrc, ptrSrc + srcLen, 0.0);
         return acc/srcLen;
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     float MathUtils::StdDevF32(float* ptrSrc, const uint32_t srcLen,
@@ -73,7 +73,7 @@ namespace math {
         if (!srcLen) {
             return 0.f;
         }
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         /**
          * Note Standard deviation calculation can be off
          * by > 0.01 but less than < 0.1, according to
@@ -83,7 +83,7 @@ namespace math {
         float stdDev = 0;
         arm_std_f32(ptrSrc, srcLen, &stdDev);
         return stdDev;
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         auto VarianceFunction = [=](float acc, const float value) {
             return acc + (((value - mean) * (value - mean))/ srcLen);
         };
@@ -92,7 +92,7 @@ namespace math {
                                     VarianceFunction);
 
         return sqrtf(acc);
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     void MathUtils::FftInitF32(const uint16_t fftLen,
@@ -104,7 +104,7 @@ namespace math {
         fftInstance.m_optimisedOptionAvailable = false;
         fftInstance.m_type = type;
 
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         arm_status status = ARM_MATH_ARGUMENT_ERROR;
         switch (fftInstance.m_type) {
         case FftType::real:
@@ -125,7 +125,7 @@ namespace math {
         } else {
             fftInstance.m_optimisedOptionAvailable = true;
         }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
 
         debug("Optimised FFT will be used: %s.\n", fftInstance.m_optimisedOptionAvailable? "yes": "no");
 
@@ -203,12 +203,12 @@ namespace math {
         switch (fftInstance.m_type) {
         case FftType::real:
 
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
             if (fftInstance.m_optimisedOptionAvailable) {
                 arm_rfft_fast_f32(&fftInstance.m_instanceReal, input.data(), fftOutput.data(), 0);
                 return;
             }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
             FftRealF32(input, fftOutput);
             return;
 
@@ -217,13 +217,13 @@ namespace math {
                 printf_err("Complex FFT instance should have input size >= (FFT len x 2)");
                 return;
             }
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
             if (fftInstance.m_optimisedOptionAvailable) {
                 fftOutput = input; /* Complex function works in-place */
                 arm_cfft_f32(&fftInstance.m_instanceComplex, fftOutput.data(), 0, 1);
                 return;
             }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
             FftComplexF32(input, fftOutput);
             return;
 
@@ -236,15 +236,15 @@ namespace math {
     void MathUtils::VecLogarithmF32(std::vector <float>& input,
                                     std::vector <float>& output)
     {
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         arm_vlog_f32(input.data(), output.data(),
                      output.size());
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         for (auto in = input.begin(), out = output.begin();
              in != input.end() && out != output.end(); ++in, ++out) {
             *out = logf(*in);
         }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
     }
 
     float MathUtils::DotProductF32(float* srcPtrA, float* srcPtrB,
@@ -252,13 +252,13 @@ namespace math {
     {
         float output = 0.f;
 
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         arm_dot_prod_f32(srcPtrA, srcPtrB, srcLen, &output);
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         for (uint32_t i = 0; i < srcLen; ++i) {
             output += *srcPtrA++ * *srcPtrB++;
         }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
 
         return output;
     }
@@ -273,15 +273,15 @@ namespace math {
             return false;
         }
 
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         arm_cmplx_mag_squared_f32(ptrSrc, ptrDst, srcLen/2);
-#else /* ARM_MATH_DSP */
+#else  /* __ARM_FEATURE_DSP */
         for (uint32_t j = 0; j < srcLen/2; ++j) {
             const float real = *ptrSrc++;
             const float im = *ptrSrc++;
             *ptrDst++ = real*real + im*im;
         }
-#endif /* ARM_MATH_DSP */
+#endif /* __ARM_FEATURE_DSP */
         return true;
     }
 

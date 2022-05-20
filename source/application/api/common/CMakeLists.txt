@@ -20,7 +20,7 @@
 #  NOTE: this library should not depend on HAL.         #
 #########################################################
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(COMMON_UC_UTILS_TARGET common_api)
 project(${COMMON_UC_UTILS_TARGET}

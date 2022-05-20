@@ -17,7 +17,7 @@
 #########################################################
 #             ANOMALY DETECTION API library             #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(AD_API_TARGET ad_api)
 project(${AD_API_TARGET}

@@ -17,7 +17,7 @@
 #########################################################
 #            NOISE REDUCTION API library                #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(NOISE_REDUCTION_API_TARGET noise_reduction_api)
 project(${NOISE_REDUCTION_API_TARGET}

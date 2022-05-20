@@ -19,7 +19,7 @@
 # LCD library                                           #
 #########################################################
 
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(lcd_component
     DESCRIPTION     "LCD support library"

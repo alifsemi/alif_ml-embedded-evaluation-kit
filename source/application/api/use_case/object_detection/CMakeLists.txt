@@ -17,7 +17,7 @@
 #########################################################
 #             OBJECT DETECTION API library              #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(OBJECT_DETECTION_API_TARGET object_detection_api)
 project(${OBJECT_DETECTION_API_TARGET}

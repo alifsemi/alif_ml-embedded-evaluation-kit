@@ -17,7 +17,7 @@
 #########################################################
 #       AUTOMATIC SPEECH RECOGNITION API library        #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(ASR_API_TARGET asr_api)
 project(${ASR_API_TARGET}

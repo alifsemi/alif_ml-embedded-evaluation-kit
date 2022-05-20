@@ -19,7 +19,7 @@
 #       A generic (simple) platform support library     #
 #########################################################
 
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.21.0)
 set(PLATFORM_DRIVERS_TARGET platform_drivers)
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for a generic target"
@@ -124,5 +124,4 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${PLATFORM_DRIVERS_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "CMAKE_SYSTEM_ARCH                      : " ${CMAKE_SYSTEM_ARCH})
 message(STATUS "*******************************************************")

@@ -349,8 +349,7 @@ def set_up_resources(
     additional_npu_config_names: tuple = (),
     arena_cache_size: int = 0,
     check_clean_folder: bool = False,
-    additional_requirements_file: str = "",
-):
+    additional_requirements_file: str = "") -> (Path, Path):
     """
     Helpers function that retrieve the output from a command.
 
@@ -367,6 +366,14 @@ def set_up_resources(
     additional_requirements_file (str): Path to a requirements.txt file if
                                         additional packages need to be
                                         installed.
+
+    Returns
+    -------
+
+    Tuple of pair of Paths: (download_directory_path,  virtual_env_path)
+
+    download_directory_path: Root of the directory where the resources have been downloaded to.
+    virtual_env_path: Path to the root of virtual environment.
     """
     # Paths.
     current_file_dir = Path(__file__).parent.resolve()
@@ -420,13 +427,15 @@ def set_up_resources(
             raise
 
     # 1.2 Does the virtual environment exist?
-    env_python = str(download_dir / "env" / "bin" / "python3")
-    env_activate = str(download_dir / "env" / "bin" / "activate")
+    env_dirname = "env"
+    env_path = download_dir / env_dirname
+    env_python = str(env_path / "bin" / "python3")
+    env_activate = str(env_path / "bin" / "activate")
 
-    if not (download_dir / "env").is_dir():
+    if not env_path.is_dir():
         os.chdir(download_dir)
         # Create the virtual environment.
-        command = "python3 -m venv env"
+        command = f"python3 -m venv {env_dirname}"
         call_command(command)
         commands = ["pip install --upgrade pip", "pip install --upgrade setuptools"]
         for c in commands:
@@ -602,6 +611,8 @@ def set_up_resources(
 
     with open(metadata_file_path, "w") as metadata_file:
         json.dump(metadata_dict, metadata_file, indent=4)
+
+    return download_dir, env_path
 
 
 if __name__ == "__main__":

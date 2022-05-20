@@ -17,7 +17,7 @@
 #########################################################
 #            KEYWORD SPOTTING API library               #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(KWS_API_TARGET kws_api)
 project(${KWS_API_TARGET}

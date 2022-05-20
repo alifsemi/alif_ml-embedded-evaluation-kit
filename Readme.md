@@ -1,27 +1,31 @@
 
-***NOTE: The default branch for this repository is now the main branch, the master branch is deprecated, and will be removed after 22.05 release. Please ensure any changes are added to the main branch.***
-
 # Arm® ML embedded evaluation kit
 
 This repository is for building and deploying Machine Learning (ML) applications targeted for Arm® Cortex®-M and Arm®
 Ethos™-U NPU.
 To run evaluations using this software, we suggest using:
 
-- an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3) that runs a combination of
-the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
-[Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
-- a [Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+- an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3) with
+  [Arm® Corstone-300](https://developer.arm.com/Processors/Corstone-300) or [Arm® Corstone-310](https://developer.arm.com/Processors/Corstone-310) implementations.
+  - Arm® Corstone-300 runs a combination of
+  the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
+  [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
+  - Arm® Corstone-310 runs a combination of
+      the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85) and the
+      [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
+
+- a [Arm® Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
   that offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination of
   the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55). You can also take advantage of
-  [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) and [run the Fixed Virtual Platform
-  in the cloud](./docs/sections/arm_virtual_hardware.md).
+  [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) (AVH) and [run the Fixed Virtual Platform
+  in the cloud](./docs/sections/arm_virtual_hardware.md). An FVP implementation of Arm® Corstone-310 is also available via AVH.
 
 ## Overview of the evaluation kit
 
-The purpose of this evaluation kit is to allow users to develop software and test the performance of the Ethos-U NPU and
-Cortex-M55 CPU. The Ethos-U NPU is a new class of machine learning (ML) processor, specifically designed to accelerate
-computation for ML workloads in constrained embedded and IoT devices. The product is optimized to execute
+The purpose of this evaluation kit is to allow users to develop software and test the performance of the Arm® Ethos-U NPU and
+Arm® Cortex-M CPUs for ML workloads. The Ethos-U NPU is a new class of machine learning (ML) processor, specifically designed
+to accelerate ML computation in constrained embedded and IoT devices. The product is optimized to execute
 mathematical operations efficiently that are commonly used in ML algorithms, such as convolutions or activation functions.
 
 ## ML use cases
@@ -116,7 +120,7 @@ Contributions are only accepted under the following conditions:
 
 - The contribution have certified origin and give us your permission. To manage this process we use
   [Developer Certificate of Origin (DCO) V1.1](https://developercertificate.org/).
-  To indicate that contributors agree to the the terms of the DCO, it's necessary "sign off" the
+  To indicate that contributors agree to the terms of the DCO, it's necessary "sign off" the
   contribution by adding a line with name and e-mail address to every git commit message:
 
   ```log
@@ -169,7 +173,7 @@ see:
 ### Code Reviews
 
 Contributions must go through code review. Code reviews are performed through the
-[mlplatform.org Gerrit server](https://review.mlplatform.org). Contributors need to signup to this
+[mlplatform.org Gerrit server](https://review.mlplatform.org). Contributors need to sign up to this
 Gerrit server with their GitHub account credentials.
 In order to be merged a patch needs to:
 

@@ -22,7 +22,7 @@
 # here along with their dependencies.                   #
 #########################################################
 
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(ml-embedded-eval-kit-api
         DESCRIPTION     "Platform agnostic API for all examples.")

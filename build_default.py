@@ -86,7 +86,7 @@ def run(
     # 2. Download models if specified
     if download_resources is True:
         logging.info("Downloading resources.")
-        set_up_resources(
+        (download_dir, env_path) = set_up_resources(
             run_vela_on_models=run_vela_on_models,
             additional_npu_config_names=[npu_config_name],
             additional_requirements_file=current_file_dir / "scripts" / "py" / "requirements.txt"
@@ -114,26 +114,25 @@ def run(
 
     logpipe = PipeLogging(logging.INFO)
 
-    os.chdir(build_dir)
     cmake_toolchain_file = current_file_dir / "scripts" / "cmake" / "toolchains" / toolchain_file_name
-
+    cmake_path = env_path / "bin" / "cmake"
     cmake_command = (
-        f"cmake .. -DTARGET_PLATFORM={target_platform}"
+        f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
         + f" -DTARGET_SUBSYSTEM={target_subsystem}"
         + f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
         + f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
         + f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
     )
 
-    logging.info(cmake_command)
+    logging.info(f"\n\n\n{cmake_command}\n\n\n")
     state = subprocess.run(
         cmake_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
     )
 
-    make_command = f"make -j{make_jobs}"
+    make_command = f"{cmake_path} --build {build_dir} -j{make_jobs}"
     if make_verbose:
-        make_command += " VERBOSE=1"
-    logging.info(make_command)
+        make_command += "--verbose"
+    logging.info(f"\n\n\n{make_command}\n\n\n")
     state = subprocess.run(
         make_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
     )

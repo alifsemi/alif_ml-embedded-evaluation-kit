@@ -18,12 +18,12 @@
 #define PLATFORM_MATH_HPP
 
 /* See if ARM DSP functions can be used. */
-#if defined(ARM_MATH_DSP)
-    #include "arm_math.h"
-    #define M_PI    (PI)
-#else
-    #include <cmath>
-#endif
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
+#include "arm_math.h"
+#define M_PI (PI)
+#else /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
+#include <cmath>
+#endif /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
 
 #include <vector>
 #include <cstdint>
@@ -39,10 +39,10 @@ namespace math {
     };
 
     struct FftInstance {
-#if ARM_MATH_DSP
+#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
         arm_rfft_fast_instance_f32  m_instanceReal;
         arm_cfft_instance_f32       m_instanceComplex;
-#endif
+#endif /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
         uint16_t                    m_fftLen{0};
         FftType                     m_type{FftType::real};
         bool                        m_optimisedOptionAvailable{false};

@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.21.0)
 include(ExternalProject)
 
 # Build in release mode by default
@@ -83,7 +83,7 @@ if(POLICY CMP0123)
 endif()
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     22.02.0
+        VERSION     22.05.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 
@@ -227,7 +227,8 @@ foreach(use_case ${USE_CASES})
         arm_math
         hal
         profiler
-        tensorflow-lite-micro)
+        tensorflow-lite-micro
+        common_api)
 
     # If an API exists for this use case, include the projects here and add to
     # the library list.

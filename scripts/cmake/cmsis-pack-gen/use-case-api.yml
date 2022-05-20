@@ -23,7 +23,7 @@
 #
 # Ideal usage: from the root of the repository
 #
-# ml-embedded-eval-kit $ packgen -s ./source/                   \ # Source dir
+# ml-embedded-eval-kit $ packgen -s ./                          \ # Source dir (run this from repo root)
 #           -v ./scripts/cmake/cmsis-pack-gen/use-case-api.yml  \ # This file's path
 #           -o <path-to>/ml-embedded-eval-kit-pack              \ # Where to generate the ouput
 #           -i <path-to>/tensorflow.tensorflow-lite-micro.pdsc  \ # Tensorflow packs' PDSC file
@@ -41,18 +41,18 @@ packs:
   - name: "ml-embedded-eval-kit-uc-api"
     description: "Sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
-    license: ""
+    license: "LICENSE_APACHE_2.0.txt"
     url: "https://review.mlplatform.org/admin/repos/ml/ethos-u/ml-embedded-evaluation-kit/"
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "0.4.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.02"}
+        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.8.0"}
 
     releases:
       - version: "22.05.0"
-        date: "2022-05-04"
-        description: "Experimental package"
+        date: "2022-05-23"
+        description: "Beta release package"
 
 #    @TODO: Add API header names and descriptions here (see placeholder below).
 #    apis:

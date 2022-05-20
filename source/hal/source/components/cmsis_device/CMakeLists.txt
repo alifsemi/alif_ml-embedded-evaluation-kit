@@ -18,7 +18,7 @@
 #########################################################
 # Generic CMSIS Start up library for Cortex-M targets   #
 #########################################################
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(CMSIS_DEVICE_TARGET cmsis_device)
 set(CPU_HEADER_TARGET rte_components)
@@ -86,5 +86,4 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${CMSIS_DEVICE_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "CMAKE_SYSTEM_ARCH                      : " ${CMAKE_SYSTEM_ARCH})
 message(STATUS "*******************************************************")

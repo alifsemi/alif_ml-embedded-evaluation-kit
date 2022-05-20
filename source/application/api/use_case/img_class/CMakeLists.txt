@@ -17,7 +17,7 @@
 #########################################################
 #                IMG CLASS API library                  #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(IMG_CLASS_API_TARGET img_class_api)
 project(${IMG_CLASS_API_TARGET}

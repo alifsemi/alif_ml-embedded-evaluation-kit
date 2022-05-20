@@ -44,6 +44,8 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     Component: ARM Compiler 6.16
     ```
 
+> **Note:** To compile for Arm® Cortex™-M85 CPU (default CPU for Arm® Corstone-310), 6.18 is the minimum version required.
+
   Alternatively, use:
 
     ```commandline
@@ -63,19 +65,24 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
 - If you are using the proprietary Arm Compiler, ensure that the compiler license has been correctly configured.
 
-- CMake version 3.16.3 or above is installed and available on the path. Test CMake by running:
+- CMake version 3.21.0 or above is installed and available on the path. Test CMake by running:
 
     ```commandline
     cmake --version
     ```
 
     ```log
-    cmake version 3.16.3
-    ```
+    cmake version 3.22.4
+    ``` 
 
-> **Note:** How to add cmake to the path:
+> **Note:** Required version of CMake is also installed in the Python3 virtual environment created by
+> `setup_default_resources.py` script. See [Fetching resource files](./building.md#fetching-resource-files) section.
 >
-> `export PATH=/path/to/cmake/bin:$PATH`
+> To add CMake to the PATH on Ubuntu for example, use: `export PATH=/absolute/path/for/cmake/:${PATH}`
+> Once `setup_default_resources.py` has been executed, activating the virtual environment will enable you
+> to use that CMake. Alternatively, from the root of the repository, you could use:
+>
+> `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
 - Python 3.8 or above is installed. Check your current installed version of Python by running:
 
@@ -319,6 +326,8 @@ Arm® *Ethos™-U65* NPU.
 
 > **Note:** This script requires Python version 3.8 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
+>
+> **Note:** This script also installs required version of CMake into the virtual environment, which can be used by activating it.
 
 Additional command line arguments supported by this script are:
 

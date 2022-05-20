@@ -68,16 +68,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif ()
 
-# 5. Add any custom/conditional flags for compilation or linkage
-if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "cortex-m55" OR "${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")
-    target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC
-        ARM_MATH_MVEI
-        ARM_MATH_DSP
-        ARM_MATH_LOOPUNROLL)
-elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL cortex-m33)
-    # Placeholder, if building with Cortex-M33
-endif()
-
+# 5. General compile definitions
+target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC ARM_MATH_LOOPUNROLL)
 
 # 6. Provide the library path for the top level CMake to use:
 set(CMSIS_DSP_LIB   "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${CMSIS_DSP_TARGET}.a")

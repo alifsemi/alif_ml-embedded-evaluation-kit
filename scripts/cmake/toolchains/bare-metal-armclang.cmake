@@ -25,40 +25,46 @@ set(CMAKE_ASM_COMPILER_AR           armar)
 set(CMAKE_CROSSCOMPILING            true)
 set(CMAKE_SYSTEM_NAME               Generic)
 
-set(MIN_ARM_CLANG_VERSION           6.16)
-
 # Skip compiler test execution
 set(CMAKE_C_COMPILER_WORKS          1)
 set(CMAKE_CXX_COMPILER_WORKS        1)
 
 if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR AND NOT DEFINED CMAKE_SYSTEM_ARCH)
-    set(CMAKE_SYSTEM_PROCESSOR      cortex-m55)
+    set(CMAKE_SYSTEM_PROCESSOR      cortex-m55 CACHE STRING "Cortex-M CPU to use")
 endif()
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     # Flags for cortex-m55
+    set(MIN_ARM_CLANG_VERSION       6.16)
     set(CPU_ID                      M55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
-    set(FLOAT_ABI                   hard)
-    set(ARM_MATH_DSP                1)
-    set(ARM_MATH_LOOPUNROLL         1)
     set(CPU_HEADER_FILE             "${ARM_CPU}.h")
     set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
     set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
-elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85 OR CMAKE_SYSTEM_ARCH STREQUAL armv8.1-m.main)
-    # Flags for Cortex-M85
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85)
+    # Flags for cortex-m85
+    set(MIN_ARM_CLANG_VERSION       6.18)
+    set(CPU_ID                      M85)
+    set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
+    set(ARM_CPU                     "ARMC${CPU_ID}")
+    set(CPU_HEADER_FILE             "${ARM_CPU}.h")
+    set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
+    set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
+elseif (CMAKE_SYSTEM_ARCH STREQUAL armv8.1-m.main)
+    # Flags for generic armv8.1-m profile
+    set(MIN_ARM_CLANG_VERSION       6.16)
     set(CPU_ID                      ARMv81MML_DSP_DP_MVE_FP)
     set(ARM_CPU                     "ARMv81MML")
     set(CPU_COMPILE_DEF             ${CPU_ID})
-    set(FLOAT_ABI                   hard)
-    set(ARM_MATH_DSP                1)
-    set(ARM_MATH_LOOPUNROLL         1)
 
     # @TODO: Revise once we have the CPU file in CMSIS and CPU flags
     # are supported by toolchains.
     set(CPU_HEADER_FILE             "${CPU_ID}.h")
     set(CPU_COMPILE_OPTION          "-march=armv8.1-m.main+mve.fp+fp.dp")
+    set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
     set(CPU_LINK_OPT                "--cpu=8.1-M.Main.mve.fp")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m33)
     # Flags for cortex-m33 to go here
@@ -81,18 +87,16 @@ add_compile_options(
 # Arch compile options:
 add_compile_options(
     -mthumb
-    -mfloat-abi=${FLOAT_ABI}
     --target=arm-arm-non-eabi
     -mlittle-endian
     -MD
-    ${CPU_COMPILE_OPTION})
+    ${CPU_COMPILE_OPTION}
+    ${FLOAT_ABI_COMPILE_OPTION})
 
 # Compile definitions:
 add_compile_definitions(
     CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
-    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
-    $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
-    $<$<BOOL:${ARM_MATH_LOOPUNROLL}>:ARM_MATH_LOOPUNROLL>)
+    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>)
 
 # Link options:
 add_link_options(${CPU_LINK_OPT})

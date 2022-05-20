@@ -17,7 +17,7 @@
 #########################################################
 #              INFERENCE RUNNER API library             #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(INFERENCE_RUNNER_API_TARGET inference_runner_api)
 project(${INFERENCE_RUNNER_API_TARGET}

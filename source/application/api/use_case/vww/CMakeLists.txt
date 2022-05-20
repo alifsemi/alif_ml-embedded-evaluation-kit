@@ -17,7 +17,7 @@
 #########################################################
 #             VISUAL WAKE WORD API library              #
 #########################################################
-cmake_minimum_required(VERSION 3.15.6)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(VWW_API_TARGET vww_api)
 project(${VWW_API_TARGET}

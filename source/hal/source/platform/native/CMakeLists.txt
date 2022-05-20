@@ -19,7 +19,7 @@
 #    Native target platform support library             #
 #########################################################
 
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.21.0)
 
 set(PLATFORM_DRIVERS_TARGET platform_drivers)
 
@@ -73,5 +73,4 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${PLATFORM_DRIVERS_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "CMAKE_SYSTEM_ARCH                      : " ${CMAKE_SYSTEM_ARCH})
 message(STATUS "*******************************************************")
