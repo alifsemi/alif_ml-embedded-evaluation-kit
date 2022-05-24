@@ -31,7 +31,7 @@ To take advantage of Arm Virtual Hardware, you would need to have an AWS account
 Note that you can register to receive free AWS credits to use Arm Virtual Hardware from
 [here](https://www.arm.com/company/contact-us/virtual-hardware).
 
-You can find more information about Arm Virtual Hardware [here](https://arm-software.github.io/VHT/main/overview/html/index.html).
+You can find more information about Arm Virtual Hardware [here](https://arm-software.github.io/AVH/main/overview/html/index.html).
 
 Once you have access to the AWS instance, we recommend starting from the
 [quick start guide](../quick_start.md#Quick-start-example-ML-application) in order to get familiar
