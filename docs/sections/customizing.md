@@ -10,7 +10,7 @@
   - [Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)
   - [Implementing main loop](./customizing.md#implementing-main-loop)
   - [Implementing custom NN model](./customizing.md#implementing-custom-nn-model)
-    - [Define ModelPointer and ModelSize methods](./customizing.md#define-modelpointer-and-modelsize-methods)
+    - [Using GetModelPointer and GetModelLen methods](./customizing.md#using-getmodelpointer-and-getmodellen-methods)
   - [Executing inference](./customizing.md#executing-inference)
   - [Printing to console](./customizing.md#printing-to-console)
   - [Reading user input from console](./customizing.md#reading-user-input-from-console)
@@ -32,49 +32,10 @@ The following sign indicates the important conventions to apply:
 
 ## Software project description
 
-As mentioned in the [Repository structure](../documentation.md#repository-structure) section, project sources are:
+See [Repository structure](../documentation.md#repository-structure) section for the outline of the repo.
 
-```tree
-├── dependencies
-├── docs
-│ ├── ...
-│ └── Documentation.md
-├── model_conditioning_examples
-├── resources
-│ └── img_class
-│      └── ...
-├── /resources_downloaded/
-│ └── img_class
-│      └── ...
-├── scripts
-│   ├── platforms
-│   │   ├── mps3
-│   │   ├── native
-│   │   └── simple_platform
-│   └── ...
-├── source
-│   ├── application
-│   │   ├── main
-│   │   └── tensorflow-lite-micro
-│   ├── hal
-│   ├── log
-│   ├── math
-│   ├── profiler
-│   └── use_case
-│       └── <usecase_name>
-│           ├── include
-│           ├── src
-│           └── usecase.cmake
-├── tests
-└── CMakeLists.txt
-```
-
-Where the `source` folder contains C/C++ sources for the platform and ML applications. Common code related to the
-*Ethos-U* code samples software framework resides in the `application` sub-folder and ML application-specific logic,
-use-cases, sources are in the `use-case` subfolder.
-
-> **Convention**: Separate use-cases must be organized in sub-folders under the use-case folder. The name of the
-> directory is used as a name for this use-case and can be provided as a `USE_CASE_BUILD` parameter value. The build
+> **Convention**: Separate use-cases must be organized in sub-folders under the `source/use-case` folder. The name of
+> the directory is used as a name for this use-case and can be provided as a `USE_CASE_BUILD` parameter value. The build
 > system expects that sources for the use-case are structured as follows: Headers in an `include` directory and C/C++
 > sources in a `src` directory. For example:
 >
@@ -86,6 +47,11 @@ use-cases, sources are in the `use-case` subfolder.
 >         └── src
 >             └── *.cc
 > ```
+>
+> It is important to note that each use case example has at least one associated API that it uses from
+> `source/application/api/use_case`. The API sources are **platform-agnostic** by design so the use cases example
+> implementations can re-use one or more of these components, and they can be used on any target. However, it
+> is not mandatory to use an API, or to implement one if you are adding a use-case.
 
 ## Hardware Abstraction Layer API
 
@@ -94,9 +60,9 @@ The HAL is represented by the following interfaces. To access them, include the 
 - `hal_platform_init` function: Initializes the HAL platform and every module on the platform that the application
   requires to run.
 
-  | Parameter name  | Description                          |
-  |--------------------------------------| ------------------------------------------------------------------- |
-  | `return`          | true if successful, false otherwise. |
+  |  Parameter name | Description                             |
+  |-----------------|-----------------------------------------|
+  | `return`        | true if successful, false otherwise.    |
 
 - `hal_platform_release` function Releases the HAL platform and any acquired resources.
 
@@ -140,11 +106,11 @@ void main_loop()
 Application context can be used as a holder for a state between main loop iterations. Include `AppContext.hpp` to use
 `ApplicationContext` class.
 
-| Method name  | Description                                                      |
-|--------------|------------------------------------------------------------------|
-| `Set`         |  Saves given value as a named attribute in the context.          |
-|  `Get`         |  Gets the saved attribute from the context by the given name.    |
-|  `Has`         |  Checks if an attribute with a given name exists in the context. |
+| Method name | Description                                                     |
+|-------------|-----------------------------------------------------------------|
+| `Set`       | Saves given value as a named attribute in the context.          |
+| `Get`       | Gets the saved attribute from the context by the given name.    |
+| `Has`       | Checks if an attribute with a given name exists in the context. |
 
 For example:
 
@@ -172,13 +138,13 @@ It uses platform timer to get system timing information.
 
 | Method name             | Description                                                    |
 |-------------------------|----------------------------------------------------------------|
-|  `StartProfiling`         | Starts profiling and records the starting timing data.         |
-|  `StopProfiling`          | Stops profiling and records the ending timing data.            |
-|  `StopProfilingAndReset`  | Stops the profiling and internally resets the platform timers. |
-|  `Reset`                  | Resets the profiler and clears all collected data.             |
-|  `GetAllResultsAndReset`  | Gets all the results as string and resets the profiler.            |
-|  `PrintProfilingResult`   | Prints collected profiling results and resets the profiler.    |
-|  `SetName`                | Set the profiler name.                                         |
+| `StartProfiling`        | Starts profiling and records the starting timing data.         |
+| `StopProfiling`         | Stops profiling and records the ending timing data.            |
+| `StopProfilingAndReset` | Stops the profiling and internally resets the platform timers. |
+| `Reset`                 | Resets the profiler and clears all collected data.             |
+| `GetAllResultsAndReset` | Gets all the results as string and resets the profiler.        |
+| `PrintProfilingResult`  | Prints collected profiling results and resets the profiler.    |
+| `SetName`               | Set the profiler name.                                         |
 
 An example of it in use:
 
@@ -199,38 +165,36 @@ The Model, which refers to neural network model, is an abstract class wrapping t
 It provides methods to perform common operations such as TensorFlow Lite Micro framework initialization, inference
 execution, accessing input, and output tensor objects.
 
-To use this abstraction, import the `TensorFlowLiteMicro.hpp` header.
+To use this abstraction, import the `Model.hpp` header.
 
-| Method name              | Description                                                                  |
-|--------------------------|------------------------------------------------------------------------------|
-|  `GetInputTensor`          |  Returns the pointer to the model's input tensor.                            |
-|  `GetOutputTensor`         |  Returns the pointer to the model's output tensor                            |
-|  `GetType`                 |  Returns the model's data type                                               |
-|  `GetInputShape`           |  Return the pointer to the model's input shape                               |
-|  `GetOutputShape`          |  Return the pointer to the model's output shape.                             |
-|  `GetNumInputs`            |  Return the number of input tensors the model has.                           |
-|  `GetNumOutputs`           |  Return the number of output tensors the model has.                          |
-|  `LogTensorInfo`           |  Logs the tensor information to `stdout` for the given tensor pointer. Includes: Tensor name, tensor address, tensor type, tensor memory size, and quantization params.  |
-|  `LogInterpreterInfo`      |  Logs the interpreter information to stdout.                                 |
-|  `Init`                    |  Initializes the TensorFlow Lite Micro framework, allocates require memory for the model. |
-|  `GetAllocator`            |  Gets the allocator pointer for the instance.                                |
-|  `IsInited`                |  Checks if this model object has been initialized.                           |
-|  `IsDataSigned`            |  Checks if the model uses signed data type.                                  |
-|  `RunInference`            |  Runs the inference, so invokes the interpreter.                               |
-|  `ShowModelInfoHandler`    |  Model information handler common to all models.                             |
-|  `GetTensorArena`          |  Returns pointer to memory region to be used for tensors allocations.        |
-|  `ModelPointer`            |  Returns the pointer to the NN model data array.                             |
-|  `ModelSize`               |  Returns the model size.                                                     |
-|  `GetOpResolver`           |  Returns the reference to the TensorFlow Lite Micro operator resolver.       |
-|  `EnlistOperations`        |  Registers required operators with TensorFlow Lite Micro operator resolver.  |
-|  `GetActivationBufferSize` |  Returns the size of the tensor arena memory region.                         |
+| Method name               | Description                                                                                                                                                            |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GetInputTensor`          | Returns the pointer to the model's input tensor.                                                                                                                       |
+| `GetOutputTensor`         | Returns the pointer to the model's output tensor                                                                                                                       |
+| `GetType`                 | Returns the model's data type                                                                                                                                          |
+| `GetInputShape`           | Return the pointer to the model's input shape                                                                                                                          |
+| `GetOutputShape`          | Return the pointer to the model's output shape.                                                                                                                        |
+| `GetNumInputs`            | Return the number of input tensors the model has.                                                                                                                      |
+| `GetNumOutputs`           | Return the number of output tensors the model has.                                                                                                                     |
+| `LogTensorInfo`           | Logs the tensor information to `stdout` for the given tensor pointer. Includes: Tensor name, tensor address, tensor type, tensor memory size, and quantization params. |
+| `LogInterpreterInfo`      | Logs the interpreter information to stdout.                                                                                                                            |
+| `Init`                    | Initializes the TensorFlow Lite Micro framework, allocates require memory for the model.                                                                               |
+| `GetAllocator`            | Gets the allocator pointer for the instance.                                                                                                                           |
+| `IsInited`                | Checks if this model object has been initialized.                                                                                                                      |
+| `IsDataSigned`            | Checks if the model uses signed data type.                                                                                                                             |
+| `RunInference`            | Runs the inference, so invokes the interpreter.                                                                                                                        |
+| `ShowModelInfoHandler`    | Model information handler common to all models.                                                                                                                        |
+| `GetTensorArena`          | Returns pointer to memory region to be used for tensors allocations.                                                                                                   |
+| `ModelPointer`            | Returns the pointer to the NN model data array.                                                                                                                        |
+| `ModelSize`               | Returns the model size.                                                                                                                                                |
+| `GetOpResolver`           | Returns the reference to the TensorFlow Lite Micro operator resolver.                                                                                                  |
+| `EnlistOperations`        | Registers required operators with TensorFlow Lite Micro operator resolver.                                                                                             |
+| `GetActivationBufferSize` | Returns the size of the tensor arena memory region.                                                                                                                    |
 
 > **Convention:**  Each ML use-case must have an extension of this class and an implementation of the protected virtual
 > methods:
 >
 > ```C++
-> virtual const uint8_t* ModelPointer() = 0;
-> virtual size_t ModelSize() = 0;
 > virtual const tflite::MicroOpResolver& GetOpResolver() = 0;
 > virtual bool EnlistOperations() = 0;
 > virtual size_t GetActivationBufferSize() = 0;
@@ -241,7 +205,7 @@ To use this abstraction, import the `TensorFlowLiteMicro.hpp` header.
 > tensor arena memory for TensorFlow Lite Micro framework by the `GetTensorArena` and `GetActivationBufferSize` methods.
 >
 > **Note:** Please see `MobileNetModel.hpp` and `MobileNetModel.cc` files from the image classification ML application
-> use-case as an example of the model base class extension.
+> API as an example of the model base class extension.
 
 ## Adding custom ML use-case
 
@@ -263,8 +227,8 @@ use_case
       └── src
 ```
 
-Start with creation of a sub-directory under the `use_case` directory and two additional directories `src` and `include`
-as described in the [Software project description](./customizing.md#software-project-description) section.
+Start with creation of a subdirectory under the `source/use_case` directory and two additional directories `src` and
+`include` as described in the [Software project description](./customizing.md#software-project-description) section.
 
 ## Implementing main loop
 
@@ -277,7 +241,7 @@ Main loop has knowledge about the platform and has access to the platform compon
 Layer (HAL).
 
 Start by creating a `MainLoop.cc` file in the `src` directory (the one created under
-[Adding custom ML use case](./customizing.md#adding-custom-ml-use-case)).  The name used is not important.
+[Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)).  The name used is not important.
 
 Now define the `main_loop` function with the signature described in [Main loop function](./customizing.md#main-loop-function):
 
@@ -285,12 +249,13 @@ Now define the `main_loop` function with the signature described in [Main loop f
 #include "hal.h"
 #include "log_macros.h"
 
-void main_loop() {
-  printf("Hello world!");
+void main_loop()
+{
+    printf("Hello world!");
 }
 ```
 
-The preceding code is already a working use-case. If you compile and run it (see [Building custom usecase](./customizing.md#building-custom-use-case)),
+The preceding code is already a working use-case. If you compile and run it (see [Building custom use-case](./customizing.md#building-custom-use_case)),
 then the application starts and prints a message to console and exits straight away.
 
 You can now start filling this function with logic.
@@ -301,7 +266,7 @@ Before inference could be run with a custom NN model, TensorFlow Lite Micro fram
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
 The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](./customizing.md#nn-model-api)).
-Create `HelloWorldModel.hpp` in the use-case include sub-directory, extend Model abstract class,
+Create `HelloWorldModel.hpp` in the use-case include subdirectory, extend Model abstract class,
 and then declare the required methods.
 
 For example:
@@ -336,7 +301,7 @@ class HelloWorldModel: public Model {
 #endif /* HELLOWORLDMODEL_HPP */
 ```
 
-Create the `HelloWorldModel.cc` file in the `src` sub-directory and define the methods there. Include
+Create the `HelloWorldModel.cc` file in the `src` subdirectory and define the methods there. Include
 `HelloWorldModel.hpp` created earlier.
 
 > **Note:** The `Model.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
@@ -374,25 +339,58 @@ bool arm::app::HelloWorldModel::EnlistOperations() {
 To minimize the memory footprint of the application, we advise you to only register operators that are used by the NN
 model.
 
-### Define ModelPointer and ModelSize methods
+### Using GetModelPointer and GetModelLen methods
 
-These functions are wrappers around the functions generated in the C++ file containing the neural network model as an
-array. This logic for generation of the C++ array from the `.tflite` file needs to be defined in the `usecase.cmake` file for
-this `HelloWorld` example.
+These functions generated in the C++ file containing the neural network model as an array. This logic for generation of
+the C++ array from the `.tflite` file needs to be defined in the `usecase.cmake` file for this `HelloWorld` example.
+In the root of the `source/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to
+it:
+
+```cmake
+# Generate model file
+USER_OPTION(${${use_case}_MODEL_TFLITE_PATH}
+            "NN model tflite path"
+            "Path-to-your-model.tflite"
+            FILEPATH)
+
+generate_tflite_code(
+        MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+        DESTINATION ${SRC_GEN_DIR}
+        EXPRESSIONS ${EXTRA_MODEL_CODE}
+        NAMESPACE   "arm" "app" "hello_world")
+```
+
+Use the `${use-case}_MODEL_TFLITE_PATH` CMake configuration parameter to include custom model in the generation or
+compilation process. Please refer to: [Build options](./building.md#build-options) for further information.
 
 For more details on `usecase.cmake`, refer to: [Building options](./building.md#build-options).
 
 For details on code generation flow in general, refer to: [Automatic file generation](./building.md#automatic-file-generation).
 
-The TensorFlow Lite model data is read during the `Model::Init()` method execution. Please refer to
-`application/tensorflow-lite-micro/Model.cc` for more details.
+The TensorFlow Lite model data is read during the `Model::Init` method execution. Please refer to
+`source/application/api/common/source/Model.cc` for more details.
 
-Model invokes the `ModelPointer()` function which calls the `GetModelPointer()` function to get the neural network model
-data memory address. The `GetModelPointer()` function is generated during the build and can be found in the file
-`build/generated/hello_world/src/<model_file_name>.cc`. The file generated is automatically added to the compilation.
+`Model::Init` will need the pointer to the model. The `arm::app::hello_world::GetModelPointer()` function is generated
+during the build and can be found in the file `<build>/generated/hello_world/src/<model_file_name>.cc`. The file
+generated is automatically added to the compilation.
 
-Use the `${use-case}_MODEL_TFLITE_PATH` build parameter to include custom model in the generation or compilation
-process. Please refer to: [Build options](./building.md#build-options) for further information.
+At the top of `MainLoop.cc`, add:
+
+```c++
+namespace arm {
+namespace app {
+    namespace hello_world {
+
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace hello_world */
+
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+} /* namespace app */
+} /* namespace arm */
+```
+
+These functions can now be used in the `Model.Init` call.
 
 ## Executing inference
 
@@ -404,8 +402,9 @@ To run an inference successfully, you must use:
 - A main loop function,
 - And some input data.
 
-For the `hello_world` example below the input array is not populated. However, for real-world deployment this data must either be read from an on-board device or be prepared in
-the form of C++ sources and baked into the application before compilation.
+For the `hello_world` example below the input array is not populated. However, for real-world deployment this data must
+either be read from an on-board device or be prepared in the form of C++ sources and baked into the application before
+compilation.
 
 For example, the image classification application requires extra build steps to generate C++ sources from the provided
 images with `generate_images_code` CMake function.
@@ -418,47 +417,48 @@ images with `generate_images_code` CMake function.
 
 The following code adds inference invocation to the main loop function:
 
-```C++
+```c++
 #include "hal.h"
-#include "HelloWorldModel.hpp"
 #include "log_macros.h"
+#include "HelloWorldModel.hpp"
 
-  namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-      } /* namespace app */
-  } /* namespace arm */
-  
-  extern uint8_t* GetModelPointer();
-  extern size_t GetModelLen();
+namespace arm {
+namespace app {
+    namespace hello_world {
 
-  void main_loop() {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace hello_world */
 
-  /* model wrapper object */
-  arm::app::HelloWorldModel model;
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+} /* namespace app */
+} /* namespace arm */
 
-  /* Load the model */
-  if (!model.Init(arm::app::tensor_arena,
-                    sizeof(arm::app::tensor_arena),
-                    GetModelPointer(),
-                    GetModelLen())) {
-    printf_err("failed to initialise model\n");
-    return;
-  }
+void main_loop()
+{
+    printf("Hello world!");
 
-  TfLiteTensor *outputTensor = model.GetOutputTensor();
-  TfLiteTensor *inputTensor = model.GetInputTensor();
+    arm::app::HelloWorldModel model;
 
-  /* dummy input data*/
-  uint8_t inputData[1000];
+    /* Load the model. */
+    if (!model.Init(arm::app::tensorArena,
+                    sizeof(arm::app::tensorArena),
+                    arm::app::hello_world::GetModelPointer(),
+                    arm::app::hello_world::GetModelLen())) {
+        printf_err("failed to initialise model\n");
+        return;
+    }
 
-  memcpy(inputTensor->data.data, inputData, 1000);
+    /* Populate input tensors here */
+    // Your-custom-code;
 
-  /* run inference */
-  model.RunInference();
+    /* Run inference */
+    model.RunInference();
 
-  const uint32_t tensorSz = outputTensor->bytes;
-  const uint8_t * outputData = tflite::GetTensorData<uint8>(outputTensor);
+    /* Read or post-process output here */
+    const uint32_t tensorSz = outputTensor->bytes;
+    const uint8_t * outputData = tflite::GetTensorData<uint8>(outputTensor);
+    // Your-custom-code;
 }
 ```
 
@@ -466,18 +466,18 @@ The code snippet has several important blocks:
 
 - Creating HelloWorldModel object and initializing it.
 
-  ```C++
+```C++
   arm::app::HelloWorldModel model;
 
   /* Load the model */
-  if (!model.Init(arm::app::tensor_arena,
-                    sizeof(arm::app::tensor_arena),
-                    GetModelPointer(),
-                    GetModelLen())) {
-    printf_err(\"failed to initialise model\\n\");
-    return;
+  if (!model.Init(arm::app::tensorArena,
+                  sizeof(arm::app::tensorArena),
+                  arm::app::hello_world::GetModelPointer(),
+                  arm::app::hello_world::GetModelLen())) {
+      printf_err("failed to initialise model\n");
+      return;
   }
-  ```
+```
 
 - Getting pointers to allocated input and output tensors.
 
@@ -485,13 +485,6 @@ The code snippet has several important blocks:
   TfLiteTensor *outputTensor = model.GetOutputTensor();
   TfLiteTensor *inputTensor = model.GetInputTensor();
   ```
-
-- Copying input data to the input tensor. We assume input tensor size to be 1000 `uint8` elements.
-
-  ```C++
-  memcpy(inputTensor->data.data, inputData, 1000);
-  ```
-
 - Running inference
 
   ```C++
@@ -623,8 +616,7 @@ in the root of your use-case. However, the name of the file is not important.
 >   - `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` – The compilation flags.
 >   - `CMAKE_EXE_LINKER_FLAGS` – The linker flags.
 
-For the hello world use-case, it is enough to create a `helloworld.cmake` file and set the `DEFAULT_MODEL_PATH`, like
-so:
+For the hello world use-case, it is enough to create a `helloworld.cmake` file and set the `DEFAULT_MODEL_PATH`, like:
 
 ```cmake
 if (ETHOS_U_NPU_ENABLED)

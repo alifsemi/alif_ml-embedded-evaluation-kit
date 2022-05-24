@@ -210,7 +210,7 @@ Software components written in C/C++ may use the language features allowed and i
   namespace nspace
   {
   void FunctionInNamespace();
-  };
+  }
   ```
 
 - Source code must use Hungarian notation to annotate the name of a variable with information about its meaning.

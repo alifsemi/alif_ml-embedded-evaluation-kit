@@ -52,30 +52,53 @@ by displaying different performance metrics such as inference cycle count estima
 
 ## Software and hardware overview
 
-The evaluation kit is based on the [Arm® Corstone™-300 reference package](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300).
-Arm® Corstone™-300 helps you build SoCs quickly on the Arm® Cortex™-M55 and Arm® Ethos™-U55 designs. Arm® Corstone™-300 design
-implementation is publicly available on an [Arm MPS3 FPGA board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images),
+The evaluation kit primarily supports [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300)
+and [Arm® Corstone™-310](https://developer.arm.com/ip-products/subsystem/corstone/corstone-310) reference packages as its
+primary targets. Arm® Corstone™-300 design implementation is publicly available on an [Arm MPS3 FPGA board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images),
 or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
 The Ethos-U NPU software stack is described [here](https://developer.arm.com/documentation/101888/0500/NPU-software-overview/NPU-software-components?lang=en).
 
 All ML use cases, albeit illustrating a different application, have common code such as initializing the Hardware
-Abstraction Layer (HAL). The application common code can be run on x86 or Arm Cortex-M architecture thanks to the HAL.
+Abstraction Layer (HAL). The application common code can be run on native host machine (x86_64 or aarch64) or Arm
+Cortex-M architecture thanks to the HAL.
 For the ML application-specific part, Google® TensorFlow™ Lite for Microcontrollers inference engine is used to schedule
 the neural networks models executions. TensorFlow Lite for Microcontrollers is integrated with the
 [Ethos-U NPU driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver)
 and delegates execution of certain operators to the NPU or, if the neural network model operators are not supported on
-NPU, to the CPU. [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise CPU workload execution
-with int8 data type.
+NPU, to the CPU. If the operator is supported, [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise
+CPU workload execution with int8 data type. Else, TensorFlow™ Lite for Microcontrollers' reference kernels are used as
+a final fall-back. 
 Common ML application functions will help you to focus on implementing logic of your custom ML use case: you can modify
 only the use case code and leave all other components unchanged. Supplied build system will discover new ML application
 code and automatically include it into compilation flow.
 
+A high level overview of the different components in the software, and the platforms supported out-of-the-box, is shown
+in the diagram below.
+
 ![APIs](docs/media/APIs_description.png)
+
+For a more detailed description of the build graph with all major components, see [Building](./docs/documentation.md#building).
+
+### Reusable software
+
+There are source files in the repository that form the core of the Machine Leaning flow for all the use cases. These
+are exposed as APIs that the examples can use and even be combined to form chained use cases. The API sources are
+designed to be portable across platforms and provide functionality for preprocessing of data, running an inference, and
+postprocessing of results. These allow a common flow for all use cases with minor differences in how each of these
+blocks are instantiated.
+
+As an independent CMake project, these APIs can be used by or integrated into other projects easily. We also produce
+[CMSIS Packs](https://developer.arm.com/tools-and-software/embedded/cmsis/cmsis-packs) with these sources, so they
+could be used in all tools/IDEs (for example,
+[Arm® Development Studio](https://developer.arm.com/Tools%20and%20Software/Arm%20Development%20Studio) and
+[Keil® µVision®](https://www2.keil.com/mdk5/uvision/)) that support the use of CMSIS Packs.
+
+### Getting started
 
 To run an ML application on the Cortex-M and Ethos-U NPU, please, follow these steps:
 
-1. Setup your environment by installing [the required prerequisites](./docs/sections/building.md#Build-prerequisites).
+1. Set up your environment by installing [the required prerequisites](./docs/sections/building.md#Build-prerequisites).
 2. Generate an optimized neural network model for Ethos-U with a Vela compiler by following instructions [here](./docs/sections/building.md#Add-custom-model).
 3. [Configure the build system](./docs/sections/building.md#Build-process).
 4. [Compile the project](./docs/sections/building.md#Building-the-configured-project) with a `make` command.

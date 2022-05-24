@@ -1,23 +1,14 @@
 TITLE: Arm MPS3 FPGA prototyping board Images Configuration File
 
-; MCC mapping for Corstone-310 MPS3 bitfile package AN555
-; +-------------+---------------+-------------------------------+
-; | FPGA addr   | MCC addr      |  Region                       |
-; +-------------+---------------+-------------------------------+
-; | 0x00000000  | 0x00000000    | ITCM (NS)                     |
-; | 0x01000000  | 0x02000000    | BRAM or FPGA's data SRAM (NS) |
-; | 0x60000000  | 0x08000000    | DDR (NS)                      |
-; | 0x70000000  | 0x0c000000    | DDR (S)                       |
-; +-------------+---------------+-------------------------------+
-
 [IMAGES]
+TOTALIMAGES: 2                          ;Number of Images (Max: 32)
 
-TOTALIMAGES: 2 ;Number of Images (Max: 32)
+IMAGE0PORT: 1
+IMAGE0ADDRESS: 0x00_1100_0000           ; Address to load into
+IMAGE0UPDATE: RAM                       ; Image Update:NONE/AUTO/FORCE
+IMAGE0FILE: \SOFTWARE\bram.bin          ; Image/data to be loaded
 
-IMAGE0ADDRESS: 0x00000000 ; MCC@0x00000000 <=> FPGA@0x00000000
-IMAGE0UPDATE: AUTO
-IMAGE0FILE: \SOFTWARE\itcm.bin
-
-IMAGE1ADDRESS: 0x0c000000 ; MCC@0x0c000000 <=> FPGA@0x70000000
-IMAGE1UPDATE: AUTO
-IMAGE1FILE: \SOFTWARE\ddr.bin
+IMAGE1PORT: 1
+IMAGE1ADDRESS: 0x00_7000_0000           ; Address to load into
+IMAGE1UPDATE: RAM                       ; Image Update:NONE/AUTO/FORCE
+IMAGE1FILE: \SOFTWARE\ddr.bin           ; Image/data to be loaded

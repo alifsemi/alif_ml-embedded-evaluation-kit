@@ -24,10 +24,10 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/1a0287fc5fa81fa6aa1dcfb0c5b2e01f74164393.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/9b5df640c777563919affb4e9201c96c657adbb2.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.02.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.02.tar.gz"
+TF = "https://github.com/tensorflow/tflite-micro/archive/07821fd35e8aaca66855fa07b402325be3b70398.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/6a18a74b46ac1501a7a750dd83b8bfb06fb24504.zip"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.05-rc2.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.05-rc2.tar.gz"
 
 
 def download(url_file: str, post_process=None):

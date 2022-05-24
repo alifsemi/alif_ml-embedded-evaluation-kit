@@ -26,7 +26,7 @@
   - [Building for different Ethos-U NPU variants](./building.md#building-for-different-ethos_u-npu-variants)
   - [Automatic file generation](./building.md#automatic-file-generation)
 
-This section assumes that you are using an **x86 Linux** build machine.
+This section assumes that you are using an **x86_64 Linux** build machine.
 
 ## Build prerequisites
 

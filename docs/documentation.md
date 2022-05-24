@@ -22,14 +22,15 @@
   elsewhere.
 - Arm® and Corstone™ are registered trademarks or trademarks of Arm® Limited (or its subsidiaries) in the US and/or
   elsewhere.
+- Arm®, Keil® and µVision® are registered trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
 - TensorFlow™, the TensorFlow logo, and any related marks are trademarks of Google Inc.
 
 ## Prerequisites
 
 Before starting the setup process, please make sure that you have:
 
-- A Linux x86_64 based machine, the Windows Subsystem for Linux is preferable.
-  > **Note:** Currently, Windows is not supported as a build environment.
+- A Linux x86_64 based machine. If using Microsoft® Windows®, Windows Subsystem for Linux (WSL) is preferable.
+  > **Note:** Currently, Microsoft® Windows® is not supported as a build environment.
 
 - At least one of the following toolchains:
   - GNU Arm Embedded toolchain (version 10.2.1 or above) -
@@ -38,12 +39,13 @@ Before starting the setup process, please make sure that you have:
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
-  - An MPS3 board loaded with Arm® Corstone™-300 reference package (`AN552`) from:
-    <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>. You
+  - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package. See
+    <https://developer.arm.com/downloads/-/download-fpga-images>. You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
-    application.
-  - `Arm Corstone-300` based FVP for MPS3 is available from:
+    application. 
+  - `Arm® Corstone™-300` based FVP for MPS3 is available from:
     <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>.
+  - `Arm® Corstone™-310` based FVP is available under Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
 
 > **Note:**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
 > notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built
@@ -60,6 +62,8 @@ for additional information:
 
 - Arm® `Cortex-M55`® processor: <https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55>
 
+- Arm® `Cortex-M85`® processor: <https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85>
+
 - ML processor, also referred to as a Neural Processing Unit (NPU) - Arm® `Ethos™-U55`:
     <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55>
 
@@ -69,9 +73,13 @@ for additional information:
 - Arm® MPS3 FPGA Prototyping Board:
     <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>
 
+- Arm® Fixed Virtual Platforms: <https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms>
+
+- Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
+
 - Arm® ML-Zoo: <https://github.com/ARM-software/ML-zoo/>
 
-- Arm® Ethos-U software: <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u>
+- Arm® Ethos-U NPU™ software: <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u>
 
 To access Arm documentation online, please visit: <http://developer.arm.com>
 
@@ -80,40 +88,49 @@ To access Arm documentation online, please visit: <http://developer.arm.com>
 The repository has the following structure:
 
 ```tree
-.
+├── CMakeLists.txt
 ├── dependencies
 ├── docs
 ├── model_conditioning_examples
 ├── resources
 ├── /resources_downloaded/
 ├── scripts
-│   ├── platforms
-│   │   ├── mps3
-│   │   ├── native
-│   │   └── simple_platform
-│   └── ...
+│     ├── cmake
+│     │    ├── platforms
+│     │    │      ├── mps3
+│     │    │      ├── native
+│     │    │      └── simple_platform
+│     │    └── ...
+│     └── ...
 ├── source
-│   ├── application
-│   │   ├── main
-│   │   └── tensorflow-lite-micro
-│   ├── hal
-│   ├── log
-│   ├── math
-│   ├── profiler
-│   └── use_case
+│     ├── application
+│     │    ├── api
+│     │    │    ├── common
+│     │    │    └── use_case
+│     │    └── main
+│     ├── hal
+│     │    ├── include
+│     │    └── source
+│     ├── log
+│     │    └── include
+│     ├── math
+│     │    └── include
+│     ├── profiler
+│     │    └── include
+│     use_case
 │       └── <usecase_name>
 │           ├── include
 │           ├── src
 │           └── usecase.cmake
-├── tests
-└── CMakeLists.txt
+└── tests
 ```
 
 What these folders contain:
 
-- `dependencies`: All the third-party dependencies for this project.
+- `dependencies`: All the third-party dependencies for this project. These are either populated by `git submodule` or by
+    downloading packages in the required hierarchy. See `download_dependencies.py`.
 
-- `docs`: The documentation for this ML application.
+- `docs`: Detailed documentation for this repository.
 
 - `model_conditioning_examples`: short example scripts that demonstrate some methods available in TensorFlow
     to condition your model in preparation for deployment on Arm Ethos NPU.
@@ -121,7 +138,8 @@ What these folders contain:
 - `resources`: contains ML use-cases applications resources such as input data, label files, etc.
 
 - `resources_downloaded`: created by `set_up_default_resources.py`, contains downloaded resources for ML use-cases
-    applications such as models, test data, etc.
+    applications such as models, test data, etc. It also contains a Python virtual environment with all the required
+    packages installed.
 
 - `scripts`: Build and source generation scripts.
 
@@ -133,20 +151,32 @@ What these folders contain:
                                     Native profile related script compiles unit-tests.
 
 - `source`: C/C++ sources for the platform and ML applications.
-  > **Note:** Common code related to the `Ethos-U` NPU software framework resides in *application* subfolder.
 
-  The contents of the *application* subfolder is as follows:
+  The contents of the *application* sub-folder is as follows:
 
   - `application`: All sources that form the *core* of the application. The `use-case` part of the sources depend on the
     sources themselves, such as:
     - `main`: Contains the main function and calls to platform initialization logic to set up things before launching
       the main loop. Also contains sources common to all use-case implementations.
 
-    - `tensorflow-lite-micro`: Contains abstraction around TensorFlow Lite Micro API. This abstraction implements common
-      functions to initialize a neural network model, run an inference, and access inference results.
+    - `api`: Contains **platform-agnostic** API that all the use case examples can use. It depends only on TensorFlow
+      Lite Micro and math functionality exposed by `math` module. It is further subdivided into:
+
+      - `common`: Common part of the API. This consists of the generic code like neural network model initialisation,
+        running an inference, and some common logic used for image and audio use cases.
+
+      - `use_case`: This contains "model" and "processing" APIs for each individual use case. For example, KWS use case
+        contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
+        the MFCC calculations.
+      
+> **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
+> that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
+> reuse components from this repository for your application level logic, this directory should be the prime candidate.
 
   - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform-agnostic API to access hardware
     platform-specific functions.
+
+> **Note:** Common code related to the `Arm Ethos-U NPU` software framework resides in *hal/components* sub-folder.
 
   - `log`: Common to all code logging macros managing log levels.
 
