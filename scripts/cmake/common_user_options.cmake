@@ -39,11 +39,11 @@ USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the tensor flow directory"
     "${DEPENDENCY_ROOT_DIR}/tensorflow"
     PATH)
 
-USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: mps3, simple_platform, native"
+USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: mps3, simple_platform, native or ensemble"
     mps3
     STRING)
 
-USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300, sse-310 or none"
+USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300, sse-310, RTSS-HP, RTSS-HE or none"
     sse-300
     STRING)
 

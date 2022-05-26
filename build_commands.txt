@@ -1,0 +1,40 @@
+; ------------ Image classification on CM55-HP ----------------------
+cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DUSE_CASE_BUILD=img_class \
+    -Dimg_class_MODEL_TFLITE_PATH=resources/img_class/model/mobilenet_softmax_v2_1.0_224_uint8_vela_H256.tflite \
+    -Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
+    -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+
+; ------------ Image classification on CM55-HP GCC Toolchain ----------------------
+cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DUSE_CASE_BUILD=img_class \
+    -Dimg_class_MODEL_TFLITE_PATH=resources/img_class/model/mobilenet_softmax_v2_1.0_224_uint8_vela_H256.tflite \
+    -Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
+    -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+
+
+
+NOTE! Genereate micronet model with:
+python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+
+; ------------ Keyword spotting on CM55-HP ARMCLANG----------------------
+cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DUSE_CASE_BUILD=kws \
+    -Dkws_MODEL_TFLITE_PATH=resources_downloaded/kws/kws_micronet_m_vela_H256.tflite \
+    -Dkws_FILE_PATH=resources/kws/samples/down.wav \
+    -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+
+; ------------ Keyword spotting on CM55-HP GCC----------------------
+cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DUSE_CASE_BUILD=kws \
+    -Dkws_MODEL_TFLITE_PATH=resources_downloaded/kws/kws_micronet_m_vela_H256.tflite \
+    -Dkws_FILE_PATH=resources/kws/samples/down.wav \
+    -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
