@@ -91,11 +91,10 @@ target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${CPU_HEADER_TARGET})
 
-#configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
 # Check if semihosting configuration is available
-# if (COMMAND configure_semihosting)
-#     configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
-# endif()
+if (COMMAND configure_semihosting)
+    configure_semihosting(${CMSIS_DEVICE_TARGET} ON)
+endif()
 
 # 4 Display status:arm_ethosu_npu_irq_handler
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

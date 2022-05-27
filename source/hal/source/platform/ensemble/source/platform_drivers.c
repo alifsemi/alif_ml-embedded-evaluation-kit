@@ -61,7 +61,7 @@ extern ARM_DRIVER_GPIO Driver_GPIO3;
 
 int platform_init(void)
 {
-    //tracelib_init("[KPV] ");
+    tracelib_init(NULL);
 
     int err = 0;
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());

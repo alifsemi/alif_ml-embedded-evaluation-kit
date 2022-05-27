@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#if !defined(USE_SEMIHOSTING)
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -302,3 +305,5 @@ int ferror(FILE *f)
 }
 
 #endif /* #ifndef ferror */
+
+#endif // USE_SEMIHOSTING

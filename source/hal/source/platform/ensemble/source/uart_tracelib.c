@@ -196,6 +196,12 @@ void tracef(const char * format, ...)
     }
 }
 
+unsigned int GetLine(char *user_input, unsigned int size)
+{
+    // UNSUPPORTED AT THE MOMENT
+    return 0;
+}
+
 #else
 
 int tracelib_init(const char * prefix)
@@ -210,6 +216,11 @@ int send_str(const char* str, uint32_t len)
 
 void tracef(const char * format, ...)
 {
+}
+
+unsigned int GetLine(char *user_input, unsigned int size)
+{
+    return 0;
 }
 
 #endif // DISABLE_UART_TRACE
