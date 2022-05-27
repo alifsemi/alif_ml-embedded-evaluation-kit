@@ -16,12 +16,11 @@ cmake -DTARGET_PLATFORM=ensemble \
     -Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
     -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
+; ------------ Keyword spotting on CM55-HP ARMCLANG----------------------
 
-
-NOTE! Genereate micronet model with:
+NOTE! Genereate micronet model 1st with:
 python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
 
-; ------------ Keyword spotting on CM55-HP ARMCLANG----------------------
 cmake -DTARGET_PLATFORM=ensemble \
     -DTARGET_SUBSYSTEM=RTSS-HP \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
