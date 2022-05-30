@@ -98,7 +98,8 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       flatbuffer_conversions.o (+RO)
 
       ethosu_driver.o (+RO)
-      ethosu_device.o (+RO)
+      ethosu_device_u55_u65.o (+RO)
+      ethosu_pmu.o (+RO)
   }
 
   ;-----------------------------------------------------
