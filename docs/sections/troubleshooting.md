@@ -6,8 +6,8 @@
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.3.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.8 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [No matching distribution found for ethos-u-vela==3.4.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+    - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
 
 ## Inference results are incorrect for my custom files
 
@@ -105,8 +105,8 @@ If the system lacks this dependency the following error will occur:
  x86_64-linux-gnu-gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O2 -Wall -g
   -fstack-protector-strong -Wformat -Werror=format-security -g -fwrapv -O2 -g -fstack-protector-strong
   -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC -DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION
-  -I/venv/include -I/usr/include/python3.8 -I/venv/lib/python3.8/site-packages/numpy/core/include
-  -c ethosu/mlw_codec/mlw_codecmodule.c -o build/temp.linux-x86_64-3.8/ethosu/mlw_codec/mlw_codecmodule.o
+  -I/venv/include -I/usr/include/python3.7 -I/venv/lib/python3.7/site-packages/numpy/core/include
+  -c ethosu/mlw_codec/mlw_codecmodule.c -o build/temp.linux-x86_64-3.7/ethosu/mlw_codec/mlw_codecmodule.o
     ethosu/mlw_codec/mlw_codecmodule.c:20:10: fatal error: Python.h: No such file or directory
        20 | #include <Python.h>
           |          ^~~~~~~~~~
@@ -119,22 +119,22 @@ ERROR: Command errored out with exit status 1: /venv/bin/python -u -c
 (__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))'
 install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-externally-managed
 --compile --install-headers
-/venv/include/site/python3.8/ethos-u-vela Check the logs for full command output.
+/venv/include/site/python3.7/ethos-u-vela Check the logs for full command output.
 ```
 
 To solve this issue install libpython3 on the system.
 
 ## No matching distribution found for ethos-u-vela
 
-Vela 3.3.0 increases Python requirement to at least version 3.8, if not installed on your system the following error will occur:
+Vela 3.4.0 increases Python requirement to at least version 3.7, if not installed on your system the following error will occur:
 
 ```log
-python3 -m pip install ethos-u-vela==3.3.0
-ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.3.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
-ERROR: No matching distribution found for ethos-u-vela==3.3.0
+python3 -m pip install ethos-u-vela==3.4.0
+ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.4.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
+ERROR: No matching distribution found for ethos-u-vela==3.4.0
 ```
 
-Ensure that the minimum Python 3.8 requirement is installed and it's the default version.
+Ensure that the minimum Python 3.7 requirement is installed and it's the default version.
 Check your current installed version of Python by running:
 
 ```commandline
@@ -155,36 +155,36 @@ python3 --version
    Python 3.6.9
    ```
 
-2. Install the Python 3.8 packages necessary on the system:
+2. Install the Python 3.7 packages necessary on the system:
 
    ```commandline
-   sudo apt-get install python3.8 python3.8-venv libpython3.8 libpython3.8-dev
+   sudo apt-get install python3.7 python3.7-venv libpython3.7 libpython3.7-dev
    ```
 
 3. Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
 
    ```commandline
    sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
    ```
 
-4. At the prompt, update the configuration by selecting Python3.8 as the chosen default alternative:
+4. At the prompt, update the configuration by selecting Python3.7 as the chosen default alternative:
 
    ```commandline
    sudo update-alternatives --config python3
    ```
 
-5. Python3.8 is now set as default you can check it by running:
+5. Python3.7 is now set as default you can check it by running:
 
    ```commandline
    python3 --version
    ```
 
    ```log
-   Python 3.8.0
+   Python 3.7.0
    ```
 
-> **Note:** After updating to from Python3.6 Python3.8 it may happen that the `gnome-terminal` or the relative
+> **Note:** After updating to from Python3.6 Python3.7 it may happen that the `gnome-terminal` or the relative
 > shortcuts doesn't work anymore.
 > If when opening it from XTerm with `gnome-terminal` the following error appear:
 >
