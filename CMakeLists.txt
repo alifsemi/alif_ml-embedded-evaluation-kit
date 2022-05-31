@@ -50,6 +50,8 @@ set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/source/platform)
 
 include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
 
+enable_testing()
+
 if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     message(FATAL_ERROR "Source and build are in the same directory")
 else()
@@ -150,6 +152,7 @@ endif()
 list(REMOVE_ITEM USE_CASES "" ${EXCLUDED_USE_CASES})
 message(STATUS "Use-cases excluded by platform configuration: ${EXCLUDED_USE_CASES}")
 message(STATUS "Building use-cases: ${USE_CASES}.")
+
 foreach(use_case ${USE_CASES})
 
     set(SRC_USE_CASE "")

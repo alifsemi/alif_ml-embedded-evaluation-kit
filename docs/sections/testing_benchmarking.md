@@ -38,18 +38,58 @@ placed under `<build folder>/bin/` folder. For example:
 ├── ethos-u-<usecase1>
 └── ethos-u-<usecase1>
 ```
-
-To execute unit-tests for a specific use-case, in addition to the common tests, use:
-
+To view all the available tests to run, use the following command in the `<build folder>`:
 ```commandline
-arm_ml_embedded_evaluation_kit-<use_case>-tests
+ctest -N
+```
+Sample output:
+```commandline
+Test #1: ad-tests
+Test #2: asr-tests
+Test #3: img_class-tests
+Test #4: kws-tests
+Test #5: kws_asr-tests
+Test #6: noise_reduction-tests
+Test #7: object_detection-tests
+Test #8: vww-tests
+
+Total Tests: 8
 ```
 
+To execute a specific unit-test from the above list, in addition to the common tests, run the following command in the `<build folder>`:
+
+```commandline
+ctest -R <test_name>
+```
+
+To run every test that has been built, run the following command in the `<build folder>`:
+
+```commandline
+ctest
+```
+
+Sample output:
 ```log
-INFO - native platform initialised
-...
-===============================================================================
-   All tests passed (37 assertions in 7 test cases)
+Start 1: ad-tests
+1/8 Test #1: ad-tests .........................   Passed    0.17 sec
+    Start 2: asr-tests
+2/8 Test #2: asr-tests ........................   Passed    3.04 sec
+    Start 3: img_class-tests
+3/8 Test #3: img_class-tests ..................   Passed    0.49 sec
+    Start 4: kws-tests
+4/8 Test #4: kws-tests ........................   Passed    7.52 sec
+    Start 5: kws_asr-tests
+5/8 Test #5: kws_asr-tests ....................   Passed    2.85 sec
+    Start 6: noise_reduction-tests
+6/8 Test #6: noise_reduction-tests ............   Passed   16.41 sec
+    Start 7: object_detection-tests
+7/8 Test #7: object_detection-tests ...........   Passed    0.58 sec
+    Start 8: vww-tests
+8/8 Test #8: vww-tests ........................   Passed    0.07 sec
+
+
+Total Test time (real) =  34.71 sec
+
 ```
 
 > **Note:** Test outputs could contain `[ERROR]` messages. This is OK as they are coming from negative scenarios tests.

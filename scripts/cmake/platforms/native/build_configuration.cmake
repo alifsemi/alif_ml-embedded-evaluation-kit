@@ -110,5 +110,6 @@ function(platform_custom_post_build)
         target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)
+        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME})
     endif ()
 endfunction()
