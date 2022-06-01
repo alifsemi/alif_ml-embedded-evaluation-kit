@@ -134,6 +134,11 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   *Ethos™-U55* NPU driver, and CMSIS. Instructions for downloading these are listed under:
   [preparing build environment](./building.md#preparing-build-environment).
 
+> **NOTE**: A Docker image built from the `Dockerfile` provided will have all the above packages installed and
+> available for use. The GNU Embedded toolchain is available by default and the environment of the image will
+> have certain helper variables set for running the FVP within a non-interactive terminal. Run `env` to see the
+> list.
+
 ### Third-party build prerequisites
 
 - The following software is needed by TensorFlow Lite Micro.

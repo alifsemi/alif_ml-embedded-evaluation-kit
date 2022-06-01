@@ -25,7 +25,7 @@
 #
 # ml-embedded-eval-kit $ packgen -s ./                          \ # Source dir (run this from repo root)
 #           -v ./scripts/cmake/cmsis-pack-gen/use-case-api.yml  \ # This file's path
-#           -o <path-to>/ml-embedded-eval-kit-pack              \ # Where to generate the ouput
+#           -o <path-to>/ml-embedded-eval-kit-pack              \ # Where to generate the output
 #           -i <path-to>/tensorflow.tensorflow-lite-micro.pdsc  \ # Tensorflow packs' PDSC file
 #           -i <path-to>/ARM.CMSIS.pdsc                         \ # CMSIS packs' PDSC file
 #

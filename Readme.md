@@ -99,6 +99,7 @@ could be used in all tools/IDEs (for example,
 To run an ML application on the Cortex-M and Ethos-U NPU, please, follow these steps:
 
 1. Set up your environment by installing [the required prerequisites](./docs/sections/building.md#Build-prerequisites).
+> **NOTE**: A Docker image built from the `Dockerfile` provided will have all the required packages installed.
 2. Generate an optimized neural network model for Ethos-U with a Vela compiler by following instructions [here](./docs/sections/building.md#Add-custom-model).
 3. [Configure the build system](./docs/sections/building.md#Build-process).
 4. [Compile the project](./docs/sections/building.md#Building-the-configured-project) with a `make` command.

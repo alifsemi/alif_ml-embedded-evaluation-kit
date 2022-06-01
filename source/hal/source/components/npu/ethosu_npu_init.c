@@ -46,16 +46,6 @@ static size_t get_cache_arena_size()
 }
 
 /**
- * @brief   Defines the Ethos-U interrupt handler: just a wrapper around the default
- *          implementation.
- **/
-static void arm_ethosu_npu_irq_handler(void)
-{
-    /* Call the default interrupt handler from the NPU driver */
-    ethosu_irq_handler(&ethosu_drv);
-}
-
-/**
  * @brief  Initialises the NPU IRQ
  **/
 static void arm_ethosu_npu_irq_init(void)
@@ -71,6 +61,16 @@ static void arm_ethosu_npu_irq_init(void)
 
     debug("EthosU IRQ#: %u, Handler: 0x%p\n",
           ethosu_irqnum, arm_ethosu_npu_irq_handler);
+}
+
+/**
+ * @brief   Defines the Ethos-U interrupt handler: just a wrapper around the default
+ *          implementation.
+ **/
+void arm_ethosu_npu_irq_handler(void)
+{
+    /* Call the default interrupt handler from the NPU driver */
+    ethosu_irq_handler(&ethosu_drv);
 }
 
 int arm_ethosu_npu_init(void)
