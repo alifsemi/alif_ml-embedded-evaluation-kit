@@ -103,13 +103,13 @@ function(platform_custom_post_build)
         list(APPEND TEST_SOURCES ${TEST_SOURCES_GEN})
         list(APPEND TEST_RESOURCES_INCLUDE ${TEST_INC_GEN_DIR})
 
-        set(TEST_TARGET_NAME "${CMAKE_PROJECT_NAME}-${use_case}-tests")
+        set(TEST_TARGET_NAME "${use_case}_tests")
         add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})
         target_include_directories(${TEST_TARGET_NAME} PRIVATE ${TEST_RESOURCES_INCLUDE})
         target_link_libraries(${TEST_TARGET_NAME} PRIVATE ${UC_LIB_NAME} catch2)
         target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)
-        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME})
+        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME} -r junit -o ${TEST_TARGET_NAME}.xml)
     endif ()
 endfunction()
