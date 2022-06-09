@@ -82,7 +82,8 @@ set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved fo
 set(ENSEMBLE_CORE_FLAG  "-D${ENSEMBLE_CORE}")
 set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ENSEMBLE_CORE_FLAG}")
 
-set(COMPILER_FLAGS    "${OPTIONAL_FLAGS} -mcpu=cortex-m55 -mfloat-abi=hard -mthumb -mlittle-endian -Og -g -std=c++11 -DETHOS_U_IRQN=${ETHOS_U_IRQN} -DETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR} -DETHOS_U_NPU_CONFIG_ID=H256")
+#set(COMPILER_FLAGS    "${OPTIONAL_FLAGS} -mcpu=cortex-m55 -mfloat-abi=hard -mthumb -mlittle-endian -Og -g -std=c++11 -DETHOS_U_IRQN=${ETHOS_U_IRQN} -DETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR} -DETHOS_U_NPU_CONFIG_ID=H256")
+set(COMPILER_FLAGS    "${OPTIONAL_FLAGS} -mthumb -mlittle-endian -Og -g -DETHOS_U_IRQN=${ETHOS_U_IRQN} -DETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR} -DETHOS_U_NPU_CONFIG_ID=H256")
 
 # For some reason, cmake doesn't pass the c++ standard flag, adding it manually
 set(CMAKE_CXX_FLAGS             "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS} " CACHE INTERNAL "")
@@ -129,6 +130,8 @@ add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART" FORCE)
 add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
+## Platform component: audio
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
@@ -151,6 +154,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     platform_pmu
     lcd_stubs
     rte_components
+    audio_ensemble
 #    $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_cmsdk,stdout>
 )
 

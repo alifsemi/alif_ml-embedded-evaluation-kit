@@ -59,8 +59,23 @@ static const char* s_platform_name = DESIGN_NAME;
 extern ARM_DRIVER_GPIO Driver_GPIO1;
 extern ARM_DRIVER_GPIO Driver_GPIO3;
 
+void copy_vtor_table_to_ram()
+{
+    extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
+    static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048)));
+    for(int i = 0; i < 496; i++)
+    {
+        MyVectorTable[i] = __VECTOR_TABLE[i];
+    }
+    // Set the new vector table into use.
+    SCB->VTOR = (uint32_t)(&MyVectorTable[0]);
+    __DSB();
+}
+
 int platform_init(void)
 {
+    //copy_vtor_table_to_ram();
+
     tracelib_init(NULL);
 
     int err = 0;

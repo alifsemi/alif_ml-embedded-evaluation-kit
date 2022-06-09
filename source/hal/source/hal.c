@@ -21,15 +21,24 @@
 
 bool hal_platform_init(void)
 {
+    int err  = 0;
     /* Initialise platform */
-    if (0 != platform_init()) {
-        printf_err("Failed to initialise platform %s\n", platform_name());
+    err = platform_init();
+    if (0 != err) {
+        printf_err("Failed to initialise platform %s with error: %d\n", platform_name(), err);
         return false;
     }
 
     /* Initialise LCD */
-    if (0 != hal_lcd_init()) {
-        printf_err("hal_lcd_init failed\n");
+    err = hal_lcd_init();
+    if (0 != err) {
+        printf_err("hal_lcd_init failed with error: %d\n", err);
+        return false;
+    }
+
+    err = hal_audio_init();
+    if (0 != err) {
+        printf_err("hal_audio_init failed with error: %d\n", err);
         return false;
     }
 

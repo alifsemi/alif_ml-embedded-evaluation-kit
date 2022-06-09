@@ -94,9 +94,8 @@ uint64_t Get_SysTick_Cycle_Count(void)
 void platform_reset_counters(void)
 {
     if (0 != Init_SysTick()) {
-        printf("ERRRRRRRR Failed to initialise system tick config\n");
+        printf("Failed to initialise system tick config\n");
     }
-    printf("system tick config ready\n");
 #if defined (ARM_NPU)
     ethosu_pmu_init();
 #endif /* defined (ARM_NPU) */

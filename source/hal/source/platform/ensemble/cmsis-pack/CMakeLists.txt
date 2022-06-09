@@ -22,7 +22,7 @@ add_library(${CPU_HEADER_TARGET} INTERFACE)
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     include
-    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
+#    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
     Device/${ENSEMBLE_CORE}
     Device/${ENSEMBLE_CORE}/Include
     Device/${ENSEMBLE_CORE}/Config
@@ -39,7 +39,7 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 ## Include directories - public
 target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
-    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
+    #${CMSIS_SRC_PATH}/CMSIS/Driver/Include
     Device/${ENSEMBLE_CORE}
     Device/${ENSEMBLE_CORE}/Include
     Device/${ENSEMBLE_CORE}/Config
@@ -57,18 +57,18 @@ target_sources(${CMSIS_DEVICE_TARGET}
     Device/${ENSEMBLE_CORE}/Source/system_M55_HP.c
     Device/${ENSEMBLE_CORE}/Source/system_utils.c
     Device/${ENSEMBLE_CORE}/Source/tgu_M55_HP.c
-    CMSIS/Driver/Src/Driver_ADC.c
+    #CMSIS/Driver/Src/Driver_ADC.c
     CMSIS/Driver/Src/Driver_GPIO.c
     CMSIS/Driver/Src/Driver_I2S.c
-    CMSIS/Driver/Src/Driver_I3C.c
-    CMSIS/Driver/Src/Driver_LPTIMER.c
+    #CMSIS/Driver/Src/Driver_I3C.c
+    #CMSIS/Driver/Src/Driver_LPTIMER.c
     CMSIS/Driver/Src/Driver_PINMUX_AND_PINPAD.c
     CMSIS/Driver/Src/Driver_USART.c
-    CMSIS/Driver/Src/Driver_UTIMER.c
+    #CMSIS/Driver/Src/Driver_UTIMER.c
     CMSIS/Driver/Src/GPIO_ll_drv.c
     CMSIS/Driver/Src/LPTIMER_ll_drv.c
     CMSIS/Driver/Src/PHY_Generic.c
-    CMSIS/Driver/Src/UTIMER_ll_drv.c
+    #CMSIS/Driver/Src/UTIMER_ll_drv.c
     )
 
 ## Sources - private
@@ -93,7 +93,7 @@ target_link_libraries(${CMSIS_DEVICE_TARGET}
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)
-    configure_semihosting(${CMSIS_DEVICE_TARGET} ON)
+    configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
 endif()
 
 # 4 Display status:arm_ethosu_npu_irq_handler
