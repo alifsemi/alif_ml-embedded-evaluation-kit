@@ -139,9 +139,6 @@ uint32_t get_mps3_core_clock(void)
     const uint32_t default_clock = 32000000 /* 32 MHz clock */;
     static int warned_once = 0;
     if (0 != MPS3_SCC->CFG_ACLK) {
-        if (default_clock != MPS3_SCC->CFG_ACLK) {
-            warn("System clock is different to the MPS3 config set clock.\n");
-        }
         return MPS3_SCC->CFG_ACLK;
     }
 
