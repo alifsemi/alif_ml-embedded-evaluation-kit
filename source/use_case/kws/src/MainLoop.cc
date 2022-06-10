@@ -24,7 +24,15 @@
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
-
+namespace arm {
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace kws {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace kws */
+} /* namespace app */
+} /* namespace arm */
 
 using KwsClassifier = arm::app::Classifier;
 
@@ -51,21 +59,19 @@ static void DisplayMenu()
     fflush(stdout);
 }
 
-#define AUDIO_SOURCE_CONTINOUS 1
-
 void main_loop()
 {
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
     /* Load the model. */
-   /* if (!model.Init(arm::app::tensorArena,
+    if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
                     arm::app::kws::GetModelPointer(),
                     arm::app::kws::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
     }
-*/
+
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
@@ -98,29 +104,17 @@ void main_loop()
         }
         switch (menuOption) {
             case MENU_OPT_RUN_INF_NEXT:
-#ifdef AUDIO_SOURCE_CONTINOUS
-                executionSuccessful = ClassifyAudioHandler(caseContext);
-#else
                 executionSuccessful = ClassifyAudioHandler(caseContext, caseContext.Get<uint32_t>("clipIndex"), false);
-#endif
                 break;
             case MENU_OPT_RUN_INF_CHOSEN: {
                 printf("    Enter the audio clip index [0, %d]: ", NUMBER_OF_FILES-1);
                 fflush(stdout);
-#ifdef AUDIO_SOURCE_CONTINOUS
-                executionSuccessful = ClassifyAudioHandler(caseContext);
-#else
                 auto clipIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt());
                 executionSuccessful = ClassifyAudioHandler(caseContext, clipIndex, false);
-#endif
                 break;
             }
             case MENU_OPT_RUN_INF_ALL:
-#ifdef AUDIO_SOURCE_CONTINOUS
-                executionSuccessful = ClassifyAudioHandler(caseContext);
-#else
-                executionSuccessful = ClassifyAudioHandler(caseContext, caseContext.Get<uint32_t>("clipIndex"), true);
-#endif
+                executionSuccessful = ClassifyAudioHandler(caseContext,caseContext.Get<uint32_t>("clipIndex"), true);
                 break;
             case MENU_OPT_SHOW_MODEL_INFO:
                 executionSuccessful = model.ShowModelInfoHandler();

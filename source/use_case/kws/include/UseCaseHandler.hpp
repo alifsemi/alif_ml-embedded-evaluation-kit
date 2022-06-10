@@ -19,21 +19,9 @@
 
 #include "AppContext.hpp"
 
-// TODO, give as command line parameter
-#define AUDIO_SOURCE_CONTINOUS 1
-
 namespace arm {
 namespace app {
 
-#ifdef AUDIO_SOURCE_CONTINOUS
-/**
-     * @brief       Handles the inference event for data coming from microphone or some other continuos source.
-     * @param[in]   ctx         Pointer to the application context.
-     * @return      true or false based on execution success.
-     **/
-    bool ClassifyAudioHandler(ApplicationContext& ctx);
-
-#else
     /**
      * @brief       Handles the inference event.
      * @param[in]   ctx         Pointer to the application context.
@@ -42,8 +30,6 @@ namespace app {
      * @return      true or false based on execution success.
      **/
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll);
-#endif // AUDIO_SOURCE_CONTINOUS
-
 
 } /* namespace app */
 } /* namespace arm */
