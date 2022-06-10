@@ -65,6 +65,16 @@ int platform_init(void)
         return err;
     }
 
+#if defined(__ICACHE_PRESENT) && (__ICACHE_PRESENT == 1U)
+    info("Enabling I-cache.\n");
+    SCB_EnableICache();
+#endif /* __ICACHE_PRESENT */
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    info("Enabling D-cache.\n");
+    SCB_EnableDCache();
+#endif /* __DCACHE_PRESENT */
+
 #if defined(ARM_NPU)
 
 #if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
