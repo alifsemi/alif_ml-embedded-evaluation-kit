@@ -38,8 +38,8 @@ void audio_callback(uint32_t /*event*/)
     data_received = true;
 }
 
-#define AUDIO_ARRAY_SIZE 64000
-int16_t audio_rec[AUDIO_ARRAY_SIZE] IFM_BUF_ATTRIBUTE;
+#define AUDIO_SAMPLES 64000
+int16_t audio_rec[AUDIO_SAMPLES] IFM_BUF_ATTRIBUTE;
 
 int64_t total;
 int16_t max;
@@ -52,14 +52,14 @@ void calc_audio_stats()
     min = 0;
     max = 0;
     average = 0;
-    for (int i = 0; i < AUDIO_ARRAY_SIZE/2; i++) {
+    for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
         total += audio_rec[i];
         if (audio_rec[i] > max)
             max = audio_rec[i];
         if (audio_rec[i] < min)
             min = audio_rec[i];
     }
-    average = total / (AUDIO_ARRAY_SIZE/2);
+    average = total / (AUDIO_SAMPLES/2);
 }
 
 namespace arm {
@@ -75,46 +75,6 @@ namespace app {
     /* KWS inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
     {
-#if 1
-        hal_set_audio_callback(audio_callback);
-
-        info("KPV: Recording... " __TIME__ "\n");
-        // sample rate is 16Khz and we support only stereo so AUDIO_ARRAY_SIZE is 32kHz to get 1s audio samples
-        auto err = hal_get_audio_data(audio_rec, AUDIO_ARRAY_SIZE);
-        while (!data_received);
-
-        // start receiving new audio and process just received audio stream
-        data_received = false;
-
-        for (int i = 0; i < AUDIO_ARRAY_SIZE/2; i++) {
-            // convert first AUDIO_ARRAY_SIZE/2 to mono
-            audio_rec[i] = audio_rec[i*2];
-        }
-        calc_audio_stats();
-        printf("KPV: Orig: min = %d, max = %d, average = %d\n", min, max, average);
-
-        // Normalize
-#if 1
-        for (int i = 0; i < AUDIO_ARRAY_SIZE/2; i++) {
-            audio_rec[i] -= average;
-            audio_rec[i] *= 5;
-        }
-#endif
-        __DSB();
-        calc_audio_stats();
-        printf("KPV: New: min = %d, max = %d, average = %d\n", min, max, average);
-
-#if 0
-        const int8_t *p = (const int8_t*)audio_rec;
-        for (int i = 0; i < AUDIO_ARRAY_SIZE; i++) {
-            printf("%02hhX ", p[i]);
-            if (!((i+1) % 48)) {
-                printf("\n");
-            }
-        }
-        printf("\n");
-#endif
-#endif
         auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model = ctx.Get<Model&>("model");
         const auto mfccFrameLength = ctx.Get<int>("frameLength");
@@ -173,12 +133,52 @@ namespace app {
         do {
             hal_lcd_clear(COLOR_BLACK);
 
-            auto currentIndex = ctx.Get<uint32_t>("clipIndex");
+#if 1
+        hal_set_audio_callback(audio_callback);
+
+        info("KPV: Recording... " __TIME__ "\n");
+        // sample rate is 16Khz and we support only stereo so AUDIO_SAMPLES is 32kHz to get 1s audio samples
+        auto err = hal_get_audio_data(audio_rec, AUDIO_SAMPLES);
+        while (!data_received);
+        data_received = false;
+
+        // Convert sample to mono
+        for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
+            audio_rec[i] = audio_rec[i*2];
+        }
+        calc_audio_stats();
+        printf("KPV: Orig: min = %d, max = %d, average = %d\n", min, max, average);
+
+        // Normalize and add some gain
+#if 1
+        for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
+            audio_rec[i] -= average;
+            audio_rec[i] *= 5;
+        }
+#endif
+        __DSB();
+        calc_audio_stats();
+        printf("KPV: New: min = %d, max = %d, average = %d\n", min, max, average);
+
+#if 0
+        // Print out audio sample
+        const int8_t *p = (const int8_t*)audio_rec;
+        for (int i = 0; i < AUDIO_SAMPLES; i++) {
+            printf("%02hhX ", p[i]);
+            if (!((i+1) % 48)) {
+                printf("\n");
+            }
+        }
+        printf("\n");
+#endif
+#endif
+
+            auto currentIndex = 0; // ctx.Get<uint32_t>("clipIndex");
 
             /* Creating a sliding window through the whole audio clip. */
             auto audioDataSlider = audio::SlidingWindow<const int16_t>(
                     audio_rec, //get_audio_array(currentIndex),
-                    get_audio_array_size(currentIndex),
+                    AUDIO_SAMPLES/2, //get_audio_array_size(currentIndex),
                     preProcess.m_audioDataWindowSize, preProcess.m_audioDataStride);
 
             /* Declare a container to hold results from across the whole audio clip. */
@@ -242,7 +242,7 @@ namespace app {
 
             IncrementAppCtxIfmIdx(ctx,"clipIndex");
 
-        } while (runAll && ctx.Get<uint32_t>("clipIndex") != initialClipIdx);
+        } while (1); //(runAll && ctx.Get<uint32_t>("clipIndex") != initialClipIdx);
 
         return true;
     }
