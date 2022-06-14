@@ -31,6 +31,9 @@
 
 using KwsClassifier = arm::app::Classifier;
 
+#define RECORD_AUDIO
+
+#ifdef RECORD_AUDIO
 volatile uint8_t data_received;
 
 void audio_callback(uint32_t /*event*/)
@@ -61,6 +64,7 @@ void calc_audio_stats()
     }
     average = total / (AUDIO_SAMPLES/2);
 }
+#endif
 
 namespace arm {
 namespace app {
@@ -133,7 +137,7 @@ namespace app {
         do {
             hal_lcd_clear(COLOR_BLACK);
 
-#if 1
+#ifdef RECORD_AUDIO
         hal_set_audio_callback(audio_callback);
 
         info("KPV: Recording... " __TIME__ "\n");
@@ -171,14 +175,23 @@ namespace app {
         }
         printf("\n");
 #endif
-#endif
+#endif // #ifdef RECORD_AUDIO
 
+#ifdef RECORD_AUDIO
             auto currentIndex = 0; // ctx.Get<uint32_t>("clipIndex");
+#else
+            auto currentIndex = ctx.Get<uint32_t>("clipIndex");
+#endif
 
             /* Creating a sliding window through the whole audio clip. */
             auto audioDataSlider = audio::SlidingWindow<const int16_t>(
+#ifdef RECORD_AUDIO
                     audio_rec, //get_audio_array(currentIndex),
                     AUDIO_SAMPLES/2, //get_audio_array_size(currentIndex),
+#else
+                    get_audio_array(currentIndex),
+                    get_audio_array_size(currentIndex),
+#endif
                     preProcess.m_audioDataWindowSize, preProcess.m_audioDataStride);
 
             /* Declare a container to hold results from across the whole audio clip. */

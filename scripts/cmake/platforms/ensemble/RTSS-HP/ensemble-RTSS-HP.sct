@@ -70,7 +70,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
         *(InRoot$$Sections)
         .ANY (+RO)
         .ANY (+XO)
-        *.o (nn_model)
+        ;*.o (nn_model)
         *(:gdef:mpu_table)
   }
 
@@ -119,10 +119,23 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {   ; Reserve empty region for stack
   }
 
-  RW_SRAM0 SRAM0_BASE SRAM0_SIZE  {  ; 4MB ----------------------------
+  RW_SRAM0 SRAM0_BASE ALIGN 16 SRAM0_SIZE  {  ; 4MB ----------------------------
 
        ; * (camera_frame_buf)              ; Camera Frame Buffer
        ; * (camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
+
+        ; nn models baked in input matrices
+        *.o (ifm)
+
+        ; nn models default space
+        *.o (nn_model)
+
+        ; labels
+        *.o (labels)
+
+        ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+        *.o (activation_buf_dram)
+
 
         ; micro allocator related code
         micro_allocator.o (+RO)
