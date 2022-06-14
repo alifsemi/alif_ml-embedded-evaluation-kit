@@ -41,30 +41,70 @@ void audio_callback(uint32_t /*event*/)
     data_received = true;
 }
 
-#define AUDIO_SAMPLES 64000
-int16_t audio_rec[AUDIO_SAMPLES] IFM_BUF_ATTRIBUTE;
+#define AUDIO_SAMPLES (32000) // 16k samples/sec, 1sec sample, stereo
 
-int64_t total;
-int16_t max;
-int16_t min;
-int16_t average;
+static int16_t audio_rec[AUDIO_SAMPLES] IFM_BUF_ATTRIBUTE;
+static int16_t audio_max;
+static int16_t audio_min;
+static int16_t audio_average;
 
-void calc_audio_stats()
+void calc_audio_stats(const int16_t* audio, size_t samples)
 {
-    total = 0;
-    min = 0;
-    max = 0;
-    average = 0;
-    for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
-        total += audio_rec[i];
-        if (audio_rec[i] > max)
-            max = audio_rec[i];
-        if (audio_rec[i] < min)
-            min = audio_rec[i];
+    int64_t total = 0;
+    audio_min = 0;
+    audio_max = 0;
+    audio_average = 0;
+    for (unsigned int i = 0; i < samples; i++) {
+        total += audio[i];
+        if (audio[i] > audio_max)
+            audio_max = audio[i];
+        if (audio[i] < audio_min)
+            audio_min = audio[i];
     }
-    average = total / (AUDIO_SAMPLES/2);
+    audio_average = total / (samples);
 }
+
+int record_audio(int16_t* audio_buffer, size_t samples)
+{
+    hal_set_audio_callback(audio_callback);
+
+    info("Recording audio...\n");
+    int err = hal_get_audio_data(audio_buffer, samples);
+    while (!data_received);
+    data_received = false;
+
+    // Convert sample to mono, after this only samples/2 of data is valid in the buffer
+    for (unsigned int i = 0; i < samples/2; i++) {
+        audio_buffer[i] = (audio_buffer[i*2] >> 1) + (audio_buffer[i*2+1] >> 1);
+    }
+    calc_audio_stats(audio_buffer, samples/2);
+    printf("Original sample stats: min = %d, max = %d, average = %d\n", audio_min, audio_max, audio_average);
+
+#if 1
+    // Normalize and add some gain
+    for (unsigned int i = 0; i < samples/2; i++) {
+        audio_buffer[i] -= audio_average;
+        audio_buffer[i] *= 5;
+    }
 #endif
+    __DSB();
+    calc_audio_stats(audio_buffer, samples/2);
+    printf("Normalized sample stats: min = %d, max = %d, average = %d\n", audio_min, audio_max, audio_average);
+
+#if 0
+    // Print out audio sample
+    const int8_t *p = (const int8_t*)audio_buffer;
+    for (unsigned int i = 0; i < samples; i++) {
+        printf("%02hhX ", p[i]);
+        if (!((i+1) % 48)) {
+            printf("\n");
+        }
+    }
+    printf("\n");
+#endif
+    return err;
+}
+#endif // #ifdef RECORD_AUDIO
 
 namespace arm {
 namespace app {
@@ -138,46 +178,8 @@ namespace app {
             hal_lcd_clear(COLOR_BLACK);
 
 #ifdef RECORD_AUDIO
-        hal_set_audio_callback(audio_callback);
+            record_audio(audio_rec, AUDIO_SAMPLES);
 
-        info("KPV: Recording... " __TIME__ "\n");
-        // sample rate is 16Khz and we support only stereo so AUDIO_SAMPLES is 32kHz to get 1s audio samples
-        auto err = hal_get_audio_data(audio_rec, AUDIO_SAMPLES);
-        while (!data_received);
-        data_received = false;
-
-        // Convert sample to mono
-        for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
-            audio_rec[i] = audio_rec[i*2];
-        }
-        calc_audio_stats();
-        printf("KPV: Orig: min = %d, max = %d, average = %d\n", min, max, average);
-
-        // Normalize and add some gain
-#if 1
-        for (int i = 0; i < AUDIO_SAMPLES/2; i++) {
-            audio_rec[i] -= average;
-            audio_rec[i] *= 5;
-        }
-#endif
-        __DSB();
-        calc_audio_stats();
-        printf("KPV: New: min = %d, max = %d, average = %d\n", min, max, average);
-
-#if 0
-        // Print out audio sample
-        const int8_t *p = (const int8_t*)audio_rec;
-        for (int i = 0; i < AUDIO_SAMPLES; i++) {
-            printf("%02hhX ", p[i]);
-            if (!((i+1) % 48)) {
-                printf("\n");
-            }
-        }
-        printf("\n");
-#endif
-#endif // #ifdef RECORD_AUDIO
-
-#ifdef RECORD_AUDIO
             auto currentIndex = 0; // ctx.Get<uint32_t>("clipIndex");
 #else
             auto currentIndex = ctx.Get<uint32_t>("clipIndex");
@@ -186,8 +188,8 @@ namespace app {
             /* Creating a sliding window through the whole audio clip. */
             auto audioDataSlider = audio::SlidingWindow<const int16_t>(
 #ifdef RECORD_AUDIO
-                    audio_rec, //get_audio_array(currentIndex),
-                    AUDIO_SAMPLES/2, //get_audio_array_size(currentIndex),
+                    audio_rec,
+                    AUDIO_SAMPLES/2,
 #else
                     get_audio_array(currentIndex),
                     get_audio_array_size(currentIndex),
@@ -201,8 +203,10 @@ namespace app {
             std::string str_inf{"Running inference... "};
             hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
                     dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+#ifndef RECORD_AUDIO
             info("Running inference on audio clip %" PRIu32 " => %s\n", currentIndex,
                  get_filename(currentIndex));
+#endif
 
             /* Start sliding through audio clip. */
             while (audioDataSlider.HasNext()) {
@@ -255,8 +259,11 @@ namespace app {
 
             IncrementAppCtxIfmIdx(ctx,"clipIndex");
 
-        } while (1); //(runAll && ctx.Get<uint32_t>("clipIndex") != initialClipIdx);
-
+#ifdef RECORD_AUDIO
+        } while (1);
+#else
+        } while (runAll && ctx.Get<uint32_t>("clipIndex") != initialClipIdx);
+#endif
         return true;
     }
 
