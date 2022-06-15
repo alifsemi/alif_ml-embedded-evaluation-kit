@@ -28,48 +28,38 @@
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
 
-/*--------------------- ITCM Configuration ----------------------------------
+
+/*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM4 is mapped as ITCM */
 #define ITCM_BASE                 0x00000000
 #define ITCM_SIZE                 SRAM4_SIZE /* 256K */
 #define ITCM_GLOBAL_BASE          SRAM4_BASE
 
-/*--------------------- DTCM Configuration ---------------------------
-
+/*--------------------- DTCM Configuration ---------------------------*/
 /* SRAM5 is mapped as DTCM */
 #define DTCM_BASE                 0x20000000
 #define DTCM_SIZE                 SRAM5_SIZE /* 256KB */
 #define DTCM_GLOBAL_BASE          SRAM5_BASE
 
 
-/*--------------------- Stack / Heap Configuration ---------------------------
-; <h> Stack / Heap Configuration
-;   <o0> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
-;   <o1> Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
-;   <o2> App Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
-; </h>
- *----------------------------------------------------------------------------*/
 #define __STACK_SIZE    0x00004000
-#define __HEAP_SIZE     0x00020000
-#define __APP_HEAP_SIZE 0x00020000
+#define __HEAP_SIZE     0x00017000
+#define __APP_HEAP_SIZE 0x00017000
 
-/*
 ;------------- <<< end of configuration section >>> ---------------------------
-*/
 
-
-/*----------------------------------------------------------------------------
-   User Stack & Heap boundary definition
-   *----------------------------------------------------------------------------*/
+;----------------------------------------------------------------------------
+;   User Stack & Heap boundary definition
+;----------------------------------------------------------------------------
 #define __STACK_TOP     (DTCM_BASE + DTCM_SIZE)   /* starts at end of RAM */
 #define __HEAP_BASE     (AlignExpr(+0, 8))            /* starts after RW_RAM section, 8 byte aligned */
 #define __APP_HEAP_BASE (AlignExpr(+0, 8)) 	          /* starts after HEAP, 8 byte aligned */
 
-/*----------------------------------------------------------------------------
-  Scatter File Definitions definition
- *----------------------------------------------------------------------------*/
-#define __RO_BASE       MRAM_BASE
-#define __RO_SIZE       MRAM_SIZE
+;----------------------------------------------------------------------------
+;  Scatter File Definitions definition
+;----------------------------------------------------------------------------
+#define __RO_BASE       SRAM6_BASE
+#define __RO_SIZE       SRAM6_SIZE
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)
@@ -81,86 +71,78 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *(InRoot$$Sections)
    .ANY (+RO)
    .ANY (+XO)
+   *(:gdef:mpu_table)
   }
 
+  ;-----------------------------------------------------
+  ; R/W region - ramaining part of the 1MiB RAM region
+  ; Other parts of this region used up by stack + heap.
+  ;-----------------------------------------------------
+  DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
+        .ANY (+RW +ZI)
+  }
 
-#if __HEAP_SIZE > 0
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {   ; Reserve empty region for heap
   }
-#endif
 
   APP_HEAP  __APP_HEAP_BASE EMPTY  __APP_HEAP_SIZE {; Reserve empty region for application heap
   }
 
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {   ; Reserve empty region for stack
   }
-}
 
- LOAD_REGION_1       0x02000000                  0x00400000
-{ 
-  RW_SRAM0 0x02000000 0x00400000  {  ; Update sections as needed
-          ; nn model's baked in input matrices
-        ;*.o (ifm)
+ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
+      arm_softmax_s8.o (+RO)
+      arm_depthwise_conv_u8_basic_ver1.o (+RO)
+      arm_nn_depthwise_conv_nt_t_s8.o (+RO)
+      arm_avgpool_s8.o (+RO)
+      arm_convolve_1_x_n_s8.o (+RO)
+      arm_convolve_1x1_s8_fast.o (+RO)
+      arm_convolve_s8.o (+RO)
+      arm_convolve_wrapper_s8.o (+RO)
+      arm_depthwise_conv_s8.o (+RO)
+      arm_fully_connected_s8.o (+RO)
 
-        ; nn model
-        ;*.o (nn_model)
+      pow.o (+RO)
+      log.o (+RO)
+      ;logf.o (+RO)
+      Mfcc.o (+RO)
+      conv.o (+RO)
+      pooling.o (+RO)
 
-        ; if the activation buffer (tensor arena) doesn't
-        ; fit in the SRAM region, we accommodate it here
-        ;*.o (activation_buf)
-
-        *.o (+RO)
-
-        ; Flatbuffer conversion related code
-        flatbuffer_conversions.o (+RO)
-
-        ; micro allocator related code
-        micro_allocator.o (+RO)
-
-        arm_softmax_s8.o (+RO)
-        arm_depthwise_conv_u8_basic_ver1.o (+RO)
-        arm_nn_depthwise_conv_nt_t_s8.o (+RO)
-        arm_avgpool_s8.o (+RO)
-        arm_convolve_1_x_n_s8.o (+RO)
-        arm_convolve_1x1_s8_fast.o (+RO)
-        arm_convolve_s8.o (+RO)
-        arm_convolve_wrapper_s8.o (+RO)
-        arm_depthwise_conv_s8.o (+RO)
-        arm_fully_connected_s8.o (+RO)
-        pow.o (+RO)
-        log.o (+RO)
-        logf.o (+RO)
-        Mfcc.o (+RO)
-        conv.o (+RO)
-        pooling.o (+RO)
-
-        
-
-        ; RO data (incl. unwinding tables for debugging)
-        .ANY (+RO-DATA)
-
-  }
-  RW_SRAM1 0x08000000 0x00280000  {  ; Update sections as needed
-
-          ; activation buffers a.k.a tensor arena
-        *.o (.bss.NoInit.activation_buf)
-
+      ; Flatbuffer conversion related code
+      flatbuffer_conversions.o (+RO)
+      ethosu_driver.o (+RO)
+      ethosu_device_u55_u65.o (+RO)
+      ethosu_pmu.o (+RO)
   }
 
-      ;-----------------------------------------------------
-    ; R/W region - ramaining part of the 1MiB RAM region
-    ; Other parts of this region used up by stack + heap.
-    ;-----------------------------------------------------
-    rw.bin        0x20060000     (0x00100000 - 0x00060000)
-    {
-        .ANY(+RO)
-        .ANY(+RW +ZI)
+ RW_SRAM1 SRAM1_BASE ALIGN 16 SRAM1_SIZE  {  ; 2.5MB ----------------------------
+      ; nn models baked in input matrices
+      *.o (ifm)
+
+      ; nn models default space
+      *.o (nn_model)
+
+      ; labels
+      *.o (labels)
+
+      ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+      *.o (activation_buf_dram)
+
+      ; activation buffers a.k.a tensor arena
+      *.o (.bss.NoInit.activation_buf_sram)
+
+      ; micro allocator related code
+      micro_allocator.o (+RO)
+      .ANY (+RO-DATA)
     }
 
   PADDING +0 ALIGN 16 FILL 0 16
   {
   }
 }
+
 #if 0
 
 #define _PARTITION_ADDRESS		  0x8057F000

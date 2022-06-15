@@ -1,0 +1,18 @@
+{
+    "HP_Image": {
+        "binary": "HP_image.bin",
+        "version" : "1.0.0",
+        "mramAddress": "0x80100000",
+        "cpu_id": "M55_HP",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "HE_Voice": {
+        "binary": "HE_voice.bin",
+        "version" : "1.0.0",
+	"loadAddress": "0x62000000",
+        "cpu_id": "M55_HE",
+        "flags": ["boot", "load"],
+        "signed": false
+    }
+}

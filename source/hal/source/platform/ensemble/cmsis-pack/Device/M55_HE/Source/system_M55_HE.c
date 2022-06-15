@@ -186,4 +186,10 @@ __ISB();
 
   SystemCoreClock = SYSTEM_CLOCK;
   __dummy = &__mram_atoc;
+
+  //Enable the PMU
+  ARM_PMU_Enable();
+
+  //Enable PMU Cycle Counter
+  ARM_PMU_CNTR_Enable(PMU_CNTENSET_CCNTR_ENABLE_Msk);
 }

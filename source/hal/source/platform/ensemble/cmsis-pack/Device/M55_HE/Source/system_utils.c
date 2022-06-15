@@ -84,3 +84,30 @@ void* GlobalToLocal(void *in_addr)
     else
         return ((void*)addr);
 }
+
+/**
+  \fn          void PMU_delay_loop_us(unsigned int delay_us)
+  \brief       Using PMU cycle counter for delay. User need to
+               take care of disabling the preemption before
+	       calling this PMU_delay_loop_us function. Maximum
+               delay supported (2^32/(SystemCoreClock/1000000))
+               micro seconds.
+  \param[in]   delay_us delay in micro seconds.
+*/
+void PMU_delay_loop_us(unsigned int delay_us)
+{
+    if (delay_us == 0)
+            return;
+    uint32_t timestamp = ARM_PMU_Get_CCNTR();
+    unsigned int delay_in_cycles = delay_us * (GetSystemCoreClock()/1000000);
+    unsigned int diff = 0, curt_count = 0;
+
+    while (diff < delay_in_cycles)
+    {
+        curt_count = ARM_PMU_Get_CCNTR();
+        if(curt_count > timestamp)
+            diff = curt_count - timestamp;
+        else
+            diff = (((0xFFFFFFFF) - timestamp) + curt_count);
+    }
+}

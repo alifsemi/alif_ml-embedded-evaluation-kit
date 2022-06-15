@@ -21,6 +21,7 @@
 
 cmake_minimum_required(VERSION 3.16.3)
 set(PLATFORM_DRIVERS_TARGET platform_drivers)
+set(PLATFORM_DRIVERS_INTERFACE platform_drivers_if)
 
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
@@ -106,6 +107,15 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
     include/${TARGET_SUBSYSTEM}
     )
 
+# Interface includes
+add_library(${PLATFORM_DRIVERS_INTERFACE} INTERFACE)
+
+target_include_directories(${PLATFORM_DRIVERS_INTERFACE}
+INTERFACE
+include
+include/${TARGET_SUBSYSTEM}
+)
+
 
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
@@ -121,7 +131,8 @@ if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
 endif()
 
-
+# Ensemble services lib to have IPC communication
+add_subdirectory(services_lib ${CMAKE_BINARY_DIR}/services_lib)
 
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
@@ -150,12 +161,12 @@ endif()
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log
+    audio_ensemble
+    ensemble_services
     cmsis_ensemble
     platform_pmu
     lcd_stubs
     rte_components
-    audio_ensemble
-#    $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_cmsdk,stdout>
 )
 
 # Set the CPU profiling definition

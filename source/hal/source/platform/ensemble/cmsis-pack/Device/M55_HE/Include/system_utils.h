@@ -41,6 +41,28 @@
 extern "C" {
 #endif
 
+// common helper macros
+
+#ifndef ENABLE
+#define ENABLE                              (0x1)
+#endif
+
+#ifndef DISABLE
+#define DISABLE                             (0x0)
+#endif
+
+#ifndef MASK
+#define MASK(h,l)                           (((~(0U)) << (l)) & (~(0U) >> (32 - 1 - (h))))
+#endif
+
+#define BIT(nr)                             (1UL << (nr))
+#define SET_BIT(REG, BIT_Msk)               ((REG) |= (BIT_Msk))
+#define CLEAR_BIT(REG, BIT_Msk)             ((REG) &= ~(BIT_Msk))
+#define READ_BIT(REG, BIT_Msk)              ((REG) & (BIT_Msk))
+#define CLEAR_REG(REG)                      ((REG) = (0x0))
+#define WRITE_REG(REG, VAL)                 ((REG) = (VAL))
+#define READ_REG(REG)                       ((REG))
+
 // Function documentation
 
 /**
@@ -58,6 +80,17 @@ void* LocalToGlobal(void *in_addr);
   \return      void* local address
 */
 void* GlobalToLocal(void *in_addr);
+
+/**
+  \fn          void PMU_delay_loop_us(unsigned int delay_us)
+  \brief       Using PMU cycle counter for delay. User need to
+               take care of disabling the preemption before
+               calling this PMU_delay_loop_us function. Maximum
+               delay supported (2^32/(SystemCoreClock/1000000))
+               micro seconds.
+  \param[in]   delay_us delay in micro seconds.
+*/
+void PMU_delay_loop_us(unsigned int delay_us);
 
 #ifdef __cplusplus
 }

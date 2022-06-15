@@ -12,6 +12,7 @@
  * Define the Device Header File: 
  */
 #define CMSIS_device_header "M55_HE.h"
+#include CMSIS_device_header
 
 /* AlifSemiconductor::Device.SOC Peripherals.CAMERA Controller */
 #define RTE_Drivers_CAMERA0   1           /* Driver CAMERA Controller */

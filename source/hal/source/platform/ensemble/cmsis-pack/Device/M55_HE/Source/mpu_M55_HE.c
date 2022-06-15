@@ -45,6 +45,17 @@
   #error device not specified!
 #endif
 
+const ARM_MPU_Region_t mpu_table[] = {
+    {   /* EXTSYS0 TCM */
+        .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 1UL),
+        .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 0UL)
+    },
+    {
+  /* Low Power Peripheral Regions */
+        .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
+        .RLAR = ARM_MPU_RLAR(0x72FFFFFFUL, 1UL)
+    },
+};
 
 /* Public functions ----------------------------------------------------------*/
 /**
@@ -56,18 +67,6 @@
  */
 static void MPU_Load_Regions(void)
 {
-    static const ARM_MPU_Region_t table[] = {
-        {   /* EXTSYS0 TCM */
-            .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 1UL),
-            .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 0UL)
-        },
-        {
-	    /* Low Power Peripheral Regions */
-            .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
-            .RLAR = ARM_MPU_RLAR(0x72FFFFFFUL, 1UL)
-        },
-    };
-
     /* Define the possible Attribute regions */
     ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR( /* Attr0, Normal Memory, Non-Cacheable */
         ARM_MPU_ATTR_NON_CACHEABLE,
@@ -75,7 +74,7 @@ static void MPU_Load_Regions(void)
     ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR_DEVICE); /* Attr1, Device Memory */
 
     /* Load the regions from the table */
-    ARM_MPU_Load(0U, &table[0], 2U);
+    ARM_MPU_Load(0U, &mpu_table[0], 2U);
 }
 
 /**
@@ -115,4 +114,3 @@ void MPU_Setup(void)
 }
 
 /************************ (C) COPYRIGHT ALIF SEMICONDUCTOR *****END OF FILE****/
-

@@ -52,11 +52,11 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
 ## Platform sources
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    Device/${ENSEMBLE_CORE}/Source/mpu_M55_HP.c
-    Device/${ENSEMBLE_CORE}/Source/startup_M55_HP.c
-    Device/${ENSEMBLE_CORE}/Source/system_M55_HP.c
+    Device/${ENSEMBLE_CORE}/Source/mpu_${ENSEMBLE_CORE}.c
+    Device/${ENSEMBLE_CORE}/Source/startup_${ENSEMBLE_CORE}.c
+    Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     Device/${ENSEMBLE_CORE}/Source/system_utils.c
-    Device/${ENSEMBLE_CORE}/Source/tgu_M55_HP.c
+    Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
     #CMSIS/Driver/Src/Driver_ADC.c
     CMSIS/Driver/Src/Driver_GPIO.c
     CMSIS/Driver/Src/Driver_I2S.c

@@ -39,6 +39,17 @@ cmake -DTARGET_PLATFORM=ensemble \
     -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 
+NOTE! On CM55_HE there is a different model than in HP!
+; ------------ Keyword spotting on CM55-HE ARMCLANG----------------------
+cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HE \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DUSE_CASE_BUILD=kws \
+    -Dkws_MODEL_TFLITE_PATH=resources_downloaded/kws/kws_micronet_m_vela_H128.tflite \
+    -Dkws_FILE_PATH=resources/kws/samples/down.wav \
+    -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+
+
 ; ------------Build instructions Keyword spotting on CM55-HP ARMCLANG----------------------
 git clone git@github.com:alifsemi/ml-embedded-evaluation-kit-ensemble.git (default branch 'ensemble_integration' should be automatically selected)
 git submodule init

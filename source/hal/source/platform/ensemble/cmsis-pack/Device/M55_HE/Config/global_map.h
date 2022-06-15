@@ -105,13 +105,25 @@
 #define I3C0_BASE                 (EXPMST0_APB_B_BASE + 0x00008000)
 
 /* APB-C Peripherals */
+#define ADC0_BASE                 (EXPMST0_APB_C_BASE)
+#define ADC1_BASE                 (EXPMST0_APB_C_BASE + 0x00001000)
+#define ADC2_BASE                 (EXPMST0_APB_C_BASE + 0x00002000)
+#define COMP0_BASE                (EXPMST0_APB_C_BASE + 0x00003000)
+#define COMP1_BASE                (EXPMST0_APB_C_BASE + 0x00004000)
+#define COMP2_BASE                (EXPMST0_APB_C_BASE + 0x00005000)
+#define COMP3_BASE                (EXPMST0_APB_C_BASE + 0x00006000)
+#define DAC0_BASE                 (EXPMST0_APB_C_BASE + 0x00008000)
+#define DAC1_BASE                 (EXPMST0_APB_C_BASE + 0x00009000)
 #define CFGMST0_BASE              (EXPMST0_APB_C_BASE + 0x0000F000)
 #define CFGMST0_SSI               (CFGMST0_BASE + 0x00000028)
 
 /* APB-D Peripherals */
 #define CAMERA0_BASE              (EXPMST0_APB_D_BASE)
 #define CDC200_BASE               (EXPMST0_APB_D_BASE + 0x00001000)
+#define MIPI_DSI_BASE             (EXPMST0_APB_D_BASE + 0x00002000)
+#define MIPI_CSI2_BASE            (EXPMST0_APB_D_BASE + 0x00003000)
 #define CFGSLV1_BASE              (EXPMST0_APB_D_BASE + 0x0000F000)
+#define CSI_PIXCLK_CTRL           (CFGSLV1_BASE + 0x00000008)
 
 
 /* APB-E Peripherals */
@@ -120,13 +132,25 @@
 #define VBAT_BASE                 (LP_PERIPHERAL_BASE)
 #define RTC0_BASE                 (VBAT_BASE + 0x00010000)
 #define LPTIMER_BASE              (VBAT_BASE + 0x00030000)
+#if RTE_SILICON_REV_A
+#define LPTIMER_CLK_SEL_REG       (LPTIMER_BASE + 0x00010028)
+#endif
+#if RTE_SILICON_REV_B0
+#define LPTIMER_CLK_SEL_REG       (0x1A609004)
+#endif
+#define VBAT_REGS_BASE            (VBAT_BASE + 0x00040000)
+#define VBAT_ANA_REG2_BASE        (VBAT_REGS_BASE + 0x0000001C)
 
 /* LPAON Global Address Map */
-#define LPAON_BASE                (LP_PERIPHERAL_BASE + 0x01000000)
-#define PINMUX_BASE               (LPAON_BASE + 0x00006000)
-#define LPAON_VBAT_REGS_BASE      (LPAON_BASE + 0x00007000)
-#define PADCTRL_BASE              (LPAON_VBAT_REGS_BASE)
-#define LPPADCTRL_BASE            (LP_PERIPHERAL_BASE + 0x00070000 - 0x20)
+#define PADCTRL_BASE                        (LPAON_VBAT_REGS_BASE)
+#define VBAT_GPIOV_REGS                     (LP_PERIPHERAL_BASE + 0x70000)
+#define LP_PADCTRL_BASE                     (VBAT_GPIOV_REGS + 0x160)
+#define LPAON_BASE                          (LP_PERIPHERAL_BASE + 0x01000000)
+#define PINMUX_BASE                         (LPAON_BASE + 0x00006000)
+#define LPAON_VBAT_REGS_BASE                (LPAON_BASE + 0x00007000)
+#define LPAON_CLK_RST_4_BASE                (LPAON_VBAT_REGS_BASE + 0x00000410)
+#define LPAON_REGS_BASE                     (LPAON_BASE + 0x0000A000)
+#define LPAON_ANA_XTAL_OSCILLATOR_REG_BASE  (LPAON_REGS_BASE + 0x00000100)
 
 /* Ethernet 50MHz clock mux register */
 #define ETH_50M_CLK_MUX_REG       (LPAON_VBAT_REGS_BASE + 0x00000408)

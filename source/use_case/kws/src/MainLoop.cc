@@ -23,6 +23,8 @@
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+#include "services_lib_api.h"
+#include "services_main.h"
 
 namespace arm {
 namespace app {
@@ -59,9 +61,21 @@ static void DisplayMenu()
     fflush(stdout);
 }
 
+// IPC callback
+void ipc_rx_callback(void *data)
+{
+    m55_data_payload_t* payload = (m55_data_payload_t*)data;
+    char *st = (char*)payload->msg;
+    uint16_t id = payload->id;
+    printf("****** Got message from M55 HP CPU: %s, id: %d\n", st, id);
+}
+
 void main_loop()
 {
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
+
+    // init MHU Services communication
+    services_init(ipc_rx_callback);
 
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,

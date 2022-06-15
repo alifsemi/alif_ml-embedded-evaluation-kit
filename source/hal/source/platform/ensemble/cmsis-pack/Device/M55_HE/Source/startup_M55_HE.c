@@ -123,6 +123,18 @@ void I2S3_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler"
 
 void ETH_SBD_IRQHandler     (void) __attribute__ ((weak, alias("Default_Handler")));
 
+void ADC0_INTR_DONE_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
+void ADC1_INTR_DONE_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
+void ADC2_INTR_DONE_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
+
+void GPIO4_PIN0_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN1_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN2_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN3_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN4_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN5_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN6_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
+void GPIO4_PIN7_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
 void GPIO1_PIN0_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
 void GPIO1_PIN1_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
 void GPIO1_PIN2_IRQHandler  (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -211,6 +223,8 @@ void GPIO3_PIN20_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler"
 void GPIO3_PIN21_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
 void GPIO3_PIN22_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
 void GPIO3_PIN23_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
+
+void MIPI_CSI2_IRQHandler   (void) __attribute__ ((weak, alias("Default_Handler")));
 
 void CAMERA0_IRQHandler     (void) __attribute__ ((weak, alias("Default_Handler")));
 
@@ -318,7 +332,7 @@ void UTIMER_IRQHandler93    (void) __attribute__ ((weak, alias("Default_Handler"
 void UTIMER_IRQHandler94    (void) __attribute__ ((weak, alias("Default_Handler")));
 void UTIMER_IRQHandler95    (void) __attribute__ ((weak, alias("Default_Handler")));
 
-void arm_npu_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void arm_ethosu_npu_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -404,7 +418,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt2_Handler,                       /*   2 Interrupt 2 */
   Interrupt3_Handler,                       /*   3 Interrupt 3 */
   Interrupt4_Handler,                       /*   4 Interrupt 4 */
-  arm_npu_irq_handler,                      /*   Ethos-U55 Interrupt */
+  arm_ethosu_npu_irq_handler,                      /*   Ethos-U55 Interrupt */
   Interrupt6_Handler,                       /*   6 Interrupt 6 */
   Interrupt7_Handler,                       /*   7 Interrupt 7 */
   Interrupt8_Handler,                       /*   8 Interrupt 8 */
@@ -507,7 +521,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   ETH_SBD_IRQHandler,                       /*   155  Interrupt 155 */
   Interrupt6_Handler,                       /*   6  Interrupt 6 */
   Interrupt7_Handler,                       /*   7  Interrupt 7 */
-  Interrupt8_Handler,                       /*   8  Interrupt 8 */
+  ADC0_INTR_DONE_IRQHandler,                /*   158  Interrupt 158 */
   Interrupt9_Handler,                       /*   9  Interrupt 9 */
   Interrupt0_Handler,                       /*   160  Interrupt 160 */
   Interrupt1_Handler,                       /*   1  Interrupt 1 */
@@ -515,7 +529,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt3_Handler,                       /*   3  Interrupt 3 */
   Interrupt4_Handler,                       /*   4  Interrupt 4 */
   Interrupt5_Handler,                       /*   5  Interrupt 5 */
-  Interrupt6_Handler,                       /*   6  Interrupt 6 */
+  ADC1_INTR_DONE_IRQHandler,                /*   166  Interrupt 166 */
   Interrupt7_Handler,                       /*   7  Interrupt 7 */
   Interrupt8_Handler,                       /*   8  Interrupt 8 */
   Interrupt9_Handler,                       /*   9  Interrupt 9 */
@@ -523,7 +537,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt1_Handler,                       /*   1  Interrupt 1 */
   Interrupt2_Handler,                       /*   2  Interrupt 2 */
   Interrupt3_Handler,                       /*   3  Interrupt 3 */
-  Interrupt4_Handler,                       /*   4  Interrupt 4 */
+  ADC2_INTR_DONE_IRQHandler,                /*   174  Interrupt 174 */
   Interrupt5_Handler,                       /*   5  Interrupt 5 */
   Interrupt6_Handler,                       /*   6  Interrupt 6 */
   Interrupt7_Handler,                       /*   7  Interrupt 7 */
@@ -535,14 +549,14 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt3_Handler,                       /*   3  Interrupt 3 */
   Interrupt4_Handler,                       /*   4  Interrupt 4 */
   Interrupt5_Handler,                       /*   5  Interrupt 5 */
-  Interrupt6_Handler,                       /*   6  Interrupt 6 */
-  Interrupt7_Handler,                       /*   7  Interrupt 7 */
-  Interrupt8_Handler,                       /*   8  Interrupt 8 */
-  Interrupt9_Handler,                       /*   9  Interrupt 9 */
-  Interrupt0_Handler,                       /*   190  Interrupt 190 */
-  Interrupt1_Handler,                       /*   1  Interrupt 1 */
-  Interrupt2_Handler,                       /*   2  Interrupt 2 */
-  Interrupt3_Handler,                       /*   3  Interrupt 3 */
+  GPIO4_PIN0_IRQHandler,                    /*   186 Interrupt 186  */
+  GPIO4_PIN1_IRQHandler,                    /*   187 Interrupt 187  */
+  GPIO4_PIN2_IRQHandler,                    /*   188 Interrupt 188  */
+  GPIO4_PIN3_IRQHandler,                    /*   189 Interrupt 189  */
+  GPIO4_PIN4_IRQHandler,                    /*   190 Interrupt 190  */
+  GPIO4_PIN5_IRQHandler,                    /*   191 Interrupt 191  */
+  GPIO4_PIN6_IRQHandler,                    /*   192 Interrupt 192  */
+  GPIO4_PIN7_IRQHandler,                    /*   193 Interrupt 193  */
   GPIO1_PIN0_IRQHandler,                    /*   194  Interrupt 194 */
   GPIO1_PIN1_IRQHandler,                    /*   195  Interrupt 195 */
   GPIO1_PIN2_IRQHandler,                    /*   196  Interrupt 196 */
@@ -684,7 +698,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt2_Handler,                       /*   2  Interrupt 2 */
   Interrupt3_Handler,                       /*   3  Interrupt 3 */
   Interrupt4_Handler,                       /*   4  Interrupt 4 */
-  Interrupt5_Handler,                       /*   5  Interrupt 5 */
+  MIPI_CSI2_IRQHandler,                     /*   335  Interrupt 335 */
   CAMERA0_IRQHandler,                       /*   336  Interrupt 336 */
   LPTIMER_CHANNEL0_IRQHandler,              /*   337  Interrupt 337 */
   LPTIMER_CHANNEL1_IRQHandler,              /*   338  Interrupt 338 */
@@ -858,4 +872,3 @@ void Default_Handler(void)
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
   #pragma clang diagnostic pop
 #endif
-

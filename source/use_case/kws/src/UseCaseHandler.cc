@@ -26,8 +26,14 @@
 #include "KwsResult.hpp"
 #include "log_macros.h"
 #include "KwsProcessing.hpp"
+#include "services_lib_api.h"
+#include "services_main.h"
 
 #include <vector>
+
+extern uint32_t m55_comms_handle;
+m55_data_payload_t mhu_data;
+
 
 using KwsClassifier = arm::app::Classifier;
 
@@ -47,6 +53,33 @@ static int16_t audio_rec[AUDIO_SAMPLES] IFM_BUF_ATTRIBUTE;
 static int16_t audio_max;
 static int16_t audio_min;
 static int16_t audio_average;
+
+namespace arm {
+namespace app {
+
+static void send_msg_if_needed(std::vector<kws::KwsResult> &results)
+{
+    mhu_data.id = 2; // id for M55_HE
+    for (const auto& result : results) {
+        if (result.m_resultVec.empty()) {
+            // no results, return fast
+            return;
+        }
+
+        for (uint32_t j = 0; j < result.m_resultVec.size(); ++j) {
+            if (result.m_resultVec[j].m_normalisedVal > 0.7) {
+                if (result.m_resultVec[j].m_label == "go") {
+                    memcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str(), strlen(result.m_resultVec[j].m_label.c_str()));
+                    SERVICES_send_msg(m55_comms_handle, &mhu_data);
+
+                } else if (result.m_resultVec[j].m_label == "stop") {
+                    memcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str(), strlen(result.m_resultVec[j].m_label.c_str()));
+                    SERVICES_send_msg(m55_comms_handle, &mhu_data);
+                }
+            }
+        }
+    }
+}
 
 void calc_audio_stats(const int16_t* audio, size_t samples)
 {
@@ -84,7 +117,7 @@ int record_audio(int16_t* audio_buffer, size_t samples)
     // Normalize and add some gain
     for (unsigned int i = 0; i < samples/2; i++) {
         audio_buffer[i] -= audio_average;
-        audio_buffer[i] *= 5;
+        audio_buffer[i] <<= 2;
     }
 #endif
     __DSB();
@@ -106,8 +139,7 @@ int record_audio(int16_t* audio_buffer, size_t samples)
 }
 #endif // #ifdef RECORD_AUDIO
 
-namespace arm {
-namespace app {
+
 
     /**
      * @brief           Presents KWS inference results.
@@ -256,6 +288,9 @@ namespace app {
             }
 
             profiler.PrintProfilingResult();
+
+            // send the message to HP is correct word was recognized
+            send_msg_if_needed(finalResults);
 
             IncrementAppCtxIfmIdx(ctx,"clipIndex");
 
