@@ -1,8 +1,6 @@
 #! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
-/*
-;-------- <<< Use Configuration Wizard in Context Menu >>> -------------------
-*/
+
 /*On chip RAM Regions */
 #define SRAM0_BASE                0x02000000
 #define SRAM0_SIZE                0x00400000		/* 4M */
@@ -28,7 +26,6 @@
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
 
-
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM4 is mapped as ITCM */
 #define ITCM_BASE                 0x00000000
@@ -41,12 +38,9 @@
 #define DTCM_SIZE                 SRAM5_SIZE /* 256KB */
 #define DTCM_GLOBAL_BASE          SRAM5_BASE
 
-
 #define __STACK_SIZE    0x00004000
 #define __HEAP_SIZE     0x00017000
 #define __APP_HEAP_SIZE 0x00017000
-
-;------------- <<< end of configuration section >>> ---------------------------
 
 ;----------------------------------------------------------------------------
 ;   User Stack & Heap boundary definition
@@ -74,24 +68,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *(:gdef:mpu_table)
   }
 
-  ;-----------------------------------------------------
-  ; R/W region - ramaining part of the 1MiB RAM region
-  ; Other parts of this region used up by stack + heap.
-  ;-----------------------------------------------------
-  DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-        .ANY (+RW +ZI)
-  }
-
-  ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {   ; Reserve empty region for heap
-  }
-
-  APP_HEAP  __APP_HEAP_BASE EMPTY  __APP_HEAP_SIZE {; Reserve empty region for application heap
-  }
-
-  ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {   ; Reserve empty region for stack
-  }
-
-ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
+  ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
       arm_softmax_s8.o (+RO)
       arm_depthwise_conv_u8_basic_ver1.o (+RO)
       arm_nn_depthwise_conv_nt_t_s8.o (+RO)
@@ -117,7 +94,19 @@ ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
       ethosu_pmu.o (+RO)
   }
 
- RW_SRAM1 SRAM1_BASE ALIGN 16 SRAM1_SIZE  {  ; 2.5MB ----------------------------
+  ;-----------------------------------------------------
+  ; R/W region - ramaining part of the 1MiB RAM region
+  ; Other parts of this region used up by stack + heap.
+  ;-----------------------------------------------------
+  DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
+      .ANY (+RW +ZI)
+  }
+
+  ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
+  APP_HEAP  __APP_HEAP_BASE EMPTY  __APP_HEAP_SIZE {  }
+  ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
+
+  RW_SRAM1 SRAM1_BASE ALIGN 16 SRAM1_SIZE  {  ; 2.5MB ----------------------------
       ; nn models baked in input matrices
       *.o (ifm)
 
@@ -135,25 +124,18 @@ ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
 
       ; micro allocator related code
       micro_allocator.o (+RO)
-      .ANY (+RO-DATA)
     }
 
-  PADDING +0 ALIGN 16 FILL 0 16
-  {
-  }
+  PADDING +0 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0
-
-#define _PARTITION_ADDRESS		  0x8057F000
-#define _PARTITION_SIZE			    0x1000
-#define _APP_MAX_SIZE			      0x57F000
+#define _PARTITION_ADDRESS          0x8057F000
+#define _PARTITION_SIZE             0x1000
 
 LR_PARTITION _PARTITION_ADDRESS  _PARTITION_SIZE
 {
 	RESERVED +0 FILL 0 (_PARTITION_SIZE - 16) {}
-	ATOC +0 16 {
-		*(:gdef:__mram_atoc)
-	}
+	ATOC +0 16 { *(:gdef:__mram_atoc) }
 }
 #endif

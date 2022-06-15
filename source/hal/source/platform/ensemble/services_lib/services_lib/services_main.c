@@ -10,9 +10,9 @@
 #include "uart_tracelib.h"
 
 #if   CPU == M55_HE || defined(M55_HE)
-    #include "M55_HE.h"
+//    #include "M55_HE.h"
 #elif CPU == M55_HP || defined(M55_HP)
-    #include "M55_HP.h"
+//    #include "M55_HP.h"
 #else
     #error Target CPU is not defined
 #endif
