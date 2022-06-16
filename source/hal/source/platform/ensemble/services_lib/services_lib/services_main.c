@@ -77,43 +77,43 @@ static mhu_driver_out_t s_mhu_driver_out;
 
 static mhu_m55_receive_callback_t M55_receive_callback = 0;
 
-static void mhu0_se_sender_irq_handler()
+void mhu0_se_sender_irq_handler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU0);
 }
 
-static void mhu0_se_receiver_irq_handler()
+void mhu0_se_receiver_irq_handler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU0);
 }
 
-static void mhu1_se_sender_irq_handler()
+void mhu1_se_sender_irq_handler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU1);
 }
 
-static void mhu1_se_receiver_irq_handler()
+void mhu1_se_receiver_irq_handler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU1);
 }
 
-static void mhu0_m55_sender_irq_handler()
+void mhu0_m55_sender_irq_handler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU0);
 }
 
-static void mhu0_m55_receiver_irq_handler()
+void mhu0_m55_receiver_irq_handler()
 {
     printf("KPV: mhu0_m55_receiver_irq_handler\n");
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU0);
 }
 
-static void mhu1_m55_sender_irq_handler()
+void mhu1_m55_sender_irq_handler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU1);
 }
 
-static void mhu1_m55_receiver_irq_handler()
+void mhu1_m55_receiver_irq_handler()
 {
     printf("KPV: mhu1_m55_receiver_irq_handler\n");
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU1);

@@ -69,11 +69,13 @@ static void send_msg_if_needed(std::vector<kws::KwsResult> &results)
         for (uint32_t j = 0; j < result.m_resultVec.size(); ++j) {
             if (result.m_resultVec[j].m_normalisedVal > 0.7) {
                 if (result.m_resultVec[j].m_label == "go") {
-                    memcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str(), strlen(result.m_resultVec[j].m_label.c_str()));
+                    info("******************* send_msg_if_needed, FOUND GO, copy data end send! ******************\n");
+                    strcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str());
                     SERVICES_send_msg(m55_comms_handle, &mhu_data);
 
                 } else if (result.m_resultVec[j].m_label == "stop") {
-                    memcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str(), strlen(result.m_resultVec[j].m_label.c_str()));
+                    info("******************* send_msg_if_needed, FOUND STOP, copy data end send! ******************\n");
+                    strcpy(mhu_data.msg, result.m_resultVec[j].m_label.c_str());
                     SERVICES_send_msg(m55_comms_handle, &mhu_data);
                 }
             }

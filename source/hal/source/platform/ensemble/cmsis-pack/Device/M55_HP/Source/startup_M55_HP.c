@@ -335,6 +335,16 @@ void UTIMER_IRQHandler94    (void) __attribute__ ((weak, alias("Default_Handler"
 void UTIMER_IRQHandler95    (void) __attribute__ ((weak, alias("Default_Handler")));
 
 void arm_ethosu_npu_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+
+void mhu0_se_sender_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu0_se_receiver_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu1_se_sender_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu1_se_receiver_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu0_m55_sender_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu0_m55_receiver_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu1_m55_sender_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void mhu1_m55_receiver_irq_handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
  *----------------------------------------------------------------------------*/
@@ -401,14 +411,14 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   Interrupt4_Handler,                       /*   4 Interrupt 4 */
   Interrupt5_Handler,                       /*   5 Interrupt 5 */
   Interrupt6_Handler,                       /*   6 Interrupt 6 */
-  Interrupt7_Handler,                       /*   7 Interrupt 7 */
-  Interrupt8_Handler,                       /*   8 Interrupt 8 */
-  Interrupt9_Handler,                       /*   9 Interrupt 9 */
-  Interrupt0_Handler,                       /*   40 Interrupt 40 */
-  Interrupt1_Handler,                       /*   1 Interrupt 1 */
-  Interrupt2_Handler,                       /*   2 Interrupt 2 */
-  Interrupt3_Handler,                       /*   3 Interrupt 3 */
-  Interrupt4_Handler,                       /*   4 Interrupt 4 */
+  mhu0_se_receiver_irq_handler,                       /*   7 Interrupt 7 */
+  mhu0_se_sender_irq_handler,                       /*   8 Interrupt 8 */
+  mhu1_se_receiver_irq_handler,                       /*   9 Interrupt 9 */
+  mhu1_se_sender_irq_handler,                       /*   40 Interrupt 40 */
+  mhu0_m55_receiver_irq_handler,                       /*   1 Interrupt 1 */
+  mhu0_m55_sender_irq_handler,                       /*   2 Interrupt 2 */
+  mhu1_m55_receiver_irq_handler,                       /*   3 Interrupt 3 */
+  mhu1_m55_sender_irq_handler,                       /*   4 Interrupt 4 */
   Interrupt5_Handler,                       /*   5 Interrupt 5 */
   Interrupt6_Handler,                       /*   6 Interrupt 6 */
   Interrupt7_Handler,                       /*   7 Interrupt 7 */

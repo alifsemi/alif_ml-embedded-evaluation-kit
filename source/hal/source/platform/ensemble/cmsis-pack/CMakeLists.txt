@@ -89,7 +89,8 @@ target_link_options(
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
-    ${CPU_HEADER_TARGET})
+    ${CPU_HEADER_TARGET}
+    ensemble_services)
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)
