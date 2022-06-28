@@ -4,6 +4,7 @@
   - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
     - [Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
     - [Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3)
+    - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
   - [MPS3 board](./deployment.md#mps3-board)
     - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
     - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
@@ -131,6 +132,28 @@ The FVP supports many command-line parameters, such as:
     ```
 
 - `--timelimit`: sets the number of wall clock seconds for the simulator to run, excluding startup and shutdown.
+
+### Running the FVP without the UI
+
+If there is a need to run the FVP without the UI (e.g running the FVP inside of a docker container), 
+it can be done as follows:
+
+Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0` 
+to the command line arguments when starting the FVP. For example:
+
+```commandline
+FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
+    -C mps3_board.visualisation.disable-visualisation=1 \
+    -C mps3_board.telnetterminal0.start_telnet=0 \
+    ./bin/mps3-sse-300/ethos-u-<use_case>.axf
+   ```
+
+Once the FVP reports waiting on telnet connections, connect to the first serverport from another terminal.
+Assuming the FVP has the telnet server running at the default port 5000, connect to it by:
+
+```commandline
+telnet localhost 5000
+```
 
 ## MPS3 board
 
