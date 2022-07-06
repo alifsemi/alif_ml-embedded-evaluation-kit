@@ -1,6 +1,9 @@
 # Alif Semiconductor Ensemble Evaluation Kit Multi-Core ML Example
-This project is based on the ARM ML embedded evaluation Kit. The original project description is as below. For details on how to use this project with the Ensemble Evaluation Kit, please refer to the "KWS and Image Classification on Dual M55 Cores Draft Note" document in the root of this source tree.
+
+This project is based on the ARM ML embedded evaluation Kit. The original project Readme.md file content is in the Section Arm ML embedded evaluation kit below. For details on how to use this project with the Ensemble Evaluation Kit, please refer to the "KWS and Image Classification on Dual M55 Cores Draft Note - Shared" document in the root of this source tree.
 Please note that this is meant for early beta engagement only.
+
+
 
 # Arm® ML embedded evaluation kit
 
