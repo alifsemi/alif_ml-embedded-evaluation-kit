@@ -39,8 +39,8 @@
 #define DTCM_GLOBAL_BASE          SRAM5_BASE
 
 #define __STACK_SIZE    0x00004000
-#define __HEAP_SIZE     0x00017000
-#define __APP_HEAP_SIZE 0x00017000
+#define __HEAP_SIZE     0x00008000
+#define __APP_HEAP_SIZE 0x00008000
 
 ;----------------------------------------------------------------------------
 ;   User Stack & Heap boundary definition
@@ -52,8 +52,8 @@
 ;----------------------------------------------------------------------------
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
-#define __RO_BASE       SRAM6_BASE
-#define __RO_SIZE       SRAM6_SIZE
+#define __RO_BASE       0x80480000
+#define __RO_SIZE       0xFF000
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)

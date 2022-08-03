@@ -15,53 +15,26 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00060000;
-__HEAP_SIZE  = 0x000f0000;
+__STACK_SIZE = 0x00004000;
+__HEAP_SIZE  = 0x00008000;
+__ROM_BASE = 0x80480000;
+__ROM_SIZE = 0x000FF000;
 
-/* System memory brief */
 MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
-  SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
+  SRAM0 (rwx) : ORIGIN = 0x02280000, LENGTH = 0x00180000
   SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
+  MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  TOC   (r)   : ORIGIN = 0x8057FFF0, LENGTH = 16
 }
 
-/* Linker script to place sections and symbol values. Should be used together
- * with other linker script that defines memory regions ITCM and RAM.
- * It references following symbols, which must be defined in code:
- *   Reset_Handler : Entry of reset handler
- *
- * It defines following symbols, which code can use without definition:
- *   __exidx_start
- *   __exidx_end
- *   __copy_table_start__
- *   __copy_table_end__
- *   __zero_table_start__
- *   __zero_table_end__
- *   __etext
- *   __data_start__
- *   __preinit_array_start
- *   __preinit_array_end
- *   __init_array_start
- *   __init_array_end
- *   __fini_array_start
- *   __fini_array_end
- *   __data_end__
- *   __bss_start__
- *   __bss_end__
- *   __end__
- *   end
- *   __HeapLimit
- *   __StackLimit
- *   __StackTop
- *   __stack
- */
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  .text.at_itcm :
+  .text :
   {
     KEEP(*(.vectors))
     *(.text*)
@@ -83,62 +56,108 @@ SECTIONS
     *(SORT(.dtors.*))
     *(.dtors)
 
-    KEEP(*(.eh_frame*))
-  } > ITCM
+    *(.rodata*)
+    *(startup_ro_data)
 
-  .ARM.extab.at_itcm :
+    *(npu_driver_version)
+    *(npu_driver_arch_version)
+
+    KEEP(*(.eh_frame*))
+    . = ALIGN(16);
+  } > MRAM
+
+  .ARM.extab :
   {
+    . = ALIGN(16);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
-  } > ITCM
+    . = ALIGN(16);
+  } > MRAM
 
   __exidx_start = .;
-  .ARM.exidx.at_itcm :
+  .ARM.exidx :
   {
+    . = ALIGN(16);
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-  } > ITCM
+    . = ALIGN(16);
+  } > MRAM
   __exidx_end = .;
 
-  .zero.table.at_itcm :
+  .copy.table :
   {
-    . = ALIGN(4);
-    __zero_table_start__ = .;
-
-    LONG (__bss_start__)
-    LONG ((__bss_end__ - __bss_start__)/4) /* Size is in 32-bit words */
-
-    __zero_table_end__ = .;
-  } > ITCM
-
-  .copy.table.at_itcm :
-  {
-    . = ALIGN(4);
+    . = ALIGN(16);
     __copy_table_start__ = .;
-
-    /* Section to be copied - part 1: any data to be placed in BRAM */
     LONG (__etext)
     LONG (__data_start__)
-    LONG ((__data_end__ - __data_start__)/4) /* Size is in 32-bit words */
-
-    /* Section to be copied - part 2: RO data for for DTCM */
-    LONG (__etext2)
-    LONG (__ro_data_start__)
-    LONG ((__ro_data_end__ - __ro_data_start__)/4) /* Size is in 32-bit words */
-
+    LONG ((__data_end__ - __data_start__)/4)
+/*
+    LONG (__edata)
+    LONG (__itcm_start__)
+    LONG ((__itcm_end__ - __itcm_start__)/4)
+*/
     __copy_table_end__ = .;
-  } > ITCM
+    . = ALIGN(16);
+  } > MRAM
 
-  __itcm_total = ALIGN(4);
-
-  ASSERT( __itcm_total < (ORIGIN(ITCM) + LENGTH(ITCM)), "ITCM overflow")
-
-  .sram :
+  .zero.table :
   {
     . = ALIGN(16);
-    *(.bss.NoInit.activation_buf)
+    __zero_table_start__ = .;
+    LONG (__bss_start__)
+    LONG ((__bss_end__ - __bss_start__)/4)
+    LONG (__sram0_start__)
+    LONG ((__sram0_end__ - __sram0_start__)/4)
+    LONG (__sram1_start__)
+    LONG ((__sram1_end__ - __sram1_start__)/4)
+    __zero_table_end__ = .;
     . = ALIGN(16);
-  } > SRAM0 AT > SRAM0
+  } > MRAM
 
-  .bss :
+  __etext = ALIGN(16);
+
+  .data :
+  {
+    __data_start__ = .;
+    *(vtable)
+    *(.data)
+    *(.data*)
+
+    . = ALIGN(4);
+    /* preinit data */
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP(*(.preinit_array))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+
+    . = ALIGN(4);
+    /* init data */
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(.init_array))
+    PROVIDE_HIDDEN (__init_array_end = .);
+
+    . = ALIGN(4);
+    /* finit data */
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP(*(SORT(.fini_array.*)))
+    KEEP(*(.fini_array))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+
+    KEEP(*(.jcr*))
+
+    . = ALIGN(16);
+    __data_end__ = .;
+
+  } > DTCM AT >MRAM
+/*
+  __edata = ALIGN (16);
+  . = ALIGN (16);
+
+  .text.at_itcm :
+  {
+    __itcm_start__ = .;
+    __itcm_end__ = .;
+  } > ITCM AT >MRAM
+*/
+  .bss (NOLOAD) :
   {
     . = ALIGN(4);
     __bss_start__ = .;
@@ -147,9 +166,19 @@ SECTIONS
     *(COMMON)
     . = ALIGN(4);
     __bss_end__ = .;
-  } > DTCM AT > DTCM
+  } > SRAM0
 
-  .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (COPY) :
+  .heap (NOLOAD) :
+  {
+    . = ALIGN(8);
+    __end__ = .;
+    PROVIDE(end = .);
+    . = . + __HEAP_SIZE;
+    . = ALIGN(8);
+    __HeapLimit = .;
+  } > DTCM
+
+  .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (NOLOAD) :
   {
     . = ALIGN(8);
     __StackLimit = .;
@@ -158,88 +187,31 @@ SECTIONS
     __StackTop = .;
   } > DTCM
   PROVIDE(__stack = __StackTop);
-  ASSERT(
-    (__STACK_SIZE + __bss_end__ - __bss_start__) <= LENGTH(DTCM),
-    "DTCM overflow")
 
-  .ddr.at_ddr :
+  .data.at_sram0 (NOLOAD) :
   {
-    /* __attribute__((aligned(16))) is not handled by the CMSIS startup code.
-     * Force the alignment here as a workaround */
-    . = ALIGN(16);
-    *(ifm)
-    . = ALIGN(16);
-    *(nn_model)
-    . = ALIGN (16);
-    *(labels)
-    . = ALIGN (16);
-    *(activation_buf)
-    . = ALIGN (16);
-  } > SRAM0 AT > SRAM0
+    __sram0_start__ = .;
+    * (.bss.NoInit.activation_buf_sram)
+    * (activation_buf_dram)
+    * (ifm)
+    * (nn_model)
+    * (labels)
+    __sram0_end__ = .;
+  } > SRAM0
 
-  /**
-   * Location counter can end up 2byte aligned with narrow Thumb code but
-   * __etext is assumed by startup code to be the LMA of a section in DTCM
-   * which must be 4byte aligned
-   */
-  __etext = ALIGN (4);
-
-  .bram.at_ddr :  AT (__etext)
+  .data.at_sram1 (NOLOAD) :
   {
-    __data_start__ = .;
-    *(vtable)
-    *(.data)
-    *(.data.*)
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP(*(.preinit_array))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP(*(SORT(.init_array.*)))
-    KEEP(*(.init_array))
-    PROVIDE_HIDDEN (__init_array_end = .);
-    . = ALIGN(4);
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP(*(SORT(.fini_array.*)))
-    KEEP(*(.fini_array))
-    PROVIDE_HIDDEN (__fini_array_end = .);
-    KEEP(*(.jcr*))
-    . = ALIGN(4);
-
-    __data_end__ = .;
+    __sram1_start__ = .;
+    __sram1_end__ = .;
   } > SRAM1
 
-  __etext2 = __etext + (__data_end__ - __data_start__);
-
-  .data.at_ddr : AT (__etext2)
+  /* Magic number (0xFFA0A710) + (0 = A32_0, 1 = A32_1, 2 = CM55HP, 3 = CM55HE)
+  .mini_toc :
   {
-    . = ALIGN(4);
-    __ro_data_start__ = .;
-
-    *(.rodata*)
-    . = ALIGN(4);
-    * (npu_driver_version)
-    . = ALIGN(4);
-    * (npu_driver_arch_version)
-    . = ALIGN(4);
-
-    __ro_data_end__ = .;
-  } > SRAM1
-
-  .heap (COPY) :
-  {
-    . = ALIGN(8);
-    __end__ = .;
-    PROVIDE(end = .);
-    . = . + __HEAP_SIZE;
-    . = ALIGN(8);
-    __HeapLimit = .;
-  } > SRAM1
-
-  ASSERT (
-      (__ro_data_end__ - __ro_data_start__)
-    + (__data_end__  - __data_start__)
-    + __HEAP_SIZE <= LENGTH(SRAM1),
-    "SRAM1 overflow")
+    LONG (0xffffffff)
+    LONG (0xFFA0A710 + 3)
+    LONG (__ROM_BASE)
+    LONG (0)
+  } > TOC
+  */
 }

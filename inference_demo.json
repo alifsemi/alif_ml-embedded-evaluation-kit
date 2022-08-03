@@ -10,9 +10,9 @@
     "HE_Voice": {
         "binary": "HE_voice.bin",
         "version" : "1.0.0",
-	"loadAddress": "0x62000000",
+	"mramAddress": "0x80480000",
         "cpu_id": "M55_HE",
-        "flags": ["boot", "load"],
+        "flags": ["boot"],
         "signed": false
     }
 }
