@@ -1,0 +1,196 @@
+{
+        "version": 3,
+        "cmakeMinimumRequired": {
+                "major": 3,
+                "minor": 21,
+                "patch": 0
+        },
+        "configurePresets": [
+                {
+                        "name": "base",
+                        "description": "Base configuration, sets build directory.",
+                        "hidden": true,
+                        "generator": "Unix Makefiles",
+                        "binaryDir": "${sourceDir}/build-${presetName}"
+                },
+                {
+                        "name": "gcc-toolchain",
+                        "description": "Use gcc toolchain.",
+                        "hidden": true,
+                        "cacheVariables": {
+                                "CMAKE_TOOLCHAIN_FILE": {
+                                        "type": "STRING",
+                                        "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-gcc.cmake"
+                                }
+                        }
+                },
+                {
+                        "name": "armclang-toolchain",
+                        "description": "Use armclang toolchain.",
+                        "hidden": true,
+                        "cacheVariables": {
+                                "CMAKE_TOOLCHAIN_FILE": {
+                                        "type": "STRING",
+                                        "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                                }
+                        }
+                },
+                {
+                        "name": "mps3-300",
+                        "description": "Target mps3 board, SSE-300 subsystem.",
+                        "hidden": true,
+                        "cacheVariables": {
+                                "TARGET_PLATFORM": {
+                                        "type": "STRING",
+                                        "value": "mps3"
+                                },
+                                "TARGET_SUBSYSTEM": {
+                                        "type": "STRING",
+                                        "value": "sse-300"
+                                }
+                        }
+                },
+                {
+                        "name": "mps3-310",
+                        "description": "Target mps3 board, SSE-310 subsystem.",
+                        "hidden": true,
+                        "cacheVariables": {
+                                "TARGET_PLATFORM": {
+                                        "type": "STRING",
+                                        "value": "mps3"
+                                },
+                                "TARGET_SUBSYSTEM": {
+                                        "type": "STRING",
+                                        "value": "sse-310"
+                                }
+                        }
+                },
+                {
+                        "name": "simple-platform",
+                        "description": "Target simple platform.",
+                        "hidden": true,
+                        "cacheVariables": {
+                                "TARGET_PLATFORM": {
+                                        "type": "STRING",
+                                        "value": "simple_platform"
+                                }
+                        }
+                },
+                {
+                        "name": "simple-gcc",
+                        "displayName": "simple-gcc",
+                        "description": "Target simple platform build with bare-metal gcc toolchain.",
+                        "inherits": [
+                                "base",
+                                "simple-platform",
+                                "gcc-toolchain"
+                        ]
+                },
+                {
+                        "name": "simple-clang",
+                        "displayName": "simple-armclang",
+                        "description": "Target simple platform build with bare-metal armclang toolchain.",
+                        "inherits": [
+                                "base",
+                                "simple-platform",
+                                "armclang-toolchain"
+                        ]
+                },
+                {
+                        "name": "mps3-300-gcc",
+                        "displayName": "mps3-300-gcc",
+                        "description": "Target mps3 board, SSE-300 subsystem with bare-metal gcc toolchain.",
+                        "inherits": [
+                                "base",
+                                "mps3-300",
+                                "gcc-toolchain"
+                        ]
+                },
+                {
+                        "name": "mps3-300-clang",
+                        "displayName": "mps3-300-armclang",
+                        "description": "Target mps3 board, SSE-300 subsystem with bare-metal armclang toolchain.",
+                        "inherits": [
+                                "base",
+                                "mps3-300",
+                                "armclang-toolchain"
+                        ]
+                },
+                {
+                        "name": "mps3-310-gcc",
+                        "displayName": "mps3-310-gcc",
+                        "description": "Target mps3 board, SSE-310 subsystem with bare-metal gcc toolchain.",
+                        "inherits": [
+                                "base",
+                                "mps3-310",
+                                "gcc-toolchain"
+                        ]
+                },
+                {
+                        "name": "mps3-310-clang",
+                        "displayName": "mps3-310-armclang",
+                        "description": "Target mps3 board, SSE-310 subsystem with bare-metal armclang toolchain.",
+                        "inherits": [
+                                "base",
+                                "mps3-310",
+                                "armclang-toolchain"
+                        ]
+                },
+                {
+                        "name": "native",
+                        "inherits": [
+                                "base"
+                        ],
+                        "displayName": "native",
+                        "description": "Target native system.",
+                        "cacheVariables": {
+                                "TARGET_PLATFORM": {
+                                        "type": "STRING",
+                                        "value": "native"
+                                },
+                                "CMAKE_TOOLCHAIN_FILE": {
+                                        "type": "STRING",
+                                        "value": "${sourceDir}/scripts/cmake/toolchains/native-gcc.cmake"
+                                }
+                        }
+                }
+        ],
+        "buildPresets": [
+                {
+                        "name": "native",
+                        "configurePreset": "native"
+                },
+                {
+                        "name": "mps3-300-gcc",
+                        "configurePreset": "mps3-300-gcc"
+                },
+                {
+                        "name": "mps3-300-clang",
+                        "configurePreset": "mps3-300-clang"
+                },
+                {
+                        "name": "mps3-310-gcc",
+                        "configurePreset": "mps3-310-gcc"
+                },
+                {
+                        "name": "mps3-310-clang",
+                        "configurePreset": "mps3-310-clang"
+                },
+                {
+                        "name": "simple-gcc",
+                        "configurePreset": "simple-gcc"
+                },
+                {
+                        "name": "simple-clang",
+                        "configurePreset": "simple-clang"
+                }
+        ],
+        "testPresets": [
+                {
+                        "name": "native-tests",
+                        "description": "native tests",
+                        "displayName": "Run native tests.",
+                        "configurePreset": "native"
+                }
+        ]
+}

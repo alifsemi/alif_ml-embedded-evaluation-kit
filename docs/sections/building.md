@@ -18,6 +18,7 @@
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
+    - [Building with CMakePresets](./building.md#building-with-cmakepresets)
     - [Building the configured project](./building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./building.md#add-custom-inputs)
@@ -73,7 +74,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
     ```log
     cmake version 3.22.4
-    ``` 
+    ```
 
 > **Note:** Required version of CMake is also installed in the Python3 virtual environment created by
 > `setup_default_resources.py` script. See [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -539,6 +540,64 @@ Again, if using `Arm Compiler`, use:
 cmake .. \
     -DTARGET_PLATFORM=simple_platform \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
+```
+
+### Building with CMakePresets
+
+If you are using CMake version 3.21 or above, then an alternative method of building is by using CMakePresets.
+This can be done by calling the following command:
+```commandline
+cmake --preset <platform>
+cmake --build --preset <platform>
+```
+where platform is one of:
+```commandline
+native
+mps3-gcc
+mps3-clang
+simple-gcc
+simple-clang
+```
+This will automatically configure and build the evaluation-kit into a corresponding folder.
+You can still pass in build flags as usual, for example:
+```commandline
+cmake --preset mps3-gcc -DUSE_CASE_BUILD=inference_runner
+cmake --build --preset mps3-gcc
+```
+Alternatively, you can create a CMakeUserPresets.json in the root of the project with personal user settings, for example:
+```commandline
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "my-config",
+      "displayName": "my-config",
+      "inherits": ["mps3-300-gcc"],
+      "cacheVariables": {
+        "LOG_LEVEL": {
+          "type": "STRING",
+          "value": "LOG_LEVEL_DEBUG"
+        }
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "mps3-300-gcc-custom",
+      "displayName": "mps-300-gcc-custom",
+      "configurePreset": "my-config",
+      "targets": [
+        "ethos-u-object_detection",
+        "ethos-u-inference_runner"],
+      "jobs": 12
+    }
+  ]
+}
 ```
 
 ### Building the configured project
