@@ -8,6 +8,7 @@
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
   - [No matching distribution found for ethos-u-vela==3.4.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
     - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
 
 ## Inference results are incorrect for my custom files
 
@@ -202,3 +203,48 @@ python3 --version
 > from `#!/usr/bin/python3` to `#!/usr/bin/python3.6`.
 
 Next section of the documentation: [Appendix](appendix.md).
+
+## Error trying to build on Arm Virtual Hardware
+
+If trying to build on Arm Virtual Hardware and you encounter an error similar to the following:
+
+```log
+The virtual environment was not created successfully because ensurepip is not
+available.  On Debian/Ubuntu systems, you need to install the python3-venv
+package using the following command.
+
+    apt install python3.8-venv
+
+You may need to use sudo with that command.  After installing the python3-venv
+package, recreate your virtual environment.
+
+Failing command: ['/home/test/ml-embedded-evaluation-kit/resources_downloaded/env/bin/python3', '-Im', 'ensurepip', '--upgrade', '--default-pip']
+
+
+Traceback (most recent call last):
+  File "./build_default.py", line 184, in <module>
+    run(
+  File "./build_default.py", line 89, in run
+    (download_dir, env_path) = set_up_resources(
+  File "/home/test/ml-embedded-evaluation-kit/set_up_default_resources.py", line 439, in set_up_resources
+    call_command(command)
+  File "/home/test/ml-embedded-evaluation-kit/set_up_default_resources.py", line 276, in call_command
+    proc.check_returncode()
+  File "/usr/lib/python3.8/subprocess.py", line 448, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command 'python3 -m venv env' returned non-zero exit status 1.
+```
+
+You can fix this error by installing Python virtual environment and removing the corrupted resources_downloaded folder.
+
+```commandline
+sudo apt install python3.8-venv
+rm -r resources_downloaded
+```
+
+You can then try rebuilding again e.g.
+
+```commandline
+python3 ./build_default.py
+```
+and the error should be fixed.

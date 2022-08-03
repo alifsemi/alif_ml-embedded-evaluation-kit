@@ -105,6 +105,12 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     python3 -m venv
     ```
 
+  > **Note:** If you are using an Arm Virtual Hardware instance then Python virtual environment is not installed by default.
+  > You will need to install it yourself by running the following command:
+  >   ```commandline
+  >    sudo apt install python3.8-venv
+  >    ```
+
 - The build system uses external Python libraries during the building process. Please make sure that the latest pip and
   libsndfile versions are installed.
 

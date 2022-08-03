@@ -11,7 +11,7 @@ but requires creation of an AWS account and basic configuration outlined [here](
 
 To get started quickly, please follow these steps:
 
-1. First, verify that you have installed [the required prerequisites](sections/building.md#build-prerequisites).
+1. First, verify that you have installed all of [the required prerequisites](sections/building.md#build-prerequisites).
 
 2. Clone the *Ethos-U* evaluation kit repository:
 
@@ -37,14 +37,14 @@ To get started quickly, please follow these steps:
     [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
 
     ```commandline
-    ./build_default.py
+    python3 ./build_default.py
     ```
 
     > **Note** The preceding command assumes you are using the GNU Arm Embedded toolchain. If you are using the Arm
     > Compiler instead, you can override the default selection by executing:
 
     ```commandline
-    ./build_default.py --toolchain arm
+    python3 ./build_default.py --toolchain arm
     ```
 
 5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
