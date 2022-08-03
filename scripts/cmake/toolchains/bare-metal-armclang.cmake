@@ -81,6 +81,9 @@ add_compile_options(
 # General purpose compile options:
 add_compile_options(
     -funsigned-char
+    -Os
+    -g
+    -fdata-sections
     -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 

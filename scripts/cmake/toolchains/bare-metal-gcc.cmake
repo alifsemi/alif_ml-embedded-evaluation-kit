@@ -75,8 +75,10 @@ add_compile_options(
 # General purpose compile options:
 add_compile_options(
     -funsigned-char
-    -fno-function-sections
+    -Og
+    -g
     -fdata-sections
+    -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
 # Arch compile options:
