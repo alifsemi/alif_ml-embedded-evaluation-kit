@@ -50,8 +50,8 @@ packs:
         - attributes: {vendor: "ARM", name: "CMSIS", version: "5.8.0"}
 
     releases:
-      - version: "22.05.0"
-        date: "2022-05-23"
+      - version: "22.8.0"
+        date: "2022-08-15"
         description: "Beta release package"
 
 #    @TODO: Add API header names and descriptions here (see placeholder below).
@@ -72,19 +72,19 @@ packs:
     components:
       - name: log
         target: log
-        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Log", Cversion: "1.0.0" }
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Log", Cversion: "1.0.0" }
         description: "Logging header-only utility"
 
       - name: arm_math
         target: arm_math
-        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Math", Cversion: "1.0.0" }
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Math", Cversion: "1.0.0" }
         description: "Math function helpers dependent on CMSIS-DSP."
         conditions:
           - require: { Cclass: "CMSIS", Cgroup: "DSP"}
 
       - name: common_api
         target: common_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: API", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "API", Cversion: "1.0.0"}
         description: "Common API"
         dependencies: ["arm_math", "log"]
         conditions:
@@ -92,48 +92,48 @@ packs:
 
       - name: ad_api
         target: ad_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vibration: Anomaly detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vibration", Csub: "Anomaly detection", Cversion: "1.0.0"}
         description: "Anomaly detection use case API."
         dependencies: common_api
 
       - name: asr_api
         target: asr_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Automatic speech recognition", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Automatic speech recognition", Cversion: "1.0.0"}
         description: "ASR use case API."
         dependencies: common_api
 
       - name: img_class_api
         target: img_class_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Image classification", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Image classification", Cversion: "1.0.0"}
         description: "Image classification use case API."
         dependencies: common_api
 
       - name: inference_runner_api
         target: inference_runner_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Generic", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Generic", Cversion: "1.0.0"}
         description: "Generic inference runner use case API."
         dependencies: common_api
 
       - name: kws_api
         target: kws_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Keyword spotting", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Keyword spotting", Cversion: "1.0.0"}
         description: "KWS use case API."
         dependencies: common_api
 
       - name: noise_reduction_api
         target: noise_reduction_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Noise reduction", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Noise reduction", Cversion: "1.0.0"}
         description: "RNN Noise use case API."
         dependencies: common_api
 
       - name: object_detection_api
         target: object_detection_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Object detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Object detection", Cversion: "1.0.0"}
         description: "Object detection use case API."
         dependencies: common_api
 
       - name: vww_api
         target: vww_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Person detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Person detection", Cversion: "1.0.0"}
         description: "Visual wake word use case API."
         dependencies: common_api
