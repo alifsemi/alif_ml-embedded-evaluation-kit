@@ -104,10 +104,10 @@ SECTIONS
     __zero_table_start__ = .;
     LONG (__bss_start__)
     LONG ((__bss_end__ - __bss_start__)/4)
-    LONG (__sram0_start__)
+    /*LONG (__sram0_start__)
     LONG ((__sram0_end__ - __sram0_start__)/4)
     LONG (__sram1_start__)
-    LONG ((__sram1_end__ - __sram1_start__)/4)
+    LONG ((__sram1_end__ - __sram1_start__)/4)*/
     __zero_table_end__ = .;
     . = ALIGN(16);
   } > MRAM
@@ -188,7 +188,7 @@ SECTIONS
   } > DTCM
   PROVIDE(__stack = __StackTop);
 
-  .data.at_sram0 (NOLOAD) :
+  .data.at_sram0 :
   {
     __sram0_start__ = .;
     * (.bss.NoInit.activation_buf_sram)
@@ -199,7 +199,7 @@ SECTIONS
     __sram0_end__ = .;
   } > SRAM0
 
-  .data.at_sram1 (NOLOAD) :
+  .data.at_sram1 :
   {
     __sram1_start__ = .;
     __sram1_end__ = .;
