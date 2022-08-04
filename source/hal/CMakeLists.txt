@@ -54,6 +54,7 @@ endif()
 add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 
 # Link time library targets:
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 target_link_libraries(${HAL_TARGET}
     PUBLIC
     log                 # Logging functions
@@ -63,7 +64,16 @@ target_link_libraries(${HAL_TARGET}
     -Wl,--whole-archive platform_drivers    # Platform drivers implementing the required interfaces
     -Wl,--no-whole-archive
 )
-
+else()
+target_link_libraries(${HAL_TARGET}
+    PUBLIC
+    log                 # Logging functions
+    lcd_iface           # LCD interface
+    stdout_iface        # Standard output (and error) interface
+    audio_iface         # Audio interface
+    platform_drivers    # Platform drivers implementing the required interfaces
+)
+endif()
 # Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
