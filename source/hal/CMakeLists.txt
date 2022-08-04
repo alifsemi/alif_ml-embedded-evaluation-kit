@@ -60,7 +60,8 @@ target_link_libraries(${HAL_TARGET}
     lcd_iface           # LCD interface
     stdout_iface        # Standard output (and error) interface
     audio_iface         # Audio interface
-    platform_drivers    # Platform drivers implementing the required interfaces
+    -Wl,--whole-archive platform_drivers    # Platform drivers implementing the required interfaces
+    -Wl,--no-whole-archive
 )
 
 # Display status:
