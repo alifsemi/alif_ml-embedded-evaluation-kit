@@ -62,6 +62,9 @@ SECTIONS
     *(npu_driver_version)
     *(npu_driver_arch_version)
 
+    *(nn_model)
+    *(labels)
+
     KEEP(*(.eh_frame*))
     . = ALIGN(16);
   } > MRAM
@@ -104,15 +107,16 @@ SECTIONS
     __zero_table_start__ = .;
     LONG (__bss_start__)
     LONG ((__bss_end__ - __bss_start__)/4)
-    /*LONG (__sram0_start__)
+    LONG (__sram0_start__)
     LONG ((__sram0_end__ - __sram0_start__)/4)
     LONG (__sram1_start__)
-    LONG ((__sram1_end__ - __sram1_start__)/4)*/
+    LONG ((__sram1_end__ - __sram1_start__)/4)
     __zero_table_end__ = .;
     . = ALIGN(16);
   } > MRAM
 
-  __etext = ALIGN(16);
+  . = ALIGN (16);
+  __etext = .;
 
   .data :
   {
@@ -143,12 +147,11 @@ SECTIONS
 
     KEEP(*(.jcr*))
 
-    . = ALIGN(16);
     __data_end__ = .;
-
+    . = ALIGN(16);
   } > DTCM AT >MRAM
 /*
-  __edata = ALIGN (16);
+  __edata = __etext + (__data_end__ - __data_start__);
   . = ALIGN (16);
 
   .text.at_itcm :
@@ -188,18 +191,16 @@ SECTIONS
   } > DTCM
   PROVIDE(__stack = __StackTop);
 
-  .data.at_sram0 :
+  .data.at_sram0 (NOLOAD) :
   {
     __sram0_start__ = .;
     * (.bss.NoInit.activation_buf_sram)
     * (activation_buf_dram)
     * (ifm)
-    * (nn_model)
-    * (labels)
     __sram0_end__ = .;
   } > SRAM0
 
-  .data.at_sram1 :
+  .data.at_sram1 (NOLOAD) :
   {
     __sram1_start__ = .;
     __sram1_end__ = .;
