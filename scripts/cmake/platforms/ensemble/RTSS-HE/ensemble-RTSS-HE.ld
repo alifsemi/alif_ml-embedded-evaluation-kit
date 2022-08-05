@@ -24,8 +24,8 @@ MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
-  SRAM0 (rwx) : ORIGIN = 0x02280000, LENGTH = 0x00180000
-  SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
+  SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
+  SRAM1 (rwx) : ORIGIN = 0x08140000, LENGTH = 0x00140000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
   TOC   (r)   : ORIGIN = 0x8057FFF0, LENGTH = 16
 }
@@ -34,7 +34,7 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  .text :
+  .text.at_mram :
   {
     KEEP(*(.vectors))
     *(.text*)
@@ -93,9 +93,9 @@ SECTIONS
     LONG (__data_start__)
     LONG ((__data_end__ - __data_start__)/4)
 /*
-    LONG (__edata)
-    LONG (__itcm_start__)
-    LONG ((__itcm_end__ - __itcm_start__)/4)
+    LONG (__etext2)
+    LONG (__data2_start__)
+    LONG ((__data2_end__ - __data2_start__)/4)
 */
     __copy_table_end__ = .;
     . = ALIGN(16);
@@ -115,10 +115,10 @@ SECTIONS
     . = ALIGN(16);
   } > MRAM
 
-  . = ALIGN (16);
+  . = ALIGN(16);
   __etext = .;
 
-  .data :
+  .data.at_dtcm : AT (__etext)
   {
     __data_start__ = .;
     *(vtable)
@@ -147,19 +147,43 @@ SECTIONS
 
     KEEP(*(.jcr*))
 
-    __data_end__ = .;
     . = ALIGN(16);
-  } > DTCM AT >MRAM
-/*
-  __edata = __etext + (__data_end__ - __data_start__);
-  . = ALIGN (16);
+    __data_end__ = .;
+  } > DTCM
 
-  .text.at_itcm :
+  . = ALIGN(16);
+
+  /* Place non-zero code/data here if required in SRAM0 */
+/*
+  __etext2 = __etext + (__data_end__ - __data_start__);
+
+  .data.at_sram : AT (__etext2)
   {
-    __itcm_start__ = .;
-    __itcm_end__ = .;
-  } > ITCM AT >MRAM
+    . = ALIGN(4);
+    __data2_start__ = .;
+    . = ALIGN(16);
+    __data2_end__ = .;
+  } > SRAM0
 */
+
+  .data.at_sram0 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __sram0_start__ = .;
+    . = ALIGN(4);
+    __sram0_end__ = .;
+  } > SRAM0
+
+  .data.at_sram1 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __sram1_start__ = .;
+    * (.bss.NoInit.activation_buf_sram)
+    * (ifm)
+    . = ALIGN(4);
+    __sram1_end__ = .;
+  } > SRAM1
+
   .bss (NOLOAD) :
   {
     . = ALIGN(4);
@@ -169,7 +193,7 @@ SECTIONS
     *(COMMON)
     . = ALIGN(4);
     __bss_end__ = .;
-  } > SRAM0
+  } > DTCM
 
   .heap (NOLOAD) :
   {
@@ -190,21 +214,6 @@ SECTIONS
     __StackTop = .;
   } > DTCM
   PROVIDE(__stack = __StackTop);
-
-  .data.at_sram0 (NOLOAD) :
-  {
-    __sram0_start__ = .;
-    * (.bss.NoInit.activation_buf_sram)
-    * (activation_buf_dram)
-    * (ifm)
-    __sram0_end__ = .;
-  } > SRAM0
-
-  .data.at_sram1 (NOLOAD) :
-  {
-    __sram1_start__ = .;
-    __sram1_end__ = .;
-  } > SRAM1
 
   /* Magic number (0xFFA0A710) + (0 = A32_0, 1 = A32_1, 2 = CM55HP, 3 = CM55HE)
   .mini_toc :
