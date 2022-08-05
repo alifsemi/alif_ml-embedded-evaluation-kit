@@ -36,14 +36,16 @@ void SERVICES_initialize(services_lib_t * init_params)
 
 uint32_t SERVICES_local_to_global_addr(uint32_t local_addr)
 {
-  uint32_t global_addr = local_addr + s_services_host.global_offset;
-  return global_addr;
+  // uint32_t global_addr = local_addr + s_services_host.global_offset;
+  // return global_addr;
+    return LocalToGlobal(local_addr);
 }
 
 uint32_t SERVICES_global_to_local_addr(uint32_t global_addr)
 {
-  uint32_t local_addr = global_addr - s_services_host.global_offset;
-  return local_addr;
+  // uint32_t local_addr = global_addr - s_services_host.global_offset;
+  // return local_addr;
+    return GlobalToLocal(global_addr);
 }
 
 /**

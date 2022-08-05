@@ -161,6 +161,7 @@ void rx_msg_callback(uint32_t receiver_id,
 
 static void mhu_initialize(void)
 {
+  __disable_irq();
   s_mhu_driver_in.sender_base_address_list = sender_base_address_list;
   s_mhu_driver_in.receiver_base_address_list = receiver_base_address_list;
   s_mhu_driver_in.mhu_count = NUM_MHU;
@@ -181,6 +182,8 @@ static void mhu_initialize(void)
 
   setup_irq(M55SEND_MHU1_COMB_IRQn, (uint32_t)&mhu1_m55_sender_irq_handler);
   setup_irq(M55RECV_MHU1_COMB_IRQn, (uint32_t)&mhu1_m55_receiver_irq_handler);
+
+  __enable_irq();
 }
 
 void disable_se_debug()

@@ -164,7 +164,7 @@ int tracelib_init(const char * prefix)
 int send_str(const char* str, uint32_t len)
 {
     int ret = 0;
-    //int kpv = 2000000;
+    int kpv = 2000000;
     if (initialized)
     {
         uart_event = 0;
@@ -174,7 +174,7 @@ int send_str(const char* str, uint32_t len)
             return ret;
         }
 
-        while (!uart_event/* && kpv--*/);
+        while (!uart_event && kpv--);
     }
     return ret;
 }
