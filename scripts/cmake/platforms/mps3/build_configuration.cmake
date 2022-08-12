@@ -31,8 +31,12 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    if ((ETHOS_U_NPU_ID STREQUAL U65) AND (TARGET_SUBSYSTEM STREQUAL sse-310))
-        message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID} and target subsystem ${TARGET_SUBSYSTEM}")
+    # Arm Corstone-310's timing adapter behaviour is very different to Arm Corstone-300 and cannot
+    # be used for bandwidth/latency related performance sweeps for the Arm Ethos-U NPU. Read
+    # docs/sections/timing_adapters.md for more details.
+    if ((TARGET_SUBSYSTEM STREQUAL sse-310) AND ${ETHOS_U_NPU_TIMING_ADAPTER_ENABLED})
+        message(STATUS "Timing adapter will NOT be used for target subsystem ${TARGET_SUBSYSTEM}")
+        set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF CACHE BOOL "Use of TA" FORCE)
     endif()
 
     set(LINKER_SCRIPT_NAME "mps3-${TARGET_SUBSYSTEM}" PARENT_SCOPE)

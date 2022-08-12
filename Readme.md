@@ -7,10 +7,10 @@ To run evaluations using this software, we suggest using:
 
 - an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3) with
   [Arm® Corstone-300](https://developer.arm.com/Processors/Corstone-300) or [Arm® Corstone-310](https://developer.arm.com/Processors/Corstone-310) implementations.
-  - Arm® Corstone-300 runs a combination of
+  - Arm® Corstone™-300 runs a combination of
   the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
   [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
-  - Arm® Corstone-310 runs a combination of
+  - Arm® Corstone™-310 runs a combination of
       the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85) and the
       [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
 
@@ -19,7 +19,9 @@ To run evaluations using this software, we suggest using:
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination of
   the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55). You can also take advantage of
   [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) (AVH) and [run the Fixed Virtual Platform
-  in the cloud](./docs/sections/arm_virtual_hardware.md). An FVP implementation of Arm® Corstone-310 is also available via AVH.
+  in the cloud](./docs/sections/arm_virtual_hardware.md).
+  > **NOTE**: While Arm® Corstone™-300 is available as an [Ecosystem FVP](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+  > and AVH, Arm® Corstone™-310 is available (for both Arm® Ethos™-U55 and Ethos™-U55 NPUs) only as AVH implementations.
 
 ## Overview of the evaluation kit
 
@@ -68,7 +70,7 @@ the neural networks models executions. TensorFlow Lite for Microcontrollers is i
 and delegates execution of certain operators to the NPU or, if the neural network model operators are not supported on
 NPU, to the CPU. If the operator is supported, [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise
 CPU workload execution with int8 data type. Else, TensorFlow™ Lite for Microcontrollers' reference kernels are used as
-a final fall-back. 
+a final fall-back.
 Common ML application functions will help you to focus on implementing logic of your custom ML use case: you can modify
 only the use case code and leave all other components unchanged. Supplied build system will discover new ML application
 code and automatically include it into compilation flow.

@@ -85,7 +85,7 @@ if(POLICY CMP0123)
 endif()
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     22.05.0
+        VERSION     22.08.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 

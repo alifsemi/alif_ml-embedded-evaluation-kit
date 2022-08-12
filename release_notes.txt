@@ -1,3 +1,10 @@
+Changes in 22.08
+    * Formal support for Arm® Corstone-310 Arm Virtual Hardware and FPGA implementations.
+    * Added CMake presets.
+    * Bug fix for Arm® Ethos-U65 NPU's default AXI burst length.
+    * Provision to allow platform-agnostic use case API to be packaged as CMSIS pack.
+    * Documentation updates.
+
 Changes in 22.05
     * Support for 22.05 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.4.0, CMSIS, TensorFlow Lite Micro).
     * Restructuring of repository sources to allow generation of CMSIS packs.

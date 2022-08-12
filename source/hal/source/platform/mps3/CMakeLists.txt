@@ -59,8 +59,7 @@ if (TARGET_SUBSYSTEM STREQUAL sse-310)
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-        set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-        set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+        message(FATAL_ERROR "Timing adapter support should be disabled for ${TARGET_SUBSYSTEM}")
     endif()
 endif()
 

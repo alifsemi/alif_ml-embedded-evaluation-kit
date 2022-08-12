@@ -253,6 +253,9 @@ The build parameters are:
 
 - `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED`: Specifies if the *Ethos-U* timing adapter is enabled.
 
+  > **NOTE**: This setting is set to ON for all platforms if `ETHOS_U_NPU_ENABLED` is set. However, it is overridden
+  > to OFF for Arm® Corstone-310 implementation.
+
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
   the timing adapter build is enabled. Default for Ethos-U55 NPU is
   [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake),
