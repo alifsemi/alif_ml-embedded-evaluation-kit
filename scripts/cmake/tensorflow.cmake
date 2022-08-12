@@ -51,10 +51,7 @@ if (TARGET_PLATFORM STREQUAL native)
 else()
     set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
 
-    if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "cortex-m85")
-        # TensorFlow's generic makefile doesn't currently have a flow for Cortex-M85.
-        # We build for Arm Cortex-M55 instead.
-        # @TODO: check with latest TensorFlow package.
+    if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")
         set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "cortex-m55")
     else()
         set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
