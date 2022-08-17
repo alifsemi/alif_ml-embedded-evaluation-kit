@@ -1,4 +1,5 @@
 Changes in 22.08
+    * Support for 22.08 Ethos-U component and dependencies (core-driver, core-platform, CMSIS, TensorFlow Lite Micro).
     * Formal support for Arm® Corstone-310 Arm Virtual Hardware and FPGA implementations.
     * Added CMake presets.
     * Bug fix for Arm® Ethos-U65 NPU's default AXI burst length.
@@ -8,7 +9,7 @@ Changes in 22.08
 Changes in 22.05
     * Support for 22.05 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.4.0, CMSIS, TensorFlow Lite Micro).
     * Restructuring of repository sources to allow generation of CMSIS packs.
-    * Added support for Arm Cortex-M85, armclang 6.18 is required
+    * Added support for Arm Cortex-M85, Armclang 6.18 is required
     * Reduce minimum requirements of Python to 3.7 to align with Vela 3.4.0.
     * Increase minimum requirements of CMake to 3.21.0
     * Documentation updates.
@@ -18,7 +19,7 @@ Changes in 22.02
     * Support for 22.02 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.3.0, CMSIS, TensorFlow Lite Micro).
     * Added Object Detection use case.
     * Replace DSCNN with MicroNet for KWS and KWS_ASR use cases.
-    * Increase minimum requirements of CMake to 3.15.6, armclang to 6.16 and Python to 3.8
+    * Increase minimum requirements of CMake to 3.15.6, Armclang to 6.16 and Python to 3.8
     * Initial restructuring of repository sources.
     * Documentation updates.
     * Various minor bug fixes.
