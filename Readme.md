@@ -127,7 +127,7 @@ For more details see full documentation:
 - [Arm® ML embedded evaluation kit](./docs/documentation.md#arm_ml-embedded-evaluation-kit)
   - [Table of Content](./docs/documentation.md#table-of-content)
   - [Trademarks](./docs/documentation.md#trademarks)
-  - [Prerequisites](./docs/documentation.md#prerequisites)
+  - **[Prerequisites](./docs/documentation.md#prerequisites)**
     - [Additional reading](./docs/documentation.md#additional-reading)
   - [Repository structure](./docs/documentation.md#repository-structure)
   - [Models and resources](./docs/documentation.md#models-and-resources)
@@ -136,9 +136,9 @@ For more details see full documentation:
   - [Running code samples applications](./docs/documentation.md#running-code-samples-applications)
   - [Implementing custom ML application](./docs/documentation.md#implementing-custom-ml-application)
   - [Testing and benchmarking](./docs/documentation.md#testing-and-benchmarking)
-  - [Troubleshooting](./docs/documentation.md#troubleshooting)
+  - **[Troubleshooting](./docs/documentation.md#troubleshooting)**
   - [Appendix](./docs/documentation.md#appendix)
-  - [FAQ](./docs/documentation.md#faq)
+  - **[FAQ](./docs/documentation.md#faq)**
 
 ## Contribution guidelines
 

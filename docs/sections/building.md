@@ -708,7 +708,7 @@ After compiling, your custom model has now replaced the default one in the appli
 > The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
 > **Note:** Using the 22.05 versions of software dependencies will require Vela to be at least version 3.4.0
-> or you may encounter issues when trying to run applications on different variants of Ethos-U.
+> or you may encounter issues when trying to run applications on different variants of Ethos-U NPUs.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.
@@ -757,6 +757,10 @@ To see Vela helper for all the parameters use: `vela --help`.
 
 > **Note:** By default, use of the *Ethos-U* NPU is enabled in the CMake configuration. This can be changed by passing
 > `-DETHOS_U_NPU_ENABLED`.
+
+> **Note:** The performance summary produced by Vela compiler for any model are **estimates only**. Vela computes
+> these figures from a very simplistic approximation. To get accurate performance numbers for the Arm Ethos-U NPU, use
+> of FVP or FPGA platforms is recommended.
 
 ## Building for different Ethos-U NPU variants
 
