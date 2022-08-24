@@ -10,8 +10,7 @@
                         "name": "base",
                         "description": "Base configuration, sets build directory.",
                         "hidden": true,
-                        "generator": "Unix Makefiles",
-                        "binaryDir": "${sourceDir}/build-${presetName}"
+                        "generator": "Unix Makefiles"
                 },
                 {
                         "name": "gcc-toolchain",
