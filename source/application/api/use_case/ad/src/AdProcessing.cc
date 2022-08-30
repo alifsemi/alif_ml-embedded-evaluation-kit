@@ -164,7 +164,7 @@ GetFeatureCalculator(audio::AdMelSpectrogram& melSpec,
                      size_t cacheSize,
                      float trainingMean)
 {
-    std::function<void (std::vector<int16_t>&, size_t, bool, size_t, size_t)> melSpecFeatureCalc;
+    std::function<void (std::vector<int16_t>&, size_t, bool, size_t, size_t)> melSpecFeatureCalc = nullptr;
 
     TfLiteQuantization quant = inputTensor->quantization;
 

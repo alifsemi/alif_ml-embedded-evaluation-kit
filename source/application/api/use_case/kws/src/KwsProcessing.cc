@@ -158,7 +158,7 @@ namespace app {
     std::function<void (std::vector<int16_t>&, int, bool, size_t)>
     KwsPreProcess::GetFeatureCalculator(audio::MicroNetKwsMFCC& mfcc, TfLiteTensor* inputTensor, size_t cacheSize)
     {
-        std::function<void (std::vector<int16_t>&, size_t, bool, size_t)> mfccFeatureCalc;
+        std::function<void (std::vector<int16_t>&, size_t, bool, size_t)> mfccFeatureCalc = nullptr;
 
         TfLiteQuantization quant = inputTensor->quantization;
 
