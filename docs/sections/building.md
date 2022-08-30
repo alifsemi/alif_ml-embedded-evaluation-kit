@@ -192,9 +192,10 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_SRC_PATH`: The path to the CMSIS sources to be used to build TensorFlow Lite Micro library. This parameter is
-  optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the
-  `dependencies/cmsis` git submodule. Repository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
+  These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
+  points to the `dependencies/cmsis` and `dependencies/cmsis-dsp` git submodules.  Repositories are hosted here:
+  [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) and [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.

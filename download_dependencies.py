@@ -24,10 +24,11 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/02715237c1fc0a23f465226364d206277f54ebce.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/29615088b12e3ba8ce50d316cf7f38c1bd7fc620.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.05.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.05.tar.gz"
+TF = "https://github.com/tensorflow/tflite-micro/archive/286aeb5ff20d3571556e48a5c1af8527f84d3456.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/ed78d6b78766d71cfe0431149f2f261d1c7277a1.zip"
+CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.11.0.zip"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.08.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.08.tar.gz"
 
 
 def download(url_file: str, post_process=None):
@@ -67,6 +68,8 @@ def main(dependencies_path: Path):
 
     download(CMSIS,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis"))
+    download(CMSIS_DSP,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-dsp"))
     download(ETHOS_U_CORE_DRIVER,
              lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
     download(ETHOS_U_CORE_PLATFORM,

@@ -18,17 +18,18 @@
 # CMSIS-DSP library CMake helper script.
 
 # Check if CMSIS sources have been defined
+if (NOT DEFINED CMSIS_DSP_SRC_PATH)
+    message(FATAL_ERROR "CMSIS-DSP path should be defined for CMSIS-DSP library to be built")
+endif()
 if (NOT DEFINED CMSIS_SRC_PATH)
-    message(FATAL_ERROR "CMSIS path should be defined for CMSIS-DSP library to be built")
+    message(FATAL_ERROR "CMSIS-5 path should be defined to include CMSIS-CORE")
 endif()
 
 # 3. Form a list of all the sources we need in CSMS-DSP library
-set(CMSIS_DSP_PATH_SUFFIX   "CMSIS/DSP")
-set(CMSIS_CORE_PATH_SUFFIX  "CMSIS/Core")
-set(CMSIS_DSP_SRC_DIR       "${CMSIS_SRC_PATH}/${CMSIS_DSP_PATH_SUFFIX}/Source")
-set(CMSIS_DSP_INC_DIR       "${CMSIS_SRC_PATH}/${CMSIS_DSP_PATH_SUFFIX}/Include")
-set(CMSIS_DSP_PRI_INC_DIR   "${CMSIS_SRC_PATH}/${CMSIS_DSP_PATH_SUFFIX}/PrivateInclude")
-set(CMSIS_CORE_INC_DIR      "${CMSIS_SRC_PATH}/${CMSIS_CORE_PATH_SUFFIX}/Include")
+set(CMSIS_DSP_SRC_DIR       "${CMSIS_DSP_SRC_PATH}/Source")
+set(CMSIS_DSP_INC_DIR       "${CMSIS_DSP_SRC_PATH}/Include")
+set(CMSIS_DSP_PRI_INC_DIR   "${CMSIS_DSP_SRC_PATH}/PrivateInclude")
+set(CMSIS_CORE_INC_DIR      "${CMSIS_SRC_PATH}/CMSIS/Core/Include")
 
 file(GLOB_RECURSE
     CMSIS_DSP_SRC
