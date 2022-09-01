@@ -47,6 +47,7 @@ endif()
 add_subdirectory(${API_COMMON_PROJECT_DIR} ${CMAKE_BINARY_DIR}/common)
 
 file(GLOB UC_API_LIST "${API_UC_PROJECT_DIR}/*")
+list(FILTER UC_API_LIST EXCLUDE REGEX ".md") # Remove .md files from UC_API_LIST
 
 foreach(API ${UC_API_LIST})
     add_subdirectory(${API} ${CMAKE_BINARY_DIR}/${API})
