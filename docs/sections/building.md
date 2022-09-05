@@ -20,7 +20,7 @@
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building with CMakePresets](./building.md#building-with-cmakepresets)
     - [Building the configured project](./building.md#building-the-configured-project)
-  - [Building timing adapter with custom options](./timing_adapters.md#building-timing-adapter-with-custom-options)
+  - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./building.md#add-custom-inputs)
   - [Add custom model](./building.md#add-custom-model)
   - [Optimize custom model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler)
@@ -644,6 +644,10 @@ Where for each implemented use-case under the `source/use-case` directory, the f
   folder.
 
 > **Note:**  For the specific use-case commands, refer to the relative section in the use-case documentation.
+
+## Building timing adapter with custom options
+
+For custom configuration of timing adapter see [Timing adapter](./timing_adapters.md#timing-adapter)
 
 ## Add custom inputs
 
