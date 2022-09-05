@@ -37,7 +37,7 @@ namespace app {
         auto input = static_cast<const uint8_t*>(data);
 
         std::memcpy(this->m_inputTensor->data.data, input, inputSize);
-        debug("Input tensor populated \n");
+        //debug("Input tensor populated \n");
 
         if (this->m_convertToInt8) {
             image::ConvertImgToInt8(this->m_inputTensor->data.data, this->m_inputTensor->bytes);

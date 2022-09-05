@@ -30,6 +30,25 @@ set(LCD_IFACE_TARGET lcd_iface)
 add_library(${LCD_IFACE_TARGET} INTERFACE)
 target_include_directories(${LCD_IFACE_TARGET} INTERFACE include)
 
+set(LCD_ENSEMBLE_COMPONENT_TARGET lcd_ensemble)
+add_library(${LCD_ENSEMBLE_COMPONENT_TARGET} STATIC)
+
+add_compile_options(-Werror-implicit-function-declaration)
+
+# Create static library for Ensemble LCD
+add_subdirectory(source/ensemble)
+
+## Component sources
+target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
+    PRIVATE
+    source/lcd_img.c)
+
+## Add dependencies
+target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
+    ${LCD_IFACE_TARGET}
+    log)
+
+
 # Create static library for MPS3 LCD
 set(LCD_MPS3_COMPONENT_TARGET lcd_mps3)
 add_library(${LCD_MPS3_COMPONENT_TARGET} STATIC)

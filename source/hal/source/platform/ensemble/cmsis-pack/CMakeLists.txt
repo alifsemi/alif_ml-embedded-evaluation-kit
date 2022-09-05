@@ -57,18 +57,17 @@ target_sources(${CMSIS_DEVICE_TARGET}
     Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     Device/${ENSEMBLE_CORE}/Source/system_utils.c
     Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
-    #CMSIS/Driver/Src/Driver_ADC.c
     CMSIS/Driver/Src/Driver_GPIO.c
     CMSIS/Driver/Src/Driver_I2S.c
-    #CMSIS/Driver/Src/Driver_I3C.c
-    #CMSIS/Driver/Src/Driver_LPTIMER.c
+    CMSIS/Driver/Src/Driver_I3C.c
     CMSIS/Driver/Src/Driver_PINMUX_AND_PINPAD.c
     CMSIS/Driver/Src/Driver_USART.c
-    #CMSIS/Driver/Src/Driver_UTIMER.c
     CMSIS/Driver/Src/GPIO_ll_drv.c
     CMSIS/Driver/Src/LPTIMER_ll_drv.c
     CMSIS/Driver/Src/PHY_Generic.c
-    #CMSIS/Driver/Src/UTIMER_ll_drv.c
+    CMSIS/Driver/Src/Camera_Sensor_i2c.c
+    CMSIS/Driver/Src/Driver_CDC200.c
+    #CMSIS/Driver/Src/arx3A0_camera_sensor.c
     )
 
 ## Sources - private

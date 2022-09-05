@@ -124,6 +124,7 @@ target_sources(${PLATFORM_DRIVERS_TARGET}
     source/platform_drivers.c
     source/uart_tracelib.c
     source/retarget_ensemble.c
+    source/delay.c
     )
 
 ## Directory for additional components required by MPS3:
@@ -150,6 +151,9 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
+## Platform component image
+add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)
@@ -162,12 +166,15 @@ endif()
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log
     audio_ensemble
+    image_ensemble
     ensemble_services
     cmsis_ensemble
     platform_pmu
-    lcd_stubs
+    lcd_ensemble
     rte_components
 )
+
+add_compile_options(-Werror-implicit-function-declaration)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)
