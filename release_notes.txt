@@ -1,5 +1,5 @@
 Changes in 22.08
-    * Support for 22.08 Ethos-U component and dependencies (core-driver, core-platform, CMSIS, TensorFlow Lite Micro).
+    * Support for 22.08 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.5.0, CMSIS, TensorFlow Lite Micro).
     * Formal support for Arm® Corstone-310 Arm Virtual Hardware and FPGA implementations.
     * Added CMake presets.
     * Bug fix for Arm® Ethos-U65 NPU's default AXI burst length.

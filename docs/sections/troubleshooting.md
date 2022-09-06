@@ -6,7 +6,7 @@
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.4.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+  - [No matching distribution found for ethos-u-vela==3.5.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
     - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
 
@@ -127,12 +127,12 @@ To solve this issue install libpython3 on the system.
 
 ## No matching distribution found for ethos-u-vela
 
-Vela 3.4.0 increases Python requirement to at least version 3.7, if not installed on your system the following error will occur:
+Vela 3.5.0 increases Python requirement to at least version 3.7, if not installed on your system the following error will occur:
 
 ```log
-python3 -m pip install ethos-u-vela==3.4.0
-ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.4.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
-ERROR: No matching distribution found for ethos-u-vela==3.4.0
+python3 -m pip install ethos-u-vela==3.5.0
+ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.5.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
+ERROR: No matching distribution found for ethos-u-vela==3.5.0
 ```
 
 Ensure that the minimum Python 3.7 requirement is installed and it's the default version.
