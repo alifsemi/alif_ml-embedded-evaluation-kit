@@ -59,7 +59,7 @@ namespace app {
     {
         return this->m_imgClassifier.GetClassificationResults(
                 this->m_outputTensor, this->m_results,
-                this->m_labels, 5, false);
+                this->m_labels, 3, false);
     }
 
 } /* namespace app */

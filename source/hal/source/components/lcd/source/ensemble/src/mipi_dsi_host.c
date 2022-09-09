@@ -7,7 +7,7 @@
 #include "base_def.h"
 #include "mipi_dsi_host.h"
 #include "display.h"
-#include "system_utils.h"
+#include "delay.h"
 
 static void DSI_DPHY_REG_WRITE(uint16_t,uint8_t);
 static uint8_t DSI_DPHY_REG_READ(uint16_t);
@@ -108,32 +108,32 @@ void dsi_video_mode_initialization(void)
 	HW_REG_WORD(MIPI_DSI_BASE,0x60) = VACT;
 }
 
-#define DCS_DELAY  100000
+#define DCS_DELAY  100
 
 void DCSWN_S (uint8_t cmd)
 {
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x05 | cmd<<8;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 }
 
 void DCSW1_S (uint8_t cmd, uint8_t data)
 {
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x15 | cmd<<8 | data<<16;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 }
 
 void DCSRN_S (uint8_t cmd)
 {
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x137;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x06 | cmd<<8;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 }
 
 void SMRPS_S(uint8_t num_bytes)
 {
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x37 | num_bytes<<8;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 }
 
 void DCSW_L (uint8_t cmd, uint8_t data1, uint8_t data2, uint8_t data3, uint8_t data4)
@@ -141,7 +141,7 @@ void DCSW_L (uint8_t cmd, uint8_t data1, uint8_t data2, uint8_t data3, uint8_t d
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_PLD_DATA) = data2<<24 | data1<<16 | cmd<<8 | cmd;
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_PLD_DATA) = data4<<8 | data3;
 	HW_REG_WORD(MIPI_DSI_BASE,A_GEN_HDR) = 0x39 | 0x6<<8;
-	PMU_delay_loop_us(DCS_DELAY);
+	sleep_or_wait_usec(DCS_DELAY);
 }
 
 int tx_phyconfig(void)
@@ -159,7 +159,7 @@ int tx_phyconfig(void)
 	/* Enable MIPI PHY LDO */
 	HW_REG_WORD(0x7004001C,0x00) |= (1U << 10);
 
-	PMU_delay_loop_us(100000);
+	sleep_or_wait_msec(100);
 
 	HW_REG_WORD(MIPI_DSI_BASE,0x4) = 0;	// reset DSI controller
 
@@ -354,7 +354,7 @@ int tx_phyconfig(void)
 	//26. Wait until stopstatedata_n and stopstateclk outputs are asserted indicating PHY is driving LP11 in
 	//enabled datalanes and clocklane.
 	do {
-		PMU_delay_loop_us(20000);
+		sleep_or_wait_usec(20);
 		rd_data = HW_REG_WORD(MIPI_DSI_BASE,0xB0);
 
 	} while ((rd_data & 0x00000094) != 0x00000094);

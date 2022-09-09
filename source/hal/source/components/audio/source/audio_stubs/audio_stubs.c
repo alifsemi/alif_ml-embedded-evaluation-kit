@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "audio_data.h"
+#include <string.h>
 
 int audio_init()
 {
@@ -23,6 +24,6 @@ int audio_init()
 
 int get_audio_data(void *data, int len)
 {
-    data[0] = '\0';
+    memset(data, 0, len);
     return 0;
 }

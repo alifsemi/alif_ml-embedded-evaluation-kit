@@ -703,13 +703,11 @@ int rx_phyconfig(void)
 	  //enabled datalanes and clocklanes.
 	  do {
 	    rd_data = HW_REG_WORD((mipi_csi_base_addr),0x4C);
-	    DEBUG_PRINTF("================= MIPI CSI DPHY Read 0x%0x \n", rd_data);
+	    DEBUG_PRINTF("MIPI CSI DPHY Read 0x%0x \n", rd_data);
 
 	    sleep_or_wait_msec(1);
-	    if (--retry <= 0) {
-			retry = 100;
-	  	  	return -1;
-		}
+	    if (--retry <= 0)
+	  	  return -1;
 
 	  } while( (rd_data & 0x00000003) != 0x00000003);
 

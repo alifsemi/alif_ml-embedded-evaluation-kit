@@ -16,10 +16,6 @@
 #include "delay.h"
 #include "base_def.h"
 #include "image_processing.h"
-#include "Camera_Common.h"
-
-int32_t ARX3A0_Init(ARM_CAMERA_RESOLUTION cam_resolution);
-int32_t ARX3A0_Start(void);
 
 int32_t camera_init(uint8_t *buffer)
 {

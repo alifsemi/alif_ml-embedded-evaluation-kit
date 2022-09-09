@@ -91,7 +91,6 @@ set(CMAKE_CXX_FLAGS             "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS} " CACHE IN
 set(CMAKE_C_FLAGS               "${CMAKE_C_FLAGS} ${COMPILER_FLAGS}" CACHE INTERNAL "")
 set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
-
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
 
@@ -115,6 +114,10 @@ INTERFACE
 include
 include/${TARGET_SUBSYSTEM}
 )
+
+if (USE_CASE_BUILD STREQUAL img_class)
+target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC -DIMG_CLASS)
+endif()
 
 
 ## Platform sources
@@ -145,14 +148,15 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 ## Platform component: audio
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
+## Platform component image
+add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
+
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
-## Platform component image
-add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -165,12 +169,15 @@ endif()
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log
-    audio_ensemble
-    image_ensemble
+    $<$<STREQUAL:${USE_CASE_BUILD},kws>:audio_ensemble>
+    $<$<STREQUAL:${USE_CASE_BUILD},kws>:lcd_stubs>
+    $<$<STREQUAL:${USE_CASE_BUILD},kws>:image_stubs>
+    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:image_ensemble>
+    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:lcd_ensemble>
+    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:audio_stubs>
     ensemble_services
     cmsis_ensemble
     platform_pmu
-    lcd_ensemble
     rte_components
 )
 

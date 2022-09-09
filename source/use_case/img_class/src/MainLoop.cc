@@ -99,6 +99,6 @@ void main_loop()
                 printf("Incorrect choice, try again.");
                 break;
         }
-    } while (1 && executionSuccessful);
+    } while (1);
     info("Main loop terminated.\n");
 }

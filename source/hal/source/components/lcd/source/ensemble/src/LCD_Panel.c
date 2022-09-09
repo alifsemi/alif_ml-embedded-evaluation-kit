@@ -6,7 +6,7 @@
 #include "RTE_Components.h"
 #include "Driver_CDC200.h"
 #include "image_processing.h"
-#include "system_utils.h"
+#include "delay.h"
 #include CMSIS_device_header
 
 extern ARM_DRIVER_GPIO Driver_GPIO4;
@@ -19,15 +19,15 @@ int Display_reset(void)
 	Driver_GPIO4.SetDirection(PIN_NUMBER_6, GPIO_PIN_DIRECTION_OUTPUT);
 	PINMUX_Config(PORT_NUMBER_4, PIN_NUMBER_6, PINMUX_ALTERNATE_FUNCTION_0);
 
-	PMU_delay_loop_us(10000);
+	sleep_or_wait_msec(10);
 
 	Driver_GPIO4.SetValue(PIN_NUMBER_6, GPIO_PIN_OUTPUT_STATE_LOW);
 
-	PMU_delay_loop_us(10000);
+	sleep_or_wait_msec(10);
 
 	Driver_GPIO4.SetValue(PIN_NUMBER_6, GPIO_PIN_OUTPUT_STATE_HIGH);
 
-	PMU_delay_loop_us(100000);
+	sleep_or_wait_msec(100);
 
 	return ARM_DRIVER_OK;
 }
@@ -474,10 +474,10 @@ void LCD_config ()
 
 	//sleep exit
 	DCSWN_S(0x11);
-	PMU_delay_loop_us(120000);
+	sleep_or_wait_msec(120);
 
 	DCSWN_S(0x29);
-	PMU_delay_loop_us(25000);
+	sleep_or_wait_msec(25);
 
 	//05 DCS Write, No Parameter SPa (Short Packet) DCSWN-S
 	//Normal Display mode on

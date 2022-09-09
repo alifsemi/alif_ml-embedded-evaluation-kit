@@ -54,7 +54,7 @@
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
 #define __RO_BASE       (MRAM_BASE+0x1000)
-#define __RO_SIZE       (MRAM_SIZE-0x1000)
+#define __RO_SIZE       (MRAM_SIZE-0x81000)
 
 #define __RW_BASE       (DTCM_BASE)
 #define __RW_SIZE       (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)
@@ -68,7 +68,6 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       .ANY (+XO)
       *(:gdef:mpu_table)
   }
-
 
   ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
       arm_softmax_s8.o (+RO)
@@ -110,7 +109,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   APP_HEAP  __APP_HEAP_BASE EMPTY  __APP_HEAP_SIZE {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
-  RW_SRAM0 SRAM0_BASE ALIGN 16 SRAM0_SIZE  {  ; 4MB ----------------------------
+  RW_SRAM0 SRAM0_BASE SRAM0_SIZE  {  ; 4MB ----------------------------
 
       * (lcd_image_buf)
       * (camera_frame_buf)              ; Camera Frame Buffer
@@ -125,35 +124,23 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       ; labels
       ;*.o (labels)
 
-        ; activation buffers a.k.a tensor arena when memory mode dedicated sram
-        *.o (activation_buf_dram)
+      ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+      *.o (.bss.NoInit.activation_buf_sram)
 
       ; micro allocator related code
       micro_allocator.o (+RO)
-      .ANY (+RO-DATA)
   }
 
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
-      ; activation buffers a.k.a tensor arena
-      *.o (.bss.NoInit.activation_buf_sram)
-    }
-
-  PADDING +0 ALIGN 16 FILL 0 16
-  {
-  }
-
+  PADDING +0 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0
-
-#define _PARTITION_ADDRESS		  0x8057F000
-#define _PARTITION_SIZE			  0x1000
+#define _PARTITION_ADDRESS          0x8057F000
+#define _PARTITION_SIZE             0x1000
 
 LR_PARTITION _PARTITION_ADDRESS  _PARTITION_SIZE
 {
 	RESERVED +0 FILL 0 (_PARTITION_SIZE - 16) {}
-	ATOC +0 16 {
-		*(:gdef:__mram_atoc)
-	}
+	ATOC +0 16 { *(:gdef:__mram_atoc) }
 }
 #endif

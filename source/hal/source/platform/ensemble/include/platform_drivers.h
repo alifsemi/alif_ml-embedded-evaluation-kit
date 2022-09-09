@@ -41,4 +41,8 @@ void platform_release(void);
  */
 const char* platform_name(void);
 
+#ifdef IMG_CLASS
+extern bool run_requested(void);
+#endif
+
 #endif /* PLATFORM_DRIVERS_H */

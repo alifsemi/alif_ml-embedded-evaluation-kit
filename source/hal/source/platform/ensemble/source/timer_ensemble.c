@@ -153,6 +153,9 @@ void SysTick_Handler(void)
 {
     /* Increment the cycle counter based on load value. */
     cpu_cycle_count += SysTick->LOAD + 1;
+#ifdef IMG_CLASS
+    lv_tick_inc(1);
+#endif
 }
 
 static bool add_pmu_counter(uint64_t value,
