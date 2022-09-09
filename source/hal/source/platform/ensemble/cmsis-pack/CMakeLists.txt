@@ -70,12 +70,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     #CMSIS/Driver/Src/arx3A0_camera_sensor.c
     )
 
-## Sources - private
-# target_sources(${CMSIS_DEVICE_TARGET}
-#     PRIVATE
-#     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/system_${ARM_CPU}.c
-#     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/startup_${ARM_CPU}.c)
-
 # Device definition needs to be set, is checked in source files to include correct header
 target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
 

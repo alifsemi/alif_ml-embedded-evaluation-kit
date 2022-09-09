@@ -26,7 +26,7 @@
 #ifndef APP_MAP_H
 #define APP_MAP_H
 
-#define _APP_ADDRESS			  0x80100000
+#define _APP_ADDRESS			 MRAM_BASE
 
 /* TODO: The macros below must be fixed for the E-series devices */
 #define _PARTITION_ADDRESS		  0x8057F000
