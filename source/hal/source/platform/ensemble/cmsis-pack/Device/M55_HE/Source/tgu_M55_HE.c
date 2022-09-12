@@ -29,12 +29,16 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if defined (M55_HE)
+  #include "M55_HE.h"
+#else
+  #error device not specified!
+#endif
 #include "tgu_M55_HE.h"
 /*
  * Array of NS memory regions. Add new regions to this list.
  */
-static const struct mem_region ns_regions[] = {
+static const struct mem_region ns_regions[] __STARTUP_RO_DATA_ATTRIBUTE = {
     {NS_REGION_0_BASE, NS_REGION_0_END, DTCM},
     };
 

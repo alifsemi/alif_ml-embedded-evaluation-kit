@@ -77,53 +77,51 @@ static mhu_driver_out_t s_mhu_driver_out;
 
 static mhu_m55_receive_callback_t M55_receive_callback = 0;
 
-void mhu0_se_sender_irq_handler()
+void MHU_ES0SE0_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU0);
 }
 
-void mhu0_se_receiver_irq_handler()
+void MHU_SEES00_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU0);
 }
 
-void mhu1_se_sender_irq_handler()
+void MHU_ES0SE1_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU1);
 }
 
-void mhu1_se_receiver_irq_handler()
+void MHU_SEES01_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU1);
 }
 
-void mhu0_m55_sender_irq_handler()
+void MHU_ES0ES10_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU0);
 }
 
-void mhu0_m55_receiver_irq_handler()
+void MHU_ES1ES00_RX_IRQHandler()
 {
-    printf("KPV: mhu0_m55_receiver_irq_handler\n");
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU0);
 }
 
-void mhu1_m55_sender_irq_handler()
+void MHU_ES0ES11_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU1);
 }
 
-void mhu1_m55_receiver_irq_handler()
+void MHU_ES1ES01_RX_IRQHandler()
 {
-    printf("KPV: mhu1_m55_receiver_irq_handler\n");
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU1);
 }
 
-static void setup_irq(int irq_num, uint32_t irq_handler)
+static void setup_irq(int irq_num/*, uint32_t irq_handler*/)
 {
   NVIC_DisableIRQ(irq_num);
   NVIC_ClearPendingIRQ(irq_num);
-  NVIC_SetVector(irq_num, irq_handler);
+  //NVIC_SetVector(irq_num, irq_handler);
   NVIC_SetPriority(irq_num, 2);
   NVIC_EnableIRQ(irq_num);
 }
@@ -171,17 +169,17 @@ static void mhu_initialize(void)
 
   MHU_driver_initialize(&s_mhu_driver_in, &s_mhu_driver_out);
 
-  setup_irq(ESSE_MHU0_COMB_IRQn, (uint32_t)&mhu0_se_sender_irq_handler);
-  setup_irq(SEES_MHU0_COMB_IRQn, (uint32_t)&mhu0_se_receiver_irq_handler);
+  setup_irq(ESSE_MHU0_COMB_IRQn/*, (uint32_t)&mhu0_se_sender_irq_handler*/);
+  setup_irq(SEES_MHU0_COMB_IRQn/*, (uint32_t)&mhu0_se_receiver_irq_handler*/);
 
-  setup_irq(ESSE_MHU1_COMB_IRQn, (uint32_t)&mhu1_se_sender_irq_handler);
-  setup_irq(SEES_MHU1_COMB_IRQn, (uint32_t)&mhu1_se_receiver_irq_handler);
+  setup_irq(ESSE_MHU1_COMB_IRQn/*, (uint32_t)&mhu1_se_sender_irq_handler*/);
+  setup_irq(SEES_MHU1_COMB_IRQn/*, (uint32_t)&mhu1_se_receiver_irq_handler*/);
 
-  setup_irq(M55SEND_MHU0_COMB_IRQn, (uint32_t)&mhu0_m55_sender_irq_handler);
-  setup_irq(M55RECV_MHU0_COMB_IRQn, (uint32_t)&mhu0_m55_receiver_irq_handler);
+  setup_irq(M55SEND_MHU0_COMB_IRQn/*, (uint32_t)&mhu0_m55_sender_irq_handler*/);
+  setup_irq(M55RECV_MHU0_COMB_IRQn/*, (uint32_t)&mhu0_m55_receiver_irq_handler*/);
 
-  setup_irq(M55SEND_MHU1_COMB_IRQn, (uint32_t)&mhu1_m55_sender_irq_handler);
-  setup_irq(M55RECV_MHU1_COMB_IRQn, (uint32_t)&mhu1_m55_receiver_irq_handler);
+  setup_irq(M55SEND_MHU1_COMB_IRQn/*, (uint32_t)&mhu1_m55_sender_irq_handler*/);
+  setup_irq(M55RECV_MHU1_COMB_IRQn/*, (uint32_t)&mhu1_m55_receiver_irq_handler*/);
 
   __enable_irq();
 }

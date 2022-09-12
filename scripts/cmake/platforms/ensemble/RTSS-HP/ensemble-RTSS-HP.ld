@@ -174,6 +174,7 @@ SECTIONS
     * (camera_frame_buf)              /* Camera Frame Buffer */
     * (camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (lcd_image_buf)
+
     . = ALIGN(4);
     __sram0_end__ = .;
   } > SRAM0
@@ -182,7 +183,7 @@ SECTIONS
   {
     . = ALIGN(4);
     __sram1_start__ = .;
-    * (.bss.NoInit.activation_buf_sram) /* 1MB */
+    * (.bss.NoInit.activation_buf_sram) /* 2MB */
     . = ALIGN(4);
     __sram1_end__ = .;
   } > SRAM1

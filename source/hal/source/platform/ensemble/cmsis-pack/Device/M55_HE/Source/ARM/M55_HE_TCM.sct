@@ -1,14 +1,9 @@
 #! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 #include "M55_HE_map.h"
-#include "app_map.h"
 /*
 ;-------- <<< Use Configuration Wizard in Context Menu >>> -------------------
 */
-
-/* MRAM code storage for M55-HE */
-#define __ROM_BASE      _APP_ADDRESS
-#define __ROM_SIZE      _APP_MAX_SIZE
 
 /*--------------------- ITCM Configuration ----------------------------------
 ; <h> ITCM Configuration
@@ -17,8 +12,8 @@
 ; </h>
  *----------------------------------------------------------------------------*/
 /* SRAM4 is mapped as ITCM in M55-HE */
-#define __ITCM_BASE      0x00000000
-#define __ITCM_SIZE      SRAM4_SIZE
+#define __ROM_BASE      0x00000000
+#define __ROM_SIZE      SRAM4_SIZE
 
 /*--------------------- DTCM Configuration ---------------------------
 ; <h> DTCM Configuration
@@ -57,22 +52,20 @@
 /*----------------------------------------------------------------------------
   Scatter File Definitions definition
  *----------------------------------------------------------------------------*/
+#define __RO_BASE       __ROM_BASE
+#define __RO_SIZE       __ROM_SIZE
 
 #define __RW_BASE       __RAM_BASE
-#define __RW_SIZE      (__RAM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE)
+#define __RW_SIZE      (__RAM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE - NS_REGION_0_SIZE)
 
 
-LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
-  M55_HE_ROM +0 __ROM_SIZE  {                 ; load address = execution address
+LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
+  ER_ROM __RO_BASE __RO_SIZE  {                     ; load address = execution address
    *.o (RESET, +First)
    *(InRoot$$Sections)
    *.o (startup_ro_data)
    .ANY (+RO)
    .ANY (+XO)
-  }
-
-  ITCM_RAM __ITCM_BASE __ITCM_SIZE  {                     ; RW code
-   ; Specify objects intended to execute out of ITCM
   }
 
   RW_RAM __RW_BASE __RW_SIZE  {                     ; RW data
@@ -121,15 +114,4 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
 
   }
 
-  PADDING +0 ALIGN 16 FILL 0 16
-  {
-  }
-}
-
-LR_PARTITION _PARTITION_ADDRESS  _PARTITION_SIZE
-{
-	RESERVED +0 FILL 0 (_PARTITION_SIZE - 16) {}
-	ATOC +0 16 {
-		*(:gdef:__mram_atoc)
-	}
 }
