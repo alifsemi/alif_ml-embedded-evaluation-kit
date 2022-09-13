@@ -115,20 +115,14 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (camera_frame_buf)              ; Camera Frame Buffer
       * (camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
 
-      ; nn models baked in input matrices
-      ;*.o (ifm)
+      ; micro allocator related code
+      micro_allocator.o (+RO)
+  }
 
-      ; nn models default space
-      ;*.o (nn_model)
-
-      ; labels
-      ;*.o (labels)
+  RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
 
       ; activation buffers a.k.a tensor arena when memory mode dedicated sram
       *.o (.bss.NoInit.activation_buf_sram)
-
-      ; micro allocator related code
-      micro_allocator.o (+RO)
   }
 
   PADDING +0 ALIGN 16 FILL 0 16  {  }

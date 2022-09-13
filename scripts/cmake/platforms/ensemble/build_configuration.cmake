@@ -18,14 +18,7 @@
 function(set_platform_global_defaults)
     message(STATUS "Platform: Ensemble HP")
 
-    if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
-        if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-            set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
-        elseif(TARGET_SUBSYSTEM STREQUAL RTSS-HE)
-            set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
-        endif()
-    endif()
-
+    set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
                 CACHE FILEPATH "Toolchain file")

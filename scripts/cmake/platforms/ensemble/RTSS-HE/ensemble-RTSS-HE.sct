@@ -106,7 +106,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   APP_HEAP  __APP_HEAP_BASE EMPTY  __APP_HEAP_SIZE {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
-  RW_SRAM1 SRAM1_BASE ALIGN 16 SRAM1_SIZE  {  ; 2.5MB ----------------------------
+  RW_SRAM6 SRAM6_BASE ALIGN 16 SRAM6_SIZE  {  ; 2MB ----------------------------
       ; nn models baked in input matrices
       *.o (ifm)
 

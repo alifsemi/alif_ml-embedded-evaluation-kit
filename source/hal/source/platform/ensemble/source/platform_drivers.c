@@ -20,11 +20,7 @@
 #include "log_macros.h"     /* Logging functions */
 #include "peripheral_memmap.h"
 #include <string.h>         /* For strncpy */
-
 #include <time.h>
-#include <string.h>
-
-#include <string.h>
 #include <inttypes.h>
 
 #include "RTE_Device.h"
