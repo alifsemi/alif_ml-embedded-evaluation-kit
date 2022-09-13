@@ -3,7 +3,7 @@ Jinja2==2.11.2
 llvmlite==0.38.0
 MarkupSafe==1.1.1
 numba==0.55.1
-numpy==1.21.6
+numpy==1.21.3
 Pillow==7.2.0
 pycparser==2.20
 resampy==0.2.2
