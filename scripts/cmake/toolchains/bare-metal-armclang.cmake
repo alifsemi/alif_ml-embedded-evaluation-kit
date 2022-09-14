@@ -84,7 +84,7 @@ add_compile_options(
 # General purpose compile options:
 add_compile_options(
     -funsigned-char
-    -Os
+    -Og
     -g
     -fdata-sections
     -fno-function-sections

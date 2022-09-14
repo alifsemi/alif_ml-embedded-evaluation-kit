@@ -24,10 +24,6 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    # if ((ETHOS_U_NPU_ID STREQUAL U55) AND (TARGET_SUBSYSTEM STREQUAL sse-310))
-    #     message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID} and target subsystem ${TARGET_SUBSYSTEM}")
-    # endif()
-
     set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/ensemble" PARENT_SCOPE)
 
@@ -59,25 +55,11 @@ function(platform_custom_post_build)
     file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
     file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
 
-    # if (TARGET_SUBSYSTEM STREQUAL sse-310)
-    #     set(LINKER_SECTION_TAGS     "*.at_bram" "*.at_ddr")
-    #     set(LINKER_OUTPUT_BIN_TAGS  "bram.bin"  "ddr.bin")
-    # else()
-    #     set(LINKER_SECTION_TAGS     "*.at_itcm" "*.at_ddr")
-    #     set(LINKER_OUTPUT_BIN_TAGS  "itcm.bin"  "ddr.bin")
-    # endif()
-
     add_bin_generation_command(
             TARGET_NAME ${PARSED_TARGET_NAME}
             OUTPUT_DIR  ${SECTORS_BIN_DIR}
             AXF_PATH    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf
             SECTION_PATTERNS    "${LINKER_SECTION_TAGS}"
             OUTPUT_BIN_NAMES    "${LINKER_OUTPUT_BIN_TAGS}")
-
-    #set(MPS3_FPGA_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/scripts/mps3/${TARGET_SUBSYSTEM}/images.txt")
-
-    # add_custom_command(TARGET ${PARSED_TARGET_NAME}
-    #         POST_BUILD
-    #         COMMAND ${CMAKE_COMMAND} -E copy ${MPS3_FPGA_CONFIG} ${SECTORS_DIR})
 
 endfunction()
