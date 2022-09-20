@@ -34,7 +34,7 @@ function(set_platform_global_defaults)
     # Arm Corstone-310's timing adapter behaviour is very different to Arm Corstone-300 and cannot
     # be used for bandwidth/latency related performance sweeps for the Arm Ethos-U NPU. Read
     # docs/sections/timing_adapters.md for more details.
-    if ((TARGET_SUBSYSTEM STREQUAL sse-310) AND ${ETHOS_U_NPU_TIMING_ADAPTER_ENABLED})
+    if ((TARGET_SUBSYSTEM STREQUAL "sse-310") AND (DEFINED ETHOS_U_NPU_TIMING_ADAPTER_ENABLED))
         message(STATUS "Timing adapter will NOT be used for target subsystem ${TARGET_SUBSYSTEM}")
         set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF CACHE BOOL "Use of TA" FORCE)
     endif()
