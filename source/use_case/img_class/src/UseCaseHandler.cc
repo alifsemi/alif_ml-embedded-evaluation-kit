@@ -27,7 +27,14 @@
 
 #include <cinttypes>
 
+#include "lvgl.h"
+extern lv_obj_t *labelResult1;
+extern lv_obj_t *labelResult2;
+extern lv_obj_t *labelResult3;
+
 using ImgClassClassifier = arm::app::Classifier;
+
+extern bool run_requested(void);
 
 namespace arm {
 namespace app {
@@ -83,37 +90,27 @@ namespace app {
                 results);
 
         do {
-            hal_lcd_clear(COLOR_BLACK);
-
-            /* Strings for presentation/logging. */
-            std::string str_inf{"Running inference... "};
-
-            const uint8_t* imgSrc = get_img_array(ctx.Get<uint32_t>("imgIndex"));
-            if (nullptr == imgSrc) {
-                printf_err("Failed to get image index %" PRIu32 " (max: %u)\n", ctx.Get<uint32_t>("imgIndex"),
-                           NUMBER_OF_FILES - 1);
+            int err = hal_get_image_data(inputTensor->data.data);
+            if (err) {
+                printf_err("hal_get_image_data failed with : %d", err);
                 return false;
             }
 
             /* Display this image on the LCD. */
             hal_lcd_display_image(
-                imgSrc,
+                (const uint8_t*)inputTensor->data.data,
                 nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
 
-            /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
-
-            /* Select the image to run inference with. */
-            info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
-                get_filename(ctx.Get<uint32_t>("imgIndex")));
+            if (!run_requested()) {
+                break;
+            }
 
             const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
                                   inputTensor->bytes : IMAGE_DATA_SIZE;
 
             /* Run the pre-processing, inference and post-processing. */
-            if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
+            if (!preProcess.DoPreProcess(inputTensor->data.data, imgSz)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
@@ -128,17 +125,16 @@ namespace app {
                 return false;
             }
 
-            /* Erase. */
-            str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
-
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);
 
 #if VERIFY_TEST_OUTPUT
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
+
+            lv_label_set_text_fmt(labelResult1, "%s (%ld%%)", results[0].m_label.c_str(), (uint32_t)(results[0].m_normalisedVal * 100));
+            lv_label_set_text_fmt(labelResult2, "%s (%ld%%)", results[1].m_label.c_str(), (uint32_t)(results[1].m_normalisedVal * 100));
+            lv_label_set_text_fmt(labelResult3, "%s (%ld%%)", results[2].m_label.c_str(), (uint32_t)(results[2].m_normalisedVal * 100));
 
             if (!PresentInferenceResult(results)) {
                 return false;

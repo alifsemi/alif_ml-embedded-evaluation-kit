@@ -39,6 +39,7 @@
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 #include CMSIS_device_header
+#include "delay.h"
 
 /* Proceed only if ARX3A0 Camera Sensor is enabled. */
 #if RTE_ARX3A0_CAMERA_SENSOR_ENABLE
@@ -69,7 +70,7 @@ ARM_DRIVER_GPIO *GPIO_Driver_CAM = &Driver_GPIO4;
  * Delay for microsecond:
  * Provide delay using PMU(Performance Monitoring Unit).
  */
-#define ARX3A0_DELAY_mSEC(msec)       PMU_delay_loop_us(msec)
+#define ARX3A0_DELAY_mSEC(msec)       sleep_or_wait_msec(msec)
 
 /* Wrapper function for i2c read
  *  read register value from ARX3A0 Camera Sensor registers
@@ -170,19 +171,19 @@ static int32_t ARX3A0_Camera_Hard_Reseten(void)
 	if(ret != ARM_DRIVER_OK)
 		return ARM_DRIVER_ERROR;
 
-	ARX3A0_DELAY_mSEC(2000);
+	ARX3A0_DELAY_mSEC(2);
 
 	ret = GPIO_Driver_CAM->SetValue(RTE_ARX3A0_CAMERA_RESET_PIN_NO, GPIO_PIN_OUTPUT_STATE_LOW);
 	if(ret != ARM_DRIVER_OK)
 		return ARM_DRIVER_ERROR;
 
-	ARX3A0_DELAY_mSEC(2000);
+	ARX3A0_DELAY_mSEC(2);
 
 	ret = GPIO_Driver_CAM->SetValue(RTE_ARX3A0_CAMERA_RESET_PIN_NO, GPIO_PIN_OUTPUT_STATE_HIGH);
 	if(ret != ARM_DRIVER_OK)
 		return ARM_DRIVER_ERROR;
 
-	ARX3A0_DELAY_mSEC(100000);
+	ARX3A0_DELAY_mSEC(100);
 
 	return ARM_DRIVER_OK;
 }
@@ -204,7 +205,7 @@ static int32_t ARX3A0_Camera_Soft_Reseten(void)
 	/* @Observation: more delay is required for Camera Sensor
 	 *               to setup after Soft Reset.
 	 */
-	ARX3A0_DELAY_mSEC(1000);
+	ARX3A0_DELAY_mSEC(1);
 
 	return ARM_DRIVER_OK;
 }
@@ -307,7 +308,7 @@ int32_t ARX3A0_Init(ARM_CAMERA_RESOLUTION cam_resolution)
 	if(ret != ARM_DRIVER_OK)
 		return ARM_DRIVER_ERROR;
 
-	ARX3A0_DELAY_mSEC(50000);
+	ARX3A0_DELAY_mSEC(50);
 
 	/*stop streaming*/
 	ret = ARX3A0_WRITE_REG(ARX3A0_MODE_SELECT_REGISTER, 0x00, 1);
@@ -332,7 +333,7 @@ int32_t ARX3A0_Start(void)
 	if(ret != ARM_DRIVER_OK)
 		return ARM_DRIVER_ERROR;
 
-	ARX3A0_DELAY_mSEC(1000);
+	ARX3A0_DELAY_mSEC(1);
 
 	return ARM_DRIVER_OK;
 }

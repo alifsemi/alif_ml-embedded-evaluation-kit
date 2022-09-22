@@ -11,6 +11,7 @@
 #include "services_lib_api.h"
 #include "services_lib_public.h"
 #include "services_lib_protocol.h"
+#include "RTE_Components.h"
 
 #define SEND_MSG_ACK_TIMEOUT    100000ul
 
@@ -56,7 +57,7 @@ uint32_t SERVICES_global_to_local_addr(uint32_t global_addr)
  * @param   channel_number
  * @return  Handle to be used in subsequent service calls
  */
-uint32_t SERVICES_register_channel(uint32_t mhu_id, 
+uint32_t SERVICES_register_channel(uint32_t mhu_id,
                                    uint32_t channel_number)
 {
   return mhu_id * MHU_NUMBER_OF_CHANNELS_MAX + channel_number;
@@ -112,8 +113,8 @@ void SERVICES_send_msg_acked_callback(uint32_t sender_id,
  * @param channel_number
  * @param service_data
  */
-void SERVICES_rx_msg_callback(uint32_t receiver_id, 
-                              uint32_t channel_number, 
+void SERVICES_rx_msg_callback(uint32_t receiver_id,
+                              uint32_t channel_number,
                               uint32_t service_data)
 {
   uint32_t local_address = SERVICES_global_to_local_addr(service_data);
@@ -122,12 +123,12 @@ void SERVICES_rx_msg_callback(uint32_t receiver_id,
   {
     s_services_host.fn_print_msg("[SERVICESLIB] rx_msg=0x%x \n", service_data);
     s_new_msg_received = true;
-	
+
     if (s_callback)
     {
       s_callback(receiver_id, service_data);
       s_callback = NULL;
-    }	
+    }
   }
   else
   {
@@ -168,44 +169,44 @@ uint32_t SERVICES_send_msg(uint32_t services_handle,
  * @param callback
  * @return
  */
-uint32_t SERVICES_send_request(uint32_t services_handle, 
-                               uint16_t service_id, 
-                               void *service_data, 
+uint32_t SERVICES_send_request(uint32_t services_handle,
+                               uint16_t service_id,
+                               void *service_data,
                                SERVICES_sender_callback callback)
 {
-  s_services_host.fn_print_msg("[SERVICESLIB] Send service request 0x%x\n", 
+  s_services_host.fn_print_msg("[SERVICESLIB] Send service request 0x%x\n",
                                service_id);
 
   s_pkt_buffer_address = (uint32_t)service_data;
   s_new_msg_received = false;
   s_service_req_ack_received = false;
   s_callback = callback;
-  
+
   // Initialize the service request common header
   service_header_t * p_header = (service_header_t *)s_pkt_buffer_address;
   p_header->send_service_id = service_id;
   p_header->send_flags = 0;
-  
+
   // Send a message to the SE
   uint32_t ret = SERVICES_send_msg(services_handle, service_data);
   if (ret != SERVICES_REQ_SUCCESS)
       return ret;
-  
+
   if (callback) // asynchronous invokation, don't wait for the service response
   {
-    return 0;  
+    return 0;
   }
 
   // Wait for response from SE
   uint32_t timeout = s_services_host.wait_timeout;
   while (!s_new_msg_received)
   {
-    timeout--;  
+    timeout--;
     if (0 == timeout) // No response from SE
     {
       return SERVICES_REQ_TIMEOUT;
     }
-	
+
     if (0 != s_services_host.fn_wait_ms(SERVICES_REQ_TIMEOUT_MS))
     {
       break;

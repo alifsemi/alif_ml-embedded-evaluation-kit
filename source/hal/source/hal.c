@@ -29,6 +29,7 @@ bool hal_platform_init(void)
         return false;
     }
 
+#ifdef IMG_CLASS
     /* Initialise LCD */
     err = hal_lcd_init();
     if (0 != err) {
@@ -36,11 +37,19 @@ bool hal_platform_init(void)
         return false;
     }
 
+    err = hal_image_init();
+    if (0 != err) {
+        printf_err("hal_image_init failed with error: %d\n", err);
+        return false;
+    }
+#else
+
     err = hal_audio_init();
     if (0 != err) {
         printf_err("hal_audio_init failed with error: %d\n", err);
         return false;
     }
+#endif
 
     /* Initialise PMU */
     hal_pmu_init();

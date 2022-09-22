@@ -30,11 +30,16 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if defined (M55_HP)
+  #include "M55_HP.h"
+#else
+  #error device not specified!
+#endif
 #include "tgu_M55_HP.h"
 /*
  * Array of NS memory regions. Add new regions to this list.
  */
-static const struct mem_region ns_regions[] = {
+static const struct mem_region ns_regions[] __STARTUP_RO_DATA_ATTRIBUTE = {
     {NS_REGION_0_BASE, NS_REGION_0_END, DTCM},
     };
 

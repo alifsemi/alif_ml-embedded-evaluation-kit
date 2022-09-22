@@ -34,4 +34,7 @@
 #define APB_CLOCK 100000000
 #endif
 
+#define I2C_PERIPHERAL_CLOCK    APB_CLOCK
+
 #endif /* CLK_H_ */
+

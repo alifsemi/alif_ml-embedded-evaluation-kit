@@ -42,7 +42,11 @@
  *      UART2 (Pin P3_17)
  *      UART4 (Pin P3_2)
  */
+#ifdef IMG_CLASS
+#define UART      4
+#else
 #define UART      2
+#endif
 
 /* UART Driver */
 extern ARM_DRIVER_USART ARM_Driver_USART_(UART);

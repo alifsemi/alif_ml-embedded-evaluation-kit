@@ -59,7 +59,7 @@
 #define EXPMST0_BASE              (0x48000000UL)
 #define LP_PERIPHERAL_BASE        (0x70000000UL)
 
-/* EXPMSTO Global Peripheral Address Map */
+/* EXPMST0 Global Peripheral Address Map */
 
 /* AHB - 2 */
 #define EXPMST0_AHB_A_BASE        (EXPMST0_BASE)
@@ -70,10 +70,14 @@
 
 /* AHB-B Peripherals */
 #define ETH_BASE                  (EXPMST0_AHB_B_BASE)
+#define SDMMC_BASE                (EXPMST0_AHB_B_BASE + 0x00002000)
 #define SPI0_BASE                 (EXPMST0_AHB_B_BASE + 0x00003000)
 #define SPI1_BASE                 (EXPMST0_AHB_B_BASE + 0x00004000)
 #define SPI2_BASE                 (EXPMST0_AHB_B_BASE + 0x00005000)
 #define SPI3_BASE                 (EXPMST0_AHB_B_BASE + 0x00006000)
+#define CRC0_BASE                 (EXPMST0_AHB_B_BASE + 0x00007000)
+#define CRC1_BASE                 (EXPMST0_AHB_B_BASE + 0x00008000)
+#define USB0_BASE                 (EXPMST0_AHB_B_BASE + 0x00100000)
 
 /* APB - 5 */
 #define EXPMST0_APB_A_BASE        (EXPMST0_BASE + 0x01000000)
@@ -98,11 +102,34 @@
 #define UART7_BASE                  (EXPMST0_APB_A_BASE + 0x0000F000)
 
 /* APB-B Peripherals */
+#define I2C0_BASE                 (EXPMST0_APB_B_BASE)
+#define I2C1_BASE                 (EXPMST0_APB_B_BASE + 0x00001000)
+#define I2C2_BASE                 (EXPMST0_APB_B_BASE + 0x00002000)
+#define I2C3_BASE                 (EXPMST0_APB_B_BASE + 0x00003000)
 #define I2S0_BASE                 (EXPMST0_APB_B_BASE + 0x00004000)
 #define I2S1_BASE                 (EXPMST0_APB_B_BASE + 0x00005000)
 #define I2S2_BASE                 (EXPMST0_APB_B_BASE + 0x00006000)
 #define I2S3_BASE                 (EXPMST0_APB_B_BASE + 0x00007000)
 #define I3C0_BASE                 (EXPMST0_APB_B_BASE + 0x00008000)
+#define CANFD_BASE                (EXPMST0_APB_B_BASE + 0x00009000)
+#define CAN_CNT_BASE              (EXPMST0_APB_B_BASE + 0x0000A000)
+#define HWSEM0_BASE               (EXPMST0_APB_B_BASE + 0x0000B000)
+#define HWSEM1_BASE               (EXPMST0_APB_B_BASE + 0x0000B010)
+#define HWSEM2_BASE               (EXPMST0_APB_B_BASE + 0x0000B020)
+#define HWSEM3_BASE               (EXPMST0_APB_B_BASE + 0x0000B030)
+#define HWSEM4_BASE               (EXPMST0_APB_B_BASE + 0x0000B040)
+#define HWSEM5_BASE               (EXPMST0_APB_B_BASE + 0x0000B050)
+#define HWSEM6_BASE               (EXPMST0_APB_B_BASE + 0x0000B060)
+#define HWSEM7_BASE               (EXPMST0_APB_B_BASE + 0x0000B070)
+#define HWSEM8_BASE               (EXPMST0_APB_B_BASE + 0x0000B080)
+#define HWSEM9_BASE               (EXPMST0_APB_B_BASE + 0x0000B090)
+#define HWSEM10_BASE              (EXPMST0_APB_B_BASE + 0x0000B0A0)
+#define HWSEM11_BASE              (EXPMST0_APB_B_BASE + 0x0000B0B0)
+#define HWSEM12_BASE              (EXPMST0_APB_B_BASE + 0x0000B0C0)
+#define HWSEM13_BASE              (EXPMST0_APB_B_BASE + 0x0000B0D0)
+#define HWSEM14_BASE              (EXPMST0_APB_B_BASE + 0x0000B0E0)
+#define HWSEM15_BASE              (EXPMST0_APB_B_BASE + 0x0000B0F0)
+#define PDM_BASE                  (EXPMST0_APB_B_BASE + 0x0000C000)
 
 /* APB-C Peripherals */
 #define ADC0_BASE                 (EXPMST0_APB_C_BASE)
@@ -122,11 +149,22 @@
 #define CDC200_BASE               (EXPMST0_APB_D_BASE + 0x00001000)
 #define MIPI_DSI_BASE             (EXPMST0_APB_D_BASE + 0x00002000)
 #define MIPI_CSI2_BASE            (EXPMST0_APB_D_BASE + 0x00003000)
+/* Interrupt Generator Block for Modem SubSystem */
+#define INTGEN_0                  (EXPMST0_APB_D_BASE + 0x00008000)
+#define INTGEN_1                  (EXPMST0_APB_D_BASE + 0x00009000)
+#define INTGEN_4                  (EXPMST0_APB_D_BASE + 0x0000C000)
+#define INTGEN_5                  (EXPMST0_APB_D_BASE + 0x0000D000)
 #define CFGSLV1_BASE              (EXPMST0_APB_D_BASE + 0x0000F000)
+#define CDC200_PIXCLK_CTRL        (CFGSLV1_BASE + 0x00000004)
 #define CSI_PIXCLK_CTRL           (CFGSLV1_BASE + 0x00000008)
 
 
 /* APB-E Peripherals */
+#define AES0_BASE                 (EXPMST0_APB_E_BASE)
+#define AES1_BASE                 (EXPMST0_APB_E_BASE + 0x01000)
+#define DAVE2D_BASE               (EXPMST0_APB_E_BASE + 0x02000)
+#define DMA0_SE_BASE              (EXPMST0_APB_E_BASE + 0x40000)
+#define DMA0_NS_BASE              (EXPMST0_APB_E_BASE + 0x60000)
 
 /* VBAT Global Address Map */
 #define VBAT_BASE                 (LP_PERIPHERAL_BASE)

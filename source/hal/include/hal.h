@@ -32,6 +32,7 @@ extern "C" {
 #include "hal_pmu.h"              /* Timer/profiler API */
 #include "hal_lcd.h"            /* LCD functions */
 #include "hal_audio.h"          /* AUDIO functions */
+#include "hal_image.h"          /* IMAGE functions */
 
 #include <inttypes.h>
 #include <stdbool.h>

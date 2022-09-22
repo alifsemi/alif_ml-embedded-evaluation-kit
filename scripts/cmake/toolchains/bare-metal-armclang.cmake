@@ -39,6 +39,9 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(CPU_ID                      M55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
+    set(FLOAT_ABI                   hard)
+    set(ARM_MATH_DSP                1)
+    set(ARM_MATH_LOOPUNROLL         1)
     set(CPU_HEADER_FILE             "${ARM_CPU}.h")
     set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
@@ -81,7 +84,7 @@ add_compile_options(
 # General purpose compile options:
 add_compile_options(
     -funsigned-char
-    -Os
+    -Og
     -g
     -fdata-sections
     -fno-function-sections
@@ -90,16 +93,18 @@ add_compile_options(
 # Arch compile options:
 add_compile_options(
     -mthumb
+    -mfloat-abi=${FLOAT_ABI}
     --target=arm-arm-non-eabi
     -mlittle-endian
     -MD
-    ${CPU_COMPILE_OPTION}
-    ${FLOAT_ABI_COMPILE_OPTION})
+    ${CPU_COMPILE_OPTION})
 
 # Compile definitions:
 add_compile_definitions(
     CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
-    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>)
+    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
+    $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
+    $<$<BOOL:${ARM_MATH_LOOPUNROLL}>:ARM_MATH_LOOPUNROLL>)
 
 # Link options:
 add_link_options(${CPU_LINK_OPT})

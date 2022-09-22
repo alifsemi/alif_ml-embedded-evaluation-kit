@@ -93,7 +93,7 @@ typedef struct
   uint32_t objSize;
 } atoc_t;
 
-const atoc_t __mram_atoc = {
+static const atoc_t __mram_atoc = {
 
   .loadAddress = 0xFFFFFFFF, // Indicate XIP Mode
   .configuration = MINI_TOC_SIGNATURE + TOC_IMAGE_CPU_M55_HP,
@@ -102,7 +102,6 @@ const atoc_t __mram_atoc = {
 };
 
 atoc_t *__dummy;
-
 
 /*----------------------------------------------------------------------------
   Define clocks
@@ -189,8 +188,7 @@ __ISB();
 
   SystemCoreClock = SYSTEM_CLOCK;
   __dummy = &__mram_atoc;
-
-  //Enable the PMU
+  //Enable the PMU 
   ARM_PMU_Enable();
 
   //Enable PMU Cycle Counter

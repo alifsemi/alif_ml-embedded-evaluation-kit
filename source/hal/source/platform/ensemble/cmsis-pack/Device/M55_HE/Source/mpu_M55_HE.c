@@ -45,17 +45,7 @@
   #error device not specified!
 #endif
 
-/* Public functions ----------------------------------------------------------*/
-/**
- * @brief  Load the MPU regions from the given table
- * @note   This function loads the region and also sets the
- *         attrbutes for the regions.
- * @param  None
- * @retval None
- */
-static void MPU_Load_Regions(void)
-{
-    static const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) = {
+const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) = {
     {
     .RBAR = ARM_MPU_RBAR(0x02000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
     .RLAR = ARM_MPU_RLAR(0x023FFFFFUL, 1UL)     // SRAM0
@@ -76,7 +66,18 @@ static void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(0x63100000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
     .RLAR = ARM_MPU_RLAR(0x632FFFFFUL, 1UL)     // SRAM8
     },
-    };
+};
+
+/* Public functions ----------------------------------------------------------*/
+/**
+ * @brief  Load the MPU regions from the given table
+ * @note   This function loads the region and also sets the
+ *         attrbutes for the regions.
+ * @param  None
+ * @retval None
+ */
+static void MPU_Load_Regions(void)
+{
 
     /* Define the possible Attribute regions */
     ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR_DEVICE);	/* Attr0, Device Memory */

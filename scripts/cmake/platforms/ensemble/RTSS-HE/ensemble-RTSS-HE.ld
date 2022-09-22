@@ -24,8 +24,9 @@ MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
-  SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
-  SRAM1 (rwx) : ORIGIN = 0x08140000, LENGTH = 0x00140000
+  /*SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
+  SRAM1 (rwx) : ORIGIN = 0x08140000, LENGTH = 0x00140000*/
+  SRAM6 (rwx) : ORIGIN = 0x62000000, LENGTH = 0x00200000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
   TOC   (r)   : ORIGIN = 0x8057FFF0, LENGTH = 16
 }
@@ -107,10 +108,12 @@ SECTIONS
     __zero_table_start__ = .;
     LONG (__bss_start__)
     LONG ((__bss_end__ - __bss_start__)/4)
-    LONG (__sram0_start__)
+ /*   LONG (__sram0_start__)
     LONG ((__sram0_end__ - __sram0_start__)/4)
     LONG (__sram1_start__)
-    LONG ((__sram1_end__ - __sram1_start__)/4)
+    LONG ((__sram1_end__ - __sram1_start__)/4)*/
+    LONG (__sram6_start__)
+    LONG ((__sram6_end__ - __sram6_start__)/4)
     __zero_table_end__ = .;
     . = ALIGN(16);
   } > MRAM
@@ -165,7 +168,7 @@ SECTIONS
     __data2_end__ = .;
   } > SRAM0
 */
-
+/*
   .data.at_sram0 (NOLOAD) :
   {
     . = ALIGN(4);
@@ -178,11 +181,19 @@ SECTIONS
   {
     . = ALIGN(4);
     __sram1_start__ = .;
-    * (.bss.NoInit.activation_buf_sram)
-    * (ifm)
     . = ALIGN(4);
     __sram1_end__ = .;
   } > SRAM1
+*/
+  .data.at_sram6 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    __sram6_start__ = .;
+    * (.bss.NoInit.activation_buf_sram)
+    * (ifm)
+    . = ALIGN(4);
+    __sram6_end__ = .;
+  } > SRAM6
 
   .bss (NOLOAD) :
   {
