@@ -18,9 +18,7 @@
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "ad")
 
-USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or path to a single input WAV file, to use in the evaluation application."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
-    PATH_OR_FILE)
+set_input_file_path_user_option(".wav" ${use_case})
 
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
     16000

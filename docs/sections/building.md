@@ -268,6 +268,9 @@ The build parameters are:
 - `TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS`: Optional parameter to enable wiping out `TPIP` downloads from TensorFlow
   source tree prior to each build. Disabled by default.
 
+- `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input file, or if a user menu is 
+provided for the user to select which input file to use via a telnet window. Disabled by default.
+
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
 Also, when setting any of the CMake configuration parameters that expect a directory, or file, path, **use absolute
@@ -457,6 +460,14 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug
 ```
 
+#### Configuring to use default input data
+
+To configure the project to use default input data for each use case, you can use the following CMake option `USE_SINGLE_INPUT`.
+This will be set to `false` if not specified. Specifying it as `true` will result in each use case automatically running with predefined input data, thus removing the need for the user to use a telnet terminal to specify the input data. For Example:
+
+```commandline
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_SINGLE_INPUT=True
+```
 #### Generating project for Arm Development Studio
 
 To import the project into Arm Development Studio, add the Eclipse project generator and `CMAKE_ECLIPSE_VERSION` in the

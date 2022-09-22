@@ -17,9 +17,7 @@
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "object_detection")
 
-USER_OPTION(${use_case}_FILE_PATH "Directory with custom image files to use, or path to a single image, in the evaluation application"
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
-    PATH_OR_FILE)
+set_input_file_path_user_option(".bmp" ${use_case})
 
 USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
     192

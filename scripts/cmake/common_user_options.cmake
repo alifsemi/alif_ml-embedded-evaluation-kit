@@ -77,6 +77,10 @@ USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be 
     ON
     BOOL)
 
+USER_OPTION(USE_SINGLE_INPUT "Select if a use case should execute using a default known input file"
+    OFF
+    BOOL)
+
 if (NOT TARGET_PLATFORM STREQUAL native)
 
     USER_OPTION(CMSIS_SRC_PATH
