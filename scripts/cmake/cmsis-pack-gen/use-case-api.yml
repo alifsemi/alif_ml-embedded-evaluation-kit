@@ -46,22 +46,13 @@ packs:
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.02"}
-        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.8.0"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.5-rc4"}
+        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
 
     releases:
       - version: "22.8.0"
         date: "2022-08-15"
         description: "Beta release package"
-
-#    @TODO: Add API header names and descriptions here (see placeholder below).
-#    apis:
-#      - name: "Image classification use case API"
-#        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Capiversion: "1.0.0"}
-#        description: "Arm ml-embedded-eval kit example APIs"
-#        files:
-#          - name: "use_case/img_class/include/ImgClassProcessing.hpp"
-#            attributes: {category: header, attr: config, version: "1.0.0"}
 
     taxonomy:
       - attributes: {Cclass: "Machine Learning"}
@@ -110,7 +101,7 @@ packs:
 
       - name: inference_runner_api
         target: inference_runner_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Generic", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Generic", Csub: "Inference runner", Cversion: "1.0.0"}
         description: "Generic inference runner use case API."
         dependencies: common_api
 

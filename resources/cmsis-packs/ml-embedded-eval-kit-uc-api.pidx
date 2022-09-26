@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<index schemaVersion="1.0.0" xs:noNamespaceSchemaLocation="PackIndex.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+  <vendor>ARM</vendor>
+  <url>https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ml-embedded-eval-kit-uc-api.pidx</url>
+  <timestamp>2022-09-26T13:57:00</timestamp>
+  <pindex>
+    <pdsc url="https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0.pack" vendor="ARM" name="ml-embedded-eval-kit-uc-api" version="22.8.0"/>
+  </pindex>
+</index>
