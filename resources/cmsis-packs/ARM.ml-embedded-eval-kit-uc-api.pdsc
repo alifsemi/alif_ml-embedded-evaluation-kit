@@ -8,7 +8,7 @@
 
   <license>LICENSE_APACHE_2.0.txt</license>
 
-  <url>https://review.mlplatform.org/admin/repos/ml/ethos-u/ml-embedded-evaluation-kit/</url>
+  <url>https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/</url>
 
   <requirements>
     <packages>
@@ -18,7 +18,7 @@
   </requirements>
 
   <releases>
-    <release date="2022-08-15" version="22.8.0">Beta release package</release>
+    <release date="2022-09-27" version="22.8.0-Beta">Beta release package</release>
   </releases>
 
   <taxonomy>

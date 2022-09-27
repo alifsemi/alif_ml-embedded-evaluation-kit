@@ -42,7 +42,7 @@ packs:
     description: "Sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://review.mlplatform.org/admin/repos/ml/ethos-u/ml-embedded-evaluation-kit/"
+    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/"
 
     requirements:
       packages:
@@ -50,8 +50,8 @@ packs:
         - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
 
     releases:
-      - version: "22.8.0"
-        date: "2022-08-15"
+      - version: "22.8.0-Beta"
+        date: "2022-09-27"
         description: "Beta release package"
 
     taxonomy:
