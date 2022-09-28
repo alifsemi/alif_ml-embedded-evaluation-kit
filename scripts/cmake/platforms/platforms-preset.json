@@ -1,0 +1,62 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+            "major": 3,
+            "minor": 23,
+            "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "mps3-300-platform",
+            "description": "Target mps3 board, SSE-300 subsystem.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "mps3"
+                },
+                "TARGET_SUBSYSTEM": {
+                    "type": "STRING",
+                    "value": "sse-300"
+                }
+            }
+        },
+        {
+            "name": "mps3-310-platform",
+            "description": "Target mps3 board, SSE-310 subsystem.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "mps3"
+                },
+                "TARGET_SUBSYSTEM": {
+                    "type": "STRING",
+                    "value": "sse-310"
+                }
+            }
+        },
+        {
+            "name": "simple-platform",
+            "description": "Target simple platform.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "simple_platform"
+                }
+            }
+        },
+        {
+            "name": "native-platform",
+            "description": "Target native platform.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "native"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+            "major": 3,
+            "minor": 23,
+            "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "gcc-toolchain",
+            "description": "Use gcc toolchain.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-gcc.cmake"
+                }
+            }
+        },
+        {
+            "name": "armclang-toolchain",
+            "description": "Use armclang toolchain.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                }
+            }
+        },
+        {
+            "name": "native-toolchain",
+            "description": "Use native toolchain.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "${sourceDir}/scripts/cmake/toolchains/native-gcc.cmake"
+                }
+            }
+        }
+    ]
+}
