@@ -268,7 +268,7 @@ The build parameters are:
 - `TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS`: Optional parameter to enable wiping out `TPIP` downloads from TensorFlow
   source tree prior to each build. Disabled by default.
 
-- `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input file, or if a user menu is 
+- `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input file, or if a user menu is
 provided for the user to select which input file to use via a telnet window. Disabled by default.
 
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
@@ -559,25 +559,28 @@ cmake .. \
 
 ### Building with CMakePresets
 
-If you are using CMake version 3.21 or above, then an alternative method of building is by using CMakePresets.
-This can be done by calling the following command:
+If you are using CMake version 3.23.3 or above, then an alternative method of building is by using CMakePresets.
+CMakePresets are well supported by most IDEs and serve as a developer-convenience tool.
+Presets can be also used from a command-line:
 ```commandline
-cmake --preset <platform>
-cmake --build --preset <platform>
+cmake --preset <config-name>
+cmake --build --preset <config-name>
 ```
-where platform is one of:
+where config-name is one of:
 ```commandline
 native
-mps3-gcc
-mps3-clang
+mps3-300-gcc
+mps3-300-clang
+mps3-310-gcc
+mps3-310-clang
 simple-gcc
 simple-clang
 ```
 This will automatically configure and build the evaluation-kit into a corresponding folder.
 You can still pass in build flags as usual, for example:
 ```commandline
-cmake --preset mps3-gcc -DUSE_CASE_BUILD=inference_runner
-cmake --build --preset mps3-gcc
+cmake --preset mps3-300-gcc -DUSE_CASE_BUILD=inference_runner
+cmake --build --preset mps3-300-gcc
 ```
 Alternatively, you can create a CMakeUserPresets.json in the root of the project with personal user settings, for example:
 ```commandline
