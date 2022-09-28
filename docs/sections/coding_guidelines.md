@@ -2,6 +2,7 @@
 
 - [Coding standards and guidelines](./coding_guidelines.md#coding-standards-and-guidelines)
   - [Introduction](./coding_guidelines.md#introduction)
+  - [Static Analysis](./coding_guidelines.md#static-analysis)
   - [Language version](./coding_guidelines.md#language-version)
   - [File naming](./coding_guidelines.md#file-naming)
   - [File layout](./coding_guidelines.md#file-layout)
@@ -25,23 +26,37 @@ Layer (HAL). Both of these languages follow different naming conventions within 
 However, because we also issue function calls to third-party APIs, and they are not guaranteed to follow these
 conventions, the intended outcome could be different for every case.
 
-## Pre-commit formatting
-To help with the adherence of the coding guidelines, we have provided a clang-format file. When commiting, please run 
-the following command, post-staging but pre-commit.
+## Static Analysis
 
+To help with the adherence of the coding guidelines, we have provided a setup script to add a static analysis, 
+pre-push Git hook. This will use the clang-format tool along with the clang-format file in the root of the directory to 
+check for formatting errors. It will also us the Cppcheck static analysis tool to minimize the risk of bugs 
+appearing in your code.
 
-  ```Git
-  git-clang-format
-  ```
+Before starting any work in the repo, please ensure that you have the static analysis Git hook, 
+clang-format tool and cppcheck tool installed by running the following commands:
 
-This will modify the staged changes, to adhere to the guidelines as described in the 
-.clang-format file in the root of the repo. Please note that the clang-format tool must be installed to run this 
-step and can be installed using the following command on Ubuntu: 
-
-  ```
+ ```
+  sudo apt install cppcheck
   sudo apt install clang-format
+  python scripts/py/setup_hooks.py /path/to/git/hooks/directory
   ```
 
+This will ensure that the modified files in your commit adhere to the coding guidelines and minimizes the risk of 
+inefficient/problematic code. 
+
+If the Git hook finds formatting errors, the ```git push``` command will fail. 
+You can run the following command on the problematic file:
+
+  ```
+  clang-format -style=file -i path/to/file
+  ```
+
+This will modify the problematic file to adhere to the guidelines as described in the 
+.clang-format file in the root of the repo. 
+
+If the Cppcheck tool finds issues, what needs to be addressed will be 
+described in the failed ```git push``` output. 
 
 ## Language version
 
