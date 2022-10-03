@@ -86,4 +86,26 @@ function(platform_custom_post_build)
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy ${MPS3_FPGA_CONFIG} ${SECTORS_DIR})
 
+    # Add tests for application on FVP if FVP path specified
+    if (BUILD_FVP_TESTS)
+
+        # Build for all use cases if USE_SINGLE_INPUT as no telnet interaction required
+        # otherwise only build for inference runner
+        if ((USE_SINGLE_INPUT) OR (${use_case} STREQUAL "inference_runner"))
+            set(AXF_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf")
+            set(TEST_TARGET_NAME "${use_case}_fvp_test")
+
+            message(STATUS "Adding FVP test for ${use_case}")
+
+            add_test(
+                NAME "${TEST_TARGET_NAME}"
+                COMMAND ${FVP_PATH} -a ${AXF_PATH}
+                    -C mps3_board.telnetterminal0.start_telnet=0
+                    -C mps3_board.uart0.out_file='-'
+                    -C mps3_board.uart0.shutdown_on_eot=1
+                    -C mps3_board.visualisation.disable-visualisation=1
+                    --stat)
+        endif()
+    endif ()
+
 endfunction()

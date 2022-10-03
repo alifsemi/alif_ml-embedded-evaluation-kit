@@ -13,6 +13,7 @@
     - [Configuring the build for MPS3 SSE-300](./building.md#configuring-the-build-for-mps3-sse_300)
       - [Using GNU Arm Embedded toolchain](./building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./building.md#using-arm-compiler)
+      - [Configuring applications to run without user interaction](./building.md#configuring-applications-to-run-without-user-interaction)
       - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
@@ -271,6 +272,13 @@ The build parameters are:
 - `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input file, or if a user menu is
 provided for the user to select which input file to use via a telnet window. Disabled by default.
 
+- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications on the Corstone-300 FVP. Tests will
+be generated for all use-cases if `USE_SINGLE_INPUT` is set to `ON`, otherwise they will only be generated for the
+inference_runner use-case.
+
+- `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
+`BUILD_FVP_TESTS` option is switched `ON`.
+
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
 Also, when setting any of the CMake configuration parameters that expect a directory, or file, path, **use absolute
@@ -460,14 +468,37 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug
 ```
 
-#### Configuring to use default input data
+#### Configuring applications to run without user interaction
 
-To configure the project to use default input data for each use case, you can use the following CMake option `USE_SINGLE_INPUT`.
-This will be set to `false` if not specified. Specifying it as `true` will result in each use case automatically running with predefined input data, thus removing the need for the user to use a telnet terminal to specify the input data. For Example:
+Default CMake configuration behaviour looks for input samples, for each use case, in the default directory. All these
+inputs are baked-in into the application. If the number of files baked in is greater than one, a user menu is displayed
+on the application output, where the user is expected to enter their chosen option. See more here:
+[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3).
+
+To configure the project to use single input for each use case, CMake option `USE_SINGLE_INPUT` can be set to `ON`.
+This will result in each use case automatically running with predefined input data, thus removing the need for the
+user to use a telnet terminal to specify the input data. For Example:
 
 ```commandline
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_SINGLE_INPUT=True
+cmake ../ -DUSE_SINGLE_INPUT=ON
 ```
+
+When a single input file is used, the non-native targets will also allow FVP tests to be added to the configuration
+using the CTest framework. For example:
+
+```commandline
+cmake .. \
+    -DUSE_SINGLE_INPUT=ON \
+    -DBUILD_FVP_TESTS=ON \
+    -DFVP_PATH=/home/user/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
+```
+
+This will allow the built application to be executed on the FVP in headless mode using:
+
+```commandline
+ctest --verbose
+```
+
 #### Generating project for Arm Development Studio
 
 To import the project into Arm Development Studio, add the Eclipse project generator and `CMAKE_ECLIPSE_VERSION` in the

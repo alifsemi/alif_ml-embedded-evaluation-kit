@@ -150,5 +150,16 @@ if (NOT TARGET_PLATFORM STREQUAL native)
                     ${DEFAULT_TA_CONFIG_FILE_PATH}
                     FILEPATH)
         endif()
+
+        USER_OPTION(BUILD_FVP_TESTS "Build tests for CTest driven FVP runs for built applications"
+            OFF
+            BOOL)
+
+        if (BUILD_FVP_TESTS)
+            USER_OPTION(FVP_PATH "Path to FVP for verifying execution"
+                ""
+                FILEPATH)
+        endif()
+
     endif()
 endif()
