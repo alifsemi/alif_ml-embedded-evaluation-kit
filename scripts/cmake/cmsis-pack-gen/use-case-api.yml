@@ -39,7 +39,7 @@ build:
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
-    description: "Sample use case APIs derived from ml-embedded-eval-kit"
+    description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
     url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/"
@@ -51,13 +51,11 @@ packs:
 
     releases:
       - version: "22.8.0-Beta"
-        date: "2022-09-27"
+        date: "2022-09-29"
         description: "Beta release package"
 
     taxonomy:
-      - attributes: {Cclass: "Machine Learning"}
-        description: "Machine Learning software frameworks and libraries"
-      - attributes: {Cgroup: "Evaluation Kit"}
+      - attributes: {Cclass: "ML Eval Kit", doc: "https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md"}
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:
@@ -65,6 +63,9 @@ packs:
         target: log
         attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Log", Cversion: "1.0.0" }
         description: "Logging header-only utility"
+        files:
+          - name: "source/log/include/"
+            attributes: {category: include}
 
       - name: arm_math
         target: arm_math

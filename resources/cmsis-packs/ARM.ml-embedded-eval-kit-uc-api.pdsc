@@ -2,7 +2,7 @@
 <package schemaVersion="1.7.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PACK.xsd">
   <name>ml-embedded-eval-kit-uc-api</name>
 
-  <description>Sample use case APIs derived from ml-embedded-eval-kit</description>
+  <description>ML sample use case APIs derived from ml-embedded-eval-kit</description>
 
   <vendor>ARM</vendor>
 
@@ -18,12 +18,11 @@
   </requirements>
 
   <releases>
-    <release date="2022-09-27" version="22.8.0-Beta">Beta release package</release>
+    <release date="2022-09-29" version="22.8.0-Beta">Beta release package</release>
   </releases>
 
   <taxonomy>
-    <description Cclass="Machine Learning">Machine Learning software frameworks and libraries</description>
-    <description Cgroup="Evaluation Kit">A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets.</description>
+    <description Cclass="ML Eval Kit" doc="https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md">A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets.</description>
   </taxonomy>
 
   <conditions>
@@ -64,6 +63,9 @@
   <components>
     <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Log" Cversion="1.0.0">
       <description>Logging header-only utility</description>
+      <files>
+        <file category="include" name="source/log/include/"/>
+      </files>
     </component>
     <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Math" Cversion="1.0.0" condition="arm_math Condition">
       <description>Math function helpers dependent on CMSIS-DSP.</description>
