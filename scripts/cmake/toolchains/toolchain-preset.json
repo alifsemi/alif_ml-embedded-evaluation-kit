@@ -13,7 +13,7 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "STRING",
-                    "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-gcc.cmake"
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-gcc.cmake"
                 }
             }
         },
@@ -24,7 +24,7 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "STRING",
-                    "value": "${sourceDir}/scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-armclang.cmake"
                 }
             }
         },
@@ -35,7 +35,7 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "STRING",
-                    "value": "${sourceDir}/scripts/cmake/toolchains/native-gcc.cmake"
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/native-gcc.cmake"
                 }
             }
         }
