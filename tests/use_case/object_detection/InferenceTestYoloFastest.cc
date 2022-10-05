@@ -20,7 +20,7 @@
 #include "TensorFlowLiteMicro.hpp"
 #include "DetectorPostProcessing.hpp"
 #include "InputFiles.hpp"
-#include "UseCaseCommonUtils.hpp"
+#include "BufAttributes.hpp"
 
 namespace arm {
     namespace app {

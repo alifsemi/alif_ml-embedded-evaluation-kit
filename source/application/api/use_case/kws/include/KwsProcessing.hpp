@@ -19,7 +19,7 @@
 
 #include "AudioUtils.hpp"
 #include "BaseProcessing.hpp"
-#include "Classifier.hpp"
+#include "KwsClassifier.hpp"
 #include "MicroNetKwsMfcc.hpp"
 
 #include <functional>
@@ -55,9 +55,8 @@ namespace app {
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
          **/
-        bool DoPreProcess(const void* input, size_t inputSize) override;
+        bool DoPreProcess(const void* input, size_t inferenceIndex = 0) override;
 
-        size_t m_audioWindowIndex = 0;  /* Index of audio slider, used when caching features in longer clips. */
         size_t m_audioDataWindowSize;   /* Amount of audio needed for 1 inference. */
         size_t m_audioDataStride;       /* Amount of audio to stride across if doing >1 inference in longer clips. */
 
@@ -106,11 +105,11 @@ namespace app {
     class KwsPostProcess : public BasePostProcess {
 
     private:
-        TfLiteTensor* m_outputTensor;                   /* Model output tensor. */
-        Classifier& m_kwsClassifier;                    /* KWS Classifier object. */
-        const std::vector<std::string>& m_labels;       /* KWS Labels. */
-        std::vector<ClassificationResult>& m_results;   /* Results vector for a single inference. */
-
+        TfLiteTensor* m_outputTensor;                      /* Model output tensor. */
+        KwsClassifier& m_kwsClassifier;                    /* KWS Classifier object. */
+        const std::vector<std::string>& m_labels;          /* KWS Labels. */
+        std::vector<ClassificationResult>& m_results;      /* Results vector for a single inference. */
+        std::vector<std::vector<float>> m_resultHistory;   /* Store previous results so they can be averaged. */
     public:
         /**
          * @brief           Constructor
@@ -119,9 +118,9 @@ namespace app {
          * @param[in]       labels         Vector of string labels to identify each output of the model.
          * @param[in/out]   results        Vector of classification results to store decoded outputs.
          **/
-        KwsPostProcess(TfLiteTensor* outputTensor, Classifier& classifier,
+        KwsPostProcess(TfLiteTensor* outputTensor, KwsClassifier& classifier,
                        const std::vector<std::string>& labels,
-                       std::vector<ClassificationResult>& results);
+                       std::vector<ClassificationResult>& results, size_t averagingWindowLen = 1);
 
         /**
          * @brief    Should perform post-processing of the result of inference then

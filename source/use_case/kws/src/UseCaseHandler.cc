@@ -17,7 +17,7 @@
 #include "UseCaseHandler.hpp"
 
 #include "InputFiles.hpp"
-#include "Classifier.hpp"
+#include "KwsClassifier.hpp"
 #include "MicroNetKwsModel.hpp"
 #include "hal.h"
 #include "AudioUtils.hpp"
@@ -28,8 +28,6 @@
 #include "KwsProcessing.hpp"
 
 #include <vector>
-
-using KwsClassifier = arm::app::Classifier;
 
 namespace arm {
 namespace app {
@@ -124,14 +122,11 @@ namespace app {
             while (audioDataSlider.HasNext()) {
                 const int16_t* inferenceWindow = audioDataSlider.Next();
 
-                /* The first window does not have cache ready. */
-                preProcess.m_audioWindowIndex = audioDataSlider.Index();
-
                 info("Inference %zu/%zu\n", audioDataSlider.Index() + 1,
                      audioDataSlider.TotalStrides() + 1);
 
                 /* Run the pre-processing, inference and post-processing. */
-                if (!preProcess.DoPreProcess(inferenceWindow, audio::MicroNetKwsMFCC::ms_defaultSamplingFreq)) {
+                if (!preProcess.DoPreProcess(inferenceWindow, audioDataSlider.Index())) {
                     printf_err("Pre-processing failed.");
                     return false;
                 }

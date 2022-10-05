@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@
 #include "UseCaseHandler.hpp"
 #include "InputFiles.hpp"
 #include "RNNUCTestCaseData.hpp"
-#include "UseCaseCommonUtils.hpp"
+#include "BufAttributes.hpp"
+#include "hal.h"
+#include "Profiler.hpp"
 
 #include <catch.hpp>
-#include <hal.h>
-#include <Profiler.hpp>
 
 namespace arm {
 namespace app {

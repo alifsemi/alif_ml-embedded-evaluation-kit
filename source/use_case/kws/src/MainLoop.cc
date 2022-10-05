@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 #include "InputFiles.hpp"           /* For input audio clips. */
-#include "Classifier.hpp"           /* Classifier. */
+#include "KwsClassifier.hpp"        /* Classifier. */
 #include "MicroNetKwsModel.hpp"     /* Model class for running inference. */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "Labels.hpp"               /* For label strings. */
@@ -34,7 +34,6 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-using KwsClassifier = arm::app::Classifier;
 
 enum opcodes
 {
@@ -83,8 +82,8 @@ void main_loop()
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::kws::g_ScoreThreshold);  /* Normalised score threshold. */
 
-    KwsClassifier classifier;  /* classifier wrapper object. */
-    caseContext.Set<arm::app::Classifier&>("classifier", classifier);
+    arm::app::KwsClassifier classifier;  /* classifier wrapper object. */
+    caseContext.Set<arm::app::KwsClassifier&>("classifier", classifier);
 
     std::vector <std::string> labels;
     GetLabelsVector(labels);

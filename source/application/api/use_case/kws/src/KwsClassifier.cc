@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Classifier.hpp"
+#include "KwsClassifier.hpp"
 
 #include "TensorFlowLiteMicro.hpp"
 #include "PlatformMath.hpp"
 #include "log_macros.h"
+#include "../include/KwsClassifier.hpp"
+
 
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <set>
 #include <cstdint>
@@ -30,56 +33,9 @@
 namespace arm {
 namespace app {
 
-    void Classifier::SetVectorResults(std::set<std::pair<float, uint32_t>>& topNSet,
-            std::vector<ClassificationResult>& vecResults,
-            const std::vector <std::string>& labels)
-    {
-        /* Reset the iterator to the largest element - use reverse iterator. */
-
-        auto topNIter = topNSet.rbegin();
-        for (size_t i = 0; i < vecResults.size() && topNIter != topNSet.rend(); ++i, ++topNIter) {
-            vecResults[i].m_normalisedVal = topNIter->first;
-            vecResults[i].m_label = labels[topNIter->second];
-            vecResults[i].m_labelIdx = topNIter->second;
-        }
-    }
-
-    bool Classifier::GetTopNResults(const std::vector<float>& tensor,
-            std::vector<ClassificationResult>& vecResults,
-            uint32_t topNCount, const std::vector <std::string>& labels)
-    {
-        std::set<std::pair<float , uint32_t>> sortedSet;
-
-        /* NOTE: inputVec's size verification against labels should be
-         *       checked by the calling/public function. */
-
-        /* Set initial elements. */
-        for (uint32_t i = 0; i < topNCount; ++i) {
-            sortedSet.insert({tensor[i], i});
-        }
-
-        /* Initialise iterator. */
-        auto setFwdIter = sortedSet.begin();
-
-        /* Scan through the rest of elements with compare operations. */
-        for (uint32_t i = topNCount; i < labels.size(); ++i) {
-            if (setFwdIter->first < tensor[i]) {
-                sortedSet.erase(*setFwdIter);
-                sortedSet.insert({tensor[i], i});
-                setFwdIter = sortedSet.begin();
-            }
-        }
-
-        /* Final results' container. */
-        vecResults = std::vector<ClassificationResult>(topNCount);
-        SetVectorResults(sortedSet, vecResults, labels);
-
-        return true;
-    }
-
-    bool Classifier::GetClassificationResults(TfLiteTensor* outputTensor,
+    bool KwsClassifier::GetClassificationResults(TfLiteTensor* outputTensor,
             std::vector<ClassificationResult>& vecResults, const std::vector <std::string>& labels,
-            uint32_t topNCount, bool useSoftmax)
+            uint32_t topNCount, bool useSoftmax, std::vector<std::vector<float>>& resultHistory)
     {
         if (outputTensor == nullptr) {
             printf_err("Output vector is null pointer.\n");
@@ -112,30 +68,31 @@ namespace app {
         /* Floating point tensor data to be populated
          * NOTE: The assumption here is that the output tensor size isn't too
          * big and therefore, there's neglibible impact on heap usage. */
-        std::vector<float> tensorData(totalOutputSize);
+        std::vector<float> resultData(totalOutputSize);
+        resultData.resize(totalOutputSize);
 
         /* Populate the floating point buffer */
         switch (outputTensor->type) {
             case kTfLiteUInt8: {
-                uint8_t *tensor_buffer = tflite::GetTensorData<uint8_t>(outputTensor);
+                uint8_t* tensor_buffer = tflite::GetTensorData<uint8_t>(outputTensor);
                 for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = quantParams.scale *
+                    resultData[i] = quantParams.scale *
                         (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
                 }
                 break;
             }
             case kTfLiteInt8: {
-                int8_t *tensor_buffer = tflite::GetTensorData<int8_t>(outputTensor);
+                int8_t* tensor_buffer = tflite::GetTensorData<int8_t>(outputTensor);
                 for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = quantParams.scale *
+                    resultData[i] = quantParams.scale *
                         (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
                 }
                 break;
             }
             case kTfLiteFloat32: {
-                float *tensor_buffer = tflite::GetTensorData<float>(outputTensor);
+                float* tensor_buffer = tflite::GetTensorData<float>(outputTensor);
                 for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = tensor_buffer[i];
+                    resultData[i] = tensor_buffer[i];
                 }
                 break;
             }
@@ -146,11 +103,18 @@ namespace app {
         }
 
         if (useSoftmax) {
-            math::MathUtils::SoftmaxF32(tensorData);
+            math::MathUtils::SoftmaxF32(resultData);
+        }
+
+        /* If keeping track of recent results, update and take an average. */
+        if (resultHistory.size() > 1) {
+            std::rotate(resultHistory.begin(), resultHistory.begin() + 1, resultHistory.end());
+            resultHistory.back() = resultData;
+            AveragResults(resultHistory, resultData);
         }
 
         /* Get the top N results. */
-        resultState = GetTopNResults(tensorData, vecResults, topNCount, labels);
+        resultState = GetTopNResults(resultData, vecResults, topNCount, labels);
 
         if (!resultState) {
             printf_err("Failed to get top N results set\n");
@@ -159,5 +123,20 @@ namespace app {
 
         return true;
     }
+
+    void app::KwsClassifier::AveragResults(const std::vector<std::vector<float>>& resultHistory,
+            std::vector<float>& averageResult)
+    {
+        /* Compute averages of each class across the window length. */
+        float sum;
+        for (size_t j = 0; j < averageResult.size(); j++) {
+            sum = 0;
+            for (size_t i = 0; i < resultHistory.size(); i++) {
+                sum += resultHistory[i][j];
+            }
+            averageResult[j] = (sum / resultHistory.size());
+        }
+    }
+
 } /* namespace app */
 } /* namespace arm */

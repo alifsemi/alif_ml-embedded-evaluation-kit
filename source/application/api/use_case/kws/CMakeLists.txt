@@ -27,7 +27,8 @@ project(${KWS_API_TARGET}
 # Create static library
 add_library(${KWS_API_TARGET} STATIC
     src/KwsProcessing.cc
-    src/MicroNetKwsModel.cc)
+    src/MicroNetKwsModel.cc
+    src/KwsClassifier.cc)
 
 target_include_directories(${KWS_API_TARGET} PUBLIC include)
 

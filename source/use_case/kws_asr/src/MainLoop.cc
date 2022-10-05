@@ -17,7 +17,7 @@
 #include "InputFiles.hpp"           /* For input images. */
 #include "Labels_micronetkws.hpp"   /* For MicroNetKws label strings. */
 #include "Labels_wav2letter.hpp"    /* For Wav2Letter label strings. */
-#include "Classifier.hpp"           /* KWS classifier. */
+#include "KwsClassifier.hpp"        /* KWS classifier. */
 #include "AsrClassifier.hpp"        /* ASR classifier. */
 #include "MicroNetKwsModel.hpp"     /* KWS model class for running inference. */
 #include "Wav2LetterModel.hpp"      /* ASR model class for running inference. */
@@ -41,8 +41,6 @@ namespace app {
     static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
-
-using KwsClassifier = arm::app::Classifier;
 
 enum opcodes
 {
@@ -118,9 +116,9 @@ void main_loop()
     caseContext.Set<int>("asrFrameStride", arm::app::asr::g_FrameStride);
     caseContext.Set<float>("asrScoreThreshold", arm::app::asr::g_ScoreThreshold);  /* Normalised score threshold. */
 
-    KwsClassifier kwsClassifier;  /* Classifier wrapper object. */
+    arm::app::KwsClassifier kwsClassifier;  /* Classifier wrapper object. */
     arm::app::AsrClassifier asrClassifier;  /* Classifier wrapper object. */
-    caseContext.Set<arm::app::Classifier&>("kwsClassifier", kwsClassifier);
+    caseContext.Set<arm::app::KwsClassifier&>("kwsClassifier", kwsClassifier);
     caseContext.Set<arm::app::AsrClassifier&>("asrClassifier", asrClassifier);
 
     std::vector<std::string> asrLabels;

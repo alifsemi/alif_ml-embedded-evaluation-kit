@@ -143,11 +143,8 @@ namespace app {
         while (audioDataSlider.HasNext()) {
             const int16_t* inferenceWindow = audioDataSlider.Next();
 
-            /* The first window does not have cache ready. */
-            preProcess.m_audioWindowIndex = audioDataSlider.Index();
-
             /* Run the pre-processing, inference and post-processing. */
-            if (!preProcess.DoPreProcess(inferenceWindow, audio::MicroNetKwsMFCC::ms_defaultSamplingFreq)) {
+            if (!preProcess.DoPreProcess(inferenceWindow, audioDataSlider.Index())) {
                 printf_err("KWS Pre-processing failed.");
                 return output;
             }
