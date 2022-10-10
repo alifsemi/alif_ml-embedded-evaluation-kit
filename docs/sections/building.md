@@ -19,7 +19,7 @@
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
-    - [Building with CMakePresets](./building.md#building-with-cmakepresets)
+    - [Building with CMake Presets](./building.md#building-with-cmake-presets)
     - [Building the configured project](./building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./building.md#add-custom-inputs)
@@ -588,66 +588,9 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
-### Building with CMakePresets
+### Building with CMake Presets
 
-If you are using CMake version 3.23.3 or above, then an alternative method of building is by using CMakePresets.
-CMakePresets are well supported by most IDEs and serve as a developer-convenience tool.
-Presets can be also used from a command-line:
-```commandline
-cmake --preset <config-name>
-cmake --build --preset <config-name>
-```
-where config-name is one of:
-```commandline
-native
-mps3-300-gcc
-mps3-300-clang
-mps3-310-gcc
-mps3-310-clang
-simple-gcc
-simple-clang
-```
-This will automatically configure and build the evaluation-kit into a corresponding folder.
-You can still pass in build flags as usual, for example:
-```commandline
-cmake --preset mps3-300-gcc -DUSE_CASE_BUILD=inference_runner
-cmake --build --preset mps3-300-gcc
-```
-Alternatively, you can create a CMakeUserPresets.json in the root of the project with personal user settings, for example:
-```commandline
-{
-  "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 21,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "my-config",
-      "displayName": "my-config",
-      "inherits": ["mps3-300-gcc"],
-      "cacheVariables": {
-        "LOG_LEVEL": {
-          "type": "STRING",
-          "value": "LOG_LEVEL_DEBUG"
-        }
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "mps3-300-gcc-custom",
-      "displayName": "mps-300-gcc-custom",
-      "configurePreset": "my-config",
-      "targets": [
-        "ethos-u-object_detection",
-        "ethos-u-inference_runner"],
-      "jobs": 12
-    }
-  ]
-}
-```
+For building using CMake Presets please see [Building with CMake Presets](./cmake_presets.md)
 
 ### Building the configured project
 
