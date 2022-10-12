@@ -42,7 +42,7 @@ packs:
     description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/"
+    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/source/application/api/use_case/readme.md"
 
     requirements:
       packages:
