@@ -590,7 +590,7 @@ cmake .. \
 
 ### Building with CMake Presets
 
-For building using CMake Presets please see [Building with CMake Presets](./cmake_presets.md)
+For building using CMake Presets please see [Building with CMake Presets](./cmake_presets.md#building-with-cmake-presets)
 
 ### Building the configured project
 
