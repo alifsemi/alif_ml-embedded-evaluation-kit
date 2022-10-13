@@ -15,8 +15,12 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-include(ProcessorCount)
-ProcessorCount(J)
+if (DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+    set(PARALLEL_JOBS $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+else()
+    include(ProcessorCount)
+    ProcessorCount(PARALLEL_JOBS)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
@@ -89,7 +93,7 @@ add_custom_target(tensorflow_build ALL
 
     # Command to build the TensorFlow Lite Micro library
     COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
-        make -j${J} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
+        make -j${PARALLEL_JOBS} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
         TARGET_TOOLCHAIN_ROOT=${TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT}
         TOOLCHAIN=${TENSORFLOW_LITE_MICRO_TOOLCHAIN}
         GENDIR=${TENSORFLOW_LITE_MICRO_GENDIR}
