@@ -24,6 +24,8 @@
 #include "TensorFlowLiteMicro.hpp"  /* our inference logic api */
 
 #include <cstdio>
+#include <new>
+#include <exception>
 
 extern void main_loop();
 
@@ -39,6 +41,12 @@ static void print_application_intro()
     info("Copyright (C) ARM Ltd 2021-2022. All rights reserved.\n\n");
 }
 
+static void out_of_heap()
+{
+    warn("Out of heap\n");
+    std::terminate();
+}
+
 int main ()
 {
     if (hal_platform_init()) {
@@ -47,6 +55,8 @@ int main ()
 
         /* Check the version of TensorFlow Lite Micro. */
         PrintTensorFlowVersion();
+
+        std::set_new_handler(out_of_heap);
 
         /* Run the application. */
         main_loop();
