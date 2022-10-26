@@ -84,7 +84,7 @@ static void setup_rxdesc(DW_EQOS_DEV *dev, uint32_t desc_id)
 {
     DMA_DESC *desc = &dev->rx_descs[desc_id];
 
-    desc->des0 = (uint32_t) LocalToGlobal(&rx_buffers[desc_id][0]);
+    desc->des0 = LocalToGlobal(&rx_buffers[desc_id][0]);
     desc->des3 = RDES3_OWN | RDES3_INT_ON_COMPLETION_EN |
                     RDES3_BUFFER1_VALID_ADDR;
 }
@@ -102,10 +102,10 @@ static void init_rx_descs(DW_EQOS_DEV *dev)
     for (i = 0; i < RX_DESC_COUNT; i++)
         setup_rxdesc(dev, i);
 
-    dev->regs->DMA_CH0_RX_BASE_ADDR = (uint32_t) LocalToGlobal(dev->rx_descs);
+    dev->regs->DMA_CH0_RX_BASE_ADDR = LocalToGlobal(dev->rx_descs);
     dev->regs->DMA_CH0_RX_RING_LEN = RX_DESC_COUNT - 1;
 
-    last_rx_desc = (uint32_t) LocalToGlobal(&(dev->rx_descs[RX_DESC_COUNT - 1]));
+    last_rx_desc = LocalToGlobal(&(dev->rx_descs[RX_DESC_COUNT - 1]));
 
     dev->regs->DMA_CH0_RX_END_ADDR = last_rx_desc;
 
@@ -126,7 +126,7 @@ static void init_tx_descs(DW_EQOS_DEV *dev)
     for (i = 0; i < TX_DESC_COUNT; i++)
         dev->tx_descs[i] = (DMA_DESC) {0, 0, 0, 0};
 
-    dev->regs->DMA_CH0_TX_BASE_ADDR = (uint32_t) LocalToGlobal(dev->tx_descs);
+    dev->regs->DMA_CH0_TX_BASE_ADDR = LocalToGlobal(dev->tx_descs);
     dev->regs->DMA_CHO_TX_RING_LEN = TX_DESC_COUNT - 1;
 
     SCB_CleanDCache_by_Addr((uint32_t *) dev->tx_descs,
@@ -572,7 +572,7 @@ static int32_t SendFrame(const uint8_t *frame, uint32_t len, uint32_t flags,
 
     dev->tx_desc_id++;
     dev->tx_desc_id %= TX_DESC_COUNT;
-    desc->des0 = (uint32_t)LocalToGlobal(&tx_buffers[cur_idx][0]);
+    desc->des0 = LocalToGlobal(&tx_buffers[cur_idx][0]);
 
     dev->frame_end = NULL;
 
@@ -581,7 +581,7 @@ static int32_t SendFrame(const uint8_t *frame, uint32_t len, uint32_t flags,
 
     SCB_CleanDCache_by_Addr((uint32_t *) desc, sizeof(DMA_DESC));
 
-    dev->regs->DMA_CH0_TX_END_ADDR = (uint32_t) LocalToGlobal(&(dev->tx_descs[dev->tx_desc_id]));
+    dev->regs->DMA_CH0_TX_END_ADDR = LocalToGlobal(&(dev->tx_descs[dev->tx_desc_id]));
 
     return ARM_DRIVER_OK;
 }
@@ -630,7 +630,7 @@ static int32_t ReadFrame(uint8_t *frame, uint32_t len, DW_EQOS_DEV *dev)
     setup_rxdesc(dev, cur_idx);
     SCB_CleanDCache_by_Addr((uint32_t *) &dev->rx_descs[cur_idx], sizeof(DMA_DESC));
 
-    dev->regs->DMA_CH0_RX_END_ADDR = (uint32_t) LocalToGlobal(&(dev->rx_descs[cur_idx]));
+    dev->regs->DMA_CH0_RX_END_ADDR = LocalToGlobal(&(dev->rx_descs[cur_idx]));
 
     dev->rx_desc_id++;
     dev->rx_desc_id %= RX_DESC_COUNT;

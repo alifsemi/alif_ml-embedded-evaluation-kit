@@ -241,17 +241,17 @@ UINT status = NX_SUCCESS;
 
         /* the packet buffers are 8 byte aligned. Add 2 byte padding to get 2 byte
          * alignment for eth header so that IP header starts on a 4byte boundary */
-        desc -> des0 = (uint32_t) (LocalToGlobal(rx_packet -> nx_packet_prepend_ptr + 2));
+        desc -> des0 = LocalToGlobal(rx_packet -> nx_packet_prepend_ptr + 2);
 
         dev -> rx_nx_packets[i] = rx_packet;
 
         desc -> des3 = RDES3_OWN | RDES3_INT_ON_COMPLETION_EN | RDES3_BUFFER1_VALID_ADDR;
     }
 
-    eqos_write_reg(dev, DMA_CHAN_RX_BASE_ADDR(0), (uint32_t) (LocalToGlobal((dev -> rx_descs))));
+    eqos_write_reg(dev, DMA_CHAN_RX_BASE_ADDR(0), LocalToGlobal((dev -> rx_descs)));
     eqos_write_reg(dev, DMA_CHAN_RX_RING_LEN(0), RX_DESC_COUNT - 1 );
 
-    last_rx_desc = (uint32_t) (LocalToGlobal(&(dev -> rx_descs[RX_DESC_COUNT - 1])));
+    last_rx_desc = LocalToGlobal(&(dev -> rx_descs[RX_DESC_COUNT - 1]));
     eqos_write_reg(dev, DMA_CHAN_RX_END_ADDR( 0 ), last_rx_desc);
 
     SCB_CleanDCache_by_Addr((uint32_t *) dev -> rx_descs, RX_DESC_COUNT * sizeof(DMA_DESC));
@@ -271,7 +271,7 @@ UINT i;
     for (i = 0; i < TX_DESC_COUNT; i++ )
         dev -> tx_descs[i] = (DMA_DESC) {0, 0, 0, 0};
 
-    eqos_write_reg(dev, DMA_CHAN_TX_BASE_ADDR(0), (uint32_t) (LocalToGlobal((dev -> tx_descs))));
+    eqos_write_reg(dev, DMA_CHAN_TX_BASE_ADDR(0), LocalToGlobal((dev -> tx_descs)));
     eqos_write_reg(dev, DMA_CHAN_TX_RING_LEN(0), TX_DESC_COUNT - 1 );
     SCB_CleanDCache_by_Addr((uint32_t *) dev -> tx_descs, TX_DESC_COUNT * sizeof(DMA_DESC));
 }
@@ -604,7 +604,7 @@ TX_INTERRUPT_SAVE_AREA;
 
         desc -> des2 = TDES2_INTERRUPT_ON_COMPLETION | packet_length;
 
-        desc -> des0 = (uint32_t) (LocalToGlobal((current_packet -> nx_packet_prepend_ptr)));
+        desc -> des0 = LocalToGlobal((current_packet -> nx_packet_prepend_ptr));
 
         /* reset DES3 */
         desc -> des3 = 0x0;
@@ -667,7 +667,7 @@ TX_INTERRUPT_SAVE_AREA;
 
     /* move the tail pointer */
     eqos_write_reg(dev, DMA_CHAN_TX_END_ADDR(0),
-               (uint32_t) (LocalToGlobal(&(dev -> tx_descs[dev -> cur_tx_desc_id]))));
+               LocalToGlobal(&(dev -> tx_descs[dev -> cur_tx_desc_id])));
 
     /* increment the count of transmitted packets */
     nx_eqos0_driver.nx_driver_total_tx_packets++;
@@ -795,7 +795,7 @@ INT cur_count, i;
             }
 
             eqos_write_reg(dev, DMA_CHAN_RX_END_ADDR(0),
-                   (uint32_t) (LocalToGlobal(&(dev -> rx_descs[last_idx]))));
+                   LocalToGlobal(&(dev -> rx_descs[last_idx])));
 
             dev -> cur_rx_desc_id = cur_idx;
 
@@ -874,7 +874,7 @@ INT cur_count, i;
                     cur_idx %= RX_DESC_COUNT;
                 }
                 eqos_write_reg(dev, DMA_CHAN_RX_END_ADDR(0),
-                   (uint32_t) (LocalToGlobal(&(dev -> rx_descs[last_idx]))));
+                   LocalToGlobal(&(dev -> rx_descs[last_idx])));
 
                 dev -> cur_rx_desc_id = cur_idx;
 
@@ -904,7 +904,7 @@ INT cur_count, i;
             /* Prepare the descriptor for reception with the newly allocated packet.
             * the packet buffers are 8 byte aligned add 2 byte padding to get 2 byte
              * alignment for eth header so that IP header starts on a 4byte boundary */
-            desc -> des0 = (uint32_t) (LocalToGlobal((new_packet -> nx_packet_prepend_ptr + 2)));
+            desc -> des0 = LocalToGlobal((new_packet -> nx_packet_prepend_ptr + 2));
 
             dev -> rx_nx_packets[cur_idx] = new_packet;
 
@@ -977,7 +977,7 @@ INT cur_count, i;
             dev -> cur_rx_desc_id = cur_idx;
 
             eqos_write_reg(dev, DMA_CHAN_RX_END_ADDR(0),
-                   (uint32_t) (LocalToGlobal(&(dev -> rx_descs[last_idx]))));
+                   LocalToGlobal(&(dev -> rx_descs[last_idx])));
 
             /* Try to process the next descriptor */
             desc = &dev -> rx_descs[dev -> cur_rx_desc_id];
@@ -1046,7 +1046,7 @@ INT cur_count, i;
 
         /* The packet buffers are 8 byte aligned. Add 2 byte padding to get 2 byte
          * alignment for eth header so that IP header starts on a 4byte boundary */
-        desc -> des0 = (uint32_t)(LocalToGlobal(new_packet -> nx_packet_prepend_ptr + 2));
+        desc -> des0 = LocalToGlobal(new_packet -> nx_packet_prepend_ptr + 2);
 
         dev -> rx_nx_packets[last_idx] = new_packet;
 
@@ -1056,7 +1056,7 @@ INT cur_count, i;
         SCB_CleanDCache_by_Addr((uint32_t *) &dev -> rx_descs[last_idx], sizeof(DMA_DESC));
 
         eqos_write_reg(dev, DMA_CHAN_RX_END_ADDR(0),
-                   (uint32_t) (LocalToGlobal(&(dev -> rx_descs[last_idx]))));
+                   LocalToGlobal(&(dev -> rx_descs[last_idx])));
 
         /* Move on to the next descriptor */
         dev -> cur_rx_desc_id = last_idx + 1;

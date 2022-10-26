@@ -121,5 +121,5 @@ int arm_ethosu_npu_init(void)
 
 uint64_t ethosu_base_pointer_remap(const void *p)
 {
-    return (uint64_t)LocalToGlobal(p);
+    return LocalToGlobal(p);
 }
