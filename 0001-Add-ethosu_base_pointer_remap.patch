@@ -1,0 +1,133 @@
+From edf90597835e2235b7f13d6fd70f7e5ce2b2c6d9 Mon Sep 17 00:00:00 2001
+From: Kevin Bracey <kevin.bracey@alifsemi.com>
+Date: Wed, 26 Oct 2022 17:43:31 +0300
+Subject: [PATCH] Add ethosu_base_pointer_remap
+
+Allow the platform more flexibility on address mapping, for example to
+place data in Cortex-M DTCM.
+---
+ src/ethosu_config_u55.h     |  8 --------
+ src/ethosu_config_u65.h     |  8 --------
+ src/ethosu_device.h         | 20 ++++++++++++++++++++
+ src/ethosu_device_u55_u65.c | 19 +++++++++++++++++--
+ 4 files changed, 37 insertions(+), 18 deletions(-)
+
+diff --git a/src/ethosu_config_u55.h b/src/ethosu_config_u55.h
+index afb75bc..9330bb1 100644
+--- a/src/ethosu_config_u55.h
++++ b/src/ethosu_config_u55.h
+@@ -121,12 +121,4 @@
+ #define AXI_LIMIT3_MAX_OUTSTANDING_WRITES 16
+ #endif
+ 
+-/*
+- * Address offset between the CPU and the NPU. The offset is
+- * applied to the QBASE and BASEP registers.
+- */
+-#ifndef BASE_POINTER_OFFSET
+-#define BASE_POINTER_OFFSET 0
+-#endif
+-
+ #endif /* #ifndef ETHOSU_CONFIG_H */
+diff --git a/src/ethosu_config_u65.h b/src/ethosu_config_u65.h
+index d662886..b115f43 100644
+--- a/src/ethosu_config_u65.h
++++ b/src/ethosu_config_u65.h
+@@ -121,12 +121,4 @@
+ #define AXI_LIMIT3_MAX_OUTSTANDING_WRITES 32
+ #endif
+ 
+-/*
+- * Address offset between the CPU and the NPU. The offset is
+- * applied to the QBASE and BASEP registers.
+- */
+-#ifndef BASE_POINTER_OFFSET
+-#define BASE_POINTER_OFFSET 0
+-#endif
+-
+ #endif /* #ifndef ETHOSU_CONFIG_H */
+diff --git a/src/ethosu_device.h b/src/ethosu_device.h
+index 0b45fd6..0802a3e 100644
+--- a/src/ethosu_device.h
++++ b/src/ethosu_device.h
+@@ -35,6 +35,16 @@ extern "C" {
+  * Defines
+  ******************************************************************************/
+ 
++/*
++ * Address offset between the CPU and the NPU. The default
++ * implementation of ethosu_base_pointer_remap applies the
++ * offset to the QBASE and BASEP registers. This is not used
++ * if ethosu_base_pointer_remap is overridden.
++ */
++#ifndef BASE_POINTER_OFFSET
++#define BASE_POINTER_OFFSET 0
++#endif
++
+ // NOTE: Deprecated
+ #ifndef ETHOSU_PMU_NCOUNTERS
+ #define ETHOSU_PMU_NCOUNTERS 4
+@@ -52,6 +62,16 @@ struct ethosu_device
+     uint32_t privileged;
+ };
+ 
++/******************************************************************************
++ * Prototypes (weak functions in driver)
++ ******************************************************************************/
++
++/*
++ * Convert a CPU address to an NPU address. This is used to produce the
++ * values programmed into the QBASE and BASEP registers.
++ */
++uint64_t ethosu_base_pointer_remap(const void *p);
++
+ /******************************************************************************
+  * Prototypes
+  ******************************************************************************/
+diff --git a/src/ethosu_device_u55_u65.c b/src/ethosu_device_u55_u65.c
+index 54d2a79..e9e452e 100644
+--- a/src/ethosu_device_u55_u65.c
++++ b/src/ethosu_device_u55_u65.c
+@@ -49,6 +49,21 @@
+ 
+ #define NPU_CMD_PWR_CLK_MASK (0xC)
+ 
++/******************************************************************************
++ * Weak functions - Address remapping
++ *
++ * Default application of a constant offset. Override for more complex mapping.
++ ******************************************************************************/
++
++/*
++ * Convert a CPU address to an NPU address. This is used to produce the
++ * values programmed into the QBASE and BASEP registers.
++ */
++uint64_t __attribute__((weak)) ethosu_base_pointer_remap(const void *p)
++{
++    return (uint64_t)p + BASE_POINTER_OFFSET;
++}
++
+ struct ethosu_device *ethosu_dev_init(const void *base_address, uint32_t secure_enable, uint32_t privilege_enable)
+ {
+     struct ethosu_device *dev = malloc(sizeof(struct ethosu_device));
+@@ -147,7 +162,7 @@ void ethosu_dev_run_command_stream(struct ethosu_device *dev,
+     assert(num_base_addr <= NPU_REG_BASEP_ARRLEN);
+ 
+     struct cmd_r cmd;
+-    uint64_t qbase = (uintptr_t)cmd_stream_ptr + BASE_POINTER_OFFSET;
++    uint64_t qbase = ethosu_base_pointer_remap(cmd_stream_ptr);
+     assert(qbase <= ADDRESS_MASK);
+     LOG_DEBUG("QBASE=0x%016llx, QSIZE=%u, base_pointer_offset=0x%08x", qbase, cms_length, BASE_POINTER_OFFSET);
+ 
+@@ -159,7 +174,7 @@ void ethosu_dev_run_command_stream(struct ethosu_device *dev,
+ 
+     for (int i = 0; i < num_base_addr; i++)
+     {
+-        uint64_t addr = base_addr[i] + BASE_POINTER_OFFSET;
++        uint64_t addr = ethosu_base_pointer_remap((void *) base_addr[i]);
+         assert(addr <= ADDRESS_MASK);
+         LOG_DEBUG("BASEP%d=0x%016llx", i, addr);
+         dev->reg->BASEP[i].word[0] = addr & 0xffffffff;
+-- 
+2.25.1
+
