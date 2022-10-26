@@ -8,18 +8,18 @@ python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-25
 ; ------------ Image classification on CM55-HP with ARMCLANG ---------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
+-DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=img_class \
--Dimg_class_MODEL_TFLITE_PATH=resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_H256.tflite \
 -Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 ; ------------ Image classification on CM55-HP with GCC --------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
+-DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=img_class \
--Dimg_class_MODEL_TFLITE_PATH=resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_H256.tflite \
 -Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
@@ -31,18 +31,18 @@ make ethos-u-img_class -j
 ; ------------ Keyword spotting on CM55-HE ARMCLANG ----------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
+-DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=kws \
--Dkws_MODEL_TFLITE_PATH=resources_downloaded/kws/kws_micronet_m_vela_H128.tflite \
 -Dkws_FILE_PATH=resources/kws/samples/down.wav \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
+-DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=kws \
--Dkws_MODEL_TFLITE_PATH=resources_downloaded/kws/kws_micronet_m_vela_H128.tflite \
 -Dkws_FILE_PATH=resources/kws/samples/down.wav \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
