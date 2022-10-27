@@ -29,6 +29,7 @@
 #include "services_lib_api.h"
 #include "services_main.h"
 
+#include <atomic>
 #include <vector>
 
 extern uint32_t m55_comms_handle;
@@ -36,7 +37,7 @@ m55_data_payload_t mhu_data;
 
 using KwsClassifier = arm::app::Classifier;
 
-volatile uint8_t data_received = false;
+std::atomic_bool data_received;
 
 void audio_callback(uint32_t /*event*/)
 {
@@ -264,15 +265,15 @@ bool process_audio(ApplicationContext& ctx)
         // sample rate is 16Khz and we support only stereo so AUDIO_ARRAY_SIZE is 32kHz to get 1s audio samples
         auto err = hal_get_audio_data(audio_rec, AUDIO_SAMPLES);
         while (err == 0) {
-            if (data_received) {
-                // start receiving new audio and process just received audio stream
-                data_received = false;
-                memcpy(audio_in, audio_rec, sizeof(audio_rec));
-                err = hal_get_audio_data(audio_rec, AUDIO_SAMPLES);
-                if (process_audio(ctx) == false) {
-                    printf_err("process_audio failed\n");
-                    return false;
-                }
+            while (!data_received.exchange(false)) {
+                __WFE();
+            }
+            // start receiving new audio and process just received audio stream
+            memcpy(audio_in, audio_rec, sizeof(audio_rec));
+            err = hal_get_audio_data(audio_rec, AUDIO_SAMPLES);
+            if (process_audio(ctx) == false) {
+                printf_err("process_audio failed\n");
+                return false;
             }
         }
         return false;
