@@ -45,28 +45,6 @@
   #error device not specified!
 #endif
 
-const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) = {
-    {
-    .RBAR = ARM_MPU_RBAR(0x02000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x023FFFFFUL, 1UL)     // SRAM0
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x08000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x0827FFFFUL, 1UL)     // SRAM1
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
-    .RLAR = ARM_MPU_RLAR(0x71FFFFFFUL, 0UL)     // LP- Peripheral & PINMUX Regions */
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x62000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x621FFFFFUL, 1UL)     // SRAM6
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x63100000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x632FFFFFUL, 1UL)     // SRAM8
-    },
-};
 
 /* Public functions ----------------------------------------------------------*/
 /**
@@ -78,12 +56,43 @@ const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) =
  */
 static void MPU_Load_Regions(void)
 {
+    static const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) = {
+    {
+    .RBAR = ARM_MPU_RBAR(0x02000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x023FFFFFUL, 2UL)     // SRAM0
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x08000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x0827FFFFUL, 1UL)     // SRAM1
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
+    .RLAR = ARM_MPU_RLAR(0x71FFFFFFUL, 0UL)     // LP- Peripheral & PINMUX Regions */
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 1UL)     // HP TCM (SRAM2 + SRAM3)
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x62000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x621FFFFFUL, 1UL)     // SRAM6
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x63100000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x632FFFFFUL, 1UL)     // SRAM8
+    },
+    };
 
     /* Define the possible Attribute regions */
-    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR_DEVICE);	/* Attr0, Device Memory */
-    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(	/* Attr1, Normal Memory, Cached, Write-through */
-                            ARM_MPU_ATTR_MEMORY_(1,0,1,1),
-                            ARM_MPU_ATTR_MEMORY_(1,0,1,1)));
+    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR(   /* Attr0, Device Memory */
+                            ARM_MPU_ATTR_DEVICE,
+                            ARM_MPU_ATTR_DEVICE_nGnRE));
+    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(	/* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
+                            ARM_MPU_ATTR_MEMORY_(1,1,1,1),
+                            ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
+    ARM_MPU_SetMemAttr(2UL, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
+                            ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                            ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
 
     /* Load the regions from the table */
     ARM_MPU_Load(0U, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
@@ -100,7 +109,7 @@ static void MPU_Clear_All_Regions(void)
 {
     MPU_Type* mpu = MPU;
     /* Retrieve the number of regions */
-    uint32_t num_regions = (mpu->TYPE >> 8);
+    uint32_t num_regions = ((mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos);
     uint32_t cnt;
 
     ARM_MPU_Disable();
