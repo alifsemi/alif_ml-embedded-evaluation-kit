@@ -14,7 +14,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=img_class \
--Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 ; ------------ Image classification on CM55-HP with GCC --------------------------
@@ -23,7 +22,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=img_class \
--Dimg_class_FILE_PATH=resources/img_class/samples/cat.bmp \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 make ethos-u-img_class -j
@@ -37,7 +35,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=kws \
--Dkws_FILE_PATH=resources/kws/samples/down.wav \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
@@ -46,7 +43,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=kws \
--Dkws_FILE_PATH=resources/kws/samples/down.wav \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
 
 make ethos-u-kws -j20
