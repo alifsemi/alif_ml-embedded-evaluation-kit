@@ -72,7 +72,7 @@ generate_labels_code(
 )
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00100000
+    0x00020000
     STRING)
 
 
