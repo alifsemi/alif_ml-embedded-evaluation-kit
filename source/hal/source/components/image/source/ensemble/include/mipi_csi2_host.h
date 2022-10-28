@@ -1,8 +1,11 @@
-/*
- * mipi_csi_host.h
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement 
  *
- *  Created on: 16-Feb-2022
- *      Author: prasanna
+ * You should have received a copy of the Alif Semiconductor Software 
+ * License Agreement with this file. If not, please write to: 
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
  */
 
 #ifndef MIPI_CSI2_MIPI_CSI2_HOST_H_
