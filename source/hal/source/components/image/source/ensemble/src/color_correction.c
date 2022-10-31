@@ -12,72 +12,46 @@
 #include "base_def.h"
 #include "image_processing.h"
 
-#ifdef HELIUM
-#include "dsp/matrix_functions.h"
-
-static arm_matrix_instance_f32 ccm =
-{
-	.numRows = 3,
-	.numCols = 3,
-	.pData = ccm_data
-};
-
-arm_matrix_instance_f32 spixel =
-{
-	.numRows = 3,
-	.numCols = 1,
-	.pData = NULL
-};
-
-arm_matrix_instance_f32 dpixel =
-{
-	.numRows = 3,
-	.numCols = 1,
-	.pData = NULL
-};
-
+#if __ARM_FEATURE_MVE & 1
+#include <arm_mve.h>
 #endif
 
-#ifndef float32_t
-#define float32_t float
-#endif
-
-
-static float32_t ccm_data[9] =
-{ 2.092, -0.369, -0.636,
- -0.492,  1.315,  0.162,
- -0.139, -0.664,  3.017};
-
-
-void color_correction(uint8_t *sp, uint8_t *dp)
+void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 {
-	static float32_t dpixel_data[3];
 //	volatile static uint32_t t0, ts;
 //	ts = PMU_GetCounter();
-#ifdef HELIUM
-	static float32_t spixel_data[3];
 
-	spixel.pData = spixel_data;
-	dpixel.pData = dpixel_data;
-
-	spixel.pData[0] = (float32_t)sp[2];
-	spixel.pData[1] = (float32_t)sp[1];
-	spixel.pData[2] = (float32_t)sp[0];
-	arm_mat_mult_f32(&ccm, &spixel, &dpixel);
-#else
 #if 0
-	dpixel_data[0] = sp[2];
-	dpixel_data[1] = sp[1];
-	dpixel_data[2] = sp[0];
+	uint8_t tmp = dp[0];
+	dp[0] = sp[2]
+	dp[1] = sp[1];
+	dp[2] = tmp;
 #else
 
+#if __ARM_FEATURE_MVE & 1
+
+#define FIXED_SHIFT 20
+#define FIXED(a) (int32_t)(((a) * (1UL << FIXED_SHIFT) + 0.5))
+
+	const int32x4_t c0 = { +FIXED(3.017), +FIXED(0.162), -FIXED(0.636) };
+	const int32x4_t c1 = { -FIXED(0.664), +FIXED(1.315), -FIXED(0.360) };
+	const int32x4_t c2 = { -FIXED(0.139), -FIXED(0.495), +FIXED(2.092) };
+
+	// multiply and accumulate, so d[0] = 3.017*sp[0] - 0.664*sp[1] - 0.139*sp[2], etc
+	int32x4_t d = vmulq(c0, sp[0]);
+	d = vmlaq(d, c1, sp[1]);
+	d = vmlaq(d, c2, sp[2]);
+	// saturating rounding shift right to unsigned and narrow - result into odd 16-bit lanes (bottom of 32-bit lanes)
+	uint16x8_t ud16 = vqrshrunbq(vuninitializedq_u16(), d, 16);
+	// saturating rounding shift right and narrow again - result into odd 8-bit lanes (bottom of 32-bit lanes)
+	uint8x16_t ud8 = vqrshrnbq(vuninitializedq_u8(), ud16, FIXED_SHIFT - 16);
+	// write out 3 bytes from the first 3 32-bit lanes
+	vstrbq_p(dp, vreinterpretq_u32(ud8), vctp32q(3));
+#else
+	float dpixel_data[3];
 	dpixel_data[0] =  2.092f*sp[2] - 0.369f*sp[1] - 0.636f*sp[0];
 	dpixel_data[1] = -0.492f*sp[2] + 1.315f*sp[1] + 0.162f*sp[0];
 	dpixel_data[2] = -0.139f*sp[2] - 0.664f*sp[1] + 3.017f*sp[0];
-
-#endif
-#endif
-//	t0 = PMU_GetCounter() - ts;
 	if (dpixel_data[0] < 0) dpixel_data[0] = 0;
 	if (dpixel_data[1] < 0) dpixel_data[1] = 0;
 	if (dpixel_data[2] < 0) dpixel_data[2] = 0;
@@ -88,30 +62,20 @@ void color_correction(uint8_t *sp, uint8_t *dp)
 	dp[2] = (uint8_t)dpixel_data[0]; // 2 = RED
 	dp[1] = (uint8_t)dpixel_data[1]; // 1 = GREEN
 	dp[0] = (uint8_t)dpixel_data[2]; // 0 = BLUE
+#endif // __ARM_FEATURE_MVE & 1
+#endif // 0
+//	t0 = PMU_GetCounter() - ts;
 }
 
-#define OFFS_X 120
-#define OFFS_Y 200
-
-void white_balance(uint8_t *sp, uint8_t *dp)
+void white_balance(const uint8_t *sp, uint8_t *dp)
 {
-	uint32_t x2 = 0, y2 = 0, index2 = 0;
-
-	for (y2 = OFFS_Y; y2 < MIMAGE_Y+OFFS_Y; y2++) {  				//height
-		//uint32_t location2 = y2 * DIMAGE_X * RGB_BYTES;
-
-		for (x2 = OFFS_X; x2 < MIMAGE_X+OFFS_X; x2++) { 			//width
-#if 1
-			color_correction(&sp[index2], &dp[index2]);
-			index2 += RGB_BYTES;
-#elif 0
-		color_correction(&sp[index2], &dp[location2 + (x2 * RGB_BYTES) ]);
-		index2 += RGB_BYTES;
+#if 0
+    if (dp != sp) {
+        memcpy(dp, sp, MIMAGE_X * MIMAGE_Y * RGB_BYTES);
+    }
 #else
-		dp[location2 + (x2 * 3) ] = sp[index2++]; //R
-		dp[location2 + (x2 * 3) + 1 ] = sp[index2++]; //G
-		dp[location2 + (x2 * 3) + 2 ] = sp[index2++]; //B
+    for (uint32_t index = 0; index < MIMAGE_X * MIMAGE_Y * RGB_BYTES; index += RGB_BYTES) {
+        color_correction(&sp[index], &dp[index]);
+    }
 #endif
-		}
-	}
 }
