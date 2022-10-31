@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include "image_processing.h"
 
+#if __ARM_FEATURE_MVE & 1
+#include <arm_mve.h>
+#endif
+
 #include "RTE_Components.h"
 
 int frame_crop(const void * restrict input_fb,
@@ -100,9 +104,9 @@ int resize_image_A(
 // Copied from ei_camera.cpp in firmware-eta-compute
 // Modified for RGB888
 // This needs to be < 16 or it won't fit. Cortex-M4 only has SIMD for signed multiplies
-    int FRAC_BITS = 14;
-    int FRAC_VAL = (1 << FRAC_BITS);
-    int FRAC_MASK = (FRAC_VAL - 1);
+#define FRAC_BITS 14
+    const int FRAC_VAL = (1 << FRAC_BITS);
+    const int FRAC_MASK = (FRAC_VAL - 1);
 
     uint32_t src_x_accum, src_y_accum; // accumulators and fractions for scaling the image
     uint32_t x_frac, nx_frac, y_frac, ny_frac;
@@ -138,17 +142,36 @@ int resize_image_A(
         // start at 1/2 pixel in to account for integer downsampling which might miss pixels
         src_x_accum = FRAC_VAL / 2;
         for (x = 0; x < dstWidth; x++) {
-            uint32_t tx, p00, p01, p10, p11;
+            uint32_t tx;
             // do indexing computations
             tx = (src_x_accum >> FRAC_BITS) * pixel_size_B;
             x_frac = src_x_accum & FRAC_MASK;
             nx_frac = FRAC_VAL - x_frac; // x fraction and 1.0 - x fraction
             src_x_accum += src_x_frac;
 
+#if __ARM_FEATURE_MVE & 1
+            mve_pred16_t p = vctp32q(pixel_size_B);
+            uint32x4_t p00 = vldrbq_z_u32(&s[tx], p);
+            uint32x4_t p10 = vldrbq_z_u32(&s[tx + pixel_size_B], p);
+            uint32x4_t p01 = vldrbq_z_u32(&s[tx + srcWidth], p);
+            uint32x4_t p11 = vldrbq_z_u32(&s[tx + srcWidth + pixel_size_B], p);
+            p00 = vmulq_x(p00, nx_frac, p);
+            p00 = vmlaq_m(p00, p10, x_frac, p);
+            p00 = vrshrq_x(p00, FRAC_BITS, p);
+            p01 = vmulq_x(p01, nx_frac, p);
+            p01 = vmlaq_m(p01, p11, x_frac, p);
+            p01 = vrshrq_x(p01, FRAC_BITS, p);
+            p00 = vmulq_x(p00, ny_frac, p);
+            p00 = vmlaq_m(p00, p01, y_frac, p);
+            p00 = vrshrq_x(p00, FRAC_BITS, p);
+            vstrbq_p_u32(d, p00, p);
+            d += pixel_size_B;
+#else
             //interpolate and write out
             for (int color = 0; color < pixel_size_B;
                  color++) // do pixel_size_B times for pixel_size_B colors
             {
+                uint32_t p00, p01, p10, p11;
                 p00 = s[tx];
                 p10 = s[tx + pixel_size_B];
                 p01 = s[tx + srcWidth];
@@ -160,6 +183,7 @@ int resize_image_A(
                 //ready next loop
                 tx++;
             }
+#endif
         } // for x
     } // for y
     return 0;
