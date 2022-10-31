@@ -71,9 +71,9 @@ void color_correction(uint8_t *sp, uint8_t *dp)
 	dpixel_data[2] = sp[0];
 #else
 
-	dpixel_data[0] =  2.092*sp[2] - 0.369*sp[1] - 0.636*sp[0];
-	dpixel_data[1] = -0.492*sp[2] + 1.315*sp[1] + 0.162*sp[0];
-	dpixel_data[2] = -0.139*sp[2] - 0.664*sp[1] + 3.017*sp[0];
+	dpixel_data[0] =  2.092f*sp[2] - 0.369f*sp[1] - 0.636f*sp[0];
+	dpixel_data[1] = -0.492f*sp[2] + 1.315f*sp[1] + 0.162f*sp[0];
+	dpixel_data[2] = -0.139f*sp[2] - 0.664f*sp[1] + 3.017f*sp[0];
 
 #endif
 #endif
