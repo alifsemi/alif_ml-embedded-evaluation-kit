@@ -94,6 +94,9 @@ int resize_image_A(
     int dstHeight,
     int pixel_size_B)
 {
+    if (pixel_size_B != 3) {
+        abort();
+    }
 // Copied from ei_camera.cpp in firmware-eta-compute
 // Modified for RGB888
 // This needs to be < 16 or it won't fit. Cortex-M4 only has SIMD for signed multiplies
@@ -191,6 +194,9 @@ int crop_and_interpolate( uint8_t const *srcImage,
 {
     uint32_t cropWidth, cropHeight;
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
+    if (bpp != 24) {
+        abort();
+    }
     tprof2 = ARM_PMU_Get_CCNTR();
     // What are dimensions that maintain aspect ratio?
     calculate_crop_dims(srcWidth, srcHeight, dstWidth, dstHeight, &cropWidth, &cropHeight);
