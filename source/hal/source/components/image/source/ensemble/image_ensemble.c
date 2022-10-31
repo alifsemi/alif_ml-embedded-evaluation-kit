@@ -47,6 +47,7 @@ int get_image_data(void *data)
     uint8_t *ml_image = (uint8_t *)data;
 
     camera_start(CAMERA_MODE_SNAPSHOT);
+    SCB_InvalidateDCache_by_Addr(raw_image, sizeof raw_image);
     camera_wait(100);
     // RGB conversion and frame resize
     bayer_to_RGB(raw_image+0x460, rgb_image);

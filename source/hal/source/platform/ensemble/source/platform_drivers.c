@@ -173,6 +173,8 @@ void MHU_msg_received(void* data)
 {
     m55_data_payload_t* payload = (m55_data_payload_t*)data;
 
+    __DMB();
+
     switch(payload->id)
     {
         case 2:
