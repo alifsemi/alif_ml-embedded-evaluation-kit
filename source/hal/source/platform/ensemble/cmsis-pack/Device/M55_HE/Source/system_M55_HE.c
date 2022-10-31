@@ -140,24 +140,17 @@ void SystemInit (void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#ifdef __ICACHE_PRESENT
-  /*Enable ICache*/
-  SCB_InvalidateICache();
-  SCB_EnableICache();
+#if defined (__MPU_PRESENT)
+  MPU_Setup();
 #endif
-#ifdef __DCACHE_PRESENT
- /*Enable DCache*/
-  SCB_InvalidateDCache();
-  SCB_EnableDCache();
+
+#ifdef __ICACHE_PRESENT
+  SCB_EnableICache();
 #endif
 
 // Enable Loop and branch info cache
 SCB->CCR |= SCB_CCR_LOB_Msk;
 __ISB();
-
-#if defined (__MPU_PRESENT)
-  MPU_Setup();
-#endif
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   TZ_SAU_Setup();
