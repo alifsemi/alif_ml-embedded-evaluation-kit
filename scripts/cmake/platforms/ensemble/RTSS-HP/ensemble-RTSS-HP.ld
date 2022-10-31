@@ -34,7 +34,7 @@ __ROM_SIZE = 0x0047F000;
 
 MEMORY
 {
-  ITCM  (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00040000
+  ITCM  (rwx) : ORIGIN = 0x00000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00100000
   SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
   SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
@@ -46,97 +46,13 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  .text.at_mram :
+  .text.at_mram : ALIGN(8)
   {
+    /* MRAM has start-up code, and most constant data */
     KEEP(*(.vectors))
-    *(.text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
-
-    /* .ctors */
-    *crtbegin.o(.ctors)
-    *crtbegin?.o(.ctors)
-    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-    *(SORT(.ctors.*))
-    *(.ctors)
-
-    /* .dtors */
-    *crtbegin.o(.dtors)
-    *crtbegin?.o(.dtors)
-    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-    *(SORT(.dtors.*))
-    *(.dtors)
-
-    *(.rodata*)
-    *(startup_ro_data)
-
-    *(npu_driver_version)
-    *(npu_driver_arch_version)
-
-    *(ifm)
-    *(nn_model)
-    *(labels)
-
-    KEEP(*(.eh_frame*))
-    . = ALIGN(16);
-  } > MRAM
-
-  .ARM.extab :
-  {
-    . = ALIGN(16);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(16);
-  } > MRAM
-
-  __exidx_start = .;
-  .ARM.exidx :
-  {
-    . = ALIGN(16);
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    . = ALIGN(16);
-  } > MRAM
-  __exidx_end = .;
-
-  .copy.table :
-  {
-    . = ALIGN(16);
-    __copy_table_start__ = .;
-    LONG (__etext)
-    LONG (__data_start__)
-    LONG ((__data_end__ - __data_start__)/4)
-/*
-    LONG (__etext2)
-    LONG (__data2_start__)
-    LONG ((__data2_end__ - __data2_start__)/4)
-*/
-    __copy_table_end__ = .;
-    . = ALIGN(16);
-  } > MRAM
-
-  .zero.table :
-  {
-    . = ALIGN(16);
-    __zero_table_start__ = .;
-    LONG (__bss_start__)
-    LONG ((__bss_end__ - __bss_start__)/4)
-    LONG (__sram0_start__)
-    LONG ((__sram0_end__ - __sram0_start__)/4)
-    LONG (__sram1_start__)
-    LONG ((__sram1_end__ - __sram1_start__)/4)
-    __zero_table_end__ = .;
-    . = ALIGN(16);
-  } > MRAM
-
-  . = ALIGN(16);
-  __etext = .;
-
-  .data.at_dtcm : AT (__etext)
-  {
-    __data_start__ = .;
-    *(vtable)
-    *(.data)
-    *(.data*)
 
     . = ALIGN(4);
     /* preinit data */
@@ -158,64 +74,122 @@ SECTIONS
     KEEP(*(.fini_array))
     PROVIDE_HIDDEN (__fini_array_end = .);
 
+    /* .ctors */
+    *crtbegin.o(.ctors)
+    *crtbegin?.o(.ctors)
+    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+    *(SORT(.ctors.*))
+    *(.ctors)
+
+    /* .dtors */
+    *crtbegin.o(.dtors)
+    *crtbegin?.o(.dtors)
+    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+    *(SORT(.dtors.*))
+    *(.dtors)
+
+    *startup_M55_*.c.obj(.text .rodata*)
+    *system_M55_*.c.obj(.text .rodata*)
+    *mpu_M55_*.c.obj(.text .rodata*)
+    
+    *lv_*.c.obj(.text .rodata*)
+
+    *(.rodata*)
+    *(startup_ro_data)
+
+    *(nn_model)
+    *(labels)
+
+    KEEP(*(.eh_frame*))
+  } > MRAM
+
+  .copy.table : ALIGN(4)
+  {
+    __copy_table_start__ = .;
+    LONG ( LOADADDR(.data.at_dtcm) )
+    LONG ( ADDR(.data.at_dtcm) )
+    LONG ( SIZEOF(.data.at_dtcm)/4 )
+    LONG ( LOADADDR(.code.at_itcm) )
+    LONG ( ADDR(.code.at_itcm) )
+    LONG ( SIZEOF(.code.at_itcm)/4 )
+    __copy_table_end__ = .;
+  } > MRAM
+
+  .zero.table : ALIGN(4)
+  {
+    __zero_table_start__ = .;
+    LONG (ADDR(.bss.at_itcm))
+    LONG (SIZEOF(.bss.at_itcm)/4)
+    LONG (ADDR(.bss))
+    LONG (SIZEOF(.bss)/4)
+    LONG (ADDR(.bss.at_sram0))
+    LONG (SIZEOF(.bss.at_sram0)/4)
+    LONG (ADDR(.bss.at_sram1))
+    LONG (SIZEOF(.bss.at_sram1)/4)
+    __zero_table_end__ = .;
+  } > MRAM
+
+  .code.at_itcm : ALIGN(8)
+  {
+    /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
+    *(.text*)    
+  } > ITCM AT> MRAM
+
+  .data.at_dtcm : ALIGN(8)
+  {
+    /* DTCM has all read-write data, including NPU activation buffer and audio processing buffers */
+    *(vtable)
+    *(.data)
+    *(.data*)
+
     KEEP(*(.jcr*))
 
-    . = ALIGN(16);
-    __data_end__ = .;
-  } > DTCM
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
 
-  . = ALIGN(16);
+  } > DTCM AT> MRAM 
 
   /* Place non-zero code/data here if required in SRAM0 */
 /*
-  __etext2 = __etext + (__data_end__ - __data_start__);
-
-  .data.at_sram : AT (__etext2)
+  .data.at_sram0 : ALIGN(8)
   {
-    . = ALIGN(4);
-    __data2_start__ = .;
-    . = ALIGN(16);
-    __data2_end__ = .;
-  } > SRAM0
+  } > SRAM0 >AT MRAM
 */
-
-  .data.at_sram0 (NOLOAD) :
+  .bss.at_sram0 (NOLOAD) : ALIGN(8)
   {
-    . = ALIGN(4);
-    __sram0_start__ = .;
-    * (camera_frame_buf)              /* Camera Frame Buffer */
+    * (camera_frame_buf)              /* Camer Frame Buffer */
     * (camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (lcd_image_buf)
-
-    . = ALIGN(4);
-    __sram0_end__ = .;
   } > SRAM0
 
-  .data.at_sram1 (NOLOAD) :
+  .bss.at_sram1 (NOLOAD) :
   {
-    . = ALIGN(4);
-    __sram1_start__ = .;
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
-    . = ALIGN(4);
-    __sram1_end__ = .;
   } > SRAM1
 
-  .bss (NOLOAD) :
+  .bss.at_itcm (NOLOAD) : ALIGN(8)
   {
-    . = ALIGN(4);
+    *(.bss.audio_rec)
+    *(.bss.copy_vtor_table_to_ram.MyVectorTable)
+  } > ITCM
+
+  .bss (NOLOAD) : ALIGN(8)
+  {
     __bss_start__ = .;
     *(.bss)
     *(.bss.*)
     *(COMMON)
-
-
-    . = ALIGN(4);
+    *(ifm)
+    . = ALIGN(8);
     __bss_end__ = .;
   } > DTCM
 
-  .heap (NOLOAD) :
+  .heap (NOLOAD) : ALIGN(8)
   {
-    . = ALIGN(8);
     __end__ = .;
     PROVIDE(end = .);
     . = . + __HEAP_SIZE;
@@ -223,9 +197,8 @@ SECTIONS
     __HeapLimit = .;
   } > DTCM
 
-  .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (NOLOAD) :
+  .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (NOLOAD) : ALIGN(8)
   {
-    . = ALIGN(8);
     __StackLimit = .;
     . = . + __STACK_SIZE;
     . = ALIGN(8);
