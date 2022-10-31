@@ -147,6 +147,11 @@ void SystemInit (void)
   SCB->VTOR = (uint32_t)(&__VECTOR_TABLE[0]);
 #endif
 
+  /* Enable UsageFault, BusFault, MemFault and SecurityFault exceptions */
+  /* Otherwise all you see is HardFault, even in the debugger */
+  SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
+                SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_SECUREFAULTENA_Msk;
+
 #if (defined (__FPU_USED) && (__FPU_USED == 1U)) || \
     (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE > 0U))
   SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */

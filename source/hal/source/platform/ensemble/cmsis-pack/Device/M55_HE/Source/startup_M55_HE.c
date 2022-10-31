@@ -79,11 +79,11 @@ __NO_RETURN void Reset_Handler  (void);
  *----------------------------------------------------------------------------*/
 /* Exceptions */
 void NMI_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void HardFault_Handler      (void) __attribute__ ((weak));
-void MemManage_Handler      (void) __attribute__ ((weak, alias("Default_Handler")));
-void BusFault_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void UsageFault_Handler     (void) __attribute__ ((weak, alias("Default_Handler")));
-void SecureFault_Handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void HardFault_Handler      (void) __attribute__ ((weak, alias("Fault_Handler")));
+void MemManage_Handler      (void) __attribute__ ((weak, alias("Fault_Handler")));
+void BusFault_Handler       (void) __attribute__ ((weak, alias("Fault_Handler")));
+void UsageFault_Handler     (void) __attribute__ ((weak, alias("Fault_Handler")));
+void SecureFault_Handler    (void) __attribute__ ((weak, alias("Fault_Handler")));
 void SVC_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
 void DebugMon_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
 void PendSV_Handler         (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -1089,7 +1089,7 @@ __NO_RETURN void Reset_Handler(void)
 /*----------------------------------------------------------------------------
   Hard Fault Handler
  *----------------------------------------------------------------------------*/
-void HardFault_Handler(void)
+void Fault_Handler(void)
 {
   while(1);
 }
