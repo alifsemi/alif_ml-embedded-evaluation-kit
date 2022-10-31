@@ -53,10 +53,6 @@ if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
     #set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "400000000"    CACHE STRING "System peripheral clock (Hz)")
     #set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-    set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
-    set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
-    set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
-    set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
     # if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
     #     set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
@@ -71,10 +67,6 @@ if (TARGET_SUBSYSTEM STREQUAL RTSS-HE)
     #set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
     #set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-    set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
-    set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
-    set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
-    set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
     # if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
     #     set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
@@ -92,16 +84,8 @@ math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMA
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
-set(ENSEMBLE_CORE_FLAG  "-D${ENSEMBLE_CORE}")
-set(OPTIONAL_FLAGS      "${OPTIONAL_FLAGS} ${ENSEMBLE_CORE_FLAG}")
-
-#set(COMPILER_FLAGS    "${OPTIONAL_FLAGS} -mcpu=cortex-m55 -mfloat-abi=hard -mthumb -mlittle-endian -Og -g -std=c++11 -DETHOS_U_IRQN=${ETHOS_U_IRQN} -DETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR} -DETHOS_U_NPU_CONFIG_ID=H256")
-set(COMPILER_FLAGS    "${OPTIONAL_FLAGS} -mthumb -mlittle-endian -Og -g -DETHOS_U_IRQN=${ETHOS_U_IRQN} -DETHOS_U_BASE_ADDR=${ETHOS_U_BASE_ADDR} -DETHOS_U_NPU_CONFIG_ID=H256")
-
-# For some reason, cmake doesn't pass the c++ standard flag, adding it manually
-set(CMAKE_CXX_FLAGS             "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS} " CACHE INTERNAL "")
-set(CMAKE_C_FLAGS               "${CMAKE_C_FLAGS} ${COMPILER_FLAGS}" CACHE INTERNAL "")
-set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
+add_compile_definitions("${ENSEMBLE_CORE}")
+#set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)

@@ -75,6 +75,14 @@ endif()
 
 set(${CPU_COMPILE_DEF}              1)
 
+set(CMAKE_C_FLAGS_DEBUG            "-O1 -g"          CACHE STRING "Flags used by the C compiler during DEBUG builds.")
+set(CMAKE_C_FLAGS_MINSIZEREL       "-Oz -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during MINSIZEREL builds.")
+set(CMAKE_C_FLAGS_RELEASE          "-O3 -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during RELEASE builds.")
+
+set(CMAKE_CXX_FLAGS_DEBUG          "-O1 -g"          CACHE STRING "Flags used by the CXX compiler during DEBUG builds.")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Oz -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during MINSIZEREL builds.")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during RELEASE builds.")
+
 # Warning options
 add_compile_options(
     -Wall
@@ -83,19 +91,14 @@ add_compile_options(
 
 # General purpose compile options:
 add_compile_options(
-    -funsigned-char
-    -O2
-    -g
     -fdata-sections
     -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
 # Arch compile options:
 add_compile_options(
-    -mthumb
     -mfloat-abi=${FLOAT_ABI}
-    --target=arm-arm-non-eabi
-    -mlittle-endian
+    --target=arm-arm-none-eabi
     -MD
     ${CPU_COMPILE_OPTION})
 
@@ -126,8 +129,7 @@ add_link_options(
     --callgraph
     --no_exceptions
     --load_addr_map_info
-    --xref
-    "$<$<CONFIG:RELEASE>:--no_debug>")
+    --xref)
 
 function(configure_semihosting TARGET_NAME SEMIHOSTING)
     if (${SEMIHOSTING})

@@ -8,10 +8,12 @@ git -C dependencies/core-driver am -3 < 0001-Add-ethosu_base_pointer_remap.patch
 NOTE! Generate micronet/mobilenet models 1st with:
 python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
 
+NOTE! For all of the following, -DCMAKE_BUILD_TYPE=Release should also work
+for full-speed operation. In particular, this enables auto-vectorization for ARMCLANG.
+
 ; ------------ Image classification on CM55-HP with ARMCLANG ---------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
--DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=img_class \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
@@ -19,7 +21,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 ; ------------ Image classification on CM55-HP with GCC --------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
--DETHOS_U_NPU_CONFIG_ID=H256 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=img_class \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
@@ -32,7 +33,6 @@ make ethos-u-img_class -j
 ; ------------ Keyword spotting on CM55-HE ARMCLANG ----------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
--DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DUSE_CASE_BUILD=kws \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
@@ -40,7 +40,6 @@ cmake -DTARGET_PLATFORM=ensemble \
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
--DETHOS_U_NPU_CONFIG_ID=H128 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DUSE_CASE_BUILD=kws \
 -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=LOG_LEVEL_DEBUG ..

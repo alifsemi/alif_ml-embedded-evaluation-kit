@@ -65,6 +65,14 @@ endif()
 
 set(${CPU_COMPILE_DEF}              1)
 
+set(CMAKE_C_FLAGS_DEBUG            "-Og -g"          CACHE STRING "Flags used by the C compiler during DEBUG builds.")
+set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during MINSIZEREL builds.")
+set(CMAKE_C_FLAGS_RELEASE          "-O2 -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during RELEASE builds.")
+
+set(CMAKE_CXX_FLAGS_DEBUG          "-Og   -g"          CACHE STRING "Flags used by the CXX compiler during DEBUG builds.")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during MINSIZEREL builds.")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during RELEASE builds.")
+
 # Warning options
 add_compile_options(
     -Wall
@@ -75,8 +83,6 @@ add_compile_options(
 # General purpose compile options:
 add_compile_options(
     -funsigned-char
-    -Og
-    -g
     -fdata-sections
     -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
@@ -101,8 +107,7 @@ add_link_options(
     ${FLOAT_ABI_COMPILE_OPTION}
     -mlittle-endian
     --stats
-    "SHELL:-Xlinker --gc-sections"
-    "$<$<CONFIG:RELEASE>:--no-debug>")
+    "SHELL:-Xlinker --gc-sections")
 
 function(configure_semihosting TARGET_NAME SEMIHOSTING)
     if (${SEMIHOSTING})
