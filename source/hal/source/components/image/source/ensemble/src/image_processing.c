@@ -15,12 +15,12 @@
 
 #include "RTE_Components.h"
 
-int frame_crop(void *input_fb,
+int frame_crop(const void * restrict input_fb,
 		       uint32_t ip_row_size,
 			   uint32_t ip_col_size,
 			   uint32_t row_start,
 			   uint32_t col_start,
-			   void *output_fb,
+			   void * restrict output_fb,
 			   uint32_t op_row_size,
 			   uint32_t op_col_size,
 			   uint32_t bpp)
@@ -184,10 +184,10 @@ void calculate_crop_dims(uint32_t srcWidth,
     }
 }
 
-int crop_and_interpolate( uint8_t const *srcImage,
+int crop_and_interpolate( uint8_t const * restrict srcImage,
 						  uint32_t srcWidth,
 						  uint32_t srcHeight,
-						  uint8_t *dstImage,
+						  uint8_t * restrict dstImage,
 						  uint32_t dstWidth,
 						  uint32_t dstHeight,
 						  uint32_t bpp)
@@ -202,12 +202,12 @@ int crop_and_interpolate( uint8_t const *srcImage,
     calculate_crop_dims(srcWidth, srcHeight, dstWidth, dstHeight, &cropWidth, &cropHeight);
     // Now crop to that dimension
     int res = frame_crop(
-        (void *)srcImage,
+        srcImage,
         srcWidth,
         srcHeight,
         (srcWidth - cropWidth) / 2,
         (srcHeight - cropHeight) / 2,
-        (void *)dstImage,
+        dstImage,
         cropWidth,
         cropHeight,
 		bpp);
