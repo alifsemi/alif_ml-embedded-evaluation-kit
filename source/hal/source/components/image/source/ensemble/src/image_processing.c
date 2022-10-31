@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include "image_processing.h"
 
+#include "RTE_Components.h"
+
 int frame_crop(void *input_fb,
 		       uint32_t ip_row_size,
 			   uint32_t ip_col_size,
@@ -188,6 +190,8 @@ int crop_and_interpolate( uint8_t const *srcImage,
 						  uint32_t bpp)
 {
     uint32_t cropWidth, cropHeight;
+    extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
+    tprof2 = ARM_PMU_Get_CCNTR();
     // What are dimensions that maintain aspect ratio?
     calculate_crop_dims(srcWidth, srcHeight, dstWidth, dstHeight, &cropWidth, &cropHeight);
     // Now crop to that dimension
@@ -203,10 +207,13 @@ int crop_and_interpolate( uint8_t const *srcImage,
 		bpp);
 
     if( res < 0 ) { return res; }
+    tprof2 = ARM_PMU_Get_CCNTR() - tprof2;
 
+    tprof3 = ARM_PMU_Get_CCNTR();
     // Finally, interpolate down to desired dimensions, in place
-    return resize_image_A(dstImage, cropWidth, cropHeight, dstImage, dstWidth, dstHeight, bpp/8);
-
+    int result = resize_image_A(dstImage, cropWidth, cropHeight, dstImage, dstWidth, dstHeight, bpp/8);
+    tprof3 = ARM_PMU_Get_CCNTR() - tprof3;
+    return result;
 }
 
 

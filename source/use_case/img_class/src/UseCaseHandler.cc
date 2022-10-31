@@ -31,10 +31,17 @@
 extern lv_obj_t *labelResult1;
 extern lv_obj_t *labelResult2;
 extern lv_obj_t *labelResult3;
+extern lv_obj_t *labelResult4;
+extern lv_obj_t *labelResult5;
 
 using ImgClassClassifier = arm::app::Classifier;
 
+#define SHOW_PROFILING 0
+
 extern bool run_requested(void);
+extern "C" {
+uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
+}
 
 namespace arm {
 namespace app {
@@ -96,13 +103,22 @@ namespace app {
                 return false;
             }
 
+            tprof5 = ARM_PMU_Get_CCNTR();
             /* Display this image on the LCD. */
             hal_lcd_display_image(
                 (const uint8_t*)inputTensor->data.data,
                 nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
+            tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
 
             if (!run_requested()) {
+#if SHOW_PROFILING
+                lv_label_set_text_fmt(labelResult1, "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
+                lv_label_set_text_fmt(labelResult2, "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
+                lv_label_set_text_fmt(labelResult3, "tprof3=%.3f ms", (double)tprof3 / SystemCoreClock * 1000);
+                lv_label_set_text_fmt(labelResult4, "tprof4=%.3f ms", (double)tprof4 / SystemCoreClock * 1000);
+                lv_label_set_text_fmt(labelResult5, "tprof5=%.3f ms", (double)tprof5 / SystemCoreClock * 1000);
+#endif
                 break;
             }
 

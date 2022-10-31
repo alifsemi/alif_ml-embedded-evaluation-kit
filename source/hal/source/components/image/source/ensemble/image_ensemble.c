@@ -45,15 +45,20 @@ int image_init()
 int get_image_data(void *data)
 {
     uint8_t *ml_image = (uint8_t *)data;
+    extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
     camera_start(CAMERA_MODE_SNAPSHOT);
     SCB_InvalidateDCache_by_Addr(raw_image, sizeof raw_image);
     camera_wait(100);
+    tprof1 = ARM_PMU_Get_CCNTR();
     // RGB conversion and frame resize
     bayer_to_RGB(raw_image+0x460, rgb_image);
+    tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
     // Cropping and scaling
     crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, MIMAGE_X, MIMAGE_Y, RGB_BYTES * 8);
+    tprof4 = ARM_PMU_Get_CCNTR();
     // Color correction for white balance
     white_balance(raw_image, ml_image);
+    tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
     return 0;
 }
