@@ -161,9 +161,9 @@ SECTIONS
 */
   .bss.at_sram0 (NOLOAD) : ALIGN(8)
   {
-    * (camera_frame_buf)              /* Camer Frame Buffer */
-    * (camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
-    * (lcd_image_buf)
+    * (.bss.camera_frame_buf)              /* Camer Frame Buffer */
+    * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
+    * (.bss.lcd_image_buf)
   } > SRAM0
 
   .bss.at_sram1 (NOLOAD) :
