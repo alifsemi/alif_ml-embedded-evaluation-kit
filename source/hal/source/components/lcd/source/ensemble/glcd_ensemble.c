@@ -56,12 +56,44 @@ void SetupLEDs()
 	PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_14, PINMUX_ALTERNATE_FUNCTION_0);
 }
 
-void write_to_lcd(uint8_t src[MIMAGE_Y][MIMAGE_X][RGB_BYTES], uint8_t dst[DIMAGE_Y][DIMAGE_X][RGB_BYTES]) {
-	int32_t x, x1, y, y1;
-	uint8_t r, g, b;
+void write_to_lcd(
+        const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
+        uint8_t dst[static restrict DIMAGE_Y][DIMAGE_X][RGB_BYTES]) {
 
-	for (y1 = 0; y1 < MIMAGE_Y; y1++) {
-		for (x1 = 0; x1 < MIMAGE_X; x1++) {
+	for (uint32_t y1 = 0; y1 < MIMAGE_Y; y1++) {
+#if 1
+#if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
+#errof "bad alignment"
+#endif
+	       const uint8_t * restrict srcp = src[y1][0];
+	       uint8_t * restrict dstp = dst[YOFFS + y1 * 2][XOFFS];
+           uint8_t * restrict dst2p = dst[YOFFS + y1 * 2 + 1][XOFFS];
+           #define SRC_ROW_OFFSET_32 ((MIMAGE_X * 3) / 4)
+	       const uint32_t *srcp32 = (const uint32_t *)srcp;
+	       uint32_t *dstp32 = (uint32_t *)dstp;
+           // Load 4 pixels as 3 words, and expand to 6 words
+           // ARM compiler can further vectorise this to across 4 lanes, so 12 input words or 16 pixels per iteration
+           // "& 0x00ffffff" or "& 0xffffff00" are valid constant forms for VBIC; we rely on shifts to get other masks
+	       // to try to avoid register pressure for mask constants (but compiler seems to convert to masking anyway)
+	       for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4) {
+	           uint32_t r1b0g0r0 = *srcp32++;
+	           uint32_t g2r2b1g1 = *srcp32++;
+	           uint32_t b3g3r3b2 = *srcp32++;
+	           *dstp32++ = (r1b0g0r0 << 24) | (r1b0g0r0 & 0xffffff); // r0b0g0r0
+	           *dstp32++ = (g2r2b1g1 << 24) | (r1b0g0r0 >> 8); // g1r1b0g0
+	           *dstp32++ = (g2r2b1g1 << 16) | ((r1b0g0r0 >> 24) << 8) | ((g2r2b1g1 << 16) >> 24); // b1g1r1b1
+	           *dstp32++ = ((g2r2b1g1 >> 16) << 24) | ((b3g3r3b2 << 24) >> 8) | (g2r2b1g1 >> 16); // r2b2g2r2
+	           *dstp32++ = (b3g3r3b2 << 8) | (g2r2b1g1 >> 24); // g3r3b2g2
+	           *dstp32++ = (b3g3r3b2 & 0xffffff00) | (b3g3r3b2 >> 24); // b3g3r3b3
+	       }
+	       // Memcpy the second row rather than doing it as-we-go, because as-we-go makes
+	       // the above too complex for the autovectoriser.
+	       memcpy(dst2p, dstp, 2*MIMAGE_X*RGB_BYTES);
+#else
+		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1++) {
+			uint8_t r, g, b;
+			int32_t x, y;
+
 			b = src[y1][x1][0];
 			r = src[y1][x1][1];
 			g = src[y1][x1][2];
@@ -85,6 +117,7 @@ void write_to_lcd(uint8_t src[MIMAGE_Y][MIMAGE_X][RGB_BYTES], uint8_t dst[DIMAGE
 			dst[y+1][x+1][1] = r;
 			dst[y+1][x+1][2] = g;
 		}
+#endif
 	}
 }
 
@@ -138,7 +171,7 @@ void GLCD_Image(const void *data, const uint32_t width,
     UNUSED(channels);
     UNUSED(downsample_factor);
 
-    write_to_lcd((uint8_t (*)[MIMAGE_Y][RGB_BYTES])data, lcd_image);
+    write_to_lcd(data, lcd_image);
 
 	lv_task_handler();
 }
