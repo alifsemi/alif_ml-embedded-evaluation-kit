@@ -14,6 +14,13 @@
 #include "base_def.h"
 #include "bayer.h"
 
+// At the time of writing, GCC produces incorrect assembly
+#define ENABLE_MVE_BAYER2RGB (__ARMCC_VERSION >= 6180002 && (__ARM_FEATURE_MVE & 1))
+
+#if __ARM_FEATURE_MVE & 1
+#include <arm_mve.h>
+#endif
+
 #include "Driver_CPI.h"
 #include "image_processing.h"
 
@@ -31,7 +38,7 @@ extern uint8_t  	raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
 //
 
 dc1394error_t
-dc1394_bayer_Simple(const uint8_t *bayer, uint8_t *rgb, int sx, int sy, int tile)
+dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int sx, int sy, int tile)
 {
 	DEBUG_PRINTF("\r\n\r\n >>> 1 bayer:0x%X rgb:0x%X sx:0x%X sy:0x%X tile:0x%X <<< \r\n",(uint32_t)bayer,(uint32_t)rgb,sx,sy,tile);
 
@@ -80,6 +87,11 @@ dc1394_bayer_Simple(const uint8_t *bayer, uint8_t *rgb, int sx, int sy, int tile
 
 	DEBUG_PRINTF("\r\n\r\n >>> dc1394_bayer_Simple 2 <<< \r\n");
 
+#if ENABLE_MVE_BAYER2RGB
+	// Index table into 16 RGB pairs for scatter stores: { 0, 6, 12, .. }
+	const uint8x16_t inc6 = vmulq(vidupq_n_u8(0, 1), 6);
+#endif
+
 	for (; height--; bayer += bayerStep, rgb += rgbStep) {
 		const uint8_t *bayerEnd = bayer + width;
 
@@ -91,6 +103,36 @@ dc1394_bayer_Simple(const uint8_t *bayer, uint8_t *rgb, int sx, int sy, int tile
 			rgb += 3;
 		}
 
+#if ENABLE_MVE_BAYER2RGB
+		// Helium lets us process 16 at a time (8 per beat on Cortex-M55)
+		int pairs_to_go = (bayerEnd - bayer) / 2;
+		while (pairs_to_go > 0) {
+			mve_pred16_t p = vctp8q(pairs_to_go);
+			uint8x16x2_t rg = vld2q(bayer);
+			uint8x16x2_t gb = vld2q(bayer + bayerStep);
+			uint8x16_t r0 = rg.val[0];
+			uint8x16_t g0 = vrhaddq_x(rg.val[1], gb.val[0], p);
+			uint8x16_t b0 = gb.val[1];
+			vstrbq_scatter_offset_p(rgb - blue, inc6, r0, p);
+			vstrbq_scatter_offset_p(rgb, inc6, g0, p);
+			vstrbq_scatter_offset_p(rgb + blue, inc6, b0, p);
+
+			uint8x16x2_t gr = vld2q(bayer + 1);
+			uint8x16x2_t bg = vld2q(bayer + bayerStep + 1);
+			uint8x16_t r1 = gr.val[1];
+			uint8x16_t g1 = vrhaddq_x(gr.val[0], bg.val[1], p);
+			uint8x16_t b1 = bg.val[0];
+			vstrbq_scatter_offset_p(rgb + 3 - blue, inc6, r1, p);
+			vstrbq_scatter_offset_p(rgb + 3, inc6, g1, p);
+			vstrbq_scatter_offset_p(rgb + 3 + blue, inc6, b1, p);
+			bayer += 16 * 2;
+			rgb += 16 * 6;
+			pairs_to_go -= 16;
+		}
+
+		bayer += pairs_to_go * 2;
+		rgb += pairs_to_go * 6;
+#else
 		if (blue > 0) {
 			for (; bayer <= bayerEnd - 2; bayer += 2, rgb += 6) {
 				rgb[-1] = bayer[0];
@@ -112,6 +154,7 @@ dc1394_bayer_Simple(const uint8_t *bayer, uint8_t *rgb, int sx, int sy, int tile
 				rgb[2] = bayer[bayerStep + 1];
 			}
 		}
+#endif
 
 		if (bayer < bayerEnd) {
 			rgb[-blue] = bayer[0];
@@ -161,7 +204,7 @@ put_tiff(uint8_t * header, uint32_t width, uint32_t height, uint16_t bpp)
 
 
 /*Bayer to RGB conversion */
-int bayer_to_RGB(uint8_t *src, uint8_t *dest)
+int bayer_to_RGB(uint8_t * restrict src, uint8_t * restrict dest)
 {
 	dc1394_bayer_Simple(src, dest, CIMAGE_X, CIMAGE_Y, DC1394_COLOR_FILTER_RGGB);
 	return 0;

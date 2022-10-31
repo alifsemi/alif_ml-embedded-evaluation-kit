@@ -56,6 +56,6 @@ int crop_and_interpolate( uint8_t const * restrict srcImage, uint32_t srcWidth, 
 void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3]);
 void white_balance(const uint8_t *sp, uint8_t *dp);
 uint8_t *put_tiff(uint8_t * rgb, uint32_t width, uint32_t height, uint16_t bpp);
-int bayer_to_RGB(uint8_t *src, uint8_t *dest);
+int bayer_to_RGB(uint8_t * restrict src, uint8_t * restrict dest);
 
 #endif /* IMAGE_PROCESSING_H_ */
