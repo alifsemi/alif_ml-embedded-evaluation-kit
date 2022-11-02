@@ -1053,12 +1053,35 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/
+__attribute__((naked))
 __NO_RETURN void Reset_Handler(void)
 {
-  /* Setup the main stack */
-  __asm volatile ("MSR MSPLIM, %0" : : "r" (&__STACK_LIMIT));
-  __asm volatile ("MSR MSP, %0" : : "r" (&__INITIAL_SP));
+    /* Setup the main stack */
+    /* Super careful to make sure are naked, and the compiler doesn't use the
+     * stack on entry, and we can't ever set MSP < MSPLIM, even briefly, if
+     * there are bad initial values thanks to debugger weirdness or whatever.
+     *
+     * Manual says "basic asm only" for naked functions, so we can't just pass
+     * the values in easily.
+     */
+#define xstr(s) str(s)
+#define str(s) #s
+    __asm (
+    "MOVS    R0, #0\n\t"
+    "LDR     R1, =" xstr(__INITIAL_SP) "\n\t"
+    "LDR     R2, =" xstr(__STACK_LIMIT) "\n\t"
+    "MSR     MSPLIM, R0\n\t"
+    "MSR     MSP, R1\n\t"
+    "MSR     MSPLIM, R2\n\t"
+    "BL      Reset_Handler_C"
+	);
+#undef xstr
+#undef str
+}
 
+__attribute__((used))
+__NO_RETURN void Reset_Handler_C(void)
+{
   SystemInit();                             /* CMSIS System Initialization */
   __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
 }
