@@ -110,6 +110,7 @@ dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int 
 			mve_pred16_t p = vctp8q(pairs_to_go);
 			uint8x16x2_t rg = vld2q(bayer);
 			uint8x16x2_t gb = vld2q(bayer + bayerStep);
+			__builtin_prefetch(bayer + bayerStep + 16 * 2 * 2);
 			uint8x16_t r0 = rg.val[0];
 			uint8x16_t g0 = vrhaddq_x(rg.val[1], gb.val[0], p);
 			uint8x16_t b0 = gb.val[1];
