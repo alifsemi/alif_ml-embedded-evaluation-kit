@@ -9,6 +9,7 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 #include "base_def.h"
 #include "image_processing.h"
 
@@ -67,12 +68,62 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 //	t0 = PMU_GetCounter() - ts;
 }
 
+static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
+{
+	const uint16x8_t pixel_offsets = vmulq(vidupq_n_u16(0, 1), 3);
+
+	while (len > 0) {
+		// Fetching two iterations ahead seems optimal for RTSS-HP fetching from SRAM0
+		__builtin_prefetch(sp + 3 * 8 * 2);
+		float16x8_t r = vcvtq(vldrbq_gather_offset(sp + 0, pixel_offsets));
+		float16x8_t g = vcvtq(vldrbq_gather_offset(sp + 1, pixel_offsets));
+		float16x8_t b = vcvtq(vldrbq_gather_offset(sp + 2, pixel_offsets));
+		sp += 3 * 8;
+
+		{
+			// I was using the f16 suffix on constants below, but GCC objects (Bug 107515)
+			float16x8_t r_mac = vmulq(r, 3.017);
+			r_mac = vfmaq(r_mac, g, -0.664);
+			r_mac = vfmaq(r_mac, b, -0.139);
+
+			uint16x8_t r_out = vcvtq_u16_f16(r_mac);
+			r_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), r_out));
+			vstrbq_scatter_offset(dp + 0, pixel_offsets, r_out);
+		}
+
+		{
+			float16x8_t g_mac = vmulq(r, 0.162);
+			g_mac = vfmaq(g_mac, g, 1.315);
+			g_mac = vfmaq(g_mac, b, -0.495);
+
+			uint16x8_t g_out = vcvtq_u16_f16(g_mac);
+			g_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), g_out));
+			vstrbq_scatter_offset(dp + 1, pixel_offsets, g_out);
+		}
+
+		{
+			float16x8_t b_mac = vmulq(r, -0.636);
+			b_mac = vfmaq(b_mac, g, -0.369);
+			b_mac = vfmaq(b_mac, b, 2.092);
+
+			uint16x8_t b_out = vcvtq_u16_f16(b_mac);
+			b_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), b_out));
+			vstrbq_scatter_offset(dp + 2, pixel_offsets, b_out);
+		}
+
+		dp += 3 * 8;
+		len -= 3 * 8;
+	}
+}
+
 void white_balance(const uint8_t *sp, uint8_t *dp)
 {
 #if 0
     if (dp != sp) {
         memcpy(dp, sp, MIMAGE_X * MIMAGE_Y * RGB_BYTES);
     }
+#elif 1
+    bulk_color_correction(sp, dp, MIMAGE_X * MIMAGE_Y * RGB_BYTES);
 #else
     for (uint32_t index = 0; index < MIMAGE_X * MIMAGE_Y * RGB_BYTES; index += RGB_BYTES) {
         color_correction(&sp[index], &dp[index]);
