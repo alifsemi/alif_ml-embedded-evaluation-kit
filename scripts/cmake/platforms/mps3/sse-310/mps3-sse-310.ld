@@ -72,6 +72,7 @@ SECTIONS
   .text.at_bram :
   {
     KEEP(*(.vectors))
+    *(.text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
@@ -91,7 +92,7 @@ SECTIONS
     *(.dtors)
 
     KEEP(*(.eh_frame*))
-    
+
     *(vtable)
     *(.data)
     *(.data.*)
@@ -166,7 +167,7 @@ SECTIONS
 
     __zero_table_end__ = .;
   } > BRAM
-  
+
   .heap (COPY) :
   {
     . = ALIGN(8);
