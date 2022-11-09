@@ -1,3 +1,10 @@
+Changes in 22.11
+    * Updates for Arm® Corstone™-310 platform.
+    * Formal support for CMake presets.
+    * Support for the new Arm Compiler 6.19
+    * Published CMSIS-Pack under `resources` and related updates.
+    * Bug fix for building with NPU disabled.
+
 Changes in 22.08
     * Support for 22.08 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.5.0, CMSIS, TensorFlow Lite Micro).
     * Formal support for Arm® Corstone-310 Arm Virtual Hardware and FPGA implementations.

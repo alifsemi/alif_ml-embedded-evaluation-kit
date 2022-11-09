@@ -32,7 +32,9 @@
 # The PDSC files are the ones extracted from the downloaded packs (and is optional).
 # packgen and packchk must be installed. See https://github.com/Open-CMSIS-Pack/devtools
 # on how to build these tools.
-
+#
+# yaml-language-server: $schema=https://github.com/Open-CMSIS-Pack/devtools/blob/tools/toolbox/1.0.0/tools/packgen/schema/manifest.schema.json
+#
 build:
   - name: "build-dir"
     options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
@@ -50,9 +52,13 @@ packs:
         - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
 
     releases:
+      - version: "22.11.0"
+        date: "2022-11-09"
+        description: "22.11.0 release package"
       - version: "22.8.0-Beta"
         date: "2022-09-29"
         description: "Beta release package"
+        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack?h=refs/heads/main"
 
     taxonomy:
       - attributes: {Cclass: "ML Eval Kit", doc: "https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md"}
