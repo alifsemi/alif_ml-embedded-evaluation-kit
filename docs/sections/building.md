@@ -56,7 +56,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
     ```log
     arm-none-eabi-gcc (GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
-    Copyright (C) 2020 Free Software Foundation, Inc.
+    SPDX-FileCopyrightText: Copyright 2020 Free Software Foundation, Inc.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     ```
