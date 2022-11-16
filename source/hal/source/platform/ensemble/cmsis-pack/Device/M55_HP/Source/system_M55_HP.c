@@ -149,6 +149,11 @@ void SystemInit (void)
   SCB->VTOR = (uint32_t)(&__VECTOR_TABLE[0]);
 #endif
 
+  /* Enable UsageFault, BusFault, MemFault and SecurityFault exceptions */
+  /* Otherwise all you see is HardFault, even in the debugger */
+  SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
+                SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_SECUREFAULTENA_Msk;
+
 #if (defined (__FPU_USED) && (__FPU_USED == 1U)) || \
     (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE > 0U))
   SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */
@@ -159,24 +164,17 @@ void SystemInit (void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#ifdef __ICACHE_PRESENT
-  /*Enable ICache*/
-  SCB_InvalidateICache();
-  SCB_EnableICache();
+#if defined (__MPU_PRESENT)
+  MPU_Setup();
 #endif
-#ifdef __DCACHE_PRESENT
- /*Enable DCache*/
-  SCB_InvalidateDCache();
-  SCB_EnableDCache();
+
+#ifdef __ICACHE_PRESENT
+  SCB_EnableICache();
 #endif
 
 // Enable Loop and branch info cache
 SCB->CCR |= SCB_CCR_LOB_Msk;
 __ISB();
-
-#if defined (__MPU_PRESENT)
-  MPU_Setup();
-#endif
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   TZ_SAU_Setup();

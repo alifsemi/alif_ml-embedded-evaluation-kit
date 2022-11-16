@@ -37,6 +37,8 @@
 #ifndef SYSTEM_UTILS_H
 #define SYSTEM_UTILS_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,9 +71,9 @@ extern "C" {
   \fn          void* LocalToGlobal (void* in_addr)
   \brief       Return the corresponding global address
   \param[in]   in_addr  address to convert
-  \return      void* global address
+  \return      uint32_t global address
 */
-void* LocalToGlobal(void *in_addr);
+uint32_t LocalToGlobal(const volatile void *in_addr);
 
 /**
   \fn          void* GlobalToLocal (void* in_addr)
@@ -79,7 +81,7 @@ void* LocalToGlobal(void *in_addr);
   \param[in]   in_addr  address to convert
   \return      void* local address
 */
-void* GlobalToLocal(void *in_addr);
+void *GlobalToLocal(uint32_t in_addr);
 
 /**
   \fn          void PMU_delay_loop_us(unsigned int delay_us)

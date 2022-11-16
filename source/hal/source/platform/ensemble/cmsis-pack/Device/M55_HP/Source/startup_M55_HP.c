@@ -79,11 +79,11 @@ __NO_RETURN void Reset_Handler  (void);
  *----------------------------------------------------------------------------*/
 /* Exceptions */
 void NMI_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void HardFault_Handler      (void) __attribute__ ((weak));
-void MemManage_Handler      (void) __attribute__ ((weak, alias("Default_Handler")));
-void BusFault_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void UsageFault_Handler     (void) __attribute__ ((weak, alias("Default_Handler")));
-void SecureFault_Handler    (void) __attribute__ ((weak, alias("Default_Handler")));
+void HardFault_Handler      (void) __attribute__ ((weak, alias("Fault_Handler")));
+void MemManage_Handler      (void) __attribute__ ((weak, alias("Fault_Handler")));
+void BusFault_Handler       (void) __attribute__ ((weak, alias("Fault_Handler")));
+void UsageFault_Handler     (void) __attribute__ ((weak, alias("Fault_Handler")));
+void SecureFault_Handler    (void) __attribute__ ((weak, alias("Fault_Handler")));
 void SVC_Handler            (void) __attribute__ ((weak, alias("Default_Handler")));
 void DebugMon_Handler       (void) __attribute__ ((weak, alias("Default_Handler")));
 void PendSV_Handler         (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -1053,16 +1053,55 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/
+__attribute__((naked))
 __NO_RETURN void Reset_Handler(void)
 {
-  /* Setup the main stack */
-  __asm volatile ("MSR MSPLIM, %0" : : "r" (&__STACK_LIMIT));
-  __asm volatile ("MSR MSP, %0" : : "r" (&__INITIAL_SP));
+    /* Setup the main stack */
+    /* Super careful to make sure are naked, and the compiler doesn't use the
+     * stack on entry, and we can't ever set MSP < MSPLIM, even briefly, if
+     * there are bad initial values thanks to debugger weirdness or whatever.
+     *
+     * Manual says "basic asm only" for naked functions, so we can't just pass
+     * the values in easily.
+     */
+#define xstr(s) str(s)
+#define str(s) #s
+    __asm (
+    "MOVS    R0, #0\n\t"
+    "LDR     R1, =" xstr(__INITIAL_SP) "\n\t"
+    "LDR     R2, =" xstr(__STACK_LIMIT) "\n\t"
+    "MSR     MSPLIM, R0\n\t"
+    "MSR     MSP, R1\n\t"
+    "MSR     MSPLIM, R2\n\t"
+    "BL      Reset_Handler_C"
+	);
+#undef xstr
+#undef str
+}
 
+__attribute__((used))
+__NO_RETURN void Reset_Handler_C(void)
+{
   SystemInit();                             /* CMSIS System Initialization */
   __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
 }
 
+/* This hook is called automatically by the ARM C library after scatter loading */
+/* We add it to the preinit table for GCC */
+void _platform_pre_stackheap_init(void)
+{
+    /* SystemInit enabled the ICache but left the DCache off */
+
+    /* Invalidate the ICache to synchronise with copied code - DCache is off, so no maintenance required */
+    SCB_InvalidateICache();
+
+    /* Enable the DCache now we've finished copying code */
+    SCB_EnableDCache();
+}
+
+#if !defined(__ARMCC_VERSION)
+void (*_do_platform_pre_stackheap_init)() __attribute__((section(".preinit_array")))= _platform_pre_stackheap_init;
+#endif
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
   #pragma clang diagnostic push
@@ -1072,7 +1111,7 @@ __NO_RETURN void Reset_Handler(void)
 /*----------------------------------------------------------------------------
   Hard Fault Handler
  *----------------------------------------------------------------------------*/
-void HardFault_Handler(void)
+void Fault_Handler(void)
 {
   while(1);
 }

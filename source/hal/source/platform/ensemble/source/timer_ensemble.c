@@ -64,7 +64,7 @@ static bool add_pmu_counter(
  */
 int Init_SysTick(void)
 {
-    const uint32_t ticks_1ms = GetSystemCoreClock()/1000 + 1;
+    const uint32_t ticks_1ms = (GetSystemCoreClock() + 500)/1000;
     int err = 0;
 
     /* Reset CPU cycle count value. */

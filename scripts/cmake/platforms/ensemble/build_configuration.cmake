@@ -28,9 +28,10 @@
 #----------------------------------------------------------------------------
 
 function(set_platform_global_defaults)
-    message(STATUS "Platform: Ensemble HP")
+    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM}")
 
     set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
+
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
@@ -38,6 +39,17 @@ function(set_platform_global_defaults)
 
     set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/ensemble" PARENT_SCOPE)
+
+    if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
+        set(ETHOS_U_NPU_CONFIG_ID "H256"    CACHE STRING "Ethos-U NPU configuration" FORCE)
+    else()
+        set(ETHOS_U_NPU_CONFIG_ID "H128"    CACHE STRING "Ethos-U NPU configuration" FORCE)
+    endif()
+    message(STATUS "Forced ETHOS_U_NPU_CONFIG_ID to ${ETHOS_U_NPU_CONFIG_ID}")
+    set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
+    set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
+    set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
+    set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
 endfunction()
 

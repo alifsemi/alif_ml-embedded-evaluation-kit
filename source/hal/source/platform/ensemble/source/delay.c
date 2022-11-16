@@ -85,10 +85,10 @@ void sleep_or_wait_msec(uint32_t msec)
 	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	ARM_PMU_Enable();
 	ARM_PMU_CNTR_Enable(1U << 31);
-	ARM_PMU_CYCCNT_Reset();
+	uint32_t start = ARM_PMU_Get_CCNTR();
 
 	uint32_t sleeptime = msec * (SystemCoreClock / 1000);
-	while (ARM_PMU_Get_CCNTR() < sleeptime);
+	while ((ARM_PMU_Get_CCNTR() - start) < sleeptime);
 
 #endif /* RTOS_AVAILABLE */
 }
@@ -100,10 +100,10 @@ void sleep_or_wait_usec(uint32_t usec)
 	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	ARM_PMU_Enable();
 	ARM_PMU_CNTR_Enable(1U << 31);
-	ARM_PMU_CYCCNT_Reset();
+	uint32_t start = ARM_PMU_Get_CCNTR();
 
 	uint32_t sleeptime = usec * (SystemCoreClock / 1000000);
-	while (ARM_PMU_Get_CCNTR() < sleeptime);
+	while ((ARM_PMU_Get_CCNTR() - start) < sleeptime);
 }
 
 /************************ (C) COPYRIGHT ALIF SEMICONDUCTOR *****END OF FILE****/
