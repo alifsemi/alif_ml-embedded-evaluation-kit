@@ -75,7 +75,7 @@ int get_image_data(void *data)
 #endif
     tprof1 = ARM_PMU_Get_CCNTR();
     // RGB conversion and frame resize
-    bayer_to_RGB(raw_image+0x460, rgb_image);
+    bayer_to_RGB(raw_image, rgb_image);
     tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
     // Cropping and scaling
     crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, MIMAGE_X, MIMAGE_Y, RGB_BYTES * 8);
