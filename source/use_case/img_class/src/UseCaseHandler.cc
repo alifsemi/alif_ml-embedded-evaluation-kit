@@ -36,7 +36,13 @@ extern lv_obj_t *labelResult5;
 
 using ImgClassClassifier = arm::app::Classifier;
 
-#define SHOW_PROFILING 0
+
+#define SKIP_MODEL 0
+#if SKIP_MODEL
+#define RAW_BUFFER ((void *) 0x08000000)
+#else
+#define RAW_BUFFER inputTensor->data.data
+#endif
 
 extern bool run_requested(void);
 extern "C" {
@@ -66,7 +72,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-
+#if !SKIP_MODEL
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -95,9 +101,10 @@ namespace app {
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
+#endif
 
         do {
-            int err = hal_get_image_data(inputTensor->data.data);
+            int err = hal_get_image_data((uint8_t *) RAW_BUFFER);
             if (err) {
                 printf_err("hal_get_image_data failed with : %d", err);
                 return false;
@@ -106,12 +113,12 @@ namespace app {
             tprof5 = ARM_PMU_Get_CCNTR();
             /* Display this image on the LCD. */
             hal_lcd_display_image(
-                (const uint8_t*)inputTensor->data.data,
-                nCols, nRows, nChannels,
+                (const uint8_t*)RAW_BUFFER,
+                224, 224, 3, //nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
             tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
 
-            if (!run_requested()) {
+            if (SKIP_MODEL || !run_requested()) {
 #if SHOW_PROFILING
                 lv_label_set_text_fmt(labelResult1, "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
                 lv_label_set_text_fmt(labelResult2, "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
@@ -122,6 +129,7 @@ namespace app {
                 break;
             }
 
+#if !SKIP_MODEL
             const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
                                   inputTensor->bytes : IMAGE_DATA_SIZE;
 
@@ -159,7 +167,7 @@ namespace app {
             profiler.PrintProfilingResult();
 
             IncrementAppCtxIfmIdx(ctx,"imgIndex");
-
+#endif
         } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImgIdx);
 
         return true;

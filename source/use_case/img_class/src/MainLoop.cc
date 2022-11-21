@@ -23,6 +23,8 @@
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
+#define SKIP_MODEL 0
+
 namespace arm {
 namespace app {
     static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
@@ -39,6 +41,7 @@ void main_loop()
 {
     arm::app::MobileNetModel model;  /* Model wrapper object. */
 
+#if !SKIP_MODEL
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
@@ -47,6 +50,7 @@ void main_loop()
         printf_err("Failed to initialise model\n");
         return;
     }
+#endif
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
