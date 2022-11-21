@@ -8,13 +8,18 @@
  *
  */
 
+#include <stdatomic.h>
+#include <stdbool.h>
+
+#include "RTE_Components.h"
+
 #include "audio_data.h"
 #include "mic_listener.h"
 
 const uint32_t wlen = 16;
 const uint32_t sampling_rate = 16000;
 
-volatile bool audio_received;
+atomic_bool audio_received = false;
 audio_callback_t audio_callback =  NULL;
 
 void voice_data_cb(uint32_t data)
@@ -45,12 +50,13 @@ int audio_init()
 
 int get_audio_data(void *data, int len)
 {
-    int status = receive_voice_data(data, len);
     audio_received = false;
+    int status = receive_voice_data(data, len);
 
     if (audio_callback == NULL && status == 0) {
-        while (audio_received == false) {
-            // get data synchronously so loop here. Hope that compiler won't optimize this away as we use volatile variable
+        while (!audio_received) {
+            // get data synchronously so loop here.
+            __WFE();
         }
     }
 
