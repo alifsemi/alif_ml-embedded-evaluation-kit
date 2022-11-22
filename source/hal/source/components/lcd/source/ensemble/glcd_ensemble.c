@@ -62,8 +62,8 @@ void write_to_lcd(
 		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
 		uint8_t dst[static restrict DIMAGE_Y][DIMAGE_X][RGB_BYTES])
 {
-	const uint8x16_t inc3 = vmulq(vidupq_n_u8(0, 1), 3);
-	const uint8x16_t inc6 = vshlq_n(inc3, 1);
+	const uint8x16_t inc3 = vmulq_n_u8(vidupq_n_u8(0, 1), 3);
+	const uint8x16_t inc6 = vshlq_n_u8(inc3, 1);
 
 	for (uint32_t y1 = 0; y1 < MIMAGE_Y; y1++) {
 #define SRC_ROW_OFFSET_32 ((MIMAGE_X * 3) / 4)
@@ -72,7 +72,7 @@ void write_to_lcd(
 #if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
 #errof "bad alignment"
 #endif
-		const uint32x4_t inc12 = vmulq(vidupq_n_u32(0, 4), 3);
+		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), 3);
 		const uint32x4_t inc24 = vshlq_n(inc12, 1);
 		const uint32_t *restrict srcp32 = (const uint32_t *) src[y1][0];
 		uint32_t *restrict dstp32 = (uint32_t *) dst[YOFFS + y1 * 2][XOFFS];
@@ -83,24 +83,24 @@ void write_to_lcd(
 			uint32x4_t g2r2b1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
 			uint32x4_t b3g3r3b2 = vldrwq_gather_offset(srcp32 + 2, inc12);
 			srcp32 += 4 * 3;
-			uint32x4_t r0b0g0r0 = vsliq(r1b0g0r0, r1b0g0r0, 24);
+			uint32x4_t r0b0g0r0 = vsliq_n_u32(r1b0g0r0, r1b0g0r0, 24);
 			vstrwq_scatter_offset(dstp32 + 0, inc24, r0b0g0r0);
 			vstrwq_scatter_offset(dst2p32 + 0, inc24, r0b0g0r0);
-			uint32x4_t g1r1b0g0 = vsriq(vshlq_n(g2r2b1g1, 24), r1b0g0r0, 8);
+			uint32x4_t g1r1b0g0 = vsriq_n_u32(vshlq_n_u32(g2r2b1g1, 24), r1b0g0r0, 8);
 			vstrwq_scatter_offset(dstp32 + 1, inc24, g1r1b0g0);
 			vstrwq_scatter_offset(dst2p32 + 1, inc24, g1r1b0g0);
-			uint32x4_t b1g1r1b0 = vsliq(vshrq(r1b0g0r0, 16), g2r2b1g1, 16);
-			uint32x4_t b1g1r1b1 = vsriq(b1g1r1b0, b1g1r1b0, 24);
+			uint32x4_t b1g1r1b0 = vsliq_n_u32(vshrq_n_u32(r1b0g0r0, 16), g2r2b1g1, 16);
+			uint32x4_t b1g1r1b1 = vsriq_n_u32(b1g1r1b0, b1g1r1b0, 24);
 			vstrwq_scatter_offset(dstp32 + 2, inc24, b1g1r1b1);
 			vstrwq_scatter_offset(dst2p32 + 2, inc24, b1g1r1b1);
-			uint32x4_t r3b2g2r2 = vsriq(vshlq_n(b3g3r3b2, 16), g2r2b1g1, 16);
-			uint32x4_t r2b2g2r2 = vsliq(r3b2g2r2, r3b2g2r2, 24);
+			uint32x4_t r3b2g2r2 = vsriq_n_u32(vshlq_n_u32(b3g3r3b2, 16), g2r2b1g1, 16);
+			uint32x4_t r2b2g2r2 = vsliq_n_u32(r3b2g2r2, r3b2g2r2, 24);
 			vstrwq_scatter_offset(dstp32 + 3, inc24, r2b2g2r2);
 			vstrwq_scatter_offset(dst2p32 + 3, inc24, r2b2g2r2);
-			uint32x4_t g3r3b2g2 = vsriq(vshlq_n(b3g3r3b2, 8), g2r2b1g1, 24);
+			uint32x4_t g3r3b2g2 = vsriq_n_u32(vshlq_n_u32(b3g3r3b2, 8), g2r2b1g1, 24);
 			vstrwq_scatter_offset(dstp32 + 4, inc24, g3r3b2g2);
 			vstrwq_scatter_offset(dst2p32 + 4, inc24, g3r3b2g2);
-			uint32x4_t b3g3r3b3 = vsriq(b3g3r3b2, b3g3r3b2, 24);
+			uint32x4_t b3g3r3b3 = vsriq_n_u32(b3g3r3b2, b3g3r3b2, 24);
 			vstrwq_scatter_offset(dstp32 + 5, inc24, b3g3r3b3);
 			vstrwq_scatter_offset(dst2p32 + 5, inc24, b3g3r3b3);
 			dstp32 += 4 * 6;

@@ -29,7 +29,7 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 	dp[2] = tmp;
 #else
 
-#if __ARM_FEATURE_MVE & 1
+#if __ARM_FEATURE_MVE & 1 && defined __ARMCC_VERSION
 
 #define FIXED_SHIFT 20
 #define FIXED(a) (int32_t)(((a) * (1UL << FIXED_SHIFT) + 0.5))
@@ -70,7 +70,7 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 
 static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 {
-	const uint16x8_t pixel_offsets = vmulq(vidupq_n_u16(0, 1), 3);
+	const uint16x8_t pixel_offsets = vmulq_n_u16(vidupq_n_u16(0, 1), 3);
 
 	while (len > 0) {
 		// Fetching two iterations ahead seems optimal for RTSS-HP fetching from SRAM0

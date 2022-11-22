@@ -222,7 +222,7 @@ int resize_image_B(
     //dstWidth still needed as is
     //dstHeight shouldn't be scaled
 
-    const uint16x8_t incpix = vmulq(vidupq_n_u16(0, 1), pixel_size_B);
+    const uint16x8_t incpix = vmulq_n_u16(vidupq_n_u16(0, 1), pixel_size_B);
 
     #pragma unroll 1
     for (int y = 0; y < dstHeight; y++) {
@@ -316,7 +316,7 @@ int resize_image_C(
     const uint8_t *s;
     uint8_t *d;
 
-    const uint16x8_t incpix = vmulq(vidupq_n_u16(0, 1), pixel_size_B);
+    const uint16x8_t incpix = vmulq_n_u16(vidupq_n_u16(0, 1), pixel_size_B);
 
     #pragma unroll 1
     for (int y = 0; y < dstHeight; y++) {
@@ -345,7 +345,7 @@ int resize_image_C(
             }
 
             uint16x8_t x_frac = vld1q(x_frac_array);
-            uint16x8_t nx_frac = vqaddq(vmvnq(x_frac), 1);
+            uint16x8_t nx_frac = vqaddq_n_u16(vmvnq(x_frac), 1);
             uint16x8_t tx = vld1q(tx_array);
 
             //interpolate and write out
