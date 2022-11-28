@@ -44,59 +44,20 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  .text.at_mram : ALIGN(8)
+  .startup.at_mram : ALIGN(16)
   {
     /* MRAM has start-up code, and most constant data */
+    /* Only more-specific stuff here. General wildcards in
+     * a later-declared section, giving a chance for other
+     * regions to get in before-hand
+     */
     KEEP(*(.vectors))
-
-    KEEP(*(.init))
-    KEEP(*(.fini))
-
-    . = ALIGN(4);
-    /* preinit data */
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP(*(.preinit_array))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
-
-    . = ALIGN(4);
-    /* init data */
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP(*(SORT(.init_array.*)))
-    KEEP(*(.init_array))
-    PROVIDE_HIDDEN (__init_array_end = .);
-
-    . = ALIGN(4);
-    /* finit data */
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP(*(SORT(.fini_array.*)))
-    KEEP(*(.fini_array))
-    PROVIDE_HIDDEN (__fini_array_end = .);
-
-    /* .ctors */
-    *crtbegin.o(.ctors)
-    *crtbegin?.o(.ctors)
-    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-    *(SORT(.ctors.*))
-    *(.ctors)
-
-    /* .dtors */
-    *crtbegin.o(.dtors)
-    *crtbegin?.o(.dtors)
-    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-    *(SORT(.dtors.*))
-    *(.dtors)
 
     *startup_M55_*.c.obj(.text .rodata*)
     *system_M55_*.c.obj(.text .rodata*)
     *mpu_M55_*.c.obj(.text .rodata*)
 
-    *(.rodata*)
     *(startup_ro_data)
-
-    *(nn_model)
-    *(labels)
-
-    KEEP(*(.eh_frame*))
   } > MRAM
 
   .copy.table : ALIGN(4)
@@ -133,6 +94,7 @@ SECTIONS
     *(vtable)
     *(.data)
     *(.data*)
+    *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
 
@@ -198,6 +160,54 @@ SECTIONS
     __StackTop = .;
   } > DTCM
   PROVIDE(__stack = __StackTop);
+
+  .readonly.at_mram : ALIGN(8)
+  {
+    /* Use wildcards to mop up any read-only not directed to TCM */ 
+    KEEP(*(.init))
+    KEEP(*(.fini))
+
+    . = ALIGN(4);
+    /* preinit data */
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP(*(.preinit_array))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+
+    . = ALIGN(4);
+    /* init data */
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(.init_array))
+    PROVIDE_HIDDEN (__init_array_end = .);
+
+    . = ALIGN(4);
+    /* finit data */
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP(*(SORT(.fini_array.*)))
+    KEEP(*(.fini_array))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+
+    /* .ctors */
+    *crtbegin.o(.ctors)
+    *crtbegin?.o(.ctors)
+    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+    *(SORT(.ctors.*))
+    *(.ctors)
+
+    /* .dtors */
+    *crtbegin.o(.dtors)
+    *crtbegin?.o(.dtors)
+    *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+    *(SORT(.dtors.*))
+    *(.dtors)
+
+    *(.rodata*)
+
+    *(nn_model)
+    *(labels)
+
+    KEEP(*(.eh_frame*))
+  } > MRAM
 
   /* Magic number (0xFFA0A710) + (0 = A32_0, 1 = A32_1, 2 = CM55HP, 3 = CM55HE)
   .mini_toc :
