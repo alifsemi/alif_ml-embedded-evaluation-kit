@@ -2,9 +2,6 @@ NOTE! Update submodules before building:
 git submodule init
 git submodule update
 
-NOTE! Apply base pointer remapping patch to Ethos core driver
-git -C dependencies/core-driver am -3 < 0001-Add-ethosu_base_pointer_remap.patch
-
 NOTE! Generate micronet/mobilenet models 1st with:
 python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
 

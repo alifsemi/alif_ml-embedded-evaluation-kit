@@ -119,7 +119,8 @@ int arm_ethosu_npu_init(void)
     return 0;
 }
 
-uint64_t ethosu_base_pointer_remap(const void *p)
+uint64_t ethosu_address_remap(uint64_t address, int index)
 {
-    return LocalToGlobal(p);
+    UNUSED(index);
+    return LocalToGlobal((void *) address);
 }
