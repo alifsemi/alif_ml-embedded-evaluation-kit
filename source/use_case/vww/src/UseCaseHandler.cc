@@ -45,7 +45,7 @@ namespace app {
         constexpr uint32_t dataPsnImgStartY = 35;
 
         constexpr uint32_t dataPsnTxtInfStartX = 150;
-        constexpr uint32_t dataPsnTxtInfStartY = 70;
+        constexpr uint32_t dataPsnTxtInfStartY = 40;
 
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");

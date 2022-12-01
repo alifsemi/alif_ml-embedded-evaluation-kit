@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,9 +31,7 @@ arm::app::Model::~Model()
 arm::app::Model::Model() :
     m_inited (false),
     m_type(kTfLiteNoType)
-{
-    this->m_pErrorReporter = tflite::GetMicroErrorReporter();
-}
+{}
 
 bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
                            uint32_t tensorArenaSize,
@@ -50,8 +48,8 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
     this->m_pModel = ::tflite::GetModel(nnModelAddr);
 
     if (this->m_pModel->version() != TFLITE_SCHEMA_VERSION) {
-        this->m_pErrorReporter->Report(
-            "[ERROR] model's schema version %d is not equal "
+        printf_err(
+            "Model's schema version %d is not equal "
             "to supported version %d.",
             this->m_pModel->version(), TFLITE_SCHEMA_VERSION);
         return false;
@@ -79,8 +77,7 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
 
         this->m_pAllocator = tflite::MicroAllocator::Create(
                                         tensorArenaAddr,
-                                        tensorArenaSize,
-                                        this->m_pErrorReporter);
+                                        tensorArenaSize);
 
         if (!this->m_pAllocator) {
             printf_err("Failed to create allocator\n");
@@ -93,7 +90,7 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
 
     this->m_pInterpreter = new ::tflite::MicroInterpreter(
         this->m_pModel, this->GetOpResolver(),
-        this->m_pAllocator, this->m_pErrorReporter);
+        this->m_pAllocator);
 
     if (!this->m_pInterpreter) {
         printf_err("Failed to allocate interpreter\n");
@@ -211,8 +208,7 @@ void arm::app::Model::LogInterpreterInfo()
         const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
         const TfLiteRegistration* reg = nullptr;
 
-        tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(),
-                                          this->m_pErrorReporter, &reg);
+        tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(), &reg);
         std::string opName;
 
         if (reg) {

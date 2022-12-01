@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 - 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,6 +101,7 @@ add_custom_target(tensorflow_build ALL
         TARGET_ARCH=${TENSORFLOW_LITE_MICRO_TARGET_ARCH}
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
         CMSIS_PATH=${CMSIS_SRC_PATH}
+        CMSIS_NN_PATH=${CMSIS_NN_SRC_PATH}
         # Conditional arguments
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${ETHOS_U_NPU_ID}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}>

@@ -58,8 +58,8 @@ namespace app {
         constexpr uint32_t dataPsnImgStartX = 10;
         constexpr uint32_t dataPsnImgStartY = 35;
 
-        constexpr uint32_t dataPsnTxtInfStartX = 150;
-        constexpr uint32_t dataPsnTxtInfStartY = 40;
+        constexpr uint32_t dataPsnTxtInfStartX = 20;
+        constexpr uint32_t dataPsnTxtInfStartY = 28;
 
         hal_lcd_clear(COLOR_BLACK);
 

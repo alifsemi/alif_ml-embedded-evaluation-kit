@@ -23,6 +23,10 @@ To run evaluations using this software, we suggest using:
   > **NOTE**: While Arm® Corstone™-300 is available as an [Ecosystem FVP](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
   > and AVH, Arm® Corstone™-310 is available (for both Arm® Ethos™-U55 and Ethos™-U65 NPUs) only as AVH implementations.
 
+## Inclusive language commitment
+This product conforms to Arm's inclusive language policy and, to the best of our knowledge,
+does not contain any non-inclusive language. If you find something that concerns you, email terms@arm.com.
+
 ## Overview of the evaluation kit
 
 The purpose of this evaluation kit is to allow users to develop software and test the performance of the Arm® Ethos-U NPU and

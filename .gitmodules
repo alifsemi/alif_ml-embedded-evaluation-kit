@@ -13,3 +13,6 @@
 [submodule "dependencies/cmsis-dsp"]
 	path = dependencies/cmsis-dsp
 	url = https://github.com/ARM-software/CMSIS-DSP.git
+[submodule "dependencies/cmsis-nn"]
+	path = dependencies/cmsis-nn
+	url = https://github.com/ARM-software/CMSIS-NN.git

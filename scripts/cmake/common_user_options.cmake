@@ -88,8 +88,12 @@ if (NOT TARGET_PLATFORM STREQUAL native)
         "${DEPENDENCY_ROOT_DIR}/cmsis"
         PATH)
     USER_OPTION(CMSIS_DSP_SRC_PATH
-	"Path to CMSIS-5 DSP sources"
+        "Path to CMSIS-5 DSP sources"
         "${DEPENDENCY_ROOT_DIR}/cmsis-dsp"
+        PATH)
+    USER_OPTION(CMSIS_NN_SRC_PATH
+        "Path to CMSIS-5 NN sources"
+        "${DEPENDENCY_ROOT_DIR}/cmsis-nn"
         PATH)
 
     # If we need NPU libraries:
