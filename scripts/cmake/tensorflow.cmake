@@ -71,7 +71,16 @@ else()
 endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
-    list(APPEND MAKE_TARGETS_LIST "clean_downloads")
+    message(STATUS "Refreshing TensorFlow Lite Micro's third party downloads...")
+    execute_process(
+        COMMAND make -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile clean_downloads third_party_downloads
+        RESULT_VARIABLE return_code
+        WORKING_DIRECTORY ${TENSORFLOW_SRC_PATH})
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to clean TensorFlow Lite Micro's third party downloads.")
+    else()
+        message(STATUS "Refresh completed.")
+    endif ()
 endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_BUILD)

@@ -55,25 +55,25 @@ def add_pre_push_hooks(hooks_dir):
 while read local_ref local_sha remote_ref remote_sha
 do
     # We should pass only added or modified C/C++ source files to cppcheck.
-    changed_files=$(git diff --name-only HEAD~1 HEAD | grep -E "*\.(c|cpp|cc|cxx)" | cut -f 2)
-                if [ -n "$changed_files" ]; then
-                                    clang-format -style=file --dry-run --Werror $changed_files
+    changed_files=$(git diff --name-only HEAD~1 HEAD | grep -iE "\.(c|cpp|cxx|cc|h|hpp|hxx)$" | cut -f 2)
+        if [ -n "$changed_files" ]; then
+            clang-format -style=file --dry-run --Werror $changed_files
 
-                                    exitcode1=$?
-                                    if [ $exitcode1 -ne 0 ]; then
-                                        echo "Formatting errors found in file: $changed_files.
-                                        \nPlease run:\n\    \"clang-format -style=file -i $changed_files\"
-                                        \nto correct these errors"
-                                        exit $exitcode1
-                                    fi
+            exitcode1=$?
+            if [ $exitcode1 -ne 0 ]; then
+                echo "Formatting errors found in file: $changed_files.
+                \nPlease run:\n\    \"clang-format -style=file -i $changed_files\"
+                \nto correct these errors"
+                exit $exitcode1
+            fi
 
-                    cppcheck --enable=performance,portability  --error-exitcode=1 $changed_files
-                                    exitcode2=$?
-                                    if [ $exitcode2 -ne 0 ]; then
-                                        exit $exitcode2
-                                    fi
-                fi
-            exit 0
+            cppcheck --enable=performance,portability  --error-exitcode=1 $changed_files
+            exitcode2=$?
+            if [ $exitcode2 -ne 0 ]; then
+                exit $exitcode2
+            fi
+        fi
+    exit 0
 done
 
 exit 0'''
