@@ -78,6 +78,9 @@ int32_t camera_init(uint8_t *buffer)
 	HW_REG_WORD(CAMERA0_BASE, CAM_CTRL) = 0x00000100;         // camera soft reset
 	HW_REG_WORD(CAMERA0_BASE, CAM_CTRL) = 0x00000000;         // clear camera soft reset
 
+	HW_REG_WORD(CAMERA0_BASE, CAM_INTR_ENA) = 1;              // enable STOP interrupt
+	NVIC_EnableIRQ (CAMERA0_IRQ);
+
 	return 0;
 }
 
@@ -91,6 +94,20 @@ void camera_start(uint32_t mode)
 	HW_REG_WORD(CAMERA0_BASE, CAM_CTRL) = mode;
 }
 
+// Don't reeally need to do anything apart from clear the interrupts;
+// we're just generating the IRQ to wake from WFE.
+void CAMERA0_IRQHandler(void)
+{
+	// Read which interrupts are pending
+	uint32_t interrupts = HW_REG_WORD(CAMERA0_BASE, CAM_INTR);
+
+	// Write back to acknowledge clear the ones we saw
+	HW_REG_WORD(CAMERA0_BASE, CAM_INTR) = interrupts;
+
+	// Read back to ensure that write reached the camera so we do
+	// not return before it deasserts the IRQ.
+	HW_REG_WORD(CAMERA0_BASE, CAM_INTR);
+}
 
 int32_t camera_vsync(uint32_t timeout_ms)
 {
@@ -109,7 +126,7 @@ int32_t camera_vsync(uint32_t timeout_ms)
 int32_t camera_wait(uint32_t timeout_ms)
 {
 	while(HW_REG_WORD(CAMERA0_BASE, CAM_CTRL) & 0x2) {
-
+		__WFE();
 	};
 	return ARM_DRIVER_OK;
 }

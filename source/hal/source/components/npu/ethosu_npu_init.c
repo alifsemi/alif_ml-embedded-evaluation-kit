@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
+
 #include "ethosu_npu_init.h"
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
@@ -119,7 +121,32 @@ int arm_ethosu_npu_init(void)
     return 0;
 }
 
-uint64_t ethosu_base_pointer_remap(const void *p)
+uint64_t ethosu_address_remap(uint64_t address, int index)
 {
-    return LocalToGlobal(p);
+    UNUSED(index);
+    return LocalToGlobal((void *) address);
 }
+
+#if 1
+
+void ethosu_flush_dcache(uint32_t *p, size_t bytes)
+{
+    // No need to flush - we're not using writeback for any Ethos areas
+    UNUSED(p);
+    UNUSED(bytes);
+}
+
+void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
+{
+    if (SCB->CCR & SCB_CCR_DC_Msk) {
+        if (p && bytes <= 128*1024) {
+            // Only worth doing a ranged operation if relatively small - big ones can get very slow
+            SCB_InvalidateDCache_by_Addr(p, bytes);
+        } else {
+            // Global operation - not safe to globally invalidate in case any writeback is in use
+            // All our regions are write-through, so it will be invalidate for them
+            SCB_CleanInvalidateDCache();
+        }
+    }
+}
+#endif

@@ -81,8 +81,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
 
   ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
-      ; ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors
-      arm_common_tables.o (+RO-DATA)
+      ; ITCM has non-startup code, audio record buffer and RAM vectors
       * (+RO-CODE)
       * (+XO)
       * (.bss.audio_rec)
@@ -90,12 +89,13 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
 
   ;-----------------------------------------------------
-  ; R/W region - ramaining part of the 1MiB RAM region
+  ; R/W region - remaining part of the 1MiB RAM region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has all read-write data, except NPU activation buffer
+      ; DTCM has CMSIS-DSP tables and all read-write data, except NPU activation buffer
       *(+RW +ZI)
+      arm_common_tables.o (+RO-DATA)
   }
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }

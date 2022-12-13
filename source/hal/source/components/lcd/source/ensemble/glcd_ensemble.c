@@ -10,6 +10,8 @@
 
 #include <inttypes.h>
 
+#include <arm_mve.h>
+
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 
@@ -56,12 +58,87 @@ void SetupLEDs()
 	PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_14, PINMUX_ALTERNATE_FUNCTION_0);
 }
 
-void write_to_lcd(uint8_t src[MIMAGE_Y][MIMAGE_X][RGB_BYTES], uint8_t dst[DIMAGE_Y][DIMAGE_X][RGB_BYTES]) {
-	int32_t x, x1, y, y1;
-	uint8_t r, g, b;
+void write_to_lcd(
+		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
+		uint8_t dst[static restrict DIMAGE_Y][DIMAGE_X][RGB_BYTES])
+{
+	const uint8x16_t inc3 = vmulq_n_u8(vidupq_n_u8(0, 1), 3);
+	const uint8x16_t inc6 = vshlq_n_u8(inc3, 1);
 
-	for (y1 = 0; y1 < MIMAGE_Y; y1++) {
-		for (x1 = 0; x1 < MIMAGE_X; x1++) {
+	for (uint32_t y1 = 0; y1 < MIMAGE_Y; y1++) {
+#define SRC_ROW_OFFSET_32 ((MIMAGE_X * 3) / 4)
+
+#if 1
+#if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
+#errof "bad alignment"
+#endif
+		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), 3);
+		const uint32x4_t inc24 = vshlq_n(inc12, 1);
+		const uint32_t *restrict srcp32 = (const uint32_t *) src[y1][0];
+		uint32_t *restrict dstp32 = (uint32_t *) dst[YOFFS + y1 * 2][XOFFS];
+		uint32_t *restrict dst2p32 = (uint32_t *) dst[YOFFS + y1 * 2 + 1][XOFFS];
+		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
+		{
+			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
+			uint32x4_t g2r2b1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
+			uint32x4_t b3g3r3b2 = vldrwq_gather_offset(srcp32 + 2, inc12);
+			srcp32 += 4 * 3;
+			uint32x4_t r0b0g0r0 = vsliq_n_u32(r1b0g0r0, r1b0g0r0, 24);
+			vstrwq_scatter_offset(dstp32 + 0, inc24, r0b0g0r0);
+			vstrwq_scatter_offset(dst2p32 + 0, inc24, r0b0g0r0);
+			uint32x4_t g1r1b0g0 = vsriq_n_u32(vshlq_n_u32(g2r2b1g1, 24), r1b0g0r0, 8);
+			vstrwq_scatter_offset(dstp32 + 1, inc24, g1r1b0g0);
+			vstrwq_scatter_offset(dst2p32 + 1, inc24, g1r1b0g0);
+			uint32x4_t b1g1r1b0 = vsliq_n_u32(vshrq_n_u32(r1b0g0r0, 16), g2r2b1g1, 16);
+			uint32x4_t b1g1r1b1 = vsriq_n_u32(b1g1r1b0, b1g1r1b0, 24);
+			vstrwq_scatter_offset(dstp32 + 2, inc24, b1g1r1b1);
+			vstrwq_scatter_offset(dst2p32 + 2, inc24, b1g1r1b1);
+			uint32x4_t r3b2g2r2 = vsriq_n_u32(vshlq_n_u32(b3g3r3b2, 16), g2r2b1g1, 16);
+			uint32x4_t r2b2g2r2 = vsliq_n_u32(r3b2g2r2, r3b2g2r2, 24);
+			vstrwq_scatter_offset(dstp32 + 3, inc24, r2b2g2r2);
+			vstrwq_scatter_offset(dst2p32 + 3, inc24, r2b2g2r2);
+			uint32x4_t g3r3b2g2 = vsriq_n_u32(vshlq_n_u32(b3g3r3b2, 8), g2r2b1g1, 24);
+			vstrwq_scatter_offset(dstp32 + 4, inc24, g3r3b2g2);
+			vstrwq_scatter_offset(dst2p32 + 4, inc24, g3r3b2g2);
+			uint32x4_t b3g3r3b3 = vsriq_n_u32(b3g3r3b2, b3g3r3b2, 24);
+			vstrwq_scatter_offset(dstp32 + 5, inc24, b3g3r3b3);
+			vstrwq_scatter_offset(dst2p32 + 5, inc24, b3g3r3b3);
+			dstp32 += 4 * 6;
+			dst2p32 += 4 * 6;
+		}
+#elif 1
+#if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
+#errof "bad alignment"
+#endif
+		const uint8_t * restrict srcp = src[y1][0];
+		uint8_t * restrict dstp = dst[YOFFS + y1 * 2][XOFFS];
+		uint8_t * restrict dst2p = dst[YOFFS + y1 * 2 + 1][XOFFS];
+		const uint32_t *srcp32 = (const uint32_t *)srcp;
+		uint32_t *dstp32 = (uint32_t *)dstp;
+		// Load 4 pixels as 3 words, and expand to 6 words, on two rows
+		// ARM compiler can further vectorise this to across 4 lanes, so 12 input words or 16 pixels per iteration
+		// "& 0x00ffffff" or "& 0xffffff00" are valid constant forms for VBIC; we rely on shifts to get other masks
+		// to try to avoid register pressure for mask constants (but compiler seems to convert to masking anyway)
+		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4)
+		{
+			uint32_t r1b0g0r0 = *srcp32++;
+			uint32_t g2r2b1g1 = *srcp32++;
+			uint32_t b3g3r3b2 = *srcp32++;
+			*dstp32++ = (r1b0g0r0 << 24) | (r1b0g0r0 & 0xffffff); // r0b0g0r0
+			*dstp32++ = (g2r2b1g1 << 24) | (r1b0g0r0 >> 8); // g1r1b0g0
+			*dstp32++ = (g2r2b1g1 << 16) | ((r1b0g0r0 >> 24) << 8) | ((g2r2b1g1 << 16) >> 24); // b1g1r1b1
+			*dstp32++ = ((g2r2b1g1 >> 16) << 24) | ((b3g3r3b2 << 24) >> 8) | (g2r2b1g1 >> 16); // r2b2g2r2
+			*dstp32++ = (b3g3r3b2 << 8) | (g2r2b1g1 >> 24); // g3r3b2g2
+			*dstp32++ = (b3g3r3b2 & 0xffffff00) | (b3g3r3b2 >> 24); // b3g3r3b3
+		}
+		// Memcpy the second row rather than doing it as-we-go, because as-we-go makes
+		// the above too complex for the autovectoriser.
+		memcpy(dst2p, dstp, 2 * MIMAGE_X * RGB_BYTES);
+#else
+		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1++) {
+			uint8_t r, g, b;
+			int32_t x, y;
+
 			b = src[y1][x1][0];
 			r = src[y1][x1][1];
 			g = src[y1][x1][2];
@@ -85,6 +162,7 @@ void write_to_lcd(uint8_t src[MIMAGE_Y][MIMAGE_X][RGB_BYTES], uint8_t dst[DIMAGE
 			dst[y+1][x+1][1] = r;
 			dst[y+1][x+1][2] = g;
 		}
+#endif
 	}
 }
 
@@ -138,7 +216,7 @@ void GLCD_Image(const void *data, const uint32_t width,
     UNUSED(channels);
     UNUSED(downsample_factor);
 
-    write_to_lcd((uint8_t (*)[MIMAGE_Y][RGB_BYTES])data, lcd_image);
+    write_to_lcd(data, lcd_image);
 
 	lv_task_handler();
 }
