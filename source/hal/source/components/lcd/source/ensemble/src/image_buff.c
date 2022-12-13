@@ -49,4 +49,5 @@ uint8_t  	rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.ca
 uint8_t  	raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460] __attribute__((aligned(32),section(".bss.camera_frame_buf")));	// 560x560x3 = 940,800
 
 uint8_t 	lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES] __attribute__((section(".bss.lcd_image_buf")));				// 480x800x3 = 1,152,000
+uint8_t 	lvgl_image[MIMAGE_Y][MIMAGE_X][4] __attribute__((section(".bss.lcd_image_buf")));						// 224x224x4 = 200,704
 

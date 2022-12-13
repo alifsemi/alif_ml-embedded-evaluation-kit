@@ -10,8 +10,6 @@
 
 #include <inttypes.h>
 
-#include <arm_mve.h>
-
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 
@@ -30,8 +28,15 @@
 #include "lvgl.h"
 #include "delay.h"
 
+#define ENABLE_MVE_WRITE (defined __ARMCC_VERSION && (__ARM_FEATURE_MVE & 1))
+
+#if __ARM_FEATURE_MVE & 1
+#include <arm_mve.h>
+#endif
+
 extern void lv_port_disp_init(void);
 extern uint8_t lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES];
+extern uint8_t lvgl_image[MIMAGE_Y][MIMAGE_X][4];
 extern uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
 extern uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
 extern ARM_DRIVER_GPIO Driver_GPIO1;
@@ -68,9 +73,9 @@ void write_to_lcd(
 	for (uint32_t y1 = 0; y1 < MIMAGE_Y; y1++) {
 #define SRC_ROW_OFFSET_32 ((MIMAGE_X * 3) / 4)
 
-#if 1
+#if ENABLE_MVE_WRITE
 #if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
-#errof "bad alignment"
+#error "bad alignment"
 #endif
 		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), 3);
 		const uint32x4_t inc24 = vshlq_n(inc12, 1);
@@ -108,7 +113,7 @@ void write_to_lcd(
 		}
 #elif 1
 #if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
-#errof "bad alignment"
+#error "bad alignment"
 #endif
 		const uint8_t * restrict srcp = src[y1][0];
 		uint8_t * restrict dstp = dst[YOFFS + y1 * 2][XOFFS];
@@ -166,6 +171,72 @@ void write_to_lcd(
 	}
 }
 
+void write_to_lvgl_buf(
+		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
+		uint8_t dst[static restrict MIMAGE_Y][MIMAGE_X][4])
+{
+	const uint8x16_t inc3 = vmulq_n_u8(vidupq_n_u8(0, 1), 3);
+	const uint8x16_t inc6 = vshlq_n_u8(inc3, 1);
+
+	for (uint32_t y = 0; y < MIMAGE_Y; y++) {
+#if ENABLE_MVE_WRITE
+#if MIMAGE_X % 4
+#error "bad alignment"
+#endif
+		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), 3);
+		const uint32x4_t inc24 = vshlq_n(inc12, 1);
+		const uint32_t *restrict srcp32 = (const uint32_t *) src[y][0];
+		uint32_t *restrict dstp32 = (uint32_t *) dst[y][0];
+		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
+		{
+			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
+			uint32x4_t g2r2b1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
+			uint32x4_t b3g3r3b2 = vldrwq_gather_offset(srcp32 + 2, inc12);
+			srcp32 += 4 * 3;
+			uint32x4x4_t out;
+			out.val[0] = vorrq_n_u32(r1b0g0r0, 0xff000000);
+			out.val[1] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(g2r2b1g1, 8), r1b0g0r0, 24), 0xff000000);
+			out.val[2] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(b3g3r3b2, 16), g2r2b1g1, 16), 0xff000000);
+			out.val[3] = vorrq_n_u32(vshrq_n_u32(b3g3r3b2, 8), 0xff000000);
+			vst4q_u32(dstp32, out);
+			dstp32 += 4 * 4;
+		}
+#elif 1
+#if XOFFS % 4 || MIMAGE_X % 4 || DIMAGE_X % 4
+#error "bad alignment"
+#endif
+		const uint8_t * restrict srcp = src[y][0];
+		uint8_t * restrict dstp = dst[y][0];
+		const uint32_t *srcp32 = (const uint32_t *)srcp;
+		uint32_t *dstp32 = (uint32_t *)dstp;
+		// Load 4 pixels as 3 words, and expand to 4 words
+		for (uint32_t x = 0; x < MIMAGE_X; x += 4)
+		{
+			uint32_t r1b0g0r0 = *srcp32++;
+			uint32_t g2r2b1g1 = *srcp32++;
+			uint32_t b3g3r3b2 = *srcp32++;
+			*dstp32++ = r1b0g0r0 | 0xff000000;
+			*dstp32++ = (g2r2b1g1 << 8) | (r1b0g0r0 >> 24) | 0xff000000;
+			*dstp32++ = (b3g3r3b2 << 16) | (g2r2b1g1 >> 16) | 0xff000000;
+			*dstp32++ = (b3g3r3b2 >> 8) | 0xff000000;
+		}
+#else
+		for (uint32_t x = 0; x < MIMAGE_X; x++) {
+			uint8_t r, g, b;
+
+			r = src[y][x][0];
+			g = src[y][x][1];
+			b = src[y][x][2];
+
+			dst[y][x][0] = r;
+			dst[y][x][1] = g;
+			dst[y][x][2] = b;
+			dst[y][x][3] = 255;
+		}
+#endif
+	}
+}
+
 void GLCD_Initialize(void)
 {
     volatile int test = 3;
@@ -216,7 +287,9 @@ void GLCD_Image(const void *data, const uint32_t width,
     UNUSED(channels);
     UNUSED(downsample_factor);
 
-    write_to_lcd(data, lcd_image);
+    write_to_lvgl_buf(data, lvgl_image);
+    extern lv_obj_t *imageObj;
+    lv_obj_invalidate(imageObj);
 
 	lv_task_handler();
 }

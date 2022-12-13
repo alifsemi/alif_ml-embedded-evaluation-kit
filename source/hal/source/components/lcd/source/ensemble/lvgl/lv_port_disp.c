@@ -48,6 +48,7 @@
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 10)
 
 extern uint8_t lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES];
+extern uint8_t lvgl_image[MIMAGE_Y][MIMAGE_X][4];
 
 __STATIC_INLINE void put_px(int32_t x, int32_t y, lv_color_t * color_p)
 {
@@ -60,7 +61,7 @@ __STATIC_INLINE void put_px(int32_t x, int32_t y, lv_color_t * color_p)
 	memcpy(&lcd_image[y+1][x+1][0], color_p, RGB_BYTES);
 }
 
-static void lv_disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
+static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
     int32_t x, y;
     for(y = area->y1; y <= area->y2; y++) {
@@ -85,6 +86,8 @@ lv_obj_t *labelResult3;
 lv_obj_t *labelResult4;
 lv_obj_t *labelResult5;
 //lv_obj_t *labelTime;
+lv_obj_t *imageObj;
+lv_img_dsc_t imageDesc;
 
 void lv_port_disp_init(void) {
 	static lv_disp_drv_t disp_drv;
@@ -97,7 +100,7 @@ void lv_port_disp_init(void) {
 	lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, MY_DISP_BUFFER);
 
 	disp_drv.draw_buf = &disp_buf;
-	disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
+	//disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
 	disp_drv.flush_cb = lv_disp_flush;
 	disp_drv.hor_res = MY_DISP_HOR_RES;
 	disp_drv.ver_res = MY_DISP_VER_RES;
@@ -143,4 +146,15 @@ void lv_port_disp_init(void) {
 	lv_label_set_text_static(labelResult5, "");
 	//lv_label_set_text_static(labelTime, "Time: XX ms");
 
+	imageObj = lv_img_create(lv_scr_act());
+	imageDesc.data = &lvgl_image[0][0][0];
+	imageDesc.data_size = sizeof lvgl_image;
+	imageDesc.header.always_zero = 0;
+	imageDesc.header.reserved = 0;
+	imageDesc.header.cf = LV_IMG_CF_TRUE_COLOR;
+	imageDesc.header.w = MIMAGE_X;
+	imageDesc.header.h = MIMAGE_Y;
+	lv_img_set_src(imageObj, &imageDesc);
+	lv_obj_align(imageObj, LV_ALIGN_TOP_MID, 0, 8);
+	lv_obj_move_background(imageObj);
 }
