@@ -207,6 +207,6 @@ put_tiff(uint8_t * header, uint32_t width, uint32_t height, uint16_t bpp)
 /*Bayer to RGB conversion */
 int bayer_to_RGB(uint8_t * restrict src, uint8_t * restrict dest)
 {
-	dc1394_bayer_Simple(src, dest, CIMAGE_X, CIMAGE_Y, DC1394_COLOR_FILTER_RGGB);
+	dc1394_bayer_Simple(src, dest, CIMAGE_X, CIMAGE_Y, DC1394_COLOR_FILTER_BGGR);
 	return 0;
 }

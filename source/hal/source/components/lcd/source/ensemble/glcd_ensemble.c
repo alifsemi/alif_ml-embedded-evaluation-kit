@@ -63,11 +63,6 @@ void SetupLEDs()
 	PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_14, PINMUX_ALTERNATE_FUNCTION_0);
 }
 
-/* Note that the write_to_lvgl routines are not swapping R and B, which means
- * we are assuming the ML data is in BGR order as required by LVGL, and this
- * works. But I believe the ML data is supposed to be RGB for the models,
- * in which case we must be feeding the models wrongly.
- */
 #ifdef HIRES_LCD
 static void write_to_lvgl_buf_doubled(
 		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
@@ -87,25 +82,28 @@ static void write_to_lvgl_buf_doubled(
 		uint32_t *restrict dst2p32 = (uint32_t *) dst[y1 * 2 + 1][0];
 		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
 		{
-			uint32x4_t b1r0g0b0 = vldrwq_gather_offset(srcp32 + 0, inc12);
-			uint32x4_t xxr0g0b0 = vorrq_n_u32(b1r0g0b0, 0xff000000);
+			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
+			uint32x4_t r0g0b0r1 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(r1b0g0r0)));
+			uint32x4_t xxr0g0b0 = vorrq_n_u32(vshrq_n_u32(r0g0b0r1, 8), 0xff000000);
 			vstrwq_scatter_offset(dstp32, inc32, xxr0g0b0);
 			vstrwq_scatter_offset(dstp32 + 1, inc32, xxr0g0b0);
 			vstrwq_scatter_offset(dst2p32, inc32, xxr0g0b0);
 			vstrwq_scatter_offset(dst2p32 + 1, inc32, xxr0g0b0);
-			uint32x4_t g2b2r1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
-			uint32x4_t xxr1g1b1 = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(g2b2r1g1, 8), b1r0g0b0, 24), 0xff000000);
+			uint32x4_t g2r2b1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
+			uint32x4_t g1b1r2g2 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(g2r2b1g1)));
+			uint32x4_t xxr1g1b1 = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(r0g0b0r1, 16), g1b1r2g2, 16), 0xff000000);
 			vstrwq_scatter_offset(dstp32 + 2, inc32, xxr1g1b1);
 			vstrwq_scatter_offset(dstp32 + 3, inc32, xxr1g1b1);
 			vstrwq_scatter_offset(dst2p32 + 2, inc32, xxr1g1b1);
 			vstrwq_scatter_offset(dst2p32 + 3, inc32, xxr1g1b1);
-			uint32x4_t r3g3b3r2 = vldrwq_gather_offset(srcp32 + 2, inc12);
-			uint32x4_t xxr2g2b2 = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(r3g3b3r2, 16), g2b2r1g1, 16), 0xff000000);
+			uint32x4_t b3g3r3b2 = vldrwq_gather_offset(srcp32 + 2, inc12);
+			uint32x4_t b2r3g3b3 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(b3g3r3b2)));
+			uint32x4_t xxr2g2b2 = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(g1b1r2g2, 8), b2r3g3b3, 24), 0xff000000);
 			vstrwq_scatter_offset(dstp32 + 4, inc32, xxr2g2b2);
 			vstrwq_scatter_offset(dstp32 + 5, inc32, xxr2g2b2);
 			vstrwq_scatter_offset(dst2p32 + 4, inc32, xxr2g2b2);
 			vstrwq_scatter_offset(dst2p32 + 5, inc32, xxr2g2b2);
-			uint32x4_t xxr3g3b3 = vorrq_n_u32(vshrq_n_u32(r3g3b3r2, 8), 0xff000000);
+			uint32x4_t xxr3g3b3 = vorrq_n_u32(b2r3g3b3, 0xff000000);
 			vstrwq_scatter_offset(dstp32 + 6, inc32, xxr3g3b3);
 			vstrwq_scatter_offset(dstp32 + 7, inc32, xxr3g3b3);
 			vstrwq_scatter_offset(dst2p32 + 6, inc32, xxr3g3b3);
@@ -126,19 +124,19 @@ static void write_to_lvgl_buf_doubled(
 		// Load 4 pixels as 3 words, and expand to 8 words, on two rows
 		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4)
 		{
-			uint32_t b1r0g0b0 = *srcp32++;
-			uint32_t xxr0g0b0 = b1r0g0b0 | 0xff000000;
+			uint32_t r0g0b0r1 = __REV(*srcp32++);
+			uint32_t xxr0g0b0 = (r0g0b0r1 >> 8) | 0xff000000;
 			*dstp32++ = xxr0g0b0;
 			*dstp32++ = xxr0g0b0;
-			uint32_t g2b2r1g1 = *srcp32++;
-			uint32_t xxr1g1b1 = (g2b2r1g1 << 8) | (b1r0g0b0 >> 24) | 0xff000000;
+			uint32_t g1r1b2g2 = __REV(*srcp32++);
+			uint32_t xxr1g1b1 = (r0g0b0r1 << 16) | (g1r1b2g2 >> 16) | 0xff000000;
 			*dstp32++ = xxr1g1b1;
 			*dstp32++ = xxr1g1b1;
-			uint32_t r3g3b3r2 = *srcp32++;
-			uint32_t xxr2g2b2 = (r3g3b3r2 << 16) | (g2b2r1g1 >> 16) | 0xff000000;
+			uint32_t b2r3g3b3 = __REV(*srcp32++);
+			uint32_t xxr2g2b2 = (g1r1b2g2 << 8) | (b2r3g3b3 >> 24) | 0xff000000;
 			*dstp32++ = xxr2g2b2;
 			*dstp32++ = xxr2g2b2;
-			uint32_t xxr3g3b3 = (r3g3b3r2 >> 8) | 0xff000000;
+			uint32_t xxr3g3b3 = b2r3g3b3 | 0xff000000;
 			*dstp32++ = xxr3g3b3;
 			*dstp32++ = xxr3g3b3;
 		}
@@ -150,9 +148,9 @@ static void write_to_lvgl_buf_doubled(
 			uint8_t r, g, b;
 			int32_t x, y;
 
-			b = src[y1][x1][0];
+			r = src[y1][x1][0];
 			g = src[y1][x1][1];
-			r = src[y1][x1][2];
+			b = src[y1][x1][2];
 
 			x = XOFFS + (x1 << 1);
 			y = YOFFS + (y1 << 1);
@@ -197,15 +195,18 @@ static void write_to_lvgl_buf(
 		uint32_t *restrict dstp32 = (uint32_t *) dst[y][0];
 		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
 		{
-			uint32x4_t b1r0g0b0 = vldrwq_gather_offset(srcp32 + 0, inc12);
-			uint32x4_t g2b2r1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
-			uint32x4_t r3g3b3r2 = vldrwq_gather_offset(srcp32 + 2, inc12);
+			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
+			uint32x4_t r0g0b0r1 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(r1b0g0r0)));
+			uint32x4_t g2r2b1g1 = vldrwq_gather_offset(srcp32 + 1, inc12);
+			uint32x4_t g1b1r2g2 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(g2r2b1g1)));
+			uint32x4_t b3g3r3b2 = vldrwq_gather_offset(srcp32 + 2, inc12);
+			uint32x4_t b2r3g3b3 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(b3g3r3b2)));
 			srcp32 += 4 * RGB_BYTES;
 			uint32x4x4_t out;
-			out.val[0] = vorrq_n_u32(b1r0g0b0, 0xff000000);
-			out.val[1] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(g2b2r1g1, 8), b1r0g0b0, 24), 0xff000000);
-			out.val[2] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(r3g3b3r2, 16), g2b2r1g1, 16), 0xff000000);
-			out.val[3] = vorrq_n_u32(vshrq_n_u32(r3g3b3r2, 8), 0xff000000);
+			out.val[0] = vorrq_n_u32(vshrq_n_u32(r0g0b0r1, 8), 0xff000000);
+			out.val[1] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(r0g0b0r1, 16), g1b1r2g2, 16), 0xff000000);
+			out.val[2] = vorrq_n_u32(vsriq_n_u32(vshlq_n_u32(g1b1r2g2, 8), b2r3g3b3, 24), 0xff000000);
+			out.val[3] = vorrq_n_u32(b2r3g3b3, 0xff000000);
 			vst4q_u32(dstp32, out);
 			dstp32 += 4 * RGBA_BYTES;
 		}
@@ -220,21 +221,22 @@ static void write_to_lvgl_buf(
 		// Load 4 pixels as 3 words, and expand to 4 words
 		for (uint32_t x = 0; x < MIMAGE_X; x += 4)
 		{
-			uint32_t b1r0g0b0 = *srcp32++;
-			uint32_t g2b2r1g1 = *srcp32++;
-			uint32_t r3g3b3r2 = *srcp32++;
-			*dstp32++ = b1r0g0b0 | 0xff000000;
-			*dstp32++ = (g2b2r1g1 << 8) | (b1r0g0b0 >> 24) | 0xff000000;
-			*dstp32++ = (r3g3b3r2 << 16) | (g2b2r1g1 >> 16) | 0xff000000;
-			*dstp32++ = (r3g3b3r2 >> 8) | 0xff000000;
+			uint32_t r0g0b0r1 = __REV(*srcp32++);
+			uint32_t g1b1r2g2 = __REV(*srcp32++);
+			uint32_t b2r3g3b3 = __REV(*srcp32++);
+
+			*dstp32++ = (r0g0b0r1 >> 8) | 0xff000000;
+			*dstp32++ = (r0g0b0r1 << 16) | (g1b1r2g2 >> 16) | 0xff000000;
+			*dstp32++ = (g1b1r2g2 << 8) | (b2r3g3b3 >> 24) | 0xff000000;
+			*dstp32++ = b2r3g3b3 | 0xff000000;
 		}
 #else
 		for (uint32_t x = 0; x < MIMAGE_X; x++) {
 			uint8_t r, g, b;
 
-			b = src[y][x][0];
+			r = src[y][x][0];
 			g = src[y][x][1];
-			r = src[y][x][2];
+			b = src[y][x][2];
 
 			dst[y][x][0] = b;
 			dst[y][x][1] = g;

@@ -22,23 +22,16 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 //	volatile static uint32_t t0, ts;
 //	ts = PMU_GetCounter();
 
-#if 0
-	uint8_t tmp = dp[0];
-	dp[0] = sp[2]
-	dp[1] = sp[1];
-	dp[2] = tmp;
-#else
-
 #if __ARM_FEATURE_MVE & 1 && defined __ARMCC_VERSION
 
 #define FIXED_SHIFT 20
 #define FIXED(a) (int32_t)(((a) * (1UL << FIXED_SHIFT) + 0.5))
 
-	const int32x4_t c0 = { +FIXED(3.017), +FIXED(0.162), -FIXED(0.636) };
-	const int32x4_t c1 = { -FIXED(0.664), +FIXED(1.315), -FIXED(0.360) };
-	const int32x4_t c2 = { -FIXED(0.139), -FIXED(0.495), +FIXED(2.092) };
+	const int32x4_t c0 = { +FIXED(2.092), -FIXED(0.492), -FIXED(0.139) };
+	const int32x4_t c1 = { -FIXED(0.369), +FIXED(1.315), -FIXED(0.664) };
+	const int32x4_t c2 = { -FIXED(0.636), +FIXED(0.162), +FIXED(3.017) };
 
-	// multiply and accumulate, so d[0] = 3.017*sp[0] - 0.664*sp[1] - 0.139*sp[2], etc
+	// multiply and accumulate, so d[0] = 2.092*sp[0] - 0.369*sp[1] - 0.636*sp[2], etc
 	int32x4_t d = vmulq(c0, sp[0]);
 	d = vmlaq(d, c1, sp[1]);
 	d = vmlaq(d, c2, sp[2]);
@@ -50,9 +43,9 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 	vstrbq_p(dp, vreinterpretq_u32(ud8), vctp32q(3));
 #else
 	float dpixel_data[3];
-	dpixel_data[0] =  2.092f*sp[2] - 0.369f*sp[1] - 0.636f*sp[0];
-	dpixel_data[1] = -0.492f*sp[2] + 1.315f*sp[1] + 0.162f*sp[0];
-	dpixel_data[2] = -0.139f*sp[2] - 0.664f*sp[1] + 3.017f*sp[0];
+	dpixel_data[0] =  2.092f*sp[0] - 0.369f*sp[1] - 0.636f*sp[2];
+	dpixel_data[1] = -0.492f*sp[0] + 1.315f*sp[1] + 0.162f*sp[2];
+	dpixel_data[2] = -0.139f*sp[0] - 0.664f*sp[1] + 3.017f*sp[2];
 	if (dpixel_data[0] < 0) dpixel_data[0] = 0;
 	if (dpixel_data[1] < 0) dpixel_data[1] = 0;
 	if (dpixel_data[2] < 0) dpixel_data[2] = 0;
@@ -60,11 +53,10 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 	if (dpixel_data[0] > 255) dpixel_data[0] = 255;
 	if (dpixel_data[1] > 255) dpixel_data[1] = 255;
 	if (dpixel_data[2] > 255) dpixel_data[2] = 255;
-	dp[2] = (uint8_t)dpixel_data[0]; // 2 = RED
+	dp[0] = (uint8_t)dpixel_data[0]; // 0 = RED
 	dp[1] = (uint8_t)dpixel_data[1]; // 1 = GREEN
-	dp[0] = (uint8_t)dpixel_data[2]; // 0 = BLUE
+	dp[2] = (uint8_t)dpixel_data[2]; // 2 = BLUE
 #endif // __ARM_FEATURE_MVE & 1
-#endif // 0
 //	t0 = PMU_GetCounter() - ts;
 }
 
@@ -82,9 +74,9 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 
 		{
 			// I was using the f16 suffix on constants below, but GCC objects (Bug 107515)
-			float16x8_t r_mac = vmulq(r, 3.017);
-			r_mac = vfmaq(r_mac, g, -0.664);
-			r_mac = vfmaq(r_mac, b, -0.139);
+			float16x8_t r_mac = vmulq(r, 2.092);
+			r_mac = vfmaq(r_mac, g, -0.369);
+			r_mac = vfmaq(r_mac, b, -0.636);
 
 			uint16x8_t r_out = vcvtq_u16_f16(r_mac);
 			r_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), r_out));
@@ -92,9 +84,9 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 		}
 
 		{
-			float16x8_t g_mac = vmulq(r, 0.162);
+			float16x8_t g_mac = vmulq(r, -0.492);
 			g_mac = vfmaq(g_mac, g, 1.315);
-			g_mac = vfmaq(g_mac, b, -0.495);
+			g_mac = vfmaq(g_mac, b, 0.162);
 
 			uint16x8_t g_out = vcvtq_u16_f16(g_mac);
 			g_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), g_out));
@@ -102,9 +94,9 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 		}
 
 		{
-			float16x8_t b_mac = vmulq(r, -0.636);
-			b_mac = vfmaq(b_mac, g, -0.369);
-			b_mac = vfmaq(b_mac, b, 2.092);
+			float16x8_t b_mac = vmulq(r, -0.139);
+			b_mac = vfmaq(b_mac, g, -0.664);
+			b_mac = vfmaq(b_mac, b, 3.017);
 
 			uint16x8_t b_out = vcvtq_u16_f16(b_mac);
 			b_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), b_out));
