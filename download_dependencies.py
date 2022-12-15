@@ -28,6 +28,8 @@ TF = "https://github.com/tensorflow/tflite-micro/archive/02715237c1fc0a23f465226
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/29615088b12e3ba8ce50d316cf7f38c1bd7fc620.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.05.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.05.tar.gz"
+LVGL = "https://github.com/lvgl/lvgl/archive/2c0162b457e32da50268127575c0c2b95ab29bc1.zip"
+ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.0.zip"
 
 
 def download(url_file: str, post_process=None):
@@ -73,6 +75,10 @@ def main(dependencies_path: Path):
              lambda file: untar(file.name, to_path=dependencies_path / "core-platform"))
     download(TF,
              lambda file: unzip(file.name, to_path=dependencies_path / "tensorflow"))
+    download(LVGL,
+             lambda file: unzip(file.name, to_path=dependencies_path / "lvgl"))
+    download(ARM2D,
+             lambda file: unzip(file.name, to_path=dependencies_path / "Arm-2D"))
 
 
 if __name__ == '__main__':

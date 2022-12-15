@@ -84,6 +84,11 @@ if (NOT TARGET_PLATFORM STREQUAL native)
         "${DEPENDENCY_ROOT_DIR}/cmsis"
         PATH)
 
+    USER_OPTION(ARM_2D_SRC_PATH
+        "Path to Arm-2D sources"
+        "${DEPENDENCY_ROOT_DIR}/Arm-2D"
+        PATH)
+
     # If we need NPU libraries:
     if (ETHOS_U_NPU_ENABLED)
         USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
