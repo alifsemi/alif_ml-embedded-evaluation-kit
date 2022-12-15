@@ -10,3 +10,6 @@
 [submodule "dependencies/core-platform"]
 	path = dependencies/core-platform
 	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-platform
+[submodule "dependencies/lvgl"]
+	path = dependencies/lvgl
+	url = https://github.com/lvgl/lvgl.git
