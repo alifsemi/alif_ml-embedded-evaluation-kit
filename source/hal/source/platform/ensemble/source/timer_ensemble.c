@@ -41,6 +41,10 @@
 
 #include CMSIS_device_header
 
+#ifdef IMG_CLASS
+#include "lvgl.h"
+#endif
+
 uint32_t volatile ms_ticks = 0;
 static uint64_t cpu_cycle_count = 0;
 

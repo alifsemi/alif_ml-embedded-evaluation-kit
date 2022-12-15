@@ -23,6 +23,7 @@
 /* Platform components */
 #include "RTE_Components.h" /* For CPU related defintiions */
 #include "timer_ensemble.h"     /* Timer functions. */
+#include "uart_tracelib.h"
 
 /**
  * @brief   Initialises the platform components.

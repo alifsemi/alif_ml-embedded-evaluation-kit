@@ -199,7 +199,11 @@ long RETARGET(_flen)(FILEHANDLE fh)
     return -1;
 }
 
+#ifdef __ARMCC_VERSION
+int RETARGET(_tmpnam2)(char *name, int sig, unsigned int maxlen)
+#else
 int RETARGET(_tmpnam)(char *name, int sig, unsigned int maxlen)
+#endif
 {
     UNUSED(name);
     UNUSED(sig);
