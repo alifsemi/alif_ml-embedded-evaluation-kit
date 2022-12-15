@@ -32,6 +32,7 @@ target_include_directories(${LCD_ENSEMBLE_COMPONENT_TARGET}
 target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
     PRIVATE
     glcd_ensemble.c
+    Alif240.c
     src/LCD_Panel.c
     src/mipi_dsi_host.c
     src/image_buff.c

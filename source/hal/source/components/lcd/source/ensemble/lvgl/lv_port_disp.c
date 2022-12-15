@@ -124,7 +124,10 @@ lv_obj_t *labelResult4;
 lv_obj_t *labelResult5;
 //lv_obj_t *labelTime;
 lv_obj_t *imageObj;
+lv_obj_t *alifObj;
 lv_img_dsc_t imageDesc;
+
+LV_IMG_DECLARE(Alif240);
 
 void lv_port_disp_init(void) {
 	static lv_disp_drv_t disp_drv;
@@ -148,7 +151,7 @@ void lv_port_disp_init(void) {
 
 	static lv_style_t style;
 	lv_style_init(&style);
-	//lv_style_set_bg_color(&style, lv_color_hex(0xff8080));
+	lv_style_set_bg_color(&style, lv_color_hex(0xffffff));
 #ifdef HIRES_LCD
 	lv_style_set_text_font(&style, &lv_font_montserrat_28);
 #else
@@ -207,4 +210,8 @@ void lv_port_disp_init(void) {
 	lv_img_set_src(imageObj, &imageDesc);
 	lv_obj_align(imageObj, LV_ALIGN_TOP_MID, 0, 8 * DISP_SCALE);
 	lv_obj_move_background(imageObj);
+
+	alifObj = lv_img_create(lv_scr_act());
+	lv_img_set_src(alifObj, &Alif240);
+	lv_obj_align(alifObj, LV_ALIGN_BOTTOM_MID, 0, -2 * DISP_SCALE);
 }
