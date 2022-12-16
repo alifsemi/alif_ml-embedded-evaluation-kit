@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "base_def.h"
-#include "image_processing.h"
+#include "image_buff.h"
 
 /*
 ml_image_t act_image = {// __attribute__((section("activation_image")));					// 224x224x3 = 150,528
@@ -48,6 +48,6 @@ ml_image_t act_image = {// __attribute__((section("activation_image")));					// 
 uint8_t  	rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));		// 560x560x3 = 940,800
 uint8_t  	raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460] __attribute__((aligned(32),section(".bss.camera_frame_buf")));	// 560x560x3 = 940,800
 
-uint8_t 	lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES] __attribute__((section(".bss.lcd_image_buf")));				// 480x800x3 = 1,152,000
-uint8_t 	lvgl_image[LIMAGE_Y][LIMAGE_X][RGBA_BYTES] __attribute__((section(".bss.lcd_image_buf")));						// 448x448x4 = 802,856
+uint8_t 	lcd_image[DIMAGE_Y][DIMAGE_X][RGB565_BYTES] __attribute__((section(".bss.lcd_image_buf")));				// 480x800x3 = 1,152,000
+lv_color_t 	lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));						// 448x448x4 = 802,856
 

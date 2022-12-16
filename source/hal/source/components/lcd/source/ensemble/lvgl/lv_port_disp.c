@@ -41,40 +41,18 @@
 
 #include "lvgl.h"
 #include "image_processing.h"
+#include "image_buff.h"
 
 
-#ifdef HIRES_LCD
 #define MY_DISP_HOR_RES DIMAGE_X
 #define MY_DISP_VER_RES DIMAGE_Y
 #define DISP_SCALE 2
-#else
-#define MY_DISP_HOR_RES (DIMAGE_X >> 1)
-#define MY_DISP_VER_RES (DIMAGE_Y >> 1)
-#define DISP_SCALE 1
-#endif
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 32)
-
-extern uint8_t lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES];
-extern uint8_t lvgl_image[MIMAGE_Y][MIMAGE_X][4];
-
-#ifndef HIRES_LCD
-__STATIC_INLINE void put_px(int32_t x, int32_t y, lv_color_t * color_p)
-{
-	x <<= 1;
-	y <<= 1;
-
-	memcpy(&lcd_image[y  ][x  ][0], color_p, RGB_BYTES);
-	memcpy(&lcd_image[y  ][x+1][0], color_p, RGB_BYTES);
-	memcpy(&lcd_image[y+1][x  ][0], color_p, RGB_BYTES);
-	memcpy(&lcd_image[y+1][x+1][0], color_p, RGB_BYTES);
-}
-#endif
 
 // lv_rounder ensures x coordinates are multiples of 4
 static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
     for(int32_t y = area->y1; y <= area->y2; y++) {
-#ifdef HIRES_LCD
 		uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
 		for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
 			uint32_t argb0 = (*color_p++).full;
@@ -88,25 +66,17 @@ static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * r
 			uint32_t r3g3b3r2 = (argb3 << 8) | ((argb2 >> 16) & 0x000000ff);
 			*dstp32++ = r3g3b3r2;
 		}
-#else
-        for(int32_t x = area->x1; x <= area->x2; x++) {
-            put_px(x, y, color_p);
-            color_p++;
-        }
-#endif
     }
 
     lv_disp_flush_ready(disp_drv);
 }
 
-#ifdef HIRES_LCD
 static void lv_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
 {
 	(void)(disp_drv);
 	area->x1 = area->x1 & ~(lv_coord_t) 3;
 	area->x2 = area->x2 | 3;
 }
-#endif
 
 #if 0
 // Unnecessary as we have the framebuffer set to write-through cacheable
@@ -142,9 +112,7 @@ void lv_port_disp_init(void) {
 	disp_drv.draw_buf = &disp_buf;
 	//disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
 	disp_drv.flush_cb = lv_disp_flush;
-#ifdef HIRES_LCD
 	disp_drv.rounder_cb = lv_rounder;
-#endif
 	disp_drv.hor_res = MY_DISP_HOR_RES;
 	disp_drv.ver_res = MY_DISP_VER_RES;
 	lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
@@ -152,11 +120,7 @@ void lv_port_disp_init(void) {
 	static lv_style_t style;
 	lv_style_init(&style);
 	lv_style_set_bg_color(&style, lv_color_hex(0xffffff));
-#ifdef HIRES_LCD
 	lv_style_set_text_font(&style, &lv_font_montserrat_28);
-#else
-	lv_style_set_text_font(&style, &lv_font_montserrat_14);
-#endif
 	lv_obj_add_style(lv_scr_act(), &style, 0);
 
 	/*Create a Label on the currently active screen*/
@@ -200,15 +164,20 @@ void lv_port_disp_init(void) {
 	//lv_label_set_text_static(labelTime, "Time: XX ms");
 
 	imageObj = lv_img_create(lv_scr_act());
-	imageDesc.data = &lvgl_image[0][0][0];
+	imageDesc.data = (const uint8_t *)lvgl_image;
 	imageDesc.data_size = sizeof lvgl_image;
 	imageDesc.header.always_zero = 0;
 	imageDesc.header.reserved = 0;
 	imageDesc.header.cf = LV_IMG_CF_TRUE_COLOR;
 	imageDesc.header.w = LIMAGE_X;
 	imageDesc.header.h = LIMAGE_Y;
-	lv_img_set_src(imageObj, &imageDesc);
 	lv_obj_align(imageObj, LV_ALIGN_TOP_MID, 0, 8 * DISP_SCALE);
+#ifdef USE_LVGL_ZOOM
+	lv_img_set_size_mode(imageObj, LV_IMG_SIZE_MODE_REAL);
+	lv_img_set_zoom(imageObj, 2*256);
+	lv_img_set_antialias(imageObj, false);
+#endif
+	lv_img_set_src(imageObj, &imageDesc);
 	lv_obj_move_background(imageObj);
 
 	alifObj = lv_img_create(lv_scr_act());

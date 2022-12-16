@@ -13,6 +13,7 @@
 
 #define RGB_BYTES 		3
 #define RGBA_BYTES 		4
+#define RGB565_BYTES	2
 #define PIXEL_BYTES 	1
 
 // Camera dimensions
@@ -23,16 +24,15 @@
 #define MIMAGE_X		224
 #define MIMAGE_Y		224
 
-// Are we using native resolution output to LCD, or low-res scaled up?
-#define HIRES_LCD
+// Do we get LVGL to zoom the camera image, or do we double it up?
+//#define USE_LVGL_ZOOM
 
-// If hi-res, we double up the ML image again for LVGL (faster than it doing zoom)
-#ifdef HIRES_LCD
-#define LIMAGE_X		(MIMAGE_X * 2)
-#define LIMAGE_Y		(MIMAGE_Y * 2)
-#else
+#ifdef USE_LVGL_ZOOM
 #define LIMAGE_X		MIMAGE_X
 #define LIMAGE_Y		MIMAGE_Y
+#else
+#define LIMAGE_X		(MIMAGE_X * 2)
+#define LIMAGE_Y		(MIMAGE_Y * 2)
 #endif
 
 // Display dimensions
@@ -57,7 +57,6 @@ typedef struct {
 		uint32_t  	words[(MIMAGE_X*MIMAGE_Y*RGB_BYTES + 2) / 4];
 	} buffer;
 } ml_image_t;
-
 
 int frame_crop(const void * restrict input_fb, uint32_t ip_row_size, uint32_t ip_col_size, uint32_t row_start, uint32_t col_start, void * restrict output_fb, uint32_t op_row_size, uint32_t op_col_size, uint32_t bpp);
 int crop_and_interpolate( uint8_t const * restrict srcImage, uint32_t srcWidth, uint32_t srcHeight, uint8_t * restrict dstImage, uint32_t dstWidth, uint32_t dstHeight, uint32_t bpp);

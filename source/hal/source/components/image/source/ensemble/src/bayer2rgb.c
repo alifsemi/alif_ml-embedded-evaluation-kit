@@ -51,9 +51,6 @@
 
 #include "image_processing.h"
 
-extern uint8_t  	rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
-extern uint8_t  	raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
-
 // tiff types: short = 3, int = 4
 // Tags: ( 2-byte tag ) ( 2-byte type ) ( 4-byte count ) ( 4-byte data )
 //    0100 0003 0000 0001 0064 0000
