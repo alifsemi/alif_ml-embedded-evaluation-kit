@@ -27,7 +27,11 @@
 #include "lvgl.h"
 #include "delay.h"
 
-#define ENABLE_MVE_WRITE (defined __ARMCC_VERSION && (__ARM_FEATURE_MVE & 1))
+#if defined __ARMCC_VERSION && (__ARM_FEATURE_MVE & 1)
+#define ENABLE_MVE_WRITE 1
+#else
+#define ENABLE_MVE_WRITE 0
+#endif
 
 #if __ARM_FEATURE_MVE & 1
 #include <arm_mve.h>

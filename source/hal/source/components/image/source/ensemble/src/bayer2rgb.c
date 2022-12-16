@@ -39,9 +39,11 @@
 #include "bayer.h"
 
 // At the time of writing, GCC produces incorrect assembly
- #if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 1)
- #define ENABLE_MVE_BAYER2RGB 1
- #endif
+#if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 1)
+#define ENABLE_MVE_BAYER2RGB 1
+#else
+#define ENABLE_MVE_BAYER2RGB 0
+#endif
 
 #if ENABLE_MVE_BAYER2RGB
 #include <arm_mve.h>
