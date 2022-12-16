@@ -174,7 +174,7 @@
  *-----------*/
 
 /*Use Arm's 2D acceleration library Arm-2D */
-#define LV_USE_GPU_ARM2D 0
+#define LV_USE_GPU_ARM2D 1
 
 /*Use STM32's DMA2D (aka Chrom Art) GPU*/
 #define LV_USE_GPU_STM32_DMA2D 0

@@ -59,16 +59,16 @@ if (NOT TARGET log)
 endif()
 
 ## LVGL and Arm-2D libraries
-#include(${CMAKE_SCRIPTS_DIR}/Arm-2D.cmake)
-#target_include_directories(${ARM_2D_TARGET} PUBLIC
-#                           ${CMAKE_CURRENT_SOURCE_DIR}/lvgl)
+include(${CMAKE_SCRIPTS_DIR}/Arm-2D.cmake)
+target_include_directories(${ARM_2D_TARGET} PUBLIC
+                           ${CMAKE_CURRENT_SOURCE_DIR}/lvgl)
 
 include(${CMAKE_SCRIPTS_DIR}/lvgl.cmake)
 target_include_directories(${LVGL_TARGET} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/lvgl)
                            
 # We configured LVGL to use Arm-2D, and it needs our ticker API
-# target_link_libraries(${LVGL_TARGET} PRIVATE ${ARM_2D_TARGET} ${LCD_IFACE_TARGET})
+target_link_libraries(${LVGL_TARGET} PRIVATE ${ARM_2D_TARGET} ${LCD_IFACE_TARGET})
 
 ## Add dependencies
 target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
