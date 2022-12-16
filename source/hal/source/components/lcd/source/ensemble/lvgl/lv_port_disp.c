@@ -196,4 +196,5 @@ void lv_port_disp_init(void) {
 	alifObj = lv_img_create(lv_scr_act());
 	lv_img_set_src(alifObj, &Alif240);
 	lv_obj_align(alifObj, LV_ALIGN_BOTTOM_MID, 0, -2 * DISP_SCALE);
+	lv_obj_move_background(alifObj);
 }
