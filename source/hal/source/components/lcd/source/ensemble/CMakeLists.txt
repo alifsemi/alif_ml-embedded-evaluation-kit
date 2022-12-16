@@ -73,6 +73,7 @@ target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
     lvgl/src/font/lv_font.c
     lvgl/src/font/lv_font_fmt_txt.c
     lvgl/src/font/lv_font_montserrat_14.c
+    lvgl/src/font/lv_font_montserrat_28.c
     lvgl/src/hal/lv_hal_disp.c
     lvgl/src/hal/lv_hal_indev.c
     lvgl/src/hal/lv_hal_tick.c

@@ -13,6 +13,7 @@
 #include "display.h"
 
 #define RGB_BYTES 		3
+#define RGBA_BYTES 		4
 #define PIXEL_BYTES 	1
 
 // Camera dimensions
@@ -22,6 +23,18 @@
 // ML scaled image dimensions
 #define MIMAGE_X		224
 #define MIMAGE_Y		224
+
+// Are we using native resolution output to LCD, or low-res scaled up?
+#define HIRES_LCD
+
+// If hi-res, we double up the ML image again for LVGL (faster than it doing zoom)
+#ifdef HIRES_LCD
+#define LIMAGE_X		(MIMAGE_X * 2)
+#define LIMAGE_Y		(MIMAGE_Y * 2)
+#else
+#define LIMAGE_X		MIMAGE_X
+#define LIMAGE_Y		MIMAGE_Y
+#endif
 
 // Display dimensions
 #define DIMAGE_X		480

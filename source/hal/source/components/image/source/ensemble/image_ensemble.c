@@ -74,8 +74,8 @@ int get_image_data(void *data)
     		float r = barr * intensity + 0.5f;
     		float g = barg * intensity + 0.5f;
     		float b = barb * intensity + 0.5f;
-    		p[0]        = g; p[1]            = r;
-    		p[CIMAGE_X] = b; p[CIMAGE_X + 1] = g;
+    		p[0]        = b; p[1]            = g;
+    		p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
     		p += 2;
     	}
     }
