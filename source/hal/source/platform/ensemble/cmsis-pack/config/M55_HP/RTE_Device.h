@@ -594,7 +594,7 @@
 //     <2=> RGB565
 // <i> Defines CDC200 pixel format
 // <i> Default: RGB888
-#define RTE_CDC200_PIXEL_FORMAT              1
+#define RTE_CDC200_PIXEL_FORMAT              2
 
 // <o> CDC200 DPI interface FPS
 // <i> Defines CDC200 DPI interface Framrate per second.

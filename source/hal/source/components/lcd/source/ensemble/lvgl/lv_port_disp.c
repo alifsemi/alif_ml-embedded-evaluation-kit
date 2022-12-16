@@ -49,9 +49,10 @@
 #define DISP_SCALE 2
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 32)
 
-// lv_rounder ensures x coordinates are multiples of 4
 static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
+#if LV_COLOR_DEPTH == 32
+// lv_rounder ensures x coordinates are multiples of 4
     for(int32_t y = area->y1; y <= area->y2; y++) {
 		uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
 		for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
@@ -67,16 +68,26 @@ static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * r
 			*dstp32++ = r3g3b3r2;
 		}
     }
+#else
+    lv_coord_t w = lv_area_get_width(area);
+    lv_coord_t x = area->x1;
+    for(int32_t y = area->y1; y <= area->y2; y++) {
+        memcpy(lcd_image[y][x], color_p, w * sizeof *color_p);
+        color_p += w;
+    }
+#endif
 
     lv_disp_flush_ready(disp_drv);
 }
 
+#if LV_COLOR_DEPTH == 32
 static void lv_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
 {
 	(void)(disp_drv);
 	area->x1 = area->x1 & ~(lv_coord_t) 3;
 	area->x2 = area->x2 | 3;
 }
+#endif
 
 #if 0
 // Unnecessary as we have the framebuffer set to write-through cacheable
@@ -112,7 +123,9 @@ void lv_port_disp_init(void) {
 	disp_drv.draw_buf = &disp_buf;
 	//disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
 	disp_drv.flush_cb = lv_disp_flush;
+#if LV_COLOR_DEPTH == 32
 	disp_drv.rounder_cb = lv_rounder;
+#endif
 	disp_drv.hor_res = MY_DISP_HOR_RES;
 	disp_drv.ver_res = MY_DISP_VER_RES;
 	lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
