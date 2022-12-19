@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "BufAttributes.hpp"
 #include "ImageUtils.hpp"
 #include "MobileNetModel.hpp"
 #include "TensorFlowLiteMicro.hpp"
 #include "TestData_img_class.hpp"
-#include "BufAttributes.hpp"
 
 #include <catch.hpp>
 
 namespace arm {
-    namespace app {
-        static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
-        namespace img_class {
-            extern uint8_t* GetModelPointer();
-            extern size_t GetModelLen();
-        } /* namespace img_class */
-    } /* namespace app */
+namespace app {
+    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    namespace img_class {
+        extern uint8_t* GetModelPointer();
+        extern size_t GetModelLen();
+    } /* namespace img_class */
+} /* namespace app */
 } /* namespace arm */
 
 using namespace test;
@@ -39,22 +39,22 @@ bool RunInference(arm::app::Model& model, const int8_t imageData[])
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < IFM_0_DATA_SIZE ?
-                            inputTensor->bytes :
-                            IFM_0_DATA_SIZE;
+    const size_t copySz =
+        inputTensor->bytes < IFM_0_DATA_SIZE ? inputTensor->bytes : IFM_0_DATA_SIZE;
     memcpy(inputTensor->data.data, imageData, copySz);
 
-    if(model.IsDataSigned()){
+    if (model.IsDataSigned()) {
         arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
     }
 
     return model.RunInference();
 }
 
-template<typename T>
-void TestInference(int imageIdx, arm::app::Model& model, T tolerance) {
-    auto image = get_ifm_data_array(imageIdx);
-    auto goldenFV = get_ofm_data_array(imageIdx);
+template <typename T>
+void TestInference(int imageIdx, arm::app::Model& model, T tolerance)
+{
+    auto image    = GetIfmDataArray(imageIdx);
+    auto goldenFV = GetOfmDataArray(imageIdx);
 
     REQUIRE(RunInference(model, image));
 
@@ -66,10 +66,10 @@ void TestInference(int imageIdx, arm::app::Model& model, T tolerance) {
     REQUIRE(tensorData);
 
     for (size_t i = 0; i < outputTensor->bytes; i++) {
-        REQUIRE(static_cast<int>(tensorData[i]) == Approx(static_cast<int>((T)goldenFV[i])).epsilon(tolerance));
+        REQUIRE(static_cast<int>(tensorData[i]) ==
+                Approx(static_cast<int>((T)goldenFV[i])).epsilon(tolerance));
     }
 }
-
 
 TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "[MobileNetV2]")
 {
@@ -84,12 +84,12 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
                            arm::app::img_class::GetModelLen()));
         REQUIRE(model.IsInited());
 
-        for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
+        for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
             TestInference<uint8_t>(i, model, 1);
         }
     }
 
-    for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
+    for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
         DYNAMIC_SECTION("Executing inference with re-init")
         {
             arm::app::MobileNetModel model{};

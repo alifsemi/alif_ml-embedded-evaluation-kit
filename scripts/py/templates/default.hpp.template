@@ -21,8 +21,13 @@
 
 #include <cstdint>
 
-#define NUMBER_OF_FILES  (0U)
+#define NUMBER_OF_FILES (0U)
 
-const char* get_filename(const uint32_t idx);
+/**
+ * @brief       Gets the filename for the baked-in input array
+ * @param[in]   idx     Index of the input.
+ * @return      const C string pointer to the name.
+ **/
+const char* GetFilename(const uint32_t idx);
 
 #endif /* DEFAULT_GENERATED_INPUT_H */

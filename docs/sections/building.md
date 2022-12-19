@@ -838,8 +838,8 @@ For example, the generated utility functions for image classification are:
     extern const uint8_t im0[IMAGE_DATA_SIZE];
     extern const uint8_t im1[IMAGE_DATA_SIZE];
 
-    const char* get_filename(const uint32_t idx);
-    const uint8_t* get_img_array(const uint32_t idx);
+    const char* GetFilename(const uint32_t idx);
+    const uint8_t* GetImgArray(const uint32_t idx);
 
     #endif /* GENERATED_IMAGES_H */
     ```
@@ -859,7 +859,7 @@ For example, the generated utility functions for image classification are:
         im1
     };
 
-    const char* get_filename(const uint32_t idx)
+    const char* GetFilename(const uint32_t idx)
     {
         if (idx < NUMBER_OF_FILES) {
             return img_filenames[idx];
@@ -867,7 +867,7 @@ For example, the generated utility functions for image classification are:
         return nullptr;
     }
 
-    const uint8_t* get_img_array(const uint32_t idx)
+    const uint8_t* GetImgArray(const uint32_t idx)
     {
         if (idx < NUMBER_OF_FILES) {
             return img_arrays[idx];

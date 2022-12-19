@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
  */
 
 #include "ImageUtils.hpp"
+#include "TensorFlowLiteMicro.hpp"
 #include "TestData_vww.hpp"
 #include "VisualWakeWordModel.hpp"
-#include "TensorFlowLiteMicro.hpp"
 
 #include <catch.hpp>
 
@@ -27,24 +27,24 @@ bool RunInference(arm::app::Model& model, const int8_t* imageData)
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < IFM_0_DATA_SIZE ?
-                            inputTensor->bytes :
-                            IFM_0_DATA_SIZE;
+    const size_t copySz =
+        inputTensor->bytes < IFM_0_DATA_SIZE ? inputTensor->bytes : IFM_0_DATA_SIZE;
 
     memcpy(inputTensor->data.data, imageData, copySz);
 
-    if(model.IsDataSigned()){
+    if (model.IsDataSigned()) {
         arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
     }
 
     return model.RunInference();
 }
 
-template<typename T>
-void TestInference(int imageIdx,arm::app::Model& model) {
+template <typename T>
+void TestInference(int imageIdx, arm::app::Model& model)
+{
 
-    auto image = test::get_ifm_data_array(imageIdx);
-    auto goldenFV = test::get_ofm_data_array(imageIdx);
+    auto image    = test::GetIfmDataArray(imageIdx);
+    auto goldenFV = test::GetOfmDataArray(imageIdx);
 
     REQUIRE(RunInference(model, image));
 
@@ -56,7 +56,7 @@ void TestInference(int imageIdx,arm::app::Model& model) {
     REQUIRE(tensorData);
 
     for (size_t i = 0; i < outputTensor->bytes; i++) {
-        auto testVal = static_cast<int>(tensorData[i]);
+        auto testVal   = static_cast<int>(tensorData[i]);
         auto goldenVal = static_cast<int>(goldenFV[i]);
         CHECK(testVal == goldenVal);
     }

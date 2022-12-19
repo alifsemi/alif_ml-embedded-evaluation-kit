@@ -21,14 +21,25 @@
 
 #include <cstdint>
 
-#define NUMBER_OF_FILES  ({{imgs_count}}U)
-#define IMAGE_DATA_SIZE  ({{img_size}}U)
+#define NUMBER_OF_FILES ({{imgs_count}}U)
+#define IMAGE_DATA_SIZE ({{img_size}}U)
 
 {% for var_name in var_names %}
 extern const uint8_t {{var_name}}[IMAGE_DATA_SIZE];
 {% endfor %}
 
-const char* get_filename(const uint32_t idx);
-const uint8_t* get_img_array(const uint32_t idx);
+/**
+ * @brief       Gets the filename for the baked-in input array
+ * @param[in]   idx     Index of the input.
+ * @return      const C string pointer to the name.
+ **/
+const char* GetFilename(const uint32_t idx);
+
+/**
+ * @brief       Gets the pointer to image data.
+ * @param[in]   idx     Index of the input.
+ * @return      Pointer to the 8-bit unsigned integer data.
+ **/
+const uint8_t* GetImgArray(const uint32_t idx);
 
 #endif /* GENERATED_IMAGES_H */

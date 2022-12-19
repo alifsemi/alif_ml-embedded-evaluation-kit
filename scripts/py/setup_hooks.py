@@ -67,7 +67,7 @@ do
                 exit $exitcode1
             fi
 
-            cppcheck --enable=performance,portability  --error-exitcode=1 $changed_files
+            cppcheck --enable=performance,portability  --error-exitcode=1 --suppress=*:tests* $changed_files
             exitcode2=$?
             if [ $exitcode2 -ne 0 ]; then
                 exit $exitcode2

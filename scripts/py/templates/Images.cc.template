@@ -18,30 +18,28 @@
 
 #include "InputFiles.hpp"
 
-static const char *img_filenames[] = {
+static const char* imgFilenames[] = {
 {% for name in img_names %}
     "{{name}}",
 {% endfor %}
 };
 
-static const uint8_t *img_arrays[] = {
-    {{ var_names|join(',\n\t') }}
+static const uint8_t* imgArrays[] = {
+    {{ var_names|join(',\n    ') }}
 };
 
-const char* get_filename(const uint32_t idx)
+const char* GetFilename(const uint32_t idx)
 {
     if (idx < NUMBER_OF_FILES) {
-        return img_filenames[idx];
+        return imgFilenames[idx];
     }
     return nullptr;
 }
 
-
-const uint8_t* get_img_array(const uint32_t idx)
+const uint8_t* GetImgArray(const uint32_t idx)
 {
     if (idx < NUMBER_OF_FILES) {
-        return img_arrays[idx];
+        return imgArrays[idx];
     }
     return nullptr;
 }
-
