@@ -65,6 +65,8 @@ void tracef(const char * format, ...);
  */
 int send_str(const char* str, uint32_t len);
 
+unsigned int GetLine(char *user_input, unsigned int size);
+
 #ifdef __cplusplus
 }
 #endif
