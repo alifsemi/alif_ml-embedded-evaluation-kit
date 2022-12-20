@@ -1,3 +1,5 @@
+#ifndef __BASE_DEF_H__
+#define __BASE_DEF_H__
 
 #define ENABLE_PRINTF      0
 #if ENABLE_PRINTF
@@ -9,3 +11,6 @@
 #define HW_REG_WORD(base,offset) *((volatile unsigned int *) (base + offset))
 
 #define UNUSED(x)       ((void)(x))
+
+#endif // #ifndef __BASE_DEF_H__
+

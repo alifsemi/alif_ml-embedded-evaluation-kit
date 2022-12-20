@@ -1,18 +1,5 @@
 #include <stdint.h>
 
-#ifdef __cplusplus
-#define B2R_RESTRICT
-#define B2R_REGISTER
-#else
-#define B2R_RESTRICT __restrict
-#define B2R_REGISTER register
-#endif
-
-#define CLIP16(in, out, bits)\
-   in = in < 0 ? 0 : in;\
-   in = in > ((1<<bits)-1) ? ((1<<bits)-1) : in;\
-   out=in;
-
 typedef enum {
     DC1394_BAYER_METHOD_NEAREST=0,
     DC1394_BAYER_METHOD_SIMPLE,
@@ -92,12 +79,9 @@ typedef enum {
 
 
 
-#if 0
+
 dc1394error_t
 dc1394_bayer_decoding_8bit(const uint8_t * bayer, uint8_t * rgb, uint32_t sx, uint32_t sy, dc1394color_filter_t tile, dc1394bayer_method_t method);
-#endif
 
-#if 1
 dc1394error_t
 dc1394_bayer_decoding_16bit(const uint16_t * bayer, uint16_t * rgb, uint32_t sx, uint32_t sy, dc1394color_filter_t tile, dc1394bayer_method_t method, uint32_t bits);
-#endif

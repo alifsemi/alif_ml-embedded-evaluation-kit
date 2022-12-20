@@ -47,7 +47,8 @@ target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
 ## Add dependencies
 target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${LCD_IFACE_TARGET}
-    log)
+    log
+    image_iface)
 endif()
 
 # Create static library for MPS3 LCD
