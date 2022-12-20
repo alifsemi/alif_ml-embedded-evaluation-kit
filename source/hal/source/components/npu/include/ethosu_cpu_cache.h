@@ -21,6 +21,11 @@
 #include <stddef.h>
 
 /**
+ * @brief   Clears all the cache state members.
+ */
+void ethosu_clear_cache_states(void);
+
+/**
  * @brief   Flush/clean the data cache by address and size. Passing NULL as p argument
  *          expects the whole cache to be flushed.
  * @param[in]   p       Pointer to the start address.

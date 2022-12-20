@@ -122,6 +122,7 @@ def run(
         + f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
         + f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
         + f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
+        + f" -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
     )
 
     logging.info(f"\n\n\n{cmake_command}\n\n\n")
