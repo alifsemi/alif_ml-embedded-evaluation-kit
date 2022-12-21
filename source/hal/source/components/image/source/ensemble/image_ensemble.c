@@ -18,9 +18,9 @@
 #include "base_def.h"
 #include "delay.h"
 
-extern uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460];
-extern uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
-extern uint8_t lcd_image[DIMAGE_Y][DIMAGE_X][RGB_BYTES];
+static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
+static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
+
 extern ARM_DRIVER_GPIO Driver_GPIO1;
 
 int image_init()
@@ -44,9 +44,8 @@ int image_init()
 
 #define FAKE_CAMERA 0
 
-int get_image_data(void *data)
+const uint8_t *get_image_data(void)
 {
-    uint8_t *ml_image = (uint8_t *)data;
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 #if !FAKE_CAMERA
@@ -89,7 +88,7 @@ int get_image_data(void *data)
     crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, MIMAGE_X, MIMAGE_Y, RGB_BYTES * 8);
     tprof4 = ARM_PMU_Get_CCNTR();
     // Color correction for white balance
-    white_balance(raw_image, ml_image);
+    white_balance(raw_image, rgb_image);
     tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
-    return 0;
+    return rgb_image;
 }

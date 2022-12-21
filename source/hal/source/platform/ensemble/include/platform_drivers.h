@@ -42,7 +42,7 @@ void platform_release(void);
  */
 const char* platform_name(void);
 
-#ifdef IMG_CLASS
+#if CONSOLE_UART==2
 extern bool run_requested(void);
 #endif
 

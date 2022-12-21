@@ -84,6 +84,11 @@ if (NOT TARGET_PLATFORM STREQUAL native)
         "${DEPENDENCY_ROOT_DIR}/cmsis"
         PATH)
 
+    USER_OPTION(LVGL_SRC_PATH
+        "Path to LVGL sources"
+        "${DEPENDENCY_ROOT_DIR}/lvgl"
+        PATH)
+
     USER_OPTION(ARM_2D_SRC_PATH
         "Path to Arm-2D sources"
         "${DEPENDENCY_ROOT_DIR}/Arm-2D"

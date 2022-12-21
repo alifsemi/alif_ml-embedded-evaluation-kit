@@ -59,7 +59,7 @@ SECTIONS
     *system_M55_*.c.obj(.text .rodata*)
     *mpu_M55_*.c.obj(.text .rodata*)
 
-    *lv_*.c.obj(.text .rodata*)
+    *liblvgl.a:*(.text .rodata*)
 
     *(startup_ro_data)
   } > MRAM

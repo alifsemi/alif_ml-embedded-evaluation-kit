@@ -36,37 +36,44 @@
  * @Note     None
  ******************************************************************************/
 
+#include <stdatomic.h>
+
 #include "RTE_Components.h"
 #include CMSIS_device_header
 
+#include "LCD_panel.h"
+#include "Driver_CDC200.h"
 #include "lvgl.h"
+#include "lv_port_disp.h"
 #include "image_processing.h"
 #include "image_buff.h"
 
-
 #define MY_DISP_HOR_RES DIMAGE_X
 #define MY_DISP_VER_RES DIMAGE_Y
-#define DISP_SCALE 2
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 32)
+
+static atomic_bool lv_inited;
+static uint32_t lv_last_timer_handler_trigger;
+static atomic_uint_fast32_t lv_ticks;
 
 static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
 #if LV_COLOR_DEPTH == 32
 // lv_rounder ensures x coordinates are multiples of 4
     for(int32_t y = area->y1; y <= area->y2; y++) {
-		uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
-		for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
-			uint32_t argb0 = (*color_p++).full;
-			uint32_t argb1 = (*color_p++).full;
-			uint32_t b1r0g0b0 = (argb1 << 24) | (argb0 & 0x00ffffff);
-			*dstp32++ = b1r0g0b0;
-			uint32_t argb2 = (*color_p++).full;
-			uint32_t g2b2r1g1 = (argb2 << 16) | ((argb1 >> 8) & 0x0000ffff);
-			*dstp32++ = g2b2r1g1;
-			uint32_t argb3 = (*color_p++).full;
-			uint32_t r3g3b3r2 = (argb3 << 8) | ((argb2 >> 16) & 0x000000ff);
-			*dstp32++ = r3g3b3r2;
-		}
+        uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
+        for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
+            uint32_t argb0 = (*color_p++).full;
+            uint32_t argb1 = (*color_p++).full;
+            uint32_t b1r0g0b0 = (argb1 << 24) | (argb0 & 0x00ffffff);
+            *dstp32++ = b1r0g0b0;
+            uint32_t argb2 = (*color_p++).full;
+            uint32_t g2b2r1g1 = (argb2 << 16) | ((argb1 >> 8) & 0x0000ffff);
+            *dstp32++ = g2b2r1g1;
+            uint32_t argb3 = (*color_p++).full;
+            uint32_t r3g3b3r2 = (argb3 << 8) | ((argb2 >> 16) & 0x000000ff);
+            *dstp32++ = r3g3b3r2;
+        }
     }
 #else
     lv_coord_t w = lv_area_get_width(area);
@@ -80,121 +87,147 @@ static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * r
     lv_disp_flush_ready(disp_drv);
 }
 
+static atomic_bool pending_flush;
+static lv_disp_drv_t *pending_flush_disp_drv;
+static lv_area_t pending_flush_area;
+static lv_color_t *pending_flush_color_p;
+
+void do_pending_flush(void)
+{
+    if (atomic_exchange(&pending_flush, false)) {
+        lv_disp_flush(pending_flush_disp_drv, &pending_flush_area, pending_flush_color_p);
+    }
+}
+
+static void lv_disp_flush_async(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
+{
+    if (pending_flush) {
+        while (1) {
+            __WFE();
+        }
+    }
+    /* Prepare the flush info */
+    pending_flush_disp_drv = disp_drv;
+    pending_flush_area = *area;
+    pending_flush_color_p = color_p;
+    pending_flush = true;
+
+    /* And then do it immediately if we can, being race-free with the display interrupt which
+     * could also do it.
+     */
+    int scan_y = LCD_current_v_pos();
+    if (scan_y < area->y1 - 32 || scan_y > area->y2) {
+        do_pending_flush();
+    }
+}
+
 #if LV_COLOR_DEPTH == 32
 static void lv_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
 {
-	(void)(disp_drv);
-	area->x1 = area->x1 & ~(lv_coord_t) 3;
-	area->x2 = area->x2 | 3;
+    (void)(disp_drv);
+    area->x1 = area->x1 & ~(lv_coord_t) 3;
+    area->x2 = area->x2 | 3;
 }
 #endif
 
 #if 0
 // Unnecessary as we have the framebuffer set to write-through cacheable
 static void lv_clean_dcache_cb(lv_disp_drv_t * disp_drv) {
-	/* Example for Cortex-M (CMSIS) */
-	SCB_CleanDCache();
-	(void)(disp_drv);
+    /* Example for Cortex-M (CMSIS) */
+    SCB_CleanDCache();
+    (void)(disp_drv);
 }
 #endif
 
-lv_obj_t *labelResult1;
-lv_obj_t *labelResult2;
-lv_obj_t *labelResult3;
-lv_obj_t *labelResult4;
-lv_obj_t *labelResult5;
-//lv_obj_t *labelTime;
-lv_obj_t *imageObj;
-lv_obj_t *alifObj;
-lv_img_dsc_t imageDesc;
-
-LV_IMG_DECLARE(Alif240);
-
+/* Use cases are expected to use either the hal_lcd interface after calling hal_lcd_init(), which
+ * will end up calling lv_port_disp_init(), or LVGL interfaces after calling lv_port_disp_init()
+ * themselves.
+ *
+ * The former is designed to support Arm's non-LVGL UI, which we happen to emulate using LVGL,
+ * or full LVGL-based UIs.
+ *
+ * With care, these could be mixed - the non-LVGL UI is a single canvas object, and more LVGL UI
+ * could be added around it.
+ */
 void lv_port_disp_init(void) {
-	static lv_disp_drv_t disp_drv;
-	static lv_disp_draw_buf_t disp_buf;
-	static lv_color_t buf_1[MY_DISP_BUFFER];
 
-	lv_init();
+    LCD_Panel_init(&lcd_image[0][0][0], LV_COLOR_DEPTH == 32 ? RGB888 : RGB565);
 
-	lv_disp_drv_init(&disp_drv);
-	lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, MY_DISP_BUFFER);
+    static lv_disp_drv_t disp_drv;
+    static lv_disp_draw_buf_t disp_buf;
+    /* This drawing buffer should be in DCTM for speed. */
+    static lv_color_t buf_1[MY_DISP_BUFFER];
 
-	disp_drv.draw_buf = &disp_buf;
-	//disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
-	disp_drv.flush_cb = lv_disp_flush;
+    lv_init();
+
+    lv_disp_drv_init(&disp_drv);
+    lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, MY_DISP_BUFFER);
+
+    disp_drv.draw_buf = &disp_buf;
+    //disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
+    disp_drv.flush_cb = lv_disp_flush_async;
 #if LV_COLOR_DEPTH == 32
-	disp_drv.rounder_cb = lv_rounder;
+    disp_drv.rounder_cb = lv_rounder;
 #endif
-	disp_drv.hor_res = MY_DISP_HOR_RES;
-	disp_drv.ver_res = MY_DISP_VER_RES;
-	lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
+    disp_drv.hor_res = MY_DISP_HOR_RES;
+    disp_drv.ver_res = MY_DISP_VER_RES;
+    lv_disp_drv_register(&disp_drv);
 
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_bg_color(&style, lv_color_hex(0xffffff));
-	lv_style_set_text_font(&style, &lv_font_montserrat_28);
-	lv_obj_add_style(lv_scr_act(), &style, 0);
+    /* Set up priorities so that SysTick can interrupt LCD interrupts which
+     * can interrupt the task handling. Most other hardware interrupts should
+     * be more urgent than the LCD interrupt, as that will do significant
+     * painting work.
+     */
+    NVIC_SetPriority (SysTick_IRQn, 0x80 >> (8-__NVIC_PRIO_BITS));
 
-	/*Create a Label on the currently active screen*/
-	lv_obj_t *label1 =  lv_label_create(lv_scr_act());
+    LCD_enable_tear_interrupt(do_pending_flush, 0xC0 >> (8-__NVIC_PRIO_BITS));
 
-	/*Modify the Label's text*/
-	lv_label_set_text_static(label1, "Image Classifier Top 3 Results");
+    lv_last_timer_handler_trigger = -256;
+    NVIC_SetPriority(PendSV_IRQn, 0xFF >> (8-__NVIC_PRIO_BITS));
+    NVIC_SetPriorityGrouping(0);
 
-	/* Align the Label to the center
-	 * NULL means align on parent (which is the screen now)
-	 * 0, 0 at the end means an x, y offset after alignment*/
-	lv_obj_set_style_text_align(label1, LV_TEXT_ALIGN_CENTER, 0);
-	lv_obj_align(label1, LV_ALIGN_CENTER, 0, 50 * DISP_SCALE);
+    lv_inited = true;
+}
 
-	labelResult1 =  lv_label_create(lv_scr_act());
-	labelResult2 =  lv_label_create(lv_scr_act());
-	labelResult3 =  lv_label_create(lv_scr_act());
-	labelResult4 =  lv_label_create(lv_scr_act());
-	labelResult5 =  lv_label_create(lv_scr_act());
-	//labelTime = lv_label_create(lv_scr_act());
+bool locked;
+void lv_port_lock(void)
+{
+    /* Mask out the low-priority PendSV */
+    __set_BASEPRI((uint8_t)(0xFF << (8-__NVIC_PRIO_BITS)));
+    locked = true;
+}
 
-	lv_obj_set_style_text_align(labelResult1, LV_TEXT_ALIGN_CENTER, 0);
-	lv_obj_set_style_text_align(labelResult2, LV_TEXT_ALIGN_CENTER, 0);
-	lv_obj_set_style_text_align(labelResult3, LV_TEXT_ALIGN_CENTER, 0);
-	lv_obj_set_style_text_align(labelResult4, LV_TEXT_ALIGN_CENTER, 0);
-	lv_obj_set_style_text_align(labelResult5, LV_TEXT_ALIGN_CENTER, 0);
-	//lv_obj_set_style_text_align(labelTime, LV_TEXT_ALIGN_CENTER, 0);
+void lv_port_unlock(void)
+{
+    locked = false;
+    __set_BASEPRI(0);
+}
 
-	lv_obj_align(labelResult1, LV_ALIGN_CENTER, 0, 75 * DISP_SCALE);
-	lv_obj_align(labelResult2, LV_ALIGN_CENTER, 0, 100 * DISP_SCALE);
-	lv_obj_align(labelResult3, LV_ALIGN_CENTER, 0, 125 * DISP_SCALE);
-	lv_obj_align(labelResult4, LV_ALIGN_CENTER, 0, 150 * DISP_SCALE);
-	lv_obj_align(labelResult5, LV_ALIGN_CENTER, 0, 175 * DISP_SCALE);
-	//lv_obj_align(labelTime, LV_ALIGN_CENTER, 0, 150 * DISP_SCALE);
+uint32_t lv_port_get_ticks(void)
+{
+    return lv_ticks;
+}
 
-	lv_label_set_text_static(labelResult1, "Result 1");
-	lv_label_set_text_static(labelResult2, "Result 2");
-	lv_label_set_text_static(labelResult3, "Result 3");
-	lv_label_set_text_static(labelResult4, "");
-	lv_label_set_text_static(labelResult5, "");
-	//lv_label_set_text_static(labelTime, "Time: XX ms");
+/* Override the weak function in timer_ensemble.c */
+void lv_tick_handler(int ticks)
+{
+    if (lv_inited) {
+        uint32_t new_ticks = (lv_ticks += ticks);
+        if (new_ticks - lv_last_timer_handler_trigger >= 5) {
+            lv_last_timer_handler_trigger = new_ticks;
+            SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+        }
+    }
+}
 
-	imageObj = lv_img_create(lv_scr_act());
-	imageDesc.data = (const uint8_t *)lvgl_image;
-	imageDesc.data_size = sizeof lvgl_image;
-	imageDesc.header.always_zero = 0;
-	imageDesc.header.reserved = 0;
-	imageDesc.header.cf = LV_IMG_CF_TRUE_COLOR;
-	imageDesc.header.w = LIMAGE_X;
-	imageDesc.header.h = LIMAGE_Y;
-	lv_obj_align(imageObj, LV_ALIGN_TOP_MID, 0, 8 * DISP_SCALE);
-#ifdef USE_LVGL_ZOOM
-	lv_img_set_size_mode(imageObj, LV_IMG_SIZE_MODE_REAL);
-	lv_img_set_zoom(imageObj, 2*256);
-	lv_img_set_antialias(imageObj, false);
-#endif
-	lv_img_set_src(imageObj, &imageDesc);
-	lv_obj_move_background(imageObj);
-
-	alifObj = lv_img_create(lv_scr_act());
-	lv_img_set_src(alifObj, &Alif240);
-	lv_obj_align(alifObj, LV_ALIGN_BOTTOM_MID, 0, -2 * DISP_SCALE);
-	lv_obj_move_background(alifObj);
+/* Run lv_timer_handler from a minimum-priority interrupt, triggered from SysTick */
+void PendSV_Handler(void)
+{
+    if (locked)
+    {
+        while (1) {
+            __WFE();
+        }
+    }
+    lv_timer_handler();
 }

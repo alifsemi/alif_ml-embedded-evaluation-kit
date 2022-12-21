@@ -39,6 +39,11 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
+# This currently is also used to infer roles for the dual-CPU bits
+USER_OPTION(CONSOLE_UART "Console UART for the application"
+    2
+    STRING)
+
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
     message(FATAL_ERROR "No ${PLATFORM_DRIVERS_TARGET} support for this target.")
@@ -111,10 +116,9 @@ include
 include/${TARGET_SUBSYSTEM}
 )
 
-if (USE_CASE_BUILD STREQUAL img_class)
-target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC -DIMG_CLASS)
-endif()
-
+target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC
+    CONSOLE_UART=${CONSOLE_UART}
+)
 
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
@@ -165,12 +169,9 @@ endif()
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:audio_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:lcd_stubs>
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:image_stubs>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:image_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:lcd_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:audio_stubs>
+    image_ensemble
+    lcd_ensemble
+    audio_ensemble
     ensemble_services
     cmsis_ensemble
     platform_pmu

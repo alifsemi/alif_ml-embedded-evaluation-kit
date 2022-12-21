@@ -27,27 +27,7 @@
 
 #include <cinttypes>
 
-#include "lvgl.h"
-extern lv_obj_t *labelResult1;
-extern lv_obj_t *labelResult2;
-extern lv_obj_t *labelResult3;
-extern lv_obj_t *labelResult4;
-extern lv_obj_t *labelResult5;
-
 using ImgClassClassifier = arm::app::Classifier;
-
-
-#define SKIP_MODEL 0
-#if SKIP_MODEL
-#define RAW_BUFFER ((void *) 0x08000000)
-#else
-#define RAW_BUFFER inputTensor->data.data
-#endif
-
-extern bool run_requested(void);
-extern "C" {
-uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
-}
 
 namespace arm {
 namespace app {
@@ -72,7 +52,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 150;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-#if !SKIP_MODEL
+
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -101,40 +81,39 @@ namespace app {
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
-#endif
 
         do {
-            int err = hal_get_image_data((uint8_t *) RAW_BUFFER);
-            if (err) {
-                printf_err("hal_get_image_data failed with : %d", err);
+            hal_lcd_clear(COLOR_BLACK);
+
+            /* Strings for presentation/logging. */
+            std::string str_inf{"Running inference... "};
+
+            const uint8_t* imgSrc = get_img_array(ctx.Get<uint32_t>("imgIndex"));
+            if (nullptr == imgSrc) {
+                printf_err("Failed to get image index %" PRIu32 " (max: %u)\n", ctx.Get<uint32_t>("imgIndex"),
+                           NUMBER_OF_FILES - 1);
                 return false;
             }
 
-            tprof5 = ARM_PMU_Get_CCNTR();
             /* Display this image on the LCD. */
             hal_lcd_display_image(
-                (const uint8_t*)RAW_BUFFER,
-                224, 224, 3, //nCols, nRows, nChannels,
+                imgSrc,
+                nCols, nRows, nChannels,
                 dataPsnImgStartX, dataPsnImgStartY, dataPsnImgDownscaleFactor);
-            tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
 
-            if (SKIP_MODEL || !run_requested()) {
-#if SHOW_PROFILING
-                lv_label_set_text_fmt(labelResult1, "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
-                lv_label_set_text_fmt(labelResult2, "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
-                lv_label_set_text_fmt(labelResult3, "tprof3=%.3f ms", (double)tprof3 / SystemCoreClock * 1000);
-                lv_label_set_text_fmt(labelResult4, "tprof4=%.3f ms", (double)tprof4 / SystemCoreClock * 1000);
-                lv_label_set_text_fmt(labelResult5, "tprof5=%.3f ms", (double)tprof5 / SystemCoreClock * 1000);
-#endif
-                break;
-            }
+            /* Display message on the LCD - inference running. */
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
-#if !SKIP_MODEL
+            /* Select the image to run inference with. */
+            info("Running inference on image %" PRIu32 " => %s\n", ctx.Get<uint32_t>("imgIndex"),
+                get_filename(ctx.Get<uint32_t>("imgIndex")));
+
             const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
                                   inputTensor->bytes : IMAGE_DATA_SIZE;
 
             /* Run the pre-processing, inference and post-processing. */
-            if (!preProcess.DoPreProcess(inputTensor->data.data, imgSz)) {
+            if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
@@ -149,16 +128,17 @@ namespace app {
                 return false;
             }
 
+            /* Erase. */
+            str_inf = std::string(str_inf.size(), ' ');
+            hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
+                    dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
+
             /* Add results to context for access outside handler. */
             ctx.Set<std::vector<ClassificationResult>>("results", results);
 
 #if VERIFY_TEST_OUTPUT
             arm::app::DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
-
-            lv_label_set_text_fmt(labelResult1, "%s (%ld%%)", results[0].m_label.c_str(), (uint32_t)(results[0].m_normalisedVal * 100));
-            lv_label_set_text_fmt(labelResult2, "%s (%ld%%)", results[1].m_label.c_str(), (uint32_t)(results[1].m_normalisedVal * 100));
-            lv_label_set_text_fmt(labelResult3, "%s (%ld%%)", results[2].m_label.c_str(), (uint32_t)(results[2].m_normalisedVal * 100));
 
             if (!PresentInferenceResult(results)) {
                 return false;
@@ -167,7 +147,7 @@ namespace app {
             profiler.PrintProfilingResult();
 
             IncrementAppCtxIfmIdx(ctx,"imgIndex");
-#endif
+
         } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImgIdx);
 
         return true;

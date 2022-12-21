@@ -114,22 +114,34 @@ int RETARGET(_write)(FILEHANDLE fh, const unsigned char *buf, unsigned int len, 
     switch (fh) {
     case STDOUT:
     case STDERR: {
-        int c;
-        unsigned int written = len;
-
-        while (len-- > 0) {
-            c = fputc(*buf++, stdout);
-            if (c == EOF) {
-                return EOF;
+        if(__get_IPSR() != 0U)
+        {
+           // this is ISR context so don't push to UART
+           if(retarget_buf_len < RETARGET_BUF_MAX)
+           {
+               // if we're full just drop
+               if (len > RETARGET_BUF_MAX - retarget_buf_len) {
+                   len = RETARGET_BUF_MAX - retarget_buf_len;
+               }
+               memcpy(retarget_buf + retarget_buf_len, buf, len);
+               retarget_buf_len += len;
+           }
+        }
+        else
+        {
+            if (retarget_buf_len != 0)
+            {
+                send_str(retarget_buf, retarget_buf_len);
+                retarget_buf_len = 0;
             }
+            send_str((const char *) buf, len);
         }
 #ifdef __ARMCC_VERSION
         // armcc expects to get the amount of characters that were not written
-        UNUSED(written);
         return 0;
 #else
         // gcc expects to get the amount of characters written
-        return written;
+        return len;
 #endif
     }
     default:
@@ -228,11 +240,14 @@ char *RETARGET(_command_string)(char *cmd, int len)
 
 void RETARGET(_exit)(int return_code)
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnonnull"
-    fputc(0x0A, (FILE*)0);
-#pragma clang diagnostic pop
-    while(1);
+    UNUSED(return_code);
+
+    putchar('\n');
+
+    __BKPT();
+    while(1) {
+        __WFE();
+    }
 }
 
 int system(const char *cmd)
@@ -274,39 +289,6 @@ int rename(const char *oldn, const char *newn)
     UNUSED(newn);
 
     return 0;
-}
-
-int fputc(int ch, FILE *f)
-{
-    UNUSED(f);
-    retarget_buf[retarget_buf_len++] = (uint8_t)ch;
-
-    // send when buffer is full and on line break
-    if(retarget_buf_len == RETARGET_BUF_MAX ||
-       ch == 0x0A)
-    {
-        if(__get_IPSR() != 0U)
-        {
-            // this is ISR context so don't push to UART
-            if(retarget_buf_len == RETARGET_BUF_MAX)
-            {
-                // if we're full just drop
-                retarget_buf_len--;
-            }
-            // otherwise just continue buffering over eol barrier
-        }
-        else
-        {
-            int buf_len = retarget_buf_len;
-            retarget_buf_len = 0;
-            if(send_str(retarget_buf, buf_len))
-            {
-                return EOF;
-            }
-        }
-    }
-
-    return ch;
 }
 
 int fgetc(FILE *f)

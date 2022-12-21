@@ -8,16 +8,25 @@
  *
  */
 
-#ifndef IMAGE_BUFF_H_
-#define IMAGE_BUFF_H_
+#ifndef LV_PAINT_UTILS_H_
+#define LV_PAINT_UTILS_H_
 
 #include "lvgl.h"
 #include "image_processing.h"
 
-extern uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
-extern uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460];
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern uint8_t lcd_image[DIMAGE_Y][DIMAGE_X][RGB565_BYTES];
-extern lv_color_t lvgl_image[LIMAGE_Y][LIMAGE_X];
+void write_to_lvgl_buf_doubled(
+        const uint8_t src[MIMAGE_Y][MIMAGE_X][3],
+        lv_color_t dst[MIMAGE_Y * 2][MIMAGE_X * 2]);
+void write_to_lvgl_buf(
+        const uint8_t src[MIMAGE_Y][MIMAGE_X][3],
+        lv_color_t dst[MIMAGE_Y][MIMAGE_X]);
 
-#endif /* IMAGE_BUFF_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LV_PAINT_UTILS_H_ */

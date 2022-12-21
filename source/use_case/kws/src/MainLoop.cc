@@ -61,6 +61,12 @@ static void DisplayMenu()
 
 void main_loop()
 {
+    int err = hal_audio_init();
+    if (0 != err) {
+        printf_err("hal_audio_init failed with error: %d\n", err);
+        return false;
+    }
+
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
 

@@ -66,7 +66,7 @@
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
 
-#ifdef IMG_CLASS
+#if CONSOLE_UART==2
 
 static void MHU_msg_received(void* data);
 extern ARM_DRIVER_GPIO Driver_GPIO1;
@@ -84,23 +84,8 @@ void ipc_rx_callback(void *data)
 }
 #endif
 
-void copy_vtor_table_to_ram()
-{
-    extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
-    static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048)));
-    for(int i = 0; i < 496; i++)
-    {
-        MyVectorTable[i] = __VECTOR_TABLE[i];
-    }
-    // Set the new vector table into use.
-    SCB->VTOR = (uint32_t)(&MyVectorTable[0]);
-    __DSB();
-}
-
 int platform_init(void)
 {
-    //copy_vtor_table_to_ram();
-
     tracelib_init(NULL);
 
     int err = 0;
@@ -108,7 +93,7 @@ int platform_init(void)
 
     info("%s: complete\n", __FUNCTION__);
 
-#ifdef IMG_CLASS
+#if CONSOLE_UART==2
     services_init(MHU_msg_received);
 
     // Initialize GPIOs to capture the buttons state
@@ -164,7 +149,7 @@ const char* platform_name(void)
     return s_platform_name;
 }
 
-#ifdef IMG_CLASS
+#if CONSOLE_UART==2
 static bool do_inference_once = true;
 static bool last_btn0 = false;
 static bool last_btn1 = false;

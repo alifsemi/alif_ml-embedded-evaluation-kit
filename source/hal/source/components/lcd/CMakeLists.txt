@@ -30,7 +30,6 @@ set(LCD_IFACE_TARGET lcd_iface)
 add_library(${LCD_IFACE_TARGET} INTERFACE)
 target_include_directories(${LCD_IFACE_TARGET} INTERFACE include)
 
-if (USE_CASE_BUILD STREQUAL img_class)
 set(LCD_ENSEMBLE_COMPONENT_TARGET lcd_ensemble)
 add_library(${LCD_ENSEMBLE_COMPONENT_TARGET} STATIC)
 
@@ -49,7 +48,6 @@ target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${LCD_IFACE_TARGET}
     log
     image_iface)
-endif()
 
 # Create static library for MPS3 LCD
 set(LCD_MPS3_COMPONENT_TARGET lcd_mps3)

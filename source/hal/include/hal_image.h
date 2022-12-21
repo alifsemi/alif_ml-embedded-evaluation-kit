@@ -28,9 +28,8 @@
 
 /**
  * @brief get image data with Hal implementation.
- *
- * @param data  void* data input buffer for image data. Data type depending on platform.
- */
-#define hal_get_image_data(data)   get_image_data(data)
+ * @return pointer to RGB image data
+ * */
+#define hal_get_image_data()   get_image_data()
 
 #endif // HAL_IMAGE_H

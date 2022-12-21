@@ -17,7 +17,7 @@
 
 int image_init();
 
-int get_image_data(void *data);
+const uint8_t *get_image_data(void);
 
 
 #endif // IMAGE_DATA_H

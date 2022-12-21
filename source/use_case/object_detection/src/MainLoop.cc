@@ -48,6 +48,13 @@ static void DisplayDetectionMenu()
 
 void main_loop()
 {
+    /* Initialise LCD */
+    int err = hal_lcd_init();
+    if (0 != err) {
+        printf_err("hal_lcd_init failed with error: %d\n", err);
+        return;
+    }
+
     arm::app::YoloFastestModel model;  /* Model wrapper object. */
 
     /* Load the model. */

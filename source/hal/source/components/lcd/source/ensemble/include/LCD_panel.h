@@ -11,10 +11,14 @@
 #ifndef ILI9806E_LCD_PANEL_LCD_PANEL_H_
 #define ILI9806E_LCD_PANEL_LCD_PANEL_H_
 
-
 int Display_reset(void);
 int Display_BL_LED_EN(void);
 int Display_initialization(uint8_t *buffer);
 
+int LCD_Panel_init(uint8_t *buffer);
+
+int LCD_current_v_pos(void);
+
+void LCD_enable_tear_interrupt(void (*handler)(void), uint8_t prio);
 
 #endif /* ILI9806E_LCD_PANEL_LCD_PANEL_H_ */
