@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,3 +287,51 @@ int ferror(FILE* f)
 #endif /* #ifndef ferror */
 
 #endif /* !defined(USE_SEMIHOSTING) */
+
+/* If using GNU compiler */
+#if defined(__GNUC__)
+
+/* If Arm GNU compiler version > 11.3.0 */
+#if __GNUC__ > 11 || \
+    (__GNUC__ == 11 && (__GNUC_MINOR__ > 3 || (__GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ > 0)))
+struct stat;
+int _fstat_r(struct _reent* r, int fdes, struct stat* s)
+{
+    (void)(r);
+    (void)(fdes);
+    (void)(s);
+    return -1;
+}
+
+int _getpid_r(struct _reent* r)
+{
+    (void)(r);
+    return -1;
+}
+
+int _isatty_r(struct _reent* r, int desc)
+{
+    (void)(r);
+    (void)(desc);
+    return -1;
+}
+
+int _kill_r(struct _reent* r, int pid, int signal)
+{
+    (void)(r);
+    (void)(pid);
+    (void)(signal);
+    return -1;
+}
+
+_off_t _lseek_r(struct _reent* r, int fdes, _off_t offset, int w)
+{
+    (void)(r);
+    (void)(fdes);
+    (void)(offset);
+    (void)(w);
+    return -1;
+}
+
+#endif /* GNU  toolchain version > 11.3.0 */
+#endif /* If using GNU toolchain */

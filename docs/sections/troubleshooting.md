@@ -9,6 +9,7 @@
   - [No matching distribution found for ethos-u-vela==3.5.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
     - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
+  - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
 
 ## Inference results are incorrect for my custom files
 
@@ -248,3 +249,28 @@ You can then try rebuilding again e.g.
 python3 ./build_default.py
 ```
 and the error should be fixed.
+
+## Internal Compiler Error
+
+There is a known issue with the Arm GNU toolchain version 12.2 (release December 22, 2022).
+Compiler from this toolchain throws up this error:
+
+```
+during RTL pass: combine
+/home/user/ml-embedded-evaluation-kit/dependencies/cmsis-nn/Source/SoftmaxFunctions/arm_softmax_s8.c: In function 'arm_exp_on_negative_values_mve_32x4':
+/home/user/ml-embedded-evaluation-kit/dependencies/cmsis-nn/Source/SoftmaxFunctions/arm_softmax_s8.c:74:1: internal compiler error: in trunc_int_for_mode, at explow.cc:59
+   74 | }
+      | ^
+0x7f0343d9b082 __libc_start_main
+	../csu/libc-start.c:308
+Please submit a full bug report, with preprocessed source (by using -freport-bug).
+Please include the complete backtrace with any bug report.
+See <https://bugs.linaro.org/> for instructions.
+```
+
+This is expected to be fixed in the next release of the toolchain. We recommend using the previous version 11.3.Rel1
+(from August 2022).
+
+See
+- [GCC patches: PR107987](https://gcc.gnu.org/pipermail/gcc-patches/2022-December/607963.html)
+- [CMSIS-NN issue 13](https://github.com/ARM-software/CMSIS-NN/issues/13)

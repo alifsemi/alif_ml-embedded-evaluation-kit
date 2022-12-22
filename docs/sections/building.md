@@ -35,7 +35,12 @@ This section assumes that you are using an **x86_64 Linux** build machine.
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
 - GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.16, or higher, is installed and available
-  on the path. Test the compiler by running:
+  on the path.
+
+> **Note**: There is a known issue with Arm GNU Embedded Toolchain version 12.2.Rel1. See
+> [Internal Compiler Error](./troubleshooting.md#internal-compiler-error) for details.
+
+  Test the compiler by running:
 
     ```commandline
     armclang -v
