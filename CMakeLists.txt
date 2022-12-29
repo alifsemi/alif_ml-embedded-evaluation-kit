@@ -15,7 +15,6 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.21.0)
-include(ExternalProject)
 
 # Build in release mode by default
 if (NOT CMAKE_BUILD_TYPE STREQUAL Debug)
