@@ -1,29 +1,12 @@
-/* Copyright (c) 2021 - 2022 ALIF SEMICONDUCTOR
-
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ALIF SEMICONDUCTOR nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
-   *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement 
+ *
+ * You should have received a copy of the Alif Semiconductor Software 
+ * License Agreement with this file. If not, please write to: 
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 /*
  * Copyright (c) 2020 Arm Limited. All rights reserved.
  *
@@ -93,7 +76,7 @@ typedef struct
   uint32_t objSize;
 } atoc_t;
 
-static const atoc_t __mram_atoc = {
+const atoc_t __mram_atoc __attribute__((used)) = {
 
   .loadAddress = 0xFFFFFFFF, // Indicate XIP Mode
   .configuration = MINI_TOC_SIGNATURE + TOC_IMAGE_CPU_M55_HP,
@@ -101,7 +84,6 @@ static const atoc_t __mram_atoc = {
   .objSize = 0
 };
 
-atoc_t *__dummy;
 
 /*----------------------------------------------------------------------------
   Define clocks
@@ -149,11 +131,6 @@ void SystemInit (void)
   SCB->VTOR = (uint32_t)(&__VECTOR_TABLE[0]);
 #endif
 
-  /* Enable UsageFault, BusFault, MemFault and SecurityFault exceptions */
-  /* Otherwise all you see is HardFault, even in the debugger */
-  SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
-                SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_SECUREFAULTENA_Msk;
-
 #if (defined (__FPU_USED) && (__FPU_USED == 1U)) || \
     (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE > 0U))
   SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */
@@ -164,29 +141,33 @@ void SystemInit (void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#if defined (__MPU_PRESENT)
-  MPU_Setup();
-#endif
-
 #ifdef __ICACHE_PRESENT
+  /*Enable ICache*/
+  SCB_InvalidateICache();
   SCB_EnableICache();
+#endif
+#ifdef __DCACHE_PRESENT
+ /*Enable DCache*/
+  SCB_InvalidateDCache();
+  SCB_EnableDCache();
 #endif
 
 // Enable Loop and branch info cache
 SCB->CCR |= SCB_CCR_LOB_Msk;
 __ISB();
 
+#if defined (__MPU_PRESENT)
+  MPU_Setup();
+#endif
+
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   TZ_SAU_Setup();
   TGU_Setup();
 #endif
-  // Initialize Reset VTOR registers
-  *((uint32_t *)0x7100A080) = (uint32_t)(&__VECTOR_TABLE[0]);
-  *((uint32_t *)0x7100A084) = (uint32_t)(&__VECTOR_TABLE[0]);
 
   SystemCoreClock = SYSTEM_CLOCK;
-  __dummy = &__mram_atoc;
-  //Enable the PMU 
+
+  //Enable the PMU
   ARM_PMU_Enable();
 
   //Enable PMU Cycle Counter

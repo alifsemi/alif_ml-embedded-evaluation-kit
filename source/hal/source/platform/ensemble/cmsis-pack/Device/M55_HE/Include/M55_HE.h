@@ -1,29 +1,12 @@
-/* Copyright (c) 2021 - 2022 ALIF SEMICONDUCTOR
-
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ALIF SEMICONDUCTOR nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
-   *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 /*
  * Copyright (c) 2020 Arm Limited. All rights reserved.
  *
@@ -114,18 +97,18 @@ typedef enum IRQn
   DMA2_IRQ30                    =   30,
   DMA2_IRQ31                    =   31,
   DMA2_AbortIRQ                 =   32,
-  MHU_HES10_RX_IRQ              =   33,
-  MHU_ES1H0_TX_IRQ              =   34,
-  MHU_HES11_RX_IRQ              =   35,
-  MHU_ES1H1_TX_IRQ              =   36,
-  MHU_SEES10_RX_IRQ             =   37,
-  MHU_ES1SE0_TX_IRQ             =   38,
-  MHU_SEES11_RX_IRQ             =   39,
-  MHU_ES1SE1_TX_IRQ             =   40,
-  MHU_ES0ES10_RX_IRQ            =   41,
-  MHU_ES1ES00_TX_IRQ            =   42,
-  MHU_ES0ES11_RX_IRQ            =   43,
-  MHU_ES1ES01_TX_IRQ            =   44,
+  MHU_APSS_S_RX_IRQ             =   33,
+  MHU_APSS_S_TX_IRQ             =   34,
+  MHU_APSS_NS_RX_IRQ            =   35,
+  MHU_APSS_NS_TX_IRQ            =   36,
+  MHU_SESS_S_RX_IRQ             =   37,
+  MHU_SESS_S_TX_IRQ             =   38,
+  MHU_SESS_NS_RX_IRQ            =   39,
+  MHU_SESS_NS_TX_IRQ            =   40,
+  MHU_RTSS_S_RX_IRQ             =   41,
+  MHU_RTSS_S_TX_IRQ             =   42,
+  MHU_RTSS_NS_RX_IRQ            =   43,
+  MHU_RTSS_NS_TX_IRQ            =   44,
   LPUART_IRQ                    =   45,
   LPSPI_IRQ                     =   46,
   /* IRQ 47 is Reserved. */
@@ -136,7 +119,7 @@ typedef enum IRQn
   MDM_INTGEN3_IRQ               =   52,
   MDM_INTGEN4_IRQ               =   53,
   MDM_INTGEN5_IRQ               =   54,
-  ETHOS_U55_1_IRQ               =   55,
+  NPU_IRQ                       =   55,
   LPCMP_IRQ                     =   56,
   GPIOV_IRQ                     =   57,
   /* IRQs 58 to 59 are Reserved. */
@@ -402,19 +385,7 @@ typedef enum IRQn
   LPTIMER_CHANNEL2_IRQ          =   339,
   LPTIMER_CHANNEL3_IRQ          =   340,
   RTC0_IRQ                      =   341,
-  IPC_GNSS_DATA_IRQ             =   342,
-  IPC_GNSS_ATCMD_IRQ            =   343,
-  IPC_MDM_IRQ2                  =   344,
-  IPC_MDM_ATCMD_IRQ             =   345,
-  IPC_MDM_DATA_IRQ              =   346,
-  IPC_MDM_IRQ5                  =   347,
-  IPC_MDM_IRQ6                  =   348,
-  IPC_MDM_IRQ7                  =   349,
-  IPC_MDM_IRQ8                  =   350,
-  IPC_MDM_IRQ9                  =   351,
-  IPC_MDM_IRQ10                 =   352,
-  IPC_MDM_IRQ11                 =   353,
-  /* IRQs 354 to 359 are Reserved. */
+  /* IRQs 342 to 359 are Reserved. */
   QEC0_INTR_CMP_A_IRQ           =   360,
   QEC0_INTR_CMP_B_IRQ           =   361,
   QEC1_INTR_CMP_A_IRQ           =   362,

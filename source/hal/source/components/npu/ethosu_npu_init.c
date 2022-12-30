@@ -56,20 +56,20 @@ static void arm_ethosu_npu_irq_init(void)
 
     /* Register the EthosU IRQ handler in our vector table.
      * Note, this handler comes from the EthosU driver */
-    NVIC_SetVector(ethosu_irqnum, (uint32_t)ETHOS_U55_0_IRQHandler);
+    NVIC_SetVector(ethosu_irqnum, (uint32_t)NPU_IRQHandler);
 
     /* Enable the IRQ */
     NVIC_EnableIRQ(ethosu_irqnum);
 
     debug("EthosU IRQ#: %u, Handler: 0x%p\n",
-          ethosu_irqnum, ETHOS_U55_0_IRQHandler);
+          ethosu_irqnum, NPU_IRQHandler);
 }
 
 /**
  * @brief   Defines the Ethos-U interrupt handler: just a wrapper around the default
  *          implementation.
  **/
-void ETHOS_U55_0_IRQHandler(void)
+void NPU_IRQHandler(void)
 {
     /* Call the default interrupt handler from the NPU driver */
     ethosu_irq_handler(&ethosu_drv);

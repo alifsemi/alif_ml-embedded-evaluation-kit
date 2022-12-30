@@ -77,42 +77,42 @@ static mhu_driver_out_t s_mhu_driver_out;
 
 static mhu_m55_receive_callback_t M55_receive_callback = 0;
 
-void MHU_ES0SE0_TX_IRQHandler()
+void MHU_SESS_S_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU0);
 }
 
-void MHU_SEES00_RX_IRQHandler()
+void MHU_SESS_S_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU0);
 }
 
-void MHU_ES0SE1_TX_IRQHandler()
+void MHU_SESS_NS_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_SE_MHU1);
 }
 
-void MHU_SEES01_RX_IRQHandler()
+void MHU_SESS_NS_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_SE_MHU1);
 }
 
-void MHU_ES0ES10_TX_IRQHandler()
+void MHU_RTSS_S_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU0);
 }
 
-void MHU_ES1ES00_RX_IRQHandler()
+void MHU_RTSS_S_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU0);
 }
 
-void MHU_ES0ES11_TX_IRQHandler()
+void MHU_RTSS_NS_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_M55_M55_MHU1);
 }
 
-void MHU_ES1ES01_RX_IRQHandler()
+void MHU_RTSS_NS_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_M55_M55_MHU1);
 }
