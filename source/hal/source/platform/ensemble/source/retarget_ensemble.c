@@ -30,6 +30,7 @@
 #if !defined(USE_SEMIHOSTING)
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include <RTE_Components.h>
@@ -145,7 +146,7 @@ int RETARGET(_write)(FILEHANDLE fh, const unsigned char *buf, unsigned int len, 
 #endif
     }
     default:
-        return EOF;
+        return -1;
     }
 }
 
@@ -156,20 +157,34 @@ int RETARGET(_read)(FILEHANDLE fh, unsigned char *buf, unsigned int len, int mod
     switch (fh) {
     case STDIN: {
         int c;
+        unsigned int read = 0;
+        bool eof = false;
 
-        while (len-- > 0) {
+        while (read < len) {
             c = fgetc(stdin);
             if (c == EOF) {
-                return EOF;
+                eof = true;
+                break;
             }
 
             *buf++ = (unsigned char)c;
+            read++;
         }
 
-        return 0;
+#ifdef __ARMCC_VERSION
+        /* Return number of bytes not read, combined with an EOF flag */
+        return (eof ? (int) 0x80000000 : 0) | (len - read);
+#else
+        /* Return number of bytes read */
+        if (read > 0) {
+            return read;
+        } else {
+            return eof ? -1 : 0;
+        }
+#endif
     }
     default:
-        return EOF;
+        return -1;
     }
 }
 
