@@ -1042,6 +1042,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/
+__attribute__((naked))
 __NO_RETURN void Reset_Handler(void)
 {
   /* Set up the main stack */
