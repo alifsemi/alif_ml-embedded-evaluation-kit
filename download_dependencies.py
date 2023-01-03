@@ -28,7 +28,7 @@ TF = "https://github.com/tensorflow/tflite-micro/archive/02715237c1fc0a23f465226
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/29615088b12e3ba8ce50d316cf7f38c1bd7fc620.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.05.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.05.tar.gz"
-LVGL = "https://github.com/lvgl/lvgl/archive/2c0162b457e32da50268127575c0c2b95ab29bc1.zip"
+LVGL = "https://github.com/lvgl/lvgl/archive/dbb15bb3ea0365373bc1ba8b182556f937e61e7d.zip"
 ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.0.zip"
 
 
