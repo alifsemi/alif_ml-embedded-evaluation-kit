@@ -1025,12 +1025,34 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/
+__attribute__((naked))
 __NO_RETURN void Reset_Handler(void)
 {
-  /* Setup the main stack */
-  __asm volatile ("MSR MSPLIM, %0" : : "r" (&__STACK_LIMIT));
-  __asm volatile ("MSR MSP, %0" : : "r" (&__INITIAL_SP));
+  /* Set up the main stack */
 
+  /*
+   * Function must be naked to ensure the compiler doesn't use the
+   * stack on entry.
+   *
+   * Only basic asm (no parameters) is permitted for naked functions,
+   * so we have to get the values in by text substitution.
+   */
+#define xstr(s) str(s)
+#define str(s) #s
+  __asm (
+    "LDR     R0, =" xstr(__STACK_LIMIT) "\n\t"
+    "LDR     R1, =" xstr(__INITIAL_SP) "\n\t"
+    "MSR     MSPLIM, R0\n\t"
+    "MSR     MSP, R1\n\t"
+    "BL      Reset_Handler_C"
+  );
+#undef xstr
+#undef str
+}
+
+__attribute__((used))
+__NO_RETURN void Reset_Handler_C(void)
+{
   SystemInit();                             /* CMSIS System Initialization */
   __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
 }
