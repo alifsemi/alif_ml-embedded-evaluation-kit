@@ -1,3 +1,26 @@
+/*
+ * 1394-Based Digital Camera Control Library
+ *
+ * Bayer pattern decoding functions
+ *
+ * Written by Damien Douxchamps and Frederic Devernay
+ * The original VNG and AHD Bayer decoding are from Dave Coffin's DCRAW.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement 
@@ -8,20 +31,22 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+// Original dc1394_bayer_Simple copied from libdc1394 - bayer.c
+// Modified to use Helium instructions when available.
+
 #include <string.h>
 #include "base_def.h"
 #include "bayer.h"
 
 // At the time of writing, GCC produces incorrect assembly
-#define ENABLE_MVE_BAYER2RGB (defined __ARMCC_VERSION && (__ARM_FEATURE_MVE & 1))
+ #if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 1)
+ #define ENABLE_MVE_BAYER2RGB 1
+ #endif
 
-#if __ARM_FEATURE_MVE & 1
+#if ENABLE_MVE_BAYER2RGB
 #include <arm_mve.h>
 #endif
 
-#include "Driver_CPI.h"
 #include "image_processing.h"
 
 extern uint8_t  	rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
