@@ -115,6 +115,7 @@ int RETARGET(_write)(FILEHANDLE fh, const unsigned char *buf, unsigned int len, 
     case STDOUT:
     case STDERR: {
         int c;
+        unsigned int written = len;
 
         while (len-- > 0) {
             c = fputc(*buf++, stdout);
@@ -122,8 +123,14 @@ int RETARGET(_write)(FILEHANDLE fh, const unsigned char *buf, unsigned int len, 
                 return EOF;
             }
         }
-
+#ifdef __ARMCC_VERSION
+        // armcc expects to get the amount of characters that were not written
+        UNUSED(written);
         return 0;
+#else
+        // gcc expects to get the amount of characters written
+        return written;
+#endif
     }
     default:
         return EOF;

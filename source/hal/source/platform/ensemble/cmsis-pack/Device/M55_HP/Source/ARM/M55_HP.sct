@@ -1,9 +1,14 @@
 #! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 #include "M55_HP_map.h"
+#include "app_map.h"
 /*
 ;-------- <<< Use Configuration Wizard in Context Menu >>> -------------------
 */
+
+/* MRAM code storage for M55-HP */
+#define __ROM_BASE      _APP_ADDRESS
+#define __ROM_SIZE      _APP_MAX_SIZE
 
 /*--------------------- ITCM Configuration ----------------------------------
 ; <h> ITCM Configuration
@@ -12,8 +17,8 @@
 ; </h>
  *----------------------------------------------------------------------------*/
 /* SRAM2 is mapped as ITCM in M55-HP */
-#define __ROM_BASE      0x00000000
-#define __ROM_SIZE      SRAM2_SIZE
+#define __ITCM_BASE      0x00000000
+#define __ITCM_SIZE      SRAM2_SIZE
 
 /*--------------------- DTCM Configuration ---------------------------
 ; <h> DTCM Configuration
@@ -46,25 +51,28 @@
  *----------------------------------------------------------------------------*/
 #define __STACK_TOP     (__RAM_BASE + __RAM_SIZE)    /* starts at end of RAM */
 #define __HEAP_BASE     (AlignExpr(+0, 8))           /* starts after RW_RAM section, 8 byte aligned */
-#define __APP_HEAP_BASE (AlignExpr(+0, 8)) 	     /* starts after HEAP, 8 byte aligned */
+#define __APP_HEAP_BASE (AlignExpr(+0, 8))           /* starts after HEAP, 8 byte aligned */
 
 
 /*----------------------------------------------------------------------------
   Scatter File Definitions definition
  *----------------------------------------------------------------------------*/
-#define __RO_BASE       __ROM_BASE
-#define __RO_SIZE       __ROM_SIZE
 
 #define __RW_BASE       __RAM_BASE
 #define __RW_SIZE      (__RAM_SIZE - __STACK_SIZE - __HEAP_SIZE - __APP_HEAP_SIZE - NS_REGION_0_SIZE)
 
 
-LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
-  ER_ROM __RO_BASE __RO_SIZE  {                     ; load address = execution address
+LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
+  M55_HP_ROM +0 __ROM_SIZE  {                 ; load address = execution address
    *.o (RESET, +First)
    *(InRoot$$Sections)
+   *.o (startup_ro_data)
    .ANY (+RO)
    .ANY (+XO)
+  }
+
+  ITCM_RAM __ITCM_BASE __ITCM_SIZE  {                     ; RW code
+   ; Specify objects intended to execute out of ITCM
   }
 
   RW_RAM __RW_BASE __RW_SIZE  {                     ; RW data
@@ -81,13 +89,15 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
   NS_REGION_0  NS_REGION_0_BASE  NS_REGION_0_SIZE { /* Non secure region 0 */
    * (eth_buf)
+   * (usb_dma_buf)
   }
 
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {   ; Reserve empty region for stack
   }
 
   RW_SRAM0 SRAM0_BASE SRAM0_SIZE  {  ; Update sections as needed
-
+   * (lcd_crop_and_interpolate_buf)  ; LCD crop and intrepolate image processing buffer.
+   * (lcd_frame_buf)                 ; LCD frame Buffer.
   }
   RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; Update sections as needed
    * (camera_frame_buf)              ; Camera Frame Buffer
@@ -112,5 +122,15 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
   }
 
+  PADDING +0 ALIGN 16 FILL 0 16
+  {
+  }
 }
 
+LR_PARTITION _PARTITION_ADDRESS  _PARTITION_SIZE
+{
+	RESERVED +0 FILL 0 (_PARTITION_SIZE - 16) {}
+	ATOC +0 16 {
+		*(:gdef:__mram_atoc)
+	}
+}

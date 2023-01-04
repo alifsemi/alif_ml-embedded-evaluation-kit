@@ -1,27 +1,12 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2021 Alif Semiconductor Inc.
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement 
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * You should have received a copy of the Alif Semiconductor Software 
+ * License Agreement with this file. If not, please write to: 
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- *
- * 3. This notice may not be removed or altered from any source distribution.
- *
- * $Date:        25. Feburary 2021
- * $Revision:    V1.0.0
- * Author:       Sudhir Sreedharan
- * Project:      Global Memory Map of SOC
- * -------------------------------------------------------------------------- */
+ */
 
 #ifndef GLOBAL_MAP_H
 #define GLOBAL_MAP_H
@@ -142,6 +127,7 @@
 #define DAC0_BASE                 (EXPMST0_APB_C_BASE + 0x00008000)
 #define DAC1_BASE                 (EXPMST0_APB_C_BASE + 0x00009000)
 #define CFGMST0_BASE              (EXPMST0_APB_C_BASE + 0x0000F000)
+#define CFGMST0_GPIO_CTRL         (CFGMST0_BASE + 0x00000004)
 #define CFGMST0_SSI               (CFGMST0_BASE + 0x00000028)
 
 /* APB-D Peripherals */
@@ -149,11 +135,6 @@
 #define CDC200_BASE               (EXPMST0_APB_D_BASE + 0x00001000)
 #define MIPI_DSI_BASE             (EXPMST0_APB_D_BASE + 0x00002000)
 #define MIPI_CSI2_BASE            (EXPMST0_APB_D_BASE + 0x00003000)
-/* Interrupt Generator Block for Modem SubSystem */
-#define INTGEN_0                  (EXPMST0_APB_D_BASE + 0x00008000)
-#define INTGEN_1                  (EXPMST0_APB_D_BASE + 0x00009000)
-#define INTGEN_4                  (EXPMST0_APB_D_BASE + 0x0000C000)
-#define INTGEN_5                  (EXPMST0_APB_D_BASE + 0x0000D000)
 #define CFGSLV1_BASE              (EXPMST0_APB_D_BASE + 0x0000F000)
 #define CDC200_PIXCLK_CTRL        (CFGSLV1_BASE + 0x00000004)
 #define CSI_PIXCLK_CTRL           (CFGSLV1_BASE + 0x00000008)
@@ -191,5 +172,11 @@
 
 /* Ethernet 50MHz clock mux register */
 #define ETH_50M_CLK_MUX_REG       (LPAON_VBAT_REGS_BASE + 0x00000408)
+
+/* OSPI Address Map */
+#define OSPI0_BASE                0xD0000000
+#define OSPI1_BASE                0xD8000000
+#define OSPI0_SIZE                0x08000000UL
+#define OSPI1_SIZE                0x08000000UL
 
 #endif /* GLOBAL_MAP_H */

@@ -1,29 +1,12 @@
-/* Copyright (c) 2021 - 2022 ALIF SEMICONDUCTOR
-
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ALIF SEMICONDUCTOR nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
-   *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement 
+ *
+ * You should have received a copy of the Alif Semiconductor Software 
+ * License Agreement with this file. If not, please write to: 
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 /*
  * Copyright (c) 2020 Arm Limited. All rights reserved.
  *
@@ -124,22 +107,24 @@ void DMA1_IRQ30Handler      (void) __attribute__ ((weak, alias("Default_Handler"
 void DMA1_IRQ31Handler      (void) __attribute__ ((weak, alias("Default_Handler")));
 void DMA1_AbortIRQHandler   (void) __attribute__ ((weak, alias("Default_Handler")));
 
-void MHU_HES00_RX_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0H0_TX_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_HES01_RX_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0H1_TX_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_SEES00_RX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0SE0_TX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_SEES01_RX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0SE1_TX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES1ES00_RX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0ES10_TX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES1ES01_RX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
-void MHU_ES0ES11_TX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_APSS_S_RX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_APSS_S_TX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_APSS_NS_RX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_APSS_NS_TX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+
+void MHU_SESS_S_RX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_SESS_S_TX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_SESS_NS_RX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_SESS_NS_TX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+
+void MHU_RTSS_S_RX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_RTSS_S_TX_IRQHandler        (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_RTSS_NS_RX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
+void MHU_RTSS_NS_TX_IRQHandler       (void) __attribute__ ((weak, alias("Default_Handler")));
 
 void HP_PPU_IRQHandler               (void) __attribute__ ((weak, alias("Default_Handler")));
 
-void ETHOS_U55_0_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
+void NPU_IRQHandler                  (void) __attribute__ ((weak, alias("Default_Handler")));
 
 void FW_IRQHandler                   (void) __attribute__ ((weak, alias("Default_Handler")));
 void SDC600_IRQHandler               (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -430,19 +415,6 @@ void LPTIMER_CHANNEL3_IRQHandler        (void) __attribute__ ((weak, alias("Defa
 
 void RTC0_IRQHandler                    (void) __attribute__ ((weak, alias("Default_Handler")));
 
-void IPC_GNSS_DATA_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_GNSS_ATCMD_IRQHandler          (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_ATCMD_IRQHandler           (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_DATA_IRQHandler            (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler2                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler5                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler6                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler7                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler8                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler9                (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler10               (void) __attribute__ ((weak, alias("Default_Handler")));
-void IPC_MDM_IRQHandler11               (void) __attribute__ ((weak, alias("Default_Handler")));
-
 void QEC0_INTR_CMP_A_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
 void QEC0_INTR_CMP_B_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
 void QEC1_INTR_CMP_A_IRQHandler         (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -612,18 +584,18 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   DMA1_IRQ30Handler,                        /*   30 Interrupt 30 */
   DMA1_IRQ31Handler,                        /*   31 Interrupt 31 */
   DMA1_AbortIRQHandler,                     /*   32 Interrupt 32 */
-  MHU_HES00_RX_IRQHandler,                  /*   33 Interrupt 33 */
-  MHU_ES0H0_TX_IRQHandler,                  /*   34 Interrupt 34 */
-  MHU_HES01_RX_IRQHandler,                  /*   35 Interrupt 35 */
-  MHU_ES0H1_TX_IRQHandler,                  /*   36 Interrupt 36 */
-  MHU_SEES00_RX_IRQHandler,                 /*   37 Interrupt 37 */
-  MHU_ES0SE0_TX_IRQHandler,                 /*   38 Interrupt 38 */
-  MHU_SEES01_RX_IRQHandler,                 /*   39 Interrupt 39 */
-  MHU_ES0SE1_TX_IRQHandler,                 /*   40 Interrupt 40 */
-  MHU_ES1ES00_RX_IRQHandler,                /*   41 Interrupt 41 */
-  MHU_ES0ES10_TX_IRQHandler,                /*   42 Interrupt 42 */
-  MHU_ES1ES01_RX_IRQHandler,                /*   43 Interrupt 43 */
-  MHU_ES0ES11_TX_IRQHandler,                /*   44 Interrupt 44 */
+  MHU_APSS_S_RX_IRQHandler,                 /*   33 Interrupt 33 */
+  MHU_APSS_S_TX_IRQHandler,                 /*   34 Interrupt 34 */
+  MHU_APSS_NS_RX_IRQHandler,                /*   35 Interrupt 35 */
+  MHU_APSS_NS_TX_IRQHandler,                /*   36 Interrupt 36 */
+  MHU_SESS_S_RX_IRQHandler,                 /*   37 Interrupt 37 */
+  MHU_SESS_S_TX_IRQHandler,                 /*   38 Interrupt 38 */
+  MHU_SESS_NS_RX_IRQHandler,                /*   39 Interrupt 39 */
+  MHU_SESS_NS_TX_IRQHandler,                /*   40 Interrupt 40 */
+  MHU_RTSS_S_RX_IRQHandler,                 /*   41 Interrupt 41 */
+  MHU_RTSS_S_TX_IRQHandler,                 /*   42 Interrupt 42 */
+  MHU_RTSS_NS_RX_IRQHandler,                /*   43 Interrupt 43 */
+  MHU_RTSS_NS_TX_IRQHandler,                /*   44 Interrupt 44 */
   0,                                        /*   45 Interrupt 45 */
   0,                                        /*   46 Interrupt 46 */
   0,                                        /*   47 Interrupt 47 */
@@ -634,7 +606,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   0,                                        /*   52 Interrupt 52 */
   0,                                        /*   53 Interrupt 53 */
   0,                                        /*   54 Interrupt 54 */
-  ETHOS_U55_0_IRQHandler,                   /*   55 Interrupt 55 */
+  NPU_IRQHandler,                           /*   55 Interrupt 55 */
   0,                                        /*   56 Interrupt 56 */
   0,                                        /*   57 Interrupt 57 */
   0,                                        /*   58 Interrupt 58 */
@@ -921,18 +893,18 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
   LPTIMER_CHANNEL2_IRQHandler,              /*   339  Interrupt 339 */
   LPTIMER_CHANNEL3_IRQHandler,              /*   340  Interrupt 340 */
   RTC0_IRQHandler,                          /*   341  Interrupt 341 */
-  IPC_GNSS_DATA_IRQHandler,                 /*   342  Interrupt 342 */
-  IPC_GNSS_ATCMD_IRQHandler,                /*   343  Interrupt 343 */
-  IPC_MDM_IRQHandler2,                      /*   344  Interrupt 344 */
-  IPC_MDM_ATCMD_IRQHandler,                 /*   345  Interrupt 345 */
-  IPC_MDM_DATA_IRQHandler,                  /*   346  Interrupt 346 */
-  IPC_MDM_IRQHandler5,                      /*   347  Interrupt 347 */
-  IPC_MDM_IRQHandler6,                      /*   348  Interrupt 348 */
-  IPC_MDM_IRQHandler7,                      /*   349  Interrupt 349 */
-  IPC_MDM_IRQHandler8,                      /*   350  Interrupt 350 */
-  IPC_MDM_IRQHandler9,                      /*   351  Interrupt 351 */
-  IPC_MDM_IRQHandler10,                     /*   352  Interrupt 352 */
-  IPC_MDM_IRQHandler11,                     /*   353  Interrupt 353 */
+  0,			                    /*   342  Interrupt 342 */
+  0,                			    /*   343  Interrupt 343 */
+  0,                      		    /*   344  Interrupt 344 */
+  0,                 			    /*   345  Interrupt 345 */
+  0,                  			    /*   346  Interrupt 346 */
+  0,                      		    /*   347  Interrupt 347 */
+  0,                      		    /*   348  Interrupt 348 */
+  0,                      		    /*   349  Interrupt 349 */
+  0,                      		    /*   350  Interrupt 350 */
+  0,                      		    /*   351  Interrupt 351 */
+  0,                     		    /*   352  Interrupt 352 */
+  0,                     		    /*   353  Interrupt 353 */
   0,                                        /*   354  Interrupt 354 */
   0,                                        /*   355  Interrupt 355 */
   0,                                        /*   356  Interrupt 356 */
@@ -1056,25 +1028,24 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 __attribute__((naked))
 __NO_RETURN void Reset_Handler(void)
 {
-    /* Setup the main stack */
-    /* Super careful to make sure are naked, and the compiler doesn't use the
-     * stack on entry, and we can't ever set MSP < MSPLIM, even briefly, if
-     * there are bad initial values thanks to debugger weirdness or whatever.
-     *
-     * Manual says "basic asm only" for naked functions, so we can't just pass
-     * the values in easily.
-     */
+  /* Set up the main stack */
+
+  /*
+   * Function must be naked to ensure the compiler doesn't use the
+   * stack on entry.
+   *
+   * Only basic asm (no parameters) is permitted for naked functions,
+   * so we have to get the values in by text substitution.
+   */
 #define xstr(s) str(s)
 #define str(s) #s
-    __asm (
-    "MOVS    R0, #0\n\t"
+  __asm (
+    "LDR     R0, =" xstr(__STACK_LIMIT) "\n\t"
     "LDR     R1, =" xstr(__INITIAL_SP) "\n\t"
-    "LDR     R2, =" xstr(__STACK_LIMIT) "\n\t"
     "MSR     MSPLIM, R0\n\t"
     "MSR     MSP, R1\n\t"
-    "MSR     MSPLIM, R2\n\t"
     "BL      Reset_Handler_C"
-	);
+  );
 #undef xstr
 #undef str
 }

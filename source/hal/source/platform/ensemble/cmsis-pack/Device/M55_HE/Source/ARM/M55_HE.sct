@@ -96,7 +96,8 @@ LR_ROM __ROM_BASE NOCOMPRESS __ROM_SIZE  {    ; load region size_region
   }
 
   RW_SRAM0 SRAM0_BASE SRAM0_SIZE  {  ; Update sections as needed
-
+   * (lcd_crop_and_interpolate_buf)  ; LCD crop and intrepolate image processing buffer.
+   * (lcd_frame_buf)                 ; LCD frame Buffer.
   }
   RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; Update sections as needed
    * (camera_frame_buf)              ; Camera Frame Buffer

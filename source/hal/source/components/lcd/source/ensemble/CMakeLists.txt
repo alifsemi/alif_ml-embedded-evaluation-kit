@@ -32,7 +32,6 @@ target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
     glcd_ensemble.c
     Alif240.c
     src/LCD_Panel.c
-    src/mipi_dsi_host.c
     src/image_buff.c
     lvgl/lv_port_disp.c
 )

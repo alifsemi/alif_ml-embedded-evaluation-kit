@@ -1,29 +1,12 @@
-/* Copyright (c) 2021 ALIF SEMICONDUCTOR
-
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ALIF SEMICONDUCTOR nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
-   *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 
 /**************************************************************************//**
  * @file     mpu_M55_HE.c
@@ -56,46 +39,26 @@
  */
 static void MPU_Load_Regions(void)
 {
-    static const ARM_MPU_Region_t mpu_table[] __attribute__((section("startup_ro_data"))) = {
-    {
-    .RBAR = ARM_MPU_RBAR(0x02000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x023FFFFFUL, 2UL)     // SRAM0
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x08000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x0827FFFFUL, 1UL)     // SRAM1
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
-    .RLAR = ARM_MPU_RLAR(0x71FFFFFFUL, 0UL)     // LP- Peripheral & PINMUX Regions */
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 1UL)     // HP TCM (SRAM2 + SRAM3)
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x62000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x621FFFFFUL, 1UL)     // SRAM6
-    },
-    {
-    .RBAR = ARM_MPU_RBAR(0x63100000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x632FFFFFUL, 1UL)     // SRAM8
-    },
+    static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
+        {   /* EXTSYS0 TCM */
+            .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 1UL),
+            .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 0UL)
+        },
+        {
+	    /* Low Power Peripheral Regions */
+            .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
+            .RLAR = ARM_MPU_RLAR(0x72FFFFFFUL, 1UL)
+        },
     };
 
     /* Define the possible Attribute regions */
-    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR(   /* Attr0, Device Memory */
-                            ARM_MPU_ATTR_DEVICE,
-                            ARM_MPU_ATTR_DEVICE_nGnRE));
-    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(	/* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
-                            ARM_MPU_ATTR_MEMORY_(1,1,1,1),
-                            ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
-    ARM_MPU_SetMemAttr(2UL, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
-                            ARM_MPU_ATTR_MEMORY_(0,0,1,0),
-                            ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR( /* Attr0, Normal Memory, Non-Cacheable */
+        ARM_MPU_ATTR_NON_CACHEABLE,
+        ARM_MPU_ATTR_NON_CACHEABLE) );
+    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR_DEVICE); /* Attr1, Device Memory */
 
     /* Load the regions from the table */
-    ARM_MPU_Load(0U, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
+    ARM_MPU_Load(0U, &mpu_table[0], 2U);
 }
 
 /**
@@ -109,7 +72,7 @@ static void MPU_Clear_All_Regions(void)
 {
     MPU_Type* mpu = MPU;
     /* Retrieve the number of regions */
-    uint32_t num_regions = ((mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos);
+    uint32_t num_regions = (mpu->TYPE >> 8);
     uint32_t cnt;
 
     ARM_MPU_Disable();

@@ -1,28 +1,12 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2021 Alif Semiconductor Inc.
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- *
- * 3. This notice may not be removed or altered from any source distribution.
- *
- * $Date:        2. Feburary 2021
- * $Revision:    V1.0.0
- * Author:       Sudhir Sreedharan
- *
- * Project:      RTE Device Configuration for ALIF M55_HE
- * -------------------------------------------------------------------------- */
+ */
 
 //-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
 
@@ -31,7 +15,7 @@
 
 // <e> SILICON_REV_A  (Silicon Revison)
 // <i> Select if the Chip Silicon Rev is Ax
-#define RTE_SILICON_REV_A 	1
+#define RTE_SILICON_REV_A	1
 #if RTE_SILICON_REV_A
 #define RTE_SILICON_REV_B0	0
 #else
@@ -108,14 +92,23 @@
 #define RTE_MIPI_CSI2_IPI_MODE                  0
 #define RTE_MIPI_CSI2_COLOR_COP                 1
 #define RTE_MIPI_CSI2_MEMFLUSH                  0
-#define RTE_MIPI_CSI2_IPI_HSA_TIME              0x2
-#define RTE_MIPI_CSI2_IPI_HBP_TIME              0x0
-#define RTE_MIPI_CSI2_IPI_HSD_TIME              0x118
-#define RTE_MIPI_CSI2_IPI_HACTIVE_TIME          0x230
-#define RTE_MIPI_CSI2_IPI_VSA_LINE              0x4
-#define RTE_MIPI_CSI2_IPI_VBP_LINE              0x4
-#define RTE_MIPI_CSI2_IPI_VFP_LINE              0x4
-#define RTE_MIPI_CSI2_IPI_VACTIVE_LINE          0x230
+#define RTE_MIPI_CSI2_SYNC_ET_MODE              0
+#define RTE_MIPI_CSI2_SYNC_ET_SEL               1
+#define RTE_MIPI_CSI2_EN_EMBEDDED               0
+#define RTE_MIPI_CSI2_EN_BLANKING               0
+#define RTE_MIPI_CSI2_EN_NULL                   0
+#define RTE_MIPI_CSI2_EN_LINE_START             0
+#define RTE_MIPI_CSI2_EN_VIDEO                  1
+#define RTE_MIPI_CSI2_EN_DT                     0
+#define RTE_MIPI_CSI2_EN_DT_OVERWRITE           0
+#define RTE_MIPI_CSI2_IPI_HSA_TIME              0
+#define RTE_MIPI_CSI2_IPI_HBP_TIME              0
+#define RTE_MIPI_CSI2_IPI_HSD_TIME              560
+#define RTE_MIPI_CSI2_IPI_HACTIVE_TIME          560
+#define RTE_MIPI_CSI2_IPI_VSA_LINE              0
+#define RTE_MIPI_CSI2_IPI_VBP_LINE              0
+#define RTE_MIPI_CSI2_IPI_VFP_LINE              0
+#define RTE_MIPI_CSI2_IPI_VACTIVE_LINE          560
 #define RTE_MIPI_CSI2_IRQ_PRI                   0
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
@@ -125,47 +118,63 @@
 #define RTE_MIPI_DSI 0
 
 #if RTE_MIPI_DSI
-#define RTE_MIPI_DSI_FREQUENCY                  125000000
 #define RTE_MIPI_DSI_N_LANES                    0x2
 #define RTE_MIPI_DSI_VC_ID                      0
 #define RTE_MIPI_DSI_NON_CONTINUOUS_CLOCK_MODE  0x1
 #define RTE_MIPI_DSI_PLL_INPUT_DIV_FACTOR_N     0x3
-#define RTE_MIPI_DSI_PHY_CLKHS2LP_TIME          0x42
-#define RTE_MIPI_DSI_PHY_CLKLP2HS_TIME          0xB5
-#define RTE_MIPI_DSI_PHY_HS2LP_TIME             0x32
-#define RTE_MIPI_DSI_PHY_LP2HS_TIME             0x99
+#define RTE_MIPI_DSI_PHY_CLKHS2LP_TIME          35
+#define RTE_MIPI_DSI_PHY_CLKLP2HS_TIME          51
+#define RTE_MIPI_DSI_PHY_HS2LP_TIME             20
+#define RTE_MIPI_DSI_PHY_LP2HS_TIME             40
 #define RTE_MIPI_DSI_TX_ESC_CLK_DIVISION        0x2
 #define RTE_MIPI_DSI_VID_MODE_TYPE              0x2
 #define RTE_MIPI_DSI_VID_NUM_CHUNKS             0
-#define RTE_MIPI_DSI_VID_NLL_SIZE               0
+#define RTE_MIPI_DSI_VID_NULL_SIZE              0
 #define RTE_MIPI_DSI_DPI_COLOR_CODE             0x5
 #define RTE_MIPI_DSI_DPI_DATAEN_ACTIVE_LOW      0
 #define RTE_MIPI_DSI_DPI_VSYNC_ACTIVE_LOW       0x1
 #define RTE_MIPI_DSI_DPI_HSYNC_ACTIVE_LOW       0x1
 #define RTE_MIPI_DSI_DPI_SHUTD_ACTIVE_LOW       0
 #define RTE_MIPI_DSI_DPI_COLORM_ACTIVE_LOW      0
-#define RTE_MIPI_DSI_DPI_HSA_TIME               0x40
-#define RTE_MIPI_DSI_DPI_HBP_TIME               0x5E
-#define RTE_MIPI_DSI_DPI_HFP_TIME               0x41A
-#define RTE_MIPI_DSI_DPI_HACTIVE_TIME           0x1E0
-#define RTE_MIPI_DSI_DPI_VSA_LINE               0xA
-#define RTE_MIPI_DSI_DPI_VBP_LINE               0x14
-#define RTE_MIPI_DSI_DPI_VFP_LINE               0x14
-#define RTE_MIPI_DSI_DPI_VACTIVE_LINE           0x320
 #define RTE_MIPI_DSI_IRQ_PRI                    0
 
 #define RTE_MIPI_DSI_ILI9806E_PANEL  1
 
 #if RTE_MIPI_DSI_ILI9806E_PANEL
+
+#define RTE_ILI9806E_PANEL_E43RB_FW405_EN      1
+#define RTE_ILI9806E_PANEL_E43GB_MW405_EN      0
+#define RTE_ILI9806E_PANEL_E50RA_MW550_EN      0
+
+#define RTE_ILI9806E_PANEL_MAX_BITRATE_MBPS              500
 #define RTE_ILI9806E_PANEL_RESET_PIN_NO                  6
 #define RTE_ILI9806E_PANEL_RESET_GPIO_PORT               4
 #define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 4
 #define RTE_ILI9806E_PANEL_BL_LED_GPIO_PORT              4
-#define RTE_ILI9806E_PANEL_BPP                           24
+
+#if (RTE_ILI9806E_PANEL_E43RB_FW405_EN || RTE_ILI9806E_PANEL_E43GB_MW405_EN)
+#define RTE_PANEL_HSYNC_TIME            4
+#define RTE_PANEL_HBP_TIME              5
+#define RTE_PANEL_HFP_TIME              5
+#define RTE_PANEL_HACTIVE_TIME          480
+#define RTE_PANEL_VSYNC_LINE            2
+#define RTE_PANEL_VBP_LINE              10
+#define RTE_PANEL_VFP_LINE              10
+#define RTE_PANEL_VACTIVE_LINE          800
+#define RTE_PANEL_BPP                   24
+#elif RTE_ILI9806E_PANEL_E50RA_MW550_EN
+#define RTE_PANEL_HSYNC_TIME            4
+#define RTE_PANEL_HBP_TIME              30
+#define RTE_PANEL_HFP_TIME              18
+#define RTE_PANEL_HACTIVE_TIME          480
+#define RTE_PANEL_VSYNC_LINE            4
+#define RTE_PANEL_VBP_LINE              30
+#define RTE_PANEL_VFP_LINE              20
+#define RTE_PANEL_VACTIVE_LINE          854
+#endif
 #endif
 
 #endif
-
 // </e> MIPI_DSI (mipi dsi) [Driver_MIPI_DSI]
 
 // <e> CDC200 (cdc200) [Driver_CDC200]
@@ -173,17 +182,8 @@
 #define RTE_CDC200 1
 
 #if RTE_CDC200
-#define RTE_CDC200_PIXCLK_DIV                0x8
-#define RTE_CDC200_PIXEL_FORMAT              0x1
-#define RTE_CDC200_DPI_HSYNC_TIME            0x40
-#define RTE_CDC200_DPI_HBP_TIME              0x5E
-#define RTE_CDC200_DPI_HFP_TIME              0x48B
-#define RTE_CDC200_DPI_HACTIVE_TIME          0x1E0
-#define RTE_CDC200_DPI_VSYNC_LINE            0xA
-#define RTE_CDC200_DPI_VBP_LINE              0x14
-#define RTE_CDC200_DPI_VFP_LINE              0x14
-#define RTE_CDC200_DPI_VACTIVE_LINE          0x320
-
+#define RTE_CDC200_PIXEL_FORMAT              1
+#define RTE_CDC200_DPI_FPS                   60
 #endif
 // </e> CDC200 (cdc200) [Driver_CDC200]
 
@@ -439,6 +439,38 @@
 #endif
 // </e> SPI3 (Serial Peripheral Interface 3) [Driver_SPI]
 
+// <e> OSPI0 (Octal Serial Peripheral Interface 0) [Driver_OSPI]
+// <i> Configuration settings for Driver_OSPI in component ::Drivers:OSPI
+#define RTE_OSPI0                               1
+#ifdef RTE_OSPI0
+#define RTE_OSPI0_IRQ_PRIORITY                    0
+#define RTE_OSPI0_SPI_FRAME_FORMAT                3
+#define RTE_OSPI0_TX_FIFO_LEVEL_TO_START_TRANSFER 0
+#define RTE_OSPI0_TX_LOAD_DUMMY_TO_START_LEVEL    0
+#define RTE_OSPI0_TX_FIFO_THRESHOLD               64
+#define RTE_OSPI0_RX_FIFO_THRESHOLD               0
+#define RTE_OSPI0_CHIP_SELECTION_PIN              0
+#endif
+// </e> OSPI0 (Octal Serial Peripheral Interface 0) [Driver_OSPI]
+
+// <e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
+// <i> Configuration settings for Driver_OSPI in component ::Drivers:OSPI
+#define RTE_OSPI1                               0
+#ifdef RTE_OSPI1
+#define RTE_OSPI1_IRQ_PRIORITY                    0
+#define RTE_OSPI1_SPI_FRAME_FORMAT                3
+#define RTE_OSPI1_TX_FIFO_LEVEL_TO_START_TRANSFER 0
+#define RTE_OSPI1_TX_LOAD_DUMMY_TO_START_LEVEL    0
+#define RTE_OSPI1_TX_FIFO_THRESHOLD               64
+#define RTE_OSPI1_RX_FIFO_THRESHOLD               0
+#define RTE_OSPI1_CHIP_SELECTION_PIN              0
+#endif
+// </e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
+
+// <e> FLASH (OSPI ISSI FLASH) [Driver_Flash]
+// <i> Configuration settings for Driver_Flash in component ::Drivers:Flash
+#define RTE_OSPI_ISSI_FLASH               1
+// <e> FLASH (OSPI ISSI FLASH) [Driver_Flash]
 
 // <e> GPIO1 (General purpose input or output) [Driver_GPIO1]
 // <i> Configuration settings for Driver_GPIO1 in component ::Drivers:GPIO
@@ -749,17 +781,17 @@
 
 #define RTE_UTIMER_CHANNEL6_FIXED_BUFFER            0
 #define RTE_UTIMER_CHANNEL6_BUF_TROUGH_N_CREST      4
-#define RTE_UTIMER_CHANNEL6_DRIVER_A                0
-#define RTE_UTIMER_CHANNEL6_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL6_DRIVER_A                1
+#define RTE_UTIMER_CHANNEL6_DRIVER_B                1
 #define RTE_UTIMER_CHANNEL6_CMP_START_STATE         0
 #define RTE_UTIMER_CHANNEL6_CMP_STOP_STATE          0
-#define RTE_UTIMER_CHANNEL6_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL6_DRV_OP_AT_MATCH_COUNT   3
 #define RTE_UTIMER_CHANNEL6_DRV_OP_AT_CYCLE_END     0
 #define RTE_UTIMER_CHANNEL6_EVENT_AT_CREST          1
 #define RTE_UTIMER_CHANNEL6_EVENT_AT_TROUGH         0
 #define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE          1
 #define RTE_UTIMER_CHANNEL6_BUFFER_OPERATION        1
-#define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE_A        2
+#define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE_A        0
 #define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE_B        0
 #define RTE_UTIMER_CHANNEL6_CAPTURE_A_IRQ_PRIORITY  0
 #define RTE_UTIMER_CHANNEL6_CAPTURE_B_IRQ_PRIORITY  0
@@ -884,21 +916,101 @@
 #define RTE_UTIMER_CHANNEL11_CAPTURE_F_IRQ_PRIORITY  0
 #define RTE_UTIMER_CHANNEL11_OVER_FLOW_IRQ_PRIORITY  0
 #define RTE_UTIMER_CHANNEL11_UNDER_FLOW_IRQ_PRIORITY 0
+
+#define RTE_UTIMER_CHANNEL12_FIXED_BUFFER            0
+#define RTE_UTIMER_CHANNEL12_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL12_DRIVER_A                1
+#define RTE_UTIMER_CHANNEL12_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL12_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL12_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL12_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL12_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL12_EVENT_AT_CREST          1
+#define RTE_UTIMER_CHANNEL12_EVENT_AT_TROUGH         0
+#define RTE_UTIMER_CHANNEL12_BUFFERING_TYPE          0
+#define RTE_UTIMER_CHANNEL12_BUFFER_OPERATION        0
+#define RTE_UTIMER_CHANNEL12_BUFFERING_TYPE_A        0
+#define RTE_UTIMER_CHANNEL12_BUFFERING_TYPE_B        0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_A_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_B_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_C_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_D_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_E_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_CAPTURE_F_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_OVER_FLOW_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL12_UNDER_FLOW_IRQ_PRIORITY 0
+
+#define RTE_UTIMER_CHANNEL13_FIXED_BUFFER            0
+#define RTE_UTIMER_CHANNEL13_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL13_DRIVER_A                1
+#define RTE_UTIMER_CHANNEL13_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL13_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL13_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL13_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL13_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL13_EVENT_AT_CREST          1
+#define RTE_UTIMER_CHANNEL13_EVENT_AT_TROUGH         0
+#define RTE_UTIMER_CHANNEL13_BUFFERING_TYPE          0
+#define RTE_UTIMER_CHANNEL13_BUFFER_OPERATION        0
+#define RTE_UTIMER_CHANNEL13_BUFFERING_TYPE_A        0
+#define RTE_UTIMER_CHANNEL13_BUFFERING_TYPE_B        0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_A_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_B_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_C_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_D_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_E_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_CAPTURE_F_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_OVER_FLOW_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL13_UNDER_FLOW_IRQ_PRIORITY 0
+
+#define RTE_UTIMER_CHANNEL14_FIXED_BUFFER            0
+#define RTE_UTIMER_CHANNEL14_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL14_DRIVER_A                1
+#define RTE_UTIMER_CHANNEL14_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL14_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL14_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL14_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL14_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL14_EVENT_AT_CREST          1
+#define RTE_UTIMER_CHANNEL14_EVENT_AT_TROUGH         0
+#define RTE_UTIMER_CHANNEL14_BUFFERING_TYPE          0
+#define RTE_UTIMER_CHANNEL14_BUFFER_OPERATION        0
+#define RTE_UTIMER_CHANNEL14_BUFFERING_TYPE_A        0
+#define RTE_UTIMER_CHANNEL14_BUFFERING_TYPE_B        0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_A_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_B_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_C_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_D_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_E_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_CAPTURE_F_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_OVER_FLOW_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL14_UNDER_FLOW_IRQ_PRIORITY 0
+
+#define RTE_UTIMER_CHANNEL15_FIXED_BUFFER            0
+#define RTE_UTIMER_CHANNEL15_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL15_DRIVER_A                1
+#define RTE_UTIMER_CHANNEL15_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL15_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL15_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL15_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL15_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL15_EVENT_AT_CREST          1
+#define RTE_UTIMER_CHANNEL15_EVENT_AT_TROUGH         0
+#define RTE_UTIMER_CHANNEL15_BUFFERING_TYPE          0
+#define RTE_UTIMER_CHANNEL15_BUFFER_OPERATION        0
+#define RTE_UTIMER_CHANNEL15_BUFFERING_TYPE_A        0
+#define RTE_UTIMER_CHANNEL15_BUFFERING_TYPE_B        0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_A_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_B_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_C_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_D_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_E_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_CAPTURE_F_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_OVER_FLOW_IRQ_PRIORITY  0
+#define RTE_UTIMER_CHANNEL15_UNDER_FLOW_IRQ_PRIORITY 0
 #endif /*RTE_UTIMER*/
 // </e> UTIMER (Universal timer) [Driver_UTIMER]
 
-// <e> IPC_MODEM_SS (InterProcessor Communication Module for Modem Subsystem) [Driver_IPC_MODEM_SS]
-// <i> Configuration settings for Driver_IPC_MODEM_SS in component ::Drivers:IPC_MODEM_SS
-#define RTE_IPC_INTGEN_BLOCK0 1
-#define RTE_IPC_MDM_ATCMD_IRQ_PRI 0
-#define RTE_IPC_INTGEN_BLOCK1 1
-#define RTE_IPC_MDM_DATA_IRQ_PRI 0
-#define RTE_IPC_INTGEN_BLOCK4 1
-#define RTE_IPC_GNSS_DATA_IRQ_PRI 0
-#define RTE_IPC_INTGEN_BLOCK5 1
-#define RTE_IPC_GNSS_ATCMD_IRQ_PRI 0
-
-// </e> IPC_MODEM_SS (Interprocessor Communication Module for Modem Subsystem) [Driver_IPC_MODEM_SS]
 
 // </e> Analog configuration [vbat analog register2 and comparator register2]
 #define RTE_ANALOG_CONFIG          1

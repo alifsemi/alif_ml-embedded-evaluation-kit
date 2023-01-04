@@ -23,7 +23,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     include
 #    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
-    Device/${ENSEMBLE_CORE}
+    config/${ENSEMBLE_CORE}
     Device/${ENSEMBLE_CORE}/Include
     Device/${ENSEMBLE_CORE}/Config
     CMSIS
@@ -31,7 +31,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     CMSIS/Driver/Inc
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include/Template)
+    )
 
 # 3.2 Create static library
 add_library(${CMSIS_DEVICE_TARGET} STATIC)
@@ -39,13 +39,10 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 ## Include directories - public
 target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
-    #${CMSIS_SRC_PATH}/CMSIS/Driver/Include
-    Device/${ENSEMBLE_CORE}
     Device/${ENSEMBLE_CORE}/Include
     Device/${ENSEMBLE_CORE}/Config
-    CMSIS
-    CMSIS/Include
-    CMSIS/Driver/Inc
+    components/include
+    components/soc
     )
 
 
@@ -57,17 +54,21 @@ target_sources(${CMSIS_DEVICE_TARGET}
     Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     Device/${ENSEMBLE_CORE}/Source/system_utils.c
     Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
-    CMSIS/Driver/Src/Driver_GPIO.c
-    CMSIS/Driver/Src/Driver_I2S.c
-    CMSIS/Driver/Src/Driver_I3C.c
-    CMSIS/Driver/Src/Driver_PINMUX_AND_PINPAD.c
-    CMSIS/Driver/Src/Driver_USART.c
-    CMSIS/Driver/Src/GPIO_ll_drv.c
-    CMSIS/Driver/Src/LPTIMER_ll_drv.c
-    CMSIS/Driver/Src/PHY_Generic.c
-    CMSIS/Driver/Src/Camera_Sensor_i2c.c
-    CMSIS/Driver/Src/Driver_CDC200.c
-    #CMSIS/Driver/Src/arx3A0_camera_sensor.c
+    components/soc/Driver_GPIO.c
+    components/soc/Driver_I2S.c
+    components/soc/Driver_I3C.c
+    components/soc/Driver_PINMUX_AND_PINPAD.c
+    components/soc/Driver_USART.c
+    components/soc/GPIO_ll_drv.c
+    components/soc/LPTIMER_ll_drv.c
+    components/external/PHY_Generic.c
+    components/soc/Driver_DMA.c
+    components/soc/DMA_Opcode.c
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Camera_Sensor_i2c.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_CDC200.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_MIPI_DSI.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/DPHY_init.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/external/ILI9806E_LCD_panel.c>
     )
 
 # Device definition needs to be set, is checked in source files to include correct header
