@@ -136,10 +136,10 @@ The FVP supports many command-line parameters, such as:
 
 ### Running the FVP without the UI
 
-If there is a need to run the FVP without the UI (e.g running the FVP inside of a docker container), 
+If there is a need to run the FVP without the UI (e.g running the FVP inside of a docker container),
 it can be done as follows:
 
-Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0` 
+Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0`
 to the command line arguments when starting the FVP. For example:
 
 ```commandline
@@ -187,8 +187,10 @@ configuration.
 > **Note:**: These instructions are valid only if the evaluation is being done using the MPS3 FPGA platform using
 > an Arm® Corstone™-300 (AN552) or Corstone™-310 (AN555) implementations.
 
-For details on platform set-up, please see the relevant documentation. For the Arm® Corstone™-300 implementation
-`AN552`, the document is available here: [Arm Developer](https://developer.arm.com/documentation/dai0552/).
+For details on platform set-up, please see the relevant documentation.
+
+- Arm® Corstone™-300 implementation `AN552`: [Arm Developer - AN552](https://developer.arm.com/documentation/dai0552/).
+- Arm® Corstone™-310 implementation `AN555`: [Arm Developer - AN555](https://developer.arm.com/documentation/107642/B/?lang=en)
 
 For the MPS3 FPGA board, instead of loading the `axf` file directly, copy the executable blobs generated under the
 `sectors/<use_case>` subdirectory to the micro SD card located on the board. Also, the `sectors/images.txt` file is

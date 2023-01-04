@@ -60,7 +60,7 @@ by displaying different performance metrics such as inference cycle count estima
 
 The evaluation kit primarily supports [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300)
 and [Arm® Corstone™-310](https://developer.arm.com/ip-products/subsystem/corstone/corstone-310) reference packages as its
-primary targets. Arm® Corstone™-300 design implementation is publicly available on an [Arm MPS3 FPGA board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images),
+primary targets. Arm® Corstone™-300 and Corstone™-310 design implementations are publicly available on [Download FPGA Images](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images) page,
 or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
 The Ethos-U NPU software stack is described [here](https://developer.arm.com/documentation/101888/0500/NPU-software-overview/NPU-software-components?lang=en).
