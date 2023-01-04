@@ -86,8 +86,8 @@ typedef struct _DMA_DESC_INFO {
     ARM_DMA_DATA_DIR  direction;                   /*!< Direction of data transfer associated with this transaction */
     DMA_SECURE_STATUS sec_state;
     uint32_t          total_len;                   /*!< Number of bytes associated with this transaction */
-    void              *src_addr;                   /*!< Source address associated with this transaction */
-    void              *dst_addr;                   /*!< Destination address associated with this transaction */
+    uint32_t          src_addr;                    /*!< Source address associated with this transaction */
+    uint32_t          dst_addr;                    /*!< Destination address associated with this transaction */
     uint8_t           src_bsize;                   /*!< Src Burst Size associated with this transaction */
     uint8_t           src_blen;                    /*!< SrcBurst length associated with this transaction */
     uint8_t           dst_bsize;                   /*!< Dest Burst Size associated with this transaction */

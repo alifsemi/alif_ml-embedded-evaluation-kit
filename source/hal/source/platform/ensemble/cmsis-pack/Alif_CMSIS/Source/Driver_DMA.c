@@ -407,8 +407,8 @@ __STATIC_INLINE int32_t DMA_CopyDesc (ARM_DMA_PARAMS *params,
 
     if(params->dir == ARM_DMA_MEM_TO_MEM)
     {
-        while (((uint32_t)dma_desc->dst_addr |
-                (uint32_t)dma_desc->src_addr |
+        while ((dma_desc->dst_addr |
+                dma_desc->src_addr |
                 dma_desc->total_len) &
                ((1 << dma_desc->dst_bsize) - 1))
         {
@@ -417,8 +417,8 @@ __STATIC_INLINE int32_t DMA_CopyDesc (ARM_DMA_PARAMS *params,
     }
     else
     {
-        if(((uint32_t)dma_desc->dst_addr |
-            (uint32_t)dma_desc->src_addr |
+        if((dma_desc->dst_addr |
+            dma_desc->src_addr |
             dma_desc->total_len) &
            ((1 << dma_desc->dst_bsize) - 1))
         {
@@ -488,7 +488,7 @@ __STATIC_INLINE void DMA_InvalidateDCache(DMA_DESC_INFO *desc_info)
     if ((desc_info->direction == ARM_DMA_MEM_TO_MEM) ||
         (desc_info->direction == ARM_DMA_DEV_TO_MEM))
     {
-        SCB_InvalidateDCache_by_Addr(desc_info->dst_addr, desc_info->total_len);
+        SCB_InvalidateDCache_by_Addr(GlobalToLocal(desc_info->dst_addr), desc_info->total_len);
     }
 }
 
@@ -503,7 +503,7 @@ __STATIC_INLINE void DMA_CleanDCache(DMA_DESC_INFO *desc_info)
     if ((desc_info->direction == ARM_DMA_MEM_TO_MEM) ||
         (desc_info->direction == ARM_DMA_MEM_TO_DEV))
     {
-        SCB_CleanDCache_by_Addr(desc_info->src_addr, desc_info->total_len);
+        SCB_CleanDCache_by_Addr(GlobalToLocal(desc_info->src_addr), desc_info->total_len);
     }
 }
 
@@ -533,11 +533,11 @@ int32_t DMA_PrepareMcode(uint8_t *mcode, DMA_CCR_Type ccr,
     if (!ret)
         return ARM_DMA_ERROR_BUFFER;
 
-    ret = DMA_ConstructMove ((uint32_t)desc->src_addr, SAR, mcode, &idx);
+    ret = DMA_ConstructMove (desc->src_addr, SAR, mcode, &idx);
     if (!ret)
         return ARM_DMA_ERROR_BUFFER;
 
-    ret = DMA_ConstructMove ((uint32_t)desc->dst_addr, DAR, mcode, &idx);
+    ret = DMA_ConstructMove (desc->dst_addr, DAR, mcode, &idx);
     if (!ret)
         return ARM_DMA_ERROR_BUFFER;
 
@@ -850,7 +850,7 @@ static int32_t DMA_GetStatus (DMA_Handle_Type *handle, uint32_t *count,
              (desc->direction == ARM_DMA_MEM_TO_MEM))
     {
         curr_addr = DMA_GetChannelDestAddress (*handle, dma);
-        *count = curr_addr - (uint32_t)desc->dst_addr;
+        *count = curr_addr - desc->dst_addr;
     }
 
     if ((dma_cfg->channel_thread[*handle].curr_state == FAULTING_COMPLETING) ||
@@ -1006,7 +1006,7 @@ static int32_t DMA_Start (DMA_Handle_Type *handle, ARM_DMA_PARAMS *params,
 
     DMA_ConstructGo (chnl_info->desc_info.sec_state,
                      chnl_info->chnl_num,
-                     (uint32_t)LocalToGlobal(mcode),
+                     LocalToGlobal(mcode),
                      &go_mcode[0]);
 
     DMA_EnableInterrupt (&dma_cfg->channel_thread[*handle], dma);
