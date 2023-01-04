@@ -27,6 +27,12 @@ bool hal_platform_init(void)
         return false;
     }
 
+    /* Initialise LCD */
+    if (0 != hal_lcd_init()) {
+        printf_err("hal_lcd_init failed\n");
+        return false;
+    }
+
     /* Initialise PMU */
     hal_pmu_init();
 

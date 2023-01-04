@@ -40,9 +40,9 @@ project(${PLATFORM_DRIVERS_TARGET}
     LANGUAGES       C CXX ASM)
 
 # This currently is also used to infer roles for the dual-CPU bits
-USER_OPTION(CONSOLE_UART "Console UART for the application"
-    2
-    STRING)
+set(CONSOLE_UART 2 CACHE STRING "Console UART for the application")
+
+set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
@@ -170,7 +170,8 @@ endif()
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     log
     image_ensemble
-    lcd_ensemble
+    $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
+    ensemble_display
     audio_ensemble
     ensemble_services
     cmsis_ensemble

@@ -11,21 +11,9 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include "RTE_Device.h"
-#include "RTE_Components.h"
-
-#include CMSIS_device_header
-//#include "cmsis.h"                  /* device specific header file    */
-
-#include "base_def.h"
-#include "system_utils.h"
-#include "image_processing.h"
-#include "image_buff.h"
 #include "lv_port_disp.h"
 #include "lvgl.h"
 #include "glcd.h"
-
-// GLCD_XXX methods taken from stubs_ensemble.c
 
 static lv_obj_t *canvas;
 static lv_draw_rect_dsc_t rect_dsc;
@@ -41,7 +29,7 @@ void GLCD_Initialize(void)
     lv_obj_t *scr = lv_scr_act();
     lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
     canvas = lv_canvas_create(lv_scr_act());
-    static uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(GLCD_WIDTH, GLCD_HEIGHT)];
+    static uint32_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(GLCD_WIDTH, GLCD_HEIGHT) / sizeof(uint32_t)];
     lv_canvas_set_buffer(canvas, buffer, GLCD_WIDTH, GLCD_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     lv_obj_center(canvas);
 	lv_draw_rect_dsc_init(&rect_dsc);

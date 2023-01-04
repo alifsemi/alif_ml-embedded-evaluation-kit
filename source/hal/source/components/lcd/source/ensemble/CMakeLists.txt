@@ -22,20 +22,25 @@ target_include_directories(${ENSEMBLE_LCD_IFACE_TARGET} INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     include)
 
+set(ENSEMBLE_DISPLAY_TARGET ensemble_display)
+add_library(${ENSEMBLE_DISPLAY_TARGET} STATIC)
+
 ## Include directories - private
-target_include_directories(${LCD_ENSEMBLE_COMPONENT_TARGET}
+target_include_directories(${ENSEMBLE_DISPLAY_TARGET}
     PRIVATE
     source)
 
+## Include directories - public
+target_include_directories(${ENSEMBLE_DISPLAY_TARGET}
+    PUBLIC
+    include)
+
 ## Component sources
-target_sources(${LCD_ENSEMBLE_COMPONENT_TARGET}
+target_sources(${ENSEMBLE_DISPLAY_TARGET}
     PRIVATE
-    glcd_ensemble.c
     src/LCD_Panel.c
-    src/image_buff.c
     lvgl/Alif240.c
     lvgl/lv_port_disp.c
-    lvgl/lv_font_9x15_h.c
     lvgl/lv_paint_utils.c
 )
 
@@ -46,7 +51,7 @@ target_include_directories(${LCD_ENSEMBLE_COMPONENT_TARGET} PRIVATE
 
 add_compile_options(-Werror-implicit-function-declaration)
 # Compile definitions
-# target_compile_definitions(${LCD_ENSEMBLE_COMPONENT_TARGET}
+# target_compile_definitions(${ENSEMBLE_DISPLAY_TARGET}
 #     PRIVATE
 #     CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE})
 
@@ -71,8 +76,10 @@ target_include_directories(${LVGL_TARGET} PUBLIC
 target_link_libraries(${LVGL_TARGET} PRIVATE ${ARM_2D_TARGET} ${LCD_IFACE_TARGET})
 
 ## Add dependencies
-target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
+target_link_libraries(${ENSEMBLE_DISPLAY_TARGET} PUBLIC
+    ${LCD_IFACE_TARGET}
     ${ENSEMBLE_LCD_IFACE_TARGET}
+    image_iface
     log
     cmsis_ensemble
     rte_components
@@ -81,5 +88,5 @@ target_link_libraries(${LCD_ENSEMBLE_COMPONENT_TARGET} PUBLIC
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${LCD_ENSEMBLE_COMPONENT_TARGET})
+message(STATUS "Library                                : " ${ENSEMBLE_DISPLAY_TARGET})
 message(STATUS "*******************************************************")

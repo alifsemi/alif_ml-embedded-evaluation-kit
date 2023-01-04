@@ -40,17 +40,31 @@
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
+#include "RTE_Device.h"
 
 #include "LCD_panel.h"
 #include "Driver_CDC200.h"
+#include "CDC200_dev.h"
 #include "lvgl.h"
 #include "lv_port_disp.h"
-#include "image_processing.h"
-#include "image_buff.h"
 
-#define MY_DISP_HOR_RES DIMAGE_X
-#define MY_DISP_VER_RES DIMAGE_Y
+#define MY_DISP_HOR_RES RTE_PANEL_HACTIVE_TIME
+#define MY_DISP_VER_RES RTE_PANEL_VACTIVE_LINE
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 32)
+
+#if LV_COLOR_DEPTH == 32
+#if RTE_CDC200_PIXEL_FORMAT != 1
+#error "LCD framebuffer must be set to RGB888 for 32-bit LVGL color depth"
+#endif
+static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][3] __attribute__((section(".bss.lcd_image_buf")));             // 480x800x3 = 1,152,000
+#elif LV_COLOR_DEPTH == 16
+#if RTE_CDC200_PIXEL_FORMAT != 2
+#error "LCD framebuffer must be set to RGB565 for 16-bit LVGL color depth"
+#endif
+static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][2] __attribute__((section(".bss.lcd_image_buf")));             // 480x800x3 = 1,152,000
+#else
+#error "Unsupported LVGL color depth"
+#endif
 
 static atomic_bool lv_inited;
 static uint32_t lv_last_timer_handler_trigger;
@@ -139,19 +153,30 @@ static void lv_clean_dcache_cb(lv_disp_drv_t * disp_drv) {
 }
 #endif
 
-/* Use cases are expected to use either the hal_lcd interface after calling hal_lcd_init(), which
- * will end up calling lv_port_disp_init(), or LVGL interfaces after calling lv_port_disp_init()
- * themselves.
+/* lv_port_disp_init() may be called twice, as it's called both by our port of
+ * ARM's GLCD UI (unless it's stubbed out), and also by native LVGL apps.
  *
- * The former is designed to support Arm's non-LVGL UI, which we happen to emulate using LVGL,
- * or full LVGL-based UIs.
- *
- * With care, these could be mixed - the non-LVGL UI is a single canvas object, and more LVGL UI
- * could be added around it.
+ * On a repeat call, all existing objects are hidden, which has the effect of hiding
+ * the unwanted GLCD canvas for a LVGL app. (To save memory, the app could be built
+ * with GLCD stubs, but we want to handle the case where the build folder is configured
+ * to support both GLCD and LVGL apps).
  */
-void lv_port_disp_init(void) {
+void lv_port_disp_init(void)
+{
+    if (lv_inited)
+    {
+        lv_port_lock();
+        lv_obj_t *screen = lv_scr_act();
+        uint32_t children = lv_obj_get_child_cnt(screen);
+        for (uint32_t i = 0; i < children; i++) {
+            lv_obj_add_flag(lv_obj_get_child(screen, i), LV_OBJ_FLAG_HIDDEN);
+        }
+        lv_obj_remove_style_all(screen);
+        lv_port_unlock();
+        return;
+    }
 
-    LCD_Panel_init(&lcd_image[0][0][0], LV_COLOR_DEPTH == 32 ? RGB888 : RGB565);
+    LCD_Panel_init(&lcd_image[0][0][0]);
 
     static lv_disp_drv_t disp_drv;
     static lv_disp_draw_buf_t disp_buf;
