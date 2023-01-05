@@ -22,7 +22,7 @@ USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
     FILEPATH)
 
 USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0, 1.0) that must be applied to the inference results for a label to be deemed valid."
-    0.7
+    0.5
     STRING)
 
 # Generate labels file
