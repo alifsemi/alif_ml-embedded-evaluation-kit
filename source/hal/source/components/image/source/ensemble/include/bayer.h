@@ -1,15 +1,32 @@
-#include <stdint.h>
+/*
+ * 1394-Based Digital Camera Control Library
+ *
+ * Bayer pattern decoding functions
+ *
+ * Written by Damien Douxchamps and Frederic Devernay
+ * The original VNG and AHD Bayer decoding are from Dave Coffin's DCRAW.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
-typedef enum {
-    DC1394_BAYER_METHOD_NEAREST=0,
-    DC1394_BAYER_METHOD_SIMPLE,
-    DC1394_BAYER_METHOD_BILINEAR,
-    DC1394_BAYER_METHOD_HQLINEAR,
-    DC1394_BAYER_METHOD_DOWNSAMPLE,
-    DC1394_BAYER_METHOD_EDGESENSE,
-    DC1394_BAYER_METHOD_VNG,
-    DC1394_BAYER_METHOD_AHD
-} dc1394bayer_method_t;
+// dc1394 definitions copied from libdc1394 - log.h and types.h
+
+#ifndef BAYER_H
+#define BAYER_H
+
+#include <stdint.h>
 
 typedef enum {
     DC1394_COLOR_FILTER_RGGB = 512,
@@ -68,20 +85,5 @@ typedef enum {
     DC1394_BASLER_CORRUPTED_SFF_CHUNK  = -38,
     DC1394_BASLER_UNKNOWN_SFF_CHUNK    = -39
 } dc1394error_t;
-#define DC1394_ERROR_MIN  DC1394_BASLER_UNKNOWN_SFF_CHUNK
-#define DC1394_ERROR_MAX  DC1394_SUCCESS
-#define DC1394_ERROR_NUM (DC1394_ERROR_MAX-DC1394_ERROR_MIN+1)
 
-typedef enum {
-    DC1394_FALSE= 0,
-    DC1394_TRUE
-} dc1394bool_t;
-
-
-
-
-dc1394error_t
-dc1394_bayer_decoding_8bit(const uint8_t * bayer, uint8_t * rgb, uint32_t sx, uint32_t sy, dc1394color_filter_t tile, dc1394bayer_method_t method);
-
-dc1394error_t
-dc1394_bayer_decoding_16bit(const uint16_t * bayer, uint16_t * rgb, uint32_t sx, uint32_t sy, dc1394color_filter_t tile, dc1394bayer_method_t method, uint32_t bits);
+#endif
