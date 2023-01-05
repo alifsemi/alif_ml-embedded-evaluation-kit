@@ -1,0 +1,82 @@
+def common_funcs
+
+pipeline {
+    agent none
+    stages {
+        stage('Init') {
+            steps {
+                script {
+                    common_funcs = evaluate readTrusted("automation/test_common.groovy");
+                }
+            }
+        }
+        stage('Build') {
+            parallel {
+                stage('Build img GCC Release') {
+                    agent { label 'build' }
+                    steps {
+                        script {
+                            common_funcs.build_img("Release", "gcc");
+                        }
+                    }
+                    post {
+                        success {
+                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                        }
+                        cleanup {
+                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Build img GCC Debug') {
+                    agent { label 'build' }
+                    steps {
+                        script {
+                            common_funcs.build_img("Debug", "gcc");
+                        }
+                    }
+                    post {
+                        success {
+                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                        }
+                        cleanup {
+                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Build kws GCC Release') {
+                    agent { label 'build' }
+                    steps {
+                        script {
+                            common_funcs.build_kws("Release", "gcc");
+                        }
+                    }
+                    post {
+                        success {
+                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                        }
+                        cleanup {
+                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Build kws GCC Debug') {
+                    agent { label 'build' }
+                    steps {
+                        script {
+                            common_funcs.build_kws("Debug", "gcc");
+                        }
+                    }
+                    post {
+                        success {
+                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                        }
+                        cleanup {
+                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
