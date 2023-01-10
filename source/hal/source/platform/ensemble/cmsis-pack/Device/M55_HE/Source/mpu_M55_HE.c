@@ -40,25 +40,45 @@
 static void MPU_Load_Regions(void)
 {
     static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
-        {   /* EXTSYS0 TCM */
-            .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 1UL),
-            .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 0UL)
-        },
-        {
-	    /* Low Power Peripheral Regions */
-            .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
-            .RLAR = ARM_MPU_RLAR(0x72FFFFFFUL, 1UL)
-        },
+    {
+    .RBAR = ARM_MPU_RBAR(0x02000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x023FFFFFUL, 2UL)     // SRAM0
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x08000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x0827FFFFUL, 1UL)     // SRAM1
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x70000000UL, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),
+    .RLAR = ARM_MPU_RLAR(0x71FFFFFFUL, 0UL)     // LP- Peripheral & PINMUX Regions */
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x50000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x50FFFFFFUL, 1UL)     // HP TCM (SRAM2 + SRAM3)
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x62000000UL, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x621FFFFFUL, 1UL)     // SRAM6
+    },
+    {
+    .RBAR = ARM_MPU_RBAR(0x63100000UL, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RO, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x632FFFFFUL, 1UL)     // SRAM8
+    },
     };
 
     /* Define the possible Attribute regions */
-    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR( /* Attr0, Normal Memory, Non-Cacheable */
-        ARM_MPU_ATTR_NON_CACHEABLE,
-        ARM_MPU_ATTR_NON_CACHEABLE) );
-    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR_DEVICE); /* Attr1, Device Memory */
+    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR(   /* Attr0, Device Memory */
+                            ARM_MPU_ATTR_DEVICE,
+                            ARM_MPU_ATTR_DEVICE_nGnRE));
+    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(	/* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
+                            ARM_MPU_ATTR_MEMORY_(1,1,1,1),
+                            ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
+    ARM_MPU_SetMemAttr(2UL, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
+                            ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                            ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
 
     /* Load the regions from the table */
-    ARM_MPU_Load(0U, &mpu_table[0], 2U);
+    ARM_MPU_Load(0U, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
 }
 
 /**
