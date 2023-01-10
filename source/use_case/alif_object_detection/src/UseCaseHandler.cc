@@ -143,47 +143,48 @@ using namespace arm::app::object_detection;
             return false;
         }
 
-        /* Display this image on the LCD. */
-        lv_port_lock();
-        write_to_lvgl_buf(inputImgCols, inputImgRows,
-                        currImage, &lvgl_image[0][0]);
-        lv_obj_invalidate(ScreenLayoutImageObject());
-        lv_port_unlock();
+        {
+            ScopedLVGLLock lv_lock;
 
-        if (!run_requested()) {
-            lv_label_set_text(ScreenLayoutLabelObject(1), "");
-            return false;
-        }
+            /* Display this image on the LCD. */
+            write_to_lvgl_buf(inputImgCols, inputImgRows,
+                            currImage, &lvgl_image[0][0]);
+            lv_obj_invalidate(ScreenLayoutImageObject());
 
-        lv_label_set_text(ScreenLayoutLabelObject(1), "Running inference...");
+            if (!run_requested()) {
+               lv_led_off(ScreenLayoutLEDObject());
+               return false;
+            }
 
-        const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
-                            inputTensor->bytes : IMAGE_DATA_SIZE;
+            lv_led_on(ScreenLayoutLEDObject());
 
-        /* Run the pre-processing, inference and post-processing. */
-        if (!preProcess.DoPreProcess(currImage, copySz)) {
-            printf_err("Pre-processing failed.");
-            return false;
-        }
+            const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
+                                inputTensor->bytes : IMAGE_DATA_SIZE;
 
-        /* Run inference over this image. */
+            /* Run the pre-processing, inference and post-processing. */
+            if (!preProcess.DoPreProcess(currImage, copySz)) {
+                printf_err("Pre-processing failed.");
+                return false;
+            }
 
-        if (!RunInference(model, profiler)) {
-            printf_err("Inference failed.");
-            return false;
-        }
+            /* Run inference over this image. */
 
-        if (!postProcess.DoPostProcess()) {
-            printf_err("Post-processing failed.");
-            return false;
-        }
+            if (!RunInference(model, profiler)) {
+                printf_err("Inference failed.");
+                return false;
+            }
 
-        lv_port_lock();
-        lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "%i", results.size());
-        lv_port_unlock();
+            if (!postProcess.DoPostProcess()) {
+                printf_err("Post-processing failed.");
+                return false;
+            }
 
-        /* Draw boxes. */
-        DrawDetectionBoxes(results, inputImgCols, inputImgRows);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "%i", results.size());
+
+            /* Draw boxes. */
+            DrawDetectionBoxes(results, inputImgCols, inputImgRows);
+
+        } // ScopedLVGLLock
 
 #if VERIFY_TEST_OUTPUT
         DumpTensor(modelOutput0);
@@ -235,8 +236,6 @@ using namespace arm::app::object_detection;
     static void DrawDetectionBoxes(const std::vector<object_detection::DetectionResult>& results,
                                    int imgInputCols, int imgInputRows)
     {
-        ScopedLVGLLock lock;
-
         lv_obj_t *frame = ScreenLayoutImageHolderObject();
         float xScale = (float) lv_obj_get_content_width(frame) / imgInputCols;
         float yScale = (float) lv_obj_get_content_height(frame) / imgInputRows;

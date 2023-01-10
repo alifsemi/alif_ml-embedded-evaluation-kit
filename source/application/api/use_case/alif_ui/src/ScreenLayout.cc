@@ -33,6 +33,7 @@ lv_obj_t *labelResult[5];
 lv_obj_t *labelHeader;
 lv_obj_t *imageObj;
 lv_obj_t *imageHolder;
+lv_obj_t *ledObj;
 
 };
 
@@ -138,6 +139,11 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_set_style_text_align(labelHeader, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_align(labelHeader, LV_ALIGN_TOP_MID);
 
+    ledObj = lv_led_create(resultHolder);
+    lv_obj_align(ledObj, LV_ALIGN_TOP_RIGHT, -4 * DISP_SCALE, -4 * DISP_SCALE);
+    lv_led_off(ledObj);
+    lv_obj_set_size(ledObj, 5 * DISP_SCALE, 5 * DISP_SCALE);
+
     /* And labels for results */
     int y = 25 * DISP_SCALE;
     for (auto &lbl : labelResult) {
@@ -203,6 +209,10 @@ lv_obj_t *ScreenLayoutLabelObject(int n)
     return labelResult[n];
 }
 
+lv_obj_t *ScreenLayoutLEDObject()
+{
+    return ledObj;
+}
 
 } /* namespace app */
 } /* namespace alif */

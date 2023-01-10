@@ -531,7 +531,7 @@
 
 #define LV_USE_KEYBOARD   0
 
-#define LV_USE_LED        0
+#define LV_USE_LED        1
 
 #define LV_USE_LIST       0
 

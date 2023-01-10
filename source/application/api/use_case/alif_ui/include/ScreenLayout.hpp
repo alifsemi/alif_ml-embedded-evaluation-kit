@@ -28,6 +28,7 @@ lv_obj_t *ScreenLayoutImageObject();
 lv_obj_t *ScreenLayoutImageHolderObject();
 lv_obj_t *ScreenLayoutHeaderObject();
 lv_obj_t *ScreenLayoutLabelObject(int);
+lv_obj_t *ScreenLayoutLEDObject();
 
 } /* namespace app */
 } /* namespace alif */

@@ -149,8 +149,11 @@ namespace app {
             lv_label_set_text_fmt(ScreenLayoutLabelObject(4), "tprof5=%.3f ms", (double)tprof5 / SystemCoreClock * 1000);
             lv_port_unlock();
 #endif
+            lv_led_off(ScreenLayoutLEDObject());
             return true;
         }
+
+        lv_led_on(ScreenLayoutLEDObject());
 
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
