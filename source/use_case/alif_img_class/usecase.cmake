@@ -15,7 +15,7 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 # Append the API to use for this use case
-list(APPEND ${use_case}_API_LIST "img_class")
+list(APPEND ${use_case}_API_LIST "img_class" "alif_ui")
 
 set(${use_case}_EXTRA_LIBS lvgl)
 set(${use_case}_COMPILE_DEFS SHOW_PROFILING=0 SKIP_MODEL=0)

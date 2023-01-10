@@ -44,7 +44,7 @@ int image_init()
 
 #define FAKE_CAMERA 0
 
-const uint8_t *get_image_data(void)
+const uint8_t *get_image_data(int ml_width, int ml_height)
 {
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
@@ -85,10 +85,10 @@ const uint8_t *get_image_data(void)
     bayer_to_RGB(raw_image, rgb_image);
     tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
     // Cropping and scaling
-    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, MIMAGE_X, MIMAGE_Y, RGB_BYTES * 8);
+    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, ml_width, ml_height, RGB_BYTES * 8);
     tprof4 = ARM_PMU_Get_CCNTR();
     // Color correction for white balance
-    white_balance(raw_image, rgb_image);
+    white_balance(ml_width, ml_height, raw_image, rgb_image);
     tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
     return rgb_image;
 }

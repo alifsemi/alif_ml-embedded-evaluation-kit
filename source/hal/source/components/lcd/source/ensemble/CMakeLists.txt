@@ -14,6 +14,8 @@ project(ensemble_display
     DESCRIPTION     "Ensemble Display"
     LANGUAGES       C CXX ASM)
 
+set(ROTATE_DISPLAY "0" CACHE STRING "Rotate display by 0, 90, 180 or 270 degrees")
+
 # Add top level interface library
 set(ENSEMBLE_LCD_IFACE_TARGET ensemble_lcd_iface)
 add_library(${ENSEMBLE_LCD_IFACE_TARGET} INTERFACE)
@@ -51,9 +53,9 @@ target_include_directories(${LCD_ENSEMBLE_COMPONENT_TARGET} PRIVATE
 
 add_compile_options(-Werror-implicit-function-declaration)
 # Compile definitions
-# target_compile_definitions(${ENSEMBLE_DISPLAY_TARGET}
-#     PRIVATE
-#     CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE})
+target_compile_definitions(${ENSEMBLE_DISPLAY_TARGET}
+    PRIVATE
+    ROTATE_DISPLAY=${ROTATE_DISPLAY})
 
 ## Logging utilities:
 if (NOT TARGET log)

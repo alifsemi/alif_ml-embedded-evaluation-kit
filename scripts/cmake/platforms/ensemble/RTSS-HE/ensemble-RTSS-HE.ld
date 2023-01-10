@@ -94,7 +94,6 @@ SECTIONS
     *(vtable)
     *(.data)
     *(.data*)
-    *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
 

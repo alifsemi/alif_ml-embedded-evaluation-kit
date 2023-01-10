@@ -17,7 +17,7 @@
 
 int image_init();
 
-const uint8_t *get_image_data(void);
+const uint8_t *get_image_data(int width, int height);
 
 
 #endif // IMAGE_DATA_H

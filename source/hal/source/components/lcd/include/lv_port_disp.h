@@ -44,6 +44,19 @@ class LVGLLock {
     }
 };
 
+struct ScopedLVGLLock {
+    ScopedLVGLLock() {
+        lv_port_lock();
+    }
+
+    ~ScopedLVGLLock() {
+        lv_port_unlock();
+    }
+
+    ScopedLVGLLock(const ScopedLVGLLock &) = delete;
+    ScopedLVGLLock &operator=(const ScopedLVGLLock &) = delete;
+};
+
 #endif
 
 #endif /* LV_PORT_DISP_H_ */

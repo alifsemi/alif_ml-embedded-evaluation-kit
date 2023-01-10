@@ -70,6 +70,8 @@ static atomic_bool lv_inited;
 static uint32_t lv_last_timer_handler_trigger;
 static atomic_uint_fast32_t lv_ticks;
 
+static atomic_char pending_flush; // 0 = no pending flush, 1 = flush pending, 2 = flush in progress
+
 static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
 #if LV_COLOR_DEPTH == 32
@@ -98,23 +100,39 @@ static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * r
     }
 #endif
 
+    pending_flush = 0;
     lv_disp_flush_ready(disp_drv);
 }
 
-static atomic_bool pending_flush;
 static lv_disp_drv_t *pending_flush_disp_drv;
 static lv_area_t pending_flush_area;
 static lv_color_t *pending_flush_color_p;
 
 void do_pending_flush(void)
 {
-    if (atomic_exchange(&pending_flush, false)) {
+    char expected = 1;
+    if (atomic_compare_exchange_strong(&pending_flush, &expected, 2)) {
         lv_disp_flush(pending_flush_disp_drv, &pending_flush_area, pending_flush_color_p);
+    }
+}
+
+static void lv_consider_immediate_flush(lv_disp_drv_t * restrict disp_drv)
+{
+    (void)(disp_drv);
+
+    if (!pending_flush) {
+        return;
+    }
+
+    int scan_y = LCD_current_v_pos();
+    if (scan_y < pending_flush_area.y1 - 32 || scan_y > pending_flush_area.y2) {
+        do_pending_flush();
     }
 }
 
 static void lv_disp_flush_async(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
 {
+    /* LVGL should not call us to flush while we have one already pending - trap just in case */
     if (pending_flush) {
         while (1) {
             __WFE();
@@ -124,15 +142,12 @@ static void lv_disp_flush_async(lv_disp_drv_t * restrict disp_drv, const lv_area
     pending_flush_disp_drv = disp_drv;
     pending_flush_area = *area;
     pending_flush_color_p = color_p;
-    pending_flush = true;
+    pending_flush = 1;
 
     /* And then do it immediately if we can, being race-free with the display interrupt which
      * could also do it.
      */
-    int scan_y = LCD_current_v_pos();
-    if (scan_y < area->y1 - 32 || scan_y > area->y2) {
-        do_pending_flush();
-    }
+    lv_consider_immediate_flush(disp_drv);
 }
 
 #if LV_COLOR_DEPTH == 32
@@ -191,11 +206,20 @@ void lv_port_disp_init(void)
     disp_drv.draw_buf = &disp_buf;
     //disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
     disp_drv.flush_cb = lv_disp_flush_async;
+    disp_drv.wait_cb = lv_consider_immediate_flush;
 #if LV_COLOR_DEPTH == 32
     disp_drv.rounder_cb = lv_rounder;
 #endif
     disp_drv.hor_res = MY_DISP_HOR_RES;
     disp_drv.ver_res = MY_DISP_VER_RES;
+    disp_drv.sw_rotate = true;
+#if ROTATE_DISPLAY == 90
+    disp_drv.rotated = LV_DISP_ROT_90;
+#elif ROTATE_DISPLAY == 180
+    disp_drv.rotated = LV_DISP_ROT_180;
+#elif ROTATE_DISPLAY == 270
+    disp_drv.rotated = LV_DISP_ROT_270;
+#endif
     lv_disp_drv_register(&disp_drv);
 
     /* Set up priorities so that SysTick can interrupt LCD interrupts which

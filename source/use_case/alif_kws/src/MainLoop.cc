@@ -44,6 +44,8 @@ void main_loop()
         return;
     }
 
+    init_trigger_tx();
+
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
     /* Load the model. */

@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ALIF_KWS_EVT_HANDLER_HPP
-#define ALIF_KWS_EVT_HANDLER_HPP
+#ifndef SCREEN_LAYOUT_HPP
+#define SCREEN_LAYOUT_HPP
 
-#include "AppContext.hpp"
+#include "lvgl.h"
 
 namespace alif {
 namespace app {
 
-    /**
-     * @brief       Handles the inference event.
-     * @param[in]   ctx         Pointer to the application context.
-     * @return      true or false based on execution success.
-     **/
-    bool ClassifyAudioHandler(arm::app::ApplicationContext& ctx);
+void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int imgHeight, unsigned short imgZoom);
+
+lv_obj_t *ScreenLayoutImageObject();
+lv_obj_t *ScreenLayoutImageHolderObject();
+lv_obj_t *ScreenLayoutHeaderObject();
+lv_obj_t *ScreenLayoutLabelObject(int);
 
 } /* namespace app */
 } /* namespace alif */
 
-#endif /* ALIF_KWS_EVT_HANDLER_HPP */
+#endif /* SCREEN_LAYOUT_HPP */

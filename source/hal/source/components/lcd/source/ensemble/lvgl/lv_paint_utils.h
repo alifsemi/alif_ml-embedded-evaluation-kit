@@ -19,11 +19,13 @@ extern "C" {
 #endif
 
 void write_to_lvgl_buf_doubled(
-        const uint8_t src[MIMAGE_Y][MIMAGE_X][3],
-        lv_color_t dst[MIMAGE_Y * 2][MIMAGE_X * 2]);
+        int width, int height,
+        const uint8_t *src,
+        lv_color_t *dst);
 void write_to_lvgl_buf(
-        const uint8_t src[MIMAGE_Y][MIMAGE_X][3],
-        lv_color_t dst[MIMAGE_Y][MIMAGE_X]);
+        int width, int height,
+        const uint8_t *src,
+        lv_color_t *dst);
 
 #ifdef __cplusplus
 }

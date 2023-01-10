@@ -17,6 +17,10 @@
 #include CMSIS_device_header
 //#include "cmsis.h"                  /* device specific header file    */
 
+#if defined __clang__ || defined __GCC__
+#pragma GCC diagnostic ignored "-Wvla"
+#endif
+
 #include "base_def.h"
 #include "system_utils.h"
 #include "image_processing.h"
@@ -38,22 +42,24 @@
 #endif
 
 void write_to_lvgl_buf_doubled(
-		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
-		lv_color_t dst[static restrict MIMAGE_Y * 2][MIMAGE_X * 2])
+        int width, int height,
+        const uint8_t * restrict src_ptr,
+        lv_color_t * restrict dst_ptr)
 {
-	for (uint32_t y1 = 0; y1 < MIMAGE_Y; y1++) {
-#define SRC_ROW_OFFSET_32 ((MIMAGE_X * RGB_BYTES) / 4)
+    const uint8_t (*src)[width][RGB_BYTES] = (const uint8_t (*)[width][RGB_BYTES]) src_ptr;
+    lv_color_t (*dst)[width * 2] = (lv_color_t (*)[width * 2]) dst_ptr;
+    if (width % 16) {
+        abort();
+    }
+	for (int y1 = 0; y1 < height; y1++) {
 
 #if ENABLE_MVE_WRITE && LV_COLOR_DEPTH == 32
-#if MIMAGE_X % 16
-#error "bad alignment"
-#endif
 		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), RGB_BYTES);
 		const uint32x4_t incout = vmulq_n_u32(vidupq_n_u32(0, 4), 2 * LV_COLOR_DEPTH / 8);
 		const uint32_t *restrict srcp32 = (const uint32_t *) src[y1][0];
 		uint32_t *restrict dstp32 = (uint32_t *) dst[y1 * 2][0];
 		uint32_t *restrict dst2p32 = (uint32_t *) dst[y1 * 2 + 1][0];
-		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
+		for (int x1 = 0; x1 < width; x1 += 4 * 4)
 		{
 			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
 			uint32x4_t r0g0b0r1 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(r1b0g0r0)));
@@ -86,16 +92,13 @@ void write_to_lvgl_buf_doubled(
 			srcp32 += 4 * RGB_BYTES;
 		}
 #elif 1
-#if MIMAGE_X % 4
-#error "bad alignment"
-#endif
 		const uint8_t * restrict srcp = src[y1][0];
 		lv_color_t * restrict dstp = dst[y1 * 2];
 		lv_color_t * restrict dst2p = dst[y1 * 2 + 1];
 		const uint32_t *srcp32 = (const uint32_t *)srcp;
 		uint32_t *dstp32 = (uint32_t *)dstp;
 		// Load 4 pixels as 3 words, and expand to 8 words, on two rows
-		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4)
+		for (int x1 = 0; x1 < width; x1 += 4)
 		{
 #if LV_COLOR_DEPTH == 32
 			uint32_t r0g0b0r1 = __REV(*srcp32++);
@@ -138,9 +141,9 @@ void write_to_lvgl_buf_doubled(
 		}
 		// Memcpy the second row rather than doing it as-we-go, because as-we-go makes
 		// the above too complex for the autovectoriser.
-		memcpy(dst2p, dstp, 2 * MIMAGE_X * RGBA_BYTES);
+		memcpy(dst2p, dstp, 2 * width * RGBA_BYTES);
 #else
-		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1++) {
+		for (int x1 = 0; x1 < width; x1++) {
 			uint8_t r, g, b;
 			int32_t x, y;
 
@@ -162,19 +165,22 @@ void write_to_lvgl_buf_doubled(
 }
 
 void write_to_lvgl_buf(
-		const uint8_t src[static restrict MIMAGE_Y][MIMAGE_X][RGB_BYTES],
-		lv_color_t dst[static restrict MIMAGE_Y][MIMAGE_X])
+        int width, int height,
+        const uint8_t * restrict src_ptr,
+        lv_color_t * restrict dst_ptr)
 {
-	for (uint32_t y = 0; y < MIMAGE_Y; y++) {
+    const uint8_t (*src)[width][RGB_BYTES] = (const uint8_t (*)[width][RGB_BYTES]) src_ptr;
+    lv_color_t (*dst)[width] = (lv_color_t (*)[width]) dst_ptr;
+    if (width % 16) {
+        abort();
+    }
+	for (int y = 0; y < height; y++) {
 #if ENABLE_MVE_WRITE
 #if LV_COLOR_DEPTH == 32
-#if MIMAGE_X % 16
-#error "bad alignment"
-#endif
 		const uint32x4_t inc12 = vmulq_n_u32(vidupq_n_u32(0, 4), 3);
 		const uint32_t *restrict srcp32 = (const uint32_t *) src[y][0];
 		uint32_t *restrict dstp32 = &dst[y].full;
-		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 4 * 4)
+		for (int x1 = 0; x1 < width; x1 += 4 * 4)
 		{
 			uint32x4_t r1b0g0r0 = vldrwq_gather_offset(srcp32 + 0, inc12);
 			uint32x4_t r0g0b0r1 = vreinterpretq_u32(vrev32q_u8(vreinterpretq_u8(r1b0g0r0)));
@@ -193,13 +199,10 @@ void write_to_lvgl_buf(
 			dstp32 += 4 * RGBA_BYTES;
 		}
 #else
-#if MIMAGE_X % 16
-#error "bad alignment"
-#endif
 		const uint8x16_t inc3 = vmulq_n_u8(vidupq_n_u8(0, 1), 3);
 		const uint8_t *restrict srcp = src[y][0];
 		uint8_t *restrict dstp = (uint8_t *)&dst[y];
-		for (uint32_t x1 = 0; x1 < MIMAGE_X; x1 += 16)
+		for (int x1 = 0; x1 < width; x1 += 16)
 		{
 			uint8x16_t r = vldrbq_gather_offset(srcp + 0, inc3);
 			uint8x16_t g = vldrbq_gather_offset(srcp + 1, inc3);
@@ -210,18 +213,14 @@ void write_to_lvgl_buf(
 			vst2q(dstp, out);
 			dstp += 16 * RGB565_BYTES;
 		}
-#
 #endif
 #elif 1
-#if MIMAGE_X % 4
-#error "bad alignment"
-#endif
 		const uint8_t * restrict srcp = src[y][0];
 		lv_color_t * restrict dstp = dst[y];
 		const uint32_t *srcp32 = (const uint32_t *)srcp;
 		uint32_t *dstp32 = (uint32_t *)dstp;
 		// Load 4 pixels as 3 words, and expand to 4 words
-		for (uint32_t x = 0; x < MIMAGE_X; x += 4)
+		for (int x = 0; x < width; x += 4)
 		{
 #if LV_COLOR_DEPTH == 32
 			uint32_t r0g0b0r1 = __REV(*srcp32++);
@@ -251,7 +250,7 @@ void write_to_lvgl_buf(
 #endif
 		}
 #else
-		for (uint32_t x = 0; x < MIMAGE_X; x++) {
+		for (int x = 0; x < width; x++) {
 			uint8_t r, g, b;
 
 			r = src[y][x][0];

@@ -25,6 +25,10 @@
 #include "timer_ensemble.h"     /* Timer functions. */
 #include "uart_tracelib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief   Initialises the platform components.
  * @return  0 if successful, error code otherwise.
@@ -42,8 +46,12 @@ void platform_release(void);
  */
 const char* platform_name(void);
 
-#if CONSOLE_UART==2
 extern bool run_requested(void);
+extern void init_trigger_rx(void);
+extern void init_trigger_tx(void);
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* PLATFORM_DRIVERS_H */

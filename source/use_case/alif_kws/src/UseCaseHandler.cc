@@ -31,7 +31,6 @@
 #include "arm_mve.h"
 #include <atomic>
 #include <vector>
-#include <deque>
 
 extern uint32_t m55_comms_handle;
 m55_data_payload_t mhu_data;
@@ -73,7 +72,7 @@ namespace kws {
 using namespace arm::app::kws;
 }
 
-std::deque<kws::KwsResult> infResults;
+std::vector<kws::KwsResult> infResults;
 std::vector<ClassificationResult> singleInfResult;
 /* We expect to be sampling 1 second worth of data at a time.
 *  NOTE: This is only used for time stamp calculation. */
@@ -84,7 +83,7 @@ const float secondsPerSample = 1.0 / audio::MicroNetKwsMFCC::ms_defaultSamplingF
  * @param[in]       results     Vector of KWS classification results to be displayed.
  * @return          true if successful, false otherwise.
  **/
-static bool PresentInferenceResult(const std::deque<arm::app::kws::KwsResult>& results);
+static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results);
 
 static std::string last_label;
 
@@ -238,7 +237,7 @@ bool process_audio(arm::app::ApplicationContext& ctx)
 
     /* Add results from this window to our final results vector. */
     if (infResults.size() == RESULTS_MEMORY) {
-        infResults.pop_front();
+        infResults.erase(infResults.begin());
     }
     infResults.emplace_back(kws::KwsResult(singleInfResult,
             index * secondsPerSample * preProcess.m_audioDataStride,
@@ -334,7 +333,7 @@ bool process_audio(arm::app::ApplicationContext& ctx)
         return false;
     }
 
-    static bool PresentInferenceResult(const std::deque<kws::KwsResult>& results)
+    static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 30;

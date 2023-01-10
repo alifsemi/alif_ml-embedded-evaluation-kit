@@ -93,7 +93,8 @@ SECTIONS
   .code.at_itcm : ALIGN(8)
   {
     /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
-    *(.text*)    
+    *(.text*)
+    *(fast_code)
   } > ITCM AT> MRAM
 
   .data.at_dtcm : ALIGN(8)

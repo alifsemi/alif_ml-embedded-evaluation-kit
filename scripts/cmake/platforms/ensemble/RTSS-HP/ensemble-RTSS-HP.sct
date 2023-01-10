@@ -84,6 +84,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       ; ITCM has non-startup code, audio record buffer and RAM vectors
       * (+RO-CODE)
       * (+XO)
+      * (fast_code)
       * (.bss.audio_rec)
       * (.bss.copy_vtor_table_to_ram.MyVectorTable)
   }

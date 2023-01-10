@@ -108,16 +108,16 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 	}
 }
 
-void white_balance(const uint8_t *sp, uint8_t *dp)
+void white_balance(int ml_width, int ml_height, const uint8_t *sp, uint8_t *dp)
 {
 #if 0
     if (dp != sp) {
-        memcpy(dp, sp, MIMAGE_X * MIMAGE_Y * RGB_BYTES);
+        memcpy(dp, sp, ml_width * ml_height * RGB_BYTES);
     }
 #elif 1
-    bulk_color_correction(sp, dp, MIMAGE_X * MIMAGE_Y * RGB_BYTES);
+    bulk_color_correction(sp, dp, ml_width * ml_height * RGB_BYTES);
 #else
-    for (uint32_t index = 0; index < MIMAGE_X * MIMAGE_Y * RGB_BYTES; index += RGB_BYTES) {
+    for (uint32_t index = 0; index < ml_width * ml_height * RGB_BYTES; index += RGB_BYTES) {
         color_correction(&sp[index], &dp[index]);
     }
 #endif

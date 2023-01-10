@@ -30,6 +30,6 @@
  * @brief get image data with Hal implementation.
  * @return pointer to RGB image data
  * */
-#define hal_get_image_data()   get_image_data()
+#define hal_get_image_data(w, h)   get_image_data(w, h)
 
 #endif // HAL_IMAGE_H

@@ -52,6 +52,7 @@ void CDC200_SCANLINE0_IRQHandler(void)
 
     regbase->global_reg.irq_clear = SCANLINE0_IRQ;
     (void)regbase->global_reg.irq_clear;
+    __DSB();
     tear_handler();
 }
 
