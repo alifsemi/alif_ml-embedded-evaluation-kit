@@ -64,11 +64,14 @@ target_sources(${CMSIS_DEVICE_TARGET}
     components/external/PHY_Generic.c
     components/soc/Driver_DMA.c
     components/soc/DMA_Opcode.c
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Camera_Sensor_i2c.c>
     $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_CDC200.c>
     $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_MIPI_DSI.c>
     $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/DPHY_init.c>
     $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/external/ILI9806E_LCD_panel.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_Camera_Controller.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/external/arx3A0_camera_sensor.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_MIPI_CSI2.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Camera_Sensor_i2c.c>
     )
 
 # Device definition needs to be set, is checked in source files to include correct header

@@ -55,12 +55,10 @@ add_library(${IMAGE_ENSEMBLE_COMPONENT_TARGET} STATIC)
 target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     PRIVATE
     source/ensemble/image_ensemble.c
-    source/ensemble/src/mipi_csi2_host.c
     source/ensemble/src/bayer2rgb.c
     source/ensemble/src/image_processing.c
     source/ensemble/src/color_correction.c
     source/ensemble/src/Driver_CPI.c
-    source/ensemble/src/arx3A0_camera_sensor.c
     )
 
 ## Logging utilities:
