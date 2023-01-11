@@ -33,6 +33,7 @@ extern "C"
 /****** CAMERA_CONTROLLER Control Codes *****/
 #define CAMERA_CONTROLLER_SOFTRESET                                (0x01UL)    ///< CAMERA CONTROLLER Software Reset; arg: 0=disable, 1=enable
 #define CAMERA_SENSOR_CONFIGURE                                    (0x02UL)    ///< CAMERA SENSOR configure; arg: 0=disable, 1=enable
+#define CAMERA_EVENTS_CONFIGURE                                    (0x03UL)    ///< CAMERA EVENTS configure; arg: list of events to enable (ARM_CAMERA_CONTROLLER_EVENT_..)
 
 /****** CAMERA_CONTROLLER Event *****/
 #define ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED         (1UL << 0)  ///< Camera Capture Stopped

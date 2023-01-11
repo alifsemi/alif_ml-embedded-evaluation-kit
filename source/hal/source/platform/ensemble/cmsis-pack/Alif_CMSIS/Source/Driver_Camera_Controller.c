@@ -106,24 +106,15 @@ __STATIC_INLINE void cam_ctrl_disable_interrupt(CAMERA_CTRL_DEV *cam_ctrl)
   \param[in]    cam_ctrl  : Pointer to Camera Controller resources structure
   \return       none
 */
-static void cam_ctrl_enable_interrupt(CAMERA_CTRL_DEV *cam_ctrl)
+static void cam_ctrl_enable_interrupt(CAMERA_CTRL_DEV *cam_ctrl, uint32_t events)
 {
   uint32_t reg_val = 0;
 
-#if !(RTE_MIPI_DSI)
-  /* Enable all Interrupt. */
-  reg_val = CAMERA_CTRL_IRQ_CAPTURE_STOP    | \
-            CAMERA_CTRL_IRQ_VSYNC_DETECT    | \
-            CAMERA_CTRL_IRQ_FIFO_OVERRUN    | \
-            CAMERA_CTRL_IRQ_FIFO_UNDERRUN   | \
-            CAMERA_CTRL_IRQ_BUS_ERR         | \
-            CAMERA_CTRL_IRQ_HBP_ERR         | \
-            CAMERA_CTRL_IRQ_HFP_ERR;
-#else
-  reg_val = CAMERA_CTRL_IRQ_FIFO_OVERRUN    | \
-            CAMERA_CTRL_IRQ_FIFO_UNDERRUN   | \
-            CAMERA_CTRL_IRQ_VSYNC_DETECT;
-#endif
+  reg_val |= (events & ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED)      ? CAMERA_CTRL_IRQ_CAPTURE_STOP  : 0;
+  reg_val |= (events & ARM_CAMERA_CONTROLLER_EVENT_CAMERA_FRAME_VSYNC_DETECTED) ? CAMERA_CTRL_IRQ_VSYNC_DETECT  : 0;
+  reg_val |= (events & ARM_CAMERA_CONTROLLER_EVENT_ERR_CAMERA_FIFO_OVERRUN)     ? CAMERA_CTRL_IRQ_FIFO_OVERRUN  : 0;
+  reg_val |= (events & ARM_CAMERA_CONTROLLER_EVENT_ERR_CAMERA_FIFO_UNDERRUN)    ? CAMERA_CTRL_IRQ_FIFO_UNDERRUN : 0;
+  reg_val |= (events & ARM_CAMERA_CONTROLLER_EVENT_ERR_HARDWARE)                ? CAMERA_CTRL_IRQ_BUS_ERR       : 0;
 
   cam_ctrl->reg_base->intr_ena = reg_val;
 }
@@ -687,9 +678,6 @@ static int32_t cam_ctrl_start(CAMERA_CTRL_DEV *cam_ctrl)
   /* Clear Camera Controller status variable. */
   cam_ctrl->status.cam_ctrl_status = 0;
 
-  /* Enable Camera Controller Interrupt. */
-  cam_ctrl_enable_interrupt(cam_ctrl);
-
   /* Clear Camera Controller control register*/
   cam_ctrl->reg_base->cam_ctrl = 0;
 
@@ -1091,6 +1079,9 @@ static int32_t CAMERAx_Control(CAMERA_CTRL_DEV       *cam_ctrl,
     case CAMERA_SENSOR_CONFIGURE:
       /* Camera Sensor configure*/
       cam_sensor_control = 1;
+      break;
+    case CAMERA_EVENTS_CONFIGURE:
+      cam_ctrl_enable_interrupt(cam_ctrl, arg);
       break;
     default:
       return ARM_DRIVER_ERROR_UNSUPPORTED;
