@@ -1,3 +1,4 @@
+
 /*
  * Auto generated Run-Time-Environment Configuration File
  *
@@ -8,9 +9,10 @@
 
 
 /*
- * Define the Device Header File: 
+ * Define the Device Header File:
  */
 #define CMSIS_device_header "M55_HE.h"
+
 #include CMSIS_device_header
 
 /* AlifSemiconductor::Device.SOC Peripherals.CAMERA Controller */
@@ -27,6 +29,7 @@
 
 #define RTE_Drivers_CDC200 1
 #define RTE_Drivers_MIPI_DSI 1
+#define RTE_Drivers_MIPI_CSI2 1
 #define RTE_Drivers_DMA 1
 #define RTE_Drivers_MIPI_DSI_ILI9806E_PANEL 1
 
