@@ -37,7 +37,7 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
+    set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" CACHE STRING "Linker script name")
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/ensemble" PARENT_SCOPE)
 
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)

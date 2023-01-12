@@ -60,8 +60,8 @@
 ;----------------------------------------------------------------------------
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
-#define __RO_BASE       (MRAM_BASE+0x1000)
-#define __RO_SIZE       (0x80480000-__RO_BASE)
+#define __RO_BASE       0x80480000
+#define __RO_SIZE       0xFF000
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE)
@@ -69,13 +69,12 @@
 
 LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ER_ROM +0 FIXED {                                 ; load address = execution address
-   ; MRAM has start-up code, LVGL read-only, and most constant data
+   ; MRAM has start-up code, and most constant data
    *(RESET, +First)
    startup_M55_HE.o (+RO)
    system_M55_HE.o (+RO)
    mpu_M55_HE.o (+RO)
    *(InRoot$$Sections)
-   *liblvgl.a(+RO)
    .ANY(+RO-DATA)
   }
 
@@ -83,39 +82,24 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       ; ITCM has non-startup code, audio record buffer and RAM vectors
       * (+RO-CODE)
       * (+XO)
-      * (fast_code)
       * (.bss.audio_rec)
       * (.bss.copy_vtor_table_to_ram.MyVectorTable)
   }
 
   ;-----------------------------------------------------
-  ; R/W region - remaining part of the DTCM region
+  ; R/W region - remaining part of the 256KiB RAM region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has CMSIS-DSP tables and all read-write data, except image and NPU buffers
-      *(+RW +ZI)
-      arm_common_tables.o (+RO-DATA)
+      ; DTCM has all read-write data,
+      ; including NPU activation buffer and audio processing buffers
+      * (+RW +ZI)
   }
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
-; avoid first page, where default A32_APP stub is loaded
-  RW_SRAM0 SRAM0_BASE+8192 SRAM0_SIZE-8192  {  ; 4MB ----------------------------
-      * (.bss.large_ram)                     ; Large LVGL buffers
-      * (.bss.lcd_image_buf)
-      * (.bss.camera_frame_buf)              ; Camera Frame Buffer
-      * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
-  }
-
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
-
-      ; activation buffers a.k.a tensor arena when memory mode dedicated sram
-      * (.bss.NoInit.activation_buf_sram)
-  }
-
-  PADDING +0 ALIGN 16 FILL 0 16  {  }
+  PADDING SRAM6_BASE ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0

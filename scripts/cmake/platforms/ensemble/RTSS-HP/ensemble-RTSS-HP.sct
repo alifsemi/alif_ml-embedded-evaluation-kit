@@ -62,7 +62,7 @@
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
 #define __RO_BASE       (MRAM_BASE+0x1000)
-#define __RO_SIZE       (MRAM_SIZE-0x81000)
+#define __RO_SIZE       (0x80480000-__RO_BASE)
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE)
@@ -90,11 +90,11 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
 
   ;-----------------------------------------------------
-  ; R/W region - remaining part of the 1MiB RAM region
+  ; R/W region - remaining part of the DTCM region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has CMSIS-DSP tables and all read-write data, except NPU activation buffer
+      ; DTCM has CMSIS-DSP tables and all read-write data, except image and NPU buffers
       *(+RW +ZI)
       arm_common_tables.o (+RO-DATA)
   }

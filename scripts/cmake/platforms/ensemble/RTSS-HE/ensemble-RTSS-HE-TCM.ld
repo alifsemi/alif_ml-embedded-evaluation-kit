@@ -27,17 +27,15 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00008000;
-__HEAP_SIZE  = 0x00010000;
-__ROM_BASE = 0x80001000;
-__ROM_SIZE = 0x0047F000;
+__STACK_SIZE = 0x00001000;
+__HEAP_SIZE  = 0x00006000;
+__ROM_BASE = 0x80480000;
+__ROM_SIZE = 0x000FF000;
 
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = 0x00000000, LENGTH = 0x00040000
-  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00100000
-  SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
-  SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
+  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
   TOC   (r)   : ORIGIN = 0x8057FFF0, LENGTH = 16
 }
@@ -58,8 +56,6 @@ SECTIONS
     *startup_M55_*.c.obj(.text .rodata*)
     *system_M55_*.c.obj(.text .rodata*)
     *mpu_M55_*.c.obj(.text .rodata*)
-
-    *liblvgl.a:*(.text .rodata*)
 
     *(startup_ro_data)
   } > MRAM
@@ -83,10 +79,6 @@ SECTIONS
     LONG (SIZEOF(.bss.at_itcm)/4)
     LONG (ADDR(.bss))
     LONG (SIZEOF(.bss)/4)
-    LONG (ADDR(.bss.at_sram0))
-    LONG (SIZEOF(.bss.at_sram0)/4)
-    LONG (ADDR(.bss.at_sram1))
-    LONG (SIZEOF(.bss.at_sram1)/4)
     __zero_table_end__ = .;
   } > MRAM
 
@@ -94,7 +86,6 @@ SECTIONS
   {
     /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
     *(.text*)
-    *(fast_code)
   } > ITCM AT> MRAM
 
   .data.at_dtcm : ALIGN(8)
@@ -103,7 +94,6 @@ SECTIONS
     *(vtable)
     *(.data)
     *(.data*)
-    *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
 
@@ -122,18 +112,15 @@ SECTIONS
   {
   } > SRAM0 >AT MRAM
 */
+/*
   .bss.at_sram0 (NOLOAD) : ALIGN(8)
   {
-    * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
-    * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
-    * (.bss.lcd_image_buf)
   } > SRAM0
 
   .bss.at_sram1 (NOLOAD) : ALIGN(8)
   {
-    * (.bss.NoInit.activation_buf_sram) /* 2MB */
-  } > SRAM1
-
+   } > SRAM1
+*/
   .bss.at_itcm (NOLOAD) : ALIGN(8)
   {
     *(.bss.audio_rec)
@@ -221,7 +208,7 @@ SECTIONS
   .mini_toc :
   {
     LONG (0xffffffff)
-    LONG (0xFFA0A710 + 2)
+    LONG (0xFFA0A710 + 3)
     LONG (__ROM_BASE)
     LONG (0)
   } > TOC

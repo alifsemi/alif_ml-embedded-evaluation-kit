@@ -29,7 +29,7 @@ void GLCD_Initialize(void)
     lv_obj_t *scr = lv_scr_act();
     lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
     canvas = lv_canvas_create(lv_scr_act());
-    static uint32_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(GLCD_WIDTH, GLCD_HEIGHT) / sizeof(uint32_t)];
+    static LV_ATTRIBUTE_LARGE_RAM_ARRAY uint32_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(GLCD_WIDTH, GLCD_HEIGHT) / sizeof(uint32_t)];
     lv_canvas_set_buffer(canvas, buffer, GLCD_WIDTH, GLCD_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     lv_obj_center(canvas);
 	lv_draw_rect_dsc_init(&rect_dsc);
