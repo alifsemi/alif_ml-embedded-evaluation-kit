@@ -59,10 +59,18 @@ using arm::app::MicroNetKwsModel;
 
 #define AUDIO_MICS  AUDIO_LR_MIX
 
+//#define STORE_AUDIO
+
 static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int samples);
 
 // 24-bit stereo record buffer
 static int32_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __attribute__((section(".bss.audio_rec"))); // stereo record buffer
+
+#ifdef STORE_AUDIO
+#define AUDIO_STORE_SAMPLES (AUDIO_SAMPLES*10)
+int32_t audio_store[AUDIO_STORE_SAMPLES * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
+static size_t store_pos;
+#endif
 
 // 16-bit working buffer. New data is initially loaded as float16, then converted to int16 during gain adjustment
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
@@ -88,6 +96,12 @@ static void audio_callback(uint32_t /*event*/)
     if (new_samples < AUDIO_STRIDE) {
         audio_start_next_rx();
     }
+#ifdef STORE_AUDIO
+    if (store_pos < sizeof audio_store / sizeof audio_store[0]) {
+        memcpy(audio_store + store_pos,  audio_rec[!audio_current_rec_buf], AUDIO_REC_SAMPLES * 2 * sizeof(int32_t));
+        store_pos += 2 * AUDIO_REC_SAMPLES;
+    }
+#endif
     copy_audio_rec_to_in((float16_t *) audio_inf + AUDIO_SAMPLES + data_received, audio_rec[!audio_current_rec_buf], AUDIO_REC_SAMPLES);
     data_received = new_samples;
 }
