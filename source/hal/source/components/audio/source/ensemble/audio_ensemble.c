@@ -16,9 +16,6 @@
 #include "audio_data.h"
 #include "mic_listener.h"
 
-const uint32_t wlen = 16;
-const uint32_t sampling_rate = 16000;
-
 atomic_bool audio_received = false;
 audio_callback_t audio_callback =  NULL;
 
@@ -35,7 +32,7 @@ void audio_set_callback(audio_callback_t callback)
     audio_callback = callback;
 }
 
-int audio_init()
+int audio_init(int sampling_rate, int wlen)
 {
     int32_t err = init_microphone(sampling_rate, wlen);
 

@@ -20,7 +20,7 @@
  */
 typedef void (*audio_callback_t)(uint32_t data);
 
-int audio_init();
+int audio_init(int sampling_rate, int wlen);
 
 int get_audio_data(void *data, int len);
 

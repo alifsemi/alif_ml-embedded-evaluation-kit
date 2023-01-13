@@ -11,8 +11,10 @@
 #include "audio_data.h"
 #include <string.h>
 
-int audio_init()
+int audio_init(int sampling_rate, int wlen)
 {
+    (void) sampling_rate;
+    (void) wlen;
     return 0;
 }
 

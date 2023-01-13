@@ -38,12 +38,6 @@ using KwsClassifier = arm::app::Classifier;
 
 void main_loop()
 {
-    int err = hal_audio_init();
-    if (0 != err) {
-        printf_err("hal_audio_init failed with error: %d\n", err);
-        return;
-    }
-
     init_trigger_tx();
 
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
@@ -63,7 +57,7 @@ void main_loop()
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("clipIndex", 0);
+    caseContext.Set<int>("index", 0);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::kws::g_ScoreThreshold);  /* Normalised score threshold. */
