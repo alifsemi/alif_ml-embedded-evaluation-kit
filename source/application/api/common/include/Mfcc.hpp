@@ -109,10 +109,9 @@ namespace audio {
 
             /* Take DCT. Uses matrix mul. */
             for (size_t i = 0, j = 0; i < mfccOut.size(); ++i, j += numFbankBins) {
-                float sum = 0;
-                for (size_t k = 0; k < numFbankBins; ++k) {
-                    sum += this->m_dctMatrix[j + k] * this->m_melEnergies[k];
-                }
+
+                float sum = math::MathUtils::DotProductF32(this->m_dctMatrix.data() + j, this->m_melEnergies.data(), numFbankBins);
+
                 /* Quantize to T. */
                 sum = std::round((sum / quantScale) + quantOffset);
                 mfccOut[i] = static_cast<T>(std::min<float>(std::max<float>(sum, minVal), maxVal));
