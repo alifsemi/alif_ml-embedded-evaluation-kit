@@ -50,6 +50,7 @@ function(set_platform_global_defaults)
     set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
+    set(ETHOS_U_PLATFORM_CACHE_OPS "ON"     CACHE BOOL   "Ethos-U NPU Custom platform cache operations")
 
 endfunction()
 

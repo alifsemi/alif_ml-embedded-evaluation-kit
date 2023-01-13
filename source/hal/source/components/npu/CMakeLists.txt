@@ -38,6 +38,7 @@ set(ETHOS_U_BASE_ADDR    "0x58102000"    CACHE STRING "Ethos-U NPU base address"
 set(ETHOS_U_IRQN         "56"            CACHE STRING "Ethos-U NPU Interrupt")
 set(ETHOS_U_SEC_ENABLED  "1"             CACHE STRING "Ethos-U NPU Security enable")
 set(ETHOS_U_PRIV_ENABLED "1"             CACHE STRING "Ethos-U NPU Privilege enable")
+set(ETHOS_U_PLATFORM_CACHE_OPS "OFF"     CACHE BOOL   "Ethos-U NPU Custom platform cache operations")
 
 # Driver needs to know what MAC configuration to build for.
 if (NOT DEFINED ETHOS_U_NPU_CONFIG_ID)
@@ -140,9 +141,11 @@ target_sources(${ETHOS_U_NPU_COMPONENT}
     ethosu_npu_init.c
     ethosu_profiler.c)
 
+if (NOT ETHOS_U_PLATFORM_CACHE_OPS)
 target_sources(${ETHOS_U_NPU_COMPONENT}
     PUBLIC
     ethosu_cpu_cache.c)
+endif()
 
 ## Add dependencies:
 target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC
