@@ -53,6 +53,12 @@ using arm::app::MicroNetKwsModel;
 #define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second
 #define RESULTS_MEMORY 8
 
+#define AUDIO_L_ONLY 1
+#define AUDIO_R_ONLY 2
+#define AUDIO_LR_MIX 3
+
+#define AUDIO_MICS  AUDIO_LR_MIX
+
 static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int samples);
 
 // 24-bit stereo record buffer
@@ -109,8 +115,16 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
         mve_pred16_t p = vctp32q(samples_to_go);
         // No predication possible on interleaved load, so will overrun end of array
         int32x4x2_t stereo = vld2q(input);
+#if AUDIO_MICS == AUDIO_LR_MIX
         // Average left and right
         int32x4_t mono = vrhaddq_x(stereo.val[0], stereo.val[1], p);
+#elif AUDIO_MICS == AUDIO_L_ONLY
+        int32x4_t mono = stereo.val[0];
+#elif AUDIO_MICS == AUDIO_R_ONLY
+        int32x4_t mono = stereo.val[1];
+#else
+#error "which microphone?"
+#endif
         // Add it up to track the pre-adjustment mean
         sum = vaddlvaq_p(sum, mono, p);
         // Subtract the current DC offset (necessary to not lose accuracy
