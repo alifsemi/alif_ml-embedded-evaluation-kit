@@ -90,6 +90,11 @@ SECTIONS
     __zero_table_end__ = .;
   } > MRAM
 
+  .vectors.at_itcm (NOLOAD) : ALIGN(2048)
+  {
+    *(.bss.noinit.ram_vectors)
+  } > ITCM
+
   .code.at_itcm : ALIGN(8)
   {
     /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
@@ -136,8 +141,6 @@ SECTIONS
 
   .bss.at_itcm (NOLOAD) : ALIGN(8)
   {
-    *(.bss.audio_rec)
-    *(.bss.copy_vtor_table_to_ram.MyVectorTable)
   } > ITCM
 
   .bss (NOLOAD) : ALIGN(8)

@@ -48,6 +48,7 @@
 #define DTCM_SIZE                 SRAM5_SIZE /* 256KB */
 #define DTCM_GLOBAL_BASE          SRAM5_BASE
 
+#define __VECTORS_SIZE  (496 * 4)
 #define __STACK_SIZE    0x00001000
 #define __HEAP_SIZE     0x00006000
 
@@ -79,13 +80,15 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    .ANY(+RO-DATA)
   }
 
-  ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
-      ; ITCM has non-startup code, audio record buffer and RAM vectors
+  ITCM_RAM_VECTORS ITCM_BASE UNINIT ALIGN 2048 __VECTORS_SIZE {
+      * (.bss.noinit.ram_vectors)
+  }
+
+  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-__VECTORS_SIZE {  ; --------------------------------
+      ; ITCM has non-startup code, except for non-fast LVGL, and RAM vectors
       * (+RO-CODE)
       * (+XO)
       * (fast_code)
-      * (.bss.audio_rec)
-      * (.bss.copy_vtor_table_to_ram.MyVectorTable)
   }
 
   ;-----------------------------------------------------
