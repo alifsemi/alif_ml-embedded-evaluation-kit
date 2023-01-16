@@ -1,9 +1,9 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -31,8 +31,8 @@
  * @email    rupesh@alifsemi.com
  * @brief    CMSIS Core Device Startup File for
  *           Alif Semiconductor M55_HP Device
- * @version  V1.0.0
- * @date     19. Feb 2021
+ * @version  V1.0.1
+ * @date     02. Dec 2022
  * @bug      None
  * @Note	 None
  ******************************************************************************/
@@ -1061,17 +1061,13 @@ __NO_RETURN void Reset_Handler_C(void)
 /* We add it to the preinit table for GCC */
 void _platform_pre_stackheap_init(void)
 {
-    /* SystemInit enabled the ICache but left the DCache off */
-
-    /* Invalidate the ICache to synchronise with copied code - DCache is off, so no maintenance required */
+    /* Synchronise the caches for any copied code */
+    SCB_CleanDCache();
     SCB_InvalidateICache();
-
-    /* Enable the DCache now we've finished copying code */
-    SCB_EnableDCache();
 }
 
 #if !defined(__ARMCC_VERSION)
-void (*_do_platform_pre_stackheap_init)() __attribute__((section(".preinit_array")))= _platform_pre_stackheap_init;
+void (*_do_platform_pre_stackheap_init)() __attribute__((section(".preinit_array"))) = _platform_pre_stackheap_init;
 #endif
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -1080,7 +1076,7 @@ void (*_do_platform_pre_stackheap_init)() __attribute__((section(".preinit_array
 #endif
 
 /*----------------------------------------------------------------------------
-  Hard Fault Handler
+  Default Handler for Faults
  *----------------------------------------------------------------------------*/
 void Fault_Handler(void)
 {

@@ -28,9 +28,9 @@
   \fn          void* LocalToGlobal(void* in_addr)
   \brief       Return the corresponding global address
   \param[in]   in_addr  address to convert
-  \return      uint32_t global address
+  \return      void* global address
 */
-uint32_t LocalToGlobal(const volatile void *in_addr)
+void* LocalToGlobal(void *in_addr)
 {
     /* Only for local TCM address, we need to map it to global address space, rest
      * for all other memories like SRAM0/1, MRAM, OctalSPI etc we can pass the address
@@ -39,11 +39,11 @@ uint32_t LocalToGlobal(const volatile void *in_addr)
     uint32_t addr = (uint32_t)in_addr;
 
     if((addr >= DTCM_BASE) && (addr < (DTCM_BASE + DTCM_SIZE)))
-        return addr - DTCM_BASE + DTCM_GLOBAL_BASE;
-    else if((addr >= ITCM_BASE) && (addr < (ITCM_BASE+ ITCM_SIZE)))
-        return addr - ITCM_BASE + ITCM_GLOBAL_BASE;
+        return (void*)(addr - DTCM_BASE + DTCM_GLOBAL_BASE);
+    else if((addr < (ITCM_BASE+ ITCM_SIZE)))
+        return (void*)(addr - ITCM_BASE + ITCM_GLOBAL_BASE);
     else
-        return addr;
+        return ((void*)addr);
 }
 
 /**
@@ -52,13 +52,13 @@ uint32_t LocalToGlobal(const volatile void *in_addr)
   \param[in]   in_addr  address to convert
   \return      void* local address
 */
-void* GlobalToLocal(uint32_t in_addr)
+void* GlobalToLocal(void *in_addr)
 {
     /* Only for local TCM address, we need to map it to local address space, rest
      * for all other memories like SRAM0/1, MRAM, OctalSPI etc we can pass the address
      * as-is as it is global.
      */
-    uint32_t addr = in_addr;
+    uint32_t addr = (uint32_t)in_addr;
 
     if((addr >= DTCM_GLOBAL_BASE) && (addr < (DTCM_GLOBAL_BASE + DTCM_SIZE)))
         return (void*)(addr - DTCM_GLOBAL_BASE + DTCM_BASE);

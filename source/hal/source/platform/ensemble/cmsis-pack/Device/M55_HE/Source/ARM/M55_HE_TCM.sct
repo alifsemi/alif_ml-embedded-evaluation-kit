@@ -94,7 +94,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
   RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; Update sections as needed
    * (camera_frame_buf)              ; Camera Frame Buffer
-   * (camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion
+   * (camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Conversion
   }
   RW_SRAM2 SRAM2_BASE SRAM2_SIZE  {  ; Update sections as needed
 

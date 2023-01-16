@@ -48,8 +48,8 @@
     #include "tgu_M55_HE.h"
   #endif
 
-#if defined (__MPU_PRESENT)
-  #include <mpu_M55_HE.h>
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
+  #include "mpu_M55_HE.h"
 #endif
 
 #include "app_map.h"
@@ -145,17 +145,19 @@ void SystemInit (void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#if defined (__MPU_PRESENT)
+  // Enable Loop and branch info cache
+  SCB->CCR |= SCB_CCR_LOB_Msk;
+  __DSB();
+  __ISB();
+
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
   MPU_Setup();
 #endif
 
-#ifdef __ICACHE_PRESENT
+  // Enable caches now, for speed, but we will have to clean
+  // after scatter-loading, in _platform_pre_stackheap_init
   SCB_EnableICache();
-#endif
-
-// Enable Loop and branch info cache
-SCB->CCR |= SCB_CCR_LOB_Msk;
-__ISB();
+  SCB_EnableDCache();
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   TZ_SAU_Setup();
