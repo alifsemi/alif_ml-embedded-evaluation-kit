@@ -9,8 +9,7 @@
 #define IMAGE_PROCESSING_H_
 
 #include <stdint.h>
-
-#include "display.h"
+#include "RTE_Device.h"
 
 #define RGB_BYTES 		3
 #define RGBA_BYTES 		4
@@ -37,12 +36,8 @@
 #endif
 
 // Display dimensions
-#define DIMAGE_X		480
-#ifdef E50RA_MW550_N
-#define DIMAGE_Y		854
-#else
-#define DIMAGE_Y        800
-#endif
+#define DIMAGE_X        RTE_PANEL_HACTIVE_TIME
+#define DIMAGE_Y        RTE_PANEL_VACTIVE_LINE
 #define DISPLAY_BUFFER_SIZE  (DIMAGE_X*DIMAGE_Y*RGB_BYTES)
 
 #define TIFF_HDR_NUM_ENTRY 8

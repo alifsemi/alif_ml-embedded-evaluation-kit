@@ -106,7 +106,7 @@ int32_t camera_init(uint8_t* buffer)
         return res;
     }
 
-    res = camera->Control(CAMERA_SENSOR_CONFIG, CAMERA_RESOLUTION_560x560);
+    res = camera->Control(CAMERA_SENSOR_CONFIGURE, CAMERA_RESOLUTION_560x560);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
