@@ -50,7 +50,8 @@ using arm::app::MicroNetKwsModel;
 #define AUDIO_REC_SAMPLES 1600
 #define NEW_SAMPLE_START (AUDIO_SAMPLES - AUDIO_STRIDE) // 0.5 second
 #define MAX_GAIN 10000.0f // 80dB
-#define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second
+//#define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second
+#define MAX_GAIN_INC_PER_STRIDE 1.12201845f // 1dB, so 2dB per second
 #define RESULTS_MEMORY 8
 
 #define AUDIO_L_ONLY 1
