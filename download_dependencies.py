@@ -36,7 +36,7 @@ from pathlib import Path
 
 TF = "https://github.com/tensorflow/tflite-micro/archive/28770e4cac1e5dae85b55a0d47d5315d35755d04.zip"
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/81564cfb339ebf9def167a50693733f8a1e1471e.zip"
-CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.14.2.zip"
+CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/b46a2f86b5c9d8247ea5417fc0e0022876b80dcf.zip"
 CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.0.0.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.11.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.11.tar.gz"
