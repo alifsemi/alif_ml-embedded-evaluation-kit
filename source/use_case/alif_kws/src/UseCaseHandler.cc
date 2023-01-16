@@ -28,7 +28,7 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "Classifier.hpp"
+#include "KwsClassifier.hpp"
 #include "MicroNetKwsModel.hpp"
 #include "hal.h"
 #include "AudioUtils.hpp"
@@ -48,7 +48,7 @@
 extern uint32_t m55_comms_handle;
 m55_data_payload_t mhu_data;
 
-using KwsClassifier = arm::app::Classifier;
+using arm::app::KwsClassifier;
 using arm::app::Profiler;
 using arm::app::ClassificationResult;
 using arm::app::ApplicationContext;
@@ -347,11 +347,9 @@ bool process_audio(int16_t *audio, int samples)
 
         const int16_t* inferenceWindow = audio_inf;
 
-        preProcess.m_audioWindowIndex = index;
-
         uint32_t start = ARM_PMU_Get_CCNTR();
         /* Run the pre-processing, inference and post-processing. */
-        if (!preProcess.DoPreProcess(inferenceWindow, audio::MicroNetKwsMFCC::ms_defaultSamplingFreq)) {
+        if (!preProcess.DoPreProcess(inferenceWindow, index)) {
             printf_err("Pre-processing failed.");
             return false;
         }
