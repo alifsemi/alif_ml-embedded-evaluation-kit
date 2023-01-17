@@ -41,7 +41,6 @@ target_include_directories(${ENSEMBLE_DISPLAY_TARGET}
 target_sources(${ENSEMBLE_DISPLAY_TARGET}
     PRIVATE
     src/LCD_Panel.c
-    lvgl/Alif240.c
     lvgl/lv_port_disp.c
     lvgl/lv_paint_utils.c
 )

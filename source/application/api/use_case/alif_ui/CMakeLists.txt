@@ -26,7 +26,8 @@ project(${ALIF_UI_API_TARGET}
 
 # Create static library
 add_library(${ALIF_UI_API_TARGET} STATIC
-        src/ScreenLayout.cc)
+        src/ScreenLayout.cc
+        src/Alif240.c)
 
 target_include_directories(${ALIF_UI_API_TARGET} PUBLIC include)
 
