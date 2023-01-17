@@ -79,11 +79,11 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *liblvgl.a(+RO)
    .ANY(+RO-DATA)
   }
-  
+
   ITCM_RAM_VECTORS ITCM_BASE UNINIT ALIGN 2048 __VECTORS_SIZE {
-  	  * (.bss.noinit.ram_vectors)
+      * (.bss.noinit.ram_vectors)
   }
-  
+
   ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-__VECTORS_SIZE {  ; --------------------------------
       ; ITCM has non-startup code, except for non-fast LVGL, and RAM vectors
       * (+RO-CODE)
@@ -106,7 +106,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
 ; avoid first page, where default A32_APP stub is loaded
   RW_SRAM0 SRAM0_BASE+8192 SRAM0_SIZE-8192  {  ; 4MB ----------------------------
-
+      * (ifm)                                ; Baked-in inputs
       * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.

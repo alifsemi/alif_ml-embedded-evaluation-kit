@@ -115,7 +115,7 @@ SECTIONS
 /*
   .data.at_sram0 : ALIGN(8)
   {
-  } > SRAM0 >AT MRAM
+  } > SRAM0 AT> MRAM
 */
 /*
   .bss.at_sram0 (NOLOAD) : ALIGN(8)
@@ -137,7 +137,6 @@ SECTIONS
     *(.bss)
     *(.bss.*)
     *(COMMON)
-    *(ifm)
     . = ALIGN(8);
     __bss_end__ = .;
   } > DTCM
@@ -204,6 +203,7 @@ SECTIONS
 
     *(nn_model)
     *(labels)
+    *(ifm)
 
     KEEP(*(.eh_frame*))
   } > MRAM

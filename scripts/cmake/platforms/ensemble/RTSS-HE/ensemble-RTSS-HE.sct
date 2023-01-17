@@ -106,6 +106,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
 ; avoid first page, where default A32_APP stub is loaded
   RW_SRAM0 SRAM0_BASE+8192 SRAM0_SIZE-8192  {  ; 4MB ----------------------------
+      * (ifm)                                ; Baked-in inputs
       * (.bss.large_ram)                     ; Large LVGL buffers
       * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
