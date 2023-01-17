@@ -100,6 +100,10 @@ int platform_init(void)
 {
     copy_vtor_table_to_ram();
 
+    /* Forces retarget code to be included in build */
+    extern void _clock_init(void);
+    _clock_init();
+
     tracelib_init(NULL);
 
     int err = 0;
