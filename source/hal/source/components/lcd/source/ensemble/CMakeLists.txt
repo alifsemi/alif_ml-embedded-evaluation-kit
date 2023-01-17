@@ -84,6 +84,7 @@ target_link_libraries(${ENSEMBLE_DISPLAY_TARGET} PUBLIC
     log
     cmsis_ensemble
     rte_components
+    platform_drivers
     ${LVGL_TARGET})
 
 # Display status
