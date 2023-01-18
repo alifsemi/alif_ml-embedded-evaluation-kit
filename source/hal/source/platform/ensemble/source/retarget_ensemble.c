@@ -57,6 +57,7 @@
 #else
 #define TMPNAM_FUNCTION RETARGET(_tmpnam)
 #endif
+#define ISTTY_FUNCTION RETARGET(_istty)
 
 #else
 /* GNU compiler re-targeting */
@@ -80,6 +81,7 @@ extern FILEHANDLE _open(const char * /*name*/, int /*openmode*/);
 #define RETARGET(fun) fun
 
 #define TMPNAM_FUNCTION RETARGET(_tmpnam)
+#define ISTTY_FUNCTION RETARGET(_isatty)
 
 #endif
 
@@ -196,7 +198,7 @@ int RETARGET(_read)(FILEHANDLE fh, unsigned char *buf, unsigned int len, int mod
     }
 }
 
-int RETARGET(_istty)(FILEHANDLE fh)
+int ISTTY_FUNCTION(FILEHANDLE fh)
 {
     switch (fh) {
     case STDIN:
@@ -210,17 +212,24 @@ int RETARGET(_istty)(FILEHANDLE fh)
 
 int RETARGET(_close)(FILEHANDLE fh)
 {
-    if (RETARGET(_istty(fh))) {
+    if (ISTTY_FUNCTION(fh)) {
         return 0;
     }
 
     return -1;
 }
 
+#if defined(__ARMCC_VERSION)
 int RETARGET(_seek)(FILEHANDLE fh, long pos)
+#else
+long RETARGET(_lseek)(FILEHANDLE fh, long pos, int whence)
+#endif
 {
     UNUSED(fh);
     UNUSED(pos);
+#if !defined(__ARMCC_VERSION)
+    UNUSED(whence);
+#endif
 
     return -1;
 }
@@ -234,7 +243,7 @@ int RETARGET(_ensure)(FILEHANDLE fh)
 
 long RETARGET(_flen)(FILEHANDLE fh)
 {
-    if (RETARGET(_istty)(fh)) {
+    if (ISTTY_FUNCTION(fh)) {
         return 0;
     }
 
@@ -329,5 +338,35 @@ int ferror(FILE *f)
 }
 
 #endif /* #ifndef ferror */
+
+/* More newlib functions */
+#ifndef __ARMCC_VERSION
+
+struct stat;
+int _fstat(int f, struct stat *buf)
+{
+    UNUSED(f);
+    UNUSED(buf);
+
+    return -1;
+}
+
+int _getpid()
+{
+    return 1;
+}
+
+int _kill(int pid, int sig)
+{
+    UNUSED(sig);
+
+    if (pid == 1) {
+        RETARGET(_exit(1));
+    }
+
+    return -1;
+}
+
+#endif // !defined __ARMCC_VERSION
 
 #endif // USE_SEMIHOSTING
