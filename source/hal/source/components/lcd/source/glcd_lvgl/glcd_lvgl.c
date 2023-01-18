@@ -25,7 +25,7 @@ void GLCD_Initialize(void)
 #if LV_COLOR_DEPTH != 16
 #error "LV_COLOR_DEPTH must be set to 16 to use GLCD emulation"
 #endif
-    lv_port_lock();
+    uint32_t lv_lock_state = lv_port_lock();
     lv_obj_t *scr = lv_scr_act();
     lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
     canvas = lv_canvas_create(lv_scr_act());
@@ -41,7 +41,7 @@ void GLCD_Initialize(void)
 	text_dsc.sel_end = 0x7fff;
 	text_dsc.sel_bg_color.full = Black;
 	text_dsc.sel_color.full = White;
-	lv_port_unlock();
+	lv_port_unlock(lv_lock_state);
 }
 
 void GLCD_Clear(unsigned short color)
@@ -49,9 +49,9 @@ void GLCD_Clear(unsigned short color)
     if (!canvas) {
         return;
     }
-    lv_port_lock();
+    uint32_t lv_lock_state = lv_port_lock();
     lv_canvas_fill_bg(canvas, (lv_color_t) { .full = color }, LV_OPA_COVER);
-    lv_port_unlock();
+    lv_port_unlock(lv_lock_state);
 }
 
 /**
@@ -108,7 +108,7 @@ void GLCD_Image(const void *data, const uint32_t width,
             abort();
     }
 
-    lv_port_lock();
+    uint32_t lv_lock_state = lv_port_lock();
     /* Loop over the image. */
     uint32_t dst_y = pos_y;
     for (j = height; j != 0; j -= downsample_factor) {
@@ -123,7 +123,7 @@ void GLCD_Image(const void *data, const uint32_t width,
         src_unsigned += y_incr;
         dst_y++;
     }
-    lv_port_unlock();
+    lv_port_unlock(lv_lock_state);
 }
 
 void GLCD_DisplayString(
@@ -135,10 +135,10 @@ void GLCD_DisplayString(
     }
 
     switch (fi) {
-    case 0:
-        lv_port_lock();
+    case 0: ;
+        uint32_t lv_lock_state = lv_port_lock();
         lv_canvas_draw_text(canvas, col * 9, ln * 15, col * 9, &text_dsc, s);
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
         break;
     }
 }
@@ -160,9 +160,9 @@ void GLCD_Box(
         return;
     }
 	rect_dsc.bg_color.full = color;
-	lv_port_lock();
+	uint32_t lv_lock_state = lv_port_lock();
 	lv_canvas_draw_rect(canvas, x, y, w, h, &rect_dsc);
-	lv_port_unlock();
+	lv_port_unlock(lv_lock_state);
 }
 
 void GLCD_SetTextColor(unsigned short color)

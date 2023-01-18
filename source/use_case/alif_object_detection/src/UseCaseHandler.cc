@@ -62,7 +62,7 @@ using namespace arm::app::object_detection;
         }
 
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
-        lv_port_lock();
+        uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
 
         lv_style_init(&boxStyle);
@@ -73,7 +73,7 @@ using namespace arm::app::object_detection;
         lv_style_set_outline_pad(&boxStyle, 0);
         lv_style_set_outline_color(&boxStyle, lv_theme_get_color_primary(ScreenLayoutHeaderObject()));
         lv_style_set_radius(&boxStyle, 4);
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
 
         return true;
     }

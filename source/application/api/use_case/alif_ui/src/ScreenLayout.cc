@@ -45,7 +45,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
 {
     lv_port_disp_init();
 
-    lv_port_lock();
+    uint32_t lv_lock_state = lv_port_lock();
     lv_obj_t *screen = lv_scr_act();
 
     static lv_style_t style;
@@ -186,7 +186,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_set_align(alifObj, LV_ALIGN_BOTTOM_MID);
     lv_obj_move_background(alifObj);
 
-    lv_port_unlock();
+    lv_port_unlock(lv_lock_state);
 }
 
 lv_obj_t *ScreenLayoutImageObject()

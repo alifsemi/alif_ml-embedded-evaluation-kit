@@ -180,14 +180,14 @@ void lv_port_disp_init(void)
 {
     if (lv_inited)
     {
-        lv_port_lock();
+        uint32_t lv_lock_state = lv_port_lock();
         lv_obj_t *screen = lv_scr_act();
         uint32_t children = lv_obj_get_child_cnt(screen);
         for (uint32_t i = 0; i < children; i++) {
             lv_obj_add_flag(lv_obj_get_child(screen, i), LV_OBJ_FLAG_HIDDEN);
         }
         lv_obj_remove_style_all(screen);
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
         return;
     }
 
@@ -238,18 +238,24 @@ void lv_port_disp_init(void)
     lv_inited = true;
 }
 
-bool locked;
-void lv_port_lock(void)
+static bool locked;
+
+uint32_t lv_port_lock(void)
 {
     /* Mask out the low-priority PendSV */
-    __set_BASEPRI((uint8_t)(0xFF << (8-__NVIC_PRIO_BITS)));
+    uint32_t old_state = __get_BASEPRI() & 0xFF;
+    const uint8_t desired_state = (uint8_t)(0xFF << (8-__NVIC_PRIO_BITS));
+    if (old_state == 0 || old_state > desired_state) {
+        __set_BASEPRI(desired_state);
+    }
     locked = true;
+    return old_state;
 }
 
-void lv_port_unlock(void)
+void lv_port_unlock(uint32_t state)
 {
+    __set_BASEPRI(state);
     locked = false;
-    __set_BASEPRI(0);
 }
 
 uint32_t lv_port_get_ticks(void)

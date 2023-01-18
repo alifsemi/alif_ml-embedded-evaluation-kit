@@ -81,9 +81,9 @@ namespace app {
         }
 
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
-        lv_port_lock();
+        uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Image Classifier");
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
 
         return true;
     }
@@ -125,7 +125,7 @@ namespace app {
             return false;
         }
 
-        lv_port_lock();
+        uint32_t lv_lock_state = lv_port_lock();
         tprof5 = ARM_PMU_Get_CCNTR();
         /* Display this image on the LCD. */
 #ifdef USE_LVGL_ZOOM
@@ -137,17 +137,17 @@ namespace app {
         tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
 
         lv_obj_invalidate(ScreenLayoutImageObject());
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
 
         if (SKIP_MODEL || !run_requested()) {
 #if SHOW_PROFILING
-            lv_port_lock();
+            lv_lock_state = lv_port_lock();
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "tprof3=%.3f ms", (double)tprof3 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "tprof4=%.3f ms", (double)tprof4 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(4), "tprof5=%.3f ms", (double)tprof5 / SystemCoreClock * 1000);
-            lv_port_unlock();
+            lv_port_unlock(lv_lock_state);
 #endif
             lv_led_off(ScreenLayoutLEDObject());
             return true;
@@ -178,7 +178,7 @@ namespace app {
         /* Add results to context for access outside handler. */
         ctx.Set<std::vector<ClassificationResult>>("results", results);
 
-        lv_port_lock();
+        lv_lock_state = lv_port_lock();
         for (int r = 0; r < 3; r++) {
             lv_obj_t *label = ScreenLayoutLabelObject(r);
             lv_label_set_text_fmt(label, "%s (%d%%)", first_bit(results[r].m_label).c_str(), (int)(results[r].m_normalisedVal * 100));
@@ -193,7 +193,7 @@ namespace app {
                 lv_obj_clear_state(label, LV_STATE_USER_2);
             }
         }
-        lv_port_unlock();
+        lv_port_unlock(lv_lock_state);
 
         if (!PresentInferenceResult(results)) {
             return false;
