@@ -30,7 +30,7 @@
 #include <cinttypes>
 
 #include "lvgl.h"
-#include "lv_port_disp.h"
+#include "lv_port.h"
 #include "lv_paint_utils.h"
 
 // Do we get LVGL to zoom the camera image, or do we double it up?

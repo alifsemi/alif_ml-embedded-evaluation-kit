@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include "lv_port_disp.h"
+#include "lv_port.h"
 #include "lvgl.h"
 #include "glcd.h"
 

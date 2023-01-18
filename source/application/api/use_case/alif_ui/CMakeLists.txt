@@ -26,12 +26,13 @@ project(${ALIF_UI_API_TARGET}
 
 # Create static library
 add_library(${ALIF_UI_API_TARGET} STATIC
+        src/lv_paint_utils.c
         src/ScreenLayout.cc
         src/Alif240.c)
 
 target_include_directories(${ALIF_UI_API_TARGET} PUBLIC include)
 
-target_link_libraries(${ALIF_UI_API_TARGET} PUBLIC common_api lvgl lcd_iface)
+target_link_libraries(${ALIF_UI_API_TARGET} PUBLIC common_api lvgl)
 
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${ALIF_UI_API_TARGET})

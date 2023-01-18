@@ -17,7 +17,7 @@
 #include "ScreenLayout.hpp"
 
 #include "lvgl.h"
-#include "lv_port_disp.h"
+#include "lv_port.h"
 
 #include "log_macros.h"
 

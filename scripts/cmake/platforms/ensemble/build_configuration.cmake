@@ -60,10 +60,6 @@ function(platform_custom_post_build)
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
 
-    message(STATUS "******************** PARSED_TARGET_NAME: ${PARSED_TARGET_NAME} ********************")
-    message(STATUS "******************** LINKER_SCRIPT_NAME: ${LINKER_SCRIPT_NAME} ********************")
-    message(STATUS "******************** CMAKE_SCRIPTS_DIR/platforms/ensemble/TARGET_SUBSYSTEM: ${CMAKE_SCRIPTS_DIR}/platforms/ensemble/${TARGET_SUBSYSTEM} ********************")
-
     # Add link options for the linker script to be used:
     add_linker_script(
             ${PARSED_TARGET_NAME}          # Target

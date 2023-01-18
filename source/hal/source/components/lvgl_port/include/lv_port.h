@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef LV_PORT_DISP_H_
-#define LV_PORT_DISP_H_
+#ifndef LV_PORT_H_
+#define LV_PORT_H_
 
 #include <stdint.h>
 
@@ -79,4 +79,4 @@ public:
 
 #endif
 
-#endif /* LV_PORT_DISP_H_ */
+#endif /* LV_PORT_H_ */

@@ -26,7 +26,7 @@
 #include <cinttypes>
 
 #include "lvgl.h"
-#include "lv_port_disp.h"
+#include "lv_port.h"
 #include "lv_paint_utils.h"
 
 #define LIMAGE_X        192

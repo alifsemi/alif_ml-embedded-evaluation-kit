@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
-#ifndef MEM_REGION_DEFS_H
-#define MEM_REGION_DEFS_H
+#ifndef PERIPHERAL_MEMMAP_H
+#define PERIPHERAL_MEMMAP_H
 
+#define DESIGN_NAME              "Ensemble"
 
+/******************************************************************************/
+/*                         Peripheral memory map                              */
+/******************************************************************************/
+#define ETHOS_U_NPU_BASE           (0x400E1000)    /* Ethos-U NPU base address*/
 
-#endif /*  MEM_REGION_DEFS_H  */
+#endif /* PERIPHERAL_MEMMAP_H */

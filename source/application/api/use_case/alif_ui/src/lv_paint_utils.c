@@ -11,21 +11,15 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include "RTE_Device.h"
-#include "RTE_Components.h"
-
-#include CMSIS_device_header
-//#include "cmsis.h"                  /* device specific header file    */
-
-#if defined __clang__ || defined __GCC__
+#if defined __clang__ || defined __GNUC__
 #pragma GCC diagnostic ignored "-Wvla"
 #endif
 
-#include "base_def.h"
-#include "system_utils.h"
-#include "image_processing.h"
-#include "display.h"
 #include "lvgl.h"
+
+#define RGB_BYTES       3
+#define RGBA_BYTES      4
+#define RGB565_BYTES    2
 
 #if defined __ARMCC_VERSION && (__ARM_FEATURE_MVE & 1)
 #define ENABLE_MVE_WRITE 1

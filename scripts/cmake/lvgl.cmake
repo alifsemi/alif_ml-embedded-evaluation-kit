@@ -26,8 +26,10 @@ endif()
 set(LVGL_TARGET       lvgl)
 
 # It's left to the person including this (a platform?) to set LV_CONF_PATH
-# appropriately, eg:
+# appropriately, or add it to our CMake include paths eg:
 # set(LV_CONF_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lvgl/lv_conf.h CACHE STRING "" FORCE)
+# OR
+# target_include_directories(${LVGL_TARGET} PUBLIC include)
 
 # Include the subdirectory - we can use LVGL's own CMake set-up
 add_subdirectory(${LVGL_SRC_PATH} ${CMAKE_BINARY_DIR}/lvgl)

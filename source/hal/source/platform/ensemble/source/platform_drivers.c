@@ -50,18 +50,13 @@
 #include "ethosu_driver.h"
 #include "ethosu_npu_init.h"
 
-#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-#include "ethosu_ta_init.h"
-#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
-
 #if defined(ETHOS_U_BASE_ADDR)
-    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
+    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
         #error "NPU component configured with incorrect NPU base address."
-    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE == ETHOS_U_BASE_ADDR) */
+    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) */
 #else
     #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
 #endif /* defined(ETHOS_U_BASE_ADDR) */
-
 #endif /* ARM_NPU */
 
 uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
@@ -112,14 +107,6 @@ int platform_init(void)
     info("%s: complete\n", __FUNCTION__);
 
 #if defined(ARM_NPU)
-
-#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    /* If the platform has timing adapter blocks along with Ethos-U core
-     * block, initialise them here. */
-    if (0 != (err = arm_ethosu_timing_adapter_init())) {
-        return err;
-    }
-#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
     int state;
 
@@ -228,7 +215,8 @@ bool run_requested(void)
 uint64_t ethosu_address_remap(uint64_t address, int index)
 {
     UNUSED(index);
-    return LocalToGlobal((void *) address);
+    /* Double cast to avoid build warning about pointer/integer size mismatch */
+    return LocalToGlobal((void *) (uint32_t) address);
 }
 
 void ethosu_flush_dcache(uint32_t *p, size_t bytes)

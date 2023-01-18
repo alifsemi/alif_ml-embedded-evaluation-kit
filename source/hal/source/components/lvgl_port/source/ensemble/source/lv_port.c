@@ -46,7 +46,7 @@
 #include "Driver_CDC200.h"
 #include "CDC200_dev.h"
 #include "lvgl.h"
-#include "lv_port_disp.h"
+#include "lv_port.h"
 
 #define MY_DISP_HOR_RES RTE_PANEL_HACTIVE_TIME
 #define MY_DISP_VER_RES RTE_PANEL_VACTIVE_LINE
