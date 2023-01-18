@@ -30,7 +30,7 @@
  * @author   Rupesh Kumar
  * @email    rupesh@alifsemi.com
  * @brief    CMSIS Device System Source File for
- *           Alif Semiconductor HPCM55 Device
+ *           Alif Semiconductor M55_HP Device
  * @version  V1.0.0
  * @date     19. Feb 2021
  * @bug      None
@@ -48,8 +48,8 @@
     #include "tgu_M55_HP.h"
   #endif
 
-#if defined (__MPU_PRESENT)
-  #include <mpu_M55_HP.h>
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
+  #include "mpu_M55_HP.h"
 #endif
 
 #include "app_map.h"
@@ -83,7 +83,6 @@ const atoc_t __mram_atoc __attribute__((used)) = {
   .execAddress = _APP_ADDRESS,
   .objSize = 0
 };
-
 
 /*----------------------------------------------------------------------------
   Define clocks
@@ -146,17 +145,19 @@ void SystemInit (void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#if defined (__MPU_PRESENT)
+  // Enable Loop and branch info cache
+  SCB->CCR |= SCB_CCR_LOB_Msk;
+  __DSB();
+  __ISB();
+
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
   MPU_Setup();
 #endif
 
-#ifdef __ICACHE_PRESENT
+  // Enable caches now, for speed, but we will have to clean
+  // after scatter-loading, in _platform_pre_stackheap_init
   SCB_EnableICache();
-#endif
-
-// Enable Loop and branch info cache
-SCB->CCR |= SCB_CCR_LOB_Msk;
-__ISB();
+  SCB_EnableDCache();
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   TZ_SAU_Setup();

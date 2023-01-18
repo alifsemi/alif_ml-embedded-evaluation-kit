@@ -106,12 +106,12 @@ int32_t camera_init(uint8_t* buffer)
         return res;
     }
 
-    res = camera->Control(CAMERA_SENSOR_CONFIG, CAMERA_RESOLUTION_560x560);
+    res = camera->Control(CAMERA_SENSOR_CONFIGURE, CAMERA_RESOLUTION_560x560);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
 
-    res = camera->Control(CAMERA_EVENTS_CONFIG, ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED);
+    res = camera->Control(CAMERA_EVENTS_CONFIGURE, ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED);
     if (res != ARM_DRIVER_OK) {
         return res;
     }

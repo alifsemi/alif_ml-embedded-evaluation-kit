@@ -21,14 +21,9 @@ add_library(${CPU_HEADER_TARGET} INTERFACE)
 ## Interface include directories:
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
-    include
-#    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
     config/${ENSEMBLE_CORE}
     Device/${ENSEMBLE_CORE}/Include
     Device/${ENSEMBLE_CORE}/Config
-    CMSIS
-    CMSIS/Include
-    CMSIS/Driver/Inc
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
     )
@@ -39,12 +34,14 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 ## Include directories - public
 target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
-    Device/${ENSEMBLE_CORE}/Include
-    Device/${ENSEMBLE_CORE}/Config
-    components/include
-    components/soc
+    Alif_CMSIS/Include
+    components/Include
     )
 
+target_include_directories(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    Alif_CMSIS/Source
+    )
 
 ## Platform sources
 target_sources(${CMSIS_DEVICE_TARGET}
@@ -54,24 +51,24 @@ target_sources(${CMSIS_DEVICE_TARGET}
     Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     Device/${ENSEMBLE_CORE}/Source/system_utils.c
     Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
-    components/soc/Driver_GPIO.c
-    components/soc/Driver_I2S.c
-    components/soc/Driver_I3C.c
-    components/soc/Driver_PINMUX_AND_PINPAD.c
-    components/soc/Driver_USART.c
-    components/soc/GPIO_ll_drv.c
-    components/soc/LPTIMER_ll_drv.c
-    components/external/PHY_Generic.c
-    components/soc/Driver_DMA.c
-    components/soc/DMA_Opcode.c
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_CDC200.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_MIPI_DSI.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/DPHY_init.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/external/ILI9806E_LCD_panel.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_Camera_Controller.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/external/arx3A0_camera_sensor.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Driver_MIPI_CSI2.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/soc/Camera_Sensor_i2c.c>
+    Alif_CMSIS/Source/Driver_GPIO.c
+    Alif_CMSIS/Source/Driver_I2S.c
+    Alif_CMSIS/Source/Driver_I3C.c
+    Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
+    Alif_CMSIS/Source/Driver_USART.c
+    Alif_CMSIS/Source/GPIO_ll_drv.c
+    Alif_CMSIS/Source/LPTIMER_ll_drv.c
+    components/Source/PHY_Generic.c
+    Alif_CMSIS/Source/Driver_DMA.c
+    Alif_CMSIS/Source/DMA_Opcode.c
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_CDC200.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_MIPI_DSI.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/DPHY_init.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/Source/ILI9806E_LCD_panel.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_Camera_Controller.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/Source/arx3A0_camera_sensor.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_MIPI_CSI2.c>
+    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Camera_Sensor_i2c.c>
     )
 
 # Device definition needs to be set, is checked in source files to include correct header

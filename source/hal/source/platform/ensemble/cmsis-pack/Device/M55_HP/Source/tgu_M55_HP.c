@@ -8,6 +8,17 @@
  *
  */
 
+/**************************************************************************//**
+ * @file     tgu_M55_HP.c
+ * @author   Silesh C V
+ * @email    silesh@alifsemi.com
+ * @version  V1.0.0
+ * @date     3-Jun-2021
+ * @brief    TGU initialization code.
+ * @bug      None.
+ * @Note     None
+ ******************************************************************************/
+
 #if defined (M55_HP)
   #include "M55_HP.h"
 #else

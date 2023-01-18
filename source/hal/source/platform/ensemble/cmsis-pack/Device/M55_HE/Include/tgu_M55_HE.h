@@ -7,6 +7,18 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
+
+/**************************************************************************//**
+ * @file     tgu_M55_HE.h
+ * @author   Silesh C V
+ * @email    silesh@alifsemi.com
+ * @version  V1.0.0
+ * @date     3-Jun-2021
+ * @brief    TGU initialization code.
+ * @bug      None.
+ * @Note     None
+ ******************************************************************************/
+
 #ifndef TGU_M55_HE_H
 #define TGU_M55_HE_H
 #include <stdint.h>

@@ -1,9 +1,9 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -17,6 +17,8 @@
 // <i> Select if the Chip Silicon Rev is Ax
 #define RTE_SILICON_REV_A 	1
 #if RTE_SILICON_REV_A
+#define RTE_SILICON_REV_A0      0
+#define RTE_SILICON_REV_A1      1
 #define RTE_SILICON_REV_B0	0
 #else
 #define RTE_SILICON_REV_B0	1
@@ -84,31 +86,189 @@
 // <i> Configuration settings for Driver_MIPI_CSI2 in component ::Drivers:MIPI_CSI2
 #define RTE_MIPI_CSI2 1
 #if RTE_MIPI_CSI2
+
+// <o> select clock mode
+//     <1=> non continuous clock mode
+//     <0=> continuous clock mode
+// <i> defines clock mode for mipi csi2
+// <i> default: non continuous clock mode
 #define RTE_MIPI_CSI2_NON_CONTINUOUS_CLOCK_MODE 1
-#define RTE_MIPI_CSI2_PIXCLK_DIV                0x2
-#define RTE_MIPI_CSI2_N_LANES                   02
+
+// <o> select CSI2 pixel clock divider
+// <i> defines select CSI2 pixel clock divider value.
+// <i> default: 2
+#define RTE_MIPI_CSI2_PIXCLK_DIV                2
+
+// <o> select number of lanes in DPHY
+//     <1=> one lane
+//     <2=> two lane
+// <i> defines select number of lanes in DPHY.
+// <i> default: two lane
+#define RTE_MIPI_CSI2_N_LANES                   2
+
+// <o> select number of virtual channel ID
+//     <0=> one virtual channel
+// <i> defines select number of virtual channel IDs.
+// <i> default: one virtual channel
 #define RTE_MIPI_CSI2_VC_ID                     0
+
+// <o> select CSI2 Data type
+//     <0=> YUV420_8
+//     <1=> YUV420_10
+//     <2=> YUV420_8_LEGACY
+//     <3=> YUV420_8_SHIFT
+//     <4=> YUV420_10_SHIFT
+//     <5=> YUV422_8
+//     <6=> YUV422_10
+//     <7=> RGB444
+//     <8=> RGB555
+//     <9=> RGB565
+//     <10=> RGB666
+//     <11=> RGB888
+//     <12=> RAW6
+//     <13=> RAW7
+//     <14=> RAW8
+//     <15=> RAW10
+//     <16=> RAW12
+//     <17=> RAW14
+//     <18=> RAW16
+//     <19=> USER_DEFINED_1
+//     <20=> USER_DEFINED_2
+//     <21=> USER_DEFINED_3
+//     <22=> USER_DEFINED_4
+//     <23=> USER_DEFINED_5
+//     <24=> USER_DEFINED_6
+//     <25=> USER_DEFINED_7
+//     <26=> USER_DEFINED_8
+// <i> defines select CSI2 Data type
+// <i> default: RAW10
 #define RTE_MIPI_CSI2_DATA_TYPE                 15
+
+// <o> select IPI mode
+//     <0=> camera mode
+//     <1=> controller mode
+// <i> defines select IPI mode
+// <i> default: camera mode
 #define RTE_MIPI_CSI2_IPI_MODE                  0
+
+// <o> select color component
+//     <0=> 48 bit interface
+//     <1=> 16 bit interface
+// <i> defines select color component
+// <i> default: 16 bit interface
 #define RTE_MIPI_CSI2_COLOR_COP                 1
+
+// <o> select memory flush
+//     <0=> auto
+//     <1=> manual
+// <i> defines select memory flush
+// <i> default: auto
 #define RTE_MIPI_CSI2_MEMFLUSH                  0
+
+// <o> select sync event mode
+//     <0=> not trigger by frame start
+//     <1=> trigger by frame start
+// <i> defines select sync event mode
+// <i> default : not trigger by frame start
 #define RTE_MIPI_CSI2_SYNC_ET_MODE              0
+
+// <o> select sync event select
+//     <0=> auto
+//     <1=> programmed
+// <i> defines select sync event select
+// <i> default : programmed
 #define RTE_MIPI_CSI2_SYNC_ET_SEL               1
+
+// <o> embedded packets for IPI synchronization events
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to use embedded packets for IPI synchronization events
+// <i> default: disable
 #define RTE_MIPI_CSI2_EN_EMBEDDED               0
+
+// <o> blanking packets for IPI synchronization events
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to use blanking packets for IPI synchronization events
+// <i> default: disable
 #define RTE_MIPI_CSI2_EN_BLANKING               0
+
+// <o> null packets for IPI synchronization events
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to use null packets for IPI synchronization events
+// <i> default: disable
 #define RTE_MIPI_CSI2_EN_NULL                   0
+
+// <o> line start packets for IPI synchronization events
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to use line start packets for IPI synchronization events
+// <i> default: disable
 #define RTE_MIPI_CSI2_EN_LINE_START             0
+
+// <o> video packets for IPI synchronization events
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to use video packets for IPI synchronization events
+// <i> default: enable
 #define RTE_MIPI_CSI2_EN_VIDEO                  1
+
+// <o> datatype to overwrite
+//     <0=> disable
+//     <1=> enable
+// <i> define if want to overwrite datatype
+// <i> default: disable
 #define RTE_MIPI_CSI2_EN_DT                     0
+
+// <o> datatype to overwrite with programmed datatype
+// <i> define if want to use programmed datatype ignoring datatype of the header
+// <i> default: 0
 #define RTE_MIPI_CSI2_EN_DT_OVERWRITE           0
+
+// <o> Horizontal Synchronism Active Time range <0-2047>
+// <i> Defines possible range for selecting horizontal sync active time
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IPI_HSA_TIME              0
+
+// <o> Horizontal Synchronism back porch Time range <0-2047>
+// <i> Defines possible range for selecting horizontal sync back porch time
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IPI_HBP_TIME              0
+
+// <o> Horizontal sync delay Time range <0-2047>
+// <i> Defines possible range for selecting horizontal sync delay time
+// <i> Default: 560
 #define RTE_MIPI_CSI2_IPI_HSD_TIME              560
+
+// <o> Horizontal Active Time range <0-2047>
+// <i> Defines possible range for selecting horizontal active time
+// <i> Default: 560
 #define RTE_MIPI_CSI2_IPI_HACTIVE_TIME          560
+
+// <o> Vertical sync active period range <0-511>
+// <i> Defines possible range for selecting vertical sync active period
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IPI_VSA_LINE              0
+
+// <o> Vertical back porch period range <0-511>
+// <i> Defines possible range for selecting vertical back porch period
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IPI_VBP_LINE              0
+
+// <o> Vertical front porch period range <0-511>
+// <i> Defines possible range for selecting vertical front porch period
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IPI_VFP_LINE              0
+
+// <o> Vertical active period range <0-8191>
+// <i> Defines possible range for selecting vertical active period
+// <i> Default: 560
 #define RTE_MIPI_CSI2_IPI_VACTIVE_LINE          560
+
+// <o> CSI2 interrupt priority.
+// <i> Defines CSI2 interrupt priority.
+// <i> Default: 0
 #define RTE_MIPI_CSI2_IRQ_PRI                   0
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
@@ -118,72 +278,327 @@
 #define RTE_MIPI_DSI 1
 
 #if RTE_MIPI_DSI
+
+// <o> Number of data lanes
+//     <1=> ONE
+//     <2=> TWO
+// <i> Defines Number of data lanes
+// <i> Default: TWO
 #define RTE_MIPI_DSI_N_LANES                    0x2
+
+// <o> Virtual channel ID
+// <i> Defines Virtual Channel ID
+// <i> Default: 0
 #define RTE_MIPI_DSI_VC_ID                      0
-#define RTE_MIPI_DSI_NON_CONTINUOUS_CLOCK_MODE  0x1
-#define RTE_MIPI_DSI_PLL_INPUT_DIV_FACTOR_N     0x3
+
+// <o> DPHY Clock Mode
+//     <0=> CONTINUOUS CLOCK_MODE
+//     <1=> NON CONTINUOUS CLOCK MODE
+// <i> Defines DPHY Clock Mode
+// <i> Default: NON CONTINUOUS CLOCK MODE
+#define RTE_MIPI_DSI_NON_CONTINUOUS_CLOCK_MODE  1
+
+// <o> DPHY PLL input division factor
+// <i> Defines DPHY PLL input division factor
+// <i> Default: 3
+#define RTE_MIPI_DSI_PLL_INPUT_DIV_FACTOR_N     3
+
+// <o> DPHY clock lane HS to LP transition time.
+// <i> Defines DPHY clock lane HS to LP transition time.
+// <i> Default: 35
 #define RTE_MIPI_DSI_PHY_CLKHS2LP_TIME          35
+
+// <o> DPHY clock lane LP to HS transition time.
+// <i> Defines DPHY clock lane LP to HS transition time.
+// <i> Default: 51
 #define RTE_MIPI_DSI_PHY_CLKLP2HS_TIME          51
+
+// <o> DPHY data lane HS to LP transition time.
+// <i> Defines DPHY data lane HS to LP transition time.
+// <i> Default: 20
 #define RTE_MIPI_DSI_PHY_HS2LP_TIME             20
+
+// <o> DPHY data lane LP to HS transition time.
+// <i> Defines DPHY data lane LP to HS transition time.
+// <i> Default: 40
 #define RTE_MIPI_DSI_PHY_LP2HS_TIME             40
-#define RTE_MIPI_DSI_TX_ESC_CLK_DIVISION        0x2
-#define RTE_MIPI_DSI_VID_MODE_TYPE              0x2
+
+// <o> DSI TX escape clock division value.
+// <i> Defines DSI TX escape clock division value.
+// <i> Default: 2
+#define RTE_MIPI_DSI_TX_ESC_CLK_DIVISION        2
+
+// <o> DPI Video Mode
+//     <0=> NON_BURST SYNC_PULSES
+//     <1=> NON_BURST SYNC_EVENTS
+//     <2=> BURST MODE
+// <i> Defines DPI Video Mode
+// <i> Default:BURST MODE
+#define RTE_MIPI_DSI_VID_MODE_TYPE              2
+
+// <o> DSI Video number of Chunks
+// <i> Defines Number of chunks used to transfer single video packet .
+// <i> Default: 0
 #define RTE_MIPI_DSI_VID_NUM_CHUNKS             0
+
+// <o> DSI Size of NULL packet
+// <i> Defines Size of the NULL packet.
+// <i> Default: 0
 #define RTE_MIPI_DSI_VID_NULL_SIZE              0
-#define RTE_MIPI_DSI_DPI_COLOR_CODE             0x5
+
+// <o> DPI interface color code
+//     <1=> 16bit
+//     <4=> 18bit
+//     <5=> 24bit
+// <i> Defines Color code for DPI Interface
+// <i> Default: 24bit
+#define RTE_MIPI_DSI_DPI_COLOR_CODE             5
+
+// <o> DPI DATAEN pin active state
+//     <0=> ACTIVE HIGH
+//     <1=> ACTIVE LOW
+// <i> Defines DPI DATAEN pin active state
+// <i> Default: ACTIVE HIGH
 #define RTE_MIPI_DSI_DPI_DATAEN_ACTIVE_LOW      0
-#define RTE_MIPI_DSI_DPI_VSYNC_ACTIVE_LOW       0x1
-#define RTE_MIPI_DSI_DPI_HSYNC_ACTIVE_LOW       0x1
+
+// <o> DPI VSYNC pin active state
+//     <0=> ACTIVE HIGH
+//     <1=> ACTIVE LOW
+// <i> Defines DPI VSYNC pin active state
+// <i> Default: ACTIVE LOW
+#define RTE_MIPI_DSI_DPI_VSYNC_ACTIVE_LOW       1
+
+// <o> DPI HSYNC pin active state
+//     <0=> ACTIVE HIGH
+//     <1=> ACTIVE LOW
+// <i> Defines DPI HSYNC pin active state
+// <i> Default: ACTIVE LOW
+#define RTE_MIPI_DSI_DPI_HSYNC_ACTIVE_LOW       1
+
+// <o> DPI SHUTD pin active state
+//     <0=> ACTIVE HIGH
+//     <1=> ACTIVE LOW
+// <i> Defines DPI SHUTD pin active state
+// <i> Default: ACTIVE HIGH
 #define RTE_MIPI_DSI_DPI_SHUTD_ACTIVE_LOW       0
+
+// <o> DPI COLORM pin active state
+//     <0=> ACTIVE HIGH
+//     <1=> ACTIVE LOW
+// <i> Defines DPI COLORM pin active state
+// <i> Default: ACTIVE HIGH
 #define RTE_MIPI_DSI_DPI_COLORM_ACTIVE_LOW      0
+
+// <o> DSI IRQ priority
+// <i> Defines Interrupt priority.
+// <i> Default: 0
 #define RTE_MIPI_DSI_IRQ_PRI                    0
 
+// <o> DSI ILI9806E LCD PANEL
+//     <0=> DISABLE
+//     <1=> ENABLE
+// <i> Defines DSI ILI9806E LCD PANEL
+// <i> Default: ENABLE
 #define RTE_MIPI_DSI_ILI9806E_PANEL  1
 
 #if RTE_MIPI_DSI_ILI9806E_PANEL
 
-#define RTE_ILI9806E_PANEL_E43RB_FW405_EN      0
-#define RTE_ILI9806E_PANEL_E43GB_MW405_EN      1
-#define RTE_ILI9806E_PANEL_E50RA_MW550_EN      0
+// <o> DSI ILI9806E panel variant
+//     <0=> E43RB_FW405
+//     <1=> E43GB_MW405
+//     <2=> E50RA_MW550
+// <i> Defines ILI9806E panel variant
+// <i> Default: E43RB_FW405
+#define RTE_ILI9806E_PANEL_VARIANT             1
 
+#if (RTE_ILI9806E_PANEL_VARIANT == 0)
+#define RTE_ILI9806E_PANEL_E43RB_FW405_EN      1
+#elif (RTE_ILI9806E_PANEL_VARIANT == 1)
+#define RTE_ILI9806E_PANEL_E43GB_MW405_EN      1
+#elif (RTE_ILI9806E_PANEL_VARIANT == 2)
+#define RTE_ILI9806E_PANEL_E50RA_MW550_EN      1
+#endif
+
+// <o> ILI9806 LCD panel maximum bitrate in mbps
+// <i> Defines ILI9806 LCD panel maximum bitrate in mbps.
+// <i> Default: 500
 #define RTE_ILI9806E_PANEL_MAX_BITRATE_MBPS              500
+
+// <o> ILI9806 LCD panel reset pin number
+// <i> Defines ILI9806 LCD panel reset pin number.
+// <i> Default: 6
 #define RTE_ILI9806E_PANEL_RESET_PIN_NO                  6
+
+// <o> ILI9806 LCD panel reset pin GPIO port number
+// <i> Defines ILI9806 LCD panel reset pin GPIO port number.
+// <i> Default: 4
 #define RTE_ILI9806E_PANEL_RESET_GPIO_PORT               4
+
+// <o> ILI9806 LCD panel back light pin number
+// <i> Defines ILI9806 LCD panel back light pin number.
+// <i> Default: 4
 #define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 4
+
+// <o> ILI9806 LCD panel back light pin GPIO port number
+// <i> Defines ILI9806 LCD panel back light pin GPIO port number.
+// <i> Default: 4
 #define RTE_ILI9806E_PANEL_BL_LED_GPIO_PORT              4
 
 #if (RTE_ILI9806E_PANEL_E43RB_FW405_EN || RTE_ILI9806E_PANEL_E43GB_MW405_EN)
+
+// <o> Panel hsync time in pixels
+// <i> Defines ILI9806 LCD panel hsync time in pixels.
+// <i> Default: 4
 #define RTE_PANEL_HSYNC_TIME            4
+
+// <o> Panel FW405/MW405 hbp time in pixels
+// <i> Defines ILI9806 LCD panel hbp time in pixels.
+// <i> Default: 5
 #define RTE_PANEL_HBP_TIME              5
+
+// <o> Panel FW405/MW405 hfp time in pixels
+// <i> Defines ILI9806 LCD panel hfp time in pixels.
+// <i> Default: 5
 #define RTE_PANEL_HFP_TIME              5
+
+// <o> Panel FW405/MW405 hactive pixels
+// <i> Defines ILI9806 LCD panel hactive pixels.
+// <i> Default: 480
 #define RTE_PANEL_HACTIVE_TIME          480
+
+// <o> Panel FW405/MW405 vsync time in lines
+// <i> Defines ILI9806 LCD panel vsync time in lines.
+// <i> Default: 2
 #define RTE_PANEL_VSYNC_LINE            2
+
+// <o> Panel FW405/MW405 vbp time in lines
+// <i> Defines ILI9806 LCD panel vbp time in lines.
+// <i> Default: 10
 #define RTE_PANEL_VBP_LINE              10
+
+// <o> Panel FW405/MW405 vfp time in lines
+// <i> Defines ILI9806 LCD panel vfp time in lines.
+// <i> Default: 10
 #define RTE_PANEL_VFP_LINE              10
+
+// <o> Panel FW405/MW405 vactive lines
+// <i> Defines ILI9806 LCD panel vactive lines.
+// <i> Default: 800
 #define RTE_PANEL_VACTIVE_LINE          800
-#define RTE_PANEL_BPP                   24
+
 #elif RTE_ILI9806E_PANEL_E50RA_MW550_EN
+
+// <o> Panel MW550 hsync time in pixels
+// <i> Defines ILI9806 LCD panel hsync time in pixels.
+// <i> Default: 4
 #define RTE_PANEL_HSYNC_TIME            4
+
+// <o> Panel MW550 hbp time in pixels
+// <i> Defines ILI9806 LCD panel hbp time in pixels.
+// <i> Default: 30
 #define RTE_PANEL_HBP_TIME              30
+
+// <o> Panel MW550 hfp time in pixels
+// <i> Defines ILI9806 LCD panel hfp time in pixels.
+// <i> Default: 18
 #define RTE_PANEL_HFP_TIME              18
+
+// <o> Panel MW550 hactive pixels
+// <i> Defines ILI9806 LCD panel hactive pixels.
+// <i> Default: 480
 #define RTE_PANEL_HACTIVE_TIME          480
+
+// <o> Panel MW550 vsync time in lines
+// <i> Defines ILI9806 LCD panel vsync time in lines.
+// <i> Default: 4
 #define RTE_PANEL_VSYNC_LINE            4
+
+// <o> Panel MW550 vbp time in lines
+// <i> Defines ILI9806 LCD panel vbp time in lines.
+// <i> Default: 30
 #define RTE_PANEL_VBP_LINE              30
+
+// <o> Panel MW550 vfp time in lines
+// <i> Defines ILI9806 LCD panel vfp time in lines.
+// <i> Default: 20
 #define RTE_PANEL_VFP_LINE              20
+
+// <o> Panel MW550 vactive lines
+// <i> Defines ILI9806 LCD panel vactive lines.
+// <i> Default: 854
 #define RTE_PANEL_VACTIVE_LINE          854
 #endif
 #endif
 
 #endif
-
 // </e> MIPI_DSI (mipi dsi) [Driver_MIPI_DSI]
+
+// <e> TOUCH_SCREEN (touch screen) [Driver_Touch_Screen]
+// <i> Configuration settings for Driver_Touch_Screen in component ::Drivers:touch screen
+#define RTE_TOUCH_SCREEN 1
+
+#if RTE_TOUCH_SCREEN
+
+// <o> GT911 Touch screen
+//     <0=> DISABLE
+//     <1=> ENABLE
+// <i> Defines GT911 Touch screen
+// <i> Default: ENABLE
+#define RTE_GT911 1
+
+#if RTE_GT911
+
+// <o> select active touch points
+//     <1=> 1
+//     <2=> 2
+//     <3=> 3
+//     <4=> 4
+//     <5=> 5
+// <i> defines select active touch points
+// <i> default: 5
+#define RTE_ACTIVE_TOUCH_POINTS     5
+
+// <o> GT911 Touch screen reset pin GPIO port number
+// <i> Defines GT911 Touch screen reset pin GPIO port number.
+// <i> Default: 4
+#define RTE_GT911_TOUCH_RESET_GPIO_PORT   4
+
+// <o> GT911 Touch screen reset pin number
+// <i> Defines GT911 Touch screen reset pin number.
+// <i> Default: 2
+#define RTE_GT911_TOUCH_RESET_PIN_NO      2
+
+// <o> GT911 Touch screen INT pin GPIO port number
+// <i> Defines GT911 Touch screen INT pin GPIO port number.
+// <i> Default: 2
+#define RTE_GT911_TOUCH_INT_GPIO_PORT     2
+
+// <o> GT911 Touch screen INT pin number
+// <i> Defines GT911 Touch screen INT pin number.
+// <i> Default: 20
+#define RTE_GT911_TOUCH_INT_PIN_NO        20
+#endif
+
+#endif
+// </e> TOUCH_SCREEN (touch screen) [Driver_Touch_Screen]
 
 // <e> CDC200 (cdc200) [Driver_CDC200]
 // <i> Configuration settings for Driver_CDC200 in component ::Drivers:CDC200
 #define RTE_CDC200 1
 
 #if RTE_CDC200
+
+// <o> CDC200 pixel format
+//     <0=> ARGB8888
+//     <1=> RGB888
+//     <2=> RGB565
+// <i> Defines CDC200 pixel format
+// <i> Default: RGB888
 #define RTE_CDC200_PIXEL_FORMAT              1
+
+// <o> CDC200 DPI interface FPS
+// <i> Defines CDC200 DPI interface Framrate per second.
+// <i> Default: 60
 #define RTE_CDC200_DPI_FPS                   60
 #endif
 // </e> CDC200 (cdc200) [Driver_CDC200]
@@ -296,6 +711,7 @@
 #define RTE_I2S0_IRQ_PRI     0
 #define RTE_I2S0_CLK_SOURCE  1
 #define RTE_I2S0_DMA_ENABLE  1
+#define RTE_I2S0_DMA_IRQ_PRI RTE_I2S0_IRQ_PRI
 #endif
 // </e> I2S0 (Integrated Interchip Sound 0) [Driver_SAI0]
 
@@ -310,6 +726,7 @@
 #define RTE_I2S1_IRQ_PRI     0
 #define RTE_I2S1_CLK_SOURCE  1
 #define RTE_I2S1_DMA_ENABLE  1
+#define RTE_I2S1_DMA_IRQ_PRI RTE_I2S1_IRQ_PRI
 #endif
 // </e> I2S1 (Integrated Interchip Sound 1) [Driver_SAI1]
 
@@ -324,6 +741,7 @@
 #define RTE_I2S2_IRQ_PRI     10
 #define RTE_I2S2_CLK_SOURCE  1
 #define RTE_I2S2_DMA_ENABLE  1
+#define RTE_I2S2_DMA_IRQ_PRI RTE_I2S2_IRQ_PRI
 #endif
 // </e> I2S2 (Integrated Interchip Sound 2) [Driver_SAI2]
 
@@ -338,6 +756,7 @@
 #define RTE_I2S3_IRQ_PRI     0
 #define RTE_I2S3_CLK_SOURCE  1
 #define RTE_I2S3_DMA_ENABLE  1
+#define RTE_I2S3_DMA_IRQ_PRI RTE_I2S3_IRQ_PRI
 #endif
 // </e> I2S3 (Integrated Interchip Sound 3) [Driver_SAI3]
 
@@ -1017,7 +1436,7 @@
 #define RTE_ANALOG_CONFIG          1
 #if RTE_ANALOG_CONFIG
 #define RTE_VBAT_ANA_REG2_VAL      (0x388C4230)
-#define RTE_COMP_REG2_VAL          (0x10200000 | 0x14240100)
+#define RTE_COMP_REG2_VAL          (0x10200000 | 0x1C240100)
 #endif
 // </e> Analog configuration [vbat analog register2 and comparator register2]
 
@@ -1130,165 +1549,164 @@
 // </e> CRC1 (Cyclic Redundancy Check) [Driver_CRC1]
 
 
-// </e> HWSEM0 (Hardware Semaphore) [Driver_HWSEM]
-
-
-// <e> HWSEM0 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM0 (Hardware Semaphore) [Driver_HWSEM0]
+// <i> Configuration settings for Driver_HWSEM0 in component ::Drivers:HWSEM
 #define RTE_HWSEM0                                     1
 #if RTE_HWSEM0
 #define RTE_HWSEM0_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM1 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM0 (Hardware Semaphore) [Driver_HWSEM0]
 
 
-// <e> HWSEM1 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM1 (Hardware Semaphore) [Driver_HWSEM1]
+// <i> Configuration settings for Driver_HWSEM1 in component ::Drivers:HWSEM
 #define RTE_HWSEM1                                     0
 #if RTE_HWSEM1
 #define RTE_HWSEM1_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM2 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM1 (Hardware Semaphore) [Driver_HWSEM1]
 
 
-// <e> HWSEM2 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM2 (Hardware Semaphore) [Driver_HWSEM2]
+// <i> Configuration settings for Driver_HWSEM2 in component ::Drivers:HWSEM
 #define RTE_HWSEM2                                     0
 #if RTE_HWSEM2
 #define RTE_HWSEM2_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM3 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM2 (Hardware Semaphore) [Driver_HWSEM2]
 
 
-// <e> HWSEM3 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM3 (Hardware Semaphore) [Driver_HWSEM3]
+// <i> Configuration settings for Driver_HWSEM3 in component ::Drivers:HWSEM
 #define RTE_HWSEM3                                     0
 #if RTE_HWSEM3
 #define RTE_HWSEM3_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM4 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM3 (Hardware Semaphore) [Driver_HWSEM3]
 
 
-// <e> HWSEM4 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM4 (Hardware Semaphore) [Driver_HWSEM4]
+// <i> Configuration settings for Driver_HWSEM4 in component ::Drivers:HWSEM
 #define RTE_HWSEM4                                     0
 #if RTE_HWSEM4
 #define RTE_HWSEM4_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM5 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM4 (Hardware Semaphore) [Driver_HWSEM4]
 
 
-// <e> HWSEM5 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM5 (Hardware Semaphore) [Driver_HWSEM5]
+// <i> Configuration settings for Driver_HWSEM5 in component ::Drivers:HWSEM
 #define RTE_HWSEM5                                     0
 #if RTE_HWSEM5
 #define RTE_HWSEM5_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM6 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM5 (Hardware Semaphore) [Driver_HWSEM5]
 
 
-// <e> HWSEM6 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM6 (Hardware Semaphore) [Driver_HWSEM6]
+// <i> Configuration settings for Driver_HWSEM6 in component ::Drivers:HWSEM
 #define RTE_HWSEM6                                     0
 #if RTE_HWSEM6
 #define RTE_HWSEM6_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM7 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM6 (Hardware Semaphore) [Driver_HWSEM6]
 
 
-// <e> HWSEM77 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM7 (Hardware Semaphore) [Driver_HWSEM7]
+// <i> Configuration settings for Driver_HWSEM7 in component ::Drivers:HWSEM
 #define RTE_HWSEM7                                     0
 #if RTE_HWSEM7
 #define RTE_HWSEM7_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM8 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM7 (Hardware Semaphore) [Driver_HWSEM7]
 
 
-// <e> HWSEM8 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM8 (Hardware Semaphore) [Driver_HWSEM8]
+// <i> Configuration settings for Driver_HWSEM8 in component ::Drivers:HWSEM
 #define RTE_HWSEM8                                     0
 #if RTE_HWSEM8
 #define RTE_HWSEM8_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM9 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM8 (Hardware Semaphore) [Driver_HWSEM8]
 
 
-// <e> HWSEM9 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM9 (Hardware Semaphore) [Driver_HWSEM9]
+// <i> Configuration settings for Driver_HWSEM9 in component ::Drivers:HWSEM
 #define RTE_HWSEM9                                     0
 #if RTE_HWSEM9
 #define RTE_HWSEM9_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM10 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM9 (Hardware Semaphore) [Driver_HWSEM9]
 
 
-// <e> HWSEM10 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM10 (Hardware Semaphore) [Driver_HWSEM10]
+// <i> Configuration settings for Driver_HWSEM10 in component ::Drivers:HWSEM
 #define RTE_HWSEM10                                     0
 #if RTE_HWSEM10
 #define RTE_HWSEM10_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM11 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM10 (Hardware Semaphore) [Driver_HWSEM10]
 
 
-// <e> HWSEM11 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM11 (Hardware Semaphore) [Driver_HWSEM11]
+// <i> Configuration settings for Driver_HWSEM11 in component ::Drivers:HWSEM
 #define RTE_HWSEM11                                     0
 #if RTE_HWSEM11
 #define RTE_HWSEM11_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM12 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM11 (Hardware Semaphore) [Driver_HWSEM11]
 
 
-// <e> HWSEM12 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM12 (Hardware Semaphore) [Driver_HWSEM12]
+// <i> Configuration settings for Driver_HWSEM12 in component ::Drivers:HWSEM
 #define RTE_HWSEM12                                     0
 #if RTE_HWSEM12
 #define RTE_HWSEM12_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM13 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM12 (Hardware Semaphore) [Driver_HWSEM12]
 
 
-// <e> HWSEM13 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM13 (Hardware Semaphore) [Driver_HWSEM13]
+// <i> Configuration settings for Driver_HWSEM13 in component ::Drivers:HWSEM
 #define RTE_HWSEM13                                     0
 #if RTE_HWSEM13
 #define RTE_HWSEM13_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM14 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM13 (Hardware Semaphore) [Driver_HWSEM13]
 
 
-// <e> HWSEM14 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM14 (Hardware Semaphore) [Driver_HWSEM14]
+// <i> Configuration settings for Driver_HWSEM14 in component ::Drivers:HWSEM
 #define RTE_HWSEM14                                     0
 #if RTE_HWSEM14
 #define RTE_HWSEM14_IRQPRIORITY                         0
 #endif
 
-// </e> HWSEM15 (Hardware Semaphore) [Driver_HWSEM]
+// </e> HWSEM14 (Hardware Semaphore) [Driver_HWSEM14]
 
 
-// <e> HWSEM15 (Hardware Semaphore) [Driver_HWSEM]
-// <i> Configuration settings for Driver_HWSEM in component ::Drivers:HWSEM
+// <e> HWSEM15 (Hardware Semaphore) [Driver_HWSEM15]
+// <i> Configuration settings for Driver_HWSEM15 in component ::Drivers:HWSEM
 #define RTE_HWSEM15                                     0
 #if RTE_HWSEM15
 #define RTE_HWSEM15_IRQPRIORITY                         0
 #endif
+
+// </e> HWSEM15 (Hardware Semaphore) [Driver_HWSEM15]
 
 // <e> CMP0 (Analog Comparator ) [Driver_CMP0]
 // <i> Configuration settings for Driver_CMP0 in component ::Drivers:Comparator
@@ -1391,7 +1809,7 @@
 #endif
 // </e> CMP3 (Analog Comparator) [Driver_CMP0]
 
-// </e> Comparator common bits for each instance
+// <e> Comparator common bits for each instance
 // <i> Configuration settings for Comparator instances ::Drivers:Comparator
 #if (RTE_CMP0 |RTE_CMP1 |RTE_CMP2 |RTE_CMP3 )
 
@@ -1443,6 +1861,7 @@
 //   0 - Secure APB interface, 1 - Non-Secure
 //   Default: 0
 #define RTE_DMA0_APB_INTERFACE 0
+#define RTE_DMA0_ABORT_IRQ_PRI 0
 #endif
 // </e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
 
@@ -1454,6 +1873,7 @@
 //   0 - Secure APB interface, 1 - Non-Secure
 //   Default: 0
 #define RTE_DMA1_APB_INTERFACE 0
+#define RTE_DMA1_ABORT_IRQ_PRI 0
 #endif
 // </e> DMA1 (Direct Memory Access Controller) [Driver_DMA1]
 
