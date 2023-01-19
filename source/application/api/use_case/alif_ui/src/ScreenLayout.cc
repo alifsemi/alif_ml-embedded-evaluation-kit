@@ -96,13 +96,8 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_set_style_radius(imageHolder, 4 * DISP_SCALE, LV_PART_MAIN);
     lv_obj_add_style(imageHolder, &noBorder, LV_PART_MAIN);
     lv_obj_add_style(imageHolder, &imageHolderPadding, LV_PART_MAIN);
-#ifdef USE_LVGL_ZOOM
-    lv_obj_set_content_width(imageHolder, imgWidth * 2 * DISP_SCALE);
-    lv_obj_set_content_height(imageHolder, imgHeight * 2 * DISP_SCALE);
-#else
-    lv_obj_set_content_width(imageHolder, imgWidth * DISP_SCALE);
-    lv_obj_set_content_height(imageHolder, imgHeight * DISP_SCALE);
-#endif
+    lv_obj_set_content_width(imageHolder, ((int32_t)imgWidth * imgZoom) >> 8 );
+    lv_obj_set_content_height(imageHolder, ((int32_t)imgHeight * imgZoom) >> 8);
 
     /* Make a holder for the results (allows easy re-layout for portrait/landscape) */
     lv_obj_t *resultHolder = lv_obj_create(screen);
