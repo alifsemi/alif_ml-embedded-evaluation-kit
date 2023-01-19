@@ -238,7 +238,7 @@ void lv_port_disp_init(void)
     lv_inited = true;
 }
 
-static bool locked;
+static atomic_bool locked;
 
 uint32_t lv_port_lock(void)
 {
@@ -254,8 +254,8 @@ uint32_t lv_port_lock(void)
 
 void lv_port_unlock(uint32_t state)
 {
-    __set_BASEPRI(state);
     locked = false;
+    __set_BASEPRI(state);
 }
 
 uint32_t lv_port_get_ticks(void)

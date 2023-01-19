@@ -76,6 +76,9 @@ int Init_SysTick(void)
     /* SysTick init - this will enable interrupt too. */
     err = SysTick_Config(ticks_1ms);
 
+    /* SysTick_Config sets minimum priority - mid priority suits us better (see lv_port.c) */
+    NVIC_SetPriority(SysTick_IRQn, 0x80 >> (8-__NVIC_PRIO_BITS));
+
     /* Enable interrupt again. */
     NVIC_EnableIRQ(SysTick_IRQn);
 
