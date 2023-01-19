@@ -17,9 +17,10 @@
 #include "Driver_GPIO.h"
 #include "base_def.h"
 #include "delay.h"
+#include <string.h>
 
 static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
-static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES + 0x460] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
+static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
 
 extern ARM_DRIVER_GPIO Driver_GPIO1;
 
