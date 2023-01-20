@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
