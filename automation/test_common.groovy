@@ -8,7 +8,7 @@
 def build_img(String build_type, String toolchain) {
 
     build_path = "build_${toolchain}_hp_${build_type}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=img_class -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
 
     sh """#!/bin/bash
         export PATH=$PATH:/opt/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin
@@ -23,7 +23,7 @@ def build_img(String build_type, String toolchain) {
 def build_kws(String build_type, String toolchain) {
 
     build_path = "build_${toolchain}_he_${build_type}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=kws -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
 
     sh """#!/bin/bash
         export PATH=$PATH:/opt/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin

@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  Copyright (c) 2021 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
@@ -74,9 +84,12 @@ target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC
     ARM_DSP_CONFIG_TABLES
     ARM_FFT_ALLOW_TABLES
     ARM_TABLE_TWIDDLECOEF_F32_512
+    ARM_TABLE_TWIDDLECOEF_RFFT_F32_1024
     ARM_TABLE_BITREVIDX_FXT_512
     ARM_TABLE_BITREVIDX_FLT_512 # see https://github.com/ARM-software/CMSIS-DSP/issues/61
-    ARM_TABLE_TWIDDLECOEF_RFFT_F32_1024
+    ARM_TABLE_BITREVIDX_FXT_1024
+    ARM_TABLE_BITREVIDX_FLT_1024
+    ARM_TABLE_TWIDDLECOEF_F32_1024
     ARM_FAST_ALLOW_TABLES
     ARM_ALL_FAST_TABLES
 )

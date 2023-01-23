@@ -13,3 +13,6 @@
 [submodule "dependencies/lvgl"]
 	path = dependencies/lvgl
 	url = https://github.com/lvgl/lvgl.git
+[submodule "dependencies/Arm-2D"]
+	path = dependencies/Arm-2D
+	url = https://github.com/ARM-software/Arm-2D.git

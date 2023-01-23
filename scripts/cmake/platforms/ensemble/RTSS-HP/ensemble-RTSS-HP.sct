@@ -48,7 +48,7 @@
 #define DTCM_SIZE                 SRAM3_SIZE
 #define DTCM_GLOBAL_BASE          SRAM3_BASE
 
-
+#define __VECTORS_SIZE  (496 * 4)
 #define __STACK_SIZE    0x00004000
 #define __HEAP_SIZE     0x00020000
 
@@ -62,7 +62,7 @@
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
 #define __RO_BASE       (MRAM_BASE+0x1000)
-#define __RO_SIZE       (MRAM_SIZE-0x81000)
+#define __RO_SIZE       (0x80480000-__RO_BASE)
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE)
@@ -76,24 +76,29 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    system_M55_HP.o (+RO)
    mpu_M55_HP.o (+RO)
    *(InRoot$$Sections)
-   lv_*.o(+RO)
+   *liblvgl.a(+RO)
+   *printf*.o (+RO)
+   btod.o (+RO)
    .ANY(+RO-DATA)
   }
 
-  ITCM ITCM_BASE ITCM_SIZE {  ; --------------------------------
-      ; ITCM has non-startup code, audio record buffer and RAM vectors
+  ITCM_RAM_VECTORS ITCM_BASE UNINIT ALIGN 2048 __VECTORS_SIZE {
+      * (.bss.noinit.ram_vectors)
+  }
+
+  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-__VECTORS_SIZE {  ; --------------------------------
+      ; ITCM has non-startup code, except for non-fast LVGL, and RAM vectors
       * (+RO-CODE)
       * (+XO)
-      * (.bss.audio_rec)
-      * (.bss.copy_vtor_table_to_ram.MyVectorTable)
+      * (fast_code)
   }
 
   ;-----------------------------------------------------
-  ; R/W region - remaining part of the 1MiB RAM region
+  ; R/W region - remaining part of the DTCM region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has CMSIS-DSP tables and all read-write data, except NPU activation buffer
+      ; DTCM has CMSIS-DSP tables and all read-write data, except image and NPU buffers
       *(+RW +ZI)
       arm_common_tables.o (+RO-DATA)
   }
@@ -103,7 +108,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
 ; avoid first page, where default A32_APP stub is loaded
   RW_SRAM0 SRAM0_BASE+8192 SRAM0_SIZE-8192  {  ; 4MB ----------------------------
-
+      * (ifm)                                ; Baked-in inputs
       * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.

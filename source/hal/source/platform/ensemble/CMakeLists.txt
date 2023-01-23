@@ -34,10 +34,16 @@
 cmake_minimum_required(VERSION 3.16.3)
 set(PLATFORM_DRIVERS_TARGET platform_drivers)
 set(PLATFORM_DRIVERS_INTERFACE platform_drivers_if)
+set(PLATFORM_DRIVERS_CORE platform_drivers_core)
 
 project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
+
+# This currently is also used to infer roles for the dual-CPU bits
+set(CONSOLE_UART 2 CACHE STRING "Console UART for the application")
+
+set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
@@ -49,29 +55,13 @@ set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF)
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
     set(ENSEMBLE_CORE       "M55_HP")
-    #set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
-    #set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "400000000"    CACHE STRING "System peripheral clock (Hz)")
-    #set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-
-    # if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    #     set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-    #     set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
-    # endif()
 endif()
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HE)
     set(ENSEMBLE_CORE       "M55_HE")
-    #set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
-    #set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
-    #set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-
-    # if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    #     set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-    #     set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
-    # endif()
 endif()
 
 set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
@@ -87,16 +77,17 @@ set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved fo
 add_compile_definitions("${ENSEMBLE_CORE}")
 #set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
-# 2. Create static library
-add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
+# 2. Create static libraries
+add_library(${PLATFORM_DRIVERS_TARGET} INTERFACE)
+add_library(${PLATFORM_DRIVERS_CORE} STATIC)
 
 ## Include directories - private
-target_include_directories(${PLATFORM_DRIVERS_TARGET}
+target_include_directories(${PLATFORM_DRIVERS_CORE}
     PRIVATE
     source)
 
 ## Include directories - public
-target_include_directories(${PLATFORM_DRIVERS_TARGET}
+target_include_directories(${PLATFORM_DRIVERS_CORE}
     PUBLIC
     include
     include/${TARGET_SUBSYSTEM}
@@ -108,16 +99,14 @@ add_library(${PLATFORM_DRIVERS_INTERFACE} INTERFACE)
 target_include_directories(${PLATFORM_DRIVERS_INTERFACE}
 INTERFACE
 include
-include/${TARGET_SUBSYSTEM}
 )
 
-if (USE_CASE_BUILD STREQUAL img_class)
-target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC -DIMG_CLASS)
-endif()
-
+target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
+    CONSOLE_UART=${CONSOLE_UART}
+)
 
 ## Platform sources
-target_sources(${PLATFORM_DRIVERS_TARGET}
+target_sources(${PLATFORM_DRIVERS_CORE}
     PRIVATE
     source/timer_ensemble.c
     source/platform_drivers.c
@@ -150,9 +139,11 @@ add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
+## Platform component: lvgl port
+add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
+
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
-
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -163,18 +154,19 @@ if (NOT TARGET log)
 endif()
 
 # Add dependencies:
-target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
+target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
     log
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:audio_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:lcd_stubs>
-    $<$<STREQUAL:${USE_CASE_BUILD},kws>:image_stubs>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:image_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:lcd_ensemble>
-    $<$<STREQUAL:${USE_CASE_BUILD},img_class>:audio_stubs>
-    ensemble_services
-    cmsis_ensemble
     platform_pmu
+    cmsis_ensemble
     rte_components
+)
+
+target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
+    ${PLATFORM_DRIVERS_CORE}
+    image_ensemble
+    $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
+    audio_ensemble
+    ensemble_services
 )
 
 add_compile_options(-Werror-implicit-function-declaration)
@@ -190,18 +182,9 @@ if (ETHOS_U_NPU_ENABLED)
     ## Platform component: Ethos-U initialization
     add_subdirectory(${COMPONENTS_DIR}/npu ${CMAKE_BINARY_DIR}/npu)
 
-    target_link_libraries(${PLATFORM_DRIVERS_TARGET}
+    target_link_libraries(${PLATFORM_DRIVERS_CORE}
         PUBLIC
         ethos_u_npu)
-
-    if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-        ## Platform component: Ethos-U timing adapter initialization
-        add_subdirectory(${COMPONENTS_DIR}/npu_ta ${CMAKE_BINARY_DIR}/npu_ta)
-
-        target_link_libraries(${PLATFORM_DRIVERS_TARGET}
-            PUBLIC
-            ethos_u_ta)
-    endif()
 
 endif()
 

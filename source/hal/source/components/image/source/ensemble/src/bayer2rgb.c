@@ -39,18 +39,17 @@
 #include "bayer.h"
 
 // At the time of writing, GCC produces incorrect assembly
- #if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 1)
- #define ENABLE_MVE_BAYER2RGB 1
- #endif
+#if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 1)
+#define ENABLE_MVE_BAYER2RGB 1
+#else
+#define ENABLE_MVE_BAYER2RGB 0
+#endif
 
 #if ENABLE_MVE_BAYER2RGB
 #include <arm_mve.h>
 #endif
 
 #include "image_processing.h"
-
-extern uint8_t  	rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
-extern uint8_t  	raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES];
 
 // tiff types: short = 3, int = 4
 // Tags: ( 2-byte tag ) ( 2-byte type ) ( 4-byte count ) ( 4-byte data )

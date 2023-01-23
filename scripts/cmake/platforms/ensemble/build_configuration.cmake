@@ -37,7 +37,7 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
+    set(LINKER_SCRIPT_NAME "ensemble-${TARGET_SUBSYSTEM}" CACHE STRING "Linker script name")
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/ensemble" PARENT_SCOPE)
 
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
@@ -50,6 +50,7 @@ function(set_platform_global_defaults)
     set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
+    set(ETHOS_U_PLATFORM_CACHE_OPS "ON"     CACHE BOOL   "Ethos-U NPU Custom platform cache operations")
 
 endfunction()
 
@@ -58,10 +59,6 @@ function(platform_custom_post_build)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
-
-    message(STATUS "******************** PARSED_TARGET_NAME: ${PARSED_TARGET_NAME} ********************")
-    message(STATUS "******************** LINKER_SCRIPT_NAME: ${LINKER_SCRIPT_NAME} ********************")
-    message(STATUS "******************** CMAKE_SCRIPTS_DIR/platforms/ensemble/TARGET_SUBSYSTEM: ${CMAKE_SCRIPTS_DIR}/platforms/ensemble/${TARGET_SUBSYSTEM} ********************")
 
     # Add link options for the linker script to be used:
     add_linker_script(

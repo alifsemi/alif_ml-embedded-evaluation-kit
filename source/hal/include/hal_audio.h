@@ -25,7 +25,7 @@
  * @brief init audio
  *
  */
-#define hal_audio_init()                audio_init()
+#define hal_audio_init(rate, wlen)          audio_init(rate, wlen)
 
 #define hal_set_audio_callback(cb)          audio_set_callback(cb)
 /**

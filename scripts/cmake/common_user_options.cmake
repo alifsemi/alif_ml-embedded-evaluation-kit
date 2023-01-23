@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
@@ -82,6 +92,16 @@ if (NOT TARGET_PLATFORM STREQUAL native)
     USER_OPTION(CMSIS_SRC_PATH
         "Path to CMSIS-5 sources"
         "${DEPENDENCY_ROOT_DIR}/cmsis"
+        PATH)
+
+    USER_OPTION(LVGL_SRC_PATH
+        "Path to LVGL sources"
+        "${DEPENDENCY_ROOT_DIR}/lvgl"
+        PATH)
+
+    USER_OPTION(ARM_2D_SRC_PATH
+        "Path to Arm-2D sources"
+        "${DEPENDENCY_ROOT_DIR}/Arm-2D"
         PATH)
 
     # If we need NPU libraries:

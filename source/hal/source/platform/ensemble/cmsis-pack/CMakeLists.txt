@@ -61,14 +61,14 @@ target_sources(${CMSIS_DEVICE_TARGET}
     components/Source/PHY_Generic.c
     Alif_CMSIS/Source/Driver_DMA.c
     Alif_CMSIS/Source/DMA_Opcode.c
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_CDC200.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_MIPI_DSI.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/DPHY_init.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/Source/ILI9806E_LCD_panel.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_Camera_Controller.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:components/Source/arx3A0_camera_sensor.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Driver_MIPI_CSI2.c>
-    $<$<STREQUAL:${ENSEMBLE_CORE},M55_HP>:Alif_CMSIS/Source/Camera_Sensor_i2c.c>
+    Alif_CMSIS/Source/Driver_CDC200.c
+    Alif_CMSIS/Source/Driver_MIPI_DSI.c
+    Alif_CMSIS/Source/DPHY_init.c
+    components/Source/ILI9806E_LCD_panel.c
+    Alif_CMSIS/Source/Driver_Camera_Controller.c
+    components/Source/arx3A0_camera_sensor.c
+    Alif_CMSIS/Source/Driver_MIPI_CSI2.c
+    Alif_CMSIS/Source/Camera_Sensor_i2c.c
     )
 
 # Device definition needs to be set, is checked in source files to include correct header

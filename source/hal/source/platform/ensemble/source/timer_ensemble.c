@@ -41,11 +41,6 @@
 
 #include CMSIS_device_header
 
-#ifdef IMG_CLASS
-#include "lvgl.h"
-#endif
-
-uint32_t volatile ms_ticks = 0;
 static uint64_t cpu_cycle_count = 0;
 
 #define UI
@@ -80,6 +75,9 @@ int Init_SysTick(void)
 
     /* SysTick init - this will enable interrupt too. */
     err = SysTick_Config(ticks_1ms);
+
+    /* SysTick_Config sets minimum priority - mid priority suits us better (see lv_port.c) */
+    NVIC_SetPriority(SysTick_IRQn, 0x80 >> (8-__NVIC_PRIO_BITS));
 
     /* Enable interrupt again. */
     NVIC_EnableIRQ(SysTick_IRQn);
@@ -165,13 +163,17 @@ void platform_get_counters(pmu_counters* counters)
 
 }
 
+__WEAK void lv_tick_handler(int ticks)
+{
+    UNUSED(ticks);
+}
+
 void SysTick_Handler(void)
 {
     /* Increment the cycle counter based on load value. */
     cpu_cycle_count += SysTick->LOAD + 1;
-#ifdef IMG_CLASS
-    lv_tick_inc(1);
-#endif
+
+    lv_tick_handler(1);
 }
 
 static bool add_pmu_counter(uint64_t value,

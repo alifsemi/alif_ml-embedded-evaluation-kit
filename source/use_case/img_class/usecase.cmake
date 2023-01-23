@@ -30,10 +30,10 @@ USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model"
     FILEPATH)
 
 # Generate input files
-#generate_images_code("${${use_case}_FILE_PATH}"
-#                     ${SRC_GEN_DIR}
-#                     ${INC_GEN_DIR}
-#                     "${${use_case}_IMAGE_SIZE}")
+generate_images_code("${${use_case}_FILE_PATH}"
+                     ${SRC_GEN_DIR}
+                     ${INC_GEN_DIR}
+                     "${${use_case}_IMAGE_SIZE}")
 
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)

@@ -1,3 +1,15 @@
+/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+
+/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /*
  * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -25,6 +37,10 @@
 #include "timer_ensemble.h"     /* Timer functions. */
 #include "uart_tracelib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief   Initialises the platform components.
  * @return  0 if successful, error code otherwise.
@@ -42,8 +58,12 @@ void platform_release(void);
  */
 const char* platform_name(void);
 
-#ifdef IMG_CLASS
 extern bool run_requested(void);
+extern void init_trigger_rx(void);
+extern void init_trigger_tx(void);
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* PLATFORM_DRIVERS_H */

@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-
 #include "ethosu_npu_init.h"
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
@@ -56,20 +54,20 @@ static void arm_ethosu_npu_irq_init(void)
 
     /* Register the EthosU IRQ handler in our vector table.
      * Note, this handler comes from the EthosU driver */
-    NVIC_SetVector(ethosu_irqnum, (uint32_t)NPU_IRQHandler);
+    NVIC_SetVector(ethosu_irqnum, (uint32_t)arm_ethosu_npu_irq_handler);
 
     /* Enable the IRQ */
     NVIC_EnableIRQ(ethosu_irqnum);
 
     debug("EthosU IRQ#: %u, Handler: 0x%p\n",
-          ethosu_irqnum, NPU_IRQHandler);
+          ethosu_irqnum, arm_ethosu_npu_irq_handler);
 }
 
 /**
  * @brief   Defines the Ethos-U interrupt handler: just a wrapper around the default
  *          implementation.
  **/
-void NPU_IRQHandler(void)
+void arm_ethosu_npu_irq_handler(void)
 {
     /* Call the default interrupt handler from the NPU driver */
     ethosu_irq_handler(&ethosu_drv);
@@ -120,33 +118,3 @@ int arm_ethosu_npu_init(void)
 
     return 0;
 }
-
-uint64_t ethosu_address_remap(uint64_t address, int index)
-{
-    UNUSED(index);
-    return LocalToGlobal((void *) address);
-}
-
-#if 1
-
-void ethosu_flush_dcache(uint32_t *p, size_t bytes)
-{
-    // No need to flush - we're not using writeback for any Ethos areas
-    UNUSED(p);
-    UNUSED(bytes);
-}
-
-void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
-{
-    if (SCB->CCR & SCB_CCR_DC_Msk) {
-        if (p && bytes <= 128*1024) {
-            // Only worth doing a ranged operation if relatively small - big ones can get very slow
-            SCB_InvalidateDCache_by_Addr(p, bytes);
-        } else {
-            // Global operation - not safe to globally invalidate in case any writeback is in use
-            // All our regions are write-through, so it will be invalidate for them
-            SCB_CleanInvalidateDCache();
-        }
-    }
-}
-#endif

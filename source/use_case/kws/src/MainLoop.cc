@@ -63,7 +63,6 @@ void main_loop()
 {
     arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
 
-
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),

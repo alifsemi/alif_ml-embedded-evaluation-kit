@@ -34,6 +34,7 @@
 #include <string.h>         /* For strncpy */
 #include <time.h>
 #include <inttypes.h>
+#include <stdatomic.h>
 
 #include "RTE_Device.h"
 #include "RTE_Components.h"
@@ -46,60 +47,57 @@
 #include CMSIS_device_header
 
 #if defined(ARM_NPU)
+#include "ethosu_driver.h"
 #include "ethosu_npu_init.h"
 
-#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-#include "ethosu_ta_init.h"
-#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
-
 #if defined(ETHOS_U_BASE_ADDR)
-    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
+    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
         #error "NPU component configured with incorrect NPU base address."
-    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE == ETHOS_U_BASE_ADDR) */
+    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) */
 #else
     #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
 #endif /* defined(ETHOS_U_BASE_ADDR) */
-
 #endif /* ARM_NPU */
 
+uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
-
-#ifdef IMG_CLASS
 
 static void MHU_msg_received(void* data);
 extern ARM_DRIVER_GPIO Driver_GPIO1;
 extern ARM_DRIVER_GPIO Driver_GPIO3;
 
-#else
-
 // IPC callback
-void ipc_rx_callback(void *data)
+static void ipc_rx_callback(void *data)
 {
     m55_data_payload_t* payload = (m55_data_payload_t*)data;
     char *st = (char*)payload->msg;
     uint16_t id = payload->id;
-    printf("****** Got message from M55 HP CPU: %s, id: %d\n", st, id);
+    printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
-#endif
 
-void copy_vtor_table_to_ram()
+static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048))) __attribute__((section (".bss.noinit.ram_vectors")));
+
+static void copy_vtor_table_to_ram()
 {
-    extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
-    static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048)));
-    for(int i = 0; i < 496; i++)
-    {
-        MyVectorTable[i] = __VECTOR_TABLE[i];
+    if (SCB->VTOR == (uint32_t) MyVectorTable) {
+        return;
     }
+    memcpy(MyVectorTable, (const void *) SCB->VTOR, sizeof MyVectorTable);
+    __DMB();
     // Set the new vector table into use.
-    SCB->VTOR = (uint32_t)(&MyVectorTable[0]);
+    SCB->VTOR = (uint32_t) MyVectorTable;
     __DSB();
 }
 
 int platform_init(void)
 {
-    //copy_vtor_table_to_ram();
+    copy_vtor_table_to_ram();
+
+    /* Forces retarget code to be included in build */
+    extern void _clock_init(void);
+    _clock_init();
 
     tracelib_init(NULL);
 
@@ -108,37 +106,7 @@ int platform_init(void)
 
     info("%s: complete\n", __FUNCTION__);
 
-#ifdef IMG_CLASS
-    services_init(MHU_msg_received);
-
-    // Initialize GPIOs to capture the buttons state
-
-	Driver_GPIO1.Initialize(PIN_NUMBER_12, NULL);
-	Driver_GPIO1.PowerControl(PIN_NUMBER_12, ARM_POWER_FULL);
-	Driver_GPIO1.SetDirection(PIN_NUMBER_12, GPIO_PIN_DIRECTION_INPUT);
-	PINMUX_Config(PORT_NUMBER_1, PIN_NUMBER_12, PINMUX_ALTERNATE_FUNCTION_0);
-	PINPAD_Config(PORT_NUMBER_1, PIN_NUMBER_12, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
-
-	Driver_GPIO3.Initialize(PIN_NUMBER_4, NULL);
-	Driver_GPIO3.PowerControl(PIN_NUMBER_4, ARM_POWER_FULL);
-	Driver_GPIO3.SetDirection(PIN_NUMBER_4, GPIO_PIN_DIRECTION_INPUT);
-	PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_0);
-	PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_4, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
-#else
-    // init MHU Services communication
-    services_init(ipc_rx_callback);
-#endif
-
-
 #if defined(ARM_NPU)
-
-#if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    /* If the platform has timing adapter blocks along with Ethos-U core
-     * block, initialise them here. */
-    if (0 != (err = arm_ethosu_timing_adapter_init())) {
-        return err;
-    }
-#endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
 
     int state;
 
@@ -164,14 +132,37 @@ const char* platform_name(void)
     return s_platform_name;
 }
 
-#ifdef IMG_CLASS
-static bool do_inference_once = true;
+void init_trigger_rx(void)
+{
+    services_init(MHU_msg_received);
+
+    // Initialize GPIOs to capture the buttons state
+
+    Driver_GPIO1.Initialize(PIN_NUMBER_12, NULL);
+    Driver_GPIO1.PowerControl(PIN_NUMBER_12, ARM_POWER_FULL);
+    Driver_GPIO1.SetDirection(PIN_NUMBER_12, GPIO_PIN_DIRECTION_INPUT);
+    PINMUX_Config(PORT_NUMBER_1, PIN_NUMBER_12, PINMUX_ALTERNATE_FUNCTION_0);
+    PINPAD_Config(PORT_NUMBER_1, PIN_NUMBER_12, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
+
+    Driver_GPIO3.Initialize(PIN_NUMBER_4, NULL);
+    Driver_GPIO3.PowerControl(PIN_NUMBER_4, ARM_POWER_FULL);
+    Driver_GPIO3.SetDirection(PIN_NUMBER_4, GPIO_PIN_DIRECTION_INPUT);
+    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_0);
+    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_4, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
+}
+
+void init_trigger_tx(void)
+{
+    services_init(ipc_rx_callback);
+}
+
+static atomic_int do_inference_once = true;
 static bool last_btn0 = false;
 static bool last_btn1 = false;
 
-void MHU_msg_received(void* data)
+static void MHU_msg_received(void* data)
 {
-    m55_data_payload_t* payload = (m55_data_payload_t*)data;
+    m55_data_payload_t* payload = data;
 
     __DMB();
 
@@ -179,11 +170,11 @@ void MHU_msg_received(void* data)
     {
         case 2:
             if (!strcmp(payload->msg, "go")) {
-                // Switch single shot and continuous inference mode
+                // Enter continuous inference mode
                do_inference_once = false;
             }
             if (!strcmp(payload->msg, "stop")) {
-                // Switch single shot and continuous inference mode
+                // Enter single shot inference mode
                do_inference_once = true;
             }
             break;
@@ -194,7 +185,7 @@ void MHU_msg_received(void* data)
     }
 }
 
-extern bool run_requested(void)
+bool run_requested(void)
 {
     bool ret = true;
     bool new_btn0, new_btn1;
@@ -214,11 +205,47 @@ extern bool run_requested(void)
     if (new_btn1 && last_btn1 != new_btn1)
     {
         // Switch single shot and continuous inference mode
-        do_inference_once = !do_inference_once;
+        do_inference_once ^= 1;
     }
     last_btn0 = new_btn0;
     last_btn1 = new_btn1;
     return ret;
 }
 
+uint64_t ethosu_address_remap(uint64_t address, int index)
+{
+    UNUSED(index);
+    /* Double cast to avoid build warning about pointer/integer size mismatch */
+    return LocalToGlobal((void *) (uint32_t) address);
+}
+
+void ethosu_flush_dcache(uint32_t *p, size_t bytes)
+{
+    // No need to flush - we're not using writeback for any Ethos areas
+    UNUSED(p);
+    UNUSED(bytes);
+}
+
+void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
+{
+    uint32_t addr = (uint32_t) p;
+    /* No need to do anything to TCM ever */
+    if ((
+#if ITCM_BASE != 0 // avoid odd unsigned comparison warning
+        addr >= ITCM_BASE &&
 #endif
+        addr + bytes <= ITCM_BASE + ITCM_SIZE) ||
+        (addr >= DTCM_BASE && addr + bytes <= DTCM_BASE + DTCM_SIZE)) {
+        return;
+    }
+    if (SCB->CCR & SCB_CCR_DC_Msk) {
+        if (p && bytes <= 128*1024) {
+            // Only worth doing a ranged operation if relatively small - big ones can get very slow
+            SCB_InvalidateDCache_by_Addr(p, bytes);
+        } else {
+            // Global operation - not safe to globally invalidate in case any writeback is in use
+            // All our regions are write-through, so it will be invalidate for them
+            SCB_CleanInvalidateDCache();
+        }
+    }
+}

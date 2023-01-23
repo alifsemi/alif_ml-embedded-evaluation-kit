@@ -59,7 +59,8 @@ SECTIONS
     *system_M55_*.c.obj(.text .rodata*)
     *mpu_M55_*.c.obj(.text .rodata*)
 
-    *lv_*.c.obj(.text .rodata*)
+    *liblvgl.a:*(.text .rodata*)
+    *libg.a:*printf*(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
@@ -67,12 +68,15 @@ SECTIONS
   .copy.table : ALIGN(4)
   {
     __copy_table_start__ = .;
-    LONG ( LOADADDR(.data.at_dtcm) )
-    LONG ( ADDR(.data.at_dtcm) )
-    LONG ( SIZEOF(.data.at_dtcm)/4 )
     LONG ( LOADADDR(.code.at_itcm) )
     LONG ( ADDR(.code.at_itcm) )
     LONG ( SIZEOF(.code.at_itcm)/4 )
+    LONG ( LOADADDR(.data.at_dtcm) )
+    LONG ( ADDR(.data.at_dtcm) )
+    LONG ( SIZEOF(.data.at_dtcm)/4 )
+    LONG ( LOADADDR(.data.at_sram0) )
+    LONG ( ADDR(.data.at_sram0) )
+    LONG ( SIZEOF(.data.at_sram0)/4 )
     __copy_table_end__ = .;
   } > MRAM
 
@@ -90,10 +94,16 @@ SECTIONS
     __zero_table_end__ = .;
   } > MRAM
 
+  .vectors.at_itcm (NOLOAD) : ALIGN(2048)
+  {
+    *(.bss.noinit.ram_vectors)
+  } > ITCM
+
   .code.at_itcm : ALIGN(8)
   {
     /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
-    *(.text*)    
+    *(.text*)
+    *(fast_code)
   } > ITCM AT> MRAM
 
   .data.at_dtcm : ALIGN(8)
@@ -116,27 +126,25 @@ SECTIONS
   } > DTCM AT> MRAM 
 
   /* Place non-zero code/data here if required in SRAM0 */
-/*
   .data.at_sram0 : ALIGN(8)
   {
-  } > SRAM0 >AT MRAM
-*/
+    * (ifm)
+  } > SRAM0 AT> MRAM
+
   .bss.at_sram0 (NOLOAD) : ALIGN(8)
   {
-    * (.bss.camera_frame_buf)              /* Camer Frame Buffer */
+    * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.lcd_image_buf)
   } > SRAM0
 
-  .bss.at_sram1 (NOLOAD) :
+  .bss.at_sram1 (NOLOAD) : ALIGN(8)
   {
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
   } > SRAM1
 
   .bss.at_itcm (NOLOAD) : ALIGN(8)
   {
-    *(.bss.audio_rec)
-    *(.bss.copy_vtor_table_to_ram.MyVectorTable)
   } > ITCM
 
   .bss (NOLOAD) : ALIGN(8)
@@ -212,6 +220,7 @@ SECTIONS
 
     *(nn_model)
     *(labels)
+    *(ifm)
 
     KEEP(*(.eh_frame*))
   } > MRAM

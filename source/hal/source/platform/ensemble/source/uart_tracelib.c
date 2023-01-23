@@ -1,3 +1,5 @@
+/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
@@ -6,6 +8,24 @@
  * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
+ */
+
+/*
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 // Uncomment this to disable traces to UART
@@ -17,27 +37,35 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdatomic.h>
 #include "Driver_PINMUX_AND_PINPAD.h"
+#include <RTE_Components.h>
+#include CMSIS_device_header
 
+
+#define CNTLQ     0x11
+#define CNTLS     0x13
+#define DEL       0x7F
+#define BACKSPACE 0x08
+#define CR        0x0D
+#define LF        0x0A
+#define ESC       0x1B
+
+#define UNUSED(x) (void)(x)
 
 /* Select used UART.
  *  Supported UARTs:
  *      UART2 (Pin P3_17)
  *      UART4 (Pin P3_2)
  */
-#ifdef IMG_CLASS
-#define UART      4
-#else
-#define UART      2
-#endif
 
 /* UART Driver */
-extern ARM_DRIVER_USART ARM_Driver_USART_(UART);
+extern ARM_DRIVER_USART ARM_Driver_USART_(CONSOLE_UART);
 
 /* UART Driver instance */
-static ARM_DRIVER_USART *USARTdrv = &ARM_Driver_USART_(UART);
+static ARM_DRIVER_USART *USARTdrv = &ARM_Driver_USART_(CONSOLE_UART);
 
-volatile uint32_t uart_event;
+static atomic_uint_fast32_t uart_event;
 static bool initialized = false;
 const char * tr_prefix = NULL;
 uint16_t prefix_len;
@@ -47,7 +75,7 @@ static int hardware_init(void)
 {
     int32_t ret;
 
-#if UART == 2
+#if CONSOLE_UART == 2
     /* PINMUX UART2_B */
 
     /* Configure GPIO Pin : P3_16 as UART2_RX_B */
@@ -63,7 +91,7 @@ static int hardware_init(void)
     {
         return -1;
     }
-#elif UART == 4
+#elif CONSOLE_UART == 4
     /* PINMUX UART4_B */
 
     /* Configure GPIO Pin : P3_1 as UART4_RX_B */
@@ -80,7 +108,7 @@ static int hardware_init(void)
         return -1;
     }
 #else
-    #error Unsupported UART!
+    #error "Unsupported UART!"
 #endif
 
     return 0;
@@ -93,9 +121,7 @@ void myUART_callback(uint32_t event)
 
 int tracelib_init(const char * prefix)
 {
-    char  cmd    = 0;
     int32_t ret    = 0;
-    uint32_t events = 0;
 
     tr_prefix = prefix;
     if (tr_prefix) {
@@ -144,6 +170,13 @@ int tracelib_init(const char * prefix)
         return ret;
     }
 
+    /* Receiver line */
+    ret =  USARTdrv->Control(ARM_USART_CONTROL_RX, 1);
+    if(ret != ARM_DRIVER_OK)
+    {
+        return ret;
+    }
+
     initialized = true;
     return ret;
 }
@@ -151,7 +184,6 @@ int tracelib_init(const char * prefix)
 int send_str(const char* str, uint32_t len)
 {
     int ret = 0;
-    int kpv = 2000000;
     if (initialized)
     {
         uart_event = 0;
@@ -161,7 +193,9 @@ int send_str(const char* str, uint32_t len)
             return ret;
         }
 
-        while (!uart_event && kpv--);
+        while (!uart_event) {
+            __WFE();
+        }
     }
     return ret;
 }
@@ -183,10 +217,83 @@ void tracef(const char * format, ...)
     }
 }
 
-unsigned int GetLine(char *user_input, unsigned int size)
+unsigned char UartPutc(unsigned char ch)
 {
-    // UNSUPPORTED AT THE MOMENT
-    return 0;
+    if (ch == '\n') {
+        (void)UartPutc('\r');
+    }
+    char c = ch;
+    send_str(&c, 1);
+    return ch;
+}
+
+unsigned char UartGetc(void)
+{
+    unsigned char c;
+    uart_event = 0;
+    if (initialized) {
+        USARTdrv->Receive(&c, 1);
+    }
+    /* We'll just loop for ever if not initialized or anything goes wrong */
+    while (!uart_event) {
+        __WFE();
+    }
+
+    if (c == '\r') {
+        c = '\n';
+    }
+    return c;
+}
+
+
+
+unsigned int GetLine(char *lp, unsigned int len)
+{
+    unsigned int cnt = 0;
+    char c;
+
+    do {
+        c = UartGetc();
+        switch (c) {
+        case CNTLQ: /* ignore Control S/Q             */
+        case CNTLS:
+            break;
+        case BACKSPACE:
+        case DEL:
+            if (cnt == 0) {
+                break;
+            }
+            cnt--;          /* decrement count                */
+            lp--;           /* and line pointer               */
+            UartPutc(0x08); /* echo backspace                 */
+            UartPutc(' ');
+            UartPutc(0x08);
+            fflush(stdout);
+            break;
+        case ESC:
+        case 0:
+            *lp = 0; /* ESC - stop editing line        */
+            return 0;
+        case CR: /* CR - done, stop editing line   */
+            *lp = c;
+            lp++;  /* increment line pointer         */
+            cnt++; /* and count                      */
+            c = LF;
+            UartPutc(*lp = c); /* echo and store character       */
+            fflush(stdout);
+            lp++;  /* increment line pointer         */
+            cnt++; /* and count                      */
+            break;
+        default:
+            UartPutc(*lp = c); /* echo and store character       */
+            fflush(stdout);
+            lp++;  /* increment line pointer         */
+            cnt++; /* and count                      */
+            break;
+        }
+    } while (cnt < len - 2 && c != LF); /* check limit and CR             */
+    *lp = 0;                            /* mark end of string             */
+    return 1;
 }
 
 #else

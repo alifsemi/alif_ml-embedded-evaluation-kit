@@ -54,13 +54,13 @@ USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0,
     STRING)
 
 # Generate input files
-#generate_audio_code(${${use_case}_FILE_PATH} ${SRC_GEN_DIR} ${INC_GEN_DIR}
-#    ${${use_case}_AUDIO_RATE}
-#    ${${use_case}_AUDIO_MONO}
-#    ${${use_case}_AUDIO_OFFSET}
-#    ${${use_case}_AUDIO_DURATION}
-#    ${${use_case}_AUDIO_RES_TYPE}
-#    ${${use_case}_AUDIO_MIN_SAMPLES})
+generate_audio_code(${${use_case}_FILE_PATH} ${SRC_GEN_DIR} ${INC_GEN_DIR}
+    ${${use_case}_AUDIO_RATE}
+    ${${use_case}_AUDIO_MONO}
+    ${${use_case}_AUDIO_OFFSET}
+    ${${use_case}_AUDIO_DURATION}
+    ${${use_case}_AUDIO_RES_TYPE}
+    ${${use_case}_AUDIO_MIN_SAMPLES})
 
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)
@@ -72,7 +72,7 @@ generate_labels_code(
 )
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00020000
+    0x00100000
     STRING)
 
 
