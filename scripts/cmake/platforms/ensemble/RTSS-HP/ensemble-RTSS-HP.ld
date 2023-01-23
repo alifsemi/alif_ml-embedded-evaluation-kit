@@ -60,6 +60,7 @@ SECTIONS
     *mpu_M55_*.c.obj(.text .rodata*)
 
     *liblvgl.a:*(.text .rodata*)
+    *libg.a:*printf*(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
