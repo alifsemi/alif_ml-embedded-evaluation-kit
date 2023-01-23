@@ -224,7 +224,6 @@ int resize_image_B(
 
     const uint16x8_t incpix = vmulq_n_u16(vidupq_n_u16(0, 1), pixel_size_B);
 
-    #pragma unroll 1
     for (int y = 0; y < dstHeight; y++) {
         // do indexing computations
         int ty = (int)src_y_accum; // src y
@@ -236,14 +235,12 @@ int resize_image_B(
         uint8_t *d = &dstImage[y * dstWidth * pixel_size_B]; //not scaled above
         // start at 1/2 pixel in to account for integer downsampling which might miss pixels
         float src_x_accum = 0.5f;
-        #pragma unroll 1
         for (int x_count = dstWidth; x_count > 0; x_count -= 8) {
             uint16_t tx_array[8];
             float16_t x_frac_array[8];
             mve_pred16_t p = vctp16q(x_count);
             // do indexing computations
             int todo = x_count < 8 ? x_count : 8;
-#pragma unroll 1
             for (int n = 0; n < todo; n++) {
                 tx_array[n] = (int)src_x_accum  * pixel_size_B;
                 x_frac_array[n] = src_x_accum - trunc(src_x_accum);
@@ -255,7 +252,6 @@ int resize_image_B(
             uint16x8_t tx = vld1q(tx_array);
 
             //interpolate and write out
-            #pragma unroll 1
             for (int color = 0; color < pixel_size_B;
                  color++) // do pixel_size_B times for pixel_size_B colors
             {
@@ -318,7 +314,6 @@ int resize_image_C(
 
     const uint16x8_t incpix = vmulq_n_u16(vidupq_n_u16(0, 1), pixel_size_B);
 
-    #pragma unroll 1
     for (int y = 0; y < dstHeight; y++) {
         // do indexing computations
         int ty = src_y_accum >> FRAC_BITS; // src y
@@ -330,14 +325,12 @@ int resize_image_C(
         d = &dstImage[y * dstWidth * pixel_size_B]; //not scaled above
         // start at 1/2 pixel in to account for integer downsampling which might miss pixels
         uint32_t src_x_accum = FRAC_VAL / 2;
-        #pragma unroll 1
         for (int x_count = dstWidth; x_count > 0; x_count -= 8) {
             uint16_t tx_array[8];
             uint16_t x_frac_array[8];
             mve_pred16_t p = vctp16q(x_count);
             // do indexing computations
             int todo = x_count < 8 ? x_count : 8;
-#pragma unroll 1
             for (int n = 0; n < todo; n++) {
                 tx_array[n] = (src_x_accum >> FRAC_BITS) * pixel_size_B;
                 x_frac_array[n] = src_x_accum & FRAC_MASK;
@@ -349,7 +342,6 @@ int resize_image_C(
             uint16x8_t tx = vld1q(tx_array);
 
             //interpolate and write out
-            #pragma unroll 1
             for (int color = 0; color < pixel_size_B;
                  color++) // do pixel_size_B times for pixel_size_B colors
             {
