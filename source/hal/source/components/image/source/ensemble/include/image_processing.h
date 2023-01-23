@@ -48,7 +48,6 @@ typedef struct {
 
 int frame_crop(const void *input_fb, uint32_t ip_row_size, uint32_t ip_col_size, uint32_t row_start, uint32_t col_start, void *output_fb, uint32_t op_row_size, uint32_t op_col_size, uint32_t bpp);
 int crop_and_interpolate( uint8_t const *srcImage, uint32_t srcWidth, uint32_t srcHeight, uint8_t *dstImage, uint32_t dstWidth, uint32_t dstHeight, uint32_t bpp);
-void color_correction(const uint8_t sp[3], uint8_t dp[3]);
 void white_balance(int width, int height, const uint8_t *sp, uint8_t *dp);
 uint8_t *put_tiff(uint8_t * rgb, uint32_t width, uint32_t height, uint16_t bpp);
 int bayer_to_RGB(uint8_t *src, uint8_t *dest);

@@ -17,7 +17,11 @@
 #include <arm_mve.h>
 #endif
 
-void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
+#define SKIP_COLOR_CORRECTION 0
+#define PIXELWISE_COLOR_CORRECTION 0
+
+#if PIXELWISE_COLOR_CORRECTION
+static void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 {
 //	volatile static uint32_t t0, ts;
 //	ts = PMU_GetCounter();
@@ -59,6 +63,8 @@ void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 #endif // __ARM_FEATURE_MVE & 1
 //	t0 = PMU_GetCounter() - ts;
 }
+
+#else
 
 static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 {
@@ -107,14 +113,15 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 		len -= 3 * 8;
 	}
 }
+#endif /* PIXELWISE_COLOR_CORRECTION */
 
 void white_balance(int ml_width, int ml_height, const uint8_t *sp, uint8_t *dp)
 {
-#if 0
+#if SKIP_COLOR_CORRECTION
     if (dp != sp) {
         memcpy(dp, sp, ml_width * ml_height * RGB_BYTES);
     }
-#elif 1
+#elif !PIXELWISE_COLOR_CORRECTION
     bulk_color_correction(sp, dp, ml_width * ml_height * RGB_BYTES);
 #else
     for (uint32_t index = 0; index < ml_width * ml_height * RGB_BYTES; index += RGB_BYTES) {

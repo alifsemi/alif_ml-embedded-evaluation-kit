@@ -131,15 +131,6 @@ static void lv_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
 }
 #endif
 
-#if 0
-// Unnecessary as we have the framebuffer set to write-through cacheable
-static void lv_clean_dcache_cb(lv_disp_drv_t * disp_drv) {
-    /* Example for Cortex-M (CMSIS) */
-    SCB_CleanDCache();
-    (void)(disp_drv);
-}
-#endif
-
 /* lv_port_disp_init() may be called twice, as it's called both by our port of
  * ARM's GLCD UI (unless it's stubbed out), and also by native LVGL apps.
  *
@@ -176,7 +167,6 @@ void lv_port_disp_init(void)
     lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, MY_DISP_BUFFER);
 
     disp_drv.draw_buf = &disp_buf;
-    //disp_drv.clean_dcache_cb = lv_clean_dcache_cb;
     disp_drv.flush_cb = lv_disp_flush_async;
     disp_drv.wait_cb = lv_consider_immediate_flush;
 #if LV_COLOR_DEPTH == 32

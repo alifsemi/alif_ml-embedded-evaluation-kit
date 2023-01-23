@@ -26,6 +26,7 @@
 #else
 #define ENABLE_MVE_WRITE 0
 #endif
+#define ENABLE_WORD_WRITE 1
 
 #if __ARM_FEATURE_MVE & 1
 #include <arm_mve.h>
@@ -85,7 +86,7 @@ void write_to_lvgl_buf_doubled(
 			dst2p32 += 4 * 2 * RGBA_BYTES;
 			srcp32 += 4 * RGB_BYTES;
 		}
-#elif 1
+#elif ENABLE_WORD_WRITE
 		const uint8_t * restrict srcp = src[y1][0];
 		lv_color_t * restrict dstp = dst[y1 * 2];
 		lv_color_t * restrict dst2p = dst[y1 * 2 + 1];
@@ -208,7 +209,7 @@ void write_to_lvgl_buf(
 			dstp += 16 * RGB565_BYTES;
 		}
 #endif
-#elif 1
+#elif ENABLE_WORD_WRITE
 		const uint8_t * restrict srcp = src[y][0];
 		lv_color_t * restrict dstp = dst[y];
 		const uint32_t *srcp32 = (const uint32_t *)srcp;
