@@ -23,7 +23,6 @@ namespace app {
 
 namespace {
 lv_obj_t *labelResult[5];
-//lv_obj_t *labelTime;
 lv_obj_t *labelHeader;
 lv_obj_t *imageObj;
 lv_obj_t *imageHolder;
@@ -115,8 +114,6 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_add_style(resultHolder, &noBorder, LV_PART_MAIN);
     lv_obj_add_style(resultHolder, &resultPadding, LV_PART_MAIN);
 
-    //lv_obj_set_style_bg_color(resultHolder, lv_color_hex(0xffdddd), LV_PART_MAIN);
-
     lv_style_init(&confident);
     lv_style_set_text_color(&confident, lv_color_hex(0x0080ff));
     lv_style_set_text_font(&confident, &lv_font_montserrat_32);
@@ -153,11 +150,6 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
         lv_obj_add_style(lbl, &confident, LV_STATE_USER_1);
         lv_obj_add_style(lbl, &weak, LV_STATE_USER_2);
     }
-
-    //labelTime = lv_label_create(screen);
-    //lv_obj_set_style_text_align(labelTime, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    //lv_obj_align(labelTime, LV_ALIGN_CENTER, 0, 150 * DISP_SCALE);
-    //lv_label_set_text_static(labelTime, "Time: XX ms");
 
     /* Centre the image in its holder */
     imageObj = lv_img_create(imageHolder);
