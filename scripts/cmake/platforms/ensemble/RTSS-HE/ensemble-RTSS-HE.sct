@@ -75,6 +75,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    startup_M55_HE.o (+RO)
    system_M55_HE.o (+RO)
    mpu_M55_HE.o (+RO)
+   Main.o (+RO)
    *(InRoot$$Sections)
    *liblvgl.a(+RO)
    *printf*.o (+RO)
