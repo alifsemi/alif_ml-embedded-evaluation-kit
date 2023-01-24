@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,9 +66,8 @@ namespace app {
         }
     }
 
-    bool KwsPreProcess::DoPreProcess(const void* data, size_t inputSize)
+    bool KwsPreProcess::DoPreProcess(const void* data, size_t inferenceIndex)
     {
-        UNUSED(inputSize);
         if (data == nullptr) {
             printf_err("Data pointer is null");
         }
@@ -77,8 +76,8 @@ namespace app {
         auto input = static_cast<const int16_t*>(data);
         this->m_mfccSlidingWindow.Reset(input);
 
-        /* Cache is only usable if we have more than 1 inference in an audio clip. */
-        bool useCache = this->m_audioWindowIndex > 0 && this->m_numReusedMfccVectors > 0;
+        /* Cache is only usable if we have more than 1 inference to do and it's not the first inference. */
+        bool useCache = inferenceIndex > 0 && this->m_numReusedMfccVectors > 0;
 
         /* Use a sliding window to calculate MFCC features frame by frame. */
         while (this->m_mfccSlidingWindow.HasNext()) {
@@ -158,12 +157,12 @@ namespace app {
     std::function<void (std::vector<int16_t>&, int, bool, size_t)>
     KwsPreProcess::GetFeatureCalculator(audio::MicroNetKwsMFCC& mfcc, TfLiteTensor* inputTensor, size_t cacheSize)
     {
-        std::function<void (std::vector<int16_t>&, size_t, bool, size_t)> mfccFeatureCalc;
+        std::function<void (std::vector<int16_t>&, size_t, bool, size_t)> mfccFeatureCalc = nullptr;
 
         TfLiteQuantization quant = inputTensor->quantization;
 
         if (kTfLiteAffineQuantization == quant.type) {
-            auto *quantParams = (TfLiteAffineQuantization *) quant.params;
+            auto* quantParams = (TfLiteAffineQuantization*) quant.params;
             const float quantScale = quantParams->scale->data[0];
             const int quantOffset = quantParams->zero_point->data[0];
 
@@ -191,20 +190,22 @@ namespace app {
         return mfccFeatureCalc;
     }
 
-    KwsPostProcess::KwsPostProcess(TfLiteTensor* outputTensor, Classifier& classifier,
+    KwsPostProcess::KwsPostProcess(TfLiteTensor* outputTensor, KwsClassifier& classifier,
                                    const std::vector<std::string>& labels,
-                                   std::vector<ClassificationResult>& results)
+                                   std::vector<ClassificationResult>& results, size_t averagingWindowLen)
             :m_outputTensor{outputTensor},
              m_kwsClassifier{classifier},
              m_labels{labels},
              m_results{results}
-    {}
+    {
+        this->m_resultHistory = {averagingWindowLen, std::vector<float>(labels.size())};
+    }
 
     bool KwsPostProcess::DoPostProcess()
     {
         return this->m_kwsClassifier.GetClassificationResults(
                 this->m_outputTensor, this->m_results,
-                this->m_labels, 1, true);
+                this->m_labels, 1, true, this->m_resultHistory);
     }
 
 } /* namespace app */

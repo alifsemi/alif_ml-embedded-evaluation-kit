@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,8 +31,12 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    if ((ETHOS_U_NPU_ID STREQUAL U65) AND (TARGET_SUBSYSTEM STREQUAL sse-310))
-        message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID} and target subsystem ${TARGET_SUBSYSTEM}")
+    # Arm Corstone-310's timing adapter behaviour is very different to Arm Corstone-300 and cannot
+    # be used for bandwidth/latency related performance sweeps for the Arm Ethos-U NPU. Read
+    # docs/sections/timing_adapters.md for more details.
+    if ((TARGET_SUBSYSTEM STREQUAL "sse-310") AND (DEFINED ETHOS_U_NPU_TIMING_ADAPTER_ENABLED))
+        message(STATUS "Timing adapter will NOT be used for target subsystem ${TARGET_SUBSYSTEM}")
+        set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF CACHE BOOL "Use of TA" FORCE)
     endif()
 
     set(LINKER_SCRIPT_NAME "mps3-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
@@ -81,5 +85,27 @@ function(platform_custom_post_build)
     add_custom_command(TARGET ${PARSED_TARGET_NAME}
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy ${MPS3_FPGA_CONFIG} ${SECTORS_DIR})
+
+    # Add tests for application on FVP if FVP path specified
+    if (BUILD_FVP_TESTS)
+
+        # Build for all use cases if USE_SINGLE_INPUT as no telnet interaction required
+        # otherwise only build for inference runner
+        if ((USE_SINGLE_INPUT) OR (${use_case} STREQUAL "inference_runner"))
+            set(AXF_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf")
+            set(TEST_TARGET_NAME "${use_case}_fvp_test")
+
+            message(STATUS "Adding FVP test for ${use_case}")
+
+            add_test(
+                NAME "${TEST_TARGET_NAME}"
+                COMMAND ${FVP_PATH} -a ${AXF_PATH}
+                    -C mps3_board.telnetterminal0.start_telnet=0
+                    -C mps3_board.uart0.out_file='-'
+                    -C mps3_board.uart0.shutdown_on_eot=1
+                    -C mps3_board.visualisation.disable-visualisation=1
+                    --stat)
+        endif()
+    endif ()
 
 endfunction()

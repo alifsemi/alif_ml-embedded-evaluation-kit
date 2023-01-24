@@ -13,10 +13,10 @@ To run evaluations using this software, we suggest using:
 
 - an [MPS3 board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3) with
   [Arm® Corstone-300](https://developer.arm.com/Processors/Corstone-300) or [Arm® Corstone-310](https://developer.arm.com/Processors/Corstone-310) implementations.
-  - Arm® Corstone-300 runs a combination of
+  - Arm® Corstone™-300 runs a combination of
   the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55) and the
   [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
-  - Arm® Corstone-310 runs a combination of
+  - Arm® Corstone™-310 runs a combination of
       the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85) and the
       [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
 
@@ -25,7 +25,13 @@ To run evaluations using this software, we suggest using:
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination of
   the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55). You can also take advantage of
   [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) (AVH) and [run the Fixed Virtual Platform
-  in the cloud](./docs/sections/arm_virtual_hardware.md). An FVP implementation of Arm® Corstone-310 is also available via AVH.
+  in the cloud](./docs/sections/arm_virtual_hardware.md).
+  > **NOTE**: While Arm® Corstone™-300 is available as an [Ecosystem FVP](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+  > and AVH, Arm® Corstone™-310 is available (for both Arm® Ethos™-U55 and Ethos™-U65 NPUs) only as AVH implementations.
+
+## Inclusive language commitment
+This product conforms to Arm's inclusive language policy and, to the best of our knowledge,
+does not contain any non-inclusive language. If you find something that concerns you, email terms@arm.com.
 
 ## Overview of the evaluation kit
 
@@ -60,7 +66,7 @@ by displaying different performance metrics such as inference cycle count estima
 
 The evaluation kit primarily supports [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300)
 and [Arm® Corstone™-310](https://developer.arm.com/ip-products/subsystem/corstone/corstone-310) reference packages as its
-primary targets. Arm® Corstone™-300 design implementation is publicly available on an [Arm MPS3 FPGA board](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images),
+primary targets. Arm® Corstone™-300 and Corstone™-310 design implementations are publicly available on [Download FPGA Images](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images) page,
 or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
 The Ethos-U NPU software stack is described [here](https://developer.arm.com/documentation/101888/0500/NPU-software-overview/NPU-software-components?lang=en).
@@ -74,7 +80,7 @@ the neural networks models executions. TensorFlow Lite for Microcontrollers is i
 and delegates execution of certain operators to the NPU or, if the neural network model operators are not supported on
 NPU, to the CPU. If the operator is supported, [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise
 CPU workload execution with int8 data type. Else, TensorFlow™ Lite for Microcontrollers' reference kernels are used as
-a final fall-back. 
+a final fall-back.
 Common ML application functions will help you to focus on implementing logic of your custom ML use case: you can modify
 only the use case code and leave all other components unchanged. Supplied build system will discover new ML application
 code and automatically include it into compilation flow.
@@ -131,7 +137,7 @@ For more details see full documentation:
 - [Arm® ML embedded evaluation kit](./docs/documentation.md#arm_ml-embedded-evaluation-kit)
   - [Table of Content](./docs/documentation.md#table-of-content)
   - [Trademarks](./docs/documentation.md#trademarks)
-  - [Prerequisites](./docs/documentation.md#prerequisites)
+  - **[Prerequisites](./docs/documentation.md#prerequisites)**
     - [Additional reading](./docs/documentation.md#additional-reading)
   - [Repository structure](./docs/documentation.md#repository-structure)
   - [Models and resources](./docs/documentation.md#models-and-resources)
@@ -140,9 +146,9 @@ For more details see full documentation:
   - [Running code samples applications](./docs/documentation.md#running-code-samples-applications)
   - [Implementing custom ML application](./docs/documentation.md#implementing-custom-ml-application)
   - [Testing and benchmarking](./docs/documentation.md#testing-and-benchmarking)
-  - [Troubleshooting](./docs/documentation.md#troubleshooting)
+  - **[Troubleshooting](./docs/documentation.md#troubleshooting)**
   - [Appendix](./docs/documentation.md#appendix)
-  - [FAQ](./docs/documentation.md#faq)
+  - **[FAQ](./docs/documentation.md#faq)**
 
 ## Contribution guidelines
 
@@ -166,7 +172,7 @@ Contributions are only accepted under the following conditions:
 
   ```copyright
   /*
-  * Copyright (c) <years additions were made to project> <your name>, Arm Limited. All rights reserved.
+  * SPDX-FileCopyrightText: Copyright <years additions were made to project> <your name>, Arm Limited and/or its affiliates <open-source-office@arm.com>
   * SPDX-License-Identifier: Apache-2.0
   *
   * Licensed under the Apache License, Version 2.0 (the "License");

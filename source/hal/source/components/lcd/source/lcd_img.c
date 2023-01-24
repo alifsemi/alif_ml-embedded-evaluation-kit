@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,36 +24,9 @@
 
 static int show_title(void)
 {
-    char title[128];
-    int status = 0;
-
-    /* LCD title string */
-#if defined(CPU_CORTEX_M55)
-    const char* cpu_name = "Arm Cortex-M55";
-#elif defined (ARMv81MML_DSP_DP_MVE_FP)
-    const char* cpu_name = "ARMv8.1-M CPU";
-#else /* defined(CPU_CORTEX_M55) */
-    const char* cpu_name = "Arm CPU";
-#endif /* defined(CPU_CORTEX_M55) */
-
+    const char title[] = "Arm ML embedded code samples";
     lcd_set_text_color(White);
-
-    /* First line */
-    snprintf(title, sizeof(title), "Arm ML embedded code samples");
-
-    if (0 != (status = lcd_display_text(
-            title, strlen(title), 10, 0, false))) {
-        return status;
-    }
-
-    /* Second line */
-#if defined (ARM_NPU)
-    snprintf(title, sizeof(title), "%s + Arm Ethos-U NPU", cpu_name);
-#else /* defined (ARM_NPU) */
-    snprintf(title, sizeof(title), "%s", cpu_name);
-#endif /* defined (ARM_NPU) */
-
-    return lcd_display_text(title, strlen(title), 10, 20, false);
+    return lcd_display_text(title, strlen(title), 10, 0, false);
 }
 
 int lcd_init(void)

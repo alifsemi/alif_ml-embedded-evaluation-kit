@@ -13,6 +13,14 @@ A good starting point to explore the repository is the
 
 ----
 
+**Q: What is an FVP or AVH?**
+
+**A:** FVP stands for Fixed Virtual Platform and AVH is Arm Virtual Hardware. More details for these can be found under:
+* https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms
+* https://www.arm.com/products/development-tools/simulation/virtual-hardware
+
+----
+
 **Q: I’m running through the quick-start guide and I’m running into an error with pip. When I run `./build_default.py`,
 I get an error `ImportError: No module named pip`, but pip is installed on my machine.**
 

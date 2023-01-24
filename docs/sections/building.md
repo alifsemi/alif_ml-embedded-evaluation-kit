@@ -13,11 +13,13 @@
     - [Configuring the build for MPS3 SSE-300](./building.md#configuring-the-build-for-mps3-sse_300)
       - [Using GNU Arm Embedded toolchain](./building.md#using-gnu-arm-embedded-toolchain)
       - [Using Arm Compiler](./building.md#using-arm-compiler)
+      - [Configuring applications to run without user interaction](./building.md#configuring-applications-to-run-without-user-interaction)
       - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
+    - [Building with CMake Presets](./building.md#building-with-cmake-presets)
     - [Building the configured project](./building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./building.md#add-custom-inputs)
@@ -33,7 +35,12 @@ This section assumes that you are using an **x86_64 Linux** build machine.
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
 - GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.16, or higher, is installed and available
-  on the path. Test the compiler by running:
+  on the path.
+
+> **Note**: There is a known issue with Arm GNU Embedded Toolchain version 12.2.Rel1. See
+> [Internal Compiler Error](./troubleshooting.md#internal-compiler-error) for details.
+
+  Test the compiler by running:
 
     ```commandline
     armclang -v
@@ -54,7 +61,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
     ```log
     arm-none-eabi-gcc (GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
-    Copyright (C) 2020 Free Software Foundation, Inc.
+    SPDX-FileCopyrightText: Copyright 2020 Free Software Foundation, Inc.
     This is free software; see the source for copying conditions.  There is NO
     warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     ```
@@ -73,7 +80,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
     ```log
     cmake version 3.22.4
-    ``` 
+    ```
 
 > **Note:** Required version of CMake is also installed in the Python3 virtual environment created by
 > `setup_default_resources.py` script. See [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -104,6 +111,12 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```commandline
     python3 -m venv
     ```
+
+  > **Note:** If you are using an Arm Virtual Hardware instance then Python virtual environment is not installed by default.
+  > You will need to install it yourself by running the following command:
+  >   ```commandline
+  >    sudo apt install python3.8-venv
+  >    ```
 
 - The build system uses external Python libraries during the building process. Please make sure that the latest pip and
   libsndfile versions are installed.
@@ -185,9 +198,10 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_SRC_PATH`: The path to the CMSIS sources to be used to build TensorFlow Lite Micro library. This parameter is
-  optional and is only valid for Arm® *Cortex®-M* CPU targeted configurations. The default value points to the
-  `dependencies/cmsis` git submodule. Repository is hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
+  These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
+  points to the `dependencies/cmsis` and `dependencies/cmsis-dsp` git submodules.  Repositories are hosted here:
+  [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) and [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -246,6 +260,9 @@ The build parameters are:
 
 - `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED`: Specifies if the *Ethos-U* timing adapter is enabled.
 
+  > **NOTE**: This setting is set to ON for all platforms if `ETHOS_U_NPU_ENABLED` is set. However, it is overridden
+  > to OFF for Arm® Corstone-310 implementation.
+
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
   the timing adapter build is enabled. Default for Ethos-U55 NPU is
   [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake),
@@ -256,6 +273,16 @@ The build parameters are:
 
 - `TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS`: Optional parameter to enable wiping out `TPIP` downloads from TensorFlow
   source tree prior to each build. Disabled by default.
+
+- `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input file, or if a user menu is
+provided for the user to select which input file to use via a telnet window. Disabled by default.
+
+- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications on the Corstone-300 FVP. Tests will
+be generated for all use-cases if `USE_SINGLE_INPUT` is set to `ON`, otherwise they will only be generated for the
+inference_runner use-case.
+
+- `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
+`BUILD_FVP_TESTS` option is switched `ON`.
 
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
@@ -446,6 +473,37 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug
 ```
 
+#### Configuring applications to run without user interaction
+
+Default CMake configuration behaviour looks for input samples, for each use case, in the default directory. All these
+inputs are baked-in into the application. If the number of files baked in is greater than one, a user menu is displayed
+on the application output, where the user is expected to enter their chosen option. See more here:
+[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3).
+
+To configure the project to use single input for each use case, CMake option `USE_SINGLE_INPUT` can be set to `ON`.
+This will result in each use case automatically running with predefined input data, thus removing the need for the
+user to use a telnet terminal to specify the input data. For Example:
+
+```commandline
+cmake ../ -DUSE_SINGLE_INPUT=ON
+```
+
+When a single input file is used, the non-native targets will also allow FVP tests to be added to the configuration
+using the CTest framework. For example:
+
+```commandline
+cmake .. \
+    -DUSE_SINGLE_INPUT=ON \
+    -DBUILD_FVP_TESTS=ON \
+    -DFVP_PATH=/home/user/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55
+```
+
+This will allow the built application to be executed on the FVP in headless mode using:
+
+```commandline
+ctest --verbose
+```
+
 #### Generating project for Arm Development Studio
 
 To import the project into Arm Development Studio, add the Eclipse project generator and `CMAKE_ECLIPSE_VERSION` in the
@@ -535,6 +593,10 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
+### Building with CMake Presets
+
+For building using CMake Presets please see [Building with CMake Presets](./cmake_presets.md#building-with-cmake-presets)
+
 ### Building the configured project
 
 If the CMake command succeeds, build the application as follows:
@@ -578,134 +640,7 @@ Where for each implemented use-case under the `source/use-case` directory, the f
 
 ## Building timing adapter with custom options
 
-The sources also contain the configuration for a timing adapter utility for the *Ethos-U* NPU driver. The timing
-adapter allows the platform to simulate user provided memory bandwidth and latency constraints.
-
-The timing adapter driver aims to control the behavior of two AXI buses used by *Ethos-U* NPU. One is for SRAM memory
-region, and the other is for flash or DRAM.
-
-The SRAM is where intermediate buffers are expected to be allocated and therefore, this region can serve frequent Read
-and Write traffic generated by computation operations while executing a neural network inference.
-
-The flash or DDR is where we expect to store the model weights and therefore, this bus would only usually be used for RO
-traffic.
-
-It is used for MPS3 FPGA and for Fast Model environment.
-
-The CMake build framework allows the parameters to control the behavior of each bus with following parameters:
-
-- `MAXR`: Maximum number of pending read operations allowed. `0` is inferred as infinite and the default value is `4`.
-
-- `MAXW`: Maximum number of pending write operations allowed. `0` is inferred as infinite and the default value is `4`.
-
-- `MAXRW`: Maximum number of pending read and write operations allowed. `0` is inferred as infinite and the default
-  value is `8`.
-
-- `RLATENCY`: Minimum latency, in cycle counts, for a read operation. This is the duration between `ARVALID` and
-  `RVALID` signals. The default value is `50`.
-
-- `WLATENCY`: Minimum latency, in cycle counts, for a write operation. This is the duration between `WVALID` and
-  `WLAST`, with `BVALID` being deasserted. The default value is `50`.
-
-- `PULSE_ON`: The number of cycles where addresses are let through. The default value is `5100`.
-
-- `PULSE_OFF`: The number of cycles where addresses are blocked. The default value is `5100`.
-
-- `BWCAP`: Maximum number of 64-bit words transferred per pulse cycle. A pulse cycle is defined by `PULSE_ON`
-  and `PULSE_OFF`. `0` is inferred as infinite and the default value is `625`.
-
-  > **Note:** The bandwidth cap `BWCAP` operates on the transaction level and, because of its simple implementation,
-  > the accuracy is limited.
-  > When set to a small value it allows only a small number of transactions for each pulse cycle.
-  > Once the counter has reached or exceeded the configured cap, no transactions will be allowed before the next pulse
-  > cycle. In order to minimize this effect some possible solutions are:
-  >
-  > - scale up all the parameters to a reasonably large value.
-  > - scale up `BWCAP` as a multiple of the burst length (in this case bulk traffic will not face rounding errors in
-  >   the bandwidth cap).
-
-- `MODE`: Timing adapter operation mode. Default value is `0`.
-
-  - `Bit 0`: `0`=simple, `1`=latency-deadline QoS throttling of read versus write,
-
-  - `Bit 1`: `1`=enable random AR reordering (`0`=default),
-
-  - `Bit 2`: `1`=enable random R reordering (`0`=default),
-
-  - `Bit 3`: `1`=enable random B reordering (`0`=default)
-
-For the CMake build configuration of the timing adapter, the SRAM AXI is assigned `index 0` and the flash, or DRAM, AXI
-bus has `index 1`.
-
-To change the bus parameter for the build a "***TA_\<index>_*"** prefix should be added to the above. For example,
-**TA0_MAXR=10** sets the maximum pending reads to 10 on the SRAM AXI bus.
-
-As an example, if we have the following parameters for the flash, or DRAM, region:
-
-- `TA1_MAXR` = "2"
-
-- `TA1_MAXW` = "0"
-
-- `TA1_MAXRW` = "0"
-
-- `TA1_RLATENCY` = "64"
-
-- `TA1_WLATENCY` = "32"
-
-- `TA1_PULSE_ON` = "320"
-
-- `TA1_PULSE_OFF` = "80"
-
-- `TA1_BWCAP` = "50"
-
-For a clock rate of 500MHz, this would translate to:
-
-- The maximum duty cycle for any operation is:\
-  ![Maximum duty cycle formula](../media/F1.png)
-
-- Maximum bit rate for this bus (64-bit wide) is:\
-  ![Maximum bit rate formula](../media/F2.png)
-
-- With a read latency of 64 cycles, and maximum pending reads as 2, each read could be a maximum of 64 or 128 bytes. As
-  defined for the *Ethos-U* NPU AXI bus attribute.
-
-  The bandwidth is calculated solely by read parameters:
-
-  ![Bandwidth formula](../media/F3.png)
-
-  This is higher than the overall bandwidth dictated by the bus parameters of:
-
-  ![Overall bandwidth formula](../media/F4.png)
-
-This suggests that the read operation is only limited by the overall bus bandwidth.
-
-Timing adapter requires recompilation to change parameters. Default timing adapter configuration file pointed to by
-`TA_CONFIG_FILE` build parameter is located in the `scripts/cmake folder` and contains all options for `AXI0` and `AXI1`
-as previously described.
-
-here is an example of `scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake`:
-
-```cmake
-# Timing adapter options
-set(TA_INTERACTIVE OFF)
-
-# Timing adapter settings for AXI0
-set(TA0_MAXR "8")
-set(TA0_MAXW "8")
-set(TA0_MAXRW "0")
-set(TA0_RLATENCY "32")
-set(TA0_WLATENCY "32")
-set(TA0_PULSE_ON "3999")
-set(TA0_PULSE_OFF "1")
-set(TA0_BWCAP "4000")
-...
-```
-
-An example of the build with a custom timing adapter configuration:
-
-```commandline
-cmake .. -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/my_ta_config.cmake
-```
+For custom configuration of timing adapter see [Timing adapter](./timing_adapters.md#timing-adapter)
 
 ## Add custom inputs
 
@@ -770,8 +705,8 @@ After compiling, your custom model has now replaced the default one in the appli
 > <https://pypi.org/project/ethos-u-vela/>.
 > The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
-> **Note:** Using the 22.05 versions of software dependencies will require Vela to be at least version 3.4.0
-> or you may encounter issues when trying to run applications on different variants of Ethos-U.
+> **Note:** Using the 22.11 versions of software dependencies will require Vela to be at least version 3.6.0
+> or you may encounter issues when trying to run applications on different variants of Ethos-U NPUs.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.
@@ -820,6 +755,10 @@ To see Vela helper for all the parameters use: `vela --help`.
 
 > **Note:** By default, use of the *Ethos-U* NPU is enabled in the CMake configuration. This can be changed by passing
 > `-DETHOS_U_NPU_ENABLED`.
+
+> **Note:** The performance summary produced by Vela compiler for any model are **estimates only**. Vela computes
+> these figures from a very simplistic approximation. To get accurate performance numbers for the Arm Ethos-U NPU, use
+> of FVP or FPGA platforms is recommended.
 
 ## Building for different Ethos-U NPU variants
 
@@ -904,8 +843,8 @@ For example, the generated utility functions for image classification are:
     extern const uint8_t im0[IMAGE_DATA_SIZE];
     extern const uint8_t im1[IMAGE_DATA_SIZE];
 
-    const char* get_filename(const uint32_t idx);
-    const uint8_t* get_img_array(const uint32_t idx);
+    const char* GetFilename(const uint32_t idx);
+    const uint8_t* GetImgArray(const uint32_t idx);
 
     #endif /* GENERATED_IMAGES_H */
     ```
@@ -925,7 +864,7 @@ For example, the generated utility functions for image classification are:
         im1
     };
 
-    const char* get_filename(const uint32_t idx)
+    const char* GetFilename(const uint32_t idx)
     {
         if (idx < NUMBER_OF_FILES) {
             return img_filenames[idx];
@@ -933,7 +872,7 @@ For example, the generated utility functions for image classification are:
         return nullptr;
     }
 
-    const uint8_t* get_img_array(const uint32_t idx)
+    const uint8_t* GetImgArray(const uint32_t idx)
     {
         if (idx < NUMBER_OF_FILES) {
             return img_arrays[idx];

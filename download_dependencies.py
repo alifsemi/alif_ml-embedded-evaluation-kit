@@ -10,7 +10,7 @@
 #  License Agreement with this file. If not, please write to:
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
-#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,10 +34,12 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/02715237c1fc0a23f465226364d206277f54ebce.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/29615088b12e3ba8ce50d316cf7f38c1bd7fc620.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.05.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.05.tar.gz"
+TF = "https://github.com/tensorflow/tflite-micro/archive/28770e4cac1e5dae85b55a0d47d5315d35755d04.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/81564cfb339ebf9def167a50693733f8a1e1471e.zip"
+CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.14.2.zip"
+CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.0.0.zip"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.11.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.11.tar.gz"
 LVGL = "https://github.com/lvgl/lvgl/archive/dbb15bb3ea0365373bc1ba8b182556f937e61e7d.zip"
 ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.0.zip"
 
@@ -79,6 +81,10 @@ def main(dependencies_path: Path):
 
     download(CMSIS,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis"))
+    download(CMSIS_DSP,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-dsp"))
+    download(CMSIS_NN,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
     download(ETHOS_U_CORE_DRIVER,
              lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
     download(ETHOS_U_CORE_PLATFORM,

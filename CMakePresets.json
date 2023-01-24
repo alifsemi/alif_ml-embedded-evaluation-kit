@@ -1,0 +1,139 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "include": [
+        "scripts/cmake/options-preset.json",
+        "scripts/cmake/platforms/platforms-preset.json",
+        "scripts/cmake/toolchains/toolchain-preset.json",
+        "source/use_case/usecase-preset.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "simple-gcc",
+            "displayName": "simple-gcc",
+            "description": "Target simple platform build with bare-metal gcc toolchain.",
+            "inherits": [
+                "simple-platform",
+                "gcc-toolchain"
+            ]
+        },
+        {
+            "name": "simple-clang",
+            "displayName": "simple-armclang",
+            "description": "Target simple platform build with bare-metal armclang toolchain.",
+            "inherits": [
+                "simple-platform",
+                "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-300-gcc",
+            "displayName": "mps3-300-gcc",
+            "description": "Target mps3 board, SSE-300 subsystem with bare-metal gcc toolchain.",
+            "inherits": [
+                "mps3-300-platform",
+                "gcc-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-300-clang",
+            "displayName": "mps3-300-armclang",
+            "description": "Target mps3 board, SSE-300 subsystem with bare-metal armclang toolchain.",
+            "inherits": [
+                "mps3-300-platform",
+                "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-310-gcc",
+            "displayName": "mps3-310-gcc",
+            "description": "Target mps3 board, SSE-310 subsystem with bare-metal gcc toolchain.",
+            "inherits": [
+                "mps3-310-platform",
+                "gcc-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-310-clang",
+            "displayName": "mps3-310-armclang",
+            "description": "Target mps3 board, SSE-310 subsystem with bare-metal armclang toolchain.",
+            "inherits": [
+                "mps3-310-platform",
+                "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "native",
+            "displayName": "native",
+            "description": "Target native system.",
+            "inherits": [
+                "native-platform",
+                "native-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-300-gcc-custom",
+            "displayName": "mps3-300-gcc-custom",
+            "description": "mps3-300-gcc with debug enabled, default option for inference.",
+            "inherits": [
+                "mps3-300-gcc",
+                "log-debug",
+                "single-input"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "native",
+            "configurePreset": "native",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-300-gcc",
+            "configurePreset": "mps3-300-gcc",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-300-gcc-custom",
+            "configurePreset": "mps3-300-gcc-custom",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-300-clang",
+            "configurePreset": "mps3-300-clang",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-310-gcc",
+            "configurePreset": "mps3-310-gcc",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-310-clang",
+            "configurePreset": "mps3-310-clang",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "simple-gcc",
+            "configurePreset": "simple-gcc",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "simple-clang",
+            "configurePreset": "simple-clang",
+            "inherits": "usecase-targets"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "native-tests",
+            "description": "native tests",
+            "displayName": "Run native tests.",
+            "configurePreset": "native"
+        }
+    ]
+}

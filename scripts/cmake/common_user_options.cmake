@@ -9,7 +9,7 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,11 +87,23 @@ USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be 
     ON
     BOOL)
 
+USER_OPTION(USE_SINGLE_INPUT "Select if a use case should execute using a default known input file"
+    OFF
+    BOOL)
+
 if (NOT TARGET_PLATFORM STREQUAL native)
 
     USER_OPTION(CMSIS_SRC_PATH
         "Path to CMSIS-5 sources"
         "${DEPENDENCY_ROOT_DIR}/cmsis"
+        PATH)
+    USER_OPTION(CMSIS_DSP_SRC_PATH
+        "Path to CMSIS-5 DSP sources"
+        "${DEPENDENCY_ROOT_DIR}/cmsis-dsp"
+        PATH)
+    USER_OPTION(CMSIS_NN_SRC_PATH
+        "Path to CMSIS-5 NN sources"
+        "${DEPENDENCY_ROOT_DIR}/cmsis-nn"
         PATH)
 
     USER_OPTION(LVGL_SRC_PATH
@@ -162,5 +174,16 @@ if (NOT TARGET_PLATFORM STREQUAL native)
                     ${DEFAULT_TA_CONFIG_FILE_PATH}
                     FILEPATH)
         endif()
+
+        USER_OPTION(BUILD_FVP_TESTS "Build tests for CTest driven FVP runs for built applications"
+            OFF
+            BOOL)
+
+        if (BUILD_FVP_TESTS)
+            USER_OPTION(FVP_PATH "Path to FVP for verifying execution"
+                ""
+                FILEPATH)
+        endif()
+
     endif()
 endif()

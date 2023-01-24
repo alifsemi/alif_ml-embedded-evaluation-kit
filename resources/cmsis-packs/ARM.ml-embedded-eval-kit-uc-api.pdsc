@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<package schemaVersion="1.7.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="PACK.xsd">
+  <name>ml-embedded-eval-kit-uc-api</name>
+
+  <description>ML sample use case APIs derived from ml-embedded-eval-kit</description>
+
+  <vendor>ARM</vendor>
+
+  <license>LICENSE_APACHE_2.0.txt</license>
+
+  <url>https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/</url>
+
+  <requirements>
+    <packages>
+      <package name="tensorflow-lite-micro" vendor="tensorflow" version="1.22.5-rc4"/>
+      <package name="CMSIS" vendor="ARM" version="5.9.0"/>
+    </packages>
+  </requirements>
+
+  <releases>
+    <release date="2022-09-29" version="22.8.0-Beta">Beta release package</release>
+  </releases>
+
+  <taxonomy>
+    <description Cclass="ML Eval Kit" doc="https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md">A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets.</description>
+  </taxonomy>
+
+  <conditions>
+    <condition id="arm_math Condition">
+      <require Cclass="CMSIS" Cgroup="DSP"/>
+    </condition>
+    <condition id="common_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="Math"/>
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="Log"/>
+      <require Cclass="Machine Learning" Cgroup="TensorFlow"/>
+    </condition>
+    <condition id="ad_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="asr_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="img_class_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="inference_runner_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="kws_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="noise_reduction_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="object_detection_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+    <condition id="vww_api Condition">
+      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
+    </condition>
+  </conditions>
+
+  <components>
+    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Log" Cversion="1.0.0">
+      <description>Logging header-only utility</description>
+      <files>
+        <file category="include" name="source/log/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Math" Cversion="1.0.0" condition="arm_math Condition">
+      <description>Math function helpers dependent on CMSIS-DSP.</description>
+      <files>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="API" Cversion="1.0.0" condition="common_api Condition">
+      <description>Common API</description>
+      <files>
+        <file category="source" name="source/application/api/common/source/Classifier.cc"/>
+        <file category="source" name="source/application/api/common/source/ImageUtils.cc"/>
+        <file category="source" name="source/application/api/common/source/Mfcc.cc"/>
+        <file category="source" name="source/application/api/common/source/Model.cc"/>
+        <file category="source" name="source/application/api/common/source/TensorFlowLiteMicro.cc"/>
+        <file category="include" name="source/application/api/common/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Vibration" Csub="Anomaly detection" Cversion="1.0.0" condition="ad_api Condition">
+      <description>Anomaly detection use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/ad/src/AdMelSpectrogram.cc"/>
+        <file category="source" name="source/application/api/use_case/ad/src/AdModel.cc"/>
+        <file category="source" name="source/application/api/use_case/ad/src/AdProcessing.cc"/>
+        <file category="source" name="source/application/api/use_case/ad/src/MelSpectrogram.cc"/>
+        <file category="include" name="source/application/api/use_case/ad/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Automatic speech recognition" Cversion="1.0.0" condition="asr_api Condition">
+      <description>ASR use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/asr/src/AsrClassifier.cc"/>
+        <file category="source" name="source/application/api/use_case/asr/src/OutputDecode.cc"/>
+        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterMfcc.cc"/>
+        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterModel.cc"/>
+        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterPostprocess.cc"/>
+        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterPreprocess.cc"/>
+        <file category="include" name="source/application/api/use_case/asr/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Image classification" Cversion="1.0.0" condition="img_class_api Condition">
+      <description>Image classification use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/img_class/src/ImgClassProcessing.cc"/>
+        <file category="source" name="source/application/api/use_case/img_class/src/MobileNetModel.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/img_class/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Generic" Csub="Inference runner" Cversion="1.0.0" condition="inference_runner_api Condition">
+      <description>Generic inference runner use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/inference_runner/src/TestModel.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/inference_runner/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Keyword spotting" Cversion="1.0.0" condition="kws_api Condition">
+      <description>KWS use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/kws/src/KwsProcessing.cc"/>
+        <file category="source" name="source/application/api/use_case/kws/src/MicroNetKwsModel.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/kws/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Noise reduction" Cversion="1.0.0" condition="noise_reduction_api Condition">
+      <description>RNN Noise use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/noise_reduction/src/RNNoiseFeatureProcessor.cc"/>
+        <file category="source" name="source/application/api/use_case/noise_reduction/src/RNNoiseModel.cc"/>
+        <file category="source" name="source/application/api/use_case/noise_reduction/src/RNNoiseProcessing.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/noise_reduction/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Object detection" Cversion="1.0.0" condition="object_detection_api Condition">
+      <description>Object detection use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/object_detection/src/DetectorPostProcessing.cc"/>
+        <file category="source" name="source/application/api/use_case/object_detection/src/DetectorPreProcessing.cc"/>
+        <file category="source" name="source/application/api/use_case/object_detection/src/YoloFastestModel.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/object_detection/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Person detection" Cversion="1.0.0" condition="vww_api Condition">
+      <description>Visual wake word use case API.</description>
+      <files>
+        <file category="source" name="source/application/api/use_case/vww/src/VisualWakeWordModel.cc"/>
+        <file category="source" name="source/application/api/use_case/vww/src/VisualWakeWordProcessing.cc"/>
+        <file category="source" name="source/math/PlatformMath.cc"/>
+        <file category="include" name="source/application/api/use_case/vww/include/"/>
+        <file category="include" name="source/log/include/"/>
+        <file category="include" name="source/math/include/"/>
+      </files>
+    </component>
+  </components>
+</package>
+

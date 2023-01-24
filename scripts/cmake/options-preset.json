@@ -1,0 +1,71 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+            "major": 3,
+            "minor": 23,
+            "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "log-trace",
+            "hidden": true,
+            "cacheVariables": {
+                "LOG_LEVEL": {
+                    "type": "STRING",
+                    "value": "LOG_LEVEL_TRACE"
+                }
+            }
+        },
+        {
+            "name": "log-debug",
+            "hidden": true,
+            "cacheVariables": {
+                "LOG_LEVEL": {
+                    "type": "STRING",
+                    "value": "LOG_LEVEL_DEBUG"
+                }
+            }
+        },
+        {
+            "name": "log-info",
+            "hidden": true,
+            "cacheVariables": {
+                "LOG_LEVEL": {
+                    "type": "STRING",
+                    "value": "LOG_LEVEL_INFO"
+                }
+            }
+        },
+        {
+            "name": "log-warning",
+            "hidden": true,
+            "cacheVariables": {
+                "LOG_LEVEL": {
+                    "type": "STRING",
+                    "value": "LOG_LEVEL_WARN"
+                }
+            }
+        },
+        {
+            "name": "log-error",
+            "hidden": true,
+            "cacheVariables": {
+                "LOG_LEVEL": {
+                    "type": "STRING",
+                    "value": "LOG_LEVEL_ERROR"
+                }
+            }
+        },
+        {
+            "name": "single-input",
+            "hidden": true,
+            "description": "Use single default input data for each use case.",
+            "cacheVariables": {
+                "USE_SINGLE_INPUT": {
+                    "type": "BOOL",
+                    "value": "TRUE"
+                }
+            }
+        }
+    ]
+}

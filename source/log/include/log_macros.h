@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,50 +21,62 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
 #include <inttypes.h>
+#include <stdio.h>
 
-#define LOG_LEVEL_TRACE       0
-#define LOG_LEVEL_DEBUG       1
-#define LOG_LEVEL_INFO        2
-#define LOG_LEVEL_WARN        3
-#define LOG_LEVEL_ERROR       4
+#define LOG_LEVEL_TRACE 0
+#define LOG_LEVEL_DEBUG 1
+#define LOG_LEVEL_INFO  2
+#define LOG_LEVEL_WARN  3
+#define LOG_LEVEL_ERROR 4
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL             LOG_LEVEL_INFO
+#define LOG_LEVEL LOG_LEVEL_INFO
 #endif /*LOG_LEVEL*/
 
-#define UNUSED(x)       ((void)(x))
+#if !defined(UNUSED)
+#define UNUSED(x) ((void)(x))
+#endif /* #if !defined(UNUSED) */
 
 #if (LOG_LEVEL == LOG_LEVEL_TRACE)
-    #define trace(...)        printf("TRACE - "); printf(__VA_ARGS__)
+#define trace(...)      \
+    printf("TRACE - "); \
+    printf(__VA_ARGS__)
 #else
-    #define trace(...)
-#endif  /* LOG_LEVEL == LOG_LEVEL_TRACE */
+#define trace(...)
+#endif /* LOG_LEVEL == LOG_LEVEL_TRACE */
 
 #if (LOG_LEVEL <= LOG_LEVEL_DEBUG)
-    #define debug(...)        printf("DEBUG - "); printf(__VA_ARGS__)
+#define debug(...)      \
+    printf("DEBUG - "); \
+    printf(__VA_ARGS__)
 #else
-    #define debug(...)
-#endif  /* LOG_LEVEL > LOG_LEVEL_TRACE */
+#define debug(...)
+#endif /* LOG_LEVEL > LOG_LEVEL_TRACE */
 
 #if (LOG_LEVEL <= LOG_LEVEL_INFO)
-    #define info(...)         printf("INFO - "); printf(__VA_ARGS__)
+#define info(...)      \
+    printf("INFO - "); \
+    printf(__VA_ARGS__)
 #else
-    #define info(...)
-#endif  /* LOG_LEVEL > LOG_LEVEL_DEBUG */
+#define info(...)
+#endif /* LOG_LEVEL > LOG_LEVEL_DEBUG */
 
 #if (LOG_LEVEL <= LOG_LEVEL_WARN)
-    #define warn(...)         printf("WARN - "); printf(__VA_ARGS__)
+#define warn(...)      \
+    printf("WARN - "); \
+    printf(__VA_ARGS__)
 #else
-    #define warn(...)
-#endif  /* LOG_LEVEL > LOG_LEVEL_INFO */
+#define warn(...)
+#endif /* LOG_LEVEL > LOG_LEVEL_INFO */
 
 #if (LOG_LEVEL <= LOG_LEVEL_ERROR)
-    #define printf_err(...)   printf("ERROR - "); printf(__VA_ARGS__)
+#define printf_err(...) \
+    printf("ERROR - "); \
+    printf(__VA_ARGS__)
 #else
-    #define printf_err(...)
-#endif  /* LOG_LEVEL > LOG_LEVEL_INFO */
+#define printf_err(...)
+#endif /* LOG_LEVEL > LOG_LEVEL_INFO */
 
 #ifdef __cplusplus
 }

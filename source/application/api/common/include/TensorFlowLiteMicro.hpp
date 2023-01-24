@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,6 @@
     #pragma clang diagnostic ignored "-Wunused-parameter"
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/micro_error_reporter.h"
     #include "tensorflow/lite/micro/all_ops_resolver.h"
     #pragma clang diagnostic pop
 #elif defined(__GNUC__)
@@ -38,18 +37,17 @@
     #pragma GCC diagnostic ignored "-Wunused-parameter"
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/micro_error_reporter.h"
     #include "tensorflow/lite/micro/all_ops_resolver.h"
     #pragma GCC diagnostic pop
 #else
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/micro_error_reporter.h"
     #include "tensorflow/lite/micro/all_ops_resolver.h"
 #endif
 
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
+#include "tensorflow/lite/micro/tflite_bridge/op_resolver_bridge.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/schema/schema_utils.h"
 

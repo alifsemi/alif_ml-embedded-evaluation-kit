@@ -1,5 +1,5 @@
 {#
- Copyright (c) 2021 Arm Limited. All rights reserved.
+ SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +22,31 @@
 #include <cstdint>
 #include <stddef.h>
 
-#define NUMBER_OF_FILES  ({{clips_count}}U)
+#define NUMBER_OF_FILES ({{clips_count}}U)
 
 {% for var_name, size in varname_size %}
 extern const int16_t {{var_name}}[{{size}}];
 {% endfor %}
 
-const char* get_filename(const uint32_t idx);
-const int16_t* get_audio_array(const uint32_t idx);
-uint32_t get_audio_array_size(const uint32_t idx);
+/**
+ * @brief       Gets the filename for the baked-in input array
+ * @param[in]   idx     Index of the input.
+ * @return      const C string pointer to the name.
+ **/
+const char* GetFilename(const uint32_t idx);
+
+/**
+ * @brief       Gets the pointer to audio data.
+ * @param[in]   idx     Index of the input.
+ * @return      Pointer to 16-bit signed integer data.
+ **/
+const int16_t* GetAudioArray(const uint32_t idx);
+
+/**
+ * @brief       Gets the size of the input array.
+ * @param[in]   idx     Index of the input.
+ * @return      Size of the input array in bytes.
+ **/
+uint32_t GetAudioArraySize(const uint32_t idx);
 
 #endif /* GENERATED_AUDIOCLIPS_H */

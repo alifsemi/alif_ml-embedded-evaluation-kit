@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,9 +139,6 @@ uint32_t get_mps3_core_clock(void)
     const uint32_t default_clock = 32000000 /* 32 MHz clock */;
     static int warned_once = 0;
     if (0 != MPS3_SCC->CFG_ACLK) {
-        if (default_clock != MPS3_SCC->CFG_ACLK) {
-            warn("System clock is different to the MPS3 config set clock.\n");
-        }
         return MPS3_SCC->CFG_ACLK;
     }
 

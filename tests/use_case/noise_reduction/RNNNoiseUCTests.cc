@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "BufAttributes.hpp"
+#include "InputFiles.hpp"
+#include "Profiler.hpp"
+#include "RNNUCTestCaseData.hpp"
 #include "RNNoiseModel.hpp"
 #include "UseCaseHandler.hpp"
-#include "InputFiles.hpp"
-#include "RNNUCTestCaseData.hpp"
-#include "UseCaseCommonUtils.hpp"
+#include "hal.h"
 
 #include <catch.hpp>
-#include <hal.h>
-#include <Profiler.hpp>
 
 namespace arm {
 namespace app {
@@ -34,13 +34,13 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-#define PLATFORM    hal_platform_init();
+#define PLATFORM hal_platform_init();
 
-#define CONTEXT \
-arm::app::ApplicationContext caseContext; \
-arm::app::Profiler profiler{"noise_reduction"}; \
-caseContext.Set<arm::app::Profiler&>("profiler", profiler); \
-caseContext.Set<arm::app::RNNoiseModel&>("model", model);
+#define CONTEXT                                                 \
+    arm::app::ApplicationContext caseContext;                   \
+    arm::app::Profiler profiler{"noise_reduction"};             \
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler); \
+    caseContext.Set<arm::app::RNNoiseModel&>("model", model);
 
 TEST_CASE("Verify output tensor memory dump")
 {
@@ -56,19 +56,18 @@ TEST_CASE("Verify output tensor memory dump")
 
     /* Populate the output tensors */
     const size_t numOutputs = model.GetNumOutputs();
-    size_t sizeToWrite = 0;
-    size_t lastTensorSize = model.GetOutputTensor(numOutputs - 1)->bytes;
+    size_t sizeToWrite      = 0;
+    size_t lastTensorSize   = model.GetOutputTensor(numOutputs - 1)->bytes;
 
     for (size_t i = 0; i < numOutputs; ++i) {
         TfLiteTensor* tensor = model.GetOutputTensor(i);
-        auto* tData = tflite::GetTensorData<uint8_t>(tensor);
+        auto* tData          = tflite::GetTensorData<uint8_t>(tensor);
 
         if (tensor->bytes > 0) {
             memset(tData, static_cast<uint8_t>(i), tensor->bytes);
             sizeToWrite += tensor->bytes;
         }
     }
-
 
     SECTION("Positive use case")
     {
@@ -80,7 +79,7 @@ TEST_CASE("Verify output tensor memory dump")
         size_t k = 0;
         for (size_t i = 0; i < numOutputs && k < memPool.size(); ++i) {
             TfLiteTensor* tensor = model.GetOutputTensor(i);
-            auto* tData = tflite::GetTensorData<uint8_t>(tensor);
+            auto* tData          = tflite::GetTensorData<uint8_t>(tensor);
 
             for (size_t j = 0; j < tensor->bytes && k < memPool.size(); ++j) {
                 REQUIRE(tData[j] == memPool[k++]);
@@ -126,28 +125,31 @@ TEST_CASE("Inference run all clips", "[RNNoise]")
     REQUIRE(arm::app::NoiseReductionHandler(caseContext, true));
 }
 
-std::function<uint32_t(const uint32_t)> get_golden_input_p232_208_array_size(const uint32_t numberOfFeatures) {
+std::function<uint32_t(const uint32_t)>
+get_golden_input_p232_208_array_size(const uint32_t numberOfFeatures)
+{
 
-    return [numberOfFeatures](const uint32_t) ->  uint32_t{
-        return numberOfFeatures;
-    };
+    return [numberOfFeatures](const uint32_t) -> uint32_t { return numberOfFeatures; };
 }
 
-const char* get_test_filename(const uint32_t idx) {
-    auto name = get_filename(idx);
+const char* get_test_filename(const uint32_t idx)
+{
+    auto name = GetFilename(idx);
     REQUIRE(std::string("p232_208.wav") == name);
     return "p232_208.wav";
 }
 
-void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
+void testInfByIndex(std::vector<uint32_t>& numberOfInferences)
+{
     PLATFORM
 
     arm::app::RNNoiseModel model;
 
     CONTEXT
 
-    caseContext.Set<std::function<const int16_t*(const uint32_t)>>("features", get_audio_array);
-    caseContext.Set<std::function<const char* (const uint32_t)>>("featureFileNames", get_test_filename);
+    caseContext.Set<std::function<const int16_t*(const uint32_t)>>("features", GetAudioArray);
+    caseContext.Set<std::function<const char*(const uint32_t)>>("featureFileNames",
+                                                                get_test_filename);
     caseContext.Set<uint32_t>("frameLength", arm::app::rnn::g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", arm::app::rnn::g_FrameStride);
     caseContext.Set<uint32_t>("numInputFeatures", arm::app::rnn::g_NumInputFeatures);
@@ -160,18 +162,21 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
     size_t oneInferenceOutSizeBytes = arm::app::rnn::g_FrameLength * sizeof(int16_t);
 
     auto infIndex = 0;
-    for (auto numInf: numberOfInferences) {
-        DYNAMIC_SECTION("Number of features: "<< numInf) {
-            caseContext.Set<uint32_t>("clipIndex", 1);  /* Only getting p232_208.wav for tests. */
+    for (auto numInf : numberOfInferences) {
+        DYNAMIC_SECTION("Number of features: " << numInf)
+        {
+            caseContext.Set<uint32_t>("clipIndex", 1); /* Only getting p232_208.wav for tests. */
             uint32_t audioSizeInput = numInf * arm::app::rnn::g_FrameLength;
-            caseContext.Set<std::function<uint32_t(const uint32_t)>>("featureSizes",
-                                                                     get_golden_input_p232_208_array_size(audioSizeInput));
+            caseContext.Set<std::function<uint32_t(const uint32_t)>>(
+                "featureSizes", get_golden_input_p232_208_array_size(audioSizeInput));
 
-            size_t headerNumBytes = 4 + 12 + 4;  /* Filename length, filename (12 for p232_208.wav), dump size. */
-            size_t footerNumBytes = 4;  /* Eof value. */
-            size_t memDumpMaxLenBytes = headerNumBytes + footerNumBytes + oneInferenceOutSizeBytes * numInf;
+            size_t headerNumBytes =
+                4 + 12 + 4; /* Filename length, filename (12 for p232_208.wav), dump size. */
+            size_t footerNumBytes = 4; /* Eof value. */
+            size_t memDumpMaxLenBytes =
+                headerNumBytes + footerNumBytes + oneInferenceOutSizeBytes * numInf;
 
-            std::vector<uint8_t > memDump(memDumpMaxLenBytes);
+            std::vector<uint8_t> memDump(memDumpMaxLenBytes);
             size_t undefMemDumpBytesWritten = 0;
             caseContext.Set<size_t>("MEM_DUMP_LEN", memDumpMaxLenBytes);
             caseContext.Set<uint8_t*>("MEM_DUMP_BASE_ADDR", memDump.data());
@@ -199,8 +204,9 @@ void testInfByIndex(std::vector<uint32_t>& numberOfInferences) {
 
 TEST_CASE("Inference by index - one inference", "[RNNoise]")
 {
-    auto totalAudioSize = get_audio_array_size(1);
-    REQUIRE(64757 == totalAudioSize);  /* Checking that the input file is as expected and has not changed. */
+    auto totalAudioSize = GetAudioArraySize(1);
+    REQUIRE(64757 ==
+            totalAudioSize); /* Checking that the input file is as expected and has not changed. */
 
     /* Run 1 inference */
     std::vector<uint32_t> numberOfInferences = {1};
@@ -209,8 +215,9 @@ TEST_CASE("Inference by index - one inference", "[RNNoise]")
 
 TEST_CASE("Inference by index - several inferences", "[RNNoise]")
 {
-    auto totalAudioSize = get_audio_array_size(1);
-    REQUIRE(64757 == totalAudioSize);  /* Checking that the input file is as expected and has not changed. */
+    auto totalAudioSize = GetAudioArraySize(1);
+    REQUIRE(64757 ==
+            totalAudioSize); /* Checking that the input file is as expected and has not changed. */
 
     /* 3 different inference amounts: 1, 2 and all inferences required to cover total feature set */
     uint32_t totalInferences                 = totalAudioSize / arm::app::rnn::g_FrameLength;

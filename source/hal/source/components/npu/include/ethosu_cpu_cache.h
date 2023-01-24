@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,11 @@
 
 #include <stdint.h>
 #include <stddef.h>
+
+/**
+ * @brief   Clears all the cache state members.
+ */
+void ethosu_clear_cache_states(void);
 
 /**
  * @brief   Flush/clean the data cache by address and size. Passing NULL as p argument

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,6 +64,16 @@ int platform_init(void)
     if (0 != (err = verify_platform())) {
         return err;
     }
+
+#if defined(__ICACHE_PRESENT) && (__ICACHE_PRESENT == 1U)
+    info("Enabling I-cache.\n");
+    SCB_EnableICache();
+#endif /* __ICACHE_PRESENT */
+
+#if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    info("Enabling D-cache.\n");
+    SCB_EnableDCache();
+#endif /* __DCACHE_PRESENT */
 
 #if defined(ARM_NPU)
 

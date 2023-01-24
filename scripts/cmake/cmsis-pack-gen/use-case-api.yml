@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,59 +32,57 @@
 # The PDSC files are the ones extracted from the downloaded packs (and is optional).
 # packgen and packchk must be installed. See https://github.com/Open-CMSIS-Pack/devtools
 # on how to build these tools.
-
+#
+# yaml-language-server: $schema=https://github.com/Open-CMSIS-Pack/devtools/blob/tools/toolbox/1.0.0/tools/packgen/schema/manifest.schema.json
+#
 build:
   - name: "build-dir"
     options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
-    description: "Sample use case APIs derived from ml-embedded-eval-kit"
+    description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://review.mlplatform.org/admin/repos/ml/ethos-u/ml-embedded-evaluation-kit/"
+    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/source/application/api/use_case/readme.md"
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.02"}
-        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.8.0"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.5-rc4"}
+        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
 
     releases:
-      - version: "22.05.0"
-        date: "2022-05-23"
+      - version: "22.11.0"
+        date: "2022-11-09"
+        description: "22.11.0 release package"
+      - version: "22.8.0-Beta"
+        date: "2022-09-29"
         description: "Beta release package"
-
-#    @TODO: Add API header names and descriptions here (see placeholder below).
-#    apis:
-#      - name: "Image classification use case API"
-#        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Capiversion: "1.0.0"}
-#        description: "Arm ml-embedded-eval kit example APIs"
-#        files:
-#          - name: "use_case/img_class/include/ImgClassProcessing.hpp"
-#            attributes: {category: header, attr: config, version: "1.0.0"}
+        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack?h=refs/heads/main"
 
     taxonomy:
-      - attributes: {Cclass: "Machine Learning"}
-        description: "Machine Learning software frameworks and libraries"
-      - attributes: {Cgroup: "Evaluation Kit"}
+      - attributes: {Cclass: "ML Eval Kit", doc: "https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md"}
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:
       - name: log
         target: log
-        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Log", Cversion: "1.0.0" }
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Log", Cversion: "1.0.0" }
         description: "Logging header-only utility"
+        files:
+          - name: "source/log/include/"
+            attributes: {category: include}
 
       - name: arm_math
         target: arm_math
-        attributes: { Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: Math", Cversion: "1.0.0" }
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Math", Cversion: "1.0.0" }
         description: "Math function helpers dependent on CMSIS-DSP."
         conditions:
           - require: { Cclass: "CMSIS", Cgroup: "DSP"}
 
       - name: common_api
         target: common_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Common: API", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "API", Cversion: "1.0.0"}
         description: "Common API"
         dependencies: ["arm_math", "log"]
         conditions:
@@ -92,48 +90,48 @@ packs:
 
       - name: ad_api
         target: ad_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vibration: Anomaly detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vibration", Csub: "Anomaly detection", Cversion: "1.0.0"}
         description: "Anomaly detection use case API."
         dependencies: common_api
 
       - name: asr_api
         target: asr_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Automatic speech recognition", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Automatic speech recognition", Cversion: "1.0.0"}
         description: "ASR use case API."
         dependencies: common_api
 
       - name: img_class_api
         target: img_class_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Image classification", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Image classification", Cversion: "1.0.0"}
         description: "Image classification use case API."
         dependencies: common_api
 
       - name: inference_runner_api
         target: inference_runner_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Generic", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Generic", Csub: "Inference runner", Cversion: "1.0.0"}
         description: "Generic inference runner use case API."
         dependencies: common_api
 
       - name: kws_api
         target: kws_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Keyword spotting", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Keyword spotting", Cversion: "1.0.0"}
         description: "KWS use case API."
         dependencies: common_api
 
       - name: noise_reduction_api
         target: noise_reduction_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Voice: Noise reduction", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Noise reduction", Cversion: "1.0.0"}
         description: "RNN Noise use case API."
         dependencies: common_api
 
       - name: object_detection_api
         target: object_detection_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Object detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Object detection", Cversion: "1.0.0"}
         description: "Object detection use case API."
         dependencies: common_api
 
       - name: vww_api
         target: vww_api
-        attributes: {Cclass: "Machine Learning", Cgroup: "Evaluation Kit", Csub: "Vision: Person detection", Cversion: "1.0.0"}
+        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Person detection", Cversion: "1.0.0"}
         description: "Visual wake word use case API."
         dependencies: common_api

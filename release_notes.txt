@@ -1,23 +1,40 @@
+Changes in 22.11
+    * Support for 22.11 NPU components and dependencies (core-driver, core-platform, Vela 3.6.0, CMSIS, TensorFlow Lite Micro)
+    * CMSIS-NN is added as a new dependency due to it moving out of the core CMSIS repository.
+    * Updates for Arm® Corstone™-310 platform.
+    * Formal support for CMake presets.
+    * Support for the new Arm Compiler 6.19
+    * Published CMSIS-Pack under `resources` and related updates.
+    * Bug fix for building with NPU disabled.
+
+Changes in 22.08
+    * Support for 22.08 NPU component and dependencies (core-driver, core-platform, Vela 3.5.0, CMSIS, TensorFlow Lite Micro).
+    * Formal support for Arm® Corstone-310 Arm Virtual Hardware and FPGA implementations.
+    * Added CMake presets.
+    * Bug fix for Arm® Ethos-U65 NPU's default AXI burst length.
+    * Provision to allow platform-agnostic use case API to be packaged as CMSIS pack.
+    * Documentation updates.
+
 Changes in 22.05
-    * Support for 22.05 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.4.0, CMSIS, TensorFlow Lite Micro).
+    * Support for 22.05 NPU component and dependencies (core-driver, core-platform, Vela 3.4.0, CMSIS, TensorFlow Lite Micro).
     * Restructuring of repository sources to allow generation of CMSIS packs.
-    * Added support for Arm Cortex-M85, armclang 6.18 is required
+    * Added support for Arm Cortex-M85, Armclang 6.18 is required
     * Reduce minimum requirements of Python to 3.7 to align with Vela 3.4.0.
     * Increase minimum requirements of CMake to 3.21.0
     * Documentation updates.
     * Various bug fixes.
 
 Changes in 22.02
-    * Support for 22.02 Ethos-U component and dependencies (core-driver, core-platform, Vela 3.3.0, CMSIS, TensorFlow Lite Micro).
+    * Support for 22.02 NPU component and dependencies (core-driver, core-platform, Vela 3.3.0, CMSIS, TensorFlow Lite Micro).
     * Added Object Detection use case.
     * Replace DSCNN with MicroNet for KWS and KWS_ASR use cases.
-    * Increase minimum requirements of CMake to 3.15.6, armclang to 6.16 and Python to 3.8
+    * Increase minimum requirements of CMake to 3.15.6, Armclang to 6.16 and Python to 3.8
     * Initial restructuring of repository sources.
     * Documentation updates.
     * Various minor bug fixes.
 
 Changes in 21.11
-    * Support for 21.11 Ethos-U component and dependencies (core-software, core-driver, Vela 3.2.0, CMSIS, TensorFlow Lite).
+    * Support for 21.11 NPU component and dependencies (core-software, core-driver, Vela 3.2.0, CMSIS, TensorFlow Lite Micro).
     * Added dynamic load support for FVP for inference runner use-case.
     * Added support for different memory modes: Shared_Sram, Dedicated_Sram and Sram_Only.
     * Added Noise Reduction use case.
@@ -26,10 +43,10 @@ Changes in 21.11
     * Changes to support AN552 design - the new Arm® Corstone™-300 implementation.
 
 Changes in 21.08
-    * Support for 21.05 Ethos-U component (core-software, core-driver, Vela 3.0.0).
+    * Support for 21.05 NPU component (core-software, core-driver, Vela 3.0.0).
     * TensorFlow submodule changed to https://github.com/tensorflow/tflite-micro (tested with TensorFlow Lite Micro commit hash: f510d38d0eaa3195ce3af66e3f32648740f08afb).
     * Image classification model changed (from uint8 to int8 datatype).
-    * Documentation updates, added support to Corstone-300 + Ethos-U65.
+    * Documentation updates, added support to Corstone-300 + Arm® Ethos-U65.
     * Various scripts improvements.
     * Added Visual Wake Word use case.
 
@@ -50,7 +67,7 @@ Changes in 21.03
 
 Changes in 20.11
     * SSE-200 and SSE-300 system support was added.
-    * Support for simple fixed virtual platform for Ethos-U55 and Cortex-M55 removed.
+    * Support for simple fixed virtual platform for Arm® Ethos-U55 and Arm® Cortex-M55 removed.
     * Build cmake parameters changed: TARGET_SUBSYSTEM was added, TARGET_PLATFORM accepted values were changed.
     * Models with multiple output tensors support was added.
     * Generic inference runner use-case added.
@@ -59,7 +76,7 @@ Changes in 20.11
 Changes in 20.09 release:
     * Support for TensorFlow Lite Micro version > 2.3.0 (tested with TensorFlow Lite Micro 2.4.0 commit hash: 5bbb8a2bd1def6865b1510175a3da5fd12387e10)
     * Added speech recognition use case example.
-    * Updated Ethos-U55 Fastmodel version to r0p2-00eac0-rc4
+    * Updated NPU Fastmodel version to r0p2-00eac0-rc4
 
 Changes in 20.08 release:
     * Added keyword spotting use case example.
@@ -73,7 +90,7 @@ Changes in 20.05 release:
     * Configurable timing-adaptor.
     * Added Active and Idle cycle counts for NPU and CPU profiling report.
     * Source code structure and build scripts refactored to support multiple ML use-cases.
-    * Used EAC Ethos-U55 software model and drivers.
+    * Used EAC NPU software model and drivers.
     * Windows support for build scripts.
 Known issues:
     * telnet connection to FastModel environment may hang after some period of inactivity.

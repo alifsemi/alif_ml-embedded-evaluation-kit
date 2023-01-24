@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +47,7 @@ namespace kws {
             this->m_inferenceNumber = inferenceIdx;
 
             this->m_resultVec = ResultVec();
-            for (auto & i : resultVec) {
+            for (auto& i : resultVec) {
                 if (i.m_normalisedVal >= this->m_threshold) {
                     this->m_resultVec.emplace_back(i);
                 }

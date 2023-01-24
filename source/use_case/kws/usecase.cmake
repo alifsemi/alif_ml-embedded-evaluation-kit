@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,7 @@
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "kws")
 
-USER_OPTION(${use_case}_FILE_PATH "Directory with custom WAV input files, or path to a single WAV file, to use in the evaluation application."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
-    PATH_OR_FILE)
+set_input_file_path_user_option(".wav" ${use_case})
 
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/micronet_kws_labels.txt
