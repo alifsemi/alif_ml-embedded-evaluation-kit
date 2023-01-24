@@ -53,19 +53,13 @@ void i2s_callback(uint32_t event)
 void i2s_pinmux_config(void)
 {
     /* Configure I2S2 WS */
-    int32_t status = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_2);
-    printf("i2s_pinmux_config(1) = %d\n", status);
-    //assert(status == ARM_DRIVER_OK);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_2);
 
     /* Configure I2S2 SCLK */
-    status = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_3);
-    printf("i2s_pinmux_config(2) = %d\n", status);
-    //assert(status == ARM_DRIVER_OK);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_3);
 
     /* Configure I2S2 SDI */
-    status = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_1, PINMUX_ALTERNATE_FUNCTION_3);
-    printf("i2s_pinmux_config(3) = %d\n", status);
-    //assert(status == ARM_DRIVER_OK);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_1, PINMUX_ALTERNATE_FUNCTION_3);
 }
 
 int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
@@ -78,10 +72,6 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
 
     /* Use the I2S2 as Receiver */
     i2s_drv = &ARM_Driver_SAI_(I2S_BUS_NUMBER);
-
-    /* Verify the I2S API version for compatibility*/
-    ARM_DRIVER_VERSION version = i2s_drv->GetVersion();
-    printf("I2S API version = %d\n", version.api);
 
     /* Verify if I2S protocol is supported */
     cap = i2s_drv->GetCapabilities();
