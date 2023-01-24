@@ -1,0 +1,54 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+            "major": 3,
+            "minor": 23,
+            "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "source-dir",
+            "description": "Sets the root of the ml-embedded-eval-kit repo. This should be overridden if this repo is used as a submodule/dependency.",
+            "hidden": true,
+            "environment": {
+                "MLEK_BASE_DIR": "${sourceDir}/"
+            }
+        },
+        {
+            "name": "gcc-toolchain",
+            "description": "Use gcc toolchain.",
+            "hidden": true,
+            "inherits": ["source-dir"],
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-gcc.cmake"
+                }
+            }
+        },
+        {
+            "name": "armclang-toolchain",
+            "description": "Use armclang toolchain.",
+            "hidden": true,
+            "inherits": ["source-dir"],
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                }
+            }
+        },
+        {
+            "name": "native-toolchain",
+            "description": "Use native toolchain.",
+            "hidden": true,
+            "inherits": ["source-dir"],
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/native-gcc.cmake"
+                }
+            }
+        }
+    ]
+}

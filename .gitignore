@@ -10,6 +10,7 @@ resources_downloaded
 
 # Build files
 CMakeFiles
+CMakeUserPresets.json
 build*/
 cmake-build-*/
 

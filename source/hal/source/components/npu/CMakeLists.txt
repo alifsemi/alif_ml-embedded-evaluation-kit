@@ -1,15 +1,5 @@
-# This file was ported to work on Alif Semiconductor Ensemble family of devices.
-
-#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
-#  Use, distribution and modification of this code is permitted under the
-#  terms stated in the Alif Semiconductor Software License Agreement
-#
-#  You should have received a copy of the Alif Semiconductor Software
-#  License Agreement with this file. If not, please write to:
-#  contact@alifsemi.com, or visit: https://alifsemi.com/license
-
 #----------------------------------------------------------------------------
-#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +38,6 @@ set(ETHOS_U_BASE_ADDR    "0x58102000"    CACHE STRING "Ethos-U NPU base address"
 set(ETHOS_U_IRQN         "56"            CACHE STRING "Ethos-U NPU Interrupt")
 set(ETHOS_U_SEC_ENABLED  "1"             CACHE STRING "Ethos-U NPU Security enable")
 set(ETHOS_U_PRIV_ENABLED "1"             CACHE STRING "Ethos-U NPU Privilege enable")
-set(ETHOS_U_PLATFORM_CACHE_OPS "OFF"     CACHE BOOL   "Ethos-U NPU Custom platform cache operations")
 
 # Driver needs to know what MAC configuration to build for.
 if (NOT DEFINED ETHOS_U_NPU_CONFIG_ID)
@@ -136,6 +125,18 @@ else()
     target_compile_definitions(ethosu_core_driver PRIVATE
         NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
 endif()
+
+# Ethos-U55 supports a maximum burst length of 64 bytes while Ethos-U65 supports up to 128 bytes.
+# Although, this is system implementation dependent the platforms we build for should support the
+# maximum burst length for both NPU configurations.
+if (ETHOS_U_NPU_ID STREQUAL U65)
+    target_compile_definitions(ethosu_core_driver PRIVATE
+            AXI_LIMIT0_MAX_BEATS_BYTES=1
+            AXI_LIMIT1_MAX_BEATS_BYTES=1
+            AXI_LIMIT2_MAX_BEATS_BYTES=1
+            AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
+endif()
+
 # Create static library
 add_library(${ETHOS_U_NPU_COMPONENT} STATIC)
 
@@ -151,11 +152,9 @@ target_sources(${ETHOS_U_NPU_COMPONENT}
     ethosu_npu_init.c
     ethosu_profiler.c)
 
-if (NOT ETHOS_U_PLATFORM_CACHE_OPS)
 target_sources(${ETHOS_U_NPU_COMPONENT}
     PUBLIC
     ethosu_cpu_cache.c)
-endif()
 
 ## Add dependencies:
 target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC

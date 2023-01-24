@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -133,17 +133,16 @@ namespace app {
         size_t GetActivationBufferSize();
 
     private:
-        tflite::ErrorReporter* m_pErrorReporter{nullptr};  /* Pointer to the error reporter. */
         const tflite::Model* m_pModel{nullptr};            /* Tflite model pointer. */
         tflite::MicroInterpreter* m_pInterpreter{nullptr}; /* Tflite interpreter. */
         tflite::MicroAllocator* m_pAllocator{nullptr};     /* Tflite micro allocator. */
-        bool m_inited{false}; /* Indicates whether this object has been initialised. */
-        const uint8_t* m_modelAddr{nullptr}; /* Model address */
-        uint32_t m_modelSize{0};             /* Model size */
+        bool m_inited{false};                              /* Indicates whether this object has been initialised. */
+        const uint8_t* m_modelAddr{nullptr};               /* Model address */
+        uint32_t m_modelSize{0};                           /* Model size */
 
-        std::vector<TfLiteTensor*> m_input{};  /* Model's input tensor pointers. */
-        std::vector<TfLiteTensor*> m_output{}; /* Model's output tensor pointers. */
-        TfLiteType m_type{kTfLiteNoType};      /* Model's data type. */
+        std::vector<TfLiteTensor*> m_input{};              /* Model's input tensor pointers. */
+        std::vector<TfLiteTensor*> m_output{};             /* Model's output tensor pointers. */
+        TfLiteType m_type{kTfLiteNoType};                  /* Model's data type. */
     };
 
 } /* namespace app */

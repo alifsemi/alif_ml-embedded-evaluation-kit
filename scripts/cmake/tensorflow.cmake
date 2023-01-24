@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2021 - 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,12 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-include(ProcessorCount)
-ProcessorCount(J)
+if (DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+    set(PARALLEL_JOBS $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+else()
+    include(ProcessorCount)
+    ProcessorCount(PARALLEL_JOBS)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
@@ -51,10 +55,7 @@ if (TARGET_PLATFORM STREQUAL native)
 else()
     set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
 
-    if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "cortex-m85")
-        # TensorFlow's generic makefile doesn't currently have a flow for Cortex-M85.
-        # We build for Arm Cortex-M55 instead.
-        # @TODO: check with latest TensorFlow package.
+    if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")
         set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "cortex-m55")
     else()
         set(TENSORFLOW_LITE_MICRO_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
@@ -70,7 +71,16 @@ else()
 endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
-    list(APPEND MAKE_TARGETS_LIST "clean_downloads")
+    message(STATUS "Refreshing TensorFlow Lite Micro's third party downloads...")
+    execute_process(
+        COMMAND make -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile clean_downloads third_party_downloads
+        RESULT_VARIABLE return_code
+        WORKING_DIRECTORY ${TENSORFLOW_SRC_PATH})
+    if (NOT return_code EQUAL "0")
+        message(FATAL_ERROR "Failed to clean TensorFlow Lite Micro's third party downloads.")
+    else()
+        message(STATUS "Refresh completed.")
+    endif ()
 endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
@@ -92,7 +102,7 @@ add_custom_target(tensorflow_build ALL
 
     # Command to build the TensorFlow Lite Micro library
     COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
-        make -j${J} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
+        make -j${PARALLEL_JOBS} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
         TARGET_TOOLCHAIN_ROOT=${TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT}
         TOOLCHAIN=${TENSORFLOW_LITE_MICRO_TOOLCHAIN}
         GENDIR=${TENSORFLOW_LITE_MICRO_GENDIR}
@@ -100,6 +110,7 @@ add_custom_target(tensorflow_build ALL
         TARGET_ARCH=${TENSORFLOW_LITE_MICRO_TARGET_ARCH}
         BUILD_TYPE=${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
         CMSIS_PATH=${CMSIS_SRC_PATH}
+        CMSIS_NN_PATH=${CMSIS_NN_SRC_PATH}
         # Conditional arguments
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${ETHOS_U_NPU_ID}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}>

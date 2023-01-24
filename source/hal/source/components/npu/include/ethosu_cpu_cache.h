@@ -1,5 +1,17 @@
+/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +31,32 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
+
+/**
+ * @brief   Clears all the cache state members.
+ */
+void ethosu_clear_cache_states(void);
+
+/**
+ * @brief   Precheck hook for ethosu_flush_dcache. Default weak implementation
+ *          returns true if the data cache is enabled. Can be overridden to
+ *          skip flush/clean for certain regions (eg TCM, or write-through cached areas).
+ * @param[in]   p       Pointer to the start address.
+ * @param[in]   bytes   Number of bytes to flush beginning at start address.
+ * @return      true if a flush/clean is required
+ */
+bool ethosu_area_needs_flush_dcache(const uint32_t *p, size_t bytes);
+
+/**
+ * @brief   Precheck hook for ethosu_invalidate_dcache. Default weak implementation
+ *          returns true if the data cache is enabled. Can be overridden to
+ *          skip invalidates for certain regions (eg TCM).
+ * @param[in]   p       Pointer to the start address (or NULL).
+ * @param[in]   bytes   Number of bytes to flush beginning at start address.
+ * @return      true if an invalidate is required
+ */
+bool ethosu_area_needs_invalidate_dcache(const uint32_t *p, size_t bytes);
 
 /**
  * @brief   Flush/clean the data cache by address and size. Passing NULL as p argument

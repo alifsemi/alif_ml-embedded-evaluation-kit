@@ -39,10 +39,10 @@ Before starting the setup process, please make sure that you have:
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
-  - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package. See
+  - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package (`AN555`). See
     <https://developer.arm.com/downloads/-/download-fpga-images>. You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
-    application. 
+    application.
   - `Arm® Corstone™-300` based FVP for MPS3 is available from:
     <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>.
   - `Arm® Corstone™-310` based FVP is available under Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
@@ -168,7 +168,7 @@ What these folders contain:
       - `use_case`: This contains "model" and "processing" APIs for each individual use case. For example, KWS use case
         contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
         the MFCC calculations.
-      
+
 > **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
 > that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
 > reuse components from this repository for your application level logic, this directory should be the prime candidate.
@@ -240,13 +240,13 @@ What these folders contain:
     for the set-up before calling the user defined "main" function in the higher-level `application` logic.
     It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
     through `CMSIS_SRC_PATH` variable.
-    The static library is used by platform code. 
+    The static library is used by platform code.
 
 - `source/platform/mps3`\
   `source/platform/simple`:
   These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral
   memory map, system registers, system specific timer implementation and other.
-  Platform is built from selected components and configured cmsis device. It is a separate CMake project, and is 
+  Platform is built from selected components and configured cmsis device. It is a separate CMake project, and is
   built into a static library `libplatform-drivers.a`. It is linked into HAL library.
 
 ## Models and resources

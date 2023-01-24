@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,6 +122,7 @@ def run(
         + f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
         + f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
         + f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
+        + f" -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
     )
 
     logging.info(f"\n\n\n{cmake_command}\n\n\n")

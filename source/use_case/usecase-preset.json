@@ -1,0 +1,27 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+            "major": 3,
+            "minor": 23,
+            "patch": 0
+    },
+    "buildPresets": [
+        {
+            "name": "usecase-targets",
+            "description": "Base preset for specifying use-case targets in build presets.",
+            "hidden": true,
+            "targets": [
+                "all",
+                "ethos-u-ad",
+                "ethos-u-asr",
+                "ethos-u-img_class",
+                "ethos-u-inference_runner",
+                "ethos-u-kws_asr",
+                "ethos-u-kws",
+                "ethos-u-noise_reduction",
+                "ethos-u-object_detection",
+                "ethos-u-vww"
+            ]
+        }
+    ]
+}

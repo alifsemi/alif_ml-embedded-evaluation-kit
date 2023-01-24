@@ -11,7 +11,7 @@ but requires creation of an AWS account and basic configuration outlined [here](
 
 To get started quickly, please follow these steps:
 
-1. First, verify that you have installed [the required prerequisites](sections/building.md#build-prerequisites).
+1. First, verify that you have installed all of [the required prerequisites](sections/building.md#build-prerequisites).
 
 2. Clone the *Ethos-U* evaluation kit repository:
 
@@ -37,14 +37,14 @@ To get started quickly, please follow these steps:
     [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
 
     ```commandline
-    ./build_default.py
+    python3 ./build_default.py
     ```
 
     > **Note** The preceding command assumes you are using the GNU Arm Embedded toolchain. If you are using the Arm
     > Compiler instead, you can override the default selection by executing:
 
     ```commandline
-    ./build_default.py --toolchain arm
+    python3 ./build_default.py --toolchain arm
     ```
 
 5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
@@ -71,7 +71,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==3.4.0
+env/bin/python3 -m pip install ethos-u-vela==3.6.0
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \
@@ -303,3 +303,8 @@ cmake .. \
 > **Note:** If you want to change the application, then, instead of using the `build_default` Python script, follow the
 > approach defined in [documentation.md](./documentation.md#arm_ml-embedded-evaluation-kit). For example, if you wanted to modify the number of
 > MACs units of the Ethos-U, or running a custom neural network.
+
+> **Note:** The performance summary produced by Vela compiler for any model are **estimates only**. Vela computes
+> these figures from a very simplistic approximation. To get accurate performance numbers for the Arm Ethos-U NPU,
+> please use the FVP or the FPGA platforms.
+

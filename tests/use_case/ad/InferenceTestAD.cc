@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 #include <random>
 
 #include "AdModel.hpp"
+#include "BufAttributes.hpp"
+#include "TensorFlowLiteMicro.hpp"
 #include "TestData_ad.hpp"
 #include "log_macros.h"
-#include "TensorFlowLiteMicro.hpp"
-#include "BufAttributes.hpp"
 
 #ifndef AD_FEATURE_VEC_DATA_SIZE
 #define AD_IN_FEATURE_VEC_DATA_SIZE (1024)
@@ -42,10 +42,12 @@ using namespace test;
 
 bool RunInference(arm::app::Model& model, const int8_t vec[])
 {
-    TfLiteTensor *inputTensor = model.GetInputTensor(0);
+    TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < AD_IN_FEATURE_VEC_DATA_SIZE ? inputTensor->bytes : AD_IN_FEATURE_VEC_DATA_SIZE;
+    const size_t copySz = inputTensor->bytes < AD_IN_FEATURE_VEC_DATA_SIZE
+                              ? inputTensor->bytes
+                              : AD_IN_FEATURE_VEC_DATA_SIZE;
 
     memcpy(inputTensor->data.data, vec, copySz);
 
@@ -54,16 +56,14 @@ bool RunInference(arm::app::Model& model, const int8_t vec[])
 
 bool RunInferenceRandom(arm::app::Model& model)
 {
-    TfLiteTensor *inputTensor = model.GetInputTensor(0);
+    TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
     std::random_device rndDevice;
     std::mt19937 mersenneGen{rndDevice()};
     std::uniform_int_distribution<short> dist{-128, 127};
 
-    auto gen = [&dist, &mersenneGen]() {
-        return dist(mersenneGen);
-    };
+    auto gen = [&dist, &mersenneGen]() { return dist(mersenneGen); };
 
     std::vector<int8_t> randomInput(inputTensor->bytes);
     std::generate(std::begin(randomInput), std::end(randomInput), gen);
@@ -73,19 +73,18 @@ bool RunInferenceRandom(arm::app::Model& model)
 }
 
 template <typename T>
-void TestInference(const T *input_goldenFV, const T *output_goldenFV, arm::app::Model& model)
+void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::Model& model)
 {
     REQUIRE(RunInference(model, static_cast<const T*>(input_goldenFV)));
 
-    TfLiteTensor *outputTensor = model.GetOutputTensor(0);
+    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
     REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
     auto tensorData = tflite::GetTensorData<T>(outputTensor);
     REQUIRE(tensorData);
 
-    for (size_t i = 0; i < outputTensor->bytes; i++)
-    {
+    for (size_t i = 0; i < outputTensor->bytes; i++) {
         REQUIRE(static_cast<int>(tensorData[i]) == static_cast<int>(((T)output_goldenFV[i])));
     }
 }
@@ -107,9 +106,10 @@ TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8"
 TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdModel Int8", "[AD]")
 {
     REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_IFM_FILES);
-    for (uint32_t i = 0 ; i < NUMBER_OF_IFM_FILES; ++i) {
-        auto input_goldenFV = get_ifm_data_array(i);;
-        auto output_goldenFV = get_ofm_data_array(i);
+    for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
+        auto input_goldenFV = GetIfmDataArray(i);
+        ;
+        auto output_goldenFV = GetOfmDataArray(i);
 
         DYNAMIC_SECTION("Executing inference with re-init")
         {
@@ -123,7 +123,6 @@ TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdMode
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(input_goldenFV, output_goldenFV, model);
-
         }
     }
 }

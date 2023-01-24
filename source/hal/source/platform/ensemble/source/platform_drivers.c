@@ -218,34 +218,59 @@ uint64_t ethosu_address_remap(uint64_t address, int index)
     /* Double cast to avoid build warning about pointer/integer size mismatch */
     return LocalToGlobal((void *) (uint32_t) address);
 }
-
-void ethosu_flush_dcache(uint32_t *p, size_t bytes)
+typedef struct address_range
 {
-    // No need to flush - we're not using writeback for any Ethos areas
-    UNUSED(p);
-    UNUSED(bytes);
-}
+    uintptr_t base;
+    uintptr_t limit;
+} address_range_t;
 
-void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
-{
-    uint32_t addr = (uint32_t) p;
-    /* No need to do anything to TCM ever */
-    if ((
-#if ITCM_BASE != 0 // avoid odd unsigned comparison warning
-        addr >= ITCM_BASE &&
-#endif
-        addr + bytes <= ITCM_BASE + ITCM_SIZE) ||
-        (addr >= DTCM_BASE && addr + bytes <= DTCM_BASE + DTCM_SIZE)) {
-        return;
+const address_range_t no_need_to_invalidate_areas[] = {
+    /* TCM is never cached */
+    {
+        .base = ITCM_BASE,
+        .limit = ITCM_BASE + ITCM_SIZE - 1,
+    },
+    {
+        .base = DTCM_BASE,
+        .limit = DTCM_BASE + DTCM_SIZE - 1,
+    },
+    /* MRAM should never change while running */
+    {
+        .base = MRAM_BASE,
+        .limit = MRAM_BASE + MRAM_SIZE - 1,
     }
-    if (SCB->CCR & SCB_CCR_DC_Msk) {
-        if (p && bytes <= 128*1024) {
-            // Only worth doing a ranged operation if relatively small - big ones can get very slow
-            SCB_InvalidateDCache_by_Addr(p, bytes);
-        } else {
-            // Global operation - not safe to globally invalidate in case any writeback is in use
-            // All our regions are write-through, so it will be invalidate for them
-            SCB_CleanInvalidateDCache();
+};
+
+static bool check_need_to_invalidate(const void *p, size_t bytes)
+{
+    uintptr_t base = (uintptr_t) p;
+    if (bytes == 0) {
+        return false;
+    }
+    uintptr_t limit = base + bytes - 1;
+    for (unsigned int i = 0; i < sizeof no_need_to_invalidate_areas / sizeof no_need_to_invalidate_areas[0]; i++) {
+        if (base >= no_need_to_invalidate_areas[i].base && limit <= no_need_to_invalidate_areas[i].limit) {
+            return false;
         }
     }
+    return true;
 }
+
+bool ethosu_area_needs_invalidate_dcache(const void *p, size_t bytes)
+{
+    /* API says null pointer can be passed */
+    if (!p) {
+        return true;
+    }
+    /* We know we have a cache and assume the cache is on */
+    return check_need_to_invalidate(p, bytes);
+}
+
+bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
+{
+    /* We're not using writeback for any Ethos areas */
+    UNUSED(p);
+    UNUSED(bytes);
+    return false;
+}
+

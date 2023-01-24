@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,8 @@ namespace app {
         /** @brief Constructor. */
         Classifier() = default;
 
+        virtual ~Classifier() = default;
+
         /**
          * @brief       Gets the top N classification results from the
          *              output vector.
@@ -41,8 +43,8 @@ namespace app {
          * @param[out]  vecResults     A vector of classification results.
          *                             populated by this function.
          * @param[in]   labels         Labels vector to match classified classes.
-         * @param[in]   topNCount      Number of top classifications to pick. Default is 1.
-         * @param[in]   useSoftmax     Whether Softmax normalisation should be applied to output. Default is false.
+         * @param[in]   topNCount      Number of top classifications to pick.
+         * @param[in]   useSoftmax     Whether Softmax normalisation should be applied to output.
          * @return      true if successful, false otherwise.
          **/
 
@@ -65,7 +67,7 @@ namespace app {
             std::vector<ClassificationResult>& vecResults,
             const std::vector <std::string>& labels);
 
-    private:
+    protected:
         /**
          * @brief       Utility function that gets the top N classification results from the
          *              output vector.

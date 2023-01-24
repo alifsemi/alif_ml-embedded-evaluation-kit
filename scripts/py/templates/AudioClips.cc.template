@@ -1,5 +1,5 @@
 {#
- Copyright (c) 2021 Arm Limited. All rights reserved.
+ SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,45 +18,41 @@
 
 #include "InputFiles.hpp"
 
-static const char *audio_clip_filenames[] = {
+static const char* audioClipFilenames[] = {
 {% for name in clip_names %}
     "{{name}}",
 {% endfor %}
 };
 
-static const int16_t *audio_clip_arrays[] = {
-    {{ var_names|join(',\n\t') }}
+static const int16_t* audioClipArrays[] = {
+    {{ var_names|join(',\n    ') }}
 };
 
 
-static const size_t audio_clip_sizes[NUMBER_OF_FILES] = {
-    {{ clip_sizes|join(',\n\t') }}
+static const size_t audioClipSizes[NUMBER_OF_FILES] = {
+    {{ clip_sizes|join(',\n    ') }}
 };
 
-
-const char* get_filename(const uint32_t idx)
+const char* GetFilename(const uint32_t idx)
 {
     if (idx < NUMBER_OF_FILES) {
-        return audio_clip_filenames[idx];
+        return audioClipFilenames[idx];
     }
     return nullptr;
 }
 
-
-const int16_t* get_audio_array(const uint32_t idx)
+const int16_t* GetAudioArray(const uint32_t idx)
 {
     if (idx < NUMBER_OF_FILES) {
-        return audio_clip_arrays[idx];
+        return audioClipArrays[idx];
     }
     return nullptr;
 }
 
-
-uint32_t get_audio_array_size(const uint32_t idx)
+uint32_t GetAudioArraySize(const uint32_t idx)
 {
     if (idx < NUMBER_OF_FILES) {
-        return audio_clip_sizes[idx];
+        return audioClipSizes[idx];
     }
     return 0;
 }
-

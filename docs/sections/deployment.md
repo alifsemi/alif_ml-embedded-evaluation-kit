@@ -4,17 +4,17 @@
   - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
     - [Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
     - [Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3)
+    - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
   - [MPS3 board](./deployment.md#mps3-board)
     - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
     - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
 
-The sample application for Arm® *Ethos™-U55* can be deployed on two target platforms:
+The sample application for Arm® Ethos™-U55 can be deployed on two target platforms:
 
 - A physical Arm MPS3 FPGA prototyping board
-
 - An MPS3 FVP
 
-Both implement the Arm® *Corstone™-300* design. For further information, please refer to:
+Both implement the Arm® Corstone™-300 design. For further information, please refer to:
 [Arm Corstone-300](https://www.arm.com/products/iot/soc/corstone-300)
 
 ## Fixed Virtual Platform
@@ -22,21 +22,18 @@ Both implement the Arm® *Corstone™-300* design. For further information, plea
 The FVP is available publicly from the following page:
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-Please ensure that you download the correct archive from the list under Arm® *Corstone™-300*. You need the one which:
+Please ensure that you download the correct archive from the list under Arm® Corstone™-300. You need the one which:
 
 - Emulates MPS3 board and *not* for MPS2 FPGA board,
-- Contains support for Arm® *Ethos™-U55* and *Ethos-U65* processors.
+- Contains support for Arm® Ethos™-U55 and Ethos™-U65 processors.
 
 ### Setting up the MPS3 Arm Corstone-300 FVP
-
-For the *Ethos-U* evaluation, please download the MPS3 based version of the Arm® *Corstone™-300* model that contains *Cortex-M55*
-and offers a choice of the *Ethos-U55* and *Ethos-U65* processors.
 
 To install the FVP:
 
 - Unpack the archive.
 
-- Run the install script in the extracted package:
+- Run the installation script in the extracted package:
 
     `./FVP_Corstone_SSE-300.sh`
 
@@ -46,10 +43,15 @@ To install the FVP:
 
 This section assumes that the FVP has been installed (see
 [Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone-300-fvp))
-to the home directory of the user: `~/FVP_Corstone_SSE-300`.
+to the home directory of the user: `~/FVP_Corstone_SSE-300`. The installation, typically, has the
+executable under `~/FVP_Corstone_SSE-300/model/<OS>_<compiler-version>/` directory. For the example
+below, we assume it is: `~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4`.
 
-The installation, typically, has the executable under `~/FVP_Corstone_SSE-300/model/<OS>_<compiler-version>/`
-directory. For the example below, we assume it is: `~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4`.
+For Arm Virtual Hardware, the installation paths are different (see Arm Virtual Hardware's
+[Useful Links](./arm_virtual_hardware.md#useful-links) section).
+
+> **NOTE**: The commandline arguments for the FVP mentioned below are valid for FVPs (and AVH) for
+> both Arm® Corstone™-300 and Corstone™-310.
 
 To run a use-case on the FVP, from the [Build directory](../sections/building.md#create-a-build-directory):
 
@@ -79,7 +81,7 @@ For example, the image classification use-case on *Ethos-U55* processor can be s
 ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-img_class.axf
 ```
 
-Meanwhile for *Ethos-U65*:
+Meanwhile, for *Ethos-U65*:
 
 ```commandline
 ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65 -a ./bin/ethos-u-img_class.axf
@@ -132,6 +134,28 @@ The FVP supports many command-line parameters, such as:
 
 - `--timelimit`: sets the number of wall clock seconds for the simulator to run, excluding startup and shutdown.
 
+### Running the FVP without the UI
+
+If there is a need to run the FVP without the UI (e.g running the FVP inside of a docker container),
+it can be done as follows:
+
+Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0`
+to the command line arguments when starting the FVP. For example:
+
+```commandline
+FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
+    -C mps3_board.visualisation.disable-visualisation=1 \
+    -C mps3_board.telnetterminal0.start_telnet=0 \
+    ./bin/mps3-sse-300/ethos-u-<use_case>.axf
+   ```
+
+Once the FVP reports waiting on telnet connections, connect to the first serverport from another terminal.
+Assuming the FVP has the telnet server running at the default port 5000, connect to it by:
+
+```commandline
+telnet localhost 5000
+```
+
 ## MPS3 board
 
 > **Note:**  Before proceeding, make sure that you have the MPS3 board powered on, and a USB A to B cable connected
@@ -157,14 +181,16 @@ For more information on getting started with an MPS3 board, please refer to:
 
 ### Deployment on MPS3 board
 
-> **Note:**: These instructions are valid only if the evaluation is being done using the MPS3 FPGA platform using
-> an Arm® *Corstone™-300* implementation.
-
 To run the application on MPS3 platform, you must first ensure that the platform has been set up using the correct
 configuration.
 
-For details on platform set-up, please see the relevant documentation. For the Arm® Corstone™-300 implementation
-`AN552`, the document is available here: [Arm Developer](https://developer.arm.com/documentation/dai0552/).
+> **Note:**: These instructions are valid only if the evaluation is being done using the MPS3 FPGA platform using
+> an Arm® Corstone™-300 (AN552) or Corstone™-310 (AN555) implementations.
+
+For details on platform set-up, please see the relevant documentation.
+
+- Arm® Corstone™-300 implementation `AN552`: [Arm Developer - AN552](https://developer.arm.com/documentation/dai0552/).
+- Arm® Corstone™-310 implementation `AN555`: [Arm Developer - AN555](https://developer.arm.com/documentation/107642/B/?lang=en)
 
 For the MPS3 FPGA board, instead of loading the `axf` file directly, copy the executable blobs generated under the
 `sectors/<use_case>` subdirectory to the micro SD card located on the board. Also, the `sectors/images.txt` file is
@@ -184,11 +210,11 @@ Enabling debug USB...
 USB Serial Number = 5000123456789
 ```
 
-If the `axf` or `elf` file is within the ITCM load size limit, it can be copied into the FPGA memory directly without
-having to break it down into separate load region-specific blobs. However, if the neural network models exceed this
-size, you must use the following approach:
+If the `axf` or `elf` file is within the ITCM/BRAM load size limit, it can be copied into the FPGA memory directly
+without having to break it down into separate load region-specific blobs. However, if the neural network models exceed
+this size, you must use the approach described below.
 
-1. For example, the image classification use-case produces:
+1. For example, the image classification use-case produces the following for Corstone™-300:
 
     ```tree
     ./bin/sectors/
@@ -196,26 +222,42 @@ size, you must use the following approach:
             ├── ddr.bin
             └── itcm.bin
     ```
+    For Corstone™-310, the tree should have:
+    ```tree
+    ./bin/sectors/
+        └── img_class
+            ├── ddr.bin
+            └── bram.bin
+    ```
+    As reflected in the names above, the primary code memory for Arm® Corstone™-300 is the ITCM. For Arm® Corstone™-310
+    however, this is the FPGA SRAM (or BRAM) region instead. This is because the ITCM is only 32kB which cannot
+    accommodate the code footprint for our applications.
 
-    If the micro SD card is mounted at `/media/user/V2M-MPS3/`, then use:
-
+    Assuming that the micro SD card is mounted at `/media/user/V2M-MPS3/`, we can use:
     ```commandline
-    cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/
+    cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/ && sync
     ```
 
-    Note that the `itcm.bin` and `ddr.bin` files correspond to the part of the application residing in the first and
-    second load region respectively, as defined in the
-    [scatter file](../../scripts/cmake/platforms/mps3/sse-300/mps3-sse-300.sct).
+    Note that the `itcm.bin` (or `bram.bin`) and `ddr.bin` files correspond to the part of the application residing in
+    the first and second load region respectively, as defined in the
+    [scatter file for sse-300](../../scripts/cmake/platforms/mps3/sse-300/mps3-sse-300.sct)
+    and [scatter file for sse-310](../../scripts/cmake/platforms/mps3/sse-310/mps3-sse-310.sct)
+
 
 2. The `./bin/sectors/images.txt` file must be copied over to the MPS3. The exact location for the destination depends
    on the version of the MPS3 board and the application note for the bit file in use.
 
-   For example, the revision C of the MPS3 board hardware uses an application note directory named `AN552`, to replace the
-   `images.txt` file, like so:
+   For example, with revision `C` of the MPS3 board hardware, using an application note directory named `AN552`, we can
+   replace the `images.txt` file by:
 
     ```commandline
-    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN552/images.txt
+    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN552/images.txt && sync
     ```
+
+> **NOTE**: Make sure the SD card is unmounted correctly after all the files have been copied. For example:
+> ```commandline
+> umount /media/user/V2M-MPS3
+> ```
 
 3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0`. This can be typically done using
    `minicom`, `screen`, or `Putty` applications. Make sure the configuration is set to 115200 8/N/1 and that the

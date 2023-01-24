@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,19 +28,25 @@ function(set_platform_global_defaults)
     file(MAKE_DIRECTORY ${TEST_TPIP})
     set(TEST_TPIP_INCLUDE ${TEST_TPIP}/include)
     file(MAKE_DIRECTORY ${TEST_TPIP_INCLUDE})
+    set(CATCH_HEADER_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
+    set(CATCH_HEADER_MD5 dc6bb8ce282ad134476b37275804c44c)
 
-    ExternalProject_Add(catch2-headers
-            URL https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
-            DOWNLOAD_NO_EXTRACT 1
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ${CMAKE_COMMAND} -E copy <DOWNLOAD_DIR>/catch.hpp ${TEST_TPIP_INCLUDE}
-            INSTALL_COMMAND "")
 
-    add_library(catch2 INTERFACE)
-    target_include_directories(catch2
+    include(FetchContent)
+    FetchContent_Declare(catch2-header-download
+        URL                 ${CATCH_HEADER_URL}
+        URL_HASH            MD5=${CATCH_HEADER_MD5}
+        DOWNLOAD_DIR        ${TEST_TPIP_INCLUDE}
+        DOWNLOAD_NO_EXTRACT ON
+    )
+    FetchContent_MakeAvailable(catch2-header-download)
+
+    add_library(mlek-catch2 INTERFACE)
+    target_include_directories(mlek-catch2
             INTERFACE
             ${TEST_TPIP_INCLUDE})
-    add_dependencies(catch2 catch2-headers)
+    add_dependencies(mlek-catch2 catch2-header-download)
+    add_library(mlek::Catch2 ALIAS mlek-catch2)
 
 endfunction()
 
@@ -103,13 +109,13 @@ function(platform_custom_post_build)
         list(APPEND TEST_SOURCES ${TEST_SOURCES_GEN})
         list(APPEND TEST_RESOURCES_INCLUDE ${TEST_INC_GEN_DIR})
 
-        set(TEST_TARGET_NAME "${CMAKE_PROJECT_NAME}-${use_case}-tests")
+        set(TEST_TARGET_NAME "${use_case}_tests")
         add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})
         target_include_directories(${TEST_TARGET_NAME} PRIVATE ${TEST_RESOURCES_INCLUDE})
-        target_link_libraries(${TEST_TARGET_NAME} PRIVATE ${UC_LIB_NAME} catch2)
+        target_link_libraries(${TEST_TARGET_NAME} PRIVATE ${UC_LIB_NAME} mlek::Catch2)
         target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)
-        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME})
+        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME} -r junit -o ${TEST_TARGET_NAME}.xml)
     endif ()
 endfunction()

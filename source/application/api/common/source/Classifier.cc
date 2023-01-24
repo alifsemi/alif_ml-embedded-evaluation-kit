@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,10 +31,9 @@ namespace arm {
 namespace app {
 
     void Classifier::SetVectorResults(std::set<std::pair<float, uint32_t>>& topNSet,
-                          std::vector<ClassificationResult>& vecResults,
-                          const std::vector <std::string>& labels)
+            std::vector<ClassificationResult>& vecResults,
+            const std::vector <std::string>& labels)
     {
-
         /* Reset the iterator to the largest element - use reverse iterator. */
 
         auto topNIter = topNSet.rbegin();
@@ -46,11 +45,9 @@ namespace app {
     }
 
     bool Classifier::GetTopNResults(const std::vector<float>& tensor,
-                                    std::vector<ClassificationResult>& vecResults,
-                                    uint32_t topNCount,
-                                    const std::vector <std::string>& labels)
+            std::vector<ClassificationResult>& vecResults,
+            uint32_t topNCount, const std::vector <std::string>& labels)
     {
-
         std::set<std::pair<float , uint32_t>> sortedSet;
 
         /* NOTE: inputVec's size verification against labels should be
@@ -80,12 +77,9 @@ namespace app {
         return true;
     }
 
-    bool  Classifier::GetClassificationResults(
-        TfLiteTensor* outputTensor,
-        std::vector<ClassificationResult>& vecResults,
-        const std::vector <std::string>& labels,
-        uint32_t topNCount,
-        bool useSoftmax)
+    bool Classifier::GetClassificationResults(TfLiteTensor* outputTensor,
+            std::vector<ClassificationResult>& vecResults, const std::vector <std::string>& labels,
+            uint32_t topNCount, bool useSoftmax)
     {
         if (outputTensor == nullptr) {
             printf_err("Output vector is null pointer.\n");

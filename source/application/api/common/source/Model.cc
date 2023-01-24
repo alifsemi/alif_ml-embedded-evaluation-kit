@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,13 @@
 /* Initialise the model */
 arm::app::Model::~Model()
 {
-   delete this->m_pInterpreter;
+    delete this->m_pInterpreter;
     /**
      * No clean-up function available for allocator in TensorFlow Lite Micro yet.
      **/
 }
 
-arm::app::Model::Model() :
-    m_inited (false),
-    m_type(kTfLiteNoType)
-{
-    this->m_pErrorReporter = tflite::GetMicroErrorReporter();
-}
+arm::app::Model::Model() : m_inited(false), m_type(kTfLiteNoType) {}
 
 bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
                            uint32_t tensorArenaSize,
@@ -50,10 +45,10 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
     this->m_pModel = ::tflite::GetModel(nnModelAddr);
 
     if (this->m_pModel->version() != TFLITE_SCHEMA_VERSION) {
-        this->m_pErrorReporter->Report(
-            "[ERROR] model's schema version %d is not equal "
-            "to supported version %d.",
-            this->m_pModel->version(), TFLITE_SCHEMA_VERSION);
+        printf_err("Model's schema version %" PRIu32 " is not equal "
+                   "to supported version %d.",
+                   this->m_pModel->version(),
+                   TFLITE_SCHEMA_VERSION);
         return false;
     }
 
@@ -77,10 +72,7 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
         /* Create an allocator instance */
         info("Creating allocator using tensor arena at 0x%p\n", tensorArenaAddr);
 
-        this->m_pAllocator = tflite::MicroAllocator::Create(
-                                        tensorArenaAddr,
-                                        tensorArenaSize,
-                                        this->m_pErrorReporter);
+        this->m_pAllocator = tflite::MicroAllocator::Create(tensorArenaAddr, tensorArenaSize);
 
         if (!this->m_pAllocator) {
             printf_err("Failed to create allocator\n");
@@ -91,9 +83,8 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
         debug("Using existing allocator @ 0x%p\n", this->m_pAllocator);
     }
 
-    this->m_pInterpreter = new ::tflite::MicroInterpreter(
-        this->m_pModel, this->GetOpResolver(),
-        this->m_pAllocator, this->m_pErrorReporter);
+    this->m_pInterpreter =
+        new ::tflite::MicroInterpreter(this->m_pModel, this->GetOpResolver(), this->m_pAllocator);
 
     if (!this->m_pInterpreter) {
         printf_err("Failed to allocate interpreter\n");
@@ -123,7 +114,7 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
         printf_err("failed to get tensors\n");
         return false;
     } else {
-        this->m_type = this->m_input[0]->type;  /* Input 0 should be the main input */
+        this->m_type = this->m_input[0]->type; /* Input 0 should be the main input */
 
         /* Clear the input & output tensors */
         for (size_t inIndex = 0; inIndex < this->GetNumInputs(); inIndex++) {
@@ -158,10 +149,9 @@ void arm::app::Model::LogTensorInfo(TfLiteTensor* tensor)
 
     debug("\ttensor is assigned to 0x%p\n", tensor);
     info("\ttensor type is %s\n", TfLiteTypeGetName(tensor->type));
-    info("\ttensor occupies %zu bytes with dimensions\n",
-         tensor->bytes);
-    for (int i = 0 ; i < tensor->dims->size; ++i) {
-        info ("\t\t%d: %3d\n", i, tensor->dims->data[i]);
+    info("\ttensor occupies %zu bytes with dimensions\n", tensor->bytes);
+    for (int i = 0; i < tensor->dims->size; ++i) {
+        info("\t\t%d: %3d\n", i, tensor->dims->data[i]);
     }
 
     TfLiteQuantization quant = tensor->quantization;
@@ -195,7 +185,7 @@ void arm::app::Model::LogInterpreterInfo()
     }
 
     info("Activation buffer (a.k.a tensor arena) size used: %zu\n",
-        this->m_pInterpreter->arena_used_bytes());
+         this->m_pInterpreter->arena_used_bytes());
 
     /* We expect there to be only one subgraph. */
     const uint32_t nOperators = tflite::NumSubgraphOperators(this->m_pModel, 0);
@@ -206,21 +196,20 @@ void arm::app::Model::LogInterpreterInfo()
     auto* opcodes = this->m_pModel->operator_codes();
 
     /* For each operator, display registration information. */
-    for (size_t i = 0 ; i < nOperators; ++i) {
-        const tflite::Operator* op = subgraph->operators()->Get(i);
+    for (size_t i = 0; i < nOperators; ++i) {
+        const tflite::Operator* op         = subgraph->operators()->Get(i);
         const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
-        const TfLiteRegistration* reg = nullptr;
+        const TfLiteRegistration* reg      = nullptr;
 
-        tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(),
-                                          this->m_pErrorReporter, &reg);
+        tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(), &reg);
         std::string opName;
 
         if (reg) {
             if (tflite::BuiltinOperator_CUSTOM == reg->builtin_code) {
                 opName = std::string(reg->custom_name);
             } else {
-                opName = std::string(EnumNameBuiltinOperator(
-                            tflite::BuiltinOperator(reg->builtin_code)));
+                opName = std::string(
+                    EnumNameBuiltinOperator(tflite::BuiltinOperator(reg->builtin_code)));
             }
         }
         info("\tOperator %zu: %s\n", i, opName.c_str());
@@ -240,21 +229,19 @@ bool arm::app::Model::IsDataSigned() const
 bool arm::app::Model::ContainsEthosUOperator() const
 {
     /* We expect there to be only one subgraph. */
-    const uint32_t nOperators = tflite::NumSubgraphOperators(this->m_pModel, 0);
+    const uint32_t nOperators        = tflite::NumSubgraphOperators(this->m_pModel, 0);
     const tflite::SubGraph* subgraph = this->m_pModel->subgraphs()->Get(0);
-    const auto* opcodes = this->m_pModel->operator_codes();
+    const auto* opcodes              = this->m_pModel->operator_codes();
 
     /* check for custom operators */
-    for (size_t i = 0; (i < nOperators); ++i)
-    {
-        const tflite::Operator* op = subgraph->operators()->Get(i);
+    for (size_t i = 0; (i < nOperators); ++i) {
+        const tflite::Operator* op         = subgraph->operators()->Get(i);
         const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
 
         auto builtin_code = tflite::GetBuiltinCode(opcode);
         if ((builtin_code == tflite::BuiltinOperator_CUSTOM) &&
-            ( nullptr != opcode->custom_code()) &&
-            ( "ethos-u" == std::string(opcode->custom_code()->c_str())))
-        {
+            (nullptr != opcode->custom_code()) &&
+            ("ethos-u" == std::string(opcode->custom_code()->c_str()))) {
             return true;
         }
     }
@@ -308,7 +295,6 @@ size_t arm::app::Model::GetNumOutputs() const
     return 0;
 }
 
-
 TfLiteType arm::app::Model::GetType() const
 {
     return this->m_type;
@@ -343,7 +329,8 @@ bool arm::app::Model::ShowModelInfoHandler()
     info("Model info:\n");
     this->LogInterpreterInfo();
 
-    info("The model is optimised for Ethos-U NPU: %s.\n", this->ContainsEthosUOperator()? "yes": "no");
+    info("The model is optimised for Ethos-U NPU: %s.\n",
+         this->ContainsEthosUOperator() ? "yes" : "no");
 
     return true;
 }

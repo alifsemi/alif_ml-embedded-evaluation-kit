@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  Copyright (c) 2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,8 @@ project(${KWS_API_TARGET}
 # Create static library
 add_library(${KWS_API_TARGET} STATIC
     src/KwsProcessing.cc
-    src/MicroNetKwsModel.cc)
+    src/MicroNetKwsModel.cc
+    src/KwsClassifier.cc)
 
 target_include_directories(${KWS_API_TARGET} PUBLIC include)
 

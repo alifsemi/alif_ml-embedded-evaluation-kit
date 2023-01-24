@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -381,7 +381,7 @@ def set_up_resources(
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
-    vela_version = "3.4.0"
+    vela_version = "3.6.0"
     py3_major_version_minimum = 3  # Python >= 3.7 is required
     py3_minor_version_minimum = 7
 
@@ -443,7 +443,12 @@ def set_up_resources(
             call_command(command)
         os.chdir(current_file_dir)
 
-    # 1.3 Make sure to have all the requirements
+    # 1.3 Install additional requirements first, if a valid file has been provided
+    if additional_requirements_file and os.path.isfile(additional_requirements_file):
+        command = f"{env_python} -m pip install -r {additional_requirements_file}"
+        call_command(command)
+
+    # 1.4 Make sure to have all the main requirements
     requirements = [f"ethos-u-vela=={vela_version}"]
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
@@ -451,11 +456,6 @@ def set_up_resources(
         if req not in packages:
             command = f"{env_python} -m pip install {req}"
             call_command(command)
-
-    # 1.4 Install additional requirements, if a valid file has been provided
-    if additional_requirements_file and os.path.isfile(additional_requirements_file):
-        command = f"{env_python} -m pip install -r {additional_requirements_file}"
-        call_command(command)
 
     # 2. Download models
     logging.info("Downloading resources.")
