@@ -218,34 +218,3 @@ uint64_t ethosu_address_remap(uint64_t address, int index)
     /* Double cast to avoid build warning about pointer/integer size mismatch */
     return LocalToGlobal((void *) (uint32_t) address);
 }
-
-void ethosu_flush_dcache(uint32_t *p, size_t bytes)
-{
-    // No need to flush - we're not using writeback for any Ethos areas
-    UNUSED(p);
-    UNUSED(bytes);
-}
-
-void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
-{
-    uint32_t addr = (uint32_t) p;
-    /* No need to do anything to TCM ever */
-    if ((
-#if ITCM_BASE != 0 // avoid odd unsigned comparison warning
-        addr >= ITCM_BASE &&
-#endif
-        addr + bytes <= ITCM_BASE + ITCM_SIZE) ||
-        (addr >= DTCM_BASE && addr + bytes <= DTCM_BASE + DTCM_SIZE)) {
-        return;
-    }
-    if (SCB->CCR & SCB_CCR_DC_Msk) {
-        if (p && bytes <= 128*1024) {
-            // Only worth doing a ranged operation if relatively small - big ones can get very slow
-            SCB_InvalidateDCache_by_Addr(p, bytes);
-        } else {
-            // Global operation - not safe to globally invalidate in case any writeback is in use
-            // All our regions are write-through, so it will be invalidate for them
-            SCB_CleanInvalidateDCache();
-        }
-    }
-}
