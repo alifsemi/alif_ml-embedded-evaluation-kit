@@ -36,6 +36,7 @@
 #include "log_macros.h"
 
 #include <cinttypes>
+#include <cmath>
 
 #include "lvgl.h"
 #include "lv_port.h"
@@ -51,7 +52,6 @@ lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_imag
 };
 
 using arm::app::Profiler;
-//using arm::app::ClassificationResult;
 using arm::app::ApplicationContext;
 using arm::app::Model;
 using arm::app::YoloFastestModel;
