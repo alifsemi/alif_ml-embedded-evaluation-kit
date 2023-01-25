@@ -75,6 +75,9 @@ function(platform_custom_post_build)
     file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
     file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
 
+    set(LINKER_SECTION_TAGS     "*.at_mram")
+    set(LINKER_OUTPUT_BIN_TAGS  "mram.bin")
+
     add_bin_generation_command(
             TARGET_NAME ${PARSED_TARGET_NAME}
             OUTPUT_DIR  ${SECTORS_BIN_DIR}

@@ -61,40 +61,40 @@ SECTIONS
     *(startup_ro_data)
   } > MRAM
 
-  .copy.table : ALIGN(4)
+  .copy.table.at_mram : ALIGN(4)
   {
     __copy_table_start__ = .;
-    LONG ( LOADADDR(.data.at_dtcm) )
-    LONG ( ADDR(.data.at_dtcm) )
-    LONG ( SIZEOF(.data.at_dtcm)/4 )
-    LONG ( LOADADDR(.code.at_itcm) )
-    LONG ( ADDR(.code.at_itcm) )
-    LONG ( SIZEOF(.code.at_itcm)/4 )
+    LONG ( LOADADDR(.text.itcm.at_mram) )
+    LONG ( ADDR(.text.itcm.at_mram) )
+    LONG ( SIZEOF(.text.itcm.at_mram)/4 )
+    LONG ( LOADADDR(.data.dtcm.at_mram) )
+    LONG ( ADDR(.data.dtcm.at_mram) )
+    LONG ( SIZEOF(.data.dtcm.at_mram)/4 )
     __copy_table_end__ = .;
   } > MRAM
 
-  .zero.table : ALIGN(4)
+  .zero.table.at_mram : ALIGN(4)
   {
     __zero_table_start__ = .;
-    LONG (ADDR(.bss.at_itcm))
-    LONG (SIZEOF(.bss.at_itcm)/4)
+    LONG (ADDR(.bss.itcm))
+    LONG (SIZEOF(.bss.itcm)/4)
     LONG (ADDR(.bss))
     LONG (SIZEOF(.bss)/4)
     __zero_table_end__ = .;
   } > MRAM
 
-  .vectors.at_itcm (NOLOAD) : ALIGN(2048)
+  .vectors.itcm (NOLOAD) : ALIGN(2048)
   {
     *(.bss.noinit.ram_vectors)
   } > ITCM
 
-  .code.at_itcm : ALIGN(8)
+  .text.itcm.at_mram : ALIGN(8)
   {
     /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
     *(.text*)
   } > ITCM AT> MRAM
 
-  .data.at_dtcm : ALIGN(8)
+  .data.dtcm.at_mram : ALIGN(8)
   {
     /* DTCM has all read-write data, including NPU activation buffer and audio processing buffers */
     *(vtable)
@@ -112,22 +112,7 @@ SECTIONS
 
   } > DTCM AT> MRAM 
 
-  /* Place non-zero code/data here if required in SRAM0 */
-/*
-  .data.at_sram0 : ALIGN(8)
-  {
-  } > SRAM0 AT> MRAM
-*/
-/*
-  .bss.at_sram0 (NOLOAD) : ALIGN(8)
-  {
-  } > SRAM0
-
-  .bss.at_sram1 (NOLOAD) : ALIGN(8)
-  {
-   } > SRAM1
-*/
-  .bss.at_itcm (NOLOAD) : ALIGN(8)
+  .bss.itcm (NOLOAD) : ALIGN(8)
   {
     *(.bss.audio_rec)
   } > ITCM
