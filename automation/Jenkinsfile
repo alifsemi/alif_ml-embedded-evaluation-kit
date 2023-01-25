@@ -1,7 +1,7 @@
 def common_funcs
 
 pipeline {
-    agent none
+    agent { label 'build' }
     stages {
         stage('Init') {
             steps {
@@ -10,73 +10,62 @@ pipeline {
                 }
             }
         }
-        stage('Build') {
+        stage('Download dependencies') {
+            steps {
+                script {
+                    common_funcs.download_dependencies()
+                }
+            }
+        }
+        stage('Setup resources') {
+            steps {
+                script {
+                    common_funcs.setup_resources()
+                }
+            }
+        }
+        // First build can end up doing some patching of Tensorflow
+        // so run one build sequentially to start with
+        stage('Build HP GCC Release') {
+            steps {
+                script {
+                    common_funcs.build_hp("Release", "gcc");
+                }
+            }
+        }
+        // Remaining builds can be parallel
+        stage('More builds') {
             parallel {
-                stage('Build img GCC Release') {
-                    agent { label 'build' }
+                stage('Build HP GCC Debug') {
                     steps {
                         script {
-                            common_funcs.build_img("Release", "gcc");
-                        }
-                    }
-                    post {
-                        success {
-                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-                        }
-                        cleanup {
-                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                            common_funcs.build_hp("Debug", "gcc");
                         }
                     }
                 }
-                stage('Build img GCC Debug') {
-                    agent { label 'build' }
+                stage('Build HE-TCM GCC Release') {
                     steps {
                         script {
-                            common_funcs.build_img("Debug", "gcc");
-                        }
-                    }
-                    post {
-                        success {
-                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-                        }
-                        cleanup {
-                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                            common_funcs.build_he_tcm("Release", "gcc");
                         }
                     }
                 }
-                stage('Build kws GCC Release') {
-                    agent { label 'build' }
+                stage('Build HE-TCM GCC Debug') {
                     steps {
                         script {
-                            common_funcs.build_kws("Release", "gcc");
-                        }
-                    }
-                    post {
-                        success {
-                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-                        }
-                        cleanup {
-                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
-                        }
-                    }
-                }
-                stage('Build kws GCC Debug') {
-                    agent { label 'build' }
-                    steps {
-                        script {
-                            common_funcs.build_kws("Debug", "gcc");
-                        }
-                    }
-                    post {
-                        success {
-                          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-                        }
-                        cleanup {
-                          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                            common_funcs.build_he_tcm("Debug", "gcc");
                         }
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+        }
+        cleanup {
+          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
         }
     }
 }
