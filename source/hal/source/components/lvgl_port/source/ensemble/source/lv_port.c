@@ -229,7 +229,13 @@ uint32_t lv_port_get_ticks(void)
 void lv_tick_handler(int ticks)
 {
     if (lv_inited) {
+#if defined __clang__ && __clang_major__ < 16
+        // Clang had a problem with atomic += that hits Arm Compiler 6.18 and earlier
+        // Bug described at https://github.com/llvm/llvm-project/issues/48742
+        uint32_t new_ticks = atomic_fetch_add(&lv_ticks, ticks) + ticks;
+#else
         uint32_t new_ticks = (lv_ticks += ticks);
+#endif
         if (new_ticks - lv_last_timer_handler_trigger >= 5) {
             lv_last_timer_handler_trigger = new_ticks;
             SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
