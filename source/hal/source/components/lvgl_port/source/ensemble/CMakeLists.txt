@@ -1,9 +1,9 @@
 #/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
 # * Use, distribution and modification of this code is permitted under the
-# * terms stated in the Alif Semiconductor Software License Agreement 
+# * terms stated in the Alif Semiconductor Software License Agreement
 # *
-# * You should have received a copy of the Alif Semiconductor Software 
-# * License Agreement with this file. If not, please write to: 
+# * You should have received a copy of the Alif Semiconductor Software
+# * License Agreement with this file. If not, please write to:
 # * contact@alifsemi.com, or visit: https://alifsemi.com/license
 # *
 # */
@@ -39,7 +39,8 @@ target_sources(${LVGL_TARGET}
 
 # LCD_Panel.c adds scanline IRQ support, and needs to access internal header CDC200_dev.h to do it
 target_include_directories(${LVGL_TARGET} PRIVATE
-    "$<TARGET_PROPERTY:cmsis_ensemble,SOURCE_DIR>/Alif_CMSIS/Source")
+    ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble/Alif_CMSIS/Source
+)
 
 # Compile definitions
 target_compile_definitions(${LVGL_TARGET}
