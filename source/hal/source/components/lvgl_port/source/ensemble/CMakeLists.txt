@@ -15,6 +15,7 @@ project(lvgl_port
     LANGUAGES       C CXX ASM)
 
 set(ROTATE_DISPLAY "0" CACHE STRING "Rotate display by 0, 90, 180 or 270 degrees")
+set_property(CACHE ROTATE_DISPLAY PROPERTY STRINGS "0" "90" "180" "270")
 
 ## LVGL and Arm-2D libraries
 include(${CMAKE_SCRIPTS_DIR}/Arm-2D.cmake)

@@ -42,6 +42,7 @@ project(${PLATFORM_DRIVERS_TARGET}
 
 # This currently is also used to infer roles for the dual-CPU bits
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application")
+set_property(CACHE CONSOLE_UART PROPERTY STRINGS "2" "4")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
