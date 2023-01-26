@@ -51,6 +51,13 @@ target_include_directories(${ARM_2D_TARGET} PUBLIC
 
 target_compile_options(${ARM_2D_TARGET} PRIVATE -ffunction-sections)
 
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    # GCC produces a lot of warnings - silence them
+    # (This is public, so will silence all warnings in any Arm-2D user, but
+    # only LVGL uses it privately in our tree, so this won't spread further than LVGL)
+    target_compile_options(${ARM_2D_TARGET} PUBLIC -w)
+endif()
+
 set_property(TARGET ${ARM_2D_TARGET} PROPERTY C_STANDARD 11)
 set_property(TARGET ${ARM_2D_TARGET} PROPERTY C_EXTENSIONS ON)
 
