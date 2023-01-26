@@ -109,25 +109,25 @@ set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
 # We include log target
-add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log)
+add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log EXCLUDE_FROM_ALL)
 
 # We include arm_math target
-add_subdirectory(${SRC_PATH}/math ${CMAKE_BINARY_DIR}/math)
+add_subdirectory(${SRC_PATH}/math ${CMAKE_BINARY_DIR}/math EXCLUDE_FROM_ALL)
 
 # We include the hal target
-add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal)
+add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal EXCLUDE_FROM_ALL)
 
 # Add the profiler target
 if (NOT DEFINED PROFILER_DIR)
     set(PROFILER_DIR ${SRC_PATH}/profiler)
 endif ()
-add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
+add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler EXCLUDE_FROM_ALL)
 
 # Include the tensorflow build target
 include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
 
 # Add the common API library target (tensorflow-lite-micro target is needed)
-add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common)
+add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common EXCLUDE_FROM_ALL)
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
