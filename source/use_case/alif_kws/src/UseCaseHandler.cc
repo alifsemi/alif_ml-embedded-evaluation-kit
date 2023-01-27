@@ -40,17 +40,7 @@
 #include "services_lib_api.h"
 #include "services_main.h"
 
-#include "arm_math_f16.h"
-#include "arm_mve.h"
-#include <atomic>
 #include <vector>
-
-// At the time of writing, GCC produces incorrect assembly
-#if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 2)
-#define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 1
-#else
-#define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 0
-#endif
 
 extern uint32_t m55_comms_handle;
 m55_data_payload_t mhu_data;
@@ -66,143 +56,10 @@ using arm::app::MicroNetKwsModel;
 
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
-#define AUDIO_REC_SAMPLES 1600
 #define NEW_SAMPLE_START (AUDIO_SAMPLES - AUDIO_STRIDE) // 0.5 second
-#define MAX_GAIN 10000.0f // 80dB
-//#define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second
-#define MAX_GAIN_INC_PER_STRIDE 1.12201845f // 1dB, so 2dB per second
 #define RESULTS_MEMORY 8
 
-#define AUDIO_L_ONLY 1
-#define AUDIO_R_ONLY 2
-#define AUDIO_LR_MIX 3
-
-#define AUDIO_MICS  AUDIO_LR_MIX
-
-//#define STORE_AUDIO
-
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int samples);
-
-// 24-bit stereo record buffer
-static int32_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __attribute__((section(".bss.audio_rec"))); // stereo record buffer
-
-#ifdef STORE_AUDIO
-#define AUDIO_STORE_SAMPLES (AUDIO_SAMPLES*10)
-int32_t audio_store[AUDIO_STORE_SAMPLES * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
-static size_t store_pos;
-#endif
-
-// 16-bit working buffer. New data is initially loaded as float16, then converted to int16 during gain adjustment
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
-static float current_gain = MAX_GAIN;
-static int32_t current_dc = 0;
-
-static int audio_current_rec_buf;
-static std::atomic_int data_received;
-static std::atomic_int audio_async_error;
-
-static void audio_start_next_rx()
-{
-    int err = hal_get_audio_data(audio_rec[audio_current_rec_buf], AUDIO_REC_SAMPLES * 2);
-    if (err) {
-        audio_async_error = err;
-    }
-}
-
-static void audio_callback(uint32_t /*event*/)
-{
-    audio_current_rec_buf = !audio_current_rec_buf;
-    int new_samples = data_received + AUDIO_REC_SAMPLES;
-    if (new_samples < AUDIO_STRIDE) {
-        audio_start_next_rx();
-    }
-#ifdef STORE_AUDIO
-    if (store_pos < sizeof audio_store / sizeof audio_store[0]) {
-        memcpy(audio_store + store_pos,  audio_rec[!audio_current_rec_buf], AUDIO_REC_SAMPLES * 2 * sizeof(int32_t));
-        store_pos += 2 * AUDIO_REC_SAMPLES;
-    }
-#endif
-    copy_audio_rec_to_in((float16_t *) audio_inf + AUDIO_SAMPLES + data_received, audio_rec[!audio_current_rec_buf], AUDIO_REC_SAMPLES);
-    data_received = new_samples;
-}
-
-static void audio_start_stride()
-{
-    data_received = 0;
-    audio_start_next_rx();
-}
-
-// Perform stereo->mono conversion and DC adjustment as we copy
-// Gain will be handled later. Note that we use 32-bit input -
-// the microphone provides 18 bits of precision. Using 24-bit
-// mode gives us non-sign-extended data, so 32-bit is nicer.
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int len)
-{
-    const int32_t *input = rec;
-    float16_t *output = in;
-    int32_t offset = current_dc;
-    int64_t sum = 0;
-    int samples_to_go = len;
-    while (samples_to_go > 0) {
-#if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
-        // Create tail predicate - if samples_to_go < 4, then limit following ops
-        // This doesn't create a literal VCTP instruction - compiler forms a DLTP/LETP loop.
-        mve_pred16_t p = vctp32q(samples_to_go);
-        // No predication possible on interleaved load, so will overrun end of array
-        int32x4x2_t stereo = vld2q(input);
-#if AUDIO_MICS == AUDIO_LR_MIX
-        // Average left and right
-        int32x4_t mono = vrhaddq_x(stereo.val[0], stereo.val[1], p);
-#elif AUDIO_MICS == AUDIO_L_ONLY
-        int32x4_t mono = stereo.val[0];
-#elif AUDIO_MICS == AUDIO_R_ONLY
-        int32x4_t mono = stereo.val[1];
-#else
-#error "which microphone?"
-#endif
-        // Add it up to track the pre-adjustment mean
-        sum = vaddlvaq_p(sum, mono, p);
-        // Subtract the current DC offset (necessary to not lose accuracy
-        // when converting to float16)
-        mono = vqsubq_m(vuninitializedq_s32(), mono, offset, p);
-        // Convert to float32, in range -1,+1, so as not to overflow float16 calculations later
-        float32x4_t mono_f32 = vcvtq_x_n(mono, 31, p);
-        // Convert to float16
-        float16x8_t mono_f16 = vcvtbq_m_f16_f32(vuninitializedq_f16(), mono_f32, p);
-        // Store 4 output values (or less). Just need to store bottom 16 bits
-        // of each 32-bit word - can't easily express this with intrinsic types
-        vstrhq_p_u32((uint16_t *)output, vreinterpretq_u32(mono_f16), p);
-        input += 8;
-        output += 4;
-        samples_to_go -= 4;
-#else
-#if AUDIO_MICS == AUDIO_LR_MIX
-        // Average left and right
-        int32_t mono = (input[0] / 2) + (input[1] / 2);
-#elif AUDIO_MICS == AUDIO_L_ONLY
-        int32_t mono = input[0];
-#elif AUDIO_MICS == AUDIO_R_ONLY
-        int32_t mono = input[1];
-#else
-#error "which microphone?"
-#endif
-        // Add it up to track the pre-adjustment mean
-        sum += mono;
-        // Subtract the current DC offset (necessary to not lose accuracy
-        // when converting to float16)
-        mono = __QSUB(mono, offset);
-        // Convert to float32, in range -1,+1, so as not to overflow float16 calculations later
-        float mono_f32 = (float) mono * (1.0f/2147483648.0f);
-        // Convert to float16
-        *output++ = (float16_t) mono_f32;
-        input += 2;
-        samples_to_go -= 1;
-#endif
-    }
-    // Update the DC offset based on the mean of this buffer
-    int32_t mean = (int32_t) (sum / len);
-    current_dc = (current_dc / 8) * 7 + mean / 8;
-}
 
 namespace alif {
 namespace app {
@@ -250,53 +107,6 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         last_label = classification.m_label;
     }
 }
-
-static void apply_gain(int16_t *ptr, int length, float16_t gain)
-{
-    while (length > 0) {
-        // Check whether we're doing 8 or fewer
-        mve_pred16_t p = vctp16q(length);
-        // Load up to 8 samples
-        float16x8_t fp = vld1q_z((float16_t *)ptr, p);
-        // Multiply by gain
-        fp = vmulq_x(fp, gain, p);
-        // Convert back to int16_t, rescaling for q15 (can't specify rounding with rescale)
-        int16x8_t data = vcvtq_x_n_s16_f16(fp, 15, p);
-        // Store back up to 8 samples
-        vst1q_p(ptr, data, p);
-        ptr += 8;
-        length -= 8;
-    }
-}
-
-bool process_audio(int16_t *audio, int samples)
-{
-    float16_t *audio_fp = (float16_t *)audio;
-	float16_t audio_mean, audio_absmax;
-
-    arm_mean_f16(audio_fp, samples, &audio_mean);
-    arm_absmax_no_idx_f16(audio_fp, samples, &audio_absmax);
-    //if (audio_absmax == INT16_MIN) audio_absmax = INT16_MAX; // CMSIS-DSP issue #66
-    printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
-
-
-    // Rescale to full range  while converting to integer
-    float new_gain = std::fmin(1.0f / audio_absmax, MAX_GAIN);
-    // Reduce gain immediately if necessary to avoid clipping, or increase slowly
-    current_gain = std::fmin(new_gain, current_gain * MAX_GAIN_INC_PER_STRIDE);
-
-    apply_gain(audio, samples, current_gain);
-
-    q15_t audio_mean_q15, audio_absmax_q15;
-    arm_mean_q15(audio, samples, &audio_mean_q15);
-    arm_absmax_no_idx_q15(audio, samples, &audio_absmax_q15);
-    if (audio_absmax_q15 == INT16_MIN) audio_absmax_q15 = INT16_MAX; // CMSIS-DSP issue #66
-    printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
-
-    return true;
-}
-
-//static void get_one_audio_stride
 
 
     /* KWS inference handler. */
@@ -352,17 +162,12 @@ bool process_audio(int16_t *audio, int samples)
                 return false;
             }
 
-            hal_set_audio_callback(audio_callback);
-
             // Start first fill of final stride section of buffer
-            audio_start_stride();
+            hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
         }
 
-        // Wait until stride buffer is full - intiated above or by previous call to ClassifyAudioHandler
-        while (data_received < AUDIO_STRIDE && audio_async_error == 0) {
-            __WFE();
-        }
-        err = audio_async_error;
+        // Wait until stride buffer is full - initiated above or by previous call to ClassifyAudioHandler
+        err = hal_wait_for_audio();
         if (err) {
             printf_err("hal_get_audio_data failed with error: %d\n", err);
             return false;
@@ -372,9 +177,9 @@ bool process_audio(int16_t *audio, int samples)
         memmove(audio_inf, audio_inf + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof audio_inf[0]);
 
         // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
-        audio_start_stride();
+        hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
-        process_audio(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+        hal_audio_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
         const int16_t* inferenceWindow = audio_inf;
 

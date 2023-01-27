@@ -79,6 +79,10 @@ target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     cmsis_ensemble
     rte_components)
 
+target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PRIVATE
+    ${AUDIO_IFACE_TARGET}
+    arm_math)
+
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")

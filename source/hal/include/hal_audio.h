@@ -31,9 +31,15 @@
 /**
  * @brief get audio data with Hal implementation.
  *
- * @param data  void* data input buffer for audio data. Data type depending on platform.
- * @param len   int len length of the input data buffer
+ * @param data  int16_t * data input buffer for audio data.
+ * @param len   int number of samples
  */
 #define hal_get_audio_data(data, len)   get_audio_data(data, len)
+
+#define hal_wait_for_audio()            wait_for_audio()
+
+#define hal_get_audio_samples_received() get_audio_samples_received()
+
+#define hal_audio_preprocessing(data, len) audio_preprocessing(data, len)
 
 #endif // HAL_DATA_H
