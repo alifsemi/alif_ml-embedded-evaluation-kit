@@ -45,6 +45,13 @@
 #include <atomic>
 #include <vector>
 
+// At the time of writing, GCC produces incorrect assembly
+#if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 2)
+#define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 1
+#else
+#define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 0
+#endif
+
 extern uint32_t m55_comms_handle;
 m55_data_payload_t mhu_data;
 
@@ -137,6 +144,7 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
     int64_t sum = 0;
     int samples_to_go = len;
     while (samples_to_go > 0) {
+#if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
         // Create tail predicate - if samples_to_go < 4, then limit following ops
         // This doesn't create a literal VCTP instruction - compiler forms a DLTP/LETP loop.
         mve_pred16_t p = vctp32q(samples_to_go);
@@ -162,11 +170,34 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
         // Convert to float16
         float16x8_t mono_f16 = vcvtbq_m_f16_f32(vuninitializedq_f16(), mono_f32, p);
         // Store 4 output values (or less). Just need to store bottom 16 bits
-        // of each 32-bit word - can't easily express this with intrinisic types
+        // of each 32-bit word - can't easily express this with intrinsic types
         vstrhq_p_u32((uint16_t *)output, vreinterpretq_u32(mono_f16), p);
         input += 8;
         output += 4;
         samples_to_go -= 4;
+#else
+#if AUDIO_MICS == AUDIO_LR_MIX
+        // Average left and right
+        int32_t mono = (input[0] / 2) + (input[1] / 2);
+#elif AUDIO_MICS == AUDIO_L_ONLY
+        int32_t mono = input[0];
+#elif AUDIO_MICS == AUDIO_R_ONLY
+        int32_t mono = input[1];
+#else
+#error "which microphone?"
+#endif
+        // Add it up to track the pre-adjustment mean
+        sum += mono;
+        // Subtract the current DC offset (necessary to not lose accuracy
+        // when converting to float16)
+        mono = __QSUB(mono, offset);
+        // Convert to float32, in range -1,+1, so as not to overflow float16 calculations later
+        float mono_f32 = (float) mono * (1.0f/2147483648.0f);
+        // Convert to float16
+        *output++ = (float16_t) mono_f32;
+        input += 2;
+        samples_to_go -= 1;
+#endif
     }
     // Update the DC offset based on the mean of this buffer
     int32_t mean = (int32_t) (sum / len);
