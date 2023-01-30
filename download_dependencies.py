@@ -38,6 +38,7 @@ TF = "https://github.com/tensorflow/tflite-micro/archive/28770e4cac1e5dae85b55a0
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/81564cfb339ebf9def167a50693733f8a1e1471e.zip"
 CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/b46a2f86b5c9d8247ea5417fc0e0022876b80dcf.zip"
 CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.0.0.zip"
+CMSIS_ENSEMBLE = "https://github.com/alifsemi/ensemble-cmsis-dfp_DEV/archive/72f9fb9ea4707395d36b441e2d8784eedc684a2a.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.11.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.11.tar.gz"
 LVGL = "https://github.com/lvgl/lvgl/archive/dbb15bb3ea0365373bc1ba8b182556f937e61e7d.zip"
@@ -85,6 +86,8 @@ def main(dependencies_path: Path):
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-dsp"))
     download(CMSIS_NN,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
+    download(CMSIS_ENSEMBLE,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble"))
     download(ETHOS_U_CORE_DRIVER,
              lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
     download(ETHOS_U_CORE_PLATFORM,
