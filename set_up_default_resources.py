@@ -68,6 +68,26 @@ json_uc_res = [
         ],
     },
     {
+        "use_case_name": "tiny_asr",
+        "url_prefix": [
+            "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_int8/"
+        ],
+        "resources": [
+            {
+                "name": "tiny_wav2letter_int8.tflite",
+                "url": "{url_prefix:0}tiny_wav2letter_int8.tflite",
+            },
+            {
+                "name": "ifm0.npy",
+                "url": "{url_prefix:0}testing_input/input_1_int8/0.npy",
+            },
+            {
+                "name": "ofm0.npy",
+                "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
+            },
+        ],
+    },
+    {
         "use_case_name": "img_class",
         "url_prefix": [
             "https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/"
