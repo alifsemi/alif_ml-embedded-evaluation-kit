@@ -9,6 +9,7 @@
  */
 
 /*System Includes */
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -41,7 +42,7 @@ void i2s_callback(uint32_t event)
     } else if (event & ARM_SAI_EVENT_FRAME_ERROR) {
         printf("*** i2s_callback with event: ARM_SAI_EVENT_FRAME_ERROR ***\n");
     } else {
-        printf("*** i2s_callback with event: %d ***\n", event);
+        printf("*** i2s_callback with event: %" PRIu32 "***\n", event);
     }
 }
 
@@ -83,14 +84,14 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
     /* Initializes I2S2 interface */
     status = i2s_drv->Initialize(i2s_callback);
     if (status != ARM_DRIVER_OK) {
-        printf("I2S Initialize failed status = %d\n", status);
+        printf("I2S Initialize failed status = %" PRId32 "\n", status);
         return status;
     }
 
     /* Enable the power for I2S2 */
     status = i2s_drv->PowerControl(ARM_POWER_FULL);
     if (status != ARM_DRIVER_OK) {
-        printf("I2S Power failed status = %d\n", status);
+        printf("I2S Power failed status = %" PRId32 "\n", status);
         return status;
     }
 
@@ -104,11 +105,11 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
                                 //ARM_SAI_DATA_SIZE(data_bit_len), ARM_SAI_FRAME_LENGTH(data_bit_len*2), sampling_rate);
 
     if (status != ARM_DRIVER_OK) {
-        printf("I2S Control status = %d\n", status);
+        printf("I2S Control status = %" PRId32 "\n", status);
         i2s_drv->PowerControl(ARM_POWER_OFF);
     }
 
-    printf(" (OUT) I2S Control status = %d\n", status);
+    printf(" (OUT) I2S Control status = %" PRId32 "\n", status);
     return ARM_DRIVER_OK;
 }
 
@@ -117,7 +118,7 @@ int32_t enable_microphone(voice_callback_t callback)
     /* enable Receiver */
     int32_t status = i2s_drv->Control(ARM_SAI_CONTROL_RX, 1, 0);
     if (status != ARM_DRIVER_OK) {
-        printf("I2S enabled failed = %d\n", status);
+        printf("I2S enabled failed = %" PRId32 "\n", status);
         i2s_drv->PowerControl(ARM_POWER_OFF);
         rx_callback = NULL;
         return status;
@@ -133,7 +134,7 @@ int32_t disable_microphone()
     /* Stop the RX */
     int32_t status = i2s_drv->Control(ARM_SAI_CONTROL_RX, 0, 0);
     if (status != ARM_DRIVER_OK) {
-        printf("I2S disable failed status = %d\n", status);
+        printf("I2S disable failed status = %" PRId32 "\n", status);
     }
 
     return status;
