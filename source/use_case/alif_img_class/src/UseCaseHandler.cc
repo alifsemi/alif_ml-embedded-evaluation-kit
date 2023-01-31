@@ -122,6 +122,11 @@ namespace app {
             return false;
         }
 
+        /* Get input shape for displaying the image. */
+        TfLiteIntArray* inputShape = model.GetInputShape(0);
+        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
+        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
+
         /* Set up pre and post-processing. */
         ImgClassPreProcess preProcess = ImgClassPreProcess(inputTensor, model.IsDataSigned());
 
@@ -131,7 +136,7 @@ namespace app {
                 results);
 #endif
 
-        const uint8_t *image_data = hal_get_image_data(MIMAGE_X, MIMAGE_Y);
+        const uint8_t *image_data = hal_get_image_data(nCols, nRows);
         if (!image_data) {
             printf_err("hal_get_image_data failed");
             return false;
@@ -168,8 +173,7 @@ namespace app {
         lv_led_on(ScreenLayoutLEDObject());
 
 #if !SKIP_MODEL
-        const size_t imgSz = inputTensor->bytes < IMAGE_DATA_SIZE ?
-                              inputTensor->bytes : IMAGE_DATA_SIZE;
+        const size_t imgSz = inputTensor->bytes;
 
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(image_data, imgSz)) {

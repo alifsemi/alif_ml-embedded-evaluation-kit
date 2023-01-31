@@ -170,8 +170,7 @@ using namespace arm::app::object_detection;
 
             lv_led_on(ScreenLayoutLEDObject());
 
-            const size_t copySz = inputTensor->bytes < IMAGE_DATA_SIZE ?
-                                inputTensor->bytes : IMAGE_DATA_SIZE;
+            const size_t copySz = inputTensor->bytes;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(currImage, copySz)) {
