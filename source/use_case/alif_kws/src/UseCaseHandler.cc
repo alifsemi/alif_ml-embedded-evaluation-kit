@@ -56,7 +56,6 @@ using arm::app::MicroNetKwsModel;
 
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
-#define NEW_SAMPLE_START (AUDIO_SAMPLES - AUDIO_STRIDE) // 0.5 second
 #define RESULTS_MEMORY 8
 
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
@@ -71,12 +70,6 @@ using namespace arm::app::audio;
 namespace kws {
 using namespace arm::app::kws;
 }
-
-std::vector<kws::KwsResult> infResults;
-std::vector<ClassificationResult> singleInfResult;
-/* We expect to be sampling 1 second worth of data at a time.
-*  NOTE: This is only used for time stamp calculation. */
-const float secondsPerSample = 1.0 / audio::MicroNetKwsMFCC::ms_defaultSamplingFreq;
 
  /**
  * @brief           Presents KWS inference results.
@@ -116,8 +109,8 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         auto& model = ctx.Get<Model&>("model");
         const auto mfccFrameLength = ctx.Get<int>("frameLength");
         const auto mfccFrameStride = ctx.Get<int>("frameStride");
+        const auto audioRate = ctx.Get<int>("audioRate");
         const auto scoreThreshold = ctx.Get<float>("scoreThreshold");
-        int index = ctx.Get<int>("index");
 
         constexpr int minTensorDims = static_cast<int>(
             (MicroNetKwsModel::ms_inputRowsIdx > MicroNetKwsModel::ms_inputColsIdx)?
@@ -144,92 +137,99 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
         const uint32_t numMfccFrames = inputShape->data[arm::app::MicroNetKwsModel::ms_inputRowsIdx];
 
+        /* We expect to be sampling 1 second worth of data at a time.
+        *  NOTE: This is only used for time stamp calculation. */
+        const float secondsPerSample = 1.0f / audioRate;
+
         /* Set up pre and post-processing. */
         KwsPreProcess preProcess = KwsPreProcess(inputTensor, numMfccFeatures, numMfccFrames,
                                                  mfccFrameLength, mfccFrameStride);
 
+        std::vector<ClassificationResult> singleInfResult;
         KwsPostProcess postProcess = KwsPostProcess(outputTensor, ctx.Get<KwsClassifier &>("classifier"),
                                                     ctx.Get<std::vector<std::string>&>("labels"),
                                                     singleInfResult);
 
-
-        int err;
-
-        if (index == 0) {
-            err = hal_audio_init(audio::MicroNetKwsMFCC::ms_defaultSamplingFreq, 32);
+        int index = 0;
+        std::vector<kws::KwsResult> infResults;
+        static bool audio_inited;
+        if (!audio_inited) {
+            int err = hal_audio_init(audioRate, 32);
             if (err) {
                 printf_err("hal_audio_init failed with error: %d\n", err);
                 return false;
             }
-
-            // Start first fill of final stride section of buffer
-            hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+            audio_inited = true;
         }
 
-        // Wait until stride buffer is full - initiated above or by previous call to ClassifyAudioHandler
-        err = hal_wait_for_audio();
-        if (err) {
-            printf_err("hal_get_audio_data failed with error: %d\n", err);
-            return false;
-        }
-
-        // move buffer down by one stride, clearing space at the end for the next stride
-        memmove(audio_inf, audio_inf + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof audio_inf[0]);
-
-        // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
+        // Start first fill of final stride section of buffer
         hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
-        hal_audio_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+        do {
+            // Wait until stride buffer is full - initiated above or by previous interation of loop
+            int err = hal_wait_for_audio();
+            if (err) {
+                printf_err("hal_get_audio_data failed with error: %d\n", err);
+                return false;
+            }
 
-        const int16_t* inferenceWindow = audio_inf;
+            // move buffer down by one stride, clearing space at the end for the next stride
+            std::copy(audio_inf + AUDIO_STRIDE, audio_inf + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
 
-        uint32_t start = ARM_PMU_Get_CCNTR();
-        /* Run the pre-processing, inference and post-processing. */
-        if (!preProcess.DoPreProcess(inferenceWindow, index)) {
-            printf_err("Pre-processing failed.");
-            return false;
-        }
-        printf("Preprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
+            hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
-        start = ARM_PMU_Get_CCNTR();
-        if (!RunInference(model, profiler)) {
-            printf_err("Inference failed.");
-            return false;
-        }
-        printf("Inference time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            hal_audio_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
-        start = ARM_PMU_Get_CCNTR();
-        if (!postProcess.DoPostProcess()) {
-            printf_err("Post-processing failed.");
-            return false;
-        }
-        printf("Postprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            const int16_t* inferenceWindow = audio_inf;
 
-        /* Add results from this window to our final results vector. */
-        if (infResults.size() == RESULTS_MEMORY) {
-            infResults.erase(infResults.begin());
-        }
-        infResults.emplace_back(kws::KwsResult(singleInfResult,
-                index * secondsPerSample * preProcess.m_audioDataStride,
-                index, scoreThreshold));
+            uint32_t start = ARM_PMU_Get_CCNTR();
+            /* Run the pre-processing, inference and post-processing. */
+            if (!preProcess.DoPreProcess(inferenceWindow, index)) {
+                printf_err("Pre-processing failed.");
+                return false;
+            }
+            printf("Preprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
 
-        send_msg_if_needed(infResults.back());
+            start = ARM_PMU_Get_CCNTR();
+            if (!RunInference(model, profiler)) {
+                printf_err("Inference failed.");
+                return false;
+            }
+            printf("Inference time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
 
-    #if VERIFY_TEST_OUTPUT
-        DumpTensor(outputTensor);
-    #endif /* VERIFY_TEST_OUTPUT */
+            start = ARM_PMU_Get_CCNTR();
+            if (!postProcess.DoPostProcess()) {
+                printf_err("Post-processing failed.");
+                return false;
+            }
+            printf("Postprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
 
-        ctx.Set<int>("index", index + 1);
+            /* Add results from this window to our final results vector. */
+            if (infResults.size() == RESULTS_MEMORY) {
+                infResults.erase(infResults.begin());
+            }
+            infResults.emplace_back(kws::KwsResult(singleInfResult,
+                    index * secondsPerSample * preProcess.m_audioDataStride,
+                    index, scoreThreshold));
 
-        hal_lcd_clear(COLOR_BLACK);
+            send_msg_if_needed(infResults.back());
 
-        if (!PresentInferenceResult(infResults)) {
-            return false;
-        }
+#if VERIFY_TEST_OUTPUT
+            DumpTensor(outputTensor);
+#endif /* VERIFY_TEST_OUTPUT */
 
-        profiler.PrintProfilingResult();
+            hal_lcd_clear(COLOR_BLACK);
 
-        return true;
+            if (!PresentInferenceResult(infResults)) {
+                return false;
+            }
+
+            profiler.PrintProfilingResult();
+
+            ++index;
+
+        } while (true);
     }
 
     static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results)

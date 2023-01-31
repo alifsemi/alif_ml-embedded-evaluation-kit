@@ -42,6 +42,7 @@ namespace app {
     namespace kws {
         extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
+        extern const int g_AudioRate;
     } /* namespace kws */
 } /* namespace app */
 } /* namespace arm */
@@ -67,9 +68,9 @@ void main_loop()
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<int>("index", 0);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
+    caseContext.Set<int>("audioRate", arm::app::kws::g_AudioRate);
     caseContext.Set<float>("scoreThreshold", arm::app::kws::g_ScoreThreshold);  /* Normalised score threshold. */
 
     arm::app::KwsClassifier classifier;  /* classifier wrapper object. */
@@ -80,8 +81,11 @@ void main_loop()
 
     caseContext.Set<const std::vector <std::string>&>("labels", labels);
 
+    bool executionSuccessful = true;
+
     /* Loop. */
     do {
-        alif::app::ClassifyAudioHandler(caseContext);
-    } while (1);
+        executionSuccessful = alif::app::ClassifyAudioHandler(caseContext);
+    } while (executionSuccessful);
+    info("Main loop terminated.\n");
 }

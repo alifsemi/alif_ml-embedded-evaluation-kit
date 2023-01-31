@@ -31,6 +31,10 @@ USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/kws/labels/micronet_kws_labels.txt
     FILEPATH)
 
+USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
+    16000
+    STRING)
+
 USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0, 1.0) that must be applied to the inference results for a label to be deemed valid."
     0.5
     STRING)
@@ -59,6 +63,7 @@ set(EXTRA_MODEL_CODE
     "/* Model parameters for ${use_case} */"
     "extern const int   g_FrameLength    = 640"
     "extern const int   g_FrameStride    = 320"
+    "extern const int   g_AudioRate      = ${${use_case}_AUDIO_RATE}"
     "extern const float g_ScoreThreshold = ${${use_case}_MODEL_SCORE_THRESHOLD}"
     )
 

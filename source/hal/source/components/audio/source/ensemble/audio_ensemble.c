@@ -45,7 +45,7 @@
 static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int samples);
 
 // 24-bit stereo record buffer
-static int32_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __attribute__((section(".bss.audio_rec"))); // stereo record buffer
+static int32_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec"))); // stereo record buffer
 
 #ifdef STORE_AUDIO
 #define AUDIO_STORE_SAMPLES (AUDIO_SAMPLES*10)
