@@ -57,6 +57,7 @@ SECTIONS
     *system_M55_*.c.obj(.text .rodata*)
     *mpu_M55_*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
+    *platform_drivers.c.obj(.text .rodata*)
 
     *(startup_ro_data)
   } > MRAM
