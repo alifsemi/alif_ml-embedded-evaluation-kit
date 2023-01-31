@@ -24,4 +24,4 @@
 	url = https://github.com/ARM-software/Arm-2D.git
 [submodule "dependencies/cmsis-ensemble"]
 	path = dependencies/cmsis-ensemble
-	url = git@github.com:alifsemi/ensemble-cmsis-dfp_DEV.git
+	url = https://github.com/alifsemi/alif_ensemble-cmsis-dfp.git
