@@ -46,14 +46,6 @@
 
 #include CMSIS_device_header
 
-#if defined (M55_HP)
-  #include "M55_HP.h"
-#elif defined (M55_HE)
-  #include "M55_HE.h"
-#else
-  #error device not specified!
-#endif
-
 #if defined(ARM_NPU)
 #include "ethosu_driver.h"
 #include "ethosu_npu_init.h"
@@ -290,35 +282,35 @@ void MPU_Load_Regions(void)
     .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1UL)
     },
     {
-    .RBAR = ARM_MPU_RBAR(SRAM0_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM0_BASE + SRAM0_SIZE - 1, 2UL)     // SRAM0
+    .RBAR = ARM_MPU_RBAR(SRAM0_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM0_BASE + SRAM0_SIZE - 1, 2UL)  // SRAM0
     },
     {
-    .RBAR = ARM_MPU_RBAR(SRAM1_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM1_BASE + SRAM1_SIZE - 1, 2UL)     // SRAM1
+    .RBAR = ARM_MPU_RBAR(SRAM1_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM1_BASE + SRAM1_SIZE - 1, 2UL)  // SRAM1
     },
     {
     .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFFUL, 0UL)     // LP- Peripheral & PINMUX Regions */
+    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFFUL, 0UL)  // LP- Peripheral & PINMUX Regions */
     },
     {
 #if defined(M55_HE)
-    .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, 1UL)     // HP TCM (SRAM2 + SRAM3)
+    .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, 1UL)  // HP TCM (SRAM2 + SRAM3)
 #elif defined(M55_HP)
-    .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, 1UL)     // HE TCM (SRAM4 + SRAM5)
+    .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, 1UL)  // HE TCM (SRAM4 + SRAM5)
 #else
   #error device not specified!
 #endif
     },
     {
-    .RBAR = ARM_MPU_RBAR(SRAM6_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM6_BASE + SRAM6_SIZE - 1, 1UL)     // SRAM6
+    .RBAR = ARM_MPU_RBAR(SRAM6_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM6_BASE + SRAM6_SIZE - 1, 1UL)  // SRAM6
     },
     {
-    .RBAR = ARM_MPU_RBAR(SRAM8_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),	// RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM8_BASE + SRAM8_SIZE - 1, 1UL)     // SRAM8
+    .RBAR = ARM_MPU_RBAR(SRAM8_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM8_BASE + SRAM8_SIZE - 1, 1UL) // SRAM8
     },
     };
 
@@ -326,7 +318,7 @@ void MPU_Load_Regions(void)
     ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR(   /* Attr0, Device Memory */
                             ARM_MPU_ATTR_DEVICE,
                             ARM_MPU_ATTR_DEVICE_nGnRE));
-    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(	/* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
+    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(   /* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
                             ARM_MPU_ATTR_MEMORY_(1,1,1,1),
                             ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
     ARM_MPU_SetMemAttr(2UL, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
