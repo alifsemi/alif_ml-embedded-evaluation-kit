@@ -16,3 +16,12 @@
 [submodule "dependencies/cmsis-nn"]
 	path = dependencies/cmsis-nn
 	url = https://github.com/ARM-software/CMSIS-NN.git
+[submodule "dependencies/lvgl"]
+	path = dependencies/lvgl
+	url = https://github.com/lvgl/lvgl.git
+[submodule "dependencies/Arm-2D"]
+	path = dependencies/Arm-2D
+	url = https://github.com/ARM-software/Arm-2D.git
+[submodule "dependencies/cmsis-ensemble"]
+	path = dependencies/cmsis-ensemble
+	url = https://github.com/alifsemi/alif_ensemble-cmsis-dfp.git

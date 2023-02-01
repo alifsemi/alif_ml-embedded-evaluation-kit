@@ -40,17 +40,6 @@ namespace math {
 #endif /* __ARM_FEATURE_DSP */
     }
 
-    float MathUtils::SqrtF32(float input)
-    {
-#if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
-        float output = 0.f;
-        arm_sqrt_f32(input, &output);
-        return output;
-#else  /* __ARM_FEATURE_DSP */
-        return sqrtf(input);
-#endif /* __ARM_FEATURE_DSP */
-    }
-
     float MathUtils::MeanF32(float* ptrSrc, const uint32_t srcLen)
     {
         if (!srcLen) {

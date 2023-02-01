@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
@@ -95,4 +105,32 @@ target_link_libraries(${LCD_STUBS_COMPONENT_TARGET} PUBLIC
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${LCD_STUBS_COMPONENT_TARGET})
+message(STATUS "*******************************************************")
+
+# Create static library for LVGL LCD
+set(LCD_LVGL_COMPONENT_TARGET lcd_lvgl)
+add_library(${LCD_LVGL_COMPONENT_TARGET} STATIC)
+
+## Include directories - private
+target_include_directories(${LCD_LVGL_COMPONENT_TARGET}
+    PRIVATE
+    source)
+
+## Component sources
+target_sources(${LCD_LVGL_COMPONENT_TARGET}
+    PRIVATE
+    source/glcd_lvgl/glcd_lvgl.c
+    source/glcd_lvgl/lv_font_9x15_h.c
+    source/lcd_img.c)
+
+## Add dependencies
+target_link_libraries(${LCD_LVGL_COMPONENT_TARGET} PUBLIC
+    ${LCD_IFACE_TARGET}
+    lvgl
+    log)
+
+# Display status
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "*******************************************************")
+message(STATUS "Library                                : " ${LCD_LVGL_COMPONENT_TARGET})
 message(STATUS "*******************************************************")

@@ -1,0 +1,71 @@
+def common_funcs
+
+pipeline {
+    agent { label 'build' }
+    stages {
+        stage('Init') {
+            steps {
+                script {
+                    common_funcs = evaluate readTrusted("automation/test_common.groovy");
+                }
+            }
+        }
+        stage('Download dependencies') {
+            steps {
+                script {
+                    common_funcs.download_dependencies()
+                }
+            }
+        }
+        stage('Setup resources') {
+            steps {
+                script {
+                    common_funcs.setup_resources()
+                }
+            }
+        }
+        // First build can end up doing some patching of Tensorflow
+        // so run one build sequentially to start with
+        stage('Build HP GCC Release') {
+            steps {
+                script {
+                    common_funcs.build_hp("Release", "gcc");
+                }
+            }
+        }
+        // Remaining builds can be parallel
+        stage('More builds') {
+            parallel {
+                stage('Build HP GCC Debug') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Debug", "gcc");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+        }
+        cleanup {
+          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+        }
+    }
+}

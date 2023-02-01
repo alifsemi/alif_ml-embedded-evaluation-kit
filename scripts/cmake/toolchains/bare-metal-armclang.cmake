@@ -39,6 +39,9 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(CPU_ID                      M55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
+    set(FLOAT_ABI                   hard)
+    set(ARM_MATH_DSP                1)
+    set(ARM_MATH_LOOPUNROLL         1)
     set(CPU_HEADER_FILE             "${ARM_CPU}.h")
     set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
@@ -72,6 +75,14 @@ endif()
 
 set(${CPU_COMPILE_DEF}              1)
 
+set(CMAKE_C_FLAGS_DEBUG            "-O1 -g"          CACHE STRING "Flags used by the C compiler during DEBUG builds.")
+set(CMAKE_C_FLAGS_MINSIZEREL       "-Oz -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during MINSIZEREL builds.")
+set(CMAKE_C_FLAGS_RELEASE          "-O3 -g -DNDEBUG" CACHE STRING "Flags used by the C compiler during RELEASE builds.")
+
+set(CMAKE_CXX_FLAGS_DEBUG          "-O1 -g"          CACHE STRING "Flags used by the CXX compiler during DEBUG builds.")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Oz -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during MINSIZEREL builds.")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during RELEASE builds.")
+
 # Warning options
 add_compile_options(
     -Wall
@@ -80,29 +91,29 @@ add_compile_options(
 
 # General purpose compile options:
 add_compile_options(
-    -funsigned-char
+    -fdata-sections
     -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
 # Arch compile options:
 add_compile_options(
-    -mthumb
-    --target=arm-arm-non-eabi
-    -mlittle-endian
+    -mfloat-abi=${FLOAT_ABI}
+    --target=arm-arm-none-eabi
     -MD
-    ${CPU_COMPILE_OPTION}
-    ${FLOAT_ABI_COMPILE_OPTION})
+    ${CPU_COMPILE_OPTION})
 
 # Compile definitions:
 add_compile_definitions(
     CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
-    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>)
+    $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
+    $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
+    $<$<BOOL:${ARM_MATH_LOOPUNROLL}>:ARM_MATH_LOOPUNROLL>)
 
 # Link options:
 add_link_options(${CPU_LINK_OPT})
 set(CMAKE_ASM_FLAGS "${CPU_LINK_OPT}")
 
-set(ARMCLANG_INFO_STR "sizes,totals,unused,veneers,summarysizes")
+set(ARMCLANG_INFO_STR "sizes,totals,unused,veneers,summarysizes,inline,tailreorder")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     # For debug builds, we can add stack information too:
     set(ARMCLANG_INFO_STR "${ARMCLANG_INFO_STR},stack,summarystack")
@@ -112,14 +123,15 @@ endif()
 # L6314W = No section matches pattern
 # L6439W = Multiply defined Global Symbol
 add_link_options(
+    "$<$<CONFIG:RELEASE>:--inline>"
+    --tailreorder
     --diag_suppress=L6439W,L6314W
     --info ${ARMCLANG_INFO_STR}
     --strict
     --callgraph
     --no_exceptions
     --load_addr_map_info
-    --xref
-    "$<$<CONFIG:RELEASE>:--no_debug>")
+    --xref)
 
 function(configure_semihosting TARGET_NAME SEMIHOSTING)
     if (${SEMIHOSTING})

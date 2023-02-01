@@ -140,7 +140,7 @@ set(TENSORFLOW_LITE_MICRO_TARGET tensorflow-lite-micro)
 add_library(${TENSORFLOW_LITE_MICRO_TARGET} STATIC IMPORTED)
 
 if(ETHOS_U_NPU_ENABLED)
-    add_dependencies(tensorflow_build ethosu_core_driver)
+    target_link_libraries(tensorflow-lite-micro INTERFACE ethos_u_npu)
 endif()
 
 add_dependencies(tensorflow-lite-micro tensorflow_build)

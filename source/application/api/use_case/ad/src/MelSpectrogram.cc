@@ -155,9 +155,7 @@ namespace audio {
 
     void MelSpectrogram::ConvertToLogarithmicScale(std::vector<float>& melEnergies)
     {
-        for (float& melEnergy : melEnergies) {
-            melEnergy = logf(melEnergy);
-        }
+        math::MathUtils::VecLogarithmF32(melEnergies, melEnergies);
     }
 
     void MelSpectrogram::ConvertToPowerSpectrum()

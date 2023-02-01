@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
@@ -39,11 +49,11 @@ USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the tensor flow directory"
     "${DEPENDENCY_ROOT_DIR}/tensorflow"
     PATH)
 
-USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: mps3, simple_platform, native"
+USER_OPTION(TARGET_PLATFORM "Target platform to execute evaluation application: mps3, simple_platform, native or ensemble"
     mps3
     STRING)
 
-USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300, sse-310 or none"
+USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300, sse-310, RTSS-HP, RTSS-HE or none"
     sse-300
     STRING)
 
@@ -94,6 +104,16 @@ if (NOT TARGET_PLATFORM STREQUAL native)
     USER_OPTION(CMSIS_NN_SRC_PATH
         "Path to CMSIS-5 NN sources"
         "${DEPENDENCY_ROOT_DIR}/cmsis-nn"
+        PATH)
+
+    USER_OPTION(LVGL_SRC_PATH
+        "Path to LVGL sources"
+        "${DEPENDENCY_ROOT_DIR}/lvgl"
+        PATH)
+
+    USER_OPTION(ARM_2D_SRC_PATH
+        "Path to Arm-2D sources"
+        "${DEPENDENCY_ROOT_DIR}/Arm-2D"
         PATH)
 
     # If we need NPU libraries:

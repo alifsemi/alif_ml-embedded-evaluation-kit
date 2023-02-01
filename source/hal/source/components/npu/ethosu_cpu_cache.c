@@ -1,3 +1,15 @@
+/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /*
  * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
@@ -52,6 +64,29 @@ static cpu_cache_state* ethosu_get_cpu_cache_state(void)
     return &s_cache_state;
 }
 
+bool __attribute__((weak)) ethosu_area_needs_flush_dcache(const uint32_t *p, size_t bytes)
+{
+    UNUSED(p);
+    UNUSED(bytes);
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    return SCB->CCR & SCB_CCR_DC_Msk;
+#else
+    return false;
+#endif
+
+}
+
+bool __attribute__((weak)) ethosu_area_needs_invalidate_dcache(const uint32_t *p, size_t bytes)
+{
+    UNUSED(p);
+    UNUSED(bytes);
+#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
+    return SCB->CCR & SCB_CCR_DC_Msk;
+#else
+    return false;
+#endif
+}
+
 void ethosu_clear_cache_states(void)
 {
     cpu_cache_state* const state = ethosu_get_cpu_cache_state();
@@ -62,11 +97,8 @@ void ethosu_clear_cache_states(void)
 
 void ethosu_flush_dcache(uint32_t *p, size_t bytes)
 {
-    UNUSED(p);
-    UNUSED(bytes);
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     cpu_cache_state* const state = ethosu_get_cpu_cache_state();
-    if (SCB->CCR & SCB_CCR_DC_Msk) {
+    if (ethosu_area_needs_flush_dcache(p, bytes)) {
 
         /**
          * @note We could choose to call the `SCB_CleanDCache_by_Addr` function
@@ -95,30 +127,30 @@ void ethosu_flush_dcache(uint32_t *p, size_t bytes)
             state->dcache_cleaned     = 1;
             state->dcache_invalidated = 0;
         }
+    } else {
+        __DSB();
     }
-#endif /* defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U) */
 }
 
 void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
 {
-    UNUSED(p);
-    UNUSED(bytes);
-#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     cpu_cache_state* const state = ethosu_get_cpu_cache_state();
-    if (SCB->CCR & SCB_CCR_DC_Msk) {
+    if (ethosu_area_needs_invalidate_dcache(p, bytes)) {
         /**
          * See note in ethosu_flush_dcache function for why we clean the whole
          * cache instead of calling it for specific addresses.
          **/
         if (!state->dcache_invalidated) {
             trace("Invalidating data cache\n");
-            SCB_InvalidateDCache();
+            /* Not safe to simply invalidate without cleaning unless we know there are no write-back areas in the system */
+            SCB_CleanInvalidateDCache();
 
             /** Assert the cache invalidation state and clear the clean
              *  state. */
             state->dcache_invalidated = 1;
             state->dcache_cleaned     = 0;
         }
+    } else {
+        __DSB();
     }
-#endif /* defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U) */
 }

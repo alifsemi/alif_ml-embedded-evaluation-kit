@@ -1,3 +1,15 @@
+/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+
+/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /*
  * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
@@ -109,10 +121,9 @@ namespace audio {
 
             /* Take DCT. Uses matrix mul. */
             for (size_t i = 0, j = 0; i < mfccOut.size(); ++i, j += numFbankBins) {
-                float sum = 0;
-                for (size_t k = 0; k < numFbankBins; ++k) {
-                    sum += this->m_dctMatrix[j + k] * this->m_melEnergies[k];
-                }
+
+                float sum = math::MathUtils::DotProductF32(this->m_dctMatrix.data() + j, this->m_melEnergies.data(), numFbankBins);
+
                 /* Quantize to T. */
                 sum = std::round((sum / quantScale) + quantOffset);
                 mfccOut[i] = static_cast<T>(std::min<float>(std::max<float>(sum, minVal), maxVal));

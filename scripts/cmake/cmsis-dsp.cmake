@@ -1,3 +1,13 @@
+# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
 #  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
@@ -70,7 +80,24 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 # 5. General compile definitions
-target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC ARM_MATH_LOOPUNROLL)
+target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC
+    ARM_MATH_LOOPUNROLL
+    ARM_DSP_CONFIG_TABLES
+    ARM_FFT_ALLOW_TABLES
+    ARM_TABLE_TWIDDLECOEF_F32_256
+    ARM_TABLE_TWIDDLECOEF_F32_512
+    ARM_TABLE_TWIDDLECOEF_F32_1024
+    ARM_TABLE_TWIDDLECOEF_RFFT_F32_512
+    ARM_TABLE_TWIDDLECOEF_RFFT_F32_1024
+    ARM_TABLE_BITREVIDX_FXT_256
+    ARM_TABLE_BITREVIDX_FLT_256
+    ARM_TABLE_BITREVIDX_FXT_512
+    ARM_TABLE_BITREVIDX_FLT_512 # see https://github.com/ARM-software/CMSIS-DSP/issues/61
+    ARM_TABLE_BITREVIDX_FXT_1024
+    ARM_TABLE_BITREVIDX_FLT_1024
+    ARM_FAST_ALLOW_TABLES
+    ARM_ALL_FAST_TABLES
+)
 
 # 6. Provide the library path for the top level CMake to use:
 set(CMSIS_DSP_LIB   "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${CMSIS_DSP_TARGET}.a")
