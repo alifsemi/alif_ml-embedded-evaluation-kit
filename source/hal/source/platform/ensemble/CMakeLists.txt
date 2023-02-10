@@ -103,6 +103,7 @@ include
 )
 
 target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
+    TARGET_BOARD=BOARD_${TARGET_BOARD}
     CONSOLE_UART=${CONSOLE_UART}
 )
 

@@ -39,9 +39,9 @@
 #include <string.h>
 #include <stdatomic.h>
 #include "Driver_PINMUX_AND_PINPAD.h"
+#include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
-
 
 #define CNTLQ     0x11
 #define CNTLS     0x13
@@ -74,6 +74,32 @@ uint16_t prefix_len;
 static int hardware_init(void)
 {
     int32_t ret;
+
+#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+
+#if CONSOLE_UART == 2
+    /* PINMUX UART2_A */
+
+    /* Configure GPIO Pin : P1_11 as UART2_TX_A */
+    ret = PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_11, PINMUX_ALTERNATE_FUNCTION_1);
+    if(ret != ARM_DRIVER_OK)
+    {
+        return -1;
+    }
+#elif CONSOLE_UART == 4
+    /* PINMUX UART4_A */
+
+    /* Configure GPIO Pin : P1_3 as UART4_TX_A */
+    ret = PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_1);
+    if(ret != ARM_DRIVER_OK)
+    {
+        return -1;
+    }
+#else
+    #error "Unsupported UART!"
+#endif
+
+#elif TARGET_BOARD == BOARD_DevKit
 
 #if CONSOLE_UART == 2
     /* PINMUX UART2_B */
@@ -109,6 +135,8 @@ static int hardware_init(void)
     }
 #else
     #error "Unsupported UART!"
+#endif
+
 #endif
 
     return 0;

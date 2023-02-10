@@ -51,18 +51,16 @@ target_include_directories(${AUDIO_IFACE_TARGET}
 set(AUDIO_ENSEMBLE_COMPONENT_TARGET audio_ensemble)
 add_library(${AUDIO_ENSEMBLE_COMPONENT_TARGET} STATIC)
 
-
-## Include directories - private
-target_include_directories(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
-    PRIVATE
-    source
-    source/ensemble)
-
 ## Component sources
 target_sources(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
     PRIVATE
     source/ensemble/audio_ensemble.c
     source/ensemble/mic_listener.c)
+
+# Ensemble TARGET_BOARD needs to be set
+target_compile_definitions(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
+    PRIVATE
+    TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 ## Logging utilities:
 if (NOT TARGET log)

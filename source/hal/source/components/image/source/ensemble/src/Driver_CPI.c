@@ -40,7 +40,78 @@ static void CameraEventHandler(uint32_t event)
 
 static int32_t camera_hw_init()
 {
-    int32_t res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_8, PINMUX_ALTERNATE_FUNCTION_3);
+    int32_t res = ARM_DRIVER_OK;
+
+#if TARGET_BOARD == BOARD_AppKit_Alpha1
+    /* Configure GPIO Pin : P2_22 as I2C_SDA */
+    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_22, PINMUX_ALTERNATE_FUNCTION_0);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    /* Configure GPIO Pin : P2_23 as I2C_SCL */
+    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_23, PINMUX_ALTERNATE_FUNCTION_0);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_22, \
+				    PAD_FUNCTION_READ_ENABLE |
+				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_23, \
+				    PAD_FUNCTION_READ_ENABLE |
+				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    /* Configure P3_15 as pixel clock output */
+    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_15, PINMUX_ALTERNATE_FUNCTION_7);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+#elif TARGET_BOARD == BOARD_AppKit_Alpha2
+
+    /* Configure GPIO Pin : P2_6 as I3C_SDA */
+    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_6, PINMUX_ALTERNATE_FUNCTION_3);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    /* Configure GPIO Pin : P2_7 as I3C_SCL */
+    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_3);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_6, \
+				    PAD_FUNCTION_READ_ENABLE |
+				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_7, \
+				    PAD_FUNCTION_READ_ENABLE |
+				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    /* Configure P3_15 as pixel clock output */
+    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_15, PINMUX_ALTERNATE_FUNCTION_7);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+#elif TARGET_BOARD == BOARD_DevKit
+    /* Configure GPIO Pin : P3_8 as I3C_SDA_B */
+    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_8, PINMUX_ALTERNATE_FUNCTION_3);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
@@ -77,11 +148,13 @@ static int32_t camera_hw_init()
         return res;
     }
 
+    /* Configure P2_7 as pixel clock output */
     res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_6);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
 
+#endif
     return res;
 }
 

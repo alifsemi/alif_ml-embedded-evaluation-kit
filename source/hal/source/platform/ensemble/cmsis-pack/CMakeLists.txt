@@ -70,10 +70,14 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
     )
 
 # Device definition needs to be set, is checked in source files to include correct header
-target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
+target_compile_definitions(${CMSIS_DEVICE_TARGET}
+    PUBLIC
+    ${ARM_CPU}
+    TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 # Tell linker that reset interrupt handler is our entry point
 target_link_options(

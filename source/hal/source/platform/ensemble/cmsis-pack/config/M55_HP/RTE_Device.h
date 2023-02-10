@@ -13,9 +13,13 @@
 #ifndef __RTE_DEVICE_H
 #define __RTE_DEVICE_H
 
+#define BOARD_DevKit        1
+#define BOARD_AppKit_Alpha1 2
+#define BOARD_AppKit_Alpha2 3
+
 // <e> SILICON_REV_A  (Silicon Revison)
 // <i> Select if the Chip Silicon Rev is Ax
-#define RTE_SILICON_REV_A 	1
+#define RTE_SILICON_REV_A	1
 #if RTE_SILICON_REV_A
 #define RTE_SILICON_REV_A0      0
 #define RTE_SILICON_REV_A1      1
@@ -434,6 +438,17 @@
 // <i> Default: 4
 #define RTE_ILI9806E_PANEL_RESET_GPIO_PORT               4
 
+#if TARGET_BOARD == BOARD_AppKit_Alpha2
+// <o> ILI9806 LCD panel back light pin number
+// <i> Defines ILI9806 LCD panel back light pin number.
+// <i> Default: 4
+#define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 19
+
+// <o> ILI9806 LCD panel back light pin GPIO port number
+// <i> Defines ILI9806 LCD panel back light pin GPIO port number.
+// <i> Default: 4
+#define RTE_ILI9806E_PANEL_BL_LED_GPIO_PORT              3
+#else
 // <o> ILI9806 LCD panel back light pin number
 // <i> Defines ILI9806 LCD panel back light pin number.
 // <i> Default: 4
@@ -443,6 +458,7 @@
 // <i> Defines ILI9806 LCD panel back light pin GPIO port number.
 // <i> Default: 4
 #define RTE_ILI9806E_PANEL_BL_LED_GPIO_PORT              4
+#endif
 
 #if (RTE_ILI9806E_PANEL_E43RB_FW405_EN || RTE_ILI9806E_PANEL_E43GB_MW405_EN)
 
@@ -568,6 +584,17 @@
 // <i> Default: 2
 #define RTE_GT911_TOUCH_RESET_PIN_NO      2
 
+#if TARGET_BOARD == BOARD_AppKit_Alpha2
+// <o> GT911 Touch screen INT pin GPIO port number
+// <i> Defines GT911 Touch screen INT pin GPIO port number.
+// <i> Default: 2
+#define RTE_GT911_TOUCH_INT_GPIO_PORT     2
+
+// <o> GT911 Touch screen INT pin number
+// <i> Defines GT911 Touch screen INT pin number.
+// <i> Default: 20
+#define RTE_GT911_TOUCH_INT_PIN_NO        21
+#else
 // <o> GT911 Touch screen INT pin GPIO port number
 // <i> Defines GT911 Touch screen INT pin GPIO port number.
 // <i> Default: 2
@@ -577,6 +604,8 @@
 // <i> Defines GT911 Touch screen INT pin number.
 // <i> Default: 20
 #define RTE_GT911_TOUCH_INT_PIN_NO        20
+#endif
+
 #endif
 
 #endif
@@ -708,7 +737,7 @@
 #define RTE_I2S0_SCLKG_CLOCK_CYCLES 0
 #define RTE_I2S0_RX_TRIG_LVL 7
 #define RTE_I2S0_TX_TRIG_LVL 8
-#define RTE_I2S0_IRQ_PRI     0
+#define RTE_I2S0_IRQ_PRI     10
 #define RTE_I2S0_CLK_SOURCE  1
 #define RTE_I2S0_DMA_ENABLE  1
 #define RTE_I2S0_DMA_IRQ_PRI RTE_I2S0_IRQ_PRI
@@ -717,13 +746,13 @@
 
 // <e> I2S1 (Integrated Interchip Sound 1) [Driver_SAI1]
 // <i> Configuration settings for Driver_SAI1 in component ::Drivers:SAI
-#define RTE_I2S1 0
+#define RTE_I2S1 1
 #ifdef RTE_I2S1
 #define RTE_I2S1_WSS_CLOCK_CYCLES 2
 #define RTE_I2S1_SCLKG_CLOCK_CYCLES 0
 #define RTE_I2S1_RX_TRIG_LVL 7
 #define RTE_I2S1_TX_TRIG_LVL 8
-#define RTE_I2S1_IRQ_PRI     0
+#define RTE_I2S1_IRQ_PRI     10
 #define RTE_I2S1_CLK_SOURCE  1
 #define RTE_I2S1_DMA_ENABLE  1
 #define RTE_I2S1_DMA_IRQ_PRI RTE_I2S1_IRQ_PRI
@@ -747,13 +776,13 @@
 
 // <e> I2S3 (Integrated Interchip Sound 3) [Driver_SAI3]
 // <i> Configuration settings for Driver_SAI3 in component ::Drivers:SAI
-#define RTE_I2S3 0
+#define RTE_I2S3 1
 #ifdef RTE_I2S3
 #define RTE_I2S3_WSS_CLOCK_CYCLES 2
 #define RTE_I2S3_SCLKG_CLOCK_CYCLES 0
 #define RTE_I2S3_RX_TRIG_LVL 7
 #define RTE_I2S3_TX_TRIG_LVL 8
-#define RTE_I2S3_IRQ_PRI     0
+#define RTE_I2S3_IRQ_PRI     10
 #define RTE_I2S3_CLK_SOURCE  1
 #define RTE_I2S3_DMA_ENABLE  1
 #define RTE_I2S3_DMA_IRQ_PRI RTE_I2S3_IRQ_PRI
