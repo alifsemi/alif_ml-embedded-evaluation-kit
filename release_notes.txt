@@ -82,7 +82,7 @@ Changes in 20.08 release:
     * Added keyword spotting use case example.
     * Added person detection use case example.
 Known issues:
-    * telnet connection to FastModel environment may hang after some period of inactivity.
+    * telnet connection to FastModel environment may stop responding after some period of inactivity.
 
 Changes in 20.05 release:
     * FastModel environment was built with FastModel Tools v11.10.22.
@@ -93,4 +93,4 @@ Changes in 20.05 release:
     * Used EAC NPU software model and drivers.
     * Windows support for build scripts.
 Known issues:
-    * telnet connection to FastModel environment may hang after some period of inactivity.
+    * telnet connection to FastModel environment may stop responding after some period of inactivity.

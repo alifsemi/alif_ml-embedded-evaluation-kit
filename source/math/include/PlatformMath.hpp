@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -150,7 +150,7 @@ namespace math {
          *                       array.
          * @param[in]   srcLen   Number of elements in the array/vector.
          * @param[out]  ptrDst   Output buffer to be populated.
-         * @param[in]   dstLen   Output buffer len (for sanity check only).
+         * @param[in]   dstLen   Output buffer len (for health check only).
          * @return      true if successful, false otherwise.
          */
         static bool ComplexMagnitudeSquaredF32(float* ptrSrc,
