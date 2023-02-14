@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,12 +74,17 @@ SECTIONS
     KEEP(*(.vectors))
 
     /**
-     * All code goes here, with one exception of
-     * all_ops_resolver object file. This code
-     * instead placed on BRAM. See comment in the
-     * BRAM section for details.
-     **/
-    *(EXCLUDE_FILE(*all_ops_resolver.o *hal.c.obj) .text*)
+     * Any code that is not time sensitive can be excluded from here.
+     * This code is instead placed on BRAM. See comment in the BRAM
+     * section for details.
+     */
+    *(EXCLUDE_FILE(*all_ops_resolver.o
+                   *hal.c.obj
+                   *_allocator.o
+                   *flatbuffer*.o
+                   *lcd*.obj
+                   *timing_adapter.c.obj)
+    .text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
@@ -237,6 +242,14 @@ SECTIONS
     *all_ops_resolver.o (*.text*)
     . = ALIGN(4);
     *hal.c.obj (*.text*)
+    . = ALIGN(4);
+    *_allocator.o (*.text*)
+    . = ALIGN(4);
+    *flatbuffer*.o (*.text*)
+    . = ALIGN(4);
+    *lcd*.obj (*.text*)
+    . = ALIGN(4);
+    *timing_adapter.* (*.text*)
     . = ALIGN(4);
 
     __data_end__ = .;
