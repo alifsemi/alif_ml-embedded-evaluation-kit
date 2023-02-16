@@ -37,4 +37,7 @@ int wait_for_audio(void);
  * the next asynchronous get into a separate buffer before running on the previous one. */
 void audio_preprocessing(int16_t *data, int len);
 
+/* Set fixed microphone gain */
+void set_audio_gain(float gain_db);
+
 #endif // AUDIO_DATA_H

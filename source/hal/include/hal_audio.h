@@ -42,4 +42,6 @@
 
 #define hal_audio_preprocessing(data, len) audio_preprocessing(data, len)
 
+#define hal_set_audio_gain(gain_db) set_audio_gain(gain_db)
+
 #endif // HAL_DATA_H

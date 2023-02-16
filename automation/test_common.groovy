@@ -17,7 +17,7 @@ def setup_resources() {
 def build_hp(String build_type, String toolchain) {
 
     build_path = "build_${toolchain}_hp_${build_type}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class\\;alif_object_detection -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class\\;alif_object_detection\\;alif_ad\\;alif_vww -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG"
 
     sh """#!/bin/bash
         export PATH=$PATH:/opt/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi/bin
