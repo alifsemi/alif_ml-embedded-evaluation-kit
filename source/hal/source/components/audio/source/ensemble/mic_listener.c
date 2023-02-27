@@ -15,12 +15,17 @@
 #include <assert.h>
 
 /* Project Includes */
+#include <RTE_Device.h>
 #include <Driver_SAI.h>
 #include <Driver_PINMUX_AND_PINPAD.h>
 
 #include "mic_listener.h"
 
-#define I2S_BUS_NUMBER 2   // We use I2S Controller 2.
+#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+#define I2S_BUS_NUMBER 1   // Alif AI/ML App Kit
+#elif TARGET_BOARD == BOARD_DevKit
+#define I2S_BUS_NUMBER 2   // Alif Development Kit
+#endif
 
 ARM_DRIVER_SAI       *i2s_drv;
 
@@ -53,14 +58,42 @@ void i2s_callback(uint32_t event)
 */
 void i2s_pinmux_config(void)
 {
-    /* Configure I2S2 WS */
+#if I2S_BUS_NUMBER == 0
+
+    /* AppKit MIC1 pair */
+    /* Configure I2S0 WS B */
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_31, PINMUX_ALTERNATE_FUNCTION_3);
+
+    /* Configure I2S0 SCLK B */
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_30, PINMUX_ALTERNATE_FUNCTION_2);
+
+    /* Configure I2S0 SDI B */
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_28, PINMUX_ALTERNATE_FUNCTION_3);
+
+#elif I2S_BUS_NUMBER == 1
+
+    /* AppKit MIC2 pair */
+    /* Configure I2S1 WS B */
+    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_3);
+
+    /* Configure I2S1 SCK B */
+    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_6, PINMUX_ALTERNATE_FUNCTION_2);
+
+    /* Configure I2S1 SDI B */
+    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_3);
+
+#elif I2S_BUS_NUMBER == 2
+
+    /* Configure I2S2 WS A */
     PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_2);
 
-    /* Configure I2S2 SCLK */
+    /* Configure I2S2 SCLK A */
     PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_3);
 
-    /* Configure I2S2 SDI */
+    /* Configure I2S2 SDI A */
     PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_1, PINMUX_ALTERNATE_FUNCTION_3);
+
+#endif
 }
 
 int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)

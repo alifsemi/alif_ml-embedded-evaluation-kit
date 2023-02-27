@@ -66,6 +66,7 @@ static const char* s_platform_name = DESIGN_NAME;
 
 static void MHU_msg_received(void* data);
 extern ARM_DRIVER_GPIO Driver_GPIO1;
+extern ARM_DRIVER_GPIO Driver_GPIO2;
 extern ARM_DRIVER_GPIO Driver_GPIO3;
 
 // IPC callback
@@ -136,19 +137,63 @@ void init_trigger_rx(void)
 {
     services_init(MHU_msg_received);
 
+#if TARGET_BOARD == BOARD_AppKit_Alpha1
+
+    Driver_GPIO2.Initialize(PIN_NUMBER_7, NULL);
+    Driver_GPIO2.PowerControl(PIN_NUMBER_7, ARM_POWER_FULL);
+    Driver_GPIO2.SetValue(PIN_NUMBER_7, GPIO_PIN_OUTPUT_STATE_HIGH);
+    Driver_GPIO2.SetDirection(PIN_NUMBER_7, GPIO_PIN_DIRECTION_OUTPUT);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_0);
+
+#elif TARGET_BOARD == BOARD_AppKit_Alpha2
+
+    Driver_GPIO2.Initialize(PIN_NUMBER_26, NULL);
+    Driver_GPIO2.PowerControl(PIN_NUMBER_26, ARM_POWER_FULL);
+    Driver_GPIO2.SetValue(PIN_NUMBER_26, GPIO_PIN_OUTPUT_STATE_HIGH);
+    Driver_GPIO2.SetDirection(PIN_NUMBER_26, GPIO_PIN_DIRECTION_OUTPUT);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_26, PINMUX_ALTERNATE_FUNCTION_0);
+
+    // Initialize GPIOs to capture the buttons state
+
+    Driver_GPIO2.Initialize(PIN_NUMBER_27, NULL);
+    Driver_GPIO2.PowerControl(PIN_NUMBER_27, ARM_POWER_FULL);
+    Driver_GPIO2.SetDirection(PIN_NUMBER_27, GPIO_PIN_DIRECTION_INPUT);
+    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_27, PINMUX_ALTERNATE_FUNCTION_0);
+    PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_27, PAD_FUNCTION_READ_ENABLE | \
+                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
+                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
+
+    Driver_GPIO3.Initialize(PIN_NUMBER_18, NULL);
+    Driver_GPIO3.PowerControl(PIN_NUMBER_18, ARM_POWER_FULL);
+    Driver_GPIO3.SetDirection(PIN_NUMBER_18, GPIO_PIN_DIRECTION_INPUT);
+    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_18, PINMUX_ALTERNATE_FUNCTION_0);
+    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_18, PAD_FUNCTION_READ_ENABLE | \
+                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
+                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
+
+#elif TARGET_BOARD == BOARD_DevKit
+
     // Initialize GPIOs to capture the buttons state
 
     Driver_GPIO1.Initialize(PIN_NUMBER_12, NULL);
     Driver_GPIO1.PowerControl(PIN_NUMBER_12, ARM_POWER_FULL);
     Driver_GPIO1.SetDirection(PIN_NUMBER_12, GPIO_PIN_DIRECTION_INPUT);
     PINMUX_Config(PORT_NUMBER_1, PIN_NUMBER_12, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_1, PIN_NUMBER_12, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
+    PINPAD_Config(PORT_NUMBER_1, PIN_NUMBER_12, PAD_FUNCTION_READ_ENABLE | \
+                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
+                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
 
     Driver_GPIO3.Initialize(PIN_NUMBER_4, NULL);
     Driver_GPIO3.PowerControl(PIN_NUMBER_4, ARM_POWER_FULL);
     Driver_GPIO3.SetDirection(PIN_NUMBER_4, GPIO_PIN_DIRECTION_INPUT);
     PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_4, (PAD_FUNCTION_READ_ENABLE|PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE|PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z));
+    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_4, PAD_FUNCTION_READ_ENABLE | \
+                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
+                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
+
+#else
+    #error "TARGET_BOARD does not seem to be defined"
+#endif
 }
 
 void init_trigger_tx(void)
@@ -156,9 +201,13 @@ void init_trigger_tx(void)
     services_init(ipc_rx_callback);
 }
 
+#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+static atomic_int do_inference_once = false;
+#elif TARGET_BOARD == BOARD_DevKit
 static atomic_int do_inference_once = true;
 static bool last_btn0 = false;
 static bool last_btn1 = false;
+#endif
 
 static void MHU_msg_received(void* data)
 {
@@ -187,6 +236,17 @@ static void MHU_msg_received(void* data)
 
 bool run_requested(void)
 {
+#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+
+    bool ret = true;
+    if (do_inference_once)
+    {
+        ret = false;
+    }
+    return ret;
+
+#elif TARGET_BOARD == BOARD_DevKit
+
     bool ret = true;
     bool new_btn0, new_btn1;
     uint32_t pin_state0, pin_state1;
@@ -210,6 +270,8 @@ bool run_requested(void)
     last_btn0 = new_btn0;
     last_btn1 = new_btn1;
     return ret;
+
+#endif
 }
 
 uint64_t ethosu_address_remap(uint64_t address, int index)
