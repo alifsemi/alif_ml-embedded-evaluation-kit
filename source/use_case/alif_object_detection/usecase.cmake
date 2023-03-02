@@ -43,6 +43,14 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     0x00082000
     STRING)
 
+USER_OPTION(${use_case}_SHOW_INF_TIME "Show inference time"
+    OFF
+    BOOL)
+
+set(${use_case}_COMPILE_DEFS
+    SHOW_INF_TIME=$<BOOL:${${use_case}_SHOW_INF_TIME}>
+)
+
 if (ETHOS_U_NPU_ENABLED)
     set(DEFAULT_MODEL_PATH      ${RESOURCES_DIR}/object_detection/yolo-fastest_192_face_v4_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
 else()

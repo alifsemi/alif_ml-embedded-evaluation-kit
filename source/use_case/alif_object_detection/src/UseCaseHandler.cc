@@ -172,6 +172,10 @@ using namespace arm::app::object_detection;
 
             const size_t copySz = inputTensor->bytes;
 
+#if SHOW_INF_TIME
+        uint32_t inf_prof = ARM_PMU_Get_CCNTR();
+#endif
+
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(currImage, copySz)) {
                 printf_err("Pre-processing failed.");
@@ -189,6 +193,11 @@ using namespace arm::app::object_detection;
                 printf_err("Post-processing failed.");
                 return false;
             }
+
+#if SHOW_INF_TIME
+            inf_prof = ARM_PMU_Get_CCNTR() - inf_prof;
+            lv_label_set_text_fmt(ScreenLayoutTimeObject(), "%.3f ms", (double)inf_prof / SystemCoreClock * 1000);
+#endif
 
             lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "%i", results.size());
 

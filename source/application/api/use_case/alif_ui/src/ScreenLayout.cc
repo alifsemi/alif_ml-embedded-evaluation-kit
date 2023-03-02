@@ -24,6 +24,7 @@ namespace app {
 namespace {
 lv_obj_t *labelResult[5];
 lv_obj_t *labelHeader;
+lv_obj_t *labelTime;
 lv_obj_t *imageObj;
 lv_obj_t *imageHolder;
 lv_obj_t *ledObj;
@@ -32,6 +33,7 @@ lv_obj_t *ledObj;
 
 static lv_style_t confident;
 static lv_style_t weak;
+static lv_style_t tiny;
 
 #define DISP_SCALE 2
 void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int imgHeight, unsigned short imgZoom)
@@ -122,8 +124,11 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_style_set_text_color(&weak, lv_color_hex(0xcccccc));
     lv_style_set_text_font(&weak, &lv_font_montserrat_24);
 
+    lv_style_init(&tiny);
+    lv_style_set_text_font(&tiny, &lv_font_montserrat_12);
+
     /*Create a Label in the results area */
-    labelHeader =  lv_label_create(resultHolder);
+    labelHeader = lv_label_create(resultHolder);
 
     lv_label_set_text_static(labelHeader, "");
 
@@ -150,6 +155,13 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
         lv_obj_add_style(lbl, &confident, LV_STATE_USER_1);
         lv_obj_add_style(lbl, &weak, LV_STATE_USER_2);
     }
+
+    /* Teeny label for time indicator */
+    labelTime = lv_label_create(resultHolder);
+    lv_label_set_text(labelTime, "");
+    lv_obj_set_style_text_align(labelTime, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+    lv_obj_set_align(labelTime, LV_ALIGN_BOTTOM_RIGHT);
+    lv_obj_add_style(labelTime, &tiny, LV_PART_MAIN);
 
     /* Centre the image in its holder */
     imageObj = lv_img_create(imageHolder);
@@ -193,6 +205,11 @@ lv_obj_t *ScreenLayoutHeaderObject()
 lv_obj_t *ScreenLayoutLabelObject(int n)
 {
     return labelResult[n];
+}
+
+lv_obj_t *ScreenLayoutTimeObject()
+{
+    return labelTime;
 }
 
 lv_obj_t *ScreenLayoutLEDObject()

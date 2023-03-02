@@ -175,6 +175,10 @@ namespace app {
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->bytes;
 
+#if SHOW_INF_TIME
+        uint32_t inf_prof = ARM_PMU_Get_CCNTR();
+#endif
+
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(image_data, imgSz)) {
             printf_err("Pre-processing failed.");
@@ -190,6 +194,10 @@ namespace app {
             printf_err("Post-processing failed.");
             return false;
         }
+
+#if SHOW_INF_TIME
+        inf_prof = ARM_PMU_Get_CCNTR() - inf_prof;
+#endif
 
         /* Add results to context for access outside handler. */
         ctx.Set<std::vector<ClassificationResult>>("results", results);
@@ -209,6 +217,10 @@ namespace app {
                 lv_obj_clear_state(label, LV_STATE_USER_2);
             }
         }
+
+#if SHOW_INF_TIME
+        lv_label_set_text_fmt(ScreenLayoutTimeObject(), "%.3f ms", (double)inf_prof / SystemCoreClock * 1000);
+#endif
         lv_port_unlock(lv_lock_state);
 
         if (!PresentInferenceResult(results)) {
