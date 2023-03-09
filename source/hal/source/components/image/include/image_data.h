@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-int image_init();
+int image_init(void);
 
 const uint8_t *get_image_data(int width, int height);
 

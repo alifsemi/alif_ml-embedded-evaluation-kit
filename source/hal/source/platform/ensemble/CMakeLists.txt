@@ -132,17 +132,17 @@ add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART" FORCE)
 add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
-## Platform component: audio
-add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
-
-## Platform component image
-add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
-
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
 ## Platform component: lvgl port
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
+
+## Platform component: audio
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
+## Platform component: image
+add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
