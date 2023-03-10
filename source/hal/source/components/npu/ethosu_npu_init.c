@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,7 @@ int arm_ethosu_npu_init(void)
     arm_ethosu_npu_irq_init();
 
     /* Initialise Ethos-U device */
-    const void *ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
+    void* const ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
 
     if (0 != (err = ethosu_init(
                   &ethosu_drv,            /* Ethos-U driver device pointer */

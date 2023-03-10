@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -381,7 +381,7 @@ def set_up_resources(
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
-    vela_version = "3.6.0"
+    vela_version = "3.7.0"
     py3_major_version_minimum = 3  # Python >= 3.7 is required
     py3_minor_version_minimum = 7
 

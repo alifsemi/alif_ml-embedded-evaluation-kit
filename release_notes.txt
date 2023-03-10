@@ -1,3 +1,10 @@
+Changes in 23.02
+    * Support for 23.02 NPU components and dependencies (core-driver, core-platform, Vela 3.7.0, CMSIS, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro).
+    * Improvement to PMU counters - reducing cache maintenance burden for Arm Cortex-M55 CPUs when NPU is used.
+    * Inclusive language updates.
+    * Documentation updates including adding links to AN555 resources.
+    * Updates to Python requirements file for virtual environment.
+
 Changes in 22.11
     * Support for 22.11 NPU components and dependencies (core-driver, core-platform, Vela 3.6.0, CMSIS, TensorFlow Lite Micro)
     * CMSIS-NN is added as a new dependency due to it moving out of the core CMSIS repository.
