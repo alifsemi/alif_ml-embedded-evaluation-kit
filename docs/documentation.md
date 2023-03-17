@@ -23,6 +23,7 @@
 - Arm® and Corstone™ are registered trademarks or trademarks of Arm® Limited (or its subsidiaries) in the US and/or
   elsewhere.
 - Arm®, Keil® and µVision® are registered trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+- Microsoft® and Windows® are proprietary registered trademarks of Microsoft and its group of companies.
 - TensorFlow™, the TensorFlow logo, and any related marks are trademarks of Google Inc.
 
 ## Prerequisites

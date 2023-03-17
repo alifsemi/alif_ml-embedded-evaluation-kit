@@ -10,6 +10,7 @@
     - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
   - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
+  - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
 
 ## Inference results are incorrect for my custom files
 
@@ -268,9 +269,28 @@ Please include the complete backtrace with any bug report.
 See <https://bugs.linaro.org/> for instructions.
 ```
 
-This is expected to be fixed in the next release of the toolchain. We recommend using the previous version 11.3.Rel1
-(from August 2022).
+It has been worked around by a CMSIS-NN patch from Dec 23, 2023. Make sure you are on a later commit of CMSIS-NN.
 
 See
 - [GCC patches: PR107987](https://gcc.gnu.org/pipermail/gcc-patches/2022-December/607963.html)
 - [CMSIS-NN issue 13](https://github.com/ARM-software/CMSIS-NN/issues/13)
+- [Workaround for GNU Toolchain 12.x bug ](https://github.com/ARM-software/CMSIS-NN/commit/245089501eef18e8b638865c5afd6cdf2d03386f)
+
+## Build issues with WSL2
+
+Builds using Windows® Subsystem For Linux (WSL2) can run into issues if their
+environment's PATH variable has paths containing unescaped space characters.
+The error might look like:
+
+```
+****Building TensorFlow Lite Micro library… /bin/sh: 1: Syntax error: “(” unexpected
+ make[2]: *** [CMakeFiles/tensorflow_build.dir/build.make:71: CMakeFiles/tensorflow_build] Error 2
+ make[1]: *** [CMakeFiles/Makefile2:537: CMakeFiles/tensorflow_build.dir/all] Error 2
+ make[1]: *** Waiting for unfinished jobs…
+```
+
+The error here was caused by `C:/Program Files (x86)/` being part of the PATH.
+To resolve this issue, remove any paths with spaces. Alternatively, if these
+paths are required, escape them using `\` or enclose them with quotes.
+
+Another example of a similar issue: [Discourse issue 171: Build error in makefile](https://discuss.mlplatform.org/t/build-error-in-makefile/171).
