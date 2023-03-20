@@ -240,7 +240,7 @@ foreach(use_case ${USE_CASES})
         if (NOT TARGET ${API_TO_USE}_api)
             add_subdirectory(
                 ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
-                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})  # Binary path
+                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
         endif()
 
         # Check if the target now exists

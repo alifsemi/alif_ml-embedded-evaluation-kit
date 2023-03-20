@@ -24,6 +24,7 @@ To run evaluations using this software, we suggest using:
   > and AVH, Arm® Corstone™-310 is available (for both Arm® Ethos™-U55 and Ethos™-U65 NPUs) only as AVH implementations.
 
 ## Inclusive language commitment
+
 This product conforms to Arm's inclusive language policy and, to the best of our knowledge,
 does not contain any non-inclusive language. If you find something that concerns you, email terms@arm.com.
 
@@ -105,7 +106,7 @@ could be used in all tools/IDEs (for example,
 To run an ML application on the Cortex-M and Ethos-U NPU, please, follow these steps:
 
 1. Set up your environment by installing [the required prerequisites](./docs/sections/building.md#Build-prerequisites).
-> **NOTE**: A Docker image built from the `Dockerfile` provided will have all the required packages installed.
+   > **NOTE**: A Docker image built from the `Dockerfile` provided will have all the required packages installed.
 2. Generate an optimized neural network model for Ethos-U with a Vela compiler by following instructions [here](./docs/sections/building.md#Add-custom-model).
 3. [Configure the build system](./docs/sections/building.md#Build-process).
 4. [Compile the project](./docs/sections/building.md#Building-the-configured-project) with a `make` command.

@@ -198,10 +198,11 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
+- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
   These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
-  points to the `dependencies/cmsis` and `dependencies/cmsis-dsp` git submodules.  Repositories are hosted here:
-  [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) and [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP).
+  points to the `dependencies/cmsis`, `dependencies/cmsis-dsp` and `dependencies/cmsis-nn` git submodules.
+  Repositories are hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git),
+  [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -317,8 +318,10 @@ repository to link against.
 
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
-3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
-4. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
+3. [Ethos-U NPU core platform repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
+4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
+6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -334,6 +337,8 @@ This downloads all of the required components and places them in a tree, like so
 ```tree
 dependencies
     ├── cmsis
+    ├── cmsis-dsp
+    ├── cmsis-nn
     ├── core-driver
     ├── core-platform
     └── tensorflow
@@ -341,7 +346,7 @@ dependencies
 
 > **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all of the
 > relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U_NPU_DRIVER_SRC_PATH`,
-> and `CMSIS_SRC_PATH`.
+> `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`and `CMSIS_NN_SRC_PATH`.
 
 #### Fetching resource files
 
@@ -545,7 +550,6 @@ cmake .. \
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
 > the CMake command.
 
-
 ### Configuring the build for MPS3 SSE-310
 
 On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-310`,
@@ -626,7 +630,7 @@ Where for each implemented use-case under the `source/use-case` directory, the f
 - `ethos-u-<use-case name>.axf`: The built application binary for an ML use-case.
 
 - `ethos-u-<use-case name>.map`: Information from building the application. For example: Libraries used, what was
-  optimized, and location of objects).
+  optimized, and location of objects.
 
 - `ethos-u-<use-case name>.htm`: Human readable file containing the call graph of application functions.
 

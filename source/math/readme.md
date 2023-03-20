@@ -1,4 +1,4 @@
-## Math
+# Math
 
 This is a CMake static library that allows application level code and ML use case APIs to use basic mathematical
 functions on scalars and vectors. This library calls the standard C/C++ math functions when being compiled for
