@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,10 +48,15 @@ packs:
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.5-rc4"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.8"}
         - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
+        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.14.4"}
+        - attributes: {vendor: "ARM", name: "CMSIS-NN", version: "4.0.0"}
 
     releases:
+      - version: "23.2.0"
+        date: "2023-03-23"
+        description: "23.02.0 release package"
       - version: "22.11.0"
         date: "2022-11-09"
         description: "22.11.0 release package"
