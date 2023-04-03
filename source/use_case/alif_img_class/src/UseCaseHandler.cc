@@ -134,6 +134,9 @@ namespace app {
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
+#else
+        const uint32_t nCols       = MIMAGE_X;
+        const uint32_t nRows       = MIMAGE_Y;
 #endif
 
         const uint8_t *image_data = hal_get_image_data(nCols, nRows);
