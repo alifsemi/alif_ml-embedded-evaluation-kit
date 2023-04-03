@@ -204,6 +204,11 @@ void camera_start(uint32_t mode)
     }
 }
 
+int32_t camera_gain(uint32_t gain)
+{
+    return camera->Control(CAMERA_SENSOR_GAIN, gain);
+}
+
 int32_t camera_wait(uint32_t timeout_ms)
 {
     while (!image_received) {
