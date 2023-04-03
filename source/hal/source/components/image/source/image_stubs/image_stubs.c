@@ -21,3 +21,8 @@ const uint8_t *get_image_data(int width, int height)
     (void) height;
     return 0;
 }
+
+float get_image_gain(void)
+{
+    return 1.0f;
+}

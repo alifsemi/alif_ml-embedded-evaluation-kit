@@ -19,5 +19,6 @@ int image_init(void);
 
 const uint8_t *get_image_data(int width, int height);
 
+float get_image_gain(void);
 
 #endif // IMAGE_DATA_H
