@@ -43,8 +43,13 @@ USER_OPTION(${use_case}_SHOW_PROFILING "Show CPU profiling"
     OFF
     BOOL)
 
+USER_OPTION(${use_case}_SHOW_EXPOSURE "Show camera exposure stats"
+    OFF
+    BOOL)
+
 set(${use_case}_COMPILE_DEFS
     SHOW_PROFILING=$<BOOL:${${use_case}_SHOW_PROFILING}>
+    SHOW_EXPOSURE=$<BOOL:${${use_case}_SHOW_EXPOSURE}>
     SHOW_INF_TIME=$<BOOL:${${use_case}_SHOW_INF_TIME}>
     SKIP_MODEL=$<BOOL:${${use_case}_SKIP_MODEL}>
 )
