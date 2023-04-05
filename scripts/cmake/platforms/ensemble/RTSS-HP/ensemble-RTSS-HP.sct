@@ -100,9 +100,11 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has CMSIS-DSP tables and all read-write data, except image and NPU buffers
+      ; DTCM has CMSIS-DSP tables, ARM library const data (eg maths tables)
+      ; and all read-write data, except image and NPU buffers
       *(+RW +ZI)
       arm_common_tables.o (+RO-DATA)
+      *armlib* (+RO-DATA)
   }
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
