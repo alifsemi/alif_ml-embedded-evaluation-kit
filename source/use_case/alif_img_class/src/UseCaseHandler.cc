@@ -134,6 +134,9 @@ namespace app {
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
+#else
+        const uint32_t nCols       = MIMAGE_X;
+        const uint32_t nRows       = MIMAGE_Y;
 #endif
 
         const uint8_t *image_data = hal_get_image_data(nCols, nRows);
@@ -154,23 +157,27 @@ namespace app {
         tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
 
         lv_obj_invalidate(ScreenLayoutImageObject());
-        lv_port_unlock(lv_lock_state);
 
         if (SKIP_MODEL || !run_requested()) {
 #if SHOW_PROFILING
-            lv_lock_state = lv_port_lock();
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "tprof3=%.3f ms", (double)tprof3 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "tprof4=%.3f ms", (double)tprof4 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(4), "tprof5=%.3f ms", (double)tprof5 / SystemCoreClock * 1000);
-            lv_port_unlock(lv_lock_state);
+#endif
+#if SHOW_EXPOSURE
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "low=%" PRIu32, exposure_low_count);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "high=%" PRIu32, exposure_high_count);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "gain=%.3f", get_image_gain());
 #endif
             lv_led_off(ScreenLayoutLEDObject());
+            lv_port_unlock(lv_lock_state);
             return true;
         }
 
         lv_led_on(ScreenLayoutLEDObject());
+        lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->bytes;
