@@ -38,7 +38,7 @@
 
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM2 is mapped as ITCM */
-#define ITCM_BASE                 0x00000000
+#define ITCM_BASE                 0x01000000
 #define ITCM_SIZE                 SRAM2_SIZE
 #define ITCM_GLOBAL_BASE          SRAM2_BASE
 

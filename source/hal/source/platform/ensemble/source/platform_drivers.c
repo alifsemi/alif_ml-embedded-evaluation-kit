@@ -97,6 +97,9 @@ int platform_init(void)
 {
     fault_dump_enable(true);
 
+    /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
+    ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
+
     copy_vtor_table_to_ram();
 
     if (0 != Init_SysTick()) {
@@ -296,12 +299,12 @@ typedef struct address_range
 const address_range_t no_need_to_invalidate_areas[] = {
     /* TCM is never cached */
     {
-        .base = ITCM_BASE,
-        .limit = ITCM_BASE + ITCM_SIZE - 1,
+        .base = 0x00000000,
+        .limit = 0x01FFFFFF,
     },
     {
-        .base = DTCM_BASE,
-        .limit = DTCM_BASE + DTCM_SIZE - 1,
+        .base = 0x20000000,
+        .limit = 0x21FFFFFF,
     },
     /* MRAM should never change while running */
     {
@@ -345,55 +348,61 @@ bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 
 void MPU_Load_Regions(void)
 {
+    /* This is a complete map - the startup code enables PRIVDEFENA that falls back
+     * to the system default, but we will turn it off later.
+     */
     static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
-    {
-    .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1UL, 1UL, 0UL),  // RO, NP, XA
-    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1UL)
+    { // ITCM (alias) at 01000000, SRAM0 at 02000000, SRAM1 at 08000000
+    .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, 2)
     },
-    {
-    .RBAR = ARM_MPU_RBAR(SRAM0_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM0_BASE + SRAM0_SIZE - 1, 2UL)  // SRAM0
+    { // LP- Peripheral & PINMUX Regions
+    .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
+    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFF, 0)
     },
-    {
-    .RBAR = ARM_MPU_RBAR(SRAM1_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM1_BASE + SRAM1_SIZE - 1, 2UL)  // SRAM1
+    { // DTCM
+    .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
+    .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
     },
-    {
-    .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 1UL),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFFUL, 0UL)  // LP- Peripheral & PINMUX Regions */
+    { // General peripherals
+    .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, 0)
     },
-    {
+    { // Other core's DTCM
 #if defined(M55_HE)
-    .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, 1UL)  // HP TCM (SRAM2 + SRAM3)
+    .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, 1)  // HP TCM (SRAM2 + SRAM3)
 #elif defined(M55_HP)
-    .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, 1UL)  // HE TCM (SRAM4 + SRAM5)
+    .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, 1)  // HE TCM (SRAM4 + SRAM5)
 #else
   #error device not specified!
 #endif
     },
-    {
-    .RBAR = ARM_MPU_RBAR(SRAM6_BASE, ARM_MPU_SH_OUTER, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM6_BASE + SRAM6_SIZE - 1, 1UL)  // SRAM6
+    { // MRAM
+    .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
+    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1)
     },
-    {
-    .RBAR = ARM_MPU_RBAR(SRAM8_BASE, ARM_MPU_SH_NON, 0UL, 1UL, 0UL),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM8_BASE + SRAM8_SIZE - 1, 1UL) // SRAM8
+    { // System PPB
+    .RBAR = ARM_MPU_RBAR(0xE0000000, ARM_MPU_SH_NON, 1, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0xE00FFFFF, 7)
     },
     };
 
     /* Define the possible Attribute regions */
-    ARM_MPU_SetMemAttr(0UL, ARM_MPU_ATTR(   /* Attr0, Device Memory */
-                            ARM_MPU_ATTR_DEVICE,
-                            ARM_MPU_ATTR_DEVICE_nGnRE));
-    ARM_MPU_SetMemAttr(1UL, ARM_MPU_ATTR(   /* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
-                            ARM_MPU_ATTR_MEMORY_(1,1,1,1),
-                            ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
-    ARM_MPU_SetMemAttr(2UL, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
-                            ARM_MPU_ATTR_MEMORY_(0,0,1,0),
-                            ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+    ARM_MPU_SetMemAttr(0, ARM_MPU_ATTR(   /* Attr0, Device Memory */
+                          ARM_MPU_ATTR_DEVICE,
+                          ARM_MPU_ATTR_DEVICE_nGnRE));
+    ARM_MPU_SetMemAttr(1, ARM_MPU_ATTR(   /* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
+                          ARM_MPU_ATTR_MEMORY_(1,1,1,1),
+                          ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
+    ARM_MPU_SetMemAttr(2, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
+                          ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                          ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+    ARM_MPU_SetMemAttr(7, ARM_MPU_ATTR(   /* Attr7, Device Memory nGnRnE*/
+                          ARM_MPU_ATTR_DEVICE,
+                          ARM_MPU_ATTR_DEVICE_nGnRnE));
 
     /* Load the regions from the table */
-    ARM_MPU_Load(0U, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
+    ARM_MPU_Load(0, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
 }
