@@ -57,13 +57,11 @@ set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF)
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-    set(ENSEMBLE_CORE       "M55_HP")
     set(SYSTEM_CORE_CLOCK    "400000000"    CACHE STRING "System peripheral clock (Hz)")
 endif()
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HE)
-    set(ENSEMBLE_CORE       "M55_HE")
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
 endif()
 
@@ -77,7 +75,6 @@ math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMA
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
-add_compile_definitions("${ENSEMBLE_CORE}")
 #set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
 # 2. Create static libraries

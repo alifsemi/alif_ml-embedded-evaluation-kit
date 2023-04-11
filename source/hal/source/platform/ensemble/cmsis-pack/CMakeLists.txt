@@ -1,6 +1,5 @@
 set(CMSIS_DEVICE_TARGET cmsis_ensemble)
 set(CPU_HEADER_TARGET rte_components)
-set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble)
 
 project(${CMSIS_DEVICE_TARGET}
     DESCRIPTION     "Generic CMSIS start up file for Cortex-M targets"
@@ -22,12 +21,29 @@ add_library(${CPU_HEADER_TARGET} INTERFACE)
 ## Interface include directories:
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
-    config/${ENSEMBLE_CORE}
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Include
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Config
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
     )
+
+if (TARGET_REVISION STREQUAL "A")
+target_include_directories(${CPU_HEADER_TARGET}
+    INTERFACE
+    config
+    config/${ENSEMBLE_CORE}
+    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Include
+    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Config
+    )
+else()
+target_include_directories(${CPU_HEADER_TARGET}
+    INTERFACE
+    config-b
+    config-b/${ENSEMBLE_CORE}
+    ${ENSEMBLE_CMSIS_PATH}/drivers/include
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/include
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/include
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/config
+    )
+endif()
 
 # 3.2 Create static library
 add_library(${CMSIS_DEVICE_TARGET} STATIC)
@@ -45,6 +61,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     )
 
 ## Platform sources
+if (TARGET_REVISION STREQUAL "A")
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/mpu_${ENSEMBLE_CORE}.c
@@ -52,12 +69,30 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
+    )
+else()
+target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_${ENSEMBLE_CORE}.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/mpu_M55.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_M55.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/pinconf.c
+    config-b/drv_pinmux_new.c
+    )
+endif()
+
+
+target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
@@ -70,13 +105,23 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
     )
+
+## Board sources
+target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    ${BOARDLIB_PATH}/appkit_alpha1/board_init.c
+    ${BOARDLIB_PATH}/appkit_alpha2/board_init.c
+    ${BOARDLIB_PATH}/devkit/board_init.c
+    ${BOARDLIB_PATH}/devkit_b0_cob/board_init.c
+    )
+
 
 # Device definition needs to be set, is checked in source files to include correct header
 target_compile_definitions(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${ARM_CPU}
+    ${ENSEMBLE_CORE}
     TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 # Tell linker that reset interrupt handler is our entry point

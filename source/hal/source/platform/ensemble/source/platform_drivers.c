@@ -387,11 +387,13 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, 2)
     },
-    { // LP- Peripheral & PINMUX Regions
-    .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFF, 0)
+#ifdef AONREGS_BASE
+    { // SSE-700 AON registers (1A600000)
+    .RBAR = ARM_MPU_RBAR(AONREGS_BASE, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(AONREGS_BASE + 0x0000FFFF, 0)
     },
-    { // DTCM
+#endif
+    { // DTCM (20000000)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
     },
@@ -414,7 +416,13 @@ void MPU_Load_Regions(void)
   #error device not specified!
 #endif
     },
-    { // MRAM
+#ifdef LP_PERIPHERAL_BASE
+    { // LP- Peripheral & PINMUX Regions (70000000)
+    .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFF, 0)
+    },
+#endif
+    { // MRAM (80000000)
     .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1)
     },
