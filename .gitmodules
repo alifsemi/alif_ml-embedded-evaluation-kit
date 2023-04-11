@@ -25,3 +25,6 @@
 [submodule "dependencies/cmsis-ensemble"]
 	path = dependencies/cmsis-ensemble
 	url = https://github.com/alifsemi/alif_ensemble-cmsis-dfp.git
+[submodule "dependencies/cmsis-ensemble-b"]
+	path = dependencies/cmsis-ensemble-b
+	url = git@github.com:alifsemi/b0-cmsis-dfp_DEV.git
