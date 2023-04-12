@@ -28,3 +28,6 @@
 [submodule "dependencies/cmsis-ensemble-b"]
 	path = dependencies/cmsis-ensemble-b
 	url = git@github.com:alifsemi/b0-cmsis-dfp_DEV.git
+[submodule "dependencies/boardlib"]
+	path = dependencies/boardlib
+	url = git@github.com:alifsemi/boardlib_DEV.git
