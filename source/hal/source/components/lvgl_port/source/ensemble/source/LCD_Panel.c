@@ -12,43 +12,10 @@
 #include "Driver_CDC200.h"
 #include "CDC200_dev.h"
 #include "RTE_Device.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
-#include "Driver_GPIO.h"
+#include "board.h"
 #include "delay.h"
 
 extern ARM_DRIVER_CDC200 Driver_CDC200;
-extern ARM_DRIVER_GPIO Driver_GPIO1;
-extern ARM_DRIVER_GPIO Driver_GPIO2;
-
-static void SetupLEDs()
-{
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
-
-    // GREEN LED
-    Driver_GPIO2.Initialize(PIN_NUMBER_29, NULL);
-    Driver_GPIO2.PowerControl(PIN_NUMBER_29, ARM_POWER_FULL);
-    Driver_GPIO2.SetValue(PIN_NUMBER_29, GPIO_PIN_OUTPUT_STATE_LOW);
-    Driver_GPIO2.SetDirection(PIN_NUMBER_29, GPIO_PIN_DIRECTION_OUTPUT);
-    PINMUX_Config (PORT_NUMBER_2, PIN_NUMBER_29, PINMUX_ALTERNATE_FUNCTION_0);
-
-#elif TARGET_BOARD == BOARD_DevKit
-
-    // ORANGE LED
-    Driver_GPIO1.Initialize(PIN_NUMBER_15,NULL);
-    Driver_GPIO1.PowerControl(PIN_NUMBER_15,  ARM_POWER_FULL);
-    Driver_GPIO1.SetValue(PIN_NUMBER_15, GPIO_PIN_OUTPUT_STATE_LOW);
-    Driver_GPIO1.SetDirection(PIN_NUMBER_15, GPIO_PIN_DIRECTION_OUTPUT);
-    PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_15, PINMUX_ALTERNATE_FUNCTION_0);
-
-#endif
-
-    // GREEN LED
-    Driver_GPIO1.Initialize(PIN_NUMBER_14,NULL);
-    Driver_GPIO1.PowerControl(PIN_NUMBER_14,  ARM_POWER_FULL);
-    Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_LOW);
-    Driver_GPIO1.SetDirection(PIN_NUMBER_14, GPIO_PIN_DIRECTION_OUTPUT);
-    PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_14, PINMUX_ALTERNATE_FUNCTION_0);
-}
 
 static void cdc_event_handler(uint32_t int_event)
 {
@@ -125,12 +92,11 @@ int Display_initialization(uint8_t *buffer)
 int LCD_Panel_init(uint8_t *buffer)
 {
     volatile int test = 3;
-    SetupLEDs();
 
     while(test) {
-        Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_HIGH);
+        BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
         sleep_or_wait_msec(300);
-        Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_LOW);
+        BOARD_LED1_Control(BOARD_LED_STATE_LOW);
         sleep_or_wait_msec(300);
         test--;
     }
@@ -138,32 +104,15 @@ int LCD_Panel_init(uint8_t *buffer)
     static volatile int dinit = 0;
 
     dinit = Display_initialization(buffer);
-
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
-
     if (dinit != 0) {
         while(1) {
-            Driver_GPIO2.SetValue(PIN_NUMBER_29, GPIO_PIN_OUTPUT_STATE_LOW);
+            BOARD_LED2_Control(BOARD_LED_STATE_LOW);
             sleep_or_wait_msec(300);
-            Driver_GPIO2.SetValue(PIN_NUMBER_29, GPIO_PIN_OUTPUT_STATE_HIGH);
+            BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
             sleep_or_wait_msec(300);
         }
     }
-    Driver_GPIO2.SetValue(PIN_NUMBER_29, GPIO_PIN_OUTPUT_STATE_HIGH);
-
-#elif TARGET_BOARD == BOARD_DevKit
-
-    if (dinit != 0) {
-        while(1) {
-            Driver_GPIO1.SetValue(PIN_NUMBER_15, GPIO_PIN_OUTPUT_STATE_LOW);
-            sleep_or_wait_msec(300);
-            Driver_GPIO1.SetValue(PIN_NUMBER_15, GPIO_PIN_OUTPUT_STATE_HIGH);
-            sleep_or_wait_msec(300);
-        }
-    }
-    Driver_GPIO1.SetValue(PIN_NUMBER_15, GPIO_PIN_OUTPUT_STATE_HIGH);
-
-#endif
+    BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
 
     return 0;
 }

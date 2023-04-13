@@ -23,6 +23,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
     ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
+    ${BOARDLIB_PATH}
     )
 
 if (TARGET_REVISION STREQUAL "A")
@@ -53,6 +54,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include
     ${ENSEMBLE_CMSIS_PATH}/components/Include
+    ${BOARDLIB_PATH}
     )
 
 target_include_directories(${CMSIS_DEVICE_TARGET}
@@ -92,6 +94,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c

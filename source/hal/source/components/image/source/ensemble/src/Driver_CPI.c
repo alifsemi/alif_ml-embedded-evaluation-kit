@@ -16,15 +16,19 @@
 /* Project Includes */
 #include "Driver_CPI.h"
 #include "Driver_Camera_Controller.h"
-#include "Driver_GPIO.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
 
 #include "Driver_Common.h"
 #include "image_processing.h"
 
 #include <stdatomic.h>
 
-extern ARM_DRIVER_GPIO Driver_GPIO2;
+/* New-enough CMSIS packs are expected to handle power for us */
+#if !defined RTE_CPI && defined BOARD_CAMERA_POWER_GPIO_PORT
+#define MANUAL_CAMERA_POWER
+extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
+static ARM_DRIVER_GPIO * const GPIO_Driver_PWR = &ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
+#endif
+
 extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
 static const ARM_DRIVER_CAMERA_CONTROLLER* camera = &Driver_CAMERA0;
 
@@ -39,148 +43,16 @@ static void CameraEventHandler(uint32_t event)
     image_received = 1;
 }
 
-static int32_t camera_hw_init()
-{
-    int32_t res = ARM_DRIVER_OK;
-
-#if TARGET_BOARD == BOARD_AppKit_Alpha1
-    /* Configure GPIO Pin : P2_22 as I2C_SDA */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_22, PINMUX_ALTERNATE_FUNCTION_0);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure GPIO Pin : P2_23 as I2C_SCL */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_23, PINMUX_ALTERNATE_FUNCTION_0);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_22, \
-				    PAD_FUNCTION_READ_ENABLE |
-				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_23, \
-				    PAD_FUNCTION_READ_ENABLE |
-				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure P3_15 as pixel clock output */
-    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_15, PINMUX_ALTERNATE_FUNCTION_7);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-#elif TARGET_BOARD == BOARD_AppKit_Alpha2
-
-    /* Configure GPIO Pin : P2_6 as I3C_SDA */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_6, PINMUX_ALTERNATE_FUNCTION_3);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure GPIO Pin : P2_7 as I3C_SCL */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_3);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_6, \
-				    PAD_FUNCTION_READ_ENABLE |
-				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    res = PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_7, \
-				    PAD_FUNCTION_READ_ENABLE |
-				    PAD_FUNCTION_DRIVER_OPEN_DRAIN);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure P3_15 as pixel clock output */
-    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_15, PINMUX_ALTERNATE_FUNCTION_7);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure P2_26 as CAM_PWR_CNTL output */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_26, PINMUX_ALTERNATE_FUNCTION_0);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    Driver_GPIO2.Initialize(PIN_NUMBER_26, NULL);
-    Driver_GPIO2.PowerControl(PIN_NUMBER_26, ARM_POWER_FULL);
-    Driver_GPIO2.SetDirection(PIN_NUMBER_26, GPIO_PIN_DIRECTION_OUTPUT);
-    Driver_GPIO2.SetValue(PIN_NUMBER_26, GPIO_PIN_OUTPUT_STATE_HIGH);
-    
-#elif TARGET_BOARD == BOARD_DevKit
-    /* Configure GPIO Pin : P3_8 as I3C_SDA_B */
-    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_8, PINMUX_ALTERNATE_FUNCTION_3);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure GPIO Pin : P3_9 as I3C_SCL_B */
-    res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_9, PINMUX_ALTERNATE_FUNCTION_4);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* i3c Pin-Pad */
-
-    /* Pin-Pad P3_8 as I3C_SDA_B
-     * Pad function: weak pull up(0x8) + read enable(0x01)
-     *               + Output drive strength 4mA(0x20)
-     */
-    res = PINPAD_Config(PORT_NUMBER_3,
-                        PIN_NUMBER_8,
-                        (PAD_FUNCTION_READ_ENABLE | PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_PULL_UP |
-                         PAD_FUNCTION_OUTPUT_DRIVE_STRENGTH_04_MILI_AMPS));
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Pin-Pad P3_9 as I3C_SCL_B
-     * Pad function: weak pull up(0x8) + read enable(0x01)
-     *               + Output drive strength 4mA(0x20)
-     */
-    res = PINPAD_Config(PORT_NUMBER_3,
-                        PIN_NUMBER_9,
-                        (PAD_FUNCTION_READ_ENABLE | PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_PULL_UP |
-                         PAD_FUNCTION_OUTPUT_DRIVE_STRENGTH_04_MILI_AMPS));
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-    /* Configure P2_7 as pixel clock output */
-    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_6);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
-#endif
-    return res;
-}
-
 int32_t camera_init(uint8_t* buffer)
 {
-    // Pin configurations
-    int32_t res = camera_hw_init();
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
+#ifdef MANUAL_CAMERA_POWER
+    GPIO_Driver_PWR->SetValue(BOARD_CAMERA_POWER_PIN_NO, GPIO_PIN_OUTPUT_STATE_HIGH);
+#endif
+
     //////////////////////////////////////////////////////////////////////////////
     // Camera initialization
     //////////////////////////////////////////////////////////////////////////////
-    res = camera->Initialize(CAMERA_RESOLUTION_560x560, CameraEventHandler);
+    int32_t res = camera->Initialize(CAMERA_RESOLUTION_560x560, CameraEventHandler);
 
     if (res != ARM_DRIVER_OK) {
         return res;

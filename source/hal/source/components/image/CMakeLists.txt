@@ -61,11 +61,6 @@ target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     source/ensemble/src/Driver_CPI.c
     )
 
-# Ensemble TARGET_BOARD needs to be set
-target_compile_definitions(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
-    PRIVATE
-    TARGET_BOARD=BOARD_${TARGET_BOARD})
-
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)

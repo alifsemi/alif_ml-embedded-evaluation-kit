@@ -14,8 +14,7 @@
 #include "image_data.h"
 #include "image_processing.h"
 #include "Driver_CPI.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
-#include "Driver_GPIO.h"
+#include "board.h"
 #include "base_def.h"
 #include "delay.h"
 #include <tgmath.h>
@@ -24,8 +23,6 @@
 static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
 static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
 
-extern ARM_DRIVER_GPIO Driver_GPIO1;
-
 int image_init()
 {
     DEBUG_PRINTF("image_init(IN)\n");
@@ -33,14 +30,14 @@ int image_init()
     DEBUG_PRINTF("image_init(), camera_init: %d\n", err);
 	if (err != 0) {
 		while(1) {
-			Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_LOW);
+		    BOARD_LED1_Control(BOARD_LED_STATE_LOW);
 			sleep_or_wait_msec(300);
-			Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_HIGH);
+            BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
 			sleep_or_wait_msec(300);
 		}
 	}
 	DEBUG_PRINTF("Camera initialized... \n");
-	Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_HIGH);
+    BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
 
     return err;
 }

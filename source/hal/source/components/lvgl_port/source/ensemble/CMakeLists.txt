@@ -45,7 +45,6 @@ target_include_directories(${LVGL_TARGET} PRIVATE
 # Compile definitions
 target_compile_definitions(${LVGL_TARGET}
     PRIVATE
-    TARGET_BOARD=BOARD_${TARGET_BOARD}
     ROTATE_DISPLAY=${ROTATE_DISPLAY})
 
 target_link_libraries(${LVGL_TARGET} PRIVATE
