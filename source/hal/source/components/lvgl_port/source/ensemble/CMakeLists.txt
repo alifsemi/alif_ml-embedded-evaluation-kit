@@ -39,7 +39,7 @@ target_sources(${LVGL_TARGET}
 
 # LCD_Panel.c adds scanline IRQ support, and needs to access internal header CDC200_dev.h to do it
 target_include_directories(${LVGL_TARGET} PRIVATE
-    ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble/Alif_CMSIS/Source
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source
 )
 
 # Compile definitions

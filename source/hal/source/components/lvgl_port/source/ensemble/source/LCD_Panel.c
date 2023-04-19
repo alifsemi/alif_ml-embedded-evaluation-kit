@@ -29,28 +29,29 @@ static void (*tear_handler)(void);
 
 void CDC200_SCANLINE0_IRQHandler(void)
 {
-    CDC200_Type *regbase = (CDC200_Type *) CDC200_BASE;
-
-    regbase->global_reg.irq_clear = SCANLINE0_IRQ;
-    (void)regbase->global_reg.irq_clear;
+    CDC200->global_reg.irq_clear = SCANLINE0_IRQ;
+    (void)CDC200->global_reg.irq_clear;
     __DSB();
     tear_handler();
 }
 
 int LCD_current_v_pos(void)
 {
-    CDC200_Type *regbase = (CDC200_Type *) CDC200_BASE;
-    return (int) (regbase->global_reg.position_status & 0xffff) - RTE_PANEL_VSYNC_LINE - RTE_PANEL_VBP_LINE;
+    return (int) (CDC200->global_reg.position_status & 0xffff) - RTE_PANEL_VSYNC_LINE - RTE_PANEL_VBP_LINE;
 }
 
 void LCD_enable_tear_interrupt(void (*handler)(void), uint8_t prio)
 {
-    CDC200_Type *regbase = (CDC200_Type *) CDC200_BASE;
     tear_handler = handler;
-    regbase->global_reg.line_irq_position_control = RTE_PANEL_VSYNC_LINE + RTE_PANEL_VBP_LINE + RTE_PANEL_VACTIVE_LINE;
-    regbase->global_reg.irq_enable |= SCANLINE0_IRQ;
+    CDC200->global_reg.line_irq_position_control = RTE_PANEL_VSYNC_LINE + RTE_PANEL_VBP_LINE + RTE_PANEL_VACTIVE_LINE;
+    CDC200->global_reg.irq_enable |= SCANLINE0_IRQ;
+#if RTE_SILICON_REV_A
     NVIC_SetPriority(CDC200_SCANLINE0_IRQ, prio);
     NVIC_EnableIRQ(CDC200_SCANLINE0_IRQ);
+#else
+    NVIC_SetPriority(CDC_SCANLINE0_IRQ_IRQn, prio);
+    NVIC_EnableIRQ(CDC_SCANLINE0_IRQ_IRQn);
+#endif
 }
 
 int Display_initialization(uint8_t *buffer)
