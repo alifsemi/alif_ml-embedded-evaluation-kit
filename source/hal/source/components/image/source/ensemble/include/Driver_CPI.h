@@ -31,6 +31,7 @@
 
 int32_t camera_init(uint8_t *buffer);
 void camera_start(uint32_t mode);
+int32_t camera_gain(uint32_t gain);
 int32_t camera_vsync(uint32_t timeout_ms);
 int32_t camera_wait(uint32_t timeout_ms);
 

@@ -27,11 +27,32 @@
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "img_class" "alif_ui")
 
-set(${use_case}_COMPILE_DEFS SHOW_PROFILING=0 SKIP_MODEL=0)
-
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model"
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/img_class/labels/labels_mobilenet_v2_1.0_224.txt
     FILEPATH)
+
+USER_OPTION(${use_case}_SKIP_MODEL "Skip ML model - UI only"
+    OFF
+    BOOL)
+
+USER_OPTION(${use_case}_SHOW_INF_TIME "Show inference time"
+    OFF
+    BOOL)
+
+USER_OPTION(${use_case}_SHOW_PROFILING "Show CPU profiling"
+    OFF
+    BOOL)
+
+USER_OPTION(${use_case}_SHOW_EXPOSURE "Show camera exposure stats"
+    OFF
+    BOOL)
+
+set(${use_case}_COMPILE_DEFS
+    SHOW_PROFILING=$<BOOL:${${use_case}_SHOW_PROFILING}>
+    SHOW_EXPOSURE=$<BOOL:${${use_case}_SHOW_EXPOSURE}>
+    SHOW_INF_TIME=$<BOOL:${${use_case}_SHOW_INF_TIME}>
+    SKIP_MODEL=$<BOOL:${${use_case}_SKIP_MODEL}>
+)
 
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)

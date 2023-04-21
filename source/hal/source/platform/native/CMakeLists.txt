@@ -58,6 +58,12 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 ## Platform component: lcd
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
+## Platform component: audio
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
+## Platform component: image
+add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
+
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
@@ -67,7 +73,9 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     log
     platform_pmu
     stdout
-    lcd_stubs)
+    lcd_stubs
+    audio_stubs
+    image_stubs)
 
 # Display status:
 message(STATUS "*******************************************************")

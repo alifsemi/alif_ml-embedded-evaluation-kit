@@ -15,11 +15,36 @@ int audio_init(int sampling_rate, int wlen)
 {
     (void) sampling_rate;
     (void) wlen;
+    return -1;
+}
+
+int get_audio_data(int16_t *data, int len)
+{
+    return -1;
+}
+
+void audio_set_callback(audio_callback_t cb)
+{
+    (void) cb;
+}
+
+int get_audio_samples_received(void)
+{
     return 0;
 }
 
-int get_audio_data(void *data, int len)
+int wait_for_audio(void)
 {
-    memset(data, 0, len);
-    return 0;
+    return -1;
+}
+
+void audio_preprocessing(int16_t *data, int len)
+{
+    (void) data;
+    (void) len;
+}
+
+void set_audio_gain(float gain_db)
+{
+    (void) gain_db;
 }
