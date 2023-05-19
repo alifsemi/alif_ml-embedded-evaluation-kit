@@ -110,6 +110,7 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_CORE}
     PRIVATE
+    source/fault_handler.c
     source/timer_ensemble.c
     source/platform_drivers.c
     source/uart_tracelib.c

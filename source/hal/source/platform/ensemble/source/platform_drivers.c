@@ -31,6 +31,7 @@
 
 #include "log_macros.h"     /* Logging functions */
 #include "peripheral_memmap.h"
+#include "fault_handler.h"
 #include <string.h>         /* For strncpy */
 #include <time.h>
 #include <inttypes.h>
@@ -94,6 +95,8 @@ static void copy_vtor_table_to_ram()
 
 int platform_init(void)
 {
+    fault_dump_enable(true);
+
     copy_vtor_table_to_ram();
 
     if (0 != Init_SysTick()) {
