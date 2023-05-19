@@ -38,6 +38,8 @@
 #include "base_def.h"
 #include "bayer.h"
 
+#include "RTE_Components.h"
+
 #if __ARM_FEATURE_MVE & 1
 
 // At the time of writing, GCC fails for either intrinsics or assembly
@@ -362,10 +364,3 @@ put_tiff(uint8_t * header, uint32_t width, uint32_t height, uint16_t bpp)
 	return header;
 };
 
-
-/*Bayer to RGB conversion */
-int bayer_to_RGB(uint8_t * restrict src, uint8_t * restrict dest)
-{
-	dc1394_bayer_Simple(src, dest, CIMAGE_X, CIMAGE_Y, DC1394_COLOR_FILTER_BGGR);
-	return 0;
-}

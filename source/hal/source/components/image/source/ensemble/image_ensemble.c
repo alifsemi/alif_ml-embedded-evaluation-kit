@@ -9,10 +9,12 @@
  */
 
 #include "RTE_Components.h"
+#include "RTE_Device.h"
 
 #include "log_macros.h"
 #include "image_data.h"
 #include "image_processing.h"
+#include "bayer.h"
 #include "Driver_CPI.h"
 #include "board.h"
 #include "base_def.h"
@@ -23,8 +25,19 @@
 static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
 static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
 
+#define FAKE_CAMERA 0
+
+#if RTE_SILICON_REV_A
+#define BAYER_FORMAT DC1394_COLOR_FILTER_BGGR
+#else
+#define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
+#endif
+
 int image_init()
 {
+#if FAKE_CAMERA
+    return 0;
+#else
     DEBUG_PRINTF("image_init(IN)\n");
     int err = camera_init(raw_image);
     DEBUG_PRINTF("image_init(), camera_init: %d\n", err);
@@ -40,6 +53,7 @@ int image_init()
     BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
 
     return err;
+#endif
 }
 
 static float current_log_gain = 0.0;
@@ -159,8 +173,6 @@ static void process_autogain(void)
     }
 }
 
-#define FAKE_CAMERA 0
-
 const uint8_t *get_image_data(int ml_width, int ml_height)
 {
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
@@ -190,8 +202,13 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     		float r = barr * intensity + 0.5f;
     		float g = barg * intensity + 0.5f;
     		float b = barb * intensity + 0.5f;
-    		p[0]        = b; p[1]            = g;
-    		p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
+            if (BAYER_FORMAT == DC1394_COLOR_FILTER_BGGR) {
+                p[0]        = b; p[1]            = g;
+                p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
+            } else if (BAYER_FORMAT == DC1394_COLOR_FILTER_GRBG) {
+                p[0]        = g; p[1]            = r;
+                p[CIMAGE_X] = b; p[CIMAGE_X + 1] = g;
+            }
     		p += 2;
     	}
     }
@@ -199,10 +216,12 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
 #endif
     tprof1 = ARM_PMU_Get_CCNTR();
     // RGB conversion and frame resize
-    bayer_to_RGB(raw_image, rgb_image);
+    dc1394_bayer_Simple(raw_image, rgb_image, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
     tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
+#if !FAKE_CAMERA
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
+#endif
     // Cropping and scaling
     crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, ml_width, ml_height, RGB_BYTES * 8);
     tprof4 = ARM_PMU_Get_CCNTR();
