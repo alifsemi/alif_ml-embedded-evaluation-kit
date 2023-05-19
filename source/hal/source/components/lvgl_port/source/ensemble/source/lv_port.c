@@ -16,7 +16,6 @@
 
 #include "LCD_panel.h"
 #include "Driver_CDC200.h"
-#include "CDC200_dev.h"
 #include "lvgl.h"
 #include "lv_port.h"
 
