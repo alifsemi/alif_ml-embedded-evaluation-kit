@@ -40,15 +40,58 @@
 #endif
 // </e> FLASH_MRAM (Flash MRAM) [Driver_FLASH_MRAM]
 
-// <e> CAMERA0 (Camera) [Driver_CAMERA0]
-// <i> Configuration settings for Driver_CAMERA0 in component ::Drivers:CAMERA
-#define RTE_CAMERA0   1
-#if RTE_CAMERA0
+// <e> CPI (Camera) [Driver_CPI]
+// <i> Configuration settings for Driver_CPI in component ::Drivers:CPI
+#define RTE_CPI                                               1
+#if RTE_CPI
 
-// <o> camera controller interrupt priority <0-255>
-// <i> Defines camera controller interrupt priority.
+// <o> CPI interrupt priority <0-255>
+// <i> Defines CPI interrupt priority.
 // <i> Default: 0
-#define RTE_CAMERA0_IRQ_PRI                    0
+#define RTE_CPI_IRQ_PRI                                       0
+
+// <o> CPI CSI halt enable/disable
+//     <0=> disable
+//     <1=> enable
+// <i> Defines CPI CSI halt enable/disable.
+// <i> Default: 0
+#define RTE_CPI_CSI_HALT                                       0
+
+// <o> CPI Row roundup
+//     <0=> disable
+//     <1=> enable
+// <i> Defines CPI row roundup to 64 bit.
+// <i> Default: 0
+#define RTE_CPI_ROW_ROUNDUP                                   0
+
+// <o> CPI FIFO read watermark
+// <i> Defines FIFO read watermark.
+// <i> Default: 0x8
+#define RTE_CPI_FIFO_READ_WATERMARK                           0x8
+
+// <o> CPI FIFO read watermark
+// <i> Defines CPI FIFO read watermark.
+// <i> Default: 0x18
+#define RTE_CPI_FIFO_WRITE_WATERMARK                          0x18
+
+// <o> CPI Color mode
+//     <0> IPI-16 RAW 6
+//     <1> IPI-16 RAW 7
+//     <2> IPI-16 RAW 8
+//     <3> IPI-16 RAW 10
+//     <4> IPI-16 RAW 12
+//     <5> IPI-16 RAW 14
+//     <6> IPI-16 RAW 16
+//     <7> IPI-48 RGB444
+//     <8> IPI-48 RGB555
+//     <9> IPI-48 RGB666
+//     <10> IPI-48 XRGB888
+//     <11> IPI-48 RGBX888
+//     <12> IPI-48 RAW 32
+//     <13> IPI-48 RAW 48
+// <i> Defines CPI color mode.
+// <i> Default: 0
+#define RTE_CPI_COLOR_MODE                                    0
 
 // <e> ARX3A0 [Driver_ARX3A0]
 // <o> Enable/Disable ARX3A0 camera sensor
@@ -56,23 +99,16 @@
 //     <1=> enable
 // <i> define if to enable or disable ARX3A0 camera sensor
 // <i> default: enable
-#define RTE_ARX3A0_CAMERA_SENSOR_ENABLE        1
+#define RTE_ARX3A0_CAMERA_SENSOR_ENABLE                   1
 
 #if (RTE_ARX3A0_CAMERA_SENSOR_ENABLE)
-
-// <o> Select camera ARX3A0 clock source
-//     <0=> internal generated camera clock
-//     <1=> camera clock from external camera device
-// <i> Defines camera ARX3A0 clock source
-// <i> Default: internal generated camera clock
-#define RTE_ARX3A0_CAMERA_CLOCK_SOURCE                  0
 
 // <o> Select camera ARX3A0 pixel clock polarity
 //     <0=> not invert camera pixclk
 //     <1=> invert camera pixclk
 // <i> Defines camera pixel ARX3A0 clock polarity
 // <i> Default: not invert camera pixclk
-#define RTE_ARX3A0_CAMERA_SENSOR_PIXEL_CLK_POL          0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_PIXEL_CLK_POL            0
 
 // <o> Select camera ARX3A0 frame per second
 //     <5=>   5 FPS
@@ -80,58 +116,100 @@
 //     <60=> 60 FPS
 //     <90=> 90 FPS
 // <i> Defines camera ARX3A0 frame per second
-// <i> Default: 5 FPS
-#define RTE_ARX3A0_CAMERA_SENSOR_CFG_FPS                40
+// <i> Default: 90 FPS
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CFG_FPS                  40
 
 // <o> Select camera ARX3A0 frequency
 // <i> Defines camera ARX3A0 frequency
 // <i> Default: 400000000
-#define RTE_ARX3A0_CAMERA_SENSOR_FREQ                   400000000
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_FREQ                     400000000
 
-// <o> Select camera sensor ARX3A0 clock source division [Divisor] <2-511>
-// <i> Defines camera sensor ARX3A0 clock source division
-// <i> Default: 0x14
-#define RTE_ARX3A0_CAMERA_SENSOR_CLK_SCR_DIV            20
+// <o> Select camera sensor ARX3A0 CPI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor ARX3A0 CPI clock source division
+// <i> Default: 20
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CLK_SCR_DIV              20
 
 // <o> Select camera ARX3A0 HSYNC polarity
 //     <0=>  not invert HSYNC input
 //     <1=>  invert HSYNC input
 // <i> Defines camera ARX3A0 HSYNC polarity
 // <i> Default:  not invert VSYNC input
-#define RTE_ARX3A0_CAMERA_SENSOR_HSYNC_POL              0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_HSYNC_POL                0
 
 // <o> Select camera ARX3A0 VSYNC polarity
 //     <0=> not invert VSYNC input
 //     <1=> invert VSYNC input
 // <i> Defines camera ARX3A0 VSYNC polarity
 // <i> Default:  not invert VSYNC input
-#define RTE_ARX3A0_CAMERA_SENSOR_VSYNC_POL              0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_POL                0
+
+// <o> Select camera ARX3A0 VSYNC wait
+//     <0=> vsync wait disable
+//     <1=> vsync wait enable
+// <i> Defines camera ARX3A0 VSYNC wait
+// <i> Default: vsync wait disable
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_WAIT               0
 
 // <o> Select camera ARX3A0 HSYNC mode
 //     <0=> sync enable
 //     <1=> data enable
 // <i> Defines camera ARX3A0 HSYNC mode
 // <i> Default: sync enable
-#define RTE_ARX3A0_CAMERA_SENSOR_HSYNC_MODE             0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_MODE               0
 
 // <o> Select video data mode
-//     <0=> 8 bit
-//     <1=> 16 bit
-//     <2=> 32 bit
-//     <3=> 64 bit
+//     <0=> 1 bit
+//     <1=> 2 bit
+//     <2=> 4 bit
+//     <3=> 8 bit
+//     <4=> 16 bit
+//     <5=> 32 bit
+//     <6=> 64 bit
 // <i> Defines video data mode
 // <i> Default: 8 bit
-#define RTE_ARX3A0_CAMERA_SENSOR_DATA_MODE              0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_MODE                3
+
+// <o> Select MSB/LSB
+//     <0=> LSB
+//     <1=> MSB
+// <i> Select MSB/LSB
+// <i> Default: LSB
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_MSB                      0
+
+// <o> Select CODE10ON8
+//     <0=> Disable
+//     <1=> Enable
+// <i> Defines transfer 10-bit coding over 8-bit data bus.
+// <i> Default: 8 bit
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CODE10ON8                0
 
 // <o> Select camera ARX3A0 data mask
-//     <0=> 10 bit
-//     <1=> 12 bit
-//     <2=> 14 bit
-//     <3=> 16 bit
+//     <0=> 16 bit
+//     <1=> 10 bit
+//     <2=> 12 bit
+//     <3=> 14 bit
 // <i> Defines camera ARX3A0 data mask
-// <i> no impact on 8-bit mode
+// <i> Valid only for 16-bit data mode
 // <i> Default: 10 bit
-#define RTE_ARX3A0_CAMERA_SENSOR_DATA_MASK              0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_MASK                1
+
+// <o> Select camera ARX3A0 CSI color mode
+//     <0=> IPI-16 RAW6
+//     <1=> IPI-16 RAW7
+//     <2=> IPI-16 RAW8
+//     <3=> IPI-16 RAW10
+//     <4=> IPI-16 RAW12
+//     <5=> IPI-16 RAW14
+//     <6=> IPI-16 RAW16
+//     <7=> IPI-48 RGB444
+//     <8=> IPI-48 RGB555
+//     <9=> IPI-48 RGB565
+//     <10=> IPI-48 RGB666
+//     <11=> IPI-48 XRGB888
+//     <12=> IPI-48 RGB666
+// <i> Defines camera ARX3A0 CSI color mode
+// <i> Default: 10 bit
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_CMCFG              2
 
 // <o> Select camera sensor ARX3A0 reset pin number
 // <i> Defines camera sensor ARX3A0 reset pin number
@@ -143,10 +221,6 @@
 // <i> Default: 4
 #define RTE_ARX3A0_CAMERA_RESET_GPIO_PORT               BOARD_CAMERA_RESET_GPIO_PORT
 
-// <o> Select I3C instance for ARX3A0 camera sensor communication
-// <i> Define I3C instance for ARX3A0 camera sensor communication
-// <i> Default: 0
-#define RTE_ARX3A0_CAMERA_SENSOR_I2C_USING_I3Cx_INSTANCE          0
 #endif
 // </e> ARX3A0 [Driver_ARX3A0]
 
@@ -156,72 +230,184 @@
 //     <1=> enable
 // <i> define if to enable or disable MT9M114 camera sensor
 // <i> default: disable
-#define RTE_MT9M114_CAMERA_SENSOR_ENABLE       0
+#define RTE_MT9M114_CAMERA_SENSOR_ENABLE                   0
 
 #if RTE_MT9M114_CAMERA_SENSOR_ENABLE
-
-// <o> Select camera MT9M114 clock source
-//     <0=> internal generated camera clock
-//     <1=> camera clock from external camera device
-// <i> Defines camera MT9M114 clock source
-// <i> Default: internal generated camera clock
-#define RTE_MT9M114_CAMERA_CLOCK_SOURCE                  0
 
 // <o> Select camera MT9M114 pixel clock polarity
 //     <0=> not invert camera pixclk
 //     <1=> invert camera pixclk
 // <i> Defines camera MT9M114 pixel clock polarity
-// <i> Default: invert camera pixclk
-#define RTE_MT9M114_CAMERA_SENSOR_PIXEL_CLK_POL          1
+// <i> Default: not invert camera pixclk
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_PIXEL_CLK_POL            0
 
 // <o> Select camera MT9M114 HSYNC polarity
 //     <0=>  not invert HSYNC input
 //     <1=>  invert HSYNC input
 // <i> Defines camera MT9M114 HSYNC polarity
 // <i> Default:  not invert HSYNC input
-#define RTE_MT9M114_CAMERA_SENSOR_HSYNC_POL              0
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_HSYNC_POL                0
 
 // <o> Select camera MT9M114 VSYNC polarity
 //     <0=> not invert VSYNC input
 //     <1=> invert VSYNC input
 // <i> Defines camera MT9M114 VSYNC polarity
 // <i> Default:  not invert VSYNC input
-#define RTE_MT9M114_CAMERA_SENSOR_VSYNC_POL              0
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_VSYNC_POL                0
 
-// <o> Select camera MT9M114 HSYNC mode
+// <o> Select camera MT9M114 VSYNC wait
+//     <0=> vsync wait disable
+//     <1=> vsync wait enable
+// <i> Defines camera MT9M114 VSYNC wait
+// <i> Default: vsync wait disable
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_VSYNC_WAIT               0
+
+// <o> Select camera MT9M114 VSYNC mode
 //     <0=> sync enable
 //     <1=> data enable
-// <i> Defines camera MT9M114 HSYNC mode
-// <i> Default: data enable
-#define RTE_MT9M114_CAMERA_SENSOR_HSYNC_MODE             1
+// <i> Defines camera MT9M114 VSYNC mode
+// <i> Default: sync enable
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_VSYNC_MODE               0
 
 // <o> Select video data mode
-//     <0=> 8 bit
-//     <1=> 16 bit
-//     <2=> 32 bit
-//     <3=> 64 bit
+//     <0=> 1 bit
+//     <1=> 2 bit
+//     <2=> 4 bit
+//     <3=> 8 bit
+//     <4=> 16 bit
 // <i> Defines video data mode
 // <i> Default: 8 bit
-#define RTE_MT9M114_CAMERA_SENSOR_DATA_MODE              0
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_MODE                3
+
+// <o> Select MSB/LSB
+//     <0=> LSB
+//     <1=> MSB
+// <i> Select MSB/LSB
+// <i> Default: LSB
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_MSB                      0
+
+// <o> Select CODE10ON8
+//     <0=> Disable
+//     <1=> Enable
+// <i> Defines transfer 10-bit coding over 8-bit data bus.
+// <i> Default: 8 bit
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_CODE10ON8                0
 
 // <o> Select camera MT9M114 data mask
-//     <0=> 10 bit
-//     <1=> 12 bit
-//     <2=> 14 bit
-//     <3=> 16 bit
+//     <0=> 16 bit
+//     <1=> 10 bit
+//     <2=> 12 bit
+//     <3=> 14 bit
 // <i> Defines camera MT9M114 data mask
 // <i> Default: 10 bit
-#define RTE_MT9M114_CAMERA_SENSOR_DATA_MASK              0
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_MASK                1
 
-// <o> Select I3C instance for MT9M114 camera sensor communication
-// <i> Define I3C instance for MT9M114 camera sensor communication
-// <i> Default: 0
-#define RTE_MT9M114_CAMERA_SENSOR_I2C_USING_I3Cx_INSTANCE          0
 #endif
 // </e> MT9M114 [Driver_MT9M114]
 
 #endif
-// </e> CAMERA0 (Camera) [Driver_CAMERA0]
+// </e> CPI (Camera) [Driver_CPI]
+
+// <e> LPCPI (Camera) [Driver_LPCPI]
+// <i> Configuration settings for Driver_LPCPI in component ::Drivers:LPCPI
+#define RTE_LPCPI                                               0
+#if RTE_LPCPI
+
+// <o> LPCPI interrupt priority <0-255>
+// <i> Defines LPCPI interrupt priority.
+// <i> Default: 0
+#define RTE_LPCPI_IRQ_PRI                                       0
+
+// <o> LPCPI Row roundup
+//     <0=> disable
+//     <1=> enable
+// <i> Defines LPCPI row roundup to 64 bit.
+// <i> Default: 0
+#define RTE_LPCPI_ROW_ROUNDUP                                   0
+
+// <o> LPCPI FIFO read watermark
+// <i> Defines LPCPI FIFO read watermark.
+// <i> Default: 0x8
+#define RTE_LPCPI_FIFO_READ_WATERMARK                           0x8
+
+// <o> LPCPI FIFO read watermark
+// <i> Defines LPCPI FIFO read watermark.
+// <i> Default: 0x18
+#define RTE_LPCPI_FIFO_WRITE_WATERMARK                          0x18
+
+// <e> MT9M114 [Driver_MT9M114]
+// <o> Enable/Disable MT9M114 camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable MT9M114 camera sensor
+// <i> default: disable
+#define RTE_MT9M114_CAMERA_SENSOR_ENABLE                  1
+
+#if RTE_MT9M114_CAMERA_SENSOR_ENABLE
+
+// <o> Select camera MT9M114 pixel clock polarity
+//     <0=> not invert camera pixclk
+//     <1=> invert camera pixclk
+// <i> Defines camera MT9M114 pixel clock polarity
+// <i> Default: not invert camera pixclk
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_PIXEL_CLK_POL           0
+
+// <o> Select camera MT9M114 HSYNC polarity
+//     <0=>  not invert HSYNC input
+//     <1=>  invert HSYNC input
+// <i> Defines camera MT9M114 HSYNC polarity
+// <i> Default:  not invert HSYNC input
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_HSYNC_POL               0
+
+// <o> Select camera MT9M114 VSYNC polarity
+//     <0=> not invert VSYNC input
+//     <1=> invert VSYNC input
+// <i> Defines camera MT9M114 VSYNC polarity
+// <i> Default:  not invert VSYNC input
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_VSYNC_POL               0
+
+// <o> Select camera MT9M114 VSYNC wait
+//     <0=> vsync wait disable
+//     <1=> vsync wait enable
+// <i> Defines camera MT9M114 VSYNC wait
+// <i> Default: vsync wait disable
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_VSYNC_WAIT              0
+
+// <o> Select camera MT9M114 VSYNC mode
+//     <0=> sync enable
+//     <1=> data enable
+// <i> Defines camera MT9M114 VSYNC mode
+// <i> Default: sync enable
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_VSYNC_MODE              0
+
+// <o> Select video data mode
+//     <0=> 1 bit
+//     <1=> 2 bit
+//     <2=> 4 bit
+//     <3=> 8 bit
+// <i> Defines video data mode
+// <i> Default: 8 bit
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_DATA_MODE               3
+
+// <o> Select MSB/LSB
+//     <0=> LSB
+//     <1=> MSB
+// <i> Select MSB/LSB
+// <i> Default: LSB
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_MSB                     0
+
+// <o> Select CODE10ON8
+//     <0=> Disable
+//     <1=> Enable
+// <i> Defines transfer 10-bit coding over 8-bit data bus.
+// <i> Default: 8 bit
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_CODE10ON8               0
+
+#endif
+// </e> MT9M114 [Driver_MT9M114]
+
+#endif
+// </e> LPCPI (Camera) [Driver_LPCPI]
 
 // <e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
 // <i> Configuration settings for Driver_MIPI_CSI2 in component ::Drivers:MIPI_CSI2
@@ -254,36 +440,36 @@
 #define RTE_MIPI_CSI2_VC_ID                     0
 
 // <o> select CSI2 Data type
-//     <0=> YUV420_8
-//     <1=> YUV420_10
-//     <2=> YUV420_8_LEGACY
-//     <3=> YUV420_8_SHIFT
-//     <4=> YUV420_10_SHIFT
-//     <5=> YUV422_8
-//     <6=> YUV422_10
-//     <7=> RGB444
-//     <8=> RGB555
-//     <9=> RGB565
-//     <10=> RGB666
-//     <11=> RGB888
-//     <12=> RAW6
-//     <13=> RAW7
-//     <14=> RAW8
-//     <15=> RAW10
-//     <16=> RAW12
-//     <17=> RAW14
-//     <18=> RAW16
-//     <19=> USER_DEFINED_1
-//     <20=> USER_DEFINED_2
-//     <21=> USER_DEFINED_3
-//     <22=> USER_DEFINED_4
-//     <23=> USER_DEFINED_5
-//     <24=> USER_DEFINED_6
-//     <25=> USER_DEFINED_7
-//     <26=> USER_DEFINED_8
+//     <24=> YUV420_8
+//     <25=> YUV420_10
+//     <26=> YUV420_8_LEGACY
+//     <28=> YUV420_8_SHIFT
+//     <29=> YUV420_10_SHIFT
+//     <30=> YUV422_8
+//     <31=> YUV422_10
+//     <32=> RGB444
+//     <33=> RGB555
+//     <34=> RGB565
+//     <35=> RGB666
+//     <36=> RGB888
+//     <40=> RAW6
+//     <41=> RAW7
+//     <42=> RAW8
+//     <43=> RAW10
+//     <44=> RAW12
+//     <45=> RAW14
+//     <46=> RAW16
+//     <48=> USER_DEFINED_1
+//     <49=> USER_DEFINED_2
+//     <50=> USER_DEFINED_3
+//     <51=> USER_DEFINED_4
+//     <52=> USER_DEFINED_5
+//     <53=> USER_DEFINED_6
+//     <54=> USER_DEFINED_7
+//     <55=> USER_DEFINED_8
 // <i> defines select CSI2 Data type
 // <i> default: RAW10
-#define RTE_MIPI_CSI2_DATA_TYPE                 15
+#define RTE_MIPI_CSI2_DATA_TYPE                 43
 
 // <o> select IPI mode
 //     <0=> camera mode
@@ -568,22 +754,22 @@
 
 // <o> ILI9806 LCD panel reset pin number
 // <i> Defines ILI9806 LCD panel reset pin number.
-// <i> Default: 6
+// <i> Default: 5
 #define RTE_ILI9806E_PANEL_RESET_PIN_NO                  BOARD_LCD_RESET_PIN_NO
 
 // <o> ILI9806 LCD panel reset pin GPIO port number
 // <i> Defines ILI9806 LCD panel reset pin GPIO port number.
-// <i> Default: 4
+// <i> Default: 15
 #define RTE_ILI9806E_PANEL_RESET_GPIO_PORT               BOARD_LCD_RESET_GPIO_PORT
 
 // <o> ILI9806 LCD panel back light pin number
 // <i> Defines ILI9806 LCD panel back light pin number.
-// <i> Default: 4
+// <i> Default: 1
 #define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 BOARD_LCD_BACKLIGHT_PIN_NO
 
 // <o> ILI9806 LCD panel back light pin GPIO port number
 // <i> Defines ILI9806 LCD panel back light pin GPIO port number.
-// <i> Default: 4
+// <i> Default: 6
 #define RTE_ILI9806E_PANEL_BL_LED_GPIO_PORT              BOARD_LCD_BACKLIGHT_GPIO_PORT
 
 // <e> MIPI_DSI (ILI9806E_PANEL_E43RB_FW405 | ILI9806E_PANEL_E43GB_MW405) [Driver_ILI9806E_PANEL]
@@ -807,13 +993,13 @@
 #endif
 // </e> CDC200 (cdc200) [Driver_CDC200]
 
-// <e> I3C0 (Improved Inter-Integrated Circuit) [Driver_I3C0]
-// <i> Configuration settings for Driver_I3C0 in component ::Drivers:I3C
-#define RTE_I3C0   1
-#if RTE_I3C0
-#define RTE_I3C0_IRQ_PRI       0
+// <e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
+// <i> Configuration settings for Driver_I3C in component ::Drivers:I3C
+#define RTE_I3C   1
+#if RTE_I3C
+#define RTE_I3C_IRQ_PRI       0
 #endif
-// </e> I3C0 (Improved Inter-Integrated Circuit) [Driver_I3C0]
+// </e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
 
 
 // <h> SPI (Serial Peripheral Interface)
@@ -1136,13 +1322,13 @@
 // <i> Configuration settings for Driver_SAI0 in component ::Drivers:SAI
 #define RTE_I2S0 1
 
-#ifdef RTE_I2S0
+#if RTE_I2S0
 
 // <o> I2S0 WORD SELECT SIZE
 //    <0=> WSS_CLOCK_CYCLES_16
 //    <1=> WSS_CLOCK_CYCLES_24
 //    <2=> WSS_CLOCK_CYCLES_32
-// <i> Defines I2S 0 size of word.
+// <i> Defines I2S0 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
 #define RTE_I2S0_WSS_CLOCK_CYCLES 2
 
@@ -1152,7 +1338,7 @@
 //    <2=> SCLKG_CLOCK_CYCLES_16
 //    <3=> SCLKG_CLOCK_CYCLES_20
 //    <4=> SCLKG_CLOCK_CYCLES_24
-// <i> Defines I2S 0 SCLK Gating.
+// <i> Defines I2S0 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
 #define RTE_I2S0_SCLKG_CLOCK_CYCLES 0
 
@@ -1173,7 +1359,7 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 0 receive fifo trigger level.
+// <i> Defines I2S0 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
 #define RTE_I2S0_RX_TRIG_LVL 7
 
@@ -1194,31 +1380,40 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 0 transfer fifo trigger level.
+// <i> Defines I2S0 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
 #define RTE_I2S0_TX_TRIG_LVL 8
 
 // <o> I2S0 IRQ priority <0-255>
-// <i> Defines I2S 0 Interrupt priority.
-// <i> Default: 1
-#define RTE_I2S0_IRQ_PRI     0
+// <i> Defines I2S0 Interrupt priority
+// <i> Default: 0
+#define RTE_I2S0_IRQ_PRI     10
 
-// <o> I2S0 CLK SOURCE
-//    <0=> CLK_76.8MHz
-//    <1=> CLK_EXTERNAL
-// <i> Defines I2S 0 clock source.
-// <i> Default: CLK_76.8MHz
-#define RTE_I2S0_CLK_SOURCE  0
+// <o> I2S0 Enable External Clock source
+//    <0=> DISABLE
+//    <1=> Enable External Clock Input
+// <i> Defines Enable External clock source
+// <i> Default: DISABLE
+#define RTE_I2S0_EXT_CLOCK_SOURCE_ENABLE  0
+#if RTE_I2S0_EXT_CLOCK_SOURCE_ENABLE
+// <o> I2S0 External clock source in Hz
+// <i> Defines I2S0 External clock source in Hz
+// <i> Default: 0
+#define RTE_I2S0_EXT_CLOCK_SOURCE  0
+#endif
 
 // <o> I2S0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines DMA feature for I2S 0.
+// <i> Defines DMA feature for I2S0
 // <i> Default: ENABLE
-#define RTE_I2S0_DMA_ENABLE  1
+#define RTE_I2S0_DMA_ENABLE  0
 
-// <i> Defines DMA Interrupt priority for I2S 0.
-#define RTE_I2S0_DMA_IRQ_PRI  RTE_I2S0_IRQ_PRI
+// <o> I2S0 DMA IRQ priority <0-255>
+// <i> Defines I2S0 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2S0_DMA_IRQ_PRI  0
+
 #endif
 // </e> I2S0 (Integrated Interchip Sound 0) [Driver_SAI0]
 
@@ -1227,13 +1422,13 @@
 // <i> Configuration settings for Driver_SAI1 in component ::Drivers:SAI
 #define RTE_I2S1   1
 
-#ifdef RTE_I2S1
+#if RTE_I2S1
 
 // <o> I2S1 WORD SELECT SIZE
 //    <0=> WSS_CLOCK_CYCLES_16
 //    <1=> WSS_CLOCK_CYCLES_24
 //    <2=> WSS_CLOCK_CYCLES_32
-// <i> Defines I2S 1 size of word.
+// <i> Defines I2S1 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
 #define RTE_I2S1_WSS_CLOCK_CYCLES 2
 
@@ -1243,7 +1438,7 @@
 //    <2=> SCLKG_CLOCK_CYCLES_16
 //    <3=> SCLKG_CLOCK_CYCLES_20
 //    <4=> SCLKG_CLOCK_CYCLES_24
-// <i> Defines I2S 1 SCLK Gating.
+// <i> Defines I2S1 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
 #define RTE_I2S1_SCLKG_CLOCK_CYCLES 0
 
@@ -1264,7 +1459,7 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 1 receive fifo trigger level.
+// <i> Defines I2S1 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
 #define RTE_I2S1_RX_TRIG_LVL 7
 
@@ -1285,31 +1480,39 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 1 transfer fifo trigger level.
+// <i> Defines I2S1 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
 #define RTE_I2S1_TX_TRIG_LVL 8
 
 // <o> I2S1 IRQ priority <0-255>
-// <i> Defines I2S 1 Interrupt priority.
+// <i> Defines I2S1 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S1_IRQ_PRI     0
+#define RTE_I2S1_IRQ_PRI     10
 
-// <o> I2S1 CLK SOURCE
-//    <0=> CLK_76.8MHz
-//    <1=> CLK_EXTERNAL
-// <i> Defines I2S 1 clock source.
-// <i> Default: CLK_76.8MHz
-#define RTE_I2S1_CLK_SOURCE  0
+// <o> I2S1 Enable External Clock source
+//    <0=> DISABLE
+//    <1=> Enable External Clock Input
+// <i> Defines Enable External clock source
+// <i> Default: DISABLE
+#define RTE_I2S1_EXT_CLOCK_SOURCE_ENABLE  0
+#if RTE_I2S1_EXT_CLOCK_SOURCE_ENABLE
+// <o> I2S1 External clock source in Hz
+// <i> Defines External clock source in Hz
+// <i> Default: 0
+#define RTE_I2S1_EXT_CLOCK_SOURCE  0
+#endif
 
 // <o> I2S1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines DMA feature for I2S 1.
+// <i> Defines DMA feature for I2S1
 // <i> Default: ENABLE
-#define RTE_I2S1_DMA_ENABLE  1
+#define RTE_I2S1_DMA_ENABLE  0
 
-// <i> Defines DMA Interrupt priority for I2S 1.
-#define RTE_I2S1_DMA_IRQ_PRI  RTE_I2S1_IRQ_PRI
+// <o> I2S1 DMA IRQ priority <0-255>
+// <i> Defines I2S1 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2S1_DMA_IRQ_PRI  0
 #endif
 // </e> I2S1 (Integrated Interchip Sound 1) [Driver_SAI1]
 
@@ -1318,13 +1521,13 @@
 // <i> Configuration settings for Driver_SAI2 in component ::Drivers:SAI
 #define RTE_I2S2 1
 
-#ifdef RTE_I2S2
+#if RTE_I2S2
 
 // <o> I2S2 WORD SELECT SIZE
 //    <0=> WSS_CLOCK_CYCLES_16
 //    <1=> WSS_CLOCK_CYCLES_24
 //    <2=> WSS_CLOCK_CYCLES_32
-// <i> Defines I2S 2 size of word.
+// <i> Defines I2S2 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
 #define RTE_I2S2_WSS_CLOCK_CYCLES 2
 
@@ -1334,7 +1537,7 @@
 //    <2=> SCLKG_CLOCK_CYCLES_16
 //    <3=> SCLKG_CLOCK_CYCLES_20
 //    <4=> SCLKG_CLOCK_CYCLES_24
-// <i> Defines I2S 2 SCLK Gating.
+// <i> Defines I2S2 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
 #define RTE_I2S2_SCLKG_CLOCK_CYCLES 0
 
@@ -1355,7 +1558,7 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 2 receive fifo trigger level.
+// <i> Defines I2S2 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
 #define RTE_I2S2_RX_TRIG_LVL 7
 
@@ -1376,31 +1579,39 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 2 transfer fifo trigger level.
+// <i> Defines I2S2 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
 #define RTE_I2S2_TX_TRIG_LVL 8
 
 // <o> I2S2 IRQ priority <0-255>
-// <i> Defines I2S 2 Interrupt priority.
+// <i> Defines I2S2 Interrupt priority
 // <i> Default: 0
 #define RTE_I2S2_IRQ_PRI     10
 
-// <o> I2S2 CLK SOURCE
-//    <0=> CLK_76.8MHz
-//    <1=> CLK_EXTERNAL
-// <i> Defines I2S 2 clock source.
-// <i> Default: CLK_76.8MHz
-#define RTE_I2S2_CLK_SOURCE  0
+// <o> I2S2 Enable External Clock source
+//    <0=> DISABLE
+//    <1=> Enable External Clock Input
+// <i> Defines Enable External clock source
+// <i> Default: DISABLE
+#define RTE_I2S2_EXT_CLOCK_SOURCE_ENABLE  0
+#if RTE_I2S2_EXT_CLOCK_SOURCE_ENABLE
+// <o> I2S2 External clock source in Hz
+// <i> Defines I2S2 External clock source in Hz
+// <i> Default: 0
+#define RTE_I2S2_EXT_CLOCK_SOURCE  0
+#endif
 
 // <o> I2S2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines DMA feature for I2S 2.
+// <i> Defines DMA feature for I2S2
 // <i> Default: ENABLE
-#define RTE_I2S2_DMA_ENABLE  1
+#define RTE_I2S2_DMA_ENABLE  0
 
-// <i> Defines DMA Interrupt priority for I2S 2.
-#define RTE_I2S2_DMA_IRQ_PRI  RTE_I2S2_IRQ_PRI
+// <o> I2S2 DMA IRQ priority <0-255>
+// <i> Defines I2S2 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2S2_DMA_IRQ_PRI  0
 #endif
 // </e> I2S2 (Integrated Interchip Sound 2) [Driver_SAI2]
 
@@ -1409,13 +1620,13 @@
 // <i> Configuration settings for Driver_SAI3 in component ::Drivers:SAI
 #define RTE_I2S3   1
 
-#ifdef RTE_I2S3
+#if RTE_I2S3
 
 // <o> I2S3 WORD SELECT SIZE
 //    <0=> WSS_CLOCK_CYCLES_16
 //    <1=> WSS_CLOCK_CYCLES_24
 //    <2=> WSS_CLOCK_CYCLES_32
-// <i> Defines I2S 3 size of word.
+// <i> Defines I2S3 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
 #define RTE_I2S3_WSS_CLOCK_CYCLES 2
 
@@ -1425,7 +1636,7 @@
 //    <2=> SCLKG_CLOCK_CYCLES_16
 //    <3=> SCLKG_CLOCK_CYCLES_20
 //    <4=> SCLKG_CLOCK_CYCLES_24
-// <i> Defines I2S 3 SCLK Gating.
+// <i> Defines I2S3 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
 #define RTE_I2S3_SCLKG_CLOCK_CYCLES 0
 
@@ -1446,7 +1657,7 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 3 receive fifo trigger level.
+// <i> Defines I2S3 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
 #define RTE_I2S3_RX_TRIG_LVL 7
 
@@ -1467,33 +1678,141 @@
 //    <13=> TRIGGER_LEVEL_14
 //    <14=> TRIGGER_LEVEL_15
 //    <15=> TRIGGER_LEVEL_16
-// <i> Defines I2S 3 transfer fifo trigger level.
+// <i> Defines I2S3 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
 #define RTE_I2S3_TX_TRIG_LVL 8
 
 // <o> I2S3 IRQ priority <0-255>
-// <i> Defines I2S 3 Interrupt priority.
-// <i> Default: 1
-#define RTE_I2S3_IRQ_PRI     0
+// <i> Defines I2S3 Interrupt priority
+// <i> Default: 0
+#define RTE_I2S3_IRQ_PRI     10
 
-// <o> I2S3 CLK SOURCE
-//    <0=> CLK_76.8MHz
-//    <1=> CLK_EXTERNAL
-// <i> Defines I2S 3 clock source.
-// <i> Default: CLK_76.8MHz
-#define RTE_I2S3_CLK_SOURCE  0
+// <o> I2S3 Enable External Clock source
+//    <0=> DISABLE
+//    <1=> Enable External Clock Input
+// <i> Defines Enable External clock source
+// <i> Default: DISABLE
+#define RTE_I2S3_EXT_CLOCK_SOURCE_ENABLE  0
+#if RTE_I2S3_EXT_CLOCK_SOURCE_ENABLE
+// <o> I2S3 External clock source in Hz
+// <i> Defines I2S3 External clock source in Hz
+// <i> Default: 0
+#define RTE_I2S3_EXT_CLOCK_SOURCE  0
+#endif
 
 // <o> I2S3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines DMA feature for I2S 3.
+// <i> Defines DMA feature for I2S3
 // <i> Default: ENABLE
-#define RTE_I2S3_DMA_ENABLE  1
+#define RTE_I2S3_DMA_ENABLE  0
 
-// <i> Defines DMA Interrupt priority for I2S 3.
+// <o> I2S3 DMA IRQ priority <0-255>
+// <i> Defines I2S3 DMA Interrupt priority
+// <i> Default: 0
 #define RTE_I2S3_DMA_IRQ_PRI  RTE_I2S3_IRQ_PRI
 #endif
 // </e> I2S3 (Integrated Interchip Sound 3) [Driver_SAI3]
+
+#if RTE_RTSS_M55_HE
+// <e> LPI2S (Low Power Integrated Interchip Sound) [Driver_SAILP]
+// <i> Configuration settings for Driver_SAILP in component ::Drivers:SAI
+#define RTE_LPI2S   1
+
+#if RTE_LPI2S
+
+// <o> LPI2S WORD SELECT SIZE
+//    <0=> WSS_CLOCK_CYCLES_16
+//    <1=> WSS_CLOCK_CYCLES_24
+//    <2=> WSS_CLOCK_CYCLES_32
+// <i> Defines LPI2S size of word
+// <i> Default: WSS_CLOCK_CYCLES_32
+#define RTE_LPI2S_WSS_CLOCK_CYCLES 2
+
+// <o> LPI2S SCLK GATING
+//    <0=> NO_CLOCK_GATING
+//    <1=> SCLKG_CLOCK_CYCLES_12
+//    <2=> SCLKG_CLOCK_CYCLES_16
+//    <3=> SCLKG_CLOCK_CYCLES_20
+//    <4=> SCLKG_CLOCK_CYCLES_24
+// <i> Defines LPI2S SCLK Gating
+// <i> Default: NO_CLOCK_GATING
+#define RTE_LPI2S_SCLKG_CLOCK_CYCLES 0
+
+// <o> LPI2S RX FIFO TRIGGER LEVEL
+//    <0=>  TRIGGER_LEVEL_1
+//    <1=>  TRIGGER_LEVEL_2
+//    <2=>  TRIGGER_LEVEL_3
+//    <3=>  TRIGGER_LEVEL_4
+//    <4=>  TRIGGER_LEVEL_5
+//    <5=>  TRIGGER_LEVEL_6
+//    <6=>  TRIGGER_LEVEL_7
+//    <7=>  TRIGGER_LEVEL_8
+//    <8=>  TRIGGER_LEVEL_9
+//    <9=>  TRIGGER_LEVEL_10
+//    <10=> TRIGGER_LEVEL_11
+//    <11=> TRIGGER_LEVEL_12
+//    <12=> TRIGGER_LEVEL_13
+//    <13=> TRIGGER_LEVEL_14
+//    <14=> TRIGGER_LEVEL_15
+//    <15=> TRIGGER_LEVEL_16
+// <i> Defines LPI2S receive fifo trigger level
+// <i> Default: TRIGGER_LEVEL_8
+#define RTE_LPI2S_RX_TRIG_LVL 7
+
+// <o> LPI2S TX FIFO TRIGGER LEVEL
+//    <0=>  TRIGGER_LEVEL_1
+//    <1=>  TRIGGER_LEVEL_2
+//    <2=>  TRIGGER_LEVEL_3
+//    <3=>  TRIGGER_LEVEL_4
+//    <4=>  TRIGGER_LEVEL_5
+//    <5=>  TRIGGER_LEVEL_6
+//    <6=>  TRIGGER_LEVEL_7
+//    <7=>  TRIGGER_LEVEL_8
+//    <8=>  TRIGGER_LEVEL_9
+//    <9=>  TRIGGER_LEVEL_10
+//    <10=> TRIGGER_LEVEL_11
+//    <11=> TRIGGER_LEVEL_12
+//    <12=> TRIGGER_LEVEL_13
+//    <13=> TRIGGER_LEVEL_14
+//    <14=> TRIGGER_LEVEL_15
+//    <15=> TRIGGER_LEVEL_16
+// <i> Defines LPI2S transfer fifo trigger level
+// <i> Default: TRIGGER_LEVEL_9
+#define RTE_LPI2S_TX_TRIG_LVL 8
+
+// <o> LPI2S IRQ priority <0-255>
+// <i> Defines LPI2S Interrupt priority
+// <i> Default: 0
+#define RTE_LPI2S_IRQ_PRI     0
+
+// <o> LPI2S Enable External Clock source
+//    <0=> DISABLE
+//    <1=> Enable External Clock Input
+// <i> Defines Enable External clock source
+// <i> Default: DISABLE
+#define RTE_LPI2S_EXT_CLOCK_SOURCE_ENABLE  0
+#if RTE_LPI2S_EXT_CLOCK_SOURCE_ENABLE
+// <o> LPI2S External clock source in Hz
+// <i> Defines LPI2S External clock source in Hz
+// <i> Default: 0
+#define RTE_LPI2S_EXT_CLOCK_SOURCE  0
+#endif
+
+// <o> LPI2S DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for LPI2S
+// <i> Default: ENABLE
+#define RTE_LPI2S_DMA_ENABLE  0
+
+// <o> LPI2S DMA IRQ priority <0-255>
+// <i> Defines LPI2S DMA Interrupt priority
+// <i> Default: 0
+#define RTE_LPI2S_DMA_IRQ_PRI  0
+#endif //RTE_LPI2S
+// </e> LPI2S (Low Power Integrated Interchip Sound) [Driver_SAILP]
+#endif //RTE_RTSS_M55_HE
 // </h> I2S (Integrated Interchip Sound)
 
 // <h> UART (Universal asynchronous receiver transmitter)
@@ -1843,12 +2162,47 @@
 #endif
 #endif
 // </e> UART7 (Universal asynchronous receiver transmitter) [Driver_USART7]
+
+
+// <e> LPUART (Low-Power Universal asynchronous receiver transmitter) [Driver_USARTLP]
+// <i> Configuration settings for Driver_USARTLP in component ::Drivers:USART
+#if RTE_RTSS_M55_HE
+#define RTE_LPUART   1
+#endif
+
+#if RTE_LPUART
+
+// <o> LPUART RX FIFO TRIGGER LEVEL
+//    <0=>  UART_RX_ONE_CHAR_IN_FIFO
+//    <1=>  UART_RX_FIFO_QUARTER_FULL
+//    <2=>  UART_RX_FIFO_HALF_FULL
+//    <3=>  UART_RX_FIFO_TWO_LESS_FULL
+// <i> Defines LPUART receive fifo trigger level.
+// <i> Default: UART_RX_ONE_CHAR_IN_FIFO
+#define RTE_LPUART_RX_TRIG_LVL   0
+
+// <o> LPUART TX FIFO TRIGGER LEVEL
+//    <0=>  UART_TX_FIFO_EMPTY
+//    <1=>  UART_TX_FIFO_CHAR_2
+//    <2=>  UART_TX_FIFO_QUARTER_FULL
+//    <3=>  UART_TX_FIFO_HALF_FULL
+// <i> Defines LPUART transmit fifo trigger level.
+// <i> Default: UART_TX_FIFO_EMPTY
+#define RTE_LPUART_TX_TRIG_LVL   0
+
+// <o> LPUART IRQ priority <0-255>
+// <i> Defines Interrupt priority for LPUART.
+// <i> Default: 0
+#define RTE_LPUART_IRQ_PRI       0
+#endif
+// </e> LPUART (Low-Power Universal asynchronous receiver transmitter) [Driver_USARTLP]
 // </h> UART (Universal asynchronous receiver transmitter)
+
 
 // <h> LPTIMER (Low power timer)
 // <e> LPTIMER (Low power timer) [Driver_LPTIMER]
 // <i> Configuration settings for Driver_LPTIMER in component ::Drivers:LPTIMER
-#define RTE_LPTIMER			    1
+#define RTE_LPTIMER    1
 
 #if RTE_LPTIMER
 
@@ -1860,13 +2214,6 @@
 // <i> Defines Interrupt priority for LPTIMER channel 0.
 // <i> Default: 0
 #define RTE_LPTIMER_CHANNEL0_IRQ_PRIORITY   (0)
-
-// <o> CHANNEL0 PWM feature
-//    <0=> DISABLED
-//    <1=> ENABLED
-// <i> Defines whether PWM feature is not enabled/disabled for channel0.
-// <i> Default: DISABLED
-#define RTE_LPTIMER_CHANNEL0_PWM            (0)
 
 // <o> CHANNEL0 FREE RUN feature
 //    <0=> DISABLED
@@ -1894,13 +2241,6 @@
 // <i> Default: 0
 #define RTE_LPTIMER_CHANNEL1_IRQ_PRIORITY   (0)
 
-// <o> CHANNEL1 PWM feature
-//    <0=> DISABLED
-//    <1=> ENABLED
-// <i> Defines whether PWM feature is not enabled/disabled for channel1.
-// <i> Default: DISABLED
-#define RTE_LPTIMER_CHANNEL1_PWM            (0)
-
 // <o> CHANNEL1 FREE RUN feature
 //    <0=> DISABLED
 //    <1=> ENABLED
@@ -1927,13 +2267,6 @@
 // <i> Default: 0
 #define RTE_LPTIMER_CHANNEL2_IRQ_PRIORITY   (0)
 
-// <o> CHANNEL2 PWM feature
-//    <0=> DISABLED
-//    <1=> ENABLED
-// <i> Defines whether PWM feature is not enabled/disabled for channel2.
-// <i> Default: DISABLED
-#define RTE_LPTIMER_CHANNEL2_PWM            (0)
-
 // <o> CHANNEL2 FREE RUN feature
 //    <0=> DISABLED
 //    <1=> ENABLED
@@ -1959,13 +2292,6 @@
 // <i> Defines Interrupt priority for LPTIMER channel 3.
 // <i> Default: 0
 #define RTE_LPTIMER_CHANNEL3_IRQ_PRIORITY   (0)
-
-// <o> CHANNEL3 PWM feature
-//    <0=> DISABLED
-//    <1=> ENABLED
-// <i> Defines whether PWM feature is not enabled/disabled for channel3.
-// <i> Default: DISABLED
-#define RTE_LPTIMER_CHANNEL3_PWM            (0)
 
 // <o> CHANNEL3 FREE RUN feature
 //    <0=> DISABLED
@@ -2035,13 +2361,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL0_FIXED_BUFFER            0
 
-// <o> CHANNEL0 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 0.
+// <o> CHANNEL0 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 0.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL0_DMA_CONTROL            0
+
+// <o> CHANNEL0 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 0.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL0_FAULT_TYPE            0
+
+// <o> CHANNEL0 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 0.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL0_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL0_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL0 DRIVER A
 //    <0=> DISABLED
@@ -2057,37 +2396,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL0_DRIVER_B                0
 
-// <o> CHANNEL0 DRIVER START STATE
+// <o> CHANNEL0 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 0.
+// <i> Defines Driver A start state for UT channel 0.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL0_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL0_DRV_A_START_STATE       0
 
-// <o> CHANNEL0 DRIVER STOP STATE
+// <o> CHANNEL0 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 0.
+// <i> Defines Driver A stop state for UT channel 0.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL0_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL0_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL0 DRIVER AT COMP MATCH
+// <o> CHANNEL0 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 0.
+// <i> Defines Driver A state at compare match for UT channel 0.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL0_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL0_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL0 DRIVER AT CYCLE END
+// <o> CHANNEL0 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 0.
+// <i> Defines Driver A state at cycle end for UT channel 0.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL0_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL0_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL0 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 0.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL0_DRV_B_START_STATE       0
+
+// <o> CHANNEL0 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 0.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL0_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL0 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 0.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL0_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL0 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 0.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL0_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL0 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -2202,13 +2573,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL1_FIXED_BUFFER            0
 
-// <o> CHANNEL1 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 1.
+// <o> CHANNEL1 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 1.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL1_DMA_CONTROL            0
+
+// <o> CHANNEL1 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 1.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL1_FAULT_TYPE            0
+
+// <o> CHANNEL1 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 1.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL1_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL1_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL1 DRIVER A
 //    <0=> DISABLED
@@ -2224,37 +2608,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL1_DRIVER_B                0
 
-// <o> CHANNEL1 DRIVER START STATE
+// <o> CHANNEL1 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 1.
+// <i> Defines Driver A start state for UT channel 1.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL1_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL1_DRV_A_START_STATE       0
 
-// <o> CHANNEL1 DRIVER STOP STATE
+// <o> CHANNEL1 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 1.
+// <i> Defines Driver A stop state for UT channel 1.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL1_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL1_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL1 DRIVER AT COMP MATCH
+// <o> CHANNEL1 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 1.
+// <i> Defines Driver A state at compare match for UT channel 1.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL1_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL1_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL1 DRIVER AT CYCLE END
+// <o> CHANNEL1 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 1.
+// <i> Defines Driver A state at cycle end for UT channel 1.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL1_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL1_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL1 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 1.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL1_DRV_B_START_STATE       0
+
+// <o> CHANNEL1 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 1.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL1_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL1 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 1.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL1_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL1 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 1.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL1_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL1 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -2290,7 +2706,7 @@
 //    <2=> DOUBLE BUFFER
 // <i> Defines buffer operation for UT channel 1 capture mode.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL1_BUFFERING_TYPE_A        2
+#define RTE_UTIMER_CHANNEL1_BUFFERING_TYPE_A        0
 
 // <o> CHANNEL1 CAPTURE BUFFER OPERATION FOR DRIVER B
 //    <0=> NO BUFFER
@@ -2369,13 +2785,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL2_FIXED_BUFFER            0
 
-// <o> CHANNEL2 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 2.
+// <o> CHANNEL2 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 2.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL2_DMA_CONTROL            0
+
+// <o> CHANNEL2 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 2.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL2_FAULT_TYPE            0
+
+// <o> CHANNEL2 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 2.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL2_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL2_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL2 DRIVER A
 //    <0=> DISABLED
@@ -2391,37 +2820,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL2_DRIVER_B                0
 
-// <o> CHANNEL2 DRIVER START STATE
+// <o> CHANNEL2 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 2.
+// <i> Defines Driver A start state for UT channel 2.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL2_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL2_DRV_A_START_STATE       0
 
-// <o> CHANNEL2 DRIVER STOP STATE
+// <o> CHANNEL2 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 2.
+// <i> Defines Driver A stop state for UT channel 2.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL2_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL2_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL2 DRIVER AT COMP MATCH
+// <o> CHANNEL2 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 2.
+// <i> Defines Driver A state at compare match for UT channel 2.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL2_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL2_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL2 DRIVER AT CYCLE END
+// <o> CHANNEL2 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 2.
+// <i> Defines Driver A state at cycle end for UT channel 2.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL2_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL2_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL2 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 2.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL2_DRV_B_START_STATE       0
+
+// <o> CHANNEL2 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 2.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL2_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL2 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 2.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL2_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL2 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 2.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL2_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL2 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -2536,13 +2997,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL3_FIXED_BUFFER            0
 
-// <o> CHANNEL3 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 3.
+// <o> CHANNEL3 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 0.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL3_DMA_CONTROL            0
+
+// <o> CHANNEL3 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 3.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL3_FAULT_TYPE            0
+
+// <o> CHANNEL3 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 3.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL3_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL3_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL3 DRIVER A
 //    <0=> DISABLED
@@ -2558,37 +3032,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL3_DRIVER_B                0
 
-// <o> CHANNEL3 DRIVER START STATE
+// <o> CHANNEL3 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 3.
+// <i> Defines Driver A start state for UT channel 3.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL3_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL3_DRV_A_START_STATE       0
 
-// <o> CHANNEL3 DRIVER STOP STATE
+// <o> CHANNEL3 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 3.
+// <i> Defines Driver A stop state for UT channel 3.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL3_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL3_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL3 DRIVER AT COMP MATCH
+// <o> CHANNEL3 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 3.
+// <i> Defines Driver A state at compare match for UT channel 3.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL3_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL3_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL3 DRIVER AT CYCLE END
+// <o> CHANNEL3 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 3.
+// <i> Defines Driver A state at cycle end for UT channel 3.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL3_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL3_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL3 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 3.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL3_DRV_B_START_STATE       0
+
+// <o> CHANNEL3 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 3.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL3_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL3 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 3.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL3_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL3 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 3.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL3_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL3 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -2609,14 +3115,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 3.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL3_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL3_BUFFERING_TYPE          0
 
 // <o> CHANNEL3 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 3.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL3_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL3_BUFFER_OPERATION        0
 
 // <o> CHANNEL3 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -2624,7 +3130,7 @@
 //    <2=> DOUBLE BUFFER
 // <i> Defines buffer operation for UT channel 3 capture mode.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL3_BUFFERING_TYPE_A        2
+#define RTE_UTIMER_CHANNEL3_BUFFERING_TYPE_A        0
 
 // <o> CHANNEL3 CAPTURE BUFFER OPERATION FOR DRIVER B
 //    <0=> NO BUFFER
@@ -2703,13 +3209,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL4_FIXED_BUFFER            0
 
-// <o> CHANNEL4 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 4.
+// <o> CHANNEL4 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 4.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL4_DMA_CONTROL            0
+
+// <o> CHANNEL4 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 4.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL4_FAULT_TYPE            0
+
+// <o> CHANNEL4 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 1.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL4_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL4_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL4 DRIVER A
 //    <0=> DISABLED
@@ -2725,37 +3244,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL4_DRIVER_B                0
 
-// <o> CHANNEL4 DRIVER START STATE
+// <o> CHANNEL4 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 4.
+// <i> Defines Driver A start state for UT channel 4.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL4_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL4_DRV_A_START_STATE       0
 
-// <o> CHANNEL4 DRIVER STOP STATE
+// <o> CHANNEL4 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 4.
+// <i> Defines Driver A stop state for UT channel 4.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL4_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL4_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL4 DRIVER AT COMP MATCH
+// <o> CHANNEL4 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 4.
+// <i> Defines Driver A state at compare match for UT channel 4.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL4_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL4_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL4 DRIVER AT CYCLE END
+// <o> CHANNEL4 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 4.
+// <i> Defines Driver A state at cycle end for UT channel 4.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL4_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL4_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL4 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 4.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL4_DRV_B_START_STATE       0
+
+// <o> CHANNEL4 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 4.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL4_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL4 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 4.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL4_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL4 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 4.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL4_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL4 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -2769,7 +3320,7 @@
 //    <1=> ENABLE
 // <i> Defines buffer transfer at trough for UT channel 4.
 // <i> Default: DISABLE
-#define RTE_UTIMER_CHANNEL4_EVENT_AT_TROUGH         0
+#define RTE_UTIMER_CHANNEL4_EVENT_AT_TROUGH         1
 
 // <o> CHANNEL4 BUFFERING TYPE
 //    <0=> SINGLE BUFFER
@@ -2799,7 +3350,7 @@
 //    <2=> DOUBLE BUFFER
 // <i> Defines buffer operation for UT channel 4 capture mode.
 // <i> Default: NO BUFFER
-#define RTE_UTIMER_CHANNEL4_BUFFERING_TYPE_B        0
+#define RTE_UTIMER_CHANNEL4_BUFFERING_TYPE_B        2
 
 // <o> CHANNEL4 CAPTURE A IRQ priority <0-255>
 // <i> Defines Interrupt priority for channel 4 capture A.
@@ -2863,7 +3414,6 @@
 // <i> Configuration settings for UTIMER channel 5 in component ::Drivers:UTIMER
 #define RTE_UTIMER_CHANNEL5   1
 
-
 // <o> CHANNEL5 FIXED BUFFER
 //    <0=> DISABLED
 //    <1=> ENABLED
@@ -2871,13 +3421,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL5_FIXED_BUFFER            0
 
-// <o> CHANNEL5 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 5.
+// <o> CHANNEL5 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 4.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL5_DMA_CONTROL            0
+
+// <o> CHANNEL5 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 5.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL5_FAULT_TYPE            0
+
+// <o> CHANNEL5 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 5.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL5_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL5_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL5 DRIVER A
 //    <0=> DISABLED
@@ -2893,37 +3456,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL5_DRIVER_B                0
 
-// <o> CHANNEL5 DRIVER START STATE
+// <o> CHANNEL5 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 5.
+// <i> Defines Driver A start state for UT channel 5.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL5_CMP_START_STATE         1
+#define RTE_UTIMER_CHANNEL5_DRV_A_START_STATE       0
 
-// <o> CHANNEL5 DRIVER STOP STATE
+// <o> CHANNEL5 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 5.
+// <i> Defines Driver A stop state for UT channel 5.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL5_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL5_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL5 DRIVER AT COMP MATCH
+// <o> CHANNEL5 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 5.
+// <i> Defines Driver A state at compare match for UT channel 5.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL5_DRV_OP_AT_MATCH_COUNT   3
+#define RTE_UTIMER_CHANNEL5_DRV_A_OP_AT_MATCH_COUNT  3
 
-// <o> CHANNEL5 DRIVER AT CYCLE END
+// <o> CHANNEL5 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 5.
+// <i> Defines Driver A state at cycle end for UT channel 5.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL5_DRV_OP_AT_CYCLE_END     3
+#define RTE_UTIMER_CHANNEL5_DRV_A_OP_AT_CYCLE_END    3
+
+// <o> CHANNEL5 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 5.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL5_DRV_B_START_STATE       0
+
+// <o> CHANNEL5 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 5.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL5_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL5 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 5.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL5_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL5 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 5.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL5_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL5 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3038,13 +3633,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL6_FIXED_BUFFER            0
 
-// <o> CHANNEL6 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 6.
+// <o> CHANNEL6 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 6.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL6_DMA_CONTROL            0
+
+// <o> CHANNEL6 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 6.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL6_FAULT_TYPE            0
+
+// <o> CHANNEL6 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 6.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL6_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL6_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL6 DRIVER A
 //    <0=> DISABLED
@@ -3058,39 +3666,71 @@
 //    <1=> ENABLED
 // <i> Defines Driver B state for UT channel 6.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL6_DRIVER_B                1
+#define RTE_UTIMER_CHANNEL6_DRIVER_B                0
 
-// <o> CHANNEL6 DRIVER START STATE
+// <o> CHANNEL6 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 6.
+// <i> Defines Driver A start state for UT channel 6.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL6_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL6_DRV_A_START_STATE       3
 
-// <o> CHANNEL6 DRIVER STOP STATE
+// <o> CHANNEL6 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 6.
+// <i> Defines Driver A stop state for UT channel 6.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL6_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL6_DRV_A_STOP_STATE        3
 
-// <o> CHANNEL6 DRIVER AT COMP MATCH
+// <o> CHANNEL6 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 6.
+// <i> Defines Driver A state at compare match for UT channel 6.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL6_DRV_OP_AT_MATCH_COUNT   3
+#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL6 DRIVER AT CYCLE END
+// <o> CHANNEL6 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 6.
+// <i> Defines Driver A state at cycle end for UT channel 6.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL6_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL6 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 6.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL6_DRV_B_START_STATE       0
+
+// <o> CHANNEL6 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 6.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL6_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL6 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 6.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL6_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL6 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 6.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL6_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL6 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3205,13 +3845,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL7_FIXED_BUFFER            0
 
-// <o> CHANNEL7 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 7.
+// <o> CHANNEL7 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 7.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL7_DMA_CONTROL            0
+
+// <o> CHANNEL7 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 7.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL7_FAULT_TYPE            0
+
+// <o> CHANNEL7 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 7.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL7_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL7_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL7 DRIVER A
 //    <0=> DISABLED
@@ -3227,37 +3880,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL7_DRIVER_B                0
 
-// <o> CHANNEL7 DRIVER START STATE
+// <o> CHANNEL7 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 7.
+// <i> Defines Driver A start state for UT channel 7.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL7_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL7_DRV_A_START_STATE       0
 
-// <o> CHANNEL7 DRIVER STOP STATE
+// <o> CHANNEL7 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 7.
+// <i> Defines Driver A stop state for UT channel 7.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL7_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL7_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL7 DRIVER AT COMP MATCH
+// <o> CHANNEL7 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 7.
+// <i> Defines Driver A state at compare match for UT channel 7.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL7_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL7_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL7 DRIVER AT CYCLE END
+// <o> CHANNEL7 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 7.
+// <i> Defines Driver A state at cycle end for UT channel 7.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL7_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL7_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL7 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 7.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL7_DRV_B_START_STATE       0
+
+// <o> CHANNEL7 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 7.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL7_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL7 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 7.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL7_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL7 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 7.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL7_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL7 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3372,13 +4057,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL8_FIXED_BUFFER            0
 
-// <o> CHANNEL8 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 8.
+// <o> CHANNEL8 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 8.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL8_DMA_CONTROL            0
+
+// <o> CHANNEL8 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 8.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL8_FAULT_TYPE            0
+
+// <o> CHANNEL8 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 8.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL8_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL8_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL8 DRIVER A
 //    <0=> DISABLED
@@ -3394,37 +4092,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL8_DRIVER_B                0
 
-// <o> CHANNEL8 DRIVER START STATE
+// <o> CHANNEL8 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 8.
+// <i> Defines Driver A start state for UT channel 8.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL8_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL8_DRV_A_START_STATE       0
 
-// <o> CHANNEL8 DRIVER STOP STATE
+// <o> CHANNEL8 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 8.
+// <i> Defines Driver A stop state for UT channel 8.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL8_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL8_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL8 DRIVER AT COMP MATCH
+// <o> CHANNEL8 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 8.
+// <i> Defines Driver A state at compare match for UT channel 8.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL8_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL8 DRIVER AT CYCLE END
+// <o> CHANNEL8 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 8.
+// <i> Defines Driver A state at cycle end for UT channel 8.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL8_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL8 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 8.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL8_DRV_B_START_STATE       0
+
+// <o> CHANNEL8 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 8.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL8_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL8 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 8.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL8_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL8 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 8.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL8_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL8 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3539,13 +4269,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL9_FIXED_BUFFER            0
 
-// <o> CHANNEL9 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 9.
+// <o> CHANNEL9 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 9.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL9_DMA_CONTROL            0
+
+// <o> CHANNEL9 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 9.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL9_FAULT_TYPE            0
+
+// <o> CHANNEL9 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 9.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL9_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL9_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL9 DRIVER A
 //    <0=> DISABLED
@@ -3561,37 +4304,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL9_DRIVER_B                0
 
-// <o> CHANNEL9 DRIVER START STATE
+// <o> CHANNEL9 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 9.
+// <i> Defines Driver A start state for UT channel 9.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL9_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL9_DRV_A_START_STATE       0
 
-// <o> CHANNEL9 DRIVER STOP STATE
+// <o> CHANNEL9 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 9.
+// <i> Defines Driver A stop state for UT channel 9.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL9_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL9_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL9 DRIVER AT COMP MATCH
+// <o> CHANNEL9 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 9.
+// <i> Defines Driver A state at compare match for UT channel 9.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL9_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL9_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL9 DRIVER AT CYCLE END
+// <o> CHANNEL9 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 9.
+// <i> Defines Driver A state at cycle end for UT channel 9.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL9_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL9_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL9 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 9.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL9_DRV_B_START_STATE       0
+
+// <o> CHANNEL9 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 9.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL9_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL9 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 9.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL9 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 9.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL9 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3706,13 +4481,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL10_FIXED_BUFFER            0
 
-// <o> CHANNEL10 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 10.
+// <o> CHANNEL10 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 10.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL10_DMA_CONTROL            0
+
+// <o> CHANNEL10 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 10.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL10_FAULT_TYPE            0
+
+// <o> CHANNEL10 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 10.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL10_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL10_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL10 DRIVER A
 //    <0=> DISABLED
@@ -3728,37 +4516,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL10_DRIVER_B                0
 
-// <o> CHANNEL10 DRIVER START STATE
+// <o> CHANNEL10 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 10.
+// <i> Defines Driver A start state for UT channel 10.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL10_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL10_DRV_A_START_STATE       0
 
-// <o> CHANNEL10 DRIVER STOP STATE
+// <o> CHANNEL10 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 10.
+// <i> Defines Driver A stop state for UT channel 10.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL10_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL10_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL10 DRIVER AT COMP MATCH
+// <o> CHANNEL10 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 10.
+// <i> Defines Driver A state at compare match for UT channel 10.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL10_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL10 DRIVER AT CYCLE END
+// <o> CHANNEL10 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 10.
+// <i> Defines Driver A state at cycle end for UT channel 10.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL10_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL10 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 10.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL10_DRV_B_START_STATE       0
+
+// <o> CHANNEL10 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 10.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL10_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL10 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 10.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL10_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL10 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 10.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL10_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL10 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -3873,13 +4693,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL11_FIXED_BUFFER            0
 
-// <o> CHANNEL11 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 11.
+// <o> CHANNEL11 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 11.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL11_DMA_CONTROL            0
+
+// <o> CHANNEL11 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 11.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL11_FAULT_TYPE            0
+
+// <o> CHANNEL11 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 11.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL11_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL11_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL11 DRIVER A
 //    <0=> DISABLED
@@ -3895,37 +4728,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL11_DRIVER_B                0
 
-// <o> CHANNEL11 DRIVER START STATE
+// <o> CHANNEL11 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 11.
+// <i> Defines Driver A start state for UT channel 11.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL11_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL11_DRV_A_START_STATE       0
 
-// <o> CHANNEL11 DRIVER STOP STATE
+// <o> CHANNEL11 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 11.
+// <i> Defines Driver A stop state for UT channel 11.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL11_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL11_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL11 DRIVER AT COMP MATCH
+// <o> CHANNEL11 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 11.
+// <i> Defines Driver A state at compare match for UT channel 11.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL11_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL11_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL11 DRIVER AT CYCLE END
+// <o> CHANNEL11 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 11.
+// <i> Defines Driver A state at cycle end for UT channel 11.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL11_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL11_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL11 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 11.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL11_DRV_B_START_STATE       0
+
+// <o> CHANNEL11 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 11.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL11_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL11 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 11.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL11_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL11 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 11.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL11_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL11 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4009,7 +4874,7 @@
 // <o> CHANNEL11 UNDERFLOW IRQ priority <0-255>
 // <i> Defines Interrupt priority for channel 11 underflow interrupt.
 // <i> Default: 0
-#define RTE_UTIMER_CHANNEL11_UNDER_FLOW_IRQ_PRIORITY 0
+#define RTE_UTIMER_CHANNEL11_UNDER_FLOW_IRQ_PRIORITY  0
 
 // <o> CHANNEL11 DUTY CYCLE
 //    <0=> DISABLE
@@ -4040,13 +4905,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL12_FIXED_BUFFER            0
 
-// <o> CHANNEL12 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 12.
+// <o> CHANNEL12 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 12.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL12_DMA_CONTROL            0
+
+// <o> CHANNEL12 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 12.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL12_FAULT_TYPE            0
+
+// <o> CHANNEL12 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 12.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL12_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL12_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL12 DRIVER A
 //    <0=> DISABLED
@@ -4062,37 +4940,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL12_DRIVER_B                0
 
-// <o> CHANNEL12 DRIVER START STATE
+// <o> CHANNEL12 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 12.
+// <i> Defines Driver A start state for UT channel 12.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL12_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL12_DRV_A_START_STATE       0
 
-// <o> CHANNEL12 DRIVER STOP STATE
+// <o> CHANNEL12 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 12.
+// <i> Defines Driver A stop state for UT channel 12.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL12_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL12_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL12 DRIVER AT COMP MATCH
+// <o> CHANNEL12 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 12.
+// <i> Defines Driver A state at compare match for UT channel 12.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL12_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL12_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL12 DRIVER AT CYCLE END
+// <o> CHANNEL12 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 12.
+// <i> Defines Driver A state at cycle end for UT channel 12.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL12_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL12_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL12 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 12.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL12_DRV_B_START_STATE       0
+
+// <o> CHANNEL12 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 12.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL12_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL12 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 12.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL12_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL12 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 12.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL12_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL12 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4207,13 +5117,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL13_FIXED_BUFFER            0
 
-// <o> CHANNEL13 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 13.
+// <o> CHANNEL13 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 13.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL13_DMA_CONTROL            0
+
+// <o> CHANNEL13 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 13.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL13_FAULT_TYPE            0
+
+// <o> CHANNEL13 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 13.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL13_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL13_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL13 DRIVER A
 //    <0=> DISABLED
@@ -4229,37 +5152,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL13_DRIVER_B                0
 
-// <o> CHANNEL13 DRIVER START STATE
+// <o> CHANNEL13 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 13.
+// <i> Defines Driver A start state for UT channel 13.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL13_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL13_DRV_A_START_STATE       0
 
-// <o> CHANNEL13 DRIVER STOP STATE
+// <o> CHANNEL13 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 13.
+// <i> Defines Driver A stop state for UT channel 13.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL13_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL13_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL13 DRIVER AT COMP MATCH
+// <o> CHANNEL13 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 13.
+// <i> Defines Driver A state at compare match for UT channel 13.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL13_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL13_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL13 DRIVER AT CYCLE END
+// <o> CHANNEL13 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 13.
+// <i> Defines Driver A state at cycle end for UT channel 13.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL13_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL13_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL13 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 13.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL13_DRV_B_START_STATE       0
+
+// <o> CHANNEL13 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 13.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL13_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL13 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 13.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL13_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL13 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 13.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL13_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL13 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4374,13 +5329,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL14_FIXED_BUFFER            0
 
-// <o> CHANNEL14 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 14.
+// <o> CHANNEL14 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 14.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL14_DMA_CONTROL            0
+
+// <o> CHANNEL14 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 14.
+// <i> Default: LOW_UNTIL_COUNTER_STOP
+#define RTE_UTIMER_CHANNEL14_FAULT_TYPE            0
+
+// <o> CHANNEL14 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 14.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL14_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL14_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL14 DRIVER A
 //    <0=> DISABLED
@@ -4396,37 +5364,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL14_DRIVER_B                0
 
-// <o> CHANNEL14 DRIVER START STATE
+// <o> CHANNEL14 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 14.
+// <i> Defines Driver A start state for UT channel 14.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL14_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL14_DRV_A_START_STATE       0
 
-// <o> CHANNEL14 DRIVER STOP STATE
+// <o> CHANNEL14 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 14.
+// <i> Defines Driver A stop state for UT channel 14.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL14_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL14_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL14 DRIVER AT COMP MATCH
+// <o> CHANNEL14 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 14.
+// <i> Defines Driver A state at compare match for UT channel 14.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL14_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL14_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL14 DRIVER AT CYCLE END
+// <o> CHANNEL14 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 14.
+// <i> Defines Driver A state at cycle end for UT channel 14.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL14_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL14_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL14 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 14.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL14_DRV_B_START_STATE       0
+
+// <o> CHANNEL14 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 14.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL14_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL14 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 14.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL14_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL14 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 14.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL14_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL14 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4541,13 +5541,26 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL15_FIXED_BUFFER            0
 
-// <o> CHANNEL15 BUFFER EVENT
-//    <4=> BUF_AT_TROUGH
-//    <5=> BUF_AT_TROUGH_N_CREST
-//    <6=> TRIANGLE_FIXED_BUF
-// <i> Defines Fixed Buffer features for UT channel 15.
+// <o> CHANNEL15 DMA CONTROL
+//    <0=> DISABLED
+//    <1=> ENABLED
+// <i> Defines DMA feature control for UT channel 15.
+// <i> Default: DISABLED
+#define RTE_UTIMER_CHANNEL15_DMA_CONTROL            0
+
+// <o> CHANNEL15 FAULT TYPE
+//    <0=> LOW_UNTIL_CYCLE_END
+//    <1=> LOW_UNTIL_COUNTER_STOP
+// <i> Defines fault type for UT channel 15.
+// <i> Default: LOW_UNTIL_CYCLE_END
+#define RTE_UTIMER_CHANNEL15_FAULT_TYPE            0
+
+// <o> CHANNEL15 TRIANGLE COUNTER BUFFER EVENT
+//    <0=> BUF_AT_TROUGH
+//    <1=> BUF_AT_TROUGH_N_CREST
+// <i> Defines Buffer for triangle counter of UT channel 15.
 // <i> Default: BUF_AT_TROUGH
-#define RTE_UTIMER_CHANNEL15_BUF_TROUGH_N_CREST      4
+#define RTE_UTIMER_CHANNEL15_BUF_TROUGH_N_CREST      0
 
 // <o> CHANNEL15 DRIVER A
 //    <0=> DISABLED
@@ -4563,37 +5576,69 @@
 // <i> Default: DISABLED
 #define RTE_UTIMER_CHANNEL15_DRIVER_B                0
 
-// <o> CHANNEL15 DRIVER START STATE
+// <o> CHANNEL15 DRIVER A START STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver start state for UT channel 15.
+// <i> Defines Driver A start state for UT channel 15.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL15_CMP_START_STATE         0
+#define RTE_UTIMER_CHANNEL15_DRV_A_START_STATE       0
 
-// <o> CHANNEL15 DRIVER STOP STATE
+// <o> CHANNEL15 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
-// <i> Defines Driver stop state for UT channel 15.
+// <i> Defines Driver A stop state for UT channel 15.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL15_CMP_STOP_STATE          0
+#define RTE_UTIMER_CHANNEL15_DRV_A_STOP_STATE        0
 
-// <o> CHANNEL15 DRIVER AT COMP MATCH
+// <o> CHANNEL15 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at compare match for UT channel 15.
+// <i> Defines Driver A state at compare match for UT channel 15.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL15_DRV_OP_AT_MATCH_COUNT   0
+#define RTE_UTIMER_CHANNEL15_DRV_A_OP_AT_MATCH_COUNT  0
 
-// <o> CHANNEL15 DRIVER AT CYCLE END
+// <o> CHANNEL15 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
 //    <1=> LOW
 //    <2=> HIGH
 //    <3=> TOGGLE
-// <i> Defines Driver state at cycle end for UT channel 15.
+// <i> Defines Driver A state at cycle end for UT channel 15.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL15_DRV_OP_AT_CYCLE_END     0
+#define RTE_UTIMER_CHANNEL15_DRV_A_OP_AT_CYCLE_END    0
+
+// <o> CHANNEL15 DRIVER B START STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B start state for UT channel 15.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL15_DRV_B_START_STATE       0
+
+// <o> CHANNEL15 DRIVER B STOP STATE
+//    <0=> LOW
+//    <1=> HIGH
+// <i> Defines Driver B stop state for UT channel 15.
+// <i> Default: LOW
+#define RTE_UTIMER_CHANNEL15_DRV_B_STOP_STATE        0
+
+// <o> CHANNEL15 DRIVER B AT COMP MATCH
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at compare match for UT channel 15.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL15_DRV_B_OP_AT_MATCH_COUNT  0
+
+// <o> CHANNEL15 DRIVER B AT CYCLE END
+//    <0=> NO CHANGE
+//    <1=> LOW
+//    <2=> HIGH
+//    <3=> TOGGLE
+// <i> Defines Driver B state at cycle end for UT channel 15.
+// <i> Default: NO CHANGE
+#define RTE_UTIMER_CHANNEL15_DRV_B_OP_AT_CYCLE_END    0
 
 // <o> CHANNEL15 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4734,65 +5779,65 @@
 #endif
 // </e> DAC1 (Digital to Analog converter) [Driver_DAC1]
 
-// <h> ADC (Analog to Digital Converter)
+// <h> ADC12 (Analog to Digital Converter)
 // <e> ADC0 (Analog to Digital Converter 0) [Driver_ADC0]
 // <i> Configuration settings for Driver_ADC0 in component ::Drivers:ADC
-#define RTE_ADC0     1
-#if RTE_ADC0
-#define RTE_ADC0_IRQ_PRIORITY        0
+#define RTE_ADC120     1
+#if RTE_ADC120
+#define RTE_ADC120_IRQ_PRIORITY        0
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
 // <i> Default: 0
-#define RTE_ADC0_INPUT_NUM               (0)
+#define RTE_ADC120_INPUT_NUM               (0)
 
 // <o> Clock Divider <2-64>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
-#define RTE_ADC0_CLOCK_DIV               (2)
+#define RTE_ADC120_CLOCK_DIV               (2)
 
 // <o> Sample Width <2-32>
 // <i> Defines Width in divided clocks of the sample output signal
 // <i> Default: 16
-#define RTE_ADC0_SAMPLE_WIDTH            (16)
+#define RTE_ADC120_SAMPLE_WIDTH            (16)
 
 // <o> Number of average sample <0-256>
 // <i> Defines Number of sample to be taken and it must be power of 2
 // <i> Default: 256
-#define RTE_ADC0_AVG_SAMPLE_NUM          (256)
+#define RTE_ADC120_AVG_SAMPLE_NUM          (256)
 
 // <o> Number of bits to shift <0-8>
 // <i> Defines How much bit to shift before storing in sample register.
 // <i> Default: 8
-#define RTE_ADC0_SHIFT_N_BIT             (8)
+#define RTE_ADC120_SHIFT_N_BIT             (8)
 
 // <o> Left or Right shift
 //     <0=> LEFT SHIFT
 //     <1=> RIGHT SHIFT
 // <i> Defines shift averaged value before loading in sample register.
 // <i> Default: RIGHT SHIFT
-#define RTE_ADC0_SHIFT_LEFT_OR_RIGHT     (1)
+#define RTE_ADC120_SHIFT_LEFT_OR_RIGHT     (1)
 
 // <o> Test Signal enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
 // <i> Default: DISABLE
-#define RTE_ADC0_TEST_EN                  0
+#define RTE_ADC120_TEST_EN                  0
 
 // <o> Differential mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
 // <i> Default: DISABLE
-#define RTE_ADC0_DIFFERENTIAL_EN          0
+#define RTE_ADC120_DIFFERENTIAL_EN          0
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines set 1 to ENABLE the comparator otherwise comparator "DISABLE"
 // <i> Default: ENABLE
-#define RTE_ADC0_COMPARATOR_EN            1
+#define RTE_ADC120_COMPARATOR_EN            1
 
 // <o> Comparator bias enable
 //     <0=> 0.5MS/s
@@ -4801,75 +5846,75 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC0_COMPARATOR_BIAS          2
+#define RTE_ADC120_COMPARATOR_BIAS          2
 
 // <o> Resistive divider enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
 // <i> Default: ENABLE
-#define RTE_ADC0_VCM_RDIV_EN              1
+#define RTE_ADC120_VCM_RDIV_EN              1
 
 #endif
-// </e> ADC0 (Analog to Digital Converter 0) [Driver_ADC0]
+// </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
 
-// <e> ADC1 (Analog to Digital Converter 1) [Driver_ADC1]
-// <i> Configuration settings for Driver_ADC1 in component ::Drivers:ADC
-#define RTE_ADC1   1
-#if RTE_ADC1
+// <e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
+// <i> Configuration settings for Driver_ADC121 in component ::Drivers:ADC
+#define RTE_ADC121   1
+#if RTE_ADC121
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
 // <i> Default: 0
-#define RTE_ADC1_INPUT_NUM               (0)
+#define RTE_ADC121_INPUT_NUM               (0)
 
 // <o> Clock Divider <2-64>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
-#define RTE_ADC1_CLOCK_DIV               (2)
+#define RTE_ADC121_CLOCK_DIV               (2)
 
 // <o> Sample Width <2-32>
 // <i> Defines Width in divided clocks of the sample output signal
 // <i> Default: 16
-#define RTE_ADC1_SAMPLE_WIDTH            (16)
+#define RTE_ADC121_SAMPLE_WIDTH            (16)
 
 // <o> Number of average sample <0-256>
 // <i> Defines Number of sample to be taken and it must be power of 2
 // <i> Default: 256
-#define RTE_ADC1_AVG_SAMPLE_NUM          (256)
+#define RTE_ADC121_AVG_SAMPLE_NUM          (256)
 
 // <o> Number of bits to shift <0-8>
 // <i> Defines How much bit to shift before storing in sample register.
 // <i> Default: 8
-#define RTE_ADC1_SHIFT_N_BIT             (8)
+#define RTE_ADC121_SHIFT_N_BIT             (8)
 
 // <o> Left or Right shift
 //     <0=> LEFT SHIFT
 //     <1=> RIGHT SHIFT
 // <i> Defines shift averaged value before loading in sample register.
 // <i> Default: RIGHT SHIFT
-#define RTE_ADC1_SHIFT_LEFT_OR_RIGHT     (1)
+#define RTE_ADC121_SHIFT_LEFT_OR_RIGHT     (1)
 
 // <o> Test Signal enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
 // <i> Default: DISABLE
-#define RTE_ADC1_TEST_EN                  0
+#define RTE_ADC121_TEST_EN                  0
 
 // <o> Differential mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
 // <i> Default: DISABLE
-#define RTE_ADC1_DIFFERENTIAL_EN          0
+#define RTE_ADC121_DIFFERENTIAL_EN          0
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines set 1 to ENABLE the comparator otherwise comparator "DISABLE"
 // <i> Default: ENABLE
-#define RTE_ADC1_COMPARATOR_EN            1
+#define RTE_ADC121_COMPARATOR_EN            1
 
 // <o> Comparator bias enable
 //     <0=> 0.5MS/s
@@ -4878,75 +5923,75 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC1_COMPARATOR_BIAS          2
+#define RTE_ADC121_COMPARATOR_BIAS          2
 
 // <o> Resistive divider enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
 // <i> Default: ENABLE
-#define RTE_ADC1_VCM_RDIV_EN              1
+#define RTE_ADC121_VCM_RDIV_EN              1
 
 #endif
-// </e> ADC1 (Analog to Digital Converter 1) [Driver_ADC1]
+// </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
 
-// <e> ADC2 (Analog to Digital Converter 2) [Driver_ADC2]
-// <i> Configuration settings for Driver_ADC2 in component ::Drivers:ADC
-#define RTE_ADC2   1
-#if RTE_ADC2
+// <e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
+// <i> Configuration settings for Driver_ADC122 in component ::Drivers:ADC
+#define RTE_ADC122   1
+#if RTE_ADC122
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
 // <i> Default: 0
-#define RTE_ADC2_INPUT_NUM               (0)
+#define RTE_ADC122_INPUT_NUM               (0)
 
 // <o> Clock Divider <2-64>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
-#define RTE_ADC2_CLOCK_DIV               (2)
+#define RTE_ADC122_CLOCK_DIV               (2)
 
 // <o> Sample Width <2-32>
 // <i> defines Width in divided clocks of the sample output signal
 // <i> default: 16
-#define RTE_ADC2_SAMPLE_WIDTH            (16)
+#define RTE_ADC122_SAMPLE_WIDTH            (16)
 
 // <o> Number of average sample <0-256>
 // <i> Defines Number of sample to be taken and it must be power of 2
 // <i> Default: 256
-#define RTE_ADC2_AVG_SAMPLE_NUM          (256)
+#define RTE_ADC122_AVG_SAMPLE_NUM          (256)
 
 // <o> Number of bits to shift <0-8>
 // <i> Defines How much bit to shift before storing in sample register.
 // <i> Default: 8
-#define RTE_ADC2_SHIFT_N_BIT             (8)
+#define RTE_ADC122_SHIFT_N_BIT             (8)
 
 // <o> Left or Right shift
 //     <0=> LEFT SHIFT
 //     <1=> RIGHT SHIFT
 // <i> Defines shift averaged value before loading in sample register.
 // <i> Default: RIGHT SHIFT
-#define RTE_ADC2_SHIFT_LEFT_OR_RIGHT     (1)
+#define RTE_ADC122_SHIFT_LEFT_OR_RIGHT     (1)
 
 // <o> Test Signal enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
 // <i> Default: DISABLE
-#define RTE_ADC2_TEST_EN                  0
+#define RTE_ADC122_TEST_EN                  0
 
 // <o> Differential mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
 // <i> Default: DISABLE
-#define RTE_ADC2_DIFFERENTIAL_EN          0
+#define RTE_ADC122_DIFFERENTIAL_EN          0
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines set 1 to ENABLE the comparator otherwise comparator "DISABLE"
 // <i> Default: ENABLE
-#define RTE_ADC2_COMPARATOR_EN            1
+#define RTE_ADC122_COMPARATOR_EN            1
 
 // <o> Comparator bias enable
 //     <0=> 0.5MS/s
@@ -4955,26 +6000,26 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC2_COMPARATOR_BIAS          2
+#define RTE_ADC122_COMPARATOR_BIAS          2
 
 // <o> Resistive divider enable
 //     <0=> DISABLE
 //     <1=> ENABLE
 // <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
 // <i> Default: ENABLE
-#define RTE_ADC2_VCM_RDIV_EN              1
+#define RTE_ADC122_VCM_RDIV_EN              1
 
 #endif
-// </e> ADC2 (Analog to Digital Converter 2) [Driver_ADC2]
+// </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 // </h> ADC (Analog to Digital Converter)
 
-// <e> ADC common bits for each instance
-// <i> Configuration settings for ADC instances ::Drivers:ADC
-#if (RTE_ADC0 | RTE_ADC1 | RTE_ADC2)
-#define RTE_ADC_CONFG_RESERVED_bits_18_23           7
-#define RTE_ADC_CONFG_amux_cont                     0
+// <e> ADC12 common bits for each instance
+// <i> Configuration settings for ADC12 instances ::Drivers:ADC12
+#if (RTE_ADC120 | RTE_ADC121 | RTE_ADC122)
+#define RTE_ADC12_CONFG_RESERVED_bits_18_23           7
+#define RTE_ADC12_CONFG_amux_cont                     0
 #endif
-// </e> ADC commmon bit for each instance
+// </e> ADC12 commmon bit for each instance
 
 // <e> CRC0 (Cyclic Redundancy Check) [Driver_CRC0]
 // <i> Configuration settings for Driver_CRC0 in component ::Drivers:CRC
@@ -5147,8 +6192,8 @@
 
 // <e> CMP0 (Analog Comparator ) [Driver_CMP0]
 // <i> Configuration settings for Driver_CMP0 in component ::Drivers:Comparator
-#define RTE_CMP0    1
-#if RTE_CMP0
+#define RTE_HSCMP0    1
+#if RTE_HSCMP0
 
 #define RTE_CMP0_IRQ_PRIORITY        0
 
@@ -5172,8 +6217,8 @@
 
 // <e> CMP1 (Analog Comparator ) [Driver_CMP1]
 // <i> Configuration settings for Driver_CMP1 in component ::Drivers:Comparator
-#define RTE_CMP1    1
-#if RTE_CMP1
+#define RTE_HSCMP1    1
+#if RTE_HSCMP1
 
 #define RTE_CMP1_IRQ_PRIORITY        0
 
@@ -5197,8 +6242,8 @@
 
 // <e> CMP2 (Analog Comparator ) [Driver_CMP2]
 // <i> Configuration settings for Driver_CMP2 in component ::Drivers:Comparator
-#define RTE_CMP2    1
-#if RTE_CMP2
+#define RTE_HSCMP2    1
+#if RTE_HSCMP2
 
 #define RTE_CMP2_IRQ_PRIORITY        0
 
@@ -5222,8 +6267,8 @@
 
 // <e> CMP3 (Analog Comparator ) [Driver_CMP3]
 // <i> Configuration settings for Driver_CMP3 in component ::Drivers:Comparator
-#define RTE_CMP3    1
-#if RTE_CMP3
+#define RTE_HSCMP3    1
+#if RTE_HSCMP3
 
 #define RTE_CMP3_IRQ_PRIORITY        0
 
@@ -5248,7 +6293,7 @@
 
 // <e> Comparator common bits for each instance
 // <i> Configuration settings for Comparator instances ::Drivers:Comparator
-#if (RTE_CMP0 |RTE_CMP1 |RTE_CMP2 |RTE_CMP3 )
+#if (RTE_HSCMP0 |RTE_HSCMP1 |RTE_HSCMP2 |RTE_HSCMP3 )
 
 #define RTE_CMP_NEGATIVE_PO_16       0
 #define RTE_CMP_NEGATIVE_PO_17       1
@@ -5298,7 +6343,18 @@
 //   0 - Secure APB interface, 1 - Non-Secure
 //   Default: 0
 #define RTE_DMA0_APB_INTERFACE 0
+// <o> DMA0 Abort interrupt priority <0-255>
+// <i> Defines DMA0 Abort interrupt priority.
+// <i> Default: 0
 #define RTE_DMA0_ABORT_IRQ_PRI 0
+// <o> DMA0 Boot Event-IRQ Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA0 Boot Event-IRQ Non-secure state
+// <i> Default: 0
+#define RTE_DMA0_BOOT_IRQ_NS_STATE 0
+// <o> DMA0 Boot Peripheral Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA0 Boot Peripheral Non-secure state
+// <i> Default: 0
+#define RTE_DMA0_BOOT_PERIPH_NS_STATE 0
 #endif
 // </e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
 
@@ -5311,7 +6367,18 @@
 //   0 - Secure APB interface, 1 - Non-Secure
 //   Default: 0
 #define RTE_DMA1_APB_INTERFACE 0
+// <o> DMA1 Abort interrupt priority <0-255>
+// <i> Defines DMA1 Abort interrupt priority.
+// <i> Default: 0
 #define RTE_DMA1_ABORT_IRQ_PRI 0
+// <o> DMA1 Boot Event-IRQ Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA1 Boot Event-IRQ Non-secure state
+// <i> Default: 0
+#define RTE_DMA1_BOOT_IRQ_NS_STATE 0
+// <o> DMA1 Boot Peripheral Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA1 Boot Peripheral Non-secure state
+// <i> Default: 0
+#define RTE_DMA1_BOOT_PERIPH_NS_STATE 0
 #endif
 // </e> DMA1 (Direct Memory Access Controller) [Driver_DMA1]
 #endif
@@ -5325,10 +6392,21 @@
 //   0 - Secure APB interface, 1 - Non-Secure
 //   Default: 0
 #define RTE_DMA2_APB_INTERFACE 0
+// <o> DMA2 Abort interrupt priority <0-255>
+// <i> Defines DMA2 Abort interrupt priority.
+// <i> Default: 0
 #define RTE_DMA2_ABORT_IRQ_PRI 0
+// <o> DMA2 Boot Event-IRQ Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA2 Boot Event-IRQ Non-secure state
+// <i> Default: 0
+#define RTE_DMA2_BOOT_IRQ_NS_STATE 0
+// <o> DMA2 Boot Peripheral Non-secure state <0-0xFFFFFFFF>
+// <i> Defines DMA2 Boot Peripheral Non-secure state
+// <i> Default: 0
+#define RTE_DMA2_BOOT_PERIPH_NS_STATE 0
 #endif
 // </e> DMA2 (Direct Memory Access Controller) [Driver_DMA2]
-#endif //todo
+#endif
 
 // <h> GPIO (general purpose input and output)
 // <e> GPIO0
@@ -5341,11 +6419,6 @@
 // <i> Defines debounce clock divisor for GPIO0.
 // <i> Default: 0
 #define RTE_GPIO0_DB_CLK_DIV            1
-
-// <o> GPIO0_PIN0 IRQ Priority
-// <i> Defines Interrupt priority for GPIO0_PIN0.
-// <i> Default: 0
-#define RTE_GPIO0_PIN0_IRQ_PRIORITY     0
 
 // <o> GPIO0_PIN0 IRQ Priority
 // <i> Defines Interrupt priority for GPIO0_PIN0.

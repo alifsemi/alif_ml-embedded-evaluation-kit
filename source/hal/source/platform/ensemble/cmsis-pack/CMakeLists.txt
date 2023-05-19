@@ -53,6 +53,7 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include
+    ${ENSEMBLE_CMSIS_PATH}/drivers/include
     ${ENSEMBLE_CMSIS_PATH}/components/Include
     ${BOARDLIB_PATH}
     )
@@ -74,6 +75,8 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
+    ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c
     )
 else()
 target_sources(${CMSIS_DEVICE_TARGET}
@@ -83,7 +86,14 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/cdc.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/csi.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/dsi.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/i3c.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/pinconf.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/uart.c
+    ${ENSEMBLE_CMSIS_PATH}/components/Source/driver_phy.c
     config-b/drv_pinmux_new.c
     )
 endif()
@@ -96,8 +106,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
-    ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DMA_Opcode.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
