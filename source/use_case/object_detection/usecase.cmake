@@ -33,7 +33,7 @@ USER_OPTION(${use_case}_ANCHOR_2 "Second anchor array estimated during training.
 
 USER_OPTION(${use_case}_CHANNELS_IMAGE_DISPLAYED "Channels' image displayed on the LCD. Select 1 if grayscale, 3 if RGB."
     3
-    BOOL)
+    STRING)
 
 # Generate input files
 generate_images_code("${${use_case}_FILE_PATH}"
