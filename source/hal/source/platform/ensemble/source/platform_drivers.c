@@ -96,6 +96,10 @@ int platform_init(void)
 {
     copy_vtor_table_to_ram();
 
+    if (0 != Init_SysTick()) {
+        printf("Failed to initialise system tick config\n");
+    }
+
     /* Forces retarget code to be included in build */
     extern void _clock_init(void);
     _clock_init();

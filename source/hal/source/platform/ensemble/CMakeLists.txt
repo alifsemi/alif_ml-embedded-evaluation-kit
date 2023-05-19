@@ -175,7 +175,7 @@ add_compile_options(-Werror-implicit-function-declaration)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)
-    target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC CPU_PROFILE_ENABLED)
+    target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC CPU_PROFILE_ENABLED)
 endif()
 
 # If Ethos-U is enabled, we need the driver library too
