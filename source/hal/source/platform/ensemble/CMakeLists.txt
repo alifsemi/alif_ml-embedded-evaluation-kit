@@ -110,6 +110,7 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_CORE}
     PRIVATE
+    source/fault_handler.c
     source/timer_ensemble.c
     source/platform_drivers.c
     source/uart_tracelib.c
@@ -175,7 +176,7 @@ add_compile_options(-Werror-implicit-function-declaration)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)
-    target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PUBLIC CPU_PROFILE_ENABLED)
+    target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC CPU_PROFILE_ENABLED)
 endif()
 
 # If Ethos-U is enabled, we need the driver library too

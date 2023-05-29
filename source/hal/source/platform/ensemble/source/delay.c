@@ -50,6 +50,7 @@
 
 /* Project Includes */
 #include "delay.h"
+#include "timer_ensemble.h"
 
 /**
   \fn           void sleep_or_wait_msec(uint32_t msec)
@@ -80,16 +81,10 @@ void sleep_or_wait_msec(uint32_t msec)
 
 #else /* NO RTOS_AVAILABLE */
 
-	extern uint32_t SystemCoreClock;
-
-	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-	ARM_PMU_Enable();
-	ARM_PMU_CNTR_Enable(1U << 31);
-	uint32_t start = ARM_PMU_Get_CCNTR();
-
-	uint32_t sleeptime = msec * (SystemCoreClock / 1000);
-	while ((ARM_PMU_Get_CCNTR() - start) < sleeptime);
-
+  uint32_t initial_tick_count = Get_SysTick_Count();
+  while (Get_SysTick_Count() - initial_tick_count < msec) {
+    __WFE();
+  }
 #endif /* RTOS_AVAILABLE */
 }
 
