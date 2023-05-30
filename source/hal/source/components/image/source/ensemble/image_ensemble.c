@@ -25,7 +25,12 @@
 static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
 static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
 
+#ifdef BOARD_IS_ALIF_DEVKIT_B0_VARIANT
+// RC4 does not support using I2C1 interface
+#define FAKE_CAMERA 1
+#else
 #define FAKE_CAMERA 0
+#endif
 
 #if RTE_SILICON_REV_A
 #define BAYER_FORMAT DC1394_COLOR_FILTER_BGGR

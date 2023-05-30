@@ -124,6 +124,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${BOARDLIB_PATH}/appkit_alpha1/board_init.c
     ${BOARDLIB_PATH}/appkit_alpha2/board_init.c
     ${BOARDLIB_PATH}/devkit/board_init.c
+    ${BOARDLIB_PATH}/devkit_b0/board_init.c
     ${BOARDLIB_PATH}/devkit_b0_cob/board_init.c
     )
 

@@ -17,7 +17,13 @@
 #ifndef __BOARD_LIB_H
 #define __BOARD_LIB_H
 
+#define BOARD_DevKit            1
+#define BOARD_DevKit_Baseboard  2
+
 #if (TARGET_BOARD == BOARD_DevKit)
+#define BOARD_IS_ALIF_DEVKIT_B0_VARIANT
+#include "devkit_b0/board_defs.h"
+#elif TARGET_BOARD == BOARD_DevKit_Baseboard
 #define BOARD_IS_ALIF_DEVKIT_B0_COB_VARIANT
 #include "devkit_b0_cob/board_defs.h"
 #endif
