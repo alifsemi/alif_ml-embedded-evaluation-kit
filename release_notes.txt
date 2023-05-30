@@ -1,3 +1,9 @@
+Changes in 23.05
+    * Support for 23.05 NPU components and dependencies (core-driver, core-platform, Vela 3.8.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
+    * Minor updates to CMSIS-pack dependencies.
+    * Update Python package requirements for compatibility reasons.
+    * Increase minimum requirements of Python to 3.9
+
 Changes in 23.02
     * Support for 23.02 NPU components and dependencies (core-driver, core-platform, Vela 3.7.0, CMSIS, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro).
     * Improvement to PMU counters - reducing cache maintenance burden for Arm Cortex-M55 CPUs when NPU is used.

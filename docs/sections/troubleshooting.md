@@ -6,8 +6,8 @@
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.5.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.7 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [No matching distribution found for ethos-u-vela==3.8.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+    - [How to update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
   - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
   - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
@@ -129,15 +129,15 @@ To solve this issue install libpython3 on the system.
 
 ## No matching distribution found for ethos-u-vela
 
-Vela 3.5.0 increases Python requirement to at least version 3.7, if not installed on your system the following error will occur:
+Vela 3.8.0 increases Python requirement to at least version 3.9, if not installed on your system the following error will occur:
 
 ```log
-python3 -m pip install ethos-u-vela==3.5.0
-ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.5.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
-ERROR: No matching distribution found for ethos-u-vela==3.5.0
+python3 -m pip install ethos-u-vela==3.8.0
+ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.8.0 (from versions: 0.1.0, 1.0.0, 1.1.0, 1.2.0, 2.0.0, 2.0.1, 2.1.1, 3.0.0, 3.1.0, 3.2.0)
+ERROR: No matching distribution found for ethos-u-vela==3.8.0
 ```
 
-Ensure that the minimum Python 3.7 requirement is installed and it's the default version.
+Ensure that the minimum Python 3.9 requirement is installed and it's the default version.
 Check your current installed version of Python by running:
 
 ```commandline
@@ -158,37 +158,37 @@ python3 --version
    Python 3.6.9
    ```
 
-2. Install the Python 3.7 packages necessary on the system:
+2. Install the Python 3.9 packages necessary on the system:
 
    ```commandline
-   sudo apt-get install python3.7 python3.7-venv libpython3.7 libpython3.7-dev
+   sudo apt-get install python3.9 python3.9-venv libpython3.9 libpython3.9-dev
    ```
 
 3. Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
 
    ```commandline
    sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
    ```
 
-4. At the prompt, update the configuration by selecting Python3.7 as the chosen default alternative:
+4. At the prompt, update the configuration by selecting Python3.9 as the chosen default alternative:
 
    ```commandline
    sudo update-alternatives --config python3
    ```
 
-5. Python3.7 is now set as default you can check it by running:
+5. Python3.9 is now set as default, you can check it by running:
 
    ```commandline
    python3 --version
    ```
 
    ```log
-   Python 3.7.0
+   Python 3.9.0
    ```
 
-> **Note:** After updating to from Python3.6 Python3.7 it may happen that the `gnome-terminal` or the relative
-> shortcuts doesn't work anymore.
+> **Note:** After updating from Python3.6 to Python3.9 it may happen that the `gnome-terminal` or the relative
+> shortcuts don't work anymore.
 > If when opening it from XTerm with `gnome-terminal` the following error appear:
 >
 > ```log
@@ -215,7 +215,7 @@ The virtual environment was not created successfully because ensurepip is not
 available.  On Debian/Ubuntu systems, you need to install the python3-venv
 package using the following command.
 
-    apt install python3.8-venv
+    apt install python3.9-venv
 
 You may need to use sudo with that command.  After installing the python3-venv
 package, recreate your virtual environment.
@@ -240,7 +240,7 @@ subprocess.CalledProcessError: Command 'python3 -m venv env' returned non-zero e
 You can fix this error by installing Python virtual environment and removing the corrupted resources_downloaded folder.
 
 ```commandline
-sudo apt install python3.8-venv
+sudo apt install python3.9-venv
 rm -r resources_downloaded
 ```
 

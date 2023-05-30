@@ -91,17 +91,17 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
-- Python 3.7 or above is installed. Check your current installed version of Python by running:
+- Python 3.9 or above is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
     ```
 
     ```log
-    Python 3.7.13
+    Python 3.9.7
     ```
 
-  > **Note:** If you have an older version of Python installed (< 3.7) see the
+  > **Note:** If you have an older version of Python installed (< 3.9) see the
   > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   > for instruction on how to update it.
 
@@ -126,7 +126,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   ```
 
   ```log
-  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.7)
+  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.9)
   ```
 
 - Make
@@ -361,7 +361,7 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU.
 
-> **Note:** This script requires Python version 3.7 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
+> **Note:** This script requires Python version 3.9 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied.
 >
 > **Note:** This script also installs required version of CMake into the virtual environment, which can be used by activating it.
@@ -709,8 +709,9 @@ After compiling, your custom model has now replaced the default one in the appli
 > <https://pypi.org/project/ethos-u-vela/>.
 > The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
-> **Note:** Using the 22.11 versions of software dependencies will require Vela to be at least version 3.6.0
+> **Note:** The correct version of Vela should be used and this depends on the versions of software dependencies used
 > or you may encounter issues when trying to run applications on different variants of Ethos-U NPUs.
+> See <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u> for more details of which versions align.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.

@@ -24,12 +24,12 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/1d810cac73330d9bf156b38a111ffd8e86523362.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/41a6424ff4307bd52d94bfc2708874d4224848b6.zip"
+TF = "https://github.com/tensorflow/tflite-micro/archive/384dd272f28ea7a99f5f7c211c9791f73cdb301b.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/e94a96201a97be3e84d3d6ef081d2f0f7db9b5fd.zip"
 CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.14.4.zip"
-CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.02.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.02.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.02.tar.gz"
+CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.05.zip"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.05.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.05.tar.gz"
 
 
 def download(url_file: str, post_process=None):

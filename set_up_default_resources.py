@@ -381,9 +381,9 @@ def set_up_resources(
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
-    vela_version = "3.7.0"
-    py3_major_version_minimum = 3  # Python >= 3.7 is required
-    py3_minor_version_minimum = 7
+    vela_version = "3.8.0"
+    py3_major_version_minimum = 3  # Python >= 3.9 is required
+    py3_minor_version_minimum = 9
 
     # Is Python minimum requirement matched?
     py3_version = sys.version_info
@@ -392,7 +392,7 @@ def set_up_resources(
         or py3_version.minor < py3_minor_version_minimum
     ):
         raise Exception(
-            "ERROR: Python3.7+ is required, please see the documentation on how to update it."
+            "ERROR: Python3.9+ is required, please see the documentation on how to update it."
         )
 
     setup_script_hash_verified = False
