@@ -41,8 +41,8 @@ CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.0.0.zi
 CMSIS_ENSEMBLE = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/3d8d339e37613b7a62992fc1702d9f581071c30b.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.11.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.11.tar.gz"
-LVGL = "https://github.com/lvgl/lvgl/archive/dbb15bb3ea0365373bc1ba8b182556f937e61e7d.zip"
-ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.0.zip"
+LVGL = "https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.7.zip"
+ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.3.zip"
 
 
 def download(url_file: str, post_process=None):
