@@ -59,10 +59,10 @@
 
 
 LR_SRAM0 __RO_BASE __RO_SIZE  {                       ; load region size_region
-  RW_SRAM0 +0 FIXED {                                 ; load address = execution address
+  RW_SRAM0 __RO_BASE __RO_SIZE {                      ; load address = execution address
    ; SRAM has start-up code, LVGL read-only, and most constant data
    *(RESET, +First)
-   startup_M55*P.o (+RO)
+   startup_M55*.o (+RO)
    system_M55*.o (+RO)
    mpu_M55*.o (+RO)
    Main.o (+RO)
