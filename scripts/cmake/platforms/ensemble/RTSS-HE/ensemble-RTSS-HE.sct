@@ -114,13 +114,13 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
   }
 
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
+  RW_SRAM1 SRAM1_BASE SRAM1_SIZE-16  {  ; 2.5MB ----------------------------
 
       ; activation buffers a.k.a tensor arena when memory mode dedicated sram
       * (.bss.NoInit.activation_buf_sram)
   }
 
-  PADDING +0 ALIGN 16 FILL 0 16  {  }
+  PADDING SRAM1_BASE+SRAM1_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0

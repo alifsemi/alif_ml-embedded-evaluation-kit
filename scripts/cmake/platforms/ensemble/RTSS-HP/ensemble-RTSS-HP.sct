@@ -62,9 +62,9 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ER_ROM __RO_BASE __RO_SIZE {                      ; load address = execution address
    ; MRAM has start-up code, LVGL read-only, and most constant data
    *(RESET, +First)
-   startup_M55_HP.o (+RO)
-   system_M55_HP.o (+RO)
-   mpu_M55_HP.o (+RO)
+   startup_M55*.o (+RO)
+   system_M55*.o (+RO)
+   mpu_M55*.o (+RO)
    Main.o (+RO)
    platform_drivers.o (+RO)
    *(InRoot$$Sections)
@@ -115,13 +115,13 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
   }
 
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
+  RW_SRAM1 SRAM1_BASE SRAM1_SIZE-16  {  ; 2.5MB ----------------------------
 
       ; activation buffers a.k.a tensor arena when memory mode dedicated sram
       * (.bss.NoInit.activation_buf_sram)
   }
 
-  PADDING +0 ALIGN 16 FILL 0 16  {  }
+  PADDING SRAM1_BASE+SRAM1_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0
