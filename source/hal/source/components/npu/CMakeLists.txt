@@ -134,6 +134,13 @@ target_compile_definitions(ethosu_core_driver PRIVATE
         AXI_LIMIT2_MAX_BEATS_BYTES=1
         AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
 
+# Use "normal" (modifiable) transactions, improving interconnect transit
+target_compile_definitions(ethosu_core_driver PRIVATE
+        AXI_LIMIT0_MEM_TYPE=3
+        AXI_LIMIT1_MEM_TYPE=3
+        AXI_LIMIT2_MEM_TYPE=3
+        AXI_LIMIT3_MEM_TYPE=3) # 3 = Normal Non-cacheable Bufferable
+
 # Create static library
 add_library(${ETHOS_U_NPU_COMPONENT} STATIC)
 
