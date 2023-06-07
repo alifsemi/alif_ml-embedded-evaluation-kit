@@ -126,16 +126,13 @@ else()
         NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
 endif()
 
-# Ethos-U55 supports a maximum burst length of 64 bytes while Ethos-U65 supports up to 128 bytes.
-# Although, this is system implementation dependent the platforms we build for should support the
-# maximum burst length for both NPU configurations.
-if (ETHOS_U_NPU_ID STREQUAL U65)
-    target_compile_definitions(ethosu_core_driver PRIVATE
-            AXI_LIMIT0_MAX_BEATS_BYTES=1
-            AXI_LIMIT1_MAX_BEATS_BYTES=1
-            AXI_LIMIT2_MAX_BEATS_BYTES=1
-            AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
-endif()
+# Although this is system implementation dependent the platforms we build for should support the
+# maximum burst length.
+target_compile_definitions(ethosu_core_driver PRIVATE
+        AXI_LIMIT0_MAX_BEATS_BYTES=1
+        AXI_LIMIT1_MAX_BEATS_BYTES=1
+        AXI_LIMIT2_MAX_BEATS_BYTES=1
+        AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
 
 # Create static library
 add_library(${ETHOS_U_NPU_COMPONENT} STATIC)
