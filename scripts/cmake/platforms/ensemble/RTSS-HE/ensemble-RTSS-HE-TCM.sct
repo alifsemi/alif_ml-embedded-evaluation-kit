@@ -85,7 +85,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.noinit.ram_vectors)
   }
 
-  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-__VECTORS_SIZE {  ; --------------------------------
+  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-16-__VECTORS_SIZE {  ; --------------------------------
       ; ITCM has non-startup code, audio record buffer and RAM vectors
       * (+RO-CODE)
       * (+XO)
@@ -106,7 +106,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
-  PADDING SRAM6_BASE ALIGN 16 FILL 0 16  {  }
+  PADDING ITCM_BASE+ITCM_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0
