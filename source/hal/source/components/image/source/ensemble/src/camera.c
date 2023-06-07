@@ -14,23 +14,34 @@
 #include "global_map.h"
 
 /* Project Includes */
-#include "Driver_CPI.h"
+#include "camera.h"
+
+#ifndef RTE_CPI
 #include "Driver_Camera_Controller.h"
+extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
+static const ARM_DRIVER_CAMERA_CONTROLLER * const camera = &Driver_CAMERA0;
+
+#define CPI_CAMERA_SENSOR_CONFIGURE             CAMERA_SENSOR_CONFIGURE
+#define CPI_EVENTS_CONFIGURE                    CAMERA_EVENTS_CONFIGURE
+#define CPI_CAMERA_SENSOR_GAIN                  CAMERA_SENSOR_GAIN
+#define ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED    ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED
+
+#ifdef BOARD_CAMERA_POWER_GPIO_PORT
+#define MANUAL_CAMERA_POWER
+extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
+static ARM_DRIVER_GPIO * const GPIO_Driver_PWR = &ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
+#endif
+#else
+#include "Driver_CPI.h"
+extern ARM_DRIVER_CPI Driver_CPI;
+static const ARM_DRIVER_CPI * const camera = &Driver_CPI;
+#endif
 
 #include "Driver_Common.h"
 #include "image_processing.h"
 
 #include <stdatomic.h>
 
-/* New-enough CMSIS packs are expected to handle power for us */
-#if !defined RTE_CPI && defined BOARD_CAMERA_POWER_GPIO_PORT
-#define MANUAL_CAMERA_POWER
-extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
-static ARM_DRIVER_GPIO * const GPIO_Driver_PWR = &ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
-#endif
-
-extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
-static const ARM_DRIVER_CAMERA_CONTROLLER* camera = &Driver_CAMERA0;
 
 static uint8_t* buf              = 0;
 static atomic_int image_received = 0;
@@ -63,12 +74,19 @@ int32_t camera_init(uint8_t* buffer)
         return res;
     }
 
-    res = camera->Control(CAMERA_SENSOR_CONFIGURE, CAMERA_RESOLUTION_560x560);
+    res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, CAMERA_RESOLUTION_560x560);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
 
-    res = camera->Control(CAMERA_EVENTS_CONFIGURE, ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED);
+#ifdef CPI_CONFIGURE
+    res = camera->Control(CPI_CONFIGURE, 0);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+#endif
+
+    res = camera->Control(CPI_EVENTS_CONFIGURE, ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED);
     if (res != ARM_DRIVER_OK) {
         return res;
     }
@@ -90,7 +108,7 @@ void camera_start(uint32_t mode)
 
 int32_t camera_gain(uint32_t gain)
 {
-    return camera->Control(CAMERA_SENSOR_GAIN, gain);
+    return camera->Control(CPI_CAMERA_SENSOR_GAIN, gain);
 }
 
 int32_t camera_wait(uint32_t timeout_ms)

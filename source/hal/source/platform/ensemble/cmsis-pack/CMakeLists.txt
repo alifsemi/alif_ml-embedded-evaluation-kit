@@ -72,6 +72,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_Camera_Controller.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
@@ -87,7 +88,9 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cdc.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/cpi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/csi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/dsi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i3c.c
@@ -112,7 +115,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_init.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_Camera_Controller.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c

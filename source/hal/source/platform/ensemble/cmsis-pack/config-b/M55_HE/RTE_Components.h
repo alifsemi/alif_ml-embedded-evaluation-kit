@@ -16,7 +16,7 @@
 #include CMSIS_device_header
 
 /* AlifSemiconductor::Device.SOC Peripherals.CAMERA Controller */
-#define RTE_Drivers_CAMERA0   1           /* Driver CAMERA Controller */
+#define RTE_Drivers_CPI    1           /* Driver CPI (Camera) */
 /* AlifSemiconductor::Device.SOC Peripherals.GPIO */
 #define RTE_Drivers_GPIO   1           /* Driver GPIO */
 /* AlifSemiconductor::Device.SOC Peripherals.I3C */

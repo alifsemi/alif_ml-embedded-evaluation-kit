@@ -58,7 +58,7 @@ target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     source/ensemble/src/bayer2rgb.c
     source/ensemble/src/image_processing.c
     source/ensemble/src/color_correction.c
-    source/ensemble/src/Driver_CPI.c
+    source/ensemble/src/camera.c
     )
 
 ## Logging utilities:

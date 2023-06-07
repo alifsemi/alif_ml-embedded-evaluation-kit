@@ -15,7 +15,7 @@
 #include "image_data.h"
 #include "image_processing.h"
 #include "bayer.h"
-#include "Driver_CPI.h"
+#include "camera.h"
 #include "board.h"
 #include "base_def.h"
 #include "delay.h"
