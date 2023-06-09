@@ -164,45 +164,36 @@ python3 --version
    sudo apt-get install python3.9 python3.9-venv libpython3.9 libpython3.9-dev
    ```
 
-3. Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
+3. Explicitly specify this Python when executing the set-up Python scripts. For example:
 
-   ```commandline
-   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
-   ```
-
-4. At the prompt, update the configuration by selecting Python3.9 as the chosen default alternative:
-
-   ```commandline
-   sudo update-alternatives --config python3
-   ```
-
-5. Python3.9 is now set as default, you can check it by running:
-
-   ```commandline
-   python3 --version
-   ```
-
-   ```log
-   Python 3.9.0
-   ```
-
-> **Note:** After updating from Python3.6 to Python3.9 it may happen that the `gnome-terminal` or the relative
-> shortcuts don't work anymore.
-> If when opening it from XTerm with `gnome-terminal` the following error appear:
+    ```commandline
+    python3.9 ./set_up_default_resources.py
+    ```
+> **Note:**: We do not recommend updating the Python version system-wide as it might break
+> various desktop utilities for your OS distribution. However, if you are using a container
+> or any other sandboxed environment, you can choose to update it using the following steps.
 >
-> ```log
-> Traceback (most recent call last):
->   File "/usr/bin/gnome-terminal", line 9, in <module>
->     from gi.repository import GLib, Gio
->   File "/usr/lib/python3/dist-packages/gi/__init__.py", line 42, in <module>
->     from . import _gi
-> ImportError: cannot import name '_gi' from partially initialized module 'gi' (most likely due to a circular import)
-> (/usr/lib/python3/dist-packages/gi/> __init__.py)
-> ```
+> * Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
 >
-> Modify the `gnome-terminal` script located in `/usr/bin/` and changing the environment (first line of the script)
-> from `#!/usr/bin/python3` to `#!/usr/bin/python3.6`.
+>   ```commandline
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
+>   ```
+>
+> * At the prompt, update the configuration by selecting Python3.9 as the chosen default alternative:
+>
+>   ```commandline
+>   sudo update-alternatives --config python3
+>   ```
+> * Python3.9 is now set as default, you can check it by running:
+>
+>   ```commandline
+>   python3 --version
+>   ```
+>
+>   ```log
+>   Python 3.9.0
+>   ```
 
 Next section of the documentation: [Appendix](appendix.md).
 
@@ -240,11 +231,11 @@ subprocess.CalledProcessError: Command 'python3 -m venv env' returned non-zero e
 You can fix this error by installing Python virtual environment and removing the corrupted resources_downloaded folder.
 
 ```commandline
-sudo apt install python3.9-venv
 rm -r resources_downloaded
 ```
 
-You can then try rebuilding again e.g.
+Follow the instructions to [update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+before attempting a rebuild with:
 
 ```commandline
 python3 ./build_default.py
