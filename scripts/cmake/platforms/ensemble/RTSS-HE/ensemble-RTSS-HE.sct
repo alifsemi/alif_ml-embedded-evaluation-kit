@@ -38,7 +38,7 @@
 
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM4 is mapped as ITCM */
-#define ITCM_BASE                 0x00000000
+#define ITCM_BASE                 0x01000000
 #define ITCM_SIZE                 SRAM4_SIZE /* 256K */
 #define ITCM_GLOBAL_BASE          SRAM4_BASE
 
@@ -61,7 +61,7 @@
 ;----------------------------------------------------------------------------
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
-#define __RO_BASE       (MRAM_BASE+0x1000)
+#define __RO_BASE       (MRAM_BASE+0x8000)
 #define __RO_SIZE       (0x80480000-__RO_BASE)
 
 #define __RW_BASE       DTCM_BASE

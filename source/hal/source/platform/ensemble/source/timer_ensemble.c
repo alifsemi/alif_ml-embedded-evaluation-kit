@@ -41,9 +41,12 @@
 
 #include CMSIS_device_header
 
-static uint64_t cpu_cycle_count = 0;
+static _Atomic uint32_t tick_count = 0;
+#if defined(CPU_PROFILE_ENABLED)
+static uint64_t perf_cycle_count_start;
+#endif
 
-#define UI
+
 /**
  * @brief Adds one PMU counter to the counters' array
  * @param value Value of the counter
@@ -66,8 +69,8 @@ int Init_SysTick(void)
     const uint32_t ticks_1ms = (GetSystemCoreClock() + 500)/1000;
     int err = 0;
 
-    /* Reset CPU cycle count value. */
-    cpu_cycle_count = 0;
+    /* Reset tick count value. */
+    tick_count = 0;
 
     /* Changing configuration for sys tick => guard from being
      * interrupted. */
@@ -90,29 +93,42 @@ int Init_SysTick(void)
     return err;
 }
 
+uint32_t Get_SysTick_Count(void)
+{
+    return tick_count;
+}
+
 /**
  * Gets the current SysTick derived counter value
  */
 uint64_t Get_SysTick_Cycle_Count(void)
 {
     uint32_t systick_val;
+    uint32_t ticks1, ticks2;
 
-    NVIC_DisableIRQ(SysTick_IRQn);
+    ticks1 = tick_count;
     systick_val = SysTick->VAL & SysTick_VAL_CURRENT_Msk;
-    NVIC_EnableIRQ(SysTick_IRQn);
+    ticks2 = tick_count;
+    /* If it ticked while reading, put the VAL at 0 */
+    if (ticks1 != ticks2) {
+        systick_val = 0;
+    }
 
-    return cpu_cycle_count + (SysTick->LOAD - systick_val);
+    uint32_t reload = SysTick->LOAD;
+
+    /* Each completed tick is LOAD cycles, and add the cycles from the countdown */
+    return ticks1 * (reload + 1) + (reload - systick_val);
 }
 
 
 void platform_reset_counters(void)
 {
-    if (0 != Init_SysTick()) {
-        printf("Failed to initialise system tick config\n");
-    }
 #if defined (ARM_NPU)
     ethosu_pmu_init();
 #endif /* defined (ARM_NPU) */
+#if defined(CPU_PROFILE_ENABLED)
+    perf_cycle_count_start = Get_SysTick_Cycle_Count();
+#endif
 }
 
 void platform_get_counters(pmu_counters* counters)
@@ -148,7 +164,7 @@ void platform_get_counters(pmu_counters* counters)
 
 #if defined(CPU_PROFILE_ENABLED)
     add_pmu_counter(
-            Get_SysTick_Cycle_Count(),
+            Get_SysTick_Cycle_Count() - perf_cycle_count_start,
             "CPU TOTAL",
             "cycles",
             counters);
@@ -170,8 +186,7 @@ __WEAK void lv_tick_handler(int ticks)
 
 void SysTick_Handler(void)
 {
-    /* Increment the cycle counter based on load value. */
-    cpu_cycle_count += SysTick->LOAD + 1;
+    tick_count++;
 
     lv_tick_handler(1);
 }

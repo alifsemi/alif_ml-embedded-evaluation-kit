@@ -42,4 +42,7 @@ void platform_get_counters(pmu_counters* counters);
  **/
 void SysTick_Handler(void);
 
+int Init_SysTick(void);
+uint32_t Get_SysTick_Count(void);
+
 #endif /* TIMER_ENSEMBLE_H */

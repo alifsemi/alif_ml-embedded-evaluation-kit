@@ -67,11 +67,6 @@ using namespace arm::app::object_detection;
 
     bool ObjectDetectionInit()
     {
-        /* Initialise the camera */
-        int err = hal_image_init();
-        if (0 != err) {
-            printf_err("hal_image_init failed with error: %d\n", err);
-        }
 
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
@@ -86,6 +81,12 @@ using namespace arm::app::object_detection;
         lv_style_set_outline_color(&boxStyle, lv_theme_get_color_primary(ScreenLayoutHeaderObject()));
         lv_style_set_radius(&boxStyle, 4);
         lv_port_unlock(lv_lock_state);
+
+        /* Initialise the camera */
+        int err = hal_image_init();
+        if (0 != err) {
+            printf_err("hal_image_init failed with error: %d\n", err);
+        }
 
         return true;
     }

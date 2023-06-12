@@ -39,13 +39,14 @@
 #include "bayer.h"
 
 #if __ARM_FEATURE_MVE & 1
-#define ASM_MVE_BAYER2RGB 1
 
-// At the time of writing, GCC produces incorrect assembly
+// At the time of writing, GCC fails for either intrinsics or assembly
 #ifdef __ARMCC_VERSION
 #define INTRINSIC_MVE_BAYER2RGB 1
+#define ASM_MVE_BAYER2RGB 1
 #else
 #define INTRINSIC_MVE_BAYER2RGB 0
+#define ASM_MVE_BAYER2RGB 0
 #endif
 
 #if ASM_MVE_BAYER2RGB || INTRINSIC_MVE_BAYER2RGB
