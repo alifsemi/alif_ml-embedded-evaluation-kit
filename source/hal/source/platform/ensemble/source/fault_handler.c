@@ -79,7 +79,7 @@ static void CommonAsmFaultHandler(int type)
           "TST   LR, #1<<4\n\t"
           "ITE   EQ\n\t"
           "MOVEQ R1, SP\n\t"
-          "MRSNE R1, MSP\n\t"
+          "MRSNE R1, PSP\n\t"
           "MOV   R2, LR\n\t"
           "B     CommonFaultHandler");
 }
