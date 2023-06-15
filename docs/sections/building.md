@@ -103,7 +103,9 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 
   > **Note:** If you have an older version of Python installed (< 3.9) see the
   > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  > for instruction on how to update it.
+  > for instruction on how to install and use it.
+  > **Note:** This scenario might be true if you are using an Arm Virtual Hardware instance.
+  > See the troubleshooting link above on how to set up the environment in this case.
 
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
   environment module is installed by running:
@@ -111,12 +113,6 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```commandline
     python3 -m venv
     ```
-
-  > **Note:** If you are using an Arm Virtual Hardware instance then Python virtual environment is not installed by default.
-  > You will need to install it yourself by running the following command:
-  >   ```commandline
-  >    sudo apt install python3.8-venv
-  >    ```
 
 - The build system uses external Python libraries during the building process. Please make sure that the latest pip and
   libsndfile versions are installed.
@@ -362,7 +358,11 @@ for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for t
 Arm® *Ethos™-U65* NPU.
 
 > **Note:** This script requires Python version 3.9 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
-> are satisfied.
+> are satisfied. If your environment points to system installed Python3 that is an older version than 3.9, choose the
+> required version explicitly after installing it:
+> ```sh
+> python3.9 ./set_up_default_resources.py
+> ```
 >
 > **Note:** This script also installs required version of CMake into the virtual environment, which can be used by activating it.
 

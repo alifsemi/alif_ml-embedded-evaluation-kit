@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import urllib.request
+import venv
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from collections import namedtuple
@@ -402,18 +403,16 @@ def set_up_resources(
 
     metadata_dict = dict()
     vela_version = "3.8.0"
-    py3_major_version_minimum = 3  # Python >= 3.9 is required
-    py3_minor_version_minimum = 9
+    py3_version_minimum = (3, 9)
 
     # Is Python minimum requirement matched?
     py3_version = sys.version_info
-    if (
-        py3_version.major < py3_major_version_minimum
-        or py3_version.minor < py3_minor_version_minimum
-    ):
+    if py3_version < py3_version_minimum:
         raise Exception(
             "ERROR: Python3.9+ is required, please see the documentation on how to update it."
         )
+    else:
+        logging.info(f"Using Python version: {py3_version}")
 
     setup_script_hash_verified = False
     setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
@@ -453,15 +452,9 @@ def set_up_resources(
     env_activate = str(env_path / "bin" / "activate")
 
     if not env_path.is_dir():
-        os.chdir(download_dir)
-        # Create the virtual environment.
-        command = f"python3 -m venv {env_dirname}"
-        call_command(command)
-        commands = ["pip install --upgrade pip", "pip install --upgrade setuptools"]
-        for c in commands:
-            command = f"{env_python} -m {c}"
-            call_command(command)
-        os.chdir(current_file_dir)
+        # Create the virtual environment using current interpreter's venv
+        # (not necessarily the system's Python3)
+        venv.create(env_dir=env_path, with_pip=True, upgrade_deps=True)
 
     # 1.3 Install additional requirements first, if a valid file has been provided
     if additional_requirements_file and os.path.isfile(additional_requirements_file):
