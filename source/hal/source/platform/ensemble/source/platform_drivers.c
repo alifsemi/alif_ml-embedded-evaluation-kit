@@ -95,8 +95,6 @@ static void copy_vtor_table_to_ram()
 
 int platform_init(void)
 {
-    fault_dump_enable(true);
-
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
@@ -111,6 +109,8 @@ int platform_init(void)
     _clock_init();
 
     tracelib_init(NULL);
+
+    fault_dump_enable(true);
 
     int err = 0;
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
