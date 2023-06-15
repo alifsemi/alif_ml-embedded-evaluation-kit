@@ -204,6 +204,16 @@
 // <i> Default: 4
 #define RTE_ARX3A0_CAMERA_RESET_GPIO_PORT               BOARD_CAMERA_RESET_GPIO_PORT
 
+// <o> Select camera sensor ARX3A0 power pin number
+// <i> Defines camera sensor ARX3A0 power pin number
+// <i> Default: -1 (none)
+#define RTE_ARX3A0_CAMERA_POWER_PIN_NO                  BOARD_CAMERA_POWER_PIN_NO
+
+// <o> Select camera sensor ARX3A0 power GPIO port
+// <i> Defines camera sensor ARX3A0 power GPIO port
+// <i> Default: -1 (none)
+#define RTE_ARX3A0_CAMERA_POWER_GPIO_PORT               BOARD_CAMERA_POWER_GPIO_PORT
+
 #endif
 // </e> ARX3A0 [Driver_ARX3A0]
 

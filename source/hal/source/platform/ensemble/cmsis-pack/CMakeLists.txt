@@ -89,10 +89,12 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cdc.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cpi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/csi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/dsi.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/i2c.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i3c.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/pinconf.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/uart.c
