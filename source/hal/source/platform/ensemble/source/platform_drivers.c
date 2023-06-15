@@ -364,6 +364,10 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
     },
+    { // Combined RAM (30000000) - firewall translation with some system packages
+    .RBAR = ARM_MPU_RBAR(0x30000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x3067FFFF, 2)
+    },
     { // General peripherals
     .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
     .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, 0)
