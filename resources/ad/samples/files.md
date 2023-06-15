@@ -1,7 +1,7 @@
 # Sample wav audio clip
 
 For this use case sample audio clips aren't provided. However, the file
-`random_id_00_000000.wav` is provided as a dummy placeholder.
+`random_id_00_000000.wav` is provided as a sample placeholder.
 
 The data used for this application sample comes from
 [https://zenodo.org/record/3384388\#.X6GILFNKiqA](https://zenodo.org/record/3384388\#.X6GILFNKiqA)

@@ -71,7 +71,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==3.6.0
+env/bin/python3 -m pip install ethos-u-vela==3.8.0
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,7 +92,7 @@ void main_loop()
     caseContext.Set<arm::app::RNNoiseModel&>("model", model);
     SetAppCtxClipIdx(caseContext, 0);
 
-#if defined(MEM_DUMP_BASE_ADDR) && defined(MPS3_PLATFORM)
+#if defined(MEM_DUMP_BASE_ADDR)
     /* For this use case, for valid targets, we dump contents
      * of the output tensor to a certain location in memory to
      * allow offline tools to pick this data up. */
@@ -102,7 +102,8 @@ void main_loop()
     caseContext.Set<size_t>("MEM_DUMP_LEN", memDumpMaxLen);
     caseContext.Set<uint8_t*>("MEM_DUMP_BASE_ADDR", memDumpBaseAddr);
     caseContext.Set<size_t*>("MEM_DUMP_BYTE_WRITTEN", &memDumpBytesWritten);
-#endif /* defined(MEM_DUMP_BASE_ADDR) && defined(MPS3_PLATFORM) */
+#endif /* defined(MEM_DUMP_BASE_ADDR) */
+
     /* Loop. */
     do {
         int menuOption = MENU_OPT_RUN_INF_NEXT;

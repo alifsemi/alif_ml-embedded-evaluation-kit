@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -203,7 +203,7 @@ void GLCD_DrawChar(
 {
     unsigned int i, j, k, pixs;
 
-    /* Sanity check: out of bounds? */
+    /* Heatlh check: out of bounds? */
     if ((x + cw) > GLCD_WIDTH || (y + ch) > GLCD_HEIGHT) {
         return;
     }

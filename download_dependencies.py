@@ -10,7 +10,7 @@
 #  License Agreement with this file. If not, please write to:
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,13 +34,13 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/28770e4cac1e5dae85b55a0d47d5315d35755d04.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/81564cfb339ebf9def167a50693733f8a1e1471e.zip"
-CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/b46a2f86b5c9d8247ea5417fc0e0022876b80dcf.zip"
-CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.0.0.zip"
+TF = "https://github.com/tensorflow/tflite-micro/archive/384dd272f28ea7a99f5f7c211c9791f73cdb301b.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/e94a96201a97be3e84d3d6ef081d2f0f7db9b5fd.zip"
+CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.14.4.zip"
+CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.1.0.zip"
 CMSIS_ENSEMBLE = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/3d8d339e37613b7a62992fc1702d9f581071c30b.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-22.11.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-22.11.tar.gz"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.05.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.05.tar.gz"
 LVGL = "https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.7.zip"
 ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.3.zip"
 
