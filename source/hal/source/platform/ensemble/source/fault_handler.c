@@ -76,7 +76,7 @@ static void CommonAsmFaultHandler(int type)
 {
     __asm("LDR   R1, =regs+4*4\n\t"
           "STM   R1, {R4-R11}\n\t"
-          "TST   LR, #1<<4\n\t"
+          "TST   LR, #1<<2\n\t"
           "ITE   EQ\n\t"
           "MOVEQ R1, SP\n\t"
           "MRSNE R1, PSP\n\t"
@@ -92,6 +92,11 @@ static void CommonFaultHandler(enum FaultType type, uint32_t * restrict sp, uint
             __WFE();
         }
     }
+
+    exc_return = lr;
+    fault_type = type;
+    uint32_t retpsr = sp[7];
+
     // Assembler fills in R4-R11, we do the rest
     regs[0] = sp[0];
     regs[1] = sp[1];
@@ -99,12 +104,10 @@ static void CommonFaultHandler(enum FaultType type, uint32_t * restrict sp, uint
     regs[3] = sp[3];
     regs[12] = sp[4];
     // For SP, we need to see if we pushed an integer-only or FP context, and also check for doubleword alignment adjustment
-    regs[13] = (uint32_t) sp + (exc_return & 0x10 ? 0x20 : 0x68) + (regs[16] & 0x200 ? 4 : 0);
+    regs[13] = (uint32_t) sp + (exc_return & 0x10 ? 0x20 : 0x68) + (retpsr & 0x200 ? 4 : 0);
     regs[14] = sp[5];
     regs[15] = sp[6];
     regs[16] = sp[7];
-    fault_type = type;
-    exc_return = lr;
 
     // Modify the fault frame so we "return" to the FaultDump routine, which hopefully will execute okay
     sp[6] = (uint32_t) FaultDump;
