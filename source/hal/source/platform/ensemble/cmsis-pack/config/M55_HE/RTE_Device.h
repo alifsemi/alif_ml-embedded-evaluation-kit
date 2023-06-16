@@ -1863,7 +1863,7 @@
 
 // <e> DMA2 (Direct Memory Access Controller) [Driver_DMA2]
 // <i> Configuration settings for Driver_DMA2 in component ::Drivers:DMA
-#define RTE_DMA2      1
+#define RTE_DMA2      0
 #if RTE_DMA2
 //   DMA APB Interface to be used <0-1>
 //   0 - Secure APB interface, 1 - Non-Secure

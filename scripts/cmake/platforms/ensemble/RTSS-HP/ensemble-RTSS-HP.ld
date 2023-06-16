@@ -60,8 +60,17 @@ SECTIONS
     *mpu_M55_*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
+
     *liblvgl.a:*(.text .rodata*)
+    *libArm-2D.a:*(.text* .rodata*)
+    *libcmsis_ensemble.a:*(.text* .rodata*)
+    *libensemble_services.a:*(.text* .rodata*)
+    *liblcd_*.a:*(.text* .rodata*)
+    *libimage_*.a:*(.text* .rodata*)
+    *libcommon_api.a:*(.text* .rodata*)
+    *libalif_ui_api.a:*(.text* .rodata*)
     *libg.a:*printf*(.text* .rodata*)
+    *libstdc++.a:cp-demangle.o(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
