@@ -70,6 +70,8 @@ LR_SRAM0 __RO_BASE __RO_SIZE  {                       ; load region size_region
    *(InRoot$$Sections)
    *(.init_array)
    *liblvgl.a(+RO)
+   *libArm-2D.a(+RO)
+   *libensemble_services.a(+RO)
    *printf*.o (+RO)
    btod.o (+RO)
    .ANY(+RO-DATA)
