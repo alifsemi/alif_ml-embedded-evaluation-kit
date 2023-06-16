@@ -9,11 +9,12 @@
  */
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "RTE_Device.h"
 #include "RTE_Components.h"
+#include CMSIS_device_header
 
 #include "fault_handler.h"
 
@@ -169,10 +170,10 @@ static void print_memmanage(void)
      if (mmfsr == 0) {
          return;
      }
-     printf("MMFSR = %02X", mmfsr);
+     printf("MMFSR = %02" PRIX32, mmfsr);
      print_fsrbits(mmfsr, mmfsr_bits);
      if (mmfsr & 0x80) {
-        printf("MMFAR = %08X\n", SCB->MMFAR);
+        printf("MMFAR = %08" PRIX32 "\n", SCB->MMFAR);
      }
      MMFSR = mmfsr;
 }
@@ -183,14 +184,14 @@ static void print_busfault(void)
      if (bfsr == 0) {
          return;
      }
-     printf("BFSR  = %02X", bfsr);
+     printf("BFSR  = %02" PRIX32, bfsr);
      print_fsrbits(bfsr, bfsr_bits);
      if (bfsr & 0x80) {
-        printf("BFAR  = %08X\n", SCB->BFAR);
+        printf("BFAR  = %08" PRIX32 "\n", SCB->BFAR);
      }
 #if __CORTEX_M == 55
      uint32_t afsr = SCB->AFSR;
-     printf("AFSR  = %08X", afsr);
+     printf("AFSR  = %08" PRIX32, afsr);
 
      print_fsrbits(afsr, afsr_bits);
      SCB->AFSR = afsr;
@@ -204,7 +205,7 @@ static void print_usagefault(void)
      if (ufsr == 0) {
          return;
      }
-     printf("UFSR  = %04X", ufsr);
+     printf("UFSR  = %04" PRIX32, ufsr);
      print_fsrbits(ufsr, ufsr_bits);
      UFSR = ufsr;
 }
@@ -215,7 +216,7 @@ static void print_hardfault(void)
      if (hfsr == 0) {
          return;
      }
-     printf("HFSR  = %08X", hfsr);
+     printf("HFSR  = %08" PRIX32, hfsr);
      print_fsrbits(hfsr, hfsr_bits);
      SCB->HFSR = hfsr;
 }
@@ -226,7 +227,7 @@ static void print_securefault(void)
      if (sfsr == 0) {
          return;
      }
-     printf("SFSR  = %08X", sfsr);
+     printf("SFSR  = %08" PRIX32, sfsr);
      print_fsrbits(sfsr, sfsr_bits);
      SCB->SFSR = sfsr;
 }
@@ -237,7 +238,7 @@ static void print_debugfault(void)
      if (dfsr == 0) {
          return;
      }
-     printf("DFSR  = %08X", dfsr);
+     printf("DFSR  = %08" PRIX32, dfsr);
      print_fsrbits(dfsr, dfsr_bits);
      SCB->DFSR = dfsr;
 }
@@ -305,7 +306,7 @@ void DebugMonitor_Handler(void)
 
 __attribute__((used))
 __attribute__((naked))
-static void CommonAsmFaultHandler(int type)
+static void CommonAsmFaultHandler(/*int type*/)
 {
     __asm("LDR   R1, =regs+4*4\n\t"
           "STM   R1, {R4-R11}\n\t"
@@ -352,12 +353,12 @@ static void FaultDump(void)
 
     print_faults();
 
-    printf("\nEXC_RETURN = %08X\n\n"
-           "Register dump (stored at &%08X) is:\n",  exc_return, (uint32_t) regs);
+    printf("\nEXC_RETURN = %08" PRIX32 "\n\n"
+           "Register dump (stored at &%08" PRIXPTR ") is:\n", exc_return, (uintptr_t) regs);
     for (int i = 0; i < 13; i++) {
-        printf("R%-3d= %08X%c", i, regs[i], i % 4 < 3 ? ' ' : '\n');
+        printf("R%-3d= %08" PRIX32 "%c", i, regs[i], i % 4 < 3 ? ' ' : '\n');
     }
-    printf("SP  = %08X LR  = %08X PC  = %08X\n", regs[13], regs[14], regs[15]);
+    printf("SP  = %08" PRIX32 " LR  = %08" PRIX32 " PC  = %08" PRIX32 "\n", regs[13], regs[14], regs[15]);
     printf("Mode %-8sflags set: ", exc_return & 8 ? "Thread" : "Handler");
     for (size_t i = 0, bit = 1u<<31; i < 24; i++) {
         if (i < sizeof flag_names) {
@@ -369,9 +370,9 @@ static void FaultDump(void)
             putchar(' ');
         }
     }
-    printf("PSR = %08X\n", regs[16]);
+    printf("PSR = %08" PRIX32 "\n", regs[16]);
     if (!(exc_return & 8)) {
-        printf("Exception %d\n", regs[16] & 0x1FF);
+        printf("Exception %" PRId32 "\n", regs[16] & 0x1FF);
     }
 
     for (;;) {
