@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,6 +130,11 @@ def run(
         cmake_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
     )
 
+    if state.returncode != 0:
+        logging.error("Failed to configure the project.")
+        logpipe.close()
+        sys.exit(state.returncode)
+
     make_command = f"{cmake_path} --build {build_dir} -j{make_jobs}"
     if make_verbose:
         make_command += "--verbose"
@@ -137,6 +142,11 @@ def run(
     state = subprocess.run(
         make_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
     )
+
+    if state.returncode != 0:
+        logging.error("Failed to build project.")
+        logpipe.close()
+        sys.exit(state.returncode)
 
     logpipe.close()
 

@@ -1,11 +1,11 @@
 def download_dependencies() {
     sh "rm -Rf dependencies"
-    sh "python3 download_dependencies.py"
+    sh "python3.9 download_dependencies.py"
 }
 
 def setup_resources() {
 
-    sh "python3 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256"
+    sh "python3.9 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256"
 }
 
 /**@

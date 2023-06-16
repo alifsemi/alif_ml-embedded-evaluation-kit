@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@ namespace app {
         auto* ptrData = tflite::GetTensorData<uint8_t>(this->m_outputTensor);
         const uint32_t elemSz = AsrPostProcess::GetTensorElementSize(this->m_outputTensor);
 
-        /* Other sanity checks. */
+        /* Other health checks. */
         if (0 == elemSz) {
             printf_err("Tensor type not supported for post processing\n");
             return false;

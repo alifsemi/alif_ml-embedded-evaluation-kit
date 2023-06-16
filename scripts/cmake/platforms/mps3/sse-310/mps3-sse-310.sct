@@ -1,4 +1,4 @@
-;  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+;  SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 ;  SPDX-License-Identifier: Apache-2.0
 ;
 ;  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,13 +30,13 @@
 LOAD_REGION_0       0x11000000                  0x00200000
 {
     ;-----------------------------------------------------
-    ; 0.5 MiB of SRAM/BRAM region. Our vector table also
+    ; First 640K of SRAM/BRAM. Our vector table also
     ; resides here as the default INITSVTOR is 0x11000000.
     ; We currently do not use the ITCM for any code, but
     ; could potentially put some critical code in there
     ; if we need to.
     ;-----------------------------------------------------
-    bram.bin        0x11000000                  0x00080000
+    bram.bin        0x11000000                  0x000A0000
     {
         *.o (RESET, +First)
         * (InRoot$$Sections)
@@ -46,10 +46,10 @@ LOAD_REGION_0       0x11000000                  0x00200000
     }
 
     ;-----------------------------------------------------
-    ; Next 0.5 MiB of SRAM/BRAM region for RO, RW and ZI
+    ; Next 384K of SRAM/BRAM region for RO, RW and ZI
     ; data, 8 byte aligned.
     ;-----------------------------------------------------
-    data.bin        0x11080000 ALIGN 8          0x00080000
+    data.bin        0x110A0000 ALIGN 8          0x00060000
     {
         ; Any RO-DATA
         .ANY (+RO-DATA)

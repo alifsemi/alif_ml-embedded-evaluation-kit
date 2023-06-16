@@ -3,7 +3,7 @@ git submodule init
 git submodule update
 
 NOTE! Generate micronet/mobilenet models 1st with:
-python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+python3.9 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
 
 NOTE! All should normally build as Release for full-speed operation. In particular,
 this enables auto-vectorization for ARMCLANG. Images can still be debugged with

@@ -21,10 +21,10 @@ RUN apt-get update && \
     apt-get install -y \
     make \
     git \
-    python3.8 \
+    python3.9 \
     python3-pip \
-    python3.8-dev \
-    python3.8-venv \
+    python3.9-dev \
+    python3.9-venv \
     unzip \
     curl \
     wget \
@@ -32,6 +32,11 @@ RUN apt-get update && \
     libsndfile1 \
     sudo \
     telnet
+
+# Set Python3.9 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 20 && \
+    update-alternatives --set python3 /usr/bin/python3.9 && python3 --version
 
 # Download and install gcc 11.2
 RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \

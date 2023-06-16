@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ static void print_application_intro()
 {
     info("%s\n", PRJ_DES_STR);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
-    info("Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>\n\n");
+    info("Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>\n\n");
 }
 
 static void out_of_heap()

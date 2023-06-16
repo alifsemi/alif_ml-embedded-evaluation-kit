@@ -9,7 +9,7 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -94,7 +94,7 @@ if(POLICY CMP0123)
 endif()
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     22.11.0
+        VERSION     23.05.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 
@@ -250,7 +250,7 @@ foreach(use_case ${USE_CASES})
         if (NOT TARGET ${API_TO_USE}_api)
             add_subdirectory(
                 ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
-                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})  # Binary path
+                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
         endif()
 
         # Check if the target now exists

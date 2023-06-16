@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +49,16 @@ function(platform_custom_post_build)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
+
+    # For GNU toolchain, we have different linker scripts for Debug and Release
+    # as the code footprint difference between the two is quite big. We do it
+    # only for SSE-300 as the main code memory is the ITCM which is limited to
+    # 512kiB.
+    if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (TARGET_SUBSYSTEM STREQUAL "sse-300"))
+        string(TOLOWER ${CMAKE_BUILD_TYPE} LINKER_SCRIPT_SUFFIX)
+        set(LINKER_SCRIPT_NAME "${LINKER_SCRIPT_NAME}-${LINKER_SCRIPT_SUFFIX}" PARENT_SCOPE FORCE)
+    endif()
+
     # Add link options for the linker script to be used:
     add_linker_script(
             ${PARSED_TARGET_NAME}          # Target

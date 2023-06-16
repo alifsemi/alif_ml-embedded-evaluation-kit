@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,15 +67,15 @@ TEST_CASE("Checking return value")
                     sizeof(arm::app::tensorArena),
                     arm::app::asr::GetModelPointer(),
                     arm::app::asr::GetModelLen());
-        std::vector<std::string> dummyLabels = {"a", "b", "$"};
+        std::vector<std::string> placeholderLabels = {"a", "b", "$"};
         const uint32_t blankTokenIdx = 2;
-        std::vector<arm::app::ClassificationResult> dummyResult;
+        std::vector<arm::app::ClassificationResult> placeholderResult;
         std::vector <int> tensorShape = {1, 1, 1, 13};
         std::vector <int8_t> tensorVec;
         TfLiteTensor tensor = GetTestTensor<int8_t>(
                 tensorShape, 100, tensorVec);
 
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         REQUIRE(!post.DoPostProcess());
@@ -90,15 +90,15 @@ TEST_CASE("Checking return value")
                     sizeof(arm::app::tensorArena),
                     arm::app::asr::GetModelPointer(),
                     arm::app::asr::GetModelLen());
-        std::vector<std::string> dummyLabels = {"a", "b", "$"};
+        std::vector<std::string> placeholderLabels = {"a", "b", "$"};
         const uint32_t blankTokenIdx = 2;
-        std::vector<arm::app::ClassificationResult> dummyResult;
+        std::vector<arm::app::ClassificationResult> placeholderResult;
         std::vector<int> tensorShape = {1, 1, 13, 1};
         std::vector<int8_t> tensorVec;
         TfLiteTensor tensor = GetTestTensor<int8_t>(
                 tensorShape, 100, tensorVec);
 
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
@@ -124,14 +124,14 @@ TEST_CASE("Postprocessing - erasing required elements")
                     sizeof(arm::app::tensorArena),
                     arm::app::asr::GetModelPointer(),
                     arm::app::asr::GetModelLen());
-    std::vector<std::string> dummyLabels = {"a", "b", "$"};
-    std::vector<arm::app::ClassificationResult> dummyResult;
+    std::vector<std::string> placeholderLabels = {"a", "b", "$"};
+    std::vector<arm::app::ClassificationResult> placeholderResult;
 
     SECTION("First and last iteration")
     {
         std::vector<int8_t> tensorVec;
         TfLiteTensor tensor = GetTestTensor<int8_t>(tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
@@ -148,7 +148,7 @@ TEST_CASE("Postprocessing - erasing required elements")
         std::vector <int8_t> tensorVec;
         TfLiteTensor tensor = GetTestTensor<int8_t>(
                 tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
@@ -186,7 +186,7 @@ TEST_CASE("Postprocessing - erasing required elements")
         std::vector <int8_t> tensorVec;
         TfLiteTensor tensor = GetTestTensor<int8_t>(
                 tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
@@ -229,7 +229,7 @@ TEST_CASE("Postprocessing - erasing required elements")
                 tensorShape, 100, tensorVec);
 
         /* Should not be able to erase the left context if it is the first iteration. */
-        arm::app::AsrPostProcess post{&tensor, classifier, dummyLabels, dummyResult, outputCtxLen,
+        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
                                       blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */

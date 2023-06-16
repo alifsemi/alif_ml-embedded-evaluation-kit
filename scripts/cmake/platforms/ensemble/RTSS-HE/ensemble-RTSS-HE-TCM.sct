@@ -69,8 +69,8 @@
 
 
 LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
-  ER_ROM +0 FIXED {                                 ; load address = execution address
-   ; MRAM has start-up code, and most constant data
+  ER_ROM __RO_BASE __RO_SIZE {                      ; load address = execution address
+   ; MRAM has start-up code, LVGL read-only, and most constant data
    *(RESET, +First)
    startup_M55_HE.o (+RO)
    system_M55_HE.o (+RO)
@@ -78,6 +78,16 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    Main.o (+RO)
    platform_drivers.o (+RO)
    *(InRoot$$Sections)
+   *liblvgl.a(+RO)
+   *libArm-2D.a(+RO)
+   *libcmsis_ensemble.a(+RO)
+   *libensemble_services.a(+RO)
+   *liblcd_*.a(+RO)
+   *libimage_*.a(+RO)
+   *libcommon_api.a(+RO)
+   *libalif_ui_api.a(+RO)
+   *printf*.o (+RO)
+   btod.o (+RO)
    .ANY(+RO-DATA)
   }
 
@@ -89,6 +99,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       ; ITCM has non-startup code, audio record buffer and RAM vectors
       * (+RO-CODE)
       * (+XO)
+      * (fast_code)
       * (.bss.audio_rec)
   }
 

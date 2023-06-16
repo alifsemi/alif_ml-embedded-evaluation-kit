@@ -1,3 +1,5 @@
+# Use case APIs
+
 - [Use case APIs](#use-case-apis)
   - [Anomaly detection](#anomaly-detection)
   - [Automatic speech recognition](#automatic-speech-recognition)
@@ -8,8 +10,6 @@
   - [Object detection](#object-detection)
   - [Visual wake word](#visual-wake-word)
   - [Useful links](#useful-links)
-
-# Use case APIs
 
 The directories in here are individual CMake projects to generate use case API static libraries.
 These libraries are intended to be used by external projects that only want access to the
@@ -61,10 +61,7 @@ bounding boxes that encapsulate the faces.
 This use case takes images as input and determines, with a certain probability, whether the image
 contains a person.
 
-
 ## Useful links
 
-* [Project ReadMe](../../../../Readme.md)
-* [Reusable Software](../../../../Readme.md#reusable-software)
-
-
+- [Project ReadMe](../../../../Readme.md)
+- [Reusable Software](../../../../Readme.md#reusable-software)

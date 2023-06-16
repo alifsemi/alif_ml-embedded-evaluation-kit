@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,7 +78,7 @@ def write_individual_img_cc_file(image_filename, cc_filename, header_template_fi
     scale_ratio = (float)(max(ifm_width, ifm_height)) / (float)(min(original_image.size[0], original_image.size[1]))
     resized_width = (int)(original_image.size[0] * scale_ratio)
     resized_height = (int)(original_image.size[1] * scale_ratio)
-    resized_image = original_image.resize([resized_width,resized_height], Image.BILINEAR)
+    resized_image = original_image.resize([resized_width,resized_height], Image.Resampling.BILINEAR)
 
     # Crop the center of the image
     resized_image = resized_image.crop((

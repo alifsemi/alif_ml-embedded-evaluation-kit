@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -182,8 +182,8 @@ typedef struct
                                   */
   __IO uint32_t CR1;             /* Offset: 0x004 (R/W)  Control register 1
                                   *                         [31:4] : Reserved
-                                  *                            [3] : Slave-mode output disable
-                                  *                            [2] : Master or slave mode select
+                                  *                            [3] : Worker output disable
+                                  *                            [2] : Controller or worker mode select
                                   *                            [1] : Synchronous serial port enable
                                   *                            [0] : Loop back mode
                                   */
@@ -259,9 +259,9 @@ typedef struct
 #define SSP_CR1_LBM_Msk         (1UL<<SSP_CR1_LBM_Pos)
 #define SSP_CR1_SSE_Pos         1           /* Serial port enable. */
 #define SSP_CR1_SSE_Msk         (1UL<<SSP_CR1_SSE_Pos)
-#define SSP_CR1_MS_Pos          2           /* Master or Slave mode. */
+#define SSP_CR1_MS_Pos          2           /* Controller or worker mode. */
 #define SSP_CR1_MS_Msk          (1UL<<SSP_CR1_MS_Pos)
-#define SSP_CR1_SOD_Pos         3           /* Slave Output mode Disable. */
+#define SSP_CR1_SOD_Pos         3           /* Secondary Output mode Disable. */
 #define SSP_CR1_SOD_Msk         (1UL<<SSP_CR1_SOD_Pos)
 
 /* SSP_SR Status register. */

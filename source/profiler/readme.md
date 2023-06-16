@@ -1,4 +1,4 @@
-## Profiler
+# Profiler
 
 This is a CMake static library that exposes a C++ API for a very simple logging based profiler implementation. It
 depends on the hardware abstraction layer's platform drivers to get performance measurement counters (PMU) from the

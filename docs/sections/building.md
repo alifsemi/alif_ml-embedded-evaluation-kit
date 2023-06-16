@@ -91,19 +91,21 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
-- Python 3.7 or above is installed. Check your current installed version of Python by running:
+- Python 3.9 or above is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
     ```
 
     ```log
-    Python 3.7.13
+    Python 3.9.7
     ```
 
-  > **Note:** If you have an older version of Python installed (< 3.7) see the
+  > **Note:** If you have an older version of Python installed (< 3.9) see the
   > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  > for instruction on how to update it.
+  > for instruction on how to install and use it.
+  > **Note:** This scenario might be true if you are using an Arm Virtual Hardware instance.
+  > See the troubleshooting link above on how to set up the environment in this case.
 
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
   environment module is installed by running:
@@ -111,12 +113,6 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```commandline
     python3 -m venv
     ```
-
-  > **Note:** If you are using an Arm Virtual Hardware instance then Python virtual environment is not installed by default.
-  > You will need to install it yourself by running the following command:
-  >   ```commandline
-  >    sudo apt install python3.8-venv
-  >    ```
 
 - The build system uses external Python libraries during the building process. Please make sure that the latest pip and
   libsndfile versions are installed.
@@ -126,7 +122,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   ```
 
   ```log
-  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.7)
+  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.9)
   ```
 
 - Make
@@ -198,10 +194,11 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
+- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
   These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
-  points to the `dependencies/cmsis` and `dependencies/cmsis-dsp` git submodules.  Repositories are hosted here:
-  [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) and [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP).
+  points to the `dependencies/cmsis`, `dependencies/cmsis-dsp` and `dependencies/cmsis-nn` git submodules.
+  Repositories are hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git),
+  [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -317,8 +314,10 @@ repository to link against.
 
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
-3. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
-4. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
+3. [Ethos-U NPU core platform repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
+4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
+6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -334,6 +333,8 @@ This downloads all of the required components and places them in a tree, like so
 ```tree
 dependencies
     ├── cmsis
+    ├── cmsis-dsp
+    ├── cmsis-nn
     ├── core-driver
     ├── core-platform
     └── tensorflow
@@ -341,7 +342,7 @@ dependencies
 
 > **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all of the
 > relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U_NPU_DRIVER_SRC_PATH`,
-> and `CMSIS_SRC_PATH`.
+> `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`and `CMSIS_NN_SRC_PATH`.
 
 #### Fetching resource files
 
@@ -356,8 +357,12 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU.
 
-> **Note:** This script requires Python version 3.7 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
-> are satisfied.
+> **Note:** This script requires Python version 3.9 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
+> are satisfied. If your environment points to system installed Python3 that is an older version than 3.9, choose the
+> required version explicitly after installing it:
+> ```sh
+> python3.9 ./set_up_default_resources.py
+> ```
 >
 > **Note:** This script also installs required version of CMake into the virtual environment, which can be used by activating it.
 
@@ -545,7 +550,6 @@ cmake .. \
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run
 > the CMake command.
 
-
 ### Configuring the build for MPS3 SSE-310
 
 On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-310`,
@@ -626,7 +630,7 @@ Where for each implemented use-case under the `source/use-case` directory, the f
 - `ethos-u-<use-case name>.axf`: The built application binary for an ML use-case.
 
 - `ethos-u-<use-case name>.map`: Information from building the application. For example: Libraries used, what was
-  optimized, and location of objects).
+  optimized, and location of objects.
 
 - `ethos-u-<use-case name>.htm`: Human readable file containing the call graph of application functions.
 
@@ -705,8 +709,9 @@ After compiling, your custom model has now replaced the default one in the appli
 > <https://pypi.org/project/ethos-u-vela/>.
 > The source code is hosted on <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
 
-> **Note:** Using the 22.11 versions of software dependencies will require Vela to be at least version 3.6.0
+> **Note:** The correct version of Vela should be used and this depends on the versions of software dependencies used
 > or you may encounter issues when trying to run applications on different variants of Ethos-U NPUs.
+> See <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u> for more details of which versions align.
 
 The Vela compiler is a tool that can optimize a neural network model into a version that can run on an embedded system
 containing an *Ethos-U* NPU.

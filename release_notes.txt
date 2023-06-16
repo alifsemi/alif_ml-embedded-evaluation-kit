@@ -1,3 +1,16 @@
+Changes in 23.05
+    * Support for 23.05 NPU components and dependencies (core-driver, core-platform, Vela 3.8.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
+    * Minor updates to CMSIS-pack dependencies.
+    * Update Python package requirements for compatibility reasons.
+    * Increase minimum requirements of Python to 3.9
+
+Changes in 23.02
+    * Support for 23.02 NPU components and dependencies (core-driver, core-platform, Vela 3.7.0, CMSIS, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro).
+    * Improvement to PMU counters - reducing cache maintenance burden for Arm Cortex-M55 CPUs when NPU is used.
+    * Inclusive language updates.
+    * Documentation updates including adding links to AN555 resources.
+    * Updates to Python requirements file for virtual environment.
+
 Changes in 22.11
     * Support for 22.11 NPU components and dependencies (core-driver, core-platform, Vela 3.6.0, CMSIS, TensorFlow Lite Micro)
     * CMSIS-NN is added as a new dependency due to it moving out of the core CMSIS repository.
@@ -82,7 +95,7 @@ Changes in 20.08 release:
     * Added keyword spotting use case example.
     * Added person detection use case example.
 Known issues:
-    * telnet connection to FastModel environment may hang after some period of inactivity.
+    * telnet connection to FastModel environment may stop responding after some period of inactivity.
 
 Changes in 20.05 release:
     * FastModel environment was built with FastModel Tools v11.10.22.
@@ -93,4 +106,4 @@ Changes in 20.05 release:
     * Used EAC NPU software model and drivers.
     * Windows support for build scripts.
 Known issues:
-    * telnet connection to FastModel environment may hang after some period of inactivity.
+    * telnet connection to FastModel environment may stop responding after some period of inactivity.

@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,8 @@ add_library(${COMMON_UC_UTILS_TARGET} STATIC)
 target_include_directories(${COMMON_UC_UTILS_TARGET}
     PUBLIC
     include
-    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include)
+    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
+    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
 
 ## Sources
 target_sources(${COMMON_UC_UTILS_TARGET}
