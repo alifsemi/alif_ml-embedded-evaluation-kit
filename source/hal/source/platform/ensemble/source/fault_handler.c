@@ -22,6 +22,10 @@
 #define BFSR (((volatile uint8_t *) &SCB->CFSR)[1])
 #define UFSR (((volatile uint16_t *) &SCB->CFSR)[1])
 
+#define VTOR_STACK_TOP (((const uint32_t *) SCB->VTOR)[0])
+
+#define STACK_DUMP_MAX_LINES 20
+
 enum FaultType {
     FT_HardFault = 0,
     FT_MemManage = 1,
@@ -306,7 +310,7 @@ void DebugMonitor_Handler(void)
 
 __attribute__((used))
 __attribute__((naked))
-static void CommonAsmFaultHandler(/*int type*/)
+static void CommonAsmFaultHandler(void /* int type */)
 {
     __asm("LDR   R1, =regs+4*4\n\t"
           "STM   R1, {R4-R11}\n\t"
@@ -326,6 +330,9 @@ static void CommonFaultHandler(enum FaultType type, uint32_t * restrict sp, uint
             __WFE();
         }
     }
+
+    // Prevent infinite loop in case fault dumping generates a new fault
+    fault_dump_enabled = false;
 
     exc_return = lr;
     fault_type = type;
@@ -375,10 +382,60 @@ static void FaultDump(void)
         printf("Exception %" PRId32 "\n", regs[16] & 0x1FF);
     }
 
+    uintptr_t stack_top = VTOR_STACK_TOP;
+    printf("Stack top from VTOR: %08" PRIXPTR "\n", stack_top);
+    printf("\n==== Stack dump ====\n\n");
+    const uintptr_t stack_point = regs[13];
+
+    // not using the default stack so we have to just
+    // print the defined maximum (STACK_DUMP_MAX_LINES)
+    if (stack_top < stack_point) {
+        stack_top = UINTPTR_MAX;
+    }
+
+    // these are for readability(?), can't be changed without modifying code below
+    #define VALUES_PER_LINE 4
+    #define BYTES_IN_VALUE 4
+
+    // start printing from aligned address
+    const uintptr_t loop_start = stack_point - stack_point % (VALUES_PER_LINE * BYTES_IN_VALUE);
+
+    // Dump uint32 values from SP until stack top or until defined number of lines is printed
+    printf("Address  :     3 2 1 0     7 6 5 4     B A 9 8     F E D C       ASCII Data\n");
+    //      80008010 :    FFEEAABB    CC001133    12345678    1A2B3C4D    ....3...xV".M<+.
+    for (uint32_t *p = (uint32_t *)loop_start; p < ((uint32_t *)loop_start + STACK_DUMP_MAX_LINES * VALUES_PER_LINE) && p < (uint32_t *)stack_top; p += VALUES_PER_LINE) {
+
+        printf("%08" PRIXPTR " :", (uintptr_t)p);
+        // print the stack values for 1 line
+        for (uint32_t *vp = p; vp < p + VALUES_PER_LINE; vp++) {
+            if (vp >= (uint32_t*)stack_point && vp < (uint32_t*)stack_top) {
+                printf("    %08" PRIX32, *vp);
+            }
+            else {
+                printf("            ");
+            }
+        }
+        printf("    ");
+
+        // print the ascii characters for one line
+        for (char *cp = (char *)p; cp < (char *)p + VALUES_PER_LINE * BYTES_IN_VALUE; cp++) {
+            if (cp >= (char*)stack_point && cp < (char*)stack_top) {
+                // only print printable ascii characters
+                if(*cp > 31 && *cp < 127) {
+                    putchar(*cp);
+                }
+                else {
+                    putchar('.');
+                }
+            }
+            else {
+                putchar(' ');
+            }
+        }
+        printf("\n");
+    }
+
     for (;;) {
         __WFE();
     }
 }
-
-
-
