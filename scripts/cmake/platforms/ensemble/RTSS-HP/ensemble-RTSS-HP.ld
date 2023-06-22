@@ -55,9 +55,9 @@ SECTIONS
      */
     KEEP(*(.vectors))
 
-    *startup_M55_*.c.obj(.text .rodata*)
-    *system_M55_*.c.obj(.text .rodata*)
-    *mpu_M55_*.c.obj(.text .rodata*)
+    *startup_M55*.c.obj(.text .rodata*)
+    *system_M55*.c.obj(.text .rodata*)
+    *mpu_M55*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
 
