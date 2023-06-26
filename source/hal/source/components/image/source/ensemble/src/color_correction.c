@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
+#include <math.h>
+
 #include "base_def.h"
 #include "image_processing.h"
 
@@ -48,7 +51,7 @@
 #endif
 
 #if PIXELWISE_COLOR_CORRECTION
-static void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
+static void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3], const uint8_t lut[static restrict 256])
 {
 //	volatile static uint32_t t0, ts;
 //	ts = PMU_GetCounter();
@@ -70,8 +73,9 @@ static void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 	uint16x8_t ud16 = vqrshrunbq(vuninitializedq_u16(), d, 16);
 	// saturating rounding shift right and narrow again - result into odd 8-bit lanes (bottom of 32-bit lanes)
 	uint8x16_t ud8 = vqrshrnbq(vuninitializedq_u8(), ud16, FIXED_SHIFT - 16);
+	uint32x4_t ud32 = vldrbq_gather_offset_u32(lut, vandq(vreinterpretq_u32(ud8), vdupq_n_u32(0x000000FF)));
 	// write out 3 bytes from the first 3 32-bit lanes
-	vstrbq_p(dp, vreinterpretq_u32(ud8), vctp32q(3));
+	vstrbq_p(dp, ud32, vctp32q(3));
 #else
 	float dpixel_data[3];
 	dpixel_data[0] = C_RR*sp[0] + C_GR*sp[1] + C_BR*sp[2];
@@ -84,16 +88,16 @@ static void color_correction(const uint8_t sp[static 3], uint8_t dp[static 3])
 	if (dpixel_data[0] > 255) dpixel_data[0] = 255;
 	if (dpixel_data[1] > 255) dpixel_data[1] = 255;
 	if (dpixel_data[2] > 255) dpixel_data[2] = 255;
-	dp[0] = (uint8_t)dpixel_data[0]; // 0 = RED
-	dp[1] = (uint8_t)dpixel_data[1]; // 1 = GREEN
-	dp[2] = (uint8_t)dpixel_data[2]; // 2 = BLUE
+	dp[0] = lut[(uint8_t)dpixel_data[0]]; // 0 = RED
+	dp[1] = lut[(uint8_t)dpixel_data[1]]; // 1 = GREEN
+	dp[2] = lut[(uint8_t)dpixel_data[2]]; // 2 = BLUE
 #endif // __ARM_FEATURE_MVE & 1
 //	t0 = PMU_GetCounter() - ts;
 }
 
 #else
 
-static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
+static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len, const uint8_t lut[static restrict 256])
 {
 	const uint16x8_t pixel_offsets = vmulq_n_u16(vidupq_n_u16(0, 1), 3);
 
@@ -111,7 +115,8 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 			r_mac = vfmaq(r_mac, b, C_BR);
 
 			uint16x8_t r_out = vcvtq_u16_f16(r_mac);
-			r_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), r_out));
+			r_out = vreinterpretq_u16(vqmovnbq(vdupq_n_u8(0), r_out));
+			r_out = vldrbq_gather_offset(lut, r_out);
 			vstrbq_scatter_offset(dp + 0, pixel_offsets, r_out);
 		}
 
@@ -121,7 +126,8 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 			g_mac = vfmaq(g_mac, b, C_BG);
 
 			uint16x8_t g_out = vcvtq_u16_f16(g_mac);
-			g_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), g_out));
+			g_out = vreinterpretq_u16(vqmovnbq(vdupq_n_u8(0), g_out));
+			g_out = vldrbq_gather_offset(lut, g_out);
 			vstrbq_scatter_offset(dp + 1, pixel_offsets, g_out);
 		}
 
@@ -131,7 +137,8 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 			b_mac = vfmaq(b_mac, b, C_BB);
 
 			uint16x8_t b_out = vcvtq_u16_f16(b_mac);
-			b_out = vreinterpretq_u16(vqmovnbq(vuninitializedq_u8(), b_out));
+			b_out = vreinterpretq_u16(vqmovnbq(vdupq_n_u8(0), b_out));
+			b_out = vldrbq_gather_offset(lut, b_out);
 			vstrbq_scatter_offset(dp + 2, pixel_offsets, b_out);
 		}
 
@@ -141,17 +148,60 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len)
 }
 #endif /* PIXELWISE_COLOR_CORRECTION */
 
+#ifdef USE_REC709_OETF
+static inline float rec709_oetf(float lum)
+{
+    if (lum < 0.018f) {
+        return 4.5f * lum;
+    } else {
+        return 1.099f * pow(lum, 0.45f) - 0.099f;
+    }
+}
+
+#define oetf rec709_oetf
+
+#else
+static inline float srgb_oetf(float lum)
+{
+    if (lum <= 0.0031308f) {
+        return 12.92f * lum;
+    } else {
+        return 1.055f * powf(lum, 1.0f / 2.4f) - 0.055f;
+    }
+}
+
+#define oetf srgb_oetf
+#endif
+
+static const uint8_t *prepare_gamma_lut(void)
+{
+    static bool inited;
+    static uint8_t lut[256];
+
+    if (inited) {
+        return lut;
+    }
+
+    for (int i = 0; i < 256; i++) {
+        lut[i] = 255.0f * oetf(i * (1.0f / 255.0f)) + 0.5f;
+    }
+    inited = true;
+    return lut;
+}
+
 void white_balance(int ml_width, int ml_height, const uint8_t *sp, uint8_t *dp)
 {
+    const uint8_t * restrict lut = prepare_gamma_lut();
+
 #if SKIP_COLOR_CORRECTION
-    if (dp != sp) {
-        memcpy(dp, sp, ml_width * ml_height * RGB_BYTES);
+    for (int i = 0; i < ml_width * ml_height * RGB_BYTES; i++) {
+        dp[i] = lut[sp[i]];
     }
 #elif !PIXELWISE_COLOR_CORRECTION
-    bulk_color_correction(sp, dp, ml_width * ml_height * RGB_BYTES);
+    bulk_color_correction(sp, dp, ml_width * ml_height * RGB_BYTES, lut);
 #else
-    for (uint32_t index = 0; index < ml_width * ml_height * RGB_BYTES; index += RGB_BYTES) {
-        color_correction(&sp[index], &dp[index]);
+    for (int index = 0; index < ml_width * ml_height * RGB_BYTES; index += RGB_BYTES) {
+        color_correction(&sp[index], &dp[index], lut);
     }
 #endif
 }

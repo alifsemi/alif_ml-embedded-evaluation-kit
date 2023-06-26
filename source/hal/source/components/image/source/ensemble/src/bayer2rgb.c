@@ -76,8 +76,9 @@
 
 // High and low threshold values - code uses >=
 // checks, so a neutral value is >= low and < high.
-#define THRESH_LOW 32
-#define THRESH_HIGH 248
+// These linear values correspond to 20%/80% thresholds after the sRGB opto-electronic function (gamma)
+#define THRESH_LOW 9
+#define THRESH_HIGH 154
 
 uint32_t exposure_high_count, exposure_low_count;
 
