@@ -93,7 +93,9 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
 }
 
 return [
-    download_dependencies: this.&download_dependencies,
+    /* Dependencies are set using git submodule for now due to private dependency repositories.
+       To be re-enabled again once boardlib and cmsis for B are publicly available */
+    /*download_dependencies: this.&download_dependencies,*/
     setup_resources: this.&setup_resources,
     build_hp: this.&build_hp,
     build_he_tcm: this.&build_he_tcm,
