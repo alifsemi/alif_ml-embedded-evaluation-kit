@@ -38,6 +38,7 @@ using ViusalWakeWordClassifier = arm::app::Classifier;
 
 void main_loop()
 {
+    init_trigger_rx();	    // P_26 = CAM_PWR_CNTL, AppKit Alpha2.
 
     arm::app::VisualWakeWordModel model;  /* Model wrapper object. */
 
