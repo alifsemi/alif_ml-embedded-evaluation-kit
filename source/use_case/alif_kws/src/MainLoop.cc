@@ -99,8 +99,7 @@ void main_loop()
 
     bool executionSuccessful = true;
 
-#define USE_MENU
-#ifdef USE_MENU
+#ifdef USE_TEST_MENU
     constexpr bool bUseMenu = true;
 #else
     constexpr bool bUseMenu = false;
