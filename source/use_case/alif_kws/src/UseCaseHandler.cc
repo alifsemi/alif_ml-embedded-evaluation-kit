@@ -103,7 +103,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
 
     /* KWS inference handler. */
-    bool ClassifyAudioHandler(ApplicationContext& ctx)
+    bool ClassifyAudioHandler(ApplicationContext& ctx, bool oneshot)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model = ctx.Get<Model&>("model");
@@ -228,8 +228,8 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             profiler.PrintProfilingResult();
 
             ++index;
-
-        } while (true);
+        } while (!oneshot);
+        return true;
     }
 
     static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results)
