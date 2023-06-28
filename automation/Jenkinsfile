@@ -24,41 +24,49 @@ pipeline {
                 }
             }
         }
-        // First build can end up doing some patching of Tensorflow
-        // so run one build sequentially to start with
-        stage('Build HP GCC Release') {
+        // Just build HE KWS release build for now
+        stage('Build HE-TCM GCC Release') {
             steps {
                 script {
-                    common_funcs.build_hp("Release", "gcc");
+                    common_funcs.build_he_tcm("Release", "gcc");
                 }
             }
         }
-        // Remaining builds can be parallel
-        stage('More builds') {
-            parallel {
-                stage('Build HP GCC Debug') {
-                    steps {
-                        script {
-                            common_funcs.build_hp("Debug", "gcc");
-                        }
-                    }
-                }
-                stage('Build HE-TCM GCC Release') {
-                    steps {
-                        script {
-                            common_funcs.build_he_tcm("Release", "gcc");
-                        }
-                    }
-                }
-                stage('Build HE-TCM GCC Debug') {
-                    steps {
-                        script {
-                            common_funcs.build_he_tcm("Debug", "gcc");
-                        }
-                    }
-                }
-            }
-        }
+        // // First build can end up doing some patching of Tensorflow
+        // // so run one build sequentially to start with
+        // stage('Build HP GCC Release') {
+        //     steps {
+        //         script {
+        //             common_funcs.build_hp("Release", "gcc");
+        //         }
+        //     }
+        // }
+        // // Remaining builds can be parallel
+        // stage('More builds') {
+        //     parallel {
+        //         stage('Build HP GCC Debug') {
+        //             steps {
+        //                 script {
+        //                     common_funcs.build_hp("Debug", "gcc");
+        //                 }
+        //             }
+        //         }
+        //         stage('Build HE-TCM GCC Release') {
+        //             steps {
+        //                 script {
+        //                     common_funcs.build_he_tcm("Release", "gcc");
+        //                 }
+        //             }
+        //         }
+        //         stage('Build HE-TCM GCC Debug') {
+        //             steps {
+        //                 script {
+        //                     common_funcs.build_he_tcm("Debug", "gcc");
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
     post {
         always {
