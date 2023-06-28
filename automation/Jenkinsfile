@@ -31,6 +31,15 @@ pipeline {
                     common_funcs.build_he_tcm("Release", "gcc");
                 }
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                    stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release/bin/ethos-u-alif_kws.bin"
+                }
+                cleanup {
+                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                }
+            }
         }
         // // First build can end up doing some patching of Tensorflow
         // // so run one build sequentially to start with
@@ -67,13 +76,29 @@ pipeline {
         //         }
         //     }
         // }
-    }
-    post {
-        always {
-          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-        }
-        cleanup {
-          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+        stage('Test KWS HE Release') {
+            agent { label 'tester_B' }
+            steps {
+                unstash name: "test_build_gnu_kws_he_release"
+                script {
+                    try {
+                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release/bin", "ethos-u-alif_kws.bin");
+                    } catch (Exception e) {
+                        echo 'Exception occurred: ' + e.toString()
+                        stageResult: 'UNSTABLE'
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                }
+                cleanup {
+                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                }
+            }
         }
     }
 }
