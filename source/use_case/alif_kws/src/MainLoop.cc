@@ -59,7 +59,8 @@ static void DisplayMenu()
     printf("User input required\n");
     printf("Enter option number from:\n\n");
     printf("  %u. Run classification on one audio sample\n", MENU_OPT_RUN_ONCE);
-    printf("  %u. Run classification continuously\n", MENU_OPT_RUN_CONTINUOUS);
+    printf("  %u. Run classification continuously\n\n", MENU_OPT_RUN_CONTINUOUS);
+    printf("  Choice: ");
     fflush(stdout);
 }
 
