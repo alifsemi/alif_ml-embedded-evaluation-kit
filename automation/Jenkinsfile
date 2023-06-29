@@ -94,6 +94,7 @@ pipeline {
                     archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
                     archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                     archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                    junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
                 }
                 cleanup {
                     cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
