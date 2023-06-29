@@ -27,58 +27,47 @@ pipeline {
                 }
             }
         }
-        // Just build HE KWS release build for now
-        stage('Build HE-TCM GCC Release') {
+        // First build can end up doing some patching of Tensorflow
+        // so run one build sequentially to start with
+        stage('Build HP GCC Release') {
             steps {
                 script {
-                    common_funcs.build_he_tcm("Release", "gcc");
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-                    stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release/bin/ethos-u-alif_kws.bin"
-                }
-                cleanup {
-                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                    common_funcs.build_hp("Release", "gcc");
                 }
             }
         }
-        // // First build can end up doing some patching of Tensorflow
-        // // so run one build sequentially to start with
-        // stage('Build HP GCC Release') {
-        //     steps {
-        //         script {
-        //             common_funcs.build_hp("Release", "gcc");
-        //         }
-        //     }
-        // }
-        // // Remaining builds can be parallel
-        // stage('More builds') {
-        //     parallel {
-        //         stage('Build HP GCC Debug') {
-        //             steps {
-        //                 script {
-        //                     common_funcs.build_hp("Debug", "gcc");
-        //                 }
-        //             }
-        //         }
-        //         stage('Build HE-TCM GCC Release') {
-        //             steps {
-        //                 script {
-        //                     common_funcs.build_he_tcm("Release", "gcc");
-        //                 }
-        //             }
-        //         }
-        //         stage('Build HE-TCM GCC Debug') {
-        //             steps {
-        //                 script {
-        //                     common_funcs.build_he_tcm("Debug", "gcc");
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        // Remaining builds can be parallel
+        stage('More builds') {
+            parallel {
+                stage('Build HP GCC Debug') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Debug", "gcc");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release/bin/ethos-u-alif_kws.bin"
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc");
+                        }
+                    }
+                }
+            }
+        }
         stage('Test KWS HE Release') {
             agent { label 'tester_B' }
             steps {
@@ -97,10 +86,8 @@ pipeline {
                     archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
                     archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                     archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
                     junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
-                }
-                cleanup {
-                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
                 }
             }
         }
@@ -116,6 +103,11 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    post {
+        cleanup {
+            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
         }
     }
 }
