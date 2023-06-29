@@ -2,6 +2,9 @@ def common_funcs
 
 pipeline {
     agent { label 'build2' }
+    environment {
+        LOG_JUNIT_RESULTS = 'true'
+    }
     stages {
         stage('Init') {
             steps {
@@ -98,6 +101,19 @@ pipeline {
                 }
                 cleanup {
                     cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                }
+            }
+        }
+        stage('Report Junit to Influx') {
+            agent any
+            options { skipDefaultCheckout() }
+            steps {
+                script {
+                    try {
+                        influxDbPublisher(selectedTarget: 'JUnit-report-testapp')
+                    } catch (Exception e) {
+                        echo 'Exception occurred: ' + e.toString()
+                    }
                 }
             }
         }
