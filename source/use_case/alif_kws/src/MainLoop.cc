@@ -58,7 +58,7 @@ static void DisplayMenu()
     printf("\n\n");
     printf("User input required\n");
     printf("Enter option number from:\n\n");
-    printf("  %u. Run classification on one audio sample\n", MENU_OPT_RUN_ONCE);
+    printf("  %u. Run classification on one audio window\n", MENU_OPT_RUN_ONCE);
     printf("  %u. Run classification continuously\n\n", MENU_OPT_RUN_CONTINUOUS);
     printf("  Choice: ");
     fflush(stdout);
@@ -100,7 +100,7 @@ void main_loop()
 
     bool executionSuccessful = true;
 
-#ifdef USE_TEST_MENU
+#ifdef USE_APP_MENU
     constexpr bool bUseMenu = true;
 #else
     constexpr bool bUseMenu = false;

@@ -26,11 +26,6 @@
 #----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.21.0)
 
-# Enable test menu in application
-if (USE_TEST_MENU)
-    add_compile_definitions(USE_TEST_MENU)
-endif()
-
 # Build in release mode by default
 if (NOT CMAKE_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_BUILD_TYPE Release CACHE INTERNAL "")
