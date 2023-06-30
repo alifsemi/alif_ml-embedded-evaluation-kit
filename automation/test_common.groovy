@@ -25,10 +25,6 @@ def build_hp(String build_type, String toolchain) {
         pushd $build_path
         $cmake_cmd &&
         make -j 4
-        arm-none-eabi-objcopy -O binary bin/ethos-u-alif_img_class.axf bin/ethos-u-alif_img_class.bin
-        arm-none-eabi-objcopy -O binary bin/ethos-u-alif_object_detection.axf bin/ethos-u-alif_object_detection.bin
-        arm-none-eabi-objcopy -O binary bin/ethos-u-alif_ad.axf bin/ethos-u-alif_ad.bin
-        arm-none-eabi-objcopy -O binary bin/ethos-u-alif_vww.axf bin/ethos-u-alif_vww.bin
         exit_code=\$?
         popd
         exit \$exit_code"""
@@ -45,18 +41,17 @@ def build_he_tcm(String build_type, String toolchain) {
         pushd $build_path
         $cmake_cmd &&
         make -j 4
-        arm-none-eabi-objcopy -O binary bin/ethos-u-alif_kws.axf bin/ethos-u-alif_kws.bin
         exit_code=\$?
         popd
         exit \$exit_code"""
 }
 
-def flash_and_run_pytest(String jsonfile, String build_dir, String binary_name) {
+def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name) {
     sh """#!/bin/bash -xe
         printenv NODE_NAME
         cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
         rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
-        cp $build_dir/$binary_name $ALIF_SETOOLS_LOCATION/build/images/
+        cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
         cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
         pushd $ALIF_SETOOLS_LOCATION/
         ./app-gen-toc --filename build/config/$jsonfile
@@ -73,9 +68,9 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String binary_name) 
     -s \
     --tb=native \
     --root-logdir=pytest-logs \
-    --junit-prefix=$binary_name \
-    --html-report=html-report-${binary_name}.html \
-    --junit-xml junit/junit-report-${binary_name}.xml"
+    --junit-prefix=$target_binary_name \
+    --html-report=html-report-${target_binary_name}.html \
+    --junit-xml junit/junit-report-${target_binary_name}.xml"
 
     sh """#!/bin/bash -xe
         set +e
