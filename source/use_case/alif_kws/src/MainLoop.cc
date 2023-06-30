@@ -100,7 +100,7 @@ void main_loop()
 
     bool executionSuccessful = true;
 
-#ifdef USE_APP_MENU
+#if USE_APP_MENU
     constexpr bool bUseMenu = true;
 #else
     constexpr bool bUseMenu = false;
