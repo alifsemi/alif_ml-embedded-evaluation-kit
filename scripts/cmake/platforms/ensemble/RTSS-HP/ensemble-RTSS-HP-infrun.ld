@@ -110,19 +110,20 @@ SECTIONS
 
     KEEP(*(.jcr*))
 
+/*
     . = ALIGN(8);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(8);
     __exidx_start = .;
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     __exidx_end = .;
+ */
 
   } > DTCM AT> MRAM 
 
   /* Place non-zero code/data here if required in SRAM0 */
   .data.sram0.at_mram : ALIGN(8)
   {
-    *(.text*)
     * (ifm)
   } > SRAM0 AT> MRAM
 
@@ -210,6 +211,15 @@ SECTIONS
     *(SORT(.dtors.*))
     *(.dtors)
 
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
+
+    . = ALIGN(4);
+    *(.text*)
     *(.rodata*)
 
     *(nn_model)
