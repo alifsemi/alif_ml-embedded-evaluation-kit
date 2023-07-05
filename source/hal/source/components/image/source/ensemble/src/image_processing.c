@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tgmath.h>
 #include "image_processing.h"
 
@@ -22,69 +23,48 @@
 
 #include "RTE_Components.h"
 
-int frame_crop(const void * restrict input_fb,
+int frame_crop(const void *input_fb,
 		       uint32_t ip_row_size,
 			   uint32_t ip_col_size,
 			   uint32_t row_start,
 			   uint32_t col_start,
-			   void * restrict output_fb,
+			   void *output_fb,
 			   uint32_t op_row_size,
 			   uint32_t op_col_size,
 			   uint32_t bpp)
 {
-	uint32_t *op_fb = NULL, *ip_fb_row = NULL;
-	uint8_t  *ip_fb = NULL, *ip8_fb_row = NULL, *op8_fb = NULL;
-	uint32_t col_cnt, row_cnt;
+	uint8_t *op_fb;
+	uint8_t *ip_fb;
 
 	//Checking the boundary
 	if(((row_start + op_row_size) > ip_row_size) || ((col_start + op_col_size) > ip_col_size))
 		return FRAME_OUT_OF_RANGE;
 
-	//updating the input frame column start
-	ip_fb = (col_start * ip_row_size * (bpp / 8)) + (uint8_t *)input_fb ;
-
-
-	if((32 % bpp) == 0) {
-		//8bit and 16bit bpp will be handled here.
-		op_fb = (uint32_t *)output_fb;
-
-
-		for(col_cnt = 0; col_cnt < op_col_size; ++col_cnt) {
-
-			//update row address
-			ip_fb_row = (uint32_t *)((row_start * (bpp / 8)) + ip_fb);
-
-			for(row_cnt = 0; row_cnt < (op_row_size / (32 / bpp)); ++row_cnt)
-				op_fb[row_cnt] = ip_fb_row[row_cnt];
-
-			//copy remaining pixels
-			if(op_row_size % (32 / bpp))
-				op_fb[row_cnt] = ip_fb_row[row_cnt];
-
-			//update fb
-			ip_fb = (ip_row_size * (bpp / 8)) + ip_fb;
-			op_fb = (uint32_t *)((op_row_size * (bpp / 8)) + (uint8_t *)op_fb);
-		}
-	} else {
-		//24bit bpp will be handled here.
-		op8_fb = (uint8_t *)output_fb;
-
-
-		for(col_cnt = 0; col_cnt < op_col_size; ++col_cnt) {
-
-			//update row address
-			ip8_fb_row = (row_start * (bpp / 8)) + ip_fb;
-
-			//copy pixels
-			for(row_cnt = 0; row_cnt < (op_row_size * (bpp / 8)); ++row_cnt)
-				op8_fb[row_cnt] = ip8_fb_row[row_cnt];
-
-			//update fb
-			ip_fb = ((ip_row_size * (bpp / 8)) + ip_fb);
-			op8_fb = ((op_row_size * (bpp / 8)) + op8_fb);
-		}
-
+	// Check for no cropping
+	if (row_start == 0 && col_start == 0 && ip_row_size == op_row_size && ip_col_size == op_col_size) {
+	    // No-op if cropping and in-place
+	    if (input_fb != output_fb) {
+	        memcpy(output_fb, input_fb, ip_row_size * op_row_size * (bpp / 8));
+	    }
+	    return 0;
 	}
+
+	//updating the input frame column start
+	ip_fb = (uint8_t *)input_fb + (col_start * ip_row_size * (bpp / 8));
+
+    op_fb = output_fb;
+
+    for(uint32_t col_cnt = 0; col_cnt < op_col_size; ++col_cnt) {
+
+        //update row address
+        const uint8_t *ip_fb_row = ip_fb + row_start * (bpp / 8);
+
+        memmove(op_fb, ip_fb_row, op_row_size * (bpp / 8));
+
+        //update fb
+        ip_fb += (ip_row_size * (bpp / 8));
+        op_fb += (op_row_size * (bpp / 8));
+    }
 
 	return 0;
 }
@@ -390,10 +370,9 @@ void calculate_crop_dims(uint32_t srcWidth,
     }
 }
 
-int crop_and_interpolate( uint8_t const * restrict srcImage,
+int crop_and_interpolate( uint8_t *image,
 						  uint32_t srcWidth,
 						  uint32_t srcHeight,
-						  uint8_t * restrict dstImage,
 						  uint32_t dstWidth,
 						  uint32_t dstHeight,
 						  uint32_t bpp)
@@ -406,14 +385,14 @@ int crop_and_interpolate( uint8_t const * restrict srcImage,
     tprof2 = ARM_PMU_Get_CCNTR();
     // What are dimensions that maintain aspect ratio?
     calculate_crop_dims(srcWidth, srcHeight, dstWidth, dstHeight, &cropWidth, &cropHeight);
-    // Now crop to that dimension
+    // Now crop to that dimension, in place
     int res = frame_crop(
-        srcImage,
+        image,
         srcWidth,
         srcHeight,
         (srcWidth - cropWidth) / 2,
         (srcHeight - cropHeight) / 2,
-        dstImage,
+        image,
         cropWidth,
         cropHeight,
 		bpp);
@@ -423,7 +402,7 @@ int crop_and_interpolate( uint8_t const * restrict srcImage,
 
     tprof3 = ARM_PMU_Get_CCNTR();
     // Finally, interpolate down to desired dimensions, in place
-    int result = resize_image_A(dstImage, cropWidth, cropHeight, dstImage, dstWidth, dstHeight, bpp/8);
+    int result = resize_image_A(image, cropWidth, cropHeight, image, dstWidth, dstHeight, bpp/8);
     tprof3 = ARM_PMU_Get_CCNTR() - tprof3;
     return result;
 }

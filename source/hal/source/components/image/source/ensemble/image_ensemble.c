@@ -22,8 +22,12 @@
 #include <tgmath.h>
 #include <string.h>
 
+/* Camera fills the raw_image buffer.
+ * Bayer->RGB conversion transfers into the rgb_image buffer.
+ * Following steps (crop, interpolate, colour correct) all occur in the rgb_image buffer in-place.
+ */
 static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
-static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
+static uint8_t raw_image[CIMAGE_X * CIMAGE_Y] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560 = 313,600
 
 #define FAKE_CAMERA 0
 
@@ -222,11 +226,14 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
 #endif
+    if ((size_t) ml_width * ml_height * RGB_BYTES > sizeof raw_image) {
+        return NULL;
+    }
     // Cropping and scaling
-    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, ml_width, ml_height, RGB_BYTES * 8);
+    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
     tprof4 = ARM_PMU_Get_CCNTR();
     // Color correction for white balance
-    white_balance(ml_width, ml_height, raw_image, rgb_image);
+    white_balance(ml_width, ml_height, rgb_image, rgb_image);
     tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
     return rgb_image;
 }
