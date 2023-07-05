@@ -183,7 +183,8 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
 
 #if !FAKE_CAMERA
     camera_start(CAMERA_MODE_SNAPSHOT);
-    // It's a huge buffer (941920 bytes) - actually doing it by address can take 0.5ms, while
+    camera_wait(100);
+    // It's a big buffer (313,600 bytes) - actually doing it by address can take 0.175ms, while
     // a global clean+invalidate is 0.023ms. (Although there will be a reload cost
     // on stuff we lost).
     // Notably, just invalidate is faster at 0.015ms, but we'd have to be sure
@@ -192,7 +193,6 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     // So maybe go to global if >128K, considering cost of refills?
     //SCB_InvalidateDCache_by_Addr(raw_image, sizeof raw_image);
     SCB_CleanInvalidateDCache();
-    camera_wait(100);
 #else
     static int roll = 0;
     for (int y = 0; y < CIMAGE_Y; y+=2) {
