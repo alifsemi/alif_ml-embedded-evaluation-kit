@@ -151,23 +151,24 @@ int resize_image_A(
             x_frac = src_x_accum & FRAC_MASK;
             nx_frac = FRAC_VAL - x_frac; // x fraction and 1.0 - x fraction
             src_x_accum += src_x_frac;
+            __builtin_prefetch(&s[tx + 64]);
+            __builtin_prefetch(&s[tx + srcWidth + 64]);
 
 #if __ARM_FEATURE_MVE & 1
-            mve_pred16_t p = vctp32q(pixel_size_B);
-            uint32x4_t p00 = vldrbq_z_u32(&s[tx], p);
-            uint32x4_t p10 = vldrbq_z_u32(&s[tx + pixel_size_B], p);
-            uint32x4_t p01 = vldrbq_z_u32(&s[tx + srcWidth], p);
-            uint32x4_t p11 = vldrbq_z_u32(&s[tx + srcWidth + pixel_size_B], p);
-            p00 = vmulq_x(p00, nx_frac, p);
-            p00 = vmlaq_m(p00, p10, x_frac, p);
-            p00 = vrshrq_x(p00, FRAC_BITS, p);
-            p01 = vmulq_x(p01, nx_frac, p);
-            p01 = vmlaq_m(p01, p11, x_frac, p);
-            p01 = vrshrq_x(p01, FRAC_BITS, p);
-            p00 = vmulq_x(p00, ny_frac, p);
-            p00 = vmlaq_m(p00, p01, y_frac, p);
-            p00 = vrshrq_x(p00, FRAC_BITS, p);
-            vstrbq_p_u32(d, p00, p);
+            uint32x4_t p00 = vldrbq_u32(&s[tx]);
+            uint32x4_t p10 = vldrbq_u32(&s[tx + pixel_size_B]);
+            uint32x4_t p01 = vldrbq_u32(&s[tx + srcWidth]);
+            uint32x4_t p11 = vldrbq_u32(&s[tx + srcWidth + pixel_size_B]);
+            p00 = vmulq(p00, nx_frac);
+            p00 = vmlaq(p00, p10, x_frac);
+            p00 = vrshrq(p00, FRAC_BITS);
+            p01 = vmulq(p01, nx_frac);
+            p01 = vmlaq(p01, p11, x_frac);
+            p01 = vrshrq(p01, FRAC_BITS);
+            p00 = vmulq(p00, ny_frac);
+            p00 = vmlaq(p00, p01, y_frac);
+            p00 = vrshrq(p00, FRAC_BITS);
+            vstrbq_p_u32(d, p00, vctp32q(pixel_size_B));
             d += pixel_size_B;
 #else
             //interpolate and write out
