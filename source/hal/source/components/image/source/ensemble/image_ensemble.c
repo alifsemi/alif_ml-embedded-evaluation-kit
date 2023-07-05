@@ -68,8 +68,9 @@ static int32_t log_gain_to_api(float gain)
 
 static void process_autogain(void)
 {
-    /* Simple "auto-exposure" algorithm. (Although we're actually just
-     * adjusting gain at the moment...)
+    /* Simple "auto-exposure" algorithm. We work a single "gain" value
+     * and leave it up to the camera driver how this is produced through
+     * adjusting exposure time, analogue gain or digital gain.
      *
      * We us a discrete velocity form of a PI controller to adjust the
      * current gain to try to make the difference between high pixels
