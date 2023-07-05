@@ -71,12 +71,12 @@ json_uc_res = [
     {
         "use_case_name": "tiny_asr",
         "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_int8/"
+            "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_pruned_int8/"
         ],
         "resources": [
             {
-                "name": "tiny_wav2letter_int8.tflite",
-                "url": "{url_prefix:0}tiny_wav2letter_int8.tflite",
+                "name": "tiny_wav2letter_pruned_int8.tflite",
+                "url": "{url_prefix:0}tiny_wav2letter_pruned_int8.tflite",
             },
             {
                 "name": "ifm0.npy",
