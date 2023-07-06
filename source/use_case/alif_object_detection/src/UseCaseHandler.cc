@@ -71,6 +71,8 @@ using namespace arm::app::object_detection;
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
+        lv_label_set_text_static(ScreenLayoutLabelObject(0), "Faces Detected: 0");
+        lv_label_set_text_static(ScreenLayoutLabelObject(1), "192px image (24-bit)");
 
         lv_style_init(&boxStyle);
         lv_style_set_bg_opa(&boxStyle, LV_OPA_TRANSP);
@@ -197,10 +199,12 @@ using namespace arm::app::object_detection;
 
 #if SHOW_INF_TIME
             inf_prof = ARM_PMU_Get_CCNTR() - inf_prof;
-            lv_label_set_text_fmt(ScreenLayoutTimeObject(), "%.3f ms", (double)inf_prof / SystemCoreClock * 1000);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "Inference time: %.3f ms", (double)inf_prof / SystemCoreClock * 1000);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Inferences / sec: %.2f", (double) SystemCoreClock / inf_prof);
+            //lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Inferences / second: %.2f", (double) SystemCoreClock / (inf_loop_time_end - inf_loop_time_start));
 #endif
 
-            lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "%i", results.size());
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "Faces Detected: %i", results.size());
 
             /* Draw boxes. */
             DrawDetectionBoxes(results, inputImgCols, inputImgRows);
