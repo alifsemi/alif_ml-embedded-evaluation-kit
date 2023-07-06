@@ -226,6 +226,7 @@ namespace app {
         }
 
 #if SHOW_INF_TIME
+        lv_label_set_text_fmt(ScreenLayoutHeaderObject(), "%s - %.2f FPS", "Image Classifier", (double) SystemCoreClock / inf_prof);
         lv_label_set_text_fmt(ScreenLayoutTimeObject(), "%.3f ms", (double)inf_prof / SystemCoreClock * 1000);
 #endif
         lv_port_unlock(lv_lock_state);

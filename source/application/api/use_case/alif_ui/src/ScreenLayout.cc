@@ -120,7 +120,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_style_set_text_font(&weak, &lv_font_montserrat_24);
 
     lv_style_init(&tiny);
-    lv_style_set_text_font(&tiny, &lv_font_montserrat_12);
+    lv_style_set_text_font(&tiny, &lv_font_montserrat_16);
 
     /*Create a Label in the results area */
     labelHeader = lv_label_create(resultHolder);
