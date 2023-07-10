@@ -80,7 +80,7 @@
 #define THRESH_LOW 9
 #define THRESH_HIGH 154
 
-uint32_t exposure_high_count, exposure_low_count;
+uint32_t exposure_over_count, exposure_high_count, exposure_low_count, exposure_under_count;
 
 dc1394error_t
 dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int sx, int sy, int tile)
@@ -98,7 +98,7 @@ dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int 
 	int i, imax, iinc;
 
 #ifdef CHECK_EXPOSURE
-	uint32_t not_low_count = 0, high_count = 0;
+	uint32_t under_count = 0, not_low_count = 0, high_count = 0, over_count = 0;
 #endif
 
 	if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
@@ -164,28 +164,30 @@ dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int 
 		rgb += pairs_to_go * 6;
 		__asm (
 
-CE("    VMOV.I8     Q4,#0\n\t")
-"       WLSTP.8     LR, %[pairs_to_go], 2f\n"
-CE("    VMOV.I8     Q5,#0\n\t")
-"1:\n\t"
-"       VLD20.8     {Q0,Q1},[%[bayer]]\n\t"
+   "    WLSTP.8     LR, %[pairs_to_go], 2f\n"
+   "1:\n\t"
+   "    VLD20.8     {Q0,Q1},[%[bayer]]\n\t"
    "    ADD         %[tmp], %[bayer], %[bayerStep]\n\t"
-CE("    VMAX.U8     Q7,Q0,Q1\n\t")
-"       VLD21.8     {Q0,Q1},[%[bayer]]!\n\t"
-CE("    VPT.U8      HS, Q7, %[expHigh]\n\t")
-CE("    VADDT.U8    Q4,Q4,%[one]\n\t")
-"       VLD20.8     {Q2,Q3},[%[tmp]]\n\t"
-CE("    VMIN.U8     Q7,Q0,Q1\n\t")
-"       VLD21.8     {Q2,Q3},[%[tmp]]\n\t"
+CE("    VMAX.U8     Q4, Q0, Q1\n\t")
+   "    VLD21.8     {Q0,Q1},[%[bayer]]!\n\t"
+CE("    VPT.U8      HS, Q4, %[expHigh]\n\t")
+CE("    VADDVAT.U8  %[high_count], %q[vector1]\n\t")
+CE("    VPT.U8      EQ, Q4, %[scalar255]\n\t")
+CE("    VADDVAT.U8  %[over_count], %q[vector1]\n\t")
+   "    VLD20.8     {Q2,Q3},[%[tmp]]\n\t"
+CE("    VMIN.U8     Q4, Q0, Q1\n\t")
+   "    VLD21.8     {Q2,Q3},[%[tmp]]\n\t"
    "    PLD         [%[tmp], #64]\n\t"
    "    SUB         %[tmp], %[rgb], %[blue]\n\t"
-CE("    VPT.U8      HS, Q7, %[expLow]\n\t")
-CE("    VADDT.U8    Q5,Q5,%[one]\n\t")
-   "    VSTRB.8     Q0,[%[tmp], %[inc6]]\n\t"
-   "    VRHADD.U8   Q1,Q1,Q2\n\t"
-   "    VSTRB.8     Q1,[%[rgb], %[inc6]]\n\t"
+   "    VSTRB.8     Q0,[%[tmp], %q[inc6]]\n\t"
+CE("    VPT.U8      HS, Q4, %[expLow]\n\t")
+CE("    VADDVAT.U8  %[not_low_count], %q[vector1]\n\t")
+   "    VRHADD.U8   Q1, Q1, Q2\n\t"
+CE("    VPT.U8      EQ, Q4, ZR\n\t")
+CE("    VADDVAT.U8  %[under_count], %q[vector1]\n\t")
+   "    VSTRB.8     Q1,[%[rgb], %q[inc6]]\n\t"
    "    ADD         %[tmp], %[rgb], %[blue]\n\t"
-   "    VSTRB.8     Q3,[%[tmp], %[inc6]]\n\t"
+   "    VSTRB.8     Q3,[%[tmp], %q[inc6]]\n\t"
    "    SUB         %[tmp], %[bayer], #31\n\t"
    "    VLD20.8     {Q0,Q1}, [%[tmp]]\n\t"
    "    VLD21.8     {Q0,Q1}, [%[tmp]]\n\t"
@@ -194,30 +196,27 @@ CE("    VADDT.U8    Q5,Q5,%[one]\n\t")
    "    VLD21.8     {Q2,Q3}, [%[tmp]]\n\t"
    "    ADD         %[rgb], %[rgb], #3\n\t"
    "    VRHADD.U8   Q0, Q0, Q3\n\t"
-   "    VSTRB.8     Q0, [%[rgb], %[inc6]]\n\t"
+   "    VSTRB.8     Q0, [%[rgb], %q[inc6]]\n\t"
    "    SUB         %[tmp], %[rgb], %[blue]\n\t"
-   "    VSTRB.8     Q1, [%[tmp], %[inc6]]\n\t"
+   "    VSTRB.8     Q1, [%[tmp], %q[inc6]]\n\t"
    "    ADD         %[tmp], %[rgb], %[blue]\n\t"
-   "    VSTRB.8     Q2, [%[tmp], %[inc6]]\n\t"
+   "    VSTRB.8     Q2, [%[tmp], %q[inc6]]\n\t"
    "    ADD         %[rgb], #16*6-3\n\t"
-   "    LETP        LR,1b\n"
-CE("    VADDVA.U8   %[high_count],Q4\n\t") // Note we rely on image being <= 512 * 16 to avoid overflow before here
-CE("    VADDVA.U8   %[not_low_count],Q5\n\t") // (Could use predicated VADDVAT inside the loop, but VADDT pipelines better)
+   "    LETP        LR, 1b\n"
 
    "2:"
    : [bayer] "+r"(bayerAsm), [rgb] "+r"(rgbAsm),
      [tmp] "=&r"(tmp)
 CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
-   : [bayerStep] "r"(bayerStep), [inc6] "w"(inc6), [blue] "r"(blue), [one] "r"(1),
-     [expHigh] "r"(THRESH_HIGH),
-     [expLow] "r"(THRESH_LOW),
+CE(, [over_count] "+Te"(over_count), [under_count] "+Te"(under_count))
+   : [bayerStep] "r"(bayerStep), [inc6] "w"(inc6), [blue] "r"(blue),
+     [expHigh] "r"(THRESH_HIGH), [scalar255] "r"(255),
+     [expLow] "r"(THRESH_LOW), [vector1] "w"(vdupq_n_u8(1)),
      [pairs_to_go] "r"(pairs_to_go)
-   : "q0", "q1", "q2", "q3", "q4", "q5", "q7", "lr", "cc", "memory");
+   : "q0", "q1", "q2", "q3", "q4", "lr", "cc", "memory");
 #elif INTRINSIC_MVE_BAYER2RGB
 		// Helium lets us process 16 at a time (8 per beat on Cortex-M55)
 		int pairs_to_go = (bayerEnd - bayer) / 2;
-		uint8x16_t notlowexp = vdupq_n_u8(0);
-		uint8x16_t highexp = vdupq_n_u8(0);
 
 		while (pairs_to_go > 0) {
 			mve_pred16_t p = vctp8q(pairs_to_go);
@@ -225,10 +224,16 @@ CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
 			uint8x16x2_t gb = vld2q(bayer + bayerStep);
 			__builtin_prefetch(bayer + bayerStep + 16 * 2 * 2);
 #ifdef CHECK_EXPOSURE
-			mve_pred16_t high = vcmpcsq_m(vmaxq_x(rg.val[0], rg.val[1], p), THRESH_HIGH, p);
-			highexp = vaddq_m(highexp, highexp, 1, high);
-			mve_pred16_t not_low = vcmpcsq_m(vminq_x(rg.val[0], rg.val[1], p), THRESH_LOW, p);
-			notlowexp = vaddq_m(notlowexp, notlowexp, 1, not_low);
+			uint8x16_t max = vmaxq_x(rg.val[0], rg.val[1], p);
+			mve_pred16_t high = vcmpcsq_m(max, THRESH_HIGH, p);
+			high_count = vaddvaq_p(high_count, vdupq_n_u8(1), high);
+			mve_pred16_t over = vcmpeqq_m(max, 255, p);
+			over_count = vaddvaq_p(over_count, vdupq_n_u8(1), over);
+			uint8x16_t min = vminq_x(rg.val[0], rg.val[1], p);
+			mve_pred16_t not_low = vcmpcsq_m(min, THRESH_LOW, p);
+			not_low_count = vaddvaq_p(not_low_count, vdupq_n_u8(1), not_low);
+			mve_pred16_t under = vcmpeqq_m(min, 0, p);
+			under_count = vaddvaq_p(under_count, vdupq_n_u8(1), under);
 #endif
 			uint8x16_t r0 = rg.val[0];
 			uint8x16_t g0 = vrhaddq_x(rg.val[1], gb.val[0], p);
@@ -249,8 +254,6 @@ CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
 			rgb += 16 * 6;
 			pairs_to_go -= 16;
 		}
-		high_count = vaddvaq(high_count, highexp);
-		not_low_count = vaddvaq(not_low_count, notlowexp);
 
 		bayer += pairs_to_go * 2;
 		rgb += pairs_to_go * 6;
@@ -258,11 +261,17 @@ CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
 		if (blue > 0) {
 			for (; bayer <= bayerEnd - 2; bayer += 2, rgb += 6) {
 #ifdef CHECK_EXPOSURE
+				if (bayer[0] == 255 || bayer[1] == 255) {
+					over_count++;
+				}
 				if (bayer[0] >= THRESH_HIGH || bayer[1] >= THRESH_HIGH) {
 					high_count++;
 				}
 				if (bayer[0] >= THRESH_LOW && bayer[1] >= THRESH_LOW) {
 					not_low_count++;
+				}
+				if (bayer[0] == 0 || bayer[1] == 0) {
+					under_count++;
 				}
 #endif
 				rgb[-1] = bayer[0];
@@ -276,11 +285,17 @@ CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
 		} else {
 			for (; bayer <= bayerEnd - 2; bayer += 2, rgb += 6) {
 #ifdef CHECK_EXPOSURE
+				if (bayer[0] == 255 || bayer[1] == 255) {
+					over_count++;
+				}
 				if (bayer[0] >= THRESH_HIGH || bayer[1] >= THRESH_HIGH) {
 					high_count++;
 				}
 				if (bayer[0] >= THRESH_LOW && bayer[1] >= THRESH_LOW) {
 					not_low_count++;
+				}
+				if (bayer[0] == 1 || bayer[1] == 1) {
+					under_count++;
 				}
 #endif
 				rgb[1] = bayer[0];
@@ -310,8 +325,10 @@ CE(, [high_count] "+Te"(high_count), [not_low_count] "+Te"(not_low_count))
 	}
 #ifdef CHECK_EXPOSURE
 	/* Adjust total to be in raw pixels - we processed pairs */
+	exposure_over_count = over_count * 2;
 	exposure_high_count = high_count * 2;
 	exposure_low_count = (sx - 2) * (sy - 1) - not_low_count * 2;
+	exposure_under_count = under_count * 2;
 #endif
 
 	DEBUG_PRINTF("\r\n\r\n >>> dc1394_bayer_Simple END <<< \r\n");
