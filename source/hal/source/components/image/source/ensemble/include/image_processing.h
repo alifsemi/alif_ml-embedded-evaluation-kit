@@ -22,9 +22,6 @@
 #define CIMAGE_X		560
 #define CIMAGE_Y		560
 
-#define TIFF_HDR_NUM_ENTRY 8
-#define TIFF_HDR_SIZE 10+TIFF_HDR_NUM_ENTRY*12
-
 /*error status*/
 #define FRAME_FORMAT_NOT_SUPPORTED   -1
 #define FRAME_OUT_OF_RANGE           -2

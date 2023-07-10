@@ -58,16 +58,6 @@
 
 #include "image_processing.h"
 
-// tiff types: short = 3, int = 4
-// Tags: ( 2-byte tag ) ( 2-byte type ) ( 4-byte count ) ( 4-byte data )
-//    0100 0003 0000 0001 0064 0000
-//       |        |    |         |
-// tag --+        |    |         |
-// short int -----+    |         |
-// one value ----------+         |
-// value of 100 -----------------+
-//
-
 #define CHECK_EXPOSURE
 
 #ifdef CHECK_EXPOSURE
@@ -336,31 +326,3 @@ CE(, [over_count] "+Te"(over_count), [under_count] "+Te"(under_count))
 	DEBUG_PRINTF("\r\n\r\n >>> dc1394_bayer_Simple END <<< \r\n");
 	return DC1394_SUCCESS;
 }
-
-/*Add tiff format headers */
-uint8_t *
-put_tiff(uint8_t * header, uint32_t width, uint32_t height, uint16_t bpp)
-{
-	uint32_t ulTemp=0;
-	uint16_t sTemp=0;
-	DEBUG_PRINTF("width 0x%x, height 0x%x bpp 0x%x\n", width, height, bpp);
-
-
-	sTemp = TIFF_HDR_NUM_ENTRY;
-	memcpy(header + 8, &sTemp, 2);
-
-	memcpy(header + 10 + 1*12 + 8, &width, 4);
-	memcpy(header + 10 + 2*12 + 8, &height, 4);
-	memcpy(header + 10 + 3*12 + 8, &bpp, 2);
-
-	// strip byte count
-	ulTemp = width * height * (bpp / 8) * 3;
-	memcpy(header + 10 + 7*12 + 8, &ulTemp, 4);
-
-	//strip offset
-	sTemp = TIFF_HDR_SIZE;
-	memcpy(header + 10 + 5*12 + 8, &sTemp, 2);
-
-	return header;
-};
-

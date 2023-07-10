@@ -15,6 +15,7 @@
 #include "image_data.h"
 #include "image_processing.h"
 #include "bayer.h"
+#include "tiff.h"
 #include "camera.h"
 #include "board.h"
 #include "base_def.h"
@@ -26,7 +27,11 @@
  * Bayer->RGB conversion transfers into the rgb_image buffer.
  * Following steps (crop, interpolate, colour correct) all occur in the rgb_image buffer in-place.
  */
-static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
+
+static struct {
+	tiff_header_t tiff_header;
+	uint8_t image_data[CIMAGE_X * CIMAGE_Y * RGB_BYTES]; // 560x560x3 = 940,800
+} rgb_image __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));
 static uint8_t raw_image[CIMAGE_X * CIMAGE_Y] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560 = 313,600
 
 #define FAKE_CAMERA 0
@@ -218,10 +223,19 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     }
     roll = (roll + 1) % CIMAGE_Y;
 #endif
+
+    /* TIFF image can be dumped in Arm Development Studio using the command
+     *
+     *     dump value camera.tiff rgb_image
+     *
+     * while stopped at an appropriate breakpoint below.
+     */
+    write_tiff_header(&rgb_image.tiff_header, CIMAGE_X, CIMAGE_Y);
     tprof1 = ARM_PMU_Get_CCNTR();
     // RGB conversion and frame resize
-    dc1394_bayer_Simple(raw_image, rgb_image, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
+    dc1394_bayer_Simple(raw_image, rgb_image.image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
     tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
+
 #if !FAKE_CAMERA
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
@@ -230,10 +244,12 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
         return NULL;
     }
     // Cropping and scaling
-    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
+    crop_and_interpolate(rgb_image.image_data, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
+    // Rewrite the TIFF header for the new size
+    write_tiff_header(&rgb_image.tiff_header, ml_width, ml_height);
     tprof4 = ARM_PMU_Get_CCNTR();
     // Color correction for white balance
-    white_balance(ml_width, ml_height, rgb_image, rgb_image);
+    white_balance(ml_width, ml_height, rgb_image.image_data, rgb_image.image_data);
     tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
-    return rgb_image;
+    return rgb_image.image_data;
 }

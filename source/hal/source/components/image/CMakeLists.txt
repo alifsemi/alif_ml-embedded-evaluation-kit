@@ -56,6 +56,7 @@ target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     PRIVATE
     source/ensemble/image_ensemble.c
     source/ensemble/src/bayer2rgb.c
+    source/ensemble/src/tiff.c
     source/ensemble/src/image_processing.c
     source/ensemble/src/color_correction.c
     source/ensemble/src/camera.c
