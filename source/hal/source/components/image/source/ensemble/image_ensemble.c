@@ -68,8 +68,9 @@ static int32_t log_gain_to_api(float gain)
 
 static void process_autogain(void)
 {
-    /* Simple "auto-exposure" algorithm. (Although we're actually just
-     * adjusting gain at the moment...)
+    /* Simple "auto-exposure" algorithm. We work a single "gain" value
+     * and leave it up to the camera driver how this is produced through
+     * adjusting exposure time, analogue gain or digital gain.
      *
      * We us a discrete velocity form of a PI controller to adjust the
      * current gain to try to make the difference between high pixels
@@ -77,9 +78,14 @@ static void process_autogain(void)
      *
      * The definition of "low" and "high" pixels has quite an effect on the
      * end result - this is set over in bayer2rgb.c, which does the analysis.
+     * It gives us 4 counts for high/low (>80% / <20%) pixels and over/under-
+     * exposed (255 or 0).
+     *
+     * We reduce to 2 counts by using high|low + (weight * over|under),
+     * effectively counting the over/under-exposed pixels weight more times.
      */
-
     const float target_highlow_difference = 0.0f;
+    const float overunder_weight = 4.0f;
 
     // Control constants - output is to the logarithm of gain (as if
     // we're working in decibels), so 1 here would mean a factor of e
@@ -104,8 +110,8 @@ static void process_autogain(void)
 
     /* Rescale high-low difference in pixel counts so that it's
      * in range [-1..+1], regardless of image size */
-    float high_proportion = (float) exposure_high_count * (1.0f / (CIMAGE_X * CIMAGE_Y));
-    float low_proportion = (float) exposure_low_count * (1.0f / (CIMAGE_X * CIMAGE_Y));
+    float high_proportion = (exposure_high_count + overunder_weight * exposure_over_count) * (1.0f / (CIMAGE_X * CIMAGE_Y));
+    float low_proportion = (exposure_low_count + overunder_weight * exposure_under_count) * (1.0f / (CIMAGE_X * CIMAGE_Y));
     float highlow_difference = high_proportion - low_proportion;
     float error = highlow_difference - target_highlow_difference;
 
@@ -124,6 +130,9 @@ static void process_autogain(void)
     current_log_gain = fmaxf(current_log_gain, minimum_log_gain);
 
     int32_t desired_api_gain = log_gain_to_api(current_log_gain);
+    if (desired_api_gain <= 0) {
+        desired_api_gain = 1;
+    }
 
     /* Apply the gain, if it's a new request */
     if (desired_api_gain != last_requested_api_gain) {
