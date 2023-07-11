@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +26,8 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O0")
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
-    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O3")
-    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O3")
+    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-Ofast")
+    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-Ofast")
 endif()
 
 assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
@@ -48,6 +48,12 @@ set(TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT "${TENSORFLOW_LITE_MICRO_TARGET_
 set(TENSORFLOW_LITE_MICRO_PATH "${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro")
 set(TENSORFLOW_LITE_MICRO_GENDIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow/)
 set(TENSORFLOW_LITE_MICRO_PLATFORM_LIB_NAME "libtensorflow-microlite.a")
+
+# Add virtual environment's Python directory path to the system path.
+# NOTE: This path is passed to the TensorFlow Lite Micro's make env
+# as it depends on some basic Python packages (like Pillow) installed
+# and the system-wide Python installation might not have them.
+set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
 
 if (TARGET_PLATFORM STREQUAL native)
     set(TENSORFLOW_LITE_MICRO_TARGET "linux")
@@ -73,7 +79,8 @@ endif()
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
     message(STATUS "Refreshing TensorFlow Lite Micro's third party downloads...")
     execute_process(
-        COMMAND make -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile clean_downloads third_party_downloads
+        COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
+        make -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile clean_downloads third_party_downloads
         RESULT_VARIABLE return_code
         WORKING_DIRECTORY ${TENSORFLOW_SRC_PATH})
     if (NOT return_code EQUAL "0")
@@ -90,12 +97,6 @@ endif()
 # Primary target
 list(APPEND MAKE_TARGETS_LIST "microlite")
 message(STATUS "TensorFlow Lite Micro build to be called for these targets: ${MAKE_TARGETS_LIST}")
-
-# Add virtual environment's Python directory path to the system path.
-# NOTE: This path is passed to the TensorFlow Lite Micro's make env
-# as it depends on some basic Python packages (like Pillow) installed
-# and the system-wide Python installation might not have them.
-set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
 
 # Commands and targets
 add_custom_target(tensorflow_build ALL
@@ -118,6 +119,7 @@ add_custom_target(tensorflow_build ALL
 
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}>:CORE_OPTIMIZATION_LEVEL=${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}>
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>:KERNEL_OPTIMIZATION_LEVEL=${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>
+        $<$<BOOL:${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>:THIRD_PARTY_KERNEL_OPTIMIZATION_LEVEL=${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL}>
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL}>:OPTIMIZED_KERNEL_DIR=${TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL}>
         $<$<BOOL:${TENSORFLOW_LITE_MICRO_CO_PROCESSOR}>:CO_PROCESSOR=${TENSORFLOW_LITE_MICRO_CO_PROCESSOR}>
 

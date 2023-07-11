@@ -24,6 +24,7 @@
 
 #include <stdatomic.h>
 
+extern ARM_DRIVER_GPIO Driver_GPIO2;
 extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
 static const ARM_DRIVER_CAMERA_CONTROLLER* camera = &Driver_CAMERA0;
 
@@ -109,6 +110,17 @@ static int32_t camera_hw_init()
         return res;
     }
 
+    /* Configure P2_26 as CAM_PWR_CNTL output */
+    res = PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_26, PINMUX_ALTERNATE_FUNCTION_0);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    Driver_GPIO2.Initialize(PIN_NUMBER_26, NULL);
+    Driver_GPIO2.PowerControl(PIN_NUMBER_26, ARM_POWER_FULL);
+    Driver_GPIO2.SetDirection(PIN_NUMBER_26, GPIO_PIN_DIRECTION_OUTPUT);
+    Driver_GPIO2.SetValue(PIN_NUMBER_26, GPIO_PIN_OUTPUT_STATE_HIGH);
+    
 #elif TARGET_BOARD == BOARD_DevKit
     /* Configure GPIO Pin : P3_8 as I3C_SDA_B */
     res = PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_8, PINMUX_ALTERNATE_FUNCTION_3);

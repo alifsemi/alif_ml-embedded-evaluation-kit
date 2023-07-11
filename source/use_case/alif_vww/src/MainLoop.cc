@@ -38,7 +38,6 @@ using ViusalWakeWordClassifier = arm::app::Classifier;
 
 void main_loop()
 {
-
     arm::app::VisualWakeWordModel model;  /* Model wrapper object. */
 
     if (!alif::app::ClassifyImageInit()) {

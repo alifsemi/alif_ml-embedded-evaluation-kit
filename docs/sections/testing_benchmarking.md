@@ -38,11 +38,15 @@ placed under `<build folder>/bin/` folder. For example:
 ├── ethos-u-<usecase1>
 └── ethos-u-<usecase1>
 ```
+
 To view all the available tests to run, use the following command in the `<build folder>`:
+
 ```commandline
 ctest -N
 ```
+
 Sample output:
+
 ```commandline
 Test #1: ad-tests
 Test #2: asr-tests
@@ -69,6 +73,7 @@ ctest
 ```
 
 Sample output:
+
 ```log
 Start 1: ad-tests
 1/8 Test #1: ad-tests .........................   Passed    0.17 sec

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ int lcd_display_image(const uint8_t* data, const uint32_t width,
     const uint32_t pos_x, const uint32_t pos_y,
     const uint32_t downsample_factor)
 {
-    /* Sanity checks */
+    /* Health checks */
     assert(data);
     if ((pos_x + width/downsample_factor > GLCD_WIDTH) ||
             (pos_y + height/downsample_factor > GLCD_HEIGHT)) {

@@ -1,7 +1,7 @@
 def common_funcs
 
 pipeline {
-    agent { label 'build' }
+    agent { label 'build2' }
     stages {
         stage('Init') {
             steps {

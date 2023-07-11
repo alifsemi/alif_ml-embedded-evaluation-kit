@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,13 @@ MEMORY
   BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00100000
   SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00200000
   DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
+
+  /* Dynamic load regions declared for use by FVP only
+   * These regions are mentioned in the CMake subsystem profile.
+   * Do not change the addresses here in isolation. */
+  DDR_dynamic_model (rx) : ORIGIN = 0x90000000, LENGTH = 0x02000000
+  DDR_dynamic_ifm   (rx) : ORIGIN = 0x92000000, LENGTH = 0x01000000
+  DDR_dynamic_ofm   (rx) : ORIGIN = 0x93000000, LENGTH = 0x01000000
 }
 
 /* Linker script to place sections and symbol values. Should be used together
@@ -67,12 +74,17 @@ SECTIONS
     KEEP(*(.vectors))
 
     /**
-     * All code goes here, with one exception of
-     * all_ops_resolver object file. This code
-     * instead placed on BRAM. See comment in the
-     * BRAM section for details.
-     **/
-    *(EXCLUDE_FILE(*all_ops_resolver.o *hal.c.obj) .text*)
+     * Any code that is not time sensitive can be excluded from here.
+     * This code is instead placed on BRAM. See comment in the BRAM
+     * section for details.
+     */
+    *(EXCLUDE_FILE(*all_ops_resolver.o
+                   *hal.c.obj
+                   *_allocator.o
+                   *flatbuffer*.o
+                   *lcd*.obj
+                   *timing_adapter.c.obj)
+    .text*)
 
     KEEP(*(.init))
     KEEP(*(.fini))
@@ -230,6 +242,14 @@ SECTIONS
     *all_ops_resolver.o (*.text*)
     . = ALIGN(4);
     *hal.c.obj (*.text*)
+    . = ALIGN(4);
+    *_allocator.o (*.text*)
+    . = ALIGN(4);
+    *flatbuffer*.o (*.text*)
+    . = ALIGN(4);
+    *lcd*.obj (*.text*)
+    . = ALIGN(4);
+    *timing_adapter.* (*.text*)
     . = ALIGN(4);
 
     __data_end__ = .;

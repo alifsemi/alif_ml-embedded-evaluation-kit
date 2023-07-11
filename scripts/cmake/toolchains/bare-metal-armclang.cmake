@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 - 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021 - 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,10 @@ elseif (CMAKE_SYSTEM_ARCH STREQUAL armv8.1-m.main)
     set(CPU_LINK_OPT                "--cpu=8.1-M.Main.mve.fp")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m33)
     # Flags for cortex-m33 to go here
+endif()
+
+if (NOT DEFINED MIN_ARM_CLANG_VERSION)
+    set(MIN_ARM_CLANG_VERSION       6.16)
 endif()
 
 set(${CPU_COMPILE_DEF}              1)

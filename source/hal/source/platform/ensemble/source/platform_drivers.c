@@ -95,8 +95,6 @@ static void copy_vtor_table_to_ram()
 
 int platform_init(void)
 {
-    fault_dump_enable(true);
-
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
@@ -111,6 +109,8 @@ int platform_init(void)
     _clock_init();
 
     tracelib_init(NULL);
+
+    fault_dump_enable(true);
 
     int err = 0;
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
@@ -211,9 +211,9 @@ void init_trigger_tx(void)
     services_init(ipc_rx_callback);
 }
 
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+#if TARGET_BOARD == BOARD_AppKit_Alpha1
 static atomic_int do_inference_once = false;
-#elif TARGET_BOARD == BOARD_DevKit
+#else
 static atomic_int do_inference_once = true;
 static bool last_btn0 = false;
 static bool last_btn1 = false;
@@ -246,13 +246,39 @@ static void MHU_msg_received(void* data)
 
 bool run_requested(void)
 {
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
+#if TARGET_BOARD == BOARD_AppKit_Alpha1
 
     bool ret = true;
     if (do_inference_once)
     {
         ret = false;
     }
+    return ret;
+
+#elif TARGET_BOARD == BOARD_AppKit_Alpha2
+
+    bool ret = true;
+    bool new_btn0, new_btn1;
+    uint32_t pin_state0, pin_state1;
+
+    // Get new button state (active low)
+    Driver_GPIO3.GetValue(PIN_NUMBER_18, &pin_state0);
+    new_btn0 = pin_state0 == 0;
+    Driver_GPIO2.GetValue(PIN_NUMBER_27, &pin_state1);
+    new_btn1 = pin_state1 == 0;
+
+    if (do_inference_once)
+    {
+        // Edge detector - run inference on the positive edge of the button pressed signal
+        ret = !last_btn0 && new_btn0;
+    }
+    if (new_btn1 && last_btn1 != new_btn1)
+    {
+        // Switch single shot and continuous inference mode
+        do_inference_once ^= 1;
+    }
+    last_btn0 = new_btn0;
+    last_btn1 = new_btn1;
     return ret;
 
 #elif TARGET_BOARD == BOARD_DevKit
@@ -363,6 +389,10 @@ void MPU_Load_Regions(void)
     { // DTCM
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
+    },
+    { // Combined RAM (30000000) - firewall translation with some system packages
+    .RBAR = ARM_MPU_RBAR(0x30000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XN
+    .RLAR = ARM_MPU_RLAR(0x3067FFFF, 2)
     },
     { // General peripherals
     .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN

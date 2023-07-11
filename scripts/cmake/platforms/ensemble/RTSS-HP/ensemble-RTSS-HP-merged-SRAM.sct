@@ -11,28 +11,26 @@
 ; *
 ; */
 
-/*On chip RAM Regions */
-#define SRAM0_BASE                0x02000000
-#define SRAM0_SIZE                0x00400000		/* 4M */
-#define SRAM1_BASE                0x08000000
-#define SRAM1_SIZE                0x00280000		/* 2.5M */
+/* Combined SRAM0+1 view (requires custom system package) */
+#define COMBINED_SRAM_BASE        0x30000000
+#define COMBINED_SRAM_SIZE        0x00680000        /* 6.5M */
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
 
 /*--------------------- ITCM Configuration ----------------------------------*/
-/* SRAM4 is mapped as ITCM */
+/* SRAM2 is mapped as ITCM */
 #define ITCM_BASE                 0x01000000
 #define ITCM_SIZE                 0x00040000        /* 256K */
 
 /*--------------------- DTCM Configuration ---------------------------*/
-/* SRAM5 is mapped as DTCM */
+/* SRAM3 is mapped as DTCM */
 #define DTCM_BASE                 0x20000000
-#define DTCM_SIZE                 0x00040000        /* 256K */
+#define DTCM_SIZE                 0x00100000        /* 1M */
 
 #define __VECTORS_SIZE  (496 * 4)
-#define __STACK_SIZE    0x00001000
-#define __HEAP_SIZE     0x00006000
+#define __STACK_SIZE    0x00004000
+#define __HEAP_SIZE     0x00020000
 
 ;----------------------------------------------------------------------------
 ;   User Stack & Heap boundary definition
@@ -43,8 +41,8 @@
 ;----------------------------------------------------------------------------
 ;  Scatter File Definitions definition
 ;----------------------------------------------------------------------------
-#define __RO_BASE       0x80480000
-#define __RO_SIZE       0xFF000
+#define __RO_BASE       (MRAM_BASE+0x8000)
+#define __RO_SIZE       (0x80480000-__RO_BASE)
 
 #define __RW_BASE       DTCM_BASE
 #define __RW_SIZE      (DTCM_SIZE - __STACK_SIZE - __HEAP_SIZE)
@@ -77,28 +75,39 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.noinit.ram_vectors)
   }
 
-  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-16-__VECTORS_SIZE {  ; --------------------------------
-      ; ITCM has non-startup code, audio record buffer and RAM vectors
+  ITCM ITCM_BASE+__VECTORS_SIZE ITCM_SIZE-__VECTORS_SIZE {  ; --------------------------------
+      ; ITCM has non-startup code, except for non-fast LVGL, and RAM vectors
       * (+RO-CODE)
       * (+XO)
       * (fast_code)
-      * (.bss.audio_rec)
   }
 
   ;-----------------------------------------------------
-  ; R/W region - remaining part of the 256KiB RAM region
+  ; R/W region - remaining part of the DTCM region
   ; Other parts of this region used up by stack + heap.
   ;-----------------------------------------------------
   DTCM __RW_BASE __RW_SIZE  {  ; RW data in DTCM
-      ; DTCM has all read-write data,
-      ; including NPU activation buffer and audio processing buffers
-      * (+RW +ZI)
+      ; DTCM has CMSIS-DSP tables, ARM library const data (eg maths tables)
+      ; and all read-write data, except image and NPU buffers
+      *(+RW +ZI)
+      arm_common_tables.o (+RO-DATA)
+      *armlib* (+RO-DATA)
   }
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
-  PADDING ITCM_BASE+ITCM_SIZE-16 ALIGN 16 FILL 0 16  {  }
+; avoid first page, where default A32_APP stub is loaded
+  SRAM COMBINED_SRAM_BASE+8192 {
+      * (ifm)                                ; Baked-in inputs
+      * (.bss.lcd_image_buf)
+      * (.bss.camera_frame_buf)              ; Camera Frame Buffer
+      * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
+      ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+      * (.bss.NoInit.activation_buf_sram)
+  }
+
+  PADDING COMBINED_SRAM_BASE+COMBINED_SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
 
 #if 0

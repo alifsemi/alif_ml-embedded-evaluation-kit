@@ -27,15 +27,15 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00001000;
-__HEAP_SIZE  = 0x00006000;
+__STACK_SIZE = 0x00008000;
+__HEAP_SIZE  = 0x00010000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
 
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00040000
-  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
+  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00100000
   SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
   SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
@@ -48,31 +48,16 @@ SECTIONS
 {
   .startup.at_mram : ALIGN(16)
   {
-    /* MRAM has start-up code, and most constant data */
+    /* MRAM has all read-only code and data except fast LVGL code and some maths tables
+     * This memory layout is a safe default for high-memory builds like the inference runner
+     * where the usual attempts to put inference code into ITCM dont fit
+     */
     /* Only more-specific stuff here. General wildcards in
      * a later-declared section, giving a chance for other
      * regions to get in before-hand
      */
     KEEP(*(.vectors))
-
-    *startup_M55*.c.obj(.text .rodata*)
-    *system_M55*.c.obj(.text .rodata*)
-    *mpu_M55*.c.obj(.text .rodata*)
-    *Main.cc.obj(.text .rodata*)
-    *platform_drivers.c.obj(.text .rodata*)
-
-    *liblvgl.a:*(.text .rodata*)
-    *libArm-2D.a:*(.text* .rodata*)
-    *libcmsis_ensemble.a:*(.text* .rodata*)
-    *libensemble_services.a:*(.text* .rodata*)
-    *liblcd_*.a:*(.text* .rodata*)
-    *libimage_*.a:*(.text* .rodata*)
-    *libcommon_api.a:*(.text* .rodata*)
-    *libalif_ui_api.a:*(.text* .rodata*)
-    *libg.a:*printf*(.text* .rodata*)
-    *libstdc++.a:cp-demangle.o(.text* .rodata*)
-
-    *(startup_ro_data)
+    *(startup_ro_data)    
   } > MRAM
 
   .copy.table.at_mram : ALIGN(4)
@@ -111,8 +96,7 @@ SECTIONS
 
   .text.itcm.at_mram : ALIGN(8)
   {
-    /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
-    *(.text*)
+    /* ITCM has only fast LVGL and RAM vectors */
     *(fast_code)
   } > ITCM AT> MRAM
 
@@ -125,15 +109,7 @@ SECTIONS
     *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
-
-    . = ALIGN(8);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(8);
-    __exidx_start = .;
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    __exidx_end = .;
-
-  } > DTCM AT> MRAM 
+  } > DTCM AT> MRAM
 
   /* Place non-zero code/data here if required in SRAM0 */
   .data.sram0.at_mram : ALIGN(8)
@@ -143,7 +119,6 @@ SECTIONS
 
   .bss.sram0 (NOLOAD) : ALIGN(8)
   {
-    * (.bss.large_ram)                     /* Large LVGL buffers */
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.lcd_image_buf)
@@ -226,6 +201,15 @@ SECTIONS
     *(SORT(.dtors.*))
     *(.dtors)
 
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
+
+    . = ALIGN(4);
+    *(.text*)
     *(.rodata*)
 
     *(nn_model)
@@ -239,7 +223,7 @@ SECTIONS
   .mini_toc :
   {
     LONG (0xffffffff)
-    LONG (0xFFA0A710 + 3)
+    LONG (0xFFA0A710 + 2)
     LONG (__ROM_BASE)
     LONG (0)
   } > TOC

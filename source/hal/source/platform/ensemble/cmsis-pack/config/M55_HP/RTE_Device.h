@@ -1896,7 +1896,7 @@
 
 // <e> DMA1 (Direct Memory Access Controller) [Driver_DMA1]
 // <i> Configuration settings for Driver_DMA1 in component ::Drivers:DMA
-#define RTE_DMA1      1
+#define RTE_DMA1      0
 #if RTE_DMA1
 //   DMA APB Interface to be used <0-1>
 //   0 - Secure APB interface, 1 - Non-Secure

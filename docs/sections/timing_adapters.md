@@ -137,7 +137,7 @@ cmake .. -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/my_ta_config.cmake
 ```
 ## Differences between timing adapter implementations in Arm Corstone-300 and Arm Corstone-310
 
-Corstone-300 FVP and FPGA implements timing adapters that are tied to AXI masters M0 and M1 on the Ethos-U NPU.
+Corstone-300 FVP and FPGA implements timing adapters that are tied to AXI buses M0 and M1 on the Ethos-U NPU.
 
 Corstone-310 **FPGA** implements timing adapter blocks differently and those are placed on each of the main
 memories present on FPGA: SRAM, QSPI flash, DDR and user memory.

@@ -23,6 +23,7 @@
 - Arm® and Corstone™ are registered trademarks or trademarks of Arm® Limited (or its subsidiaries) in the US and/or
   elsewhere.
 - Arm®, Keil® and µVision® are registered trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+- Microsoft® and Windows® are proprietary registered trademarks of Microsoft and its group of companies.
 - TensorFlow™, the TensorFlow logo, and any related marks are trademarks of Google Inc.
 
 ## Prerequisites
@@ -169,14 +170,14 @@ What these folders contain:
         contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
         the MFCC calculations.
 
-> **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
-> that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
-> reuse components from this repository for your application level logic, this directory should be the prime candidate.
+     > **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
+     > that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
+     > reuse components from this repository for your application level logic, this directory should be the prime candidate.
 
   - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform-agnostic API to access hardware
     platform-specific functions.
 
-> **Note:** Common code related to the `Arm Ethos-U NPU` software framework resides in *hal/components* sub-folder.
+    > **Note:** Common code related to the `Arm Ethos-U NPU` software framework resides in *hal/components* sub-folder.
 
   - `log`: Common to all code logging macros managing log levels.
 

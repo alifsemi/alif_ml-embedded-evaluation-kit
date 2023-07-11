@@ -284,14 +284,26 @@ function(setup_source_generator)
         return()
     endif ()
 
+    # If environment is not found, find the required Python version
+    # and create it.
+    find_package(Python3 3.9
+            COMPONENTS Interpreter
+            REQUIRED)
+
+    if (NOT Python3_FOUND)
+        message(FATAL_ERROR "Required version of Python3 not found!")
+    else()
+        message(STATUS "Python3 (v${Python3_VERSION}) found: ${Python3_EXECUTABLE}")
+    endif()
+
     message(STATUS "Configuring python environment at ${PYTHON}")
 
     execute_process(
-        COMMAND ${PY_EXEC} -m venv ${DEFAULT_VENV_DIR}
+        COMMAND ${Python3_EXECUTABLE} -m venv ${DEFAULT_VENV_DIR}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code STREQUAL "0")
-        message(FATAL_ERROR "Failed to setup python3 environment. Return code: ${return_code}")
+        message(FATAL_ERROR "Failed to setup Python3 environment. Return code: ${return_code}")
     endif ()
 
     execute_process(

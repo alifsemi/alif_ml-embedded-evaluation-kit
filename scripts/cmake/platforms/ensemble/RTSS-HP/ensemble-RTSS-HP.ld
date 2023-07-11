@@ -29,7 +29,7 @@
 
 __STACK_SIZE = 0x00008000;
 __HEAP_SIZE  = 0x00010000;
-__ROM_BASE = 0x80001000;
+__ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
 
 MEMORY
@@ -55,13 +55,22 @@ SECTIONS
      */
     KEEP(*(.vectors))
 
-    *startup_M55_*.c.obj(.text .rodata*)
-    *system_M55_*.c.obj(.text .rodata*)
-    *mpu_M55_*.c.obj(.text .rodata*)
+    *startup_M55*.c.obj(.text .rodata*)
+    *system_M55*.c.obj(.text .rodata*)
+    *mpu_M55*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
+
     *liblvgl.a:*(.text .rodata*)
+    *libArm-2D.a:*(.text* .rodata*)
+    *libcmsis_ensemble.a:*(.text* .rodata*)
+    *libensemble_services.a:*(.text* .rodata*)
+    *liblcd_*.a:*(.text* .rodata*)
+    *libimage_*.a:*(.text* .rodata*)
+    *libcommon_api.a:*(.text* .rodata*)
+    *libalif_ui_api.a:*(.text* .rodata*)
     *libg.a:*printf*(.text* .rodata*)
+    *libstdc++.a:cp-demangle.o(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM

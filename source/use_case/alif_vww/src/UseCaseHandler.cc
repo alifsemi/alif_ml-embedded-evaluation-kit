@@ -78,16 +78,16 @@ namespace app {
 
     bool ClassifyImageInit()
     {
+        ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
+        uint32_t lv_lock_state = lv_port_lock();
+        lv_label_set_text_static(ScreenLayoutHeaderObject(), "Visual Wake Word");
+        lv_port_unlock(lv_lock_state);
+
         /* Initialise the camera */
         int err = hal_image_init();
         if (0 != err) {
             printf_err("hal_image_init failed with error: %d\n", err);
         }
-
-        ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
-        uint32_t lv_lock_state = lv_port_lock();
-        lv_label_set_text_static(ScreenLayoutHeaderObject(), "Visual Wake Word");
-        lv_port_unlock(lv_lock_state);
 
         return true;
     }
