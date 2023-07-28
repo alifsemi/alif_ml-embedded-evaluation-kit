@@ -98,6 +98,7 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
     if (allocate_status != kTfLiteOk) {
         printf_err("tensor allocation failed!\n");
         delete this->m_pInterpreter;
+        this->m_pInterpreter = nullptr;
         return false;
     }
 
