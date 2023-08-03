@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ namespace app {
                 const int       quantOffset)
         {
             /* Check the output size will fit everything. */
-            if (outputBufSz < (this->m_mfccBuf.size(0) * 3 * sizeof(T))) {
+            if (outputBufSz < (this->m_mfccBuf.dimSize(0) * 3 * sizeof(T))) {
                 printf_err("Tensor size too small for features\n");
                 return false;
             }

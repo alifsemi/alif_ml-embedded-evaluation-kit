@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 #ifndef APP_CTX_HPP
 #define APP_CTX_HPP
 
-#include <string>
 #include <map>
-
+#include <memory>
+#include <string>
 namespace arm {
 namespace app {
 
@@ -58,13 +58,11 @@ namespace app {
         template<typename T>
         void Set(const std::string &name, T object)
         {
-            /* check if we have already the attribute allocated. */
-            if( true == this->Has(name) ){
-                //delete its value
-                delete this->m_attributes[name];
+            /* Attribute exists; reset the smart pointer */
+            if (this->Has(name)) {
+              this->m_attributes.at(name).reset();
             }
-            /* allocate new value */
-            this->m_attributes[name] = new Attribute<T>(object);
+            this->m_attributes[name] = std::make_unique<Attribute<T>>(object);
         }
 
         /**
@@ -73,11 +71,13 @@ namespace app {
          * @param[in]  name   Context attribute name.
          * @return     Value saved in the context.
          */
-        template<typename T>
-        T Get(const std::string &name)
+
+        template <typename T>
+        T Get(const std::string& name)
         {
-            auto a = (Attribute<T>*)m_attributes[name];
-            return a->Get();
+            //TODO Add logic to handle access of non-existent attribute
+            auto attributeValue = (Attribute<T>*)m_attributes.at(name).get();
+            return attributeValue->Get(); 
         }
 
         /**
@@ -92,14 +92,10 @@ namespace app {
 
         ApplicationContext() = default;
 
-        ~ApplicationContext() {
-            for (auto& attribute : m_attributes)
-                delete attribute.second;
+        ~ApplicationContext() = default;
 
-            this->m_attributes.clear();
-        }
     private:
-        std::map<std::string, IAttribute*> m_attributes;
+        std::map<std::string, std::unique_ptr<IAttribute>> m_attributes;
     };
 
 } /* namespace app */
