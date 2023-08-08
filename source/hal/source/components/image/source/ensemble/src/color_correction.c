@@ -154,7 +154,7 @@ static inline float rec709_oetf(float lum)
     if (lum < 0.018f) {
         return 4.5f * lum;
     } else {
-        return 1.099f * pow(lum, 0.45f) - 0.099f;
+        return 1.099f * powf(lum, 0.45f) - 0.099f;
     }
 }
 
