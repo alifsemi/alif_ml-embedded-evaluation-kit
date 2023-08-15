@@ -46,6 +46,8 @@ set_property(CACHE CONSOLE_UART PROPERTY STRINGS "2" "4")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
+set(COPY_VECTORS ON CACHE BOOL "Copy vectors - can be turned off if not booting from MRAM")
+
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
     message(FATAL_ERROR "No ${PLATFORM_DRIVERS_TARGET} support for this target.")
@@ -106,6 +108,10 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
     TARGET_BOARD=BOARD_${TARGET_BOARD}
     CONSOLE_UART=${CONSOLE_UART}
 )
+
+if (COPY_VECTORS)
+    target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE COPY_VECTORS)
+endif()
 
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_CORE}

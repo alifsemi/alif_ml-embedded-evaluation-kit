@@ -79,6 +79,8 @@ static void ipc_rx_callback(void *data)
     printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
 
+#ifdef COPY_VECTORS
+
 static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048))) __attribute__((section (".bss.noinit.ram_vectors")));
 
 static void copy_vtor_table_to_ram()
@@ -92,13 +94,16 @@ static void copy_vtor_table_to_ram()
     SCB->VTOR = (uint32_t) MyVectorTable;
     __DSB();
 }
+#endif
 
 int platform_init(void)
 {
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
+#ifdef COPY_VECTORS
     copy_vtor_table_to_ram();
+#endif
 
     if (0 != Init_SysTick()) {
         printf("Failed to initialise system tick config\n");
