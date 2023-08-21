@@ -428,13 +428,21 @@ def set_up_resources(
     # 1.2 Does the virtual environment exist?
     env_dirname = "env"
     env_path = download_dir / env_dirname
-    env_python = str(env_path / "bin" / "python3")
-    env_activate = str(env_path / "bin" / "activate")
 
-    if not env_path.is_dir():
+    venv_builder = venv.EnvBuilder(with_pip=True, upgrade_deps=True)
+    venv_context = venv_builder.ensure_directories(env_dir=env_path)
+
+    env_python = Path(venv_context.env_exe)
+
+    if sys.platform == "win32":
+        env_activate = f"{venv_context.bin_path}/activate.bat"
+    else:
+        env_activate = f". {venv_context.bin_path}/activate"
+
+    if not env_python.is_file():
         # Create the virtual environment using current interpreter's venv
         # (not necessarily the system's Python3)
-        venv.create(env_dir=env_path, with_pip=True, upgrade_deps=True)
+        venv_builder.create(env_dir=env_path)
 
     # 1.3 Install additional requirements first, if a valid file has been provided
     if additional_requirements_file and os.path.isfile(additional_requirements_file):
@@ -559,7 +567,7 @@ def set_up_resources(
                     )
 
                 vela_command = (
-                    f". {env_activate} && vela {model} "
+                    f"{env_activate} && vela {model} "
                     + f"--accelerator-config={config.config_name} "
                     + "--optimise Performance "
                     + f"--config {config_file} "
