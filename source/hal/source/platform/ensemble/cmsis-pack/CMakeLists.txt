@@ -96,6 +96,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/dsi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i2c.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i3c.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/i2s.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/pinconf.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/uart.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/driver_phy.c

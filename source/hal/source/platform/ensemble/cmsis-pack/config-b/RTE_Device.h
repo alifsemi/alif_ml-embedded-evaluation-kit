@@ -15,31 +15,13 @@
 
 #include "board.h"
 
-// <h> RTE_SELECT_RTSS_CORE (Core Selection)
-// <i> Select the Core
-#if !(defined(M55_HP) || defined(M55_HE))
-
-// <o> Select RTSS
-//     <1=> M55_HP
-//     <2=> M55_HE
-// <i> Select the Core
-// <i> Default: 1
-#define RTE_SELECT_RTSS_CORE  2
-#if (RTE_SELECT_RTSS_CORE == 1)
-#define M55_HP
-#else
-#define M55_HE
+// <e> MRAM (NVM (Non-Volatile Memory)) [Driver_MRAM]
+// <i> Configuration settings for Driver_MRAM in component ::Drivers:MRAM
+#define RTE_MRAM          1
+#if RTE_MRAM
+#define RTE_MRAM_SIZE     0x00580000
 #endif
-#endif
-// </h> RTSS_M55_HP  (Core Selection)
-
-// <e> FLASH_MRAM (Flash MRAM) [Driver_FLASH_MRAM]
-// <i> Configuration settings for Driver_FLASH_MRAM in component ::Drivers:FLASH_MRAM
-#define RTE_FLASH_MRAM          1
-#if RTE_FLASH_MRAM
-#define RTE_FLASH_MRAM_SIZE     0x00580000
-#endif
-// </e> FLASH_MRAM (Flash MRAM) [Driver_FLASH_MRAM]
+// </e> MRAM (NVM (Non-Volatile Memory)) [Driver_MRAM]
 
 // <e> CPI (Camera) [Driver_CPI]
 // <i> Configuration settings for Driver_CPI in component ::Drivers:CPI
@@ -170,12 +152,12 @@
 // <i> Default: 8 bit
 #define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_MODE                3
 
-// <o> Select MSB/LSB
-//     <0=> LSB
-//     <1=> MSB
+// <o> Select Data Endianness
+//     <0=> LSB First
+//     <1=> MSB First
 // <i> Select MSB/LSB
 // <i> Default: LSB
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_MSB                      0
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_ENDIANNESS          0
 
 // <o> Select CODE10ON8
 //     <0=> Disable
@@ -196,23 +178,33 @@
 
 // <o> Select camera sensor ARX3A0 reset pin number
 // <i> Defines camera sensor ARX3A0 reset pin number
-// <i> Default: 5
-#define RTE_ARX3A0_CAMERA_RESET_PIN_NO                  BOARD_CAMERA_RESET_PIN_NO
+// <i> Default: 1
+#define RTE_ARX3A0_CAMERA_SENSOR_RESET_PIN_NO                 BOARD_CAMERA_RESET_PIN_NO
 
 // <o> Select camera sensor ARX3A0 reset GPIO port
 // <i> Defines camera sensor ARX3A0 reset GPIO port
-// <i> Default: 4
-#define RTE_ARX3A0_CAMERA_RESET_GPIO_PORT               BOARD_CAMERA_RESET_GPIO_PORT
+// <i> Default: 9
+#define RTE_ARX3A0_CAMERA_SENSOR_RESET_GPIO_PORT              BOARD_CAMERA_RESET_GPIO_PORT
 
 // <o> Select camera sensor ARX3A0 power pin number
 // <i> Defines camera sensor ARX3A0 power pin number
-// <i> Default: -1 (none)
-#define RTE_ARX3A0_CAMERA_POWER_PIN_NO                  BOARD_CAMERA_POWER_PIN_NO
+// <i> Default: 5
+#define RTE_ARX3A0_CAMERA_SENSOR_POWER_PIN_NO                 BOARD_CAMERA_POWER_PIN_NO
 
 // <o> Select camera sensor ARX3A0 power GPIO port
 // <i> Defines camera sensor ARX3A0 power GPIO port
-// <i> Default: -1 (none)
-#define RTE_ARX3A0_CAMERA_POWER_GPIO_PORT               BOARD_CAMERA_POWER_GPIO_PORT
+// <i> Default: 7
+#define RTE_ARX3A0_CAMERA_SENSOR_POWER_GPIO_PORT              BOARD_CAMERA_POWER_GPIO_PORT
+
+// <o RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor ARX3A0 i2c instance
+// <i> Defines camera sensor ARX3A0 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
 
 #endif
 // </e> ARX3A0 [Driver_ARX3A0]
@@ -272,12 +264,12 @@
 // <i> Default: 8 bit
 #define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_MODE               3
 
-// <o> Select MSB/LSB
-//     <0=> LSB
-//     <1=> MSB
+// <o> Select Data Endianness
+//     <0=> LSB First
+//     <1=> MSB First
 // <i> Select MSB/LSB
 // <i> Default: LSB
-#define RTE_MT9M114_CAMERA_SENSOR_CPI_MSB                     0
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_ENDIANNESS         0
 
 // <o> Select CODE10ON8
 //     <0=> Disable
@@ -294,6 +286,16 @@
 // <i> Defines camera MT9M114 data mask
 // <i> Default: 10 bit
 #define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_MASK               1
+
+// <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <i> Defines camera sensor MT9M114 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE                1
 
 #endif
 // </e> MT9M114 [Driver_MT9M114]
@@ -382,12 +384,12 @@
 // <i> Default: 8 bit
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_DATA_MODE             3
 
-// <o> Select MSB/LSB
-//     <0=> LSB
-//     <1=> MSB
+// <o> Select Data Endianness
+//     <0=> LSB First
+//     <1=> MSB First
 // <i> Select MSB/LSB
 // <i> Default: LSB
-#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_MSB                   0
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_DATA_ENDIANNESS       0
 
 // <o> Select CODE10ON8
 //     <0=> Disable
@@ -395,6 +397,16 @@
 // <i> Defines transfer 10-bit coding over 8-bit data bus.
 // <i> Default: 8 bit
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_CODE10ON8             0
+
+// <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <i> Defines camera sensor MT9M114 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE                1
 
 #endif
 // </e> MT9M114 [Driver_MT9M114]
@@ -930,6 +942,16 @@
 // <i> Defines GT911 Touch screen INT pin number.
 // <i> Default: 20
 #define RTE_GT911_TOUCH_INT_PIN_NO        BOARD_TOUCH_INT_PIN_NO
+
+// <o RTE_GT911_TOUCH_I2C_INSTANCE> Select GT911 Touchscreen i2c instance
+// <i> Defines GT911 Touchscreen i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_GT911_TOUCH_I2C_INSTANCE                 BOARD_TOUCH_I2C_INSTANCE
 #endif
 
 #endif
@@ -945,6 +967,28 @@
 // <i> Defines Interrupt priority.
 // <i> Default: 0
 #define RTE_CDC200_IRQ_PRI                   0
+
+// <o> CDC200 clock select
+//     <0=>  400 MHz clock source (PLL_CLK1/2)
+//     <1=>  480 MHz clock source (PLL_CLK3)
+// <i> Defines CDC200 clock select
+// <i> Default: 400 MHz clock source (PLL_CLK1/2)
+#define RTE_CDC200_CLK_SEL                   0
+
+// <o> CDC200 background color red <0-255>
+// <i> Defines CDC200  background color red.
+// <i> Default: 0
+#define RTE_CDC200_BGC_RED                   0
+
+// <o> CDC200 background color green <0-255>
+// <i> Defines CDC200  background color green.
+// <i> Default: 0
+#define RTE_CDC200_BGC_GREEN                 0
+
+// <o> CDC200 background color blue <0-255>
+// <i> Defines CDC200  background color blue.
+// <i> Default: 0
+#define RTE_CDC200_BGC_BLUE                  0
 
 // <o> CDC200 pixel format
 //     <0=> ARGB8888
@@ -1017,6 +1061,31 @@
 #define RTE_I3C   1
 #if RTE_I3C
 #define RTE_I3C_IRQ_PRI       0
+
+// <e> I2C (Inter Integrated Circuit) [Driver_I2CI3C]
+// <i> Configuration settings for Driver_I2CI3C in component ::Drivers:I2CI3C
+#define RTE_I2CI3C            1
+// </e> I2C (Inter Integrated Circuit) [Driver_I2CI3C]
+
+// <o> I3C DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for I3C
+// <i> Default: ENABLE
+#define RTE_I3C_DMA_ENABLE   1
+
+// <o> I3C DMA Selection
+//    <0=> DMA2(M55-HE)
+//    <1=> DMA0
+// <i> Defines Select DMA0 for I3C. By default DMA0 will be considered
+// <i> Default: DMA0
+#define RTE_I3C_SELECT_DMA0  1
+
+// <o> I3C DMA IRQ priority <0-255>
+// <i> Defines I3C DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I3C_DMA_IRQ_PRI  0
+
 #endif
 // </e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
 
@@ -1071,6 +1140,50 @@
 // <i> Defines slave selection for SPI0.
 // <i> Default: 0
 #define RTE_SPI0_CHIP_SELECTION_PIN             0
+
+// <o> SPI0 RX SAMPLE DELAY <0-4>
+// <i> Defines RX SAMPLE DELAY for SPI0.
+// <i> Default: 0
+#define RTE_SPI0_RX_SAMPLE_DELAY                0
+
+// <o> SPI0 Master SS SW
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SW control slave select.
+// <i> Default: 0
+#define RTE_SPI0_USE_MASTER_SS_SW               0
+
+#if RTE_SPI0_USE_MASTER_SS_SW
+
+// <o> SPI0 SW SS Port <0-15>
+// <i> Defines SPI0 port of SS pin in software controlled mode.
+// <i> Default: 0
+#define RTE_SPI0_SW_SPI_PORT                    0
+
+// <o> SPI0 SW SS Pin <0-7>
+// <i> Defines SPI0 SS pin number in software controlled mode.
+// <i> Default: 0
+#define RTE_SPI0_SW_SPI_PIN                     0
+
+// <o> SPI0 SW SS Polarity
+//    <0=> ACTIVE LOW
+//    <1=> ACTIVE HIGH
+// <i> Defines SW controlled slave select polarity for SPI0.
+// <i> Default: 0
+#define RTE_SPI0_SW_SPI_SS_POLARITY             0
+#endif //RTE_SPI0_USE_MASTER_SS_SW
+
+// <o> SPI0 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for SPI0
+// <i> Default: ENABLE
+#define RTE_SPI0_DMA_ENABLE                     1
+
+// <o> SPI0 DMA IRQ priority <0-255>
+// <i> Defines SPI0 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_SPI0_DMA_IRQ_PRI                    0
 #endif
 // </e> SPI0 (Serial Peripheral Interface 0) [Driver_SPI0]
 
@@ -1124,6 +1237,50 @@
 // <i> Defines slave selection for SPI1.
 // <i> Default: 0
 #define RTE_SPI1_CHIP_SELECTION_PIN             0
+
+// <o> SPI1 RX SAMPLE DELAY <0-4>
+// <i> Defines RX SAMPLE DELAY for SPI1.
+// <i> Default: 0
+#define RTE_SPI1_RX_SAMPLE_DELAY                0
+
+// <o> SPI1 Master SS SW
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SW control slave select.
+// <i> Default: 0
+#define RTE_SPI1_USE_MASTER_SS_SW               0
+
+#if RTE_SPI1_USE_MASTER_SS_SW
+
+// <o> SPI1 SW SS Port <0-15>
+// <i> Defines SPI1 port of SS pin in software controlled mode.
+// <i> Default: 0
+#define RTE_SPI1_SW_SPI_PORT                    0
+
+// <o> SPI1 SW SS pin number <0-7>
+// <i> Defines SPI1 SS pin number in software controlled mode.
+// <i> Default: 0
+#define RTE_SPI1_SW_SPI_PIN                     0
+
+// <o> SPI1 SW SS Polarity
+//    <0=> ACTIVE LOW
+//    <1=> ACTIVE HIGH
+// <i> Defines SW controlled slave select polarity for SPI1.
+// <i> Default: 0
+#define RTE_SPI1_SW_SPI_SS_POLARITY             0
+#endif //RTE_SPI1_USE_MASTER_SS_SW
+
+// <o> SPI1 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for SPI1
+// <i> Default: ENABLE
+#define RTE_SPI1_DMA_ENABLE                     1
+
+// <o> SPI1 DMA IRQ priority <0-255>
+// <i> Defines SPI1 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_SPI1_DMA_IRQ_PRI                    0
 #endif
 // </e> SPI1 (Serial Peripheral Interface 1) [Driver_SPI1]
 
@@ -1176,6 +1333,50 @@
 // <i> Defines slave selection for SPI2.
 // <i> Default: 0
 #define RTE_SPI2_CHIP_SELECTION_PIN             0
+
+// <o> SPI2 RX SAMPLE DELAY <0-4>
+// <i> Defines RX SAMPLE DELAY for SPI2.
+// <i> Default: 0
+#define RTE_SPI2_RX_SAMPLE_DELAY                0
+
+// <o> SPI2 Master SS SW
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SW control slave select.
+// <i> Default: 0
+#define RTE_SPI2_USE_MASTER_SS_SW               0
+
+#if RTE_SPI2_USE_MASTER_SS_SW
+
+// <o> SPI2 SW SS Port <0-15>
+// <i> Defines SPI2 port of SS pin in software controlled mode
+// <i> Default: 0
+#define RTE_SPI2_SW_SPI_PORT                    0
+
+// <o> SPI2 SW SS pin number <0-7>
+// <i> Defines SPI2 SS pin number in software controlled mode
+// <i> Default: 0
+#define RTE_SPI2_SW_SPI_PIN                     0
+
+// <o> SPI2 SW SS Polarity
+//    <0=> ACTIVE LOW
+//    <1=> ACTIVE HIGH
+// <i> Defines SW controlled slave select polarity for SPI2.
+// <i> Default: 0
+#define RTE_SPI2_SW_SPI_SS_POLARITY             0
+#endif //RTE_SPI2_USE_MASTER_SS_SW
+
+// <o> SPI2 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for SPI2
+// <i> Default: ENABLE
+#define RTE_SPI2_DMA_ENABLE                     1
+
+// <o> SPI2 DMA IRQ priority <0-255>
+// <i> Defines SPI2 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_SPI2_DMA_IRQ_PRI                    0
 #endif
 // </e> SPI2 (Serial Peripheral Interface 2) [Driver_SPI2]
 
@@ -1229,6 +1430,50 @@
 // <i> Defines slave selection for SPI3.
 // <i> Default: 0
 #define RTE_SPI3_CHIP_SELECTION_PIN             1
+
+// <o> SPI3 RX SAMPLE DELAY <0-4>
+// <i> Defines RX SAMPLE DELAY for SPI3.
+// <i> Default: 0
+#define RTE_SPI3_RX_SAMPLE_DELAY                0
+
+// <o> SPI3 Master SS SW
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SW control slave select.
+// <i> Default: 0
+#define RTE_SPI3_USE_MASTER_SS_SW               0
+
+#if RTE_SPI3_USE_MASTER_SS_SW
+
+// <o> SPI3 SW SS Port <0-15>
+// <i> Defines SPI3 port of SS pin in software controlled mode
+// <i> Default: 0
+#define RTE_SPI3_SW_SPI_PORT                    0
+
+// <o> SPI3 SW SS pin number <0-7>
+// <i> Defines SPI3 SS pin number in software controlled mode
+// <i> Default: 0
+#define RTE_SPI3_SW_SPI_PIN                     0
+
+// <o> SPI3 SW SS Polarity
+//    <0=> ACTIVE LOW
+//    <1=> ACTIVE HIGH
+// <i> Defines SW controlled slave select polarity for SPI3.
+// <i> Default: 0
+#define RTE_SPI3_SW_SPI_SS_POLARITY             0
+#endif //RTE_SPI3_USE_MASTER_SS_SW
+
+// <o> SPI3 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for SPI3
+// <i> Default: ENABLE
+#define RTE_SPI3_DMA_ENABLE                     1
+
+// <o> SPI3 DMA IRQ priority <0-255>
+// <i> Defines SPI3 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_SPI3_DMA_IRQ_PRI                    0
 #endif
 // </e> SPI3 (Serial Peripheral Interface 3) [Driver_SPI3]
 
@@ -1283,11 +1528,69 @@
 // <i> Defines slave selection for LPSPI.
 // <i> Default: 0
 #define RTE_LPSPI_CHIP_SELECTION_PIN             0
-#endif
-#endif //defined(M55_HE)
+
+// <o> LPSPI Master SS SW
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SW control slave select.
+// <i> Default: 0
+#define RTE_LPSPI_USE_MASTER_SS_SW               0
+
+#if RTE_LPSPI_USE_MASTER_SS_SW
+
+// <o> LPSPI SW SS Port  <0-15>
+// <i> Defines LPSPI port of SS pin in software controlled mode
+// <i> Default: 0
+#define RTE_LPSPI_SW_SPI_PORT                    0
+
+// <o> LPSPI SW SS pin number <0-7>
+// <i> Defines LPSPI SS pin number in software controlled mode
+// <i> Default: 0
+#define RTE_LPSPI_SW_SPI_PIN                     0
+
+// <o> LPSPI SW SS Polarity
+//    <0=> ACTIVE LOW
+//    <1=> ACTIVE HIGH
+// <i> Defines SW controlled slave select polarity for LPSPI.
+// <i> Default: 0
+#define RTE_LPSPI_SW_SPI_SS_POLARITY             0
+#endif //RTE_LPSPI_USE_MASTER_SS_SW
+
+// <o> LPSPI DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for LPSPI
+// <i> Default: ENABLE
+#define RTE_LPSPI_DMA_ENABLE                     1
+#if RTE_LPSPI_DMA_ENABLE
+
+// <o> LPSPI DMA Selection
+//    <0=> DMA2
+//    <1=> DMA0
+// <i> Defines Select DMA0 for LPSPI. By default DMA2 will be considered
+// <i> Default: DMA2
+#define RTE_LPSPI_SELECT_DMA0                    0
+#if RTE_LPSPI_SELECT_DMA0
+
+// <o> LPSPI DMA0 Group Selection
+//    <1=> DMA0_GROUP_1
+//    <2=> DMA0_GROUP_2
+// <i> Defines DMA0 Group for LPSPI. By default DMA0 Group 1 will be considered
+// <i> Default: DMA0_GROUP_1
+#define RTE_LPSPI_SELECT_DMA0_GROUP              1
+#endif //RTE_LPSPI_SELECT_DMA0
+#endif //RTE_LPSPI_DMA_ENABLE
+
+// <o> LPSPI DMA IRQ priority <0-255>
+// <i> Defines LPSPI DMA Interrupt priority
+// <i> Default: 0
+#define RTE_LPSPI_DMA_IRQ_PRI                    0
+#endif  //RTE_LPSPI
+#endif //M55_HE
 
 // </e> LPSPI (Low Power Serial Peripheral Interface) [Driver_LPSPI]
 // </h> SPI (Serial Peripheral Interface)
+
 
 // <h> OSPI  (Octal Serial Peripheral Interface)
 // <e> OSPI0 (Octal Serial Peripheral Interface 0) [Driver_OSPI]
@@ -1300,6 +1603,12 @@
 #define RTE_OSPI0_TX_LOAD_DUMMY_TO_START_LEVEL    0
 #define RTE_OSPI0_TX_FIFO_THRESHOLD               64
 #define RTE_OSPI0_RX_FIFO_THRESHOLD               0
+#define RTE_OSPI0_DMA_ENABLE                      0
+#if RTE_OSPI0_DMA_ENABLE
+#define RTE_OSPI0_TX_DMA_DATA_LEVEL               64
+#define RTE_OSPI0_RX_DMA_DATA_LEVEL               15
+#define RTE_OSPI0_DMA_IRQ_PRIORITY                0
+#endif
 #define RTE_OSPI0_CHIP_SELECTION_PIN              0
 #define RTE_OSPI0_RX_SAMPLE_DELAY                 0
 #define RTE_OSPI0_DDR_DRIVE_EDGE                  0
@@ -1317,6 +1626,12 @@
 #define RTE_OSPI1_TX_LOAD_DUMMY_TO_START_LEVEL    0
 #define RTE_OSPI1_TX_FIFO_THRESHOLD               64
 #define RTE_OSPI1_RX_FIFO_THRESHOLD               0
+#define RTE_OSPI1_DMA_ENABLE                      0
+#if RTE_OSPI1_DMA_ENABLE
+#define RTE_OSPI1_TX_DMA_DATA_LEVEL               130
+#define RTE_OSPI1_RX_DMA_DATA_LEVEL               15
+#define RTE_OSPI1_DMA_IRQ_PRIORITY                0
+#endif
 #define RTE_OSPI1_CHIP_SELECTION_PIN              0
 #define RTE_OSPI1_RX_SAMPLE_DELAY                 0
 #define RTE_OSPI1_DDR_DRIVE_EDGE                  0
@@ -1401,19 +1716,6 @@
 // <i> Defines I2S0 Interrupt priority
 // <i> Default: 0
 #define RTE_I2S0_IRQ_PRI     10
-
-// <o> I2S0 Enable External Clock source
-//    <0=> DISABLE
-//    <1=> Enable External Clock Input
-// <i> Defines Enable External clock source
-// <i> Default: DISABLE
-#define RTE_I2S0_EXT_CLOCK_SOURCE_ENABLE  0
-#if RTE_I2S0_EXT_CLOCK_SOURCE_ENABLE
-// <o> I2S0 External clock source in Hz
-// <i> Defines I2S0 External clock source in Hz
-// <i> Default: 0
-#define RTE_I2S0_EXT_CLOCK_SOURCE  0
-#endif
 
 // <o> I2S0 DMA ENABLE
 //    <0=> DISABLE
@@ -1502,19 +1804,6 @@
 // <i> Default: 0
 #define RTE_I2S1_IRQ_PRI     10
 
-// <o> I2S1 Enable External Clock source
-//    <0=> DISABLE
-//    <1=> Enable External Clock Input
-// <i> Defines Enable External clock source
-// <i> Default: DISABLE
-#define RTE_I2S1_EXT_CLOCK_SOURCE_ENABLE  0
-#if RTE_I2S1_EXT_CLOCK_SOURCE_ENABLE
-// <o> I2S1 External clock source in Hz
-// <i> Defines External clock source in Hz
-// <i> Default: 0
-#define RTE_I2S1_EXT_CLOCK_SOURCE  0
-#endif
-
 // <o> I2S1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1601,19 +1890,6 @@
 // <i> Default: 0
 #define RTE_I2S2_IRQ_PRI     10
 
-// <o> I2S2 Enable External Clock source
-//    <0=> DISABLE
-//    <1=> Enable External Clock Input
-// <i> Defines Enable External clock source
-// <i> Default: DISABLE
-#define RTE_I2S2_EXT_CLOCK_SOURCE_ENABLE  0
-#if RTE_I2S2_EXT_CLOCK_SOURCE_ENABLE
-// <o> I2S2 External clock source in Hz
-// <i> Defines I2S2 External clock source in Hz
-// <i> Default: 0
-#define RTE_I2S2_EXT_CLOCK_SOURCE  0
-#endif
-
 // <o> I2S2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1699,19 +1975,6 @@
 // <i> Defines I2S3 Interrupt priority
 // <i> Default: 0
 #define RTE_I2S3_IRQ_PRI     10
-
-// <o> I2S3 Enable External Clock source
-//    <0=> DISABLE
-//    <1=> Enable External Clock Input
-// <i> Defines Enable External clock source
-// <i> Default: DISABLE
-#define RTE_I2S3_EXT_CLOCK_SOURCE_ENABLE  0
-#if RTE_I2S3_EXT_CLOCK_SOURCE_ENABLE
-// <o> I2S3 External clock source in Hz
-// <i> Defines I2S3 External clock source in Hz
-// <i> Default: 0
-#define RTE_I2S3_EXT_CLOCK_SOURCE  0
-#endif
 
 // <o> I2S3 DMA ENABLE
 //    <0=> DISABLE
@@ -1801,19 +2064,6 @@
 // <i> Default: 0
 #define RTE_LPI2S_IRQ_PRI        0
 
-// <o> LPI2S Enable External Clock source
-//    <0=> DISABLE
-//    <1=> Enable External Clock Input
-// <i> Defines Enable External clock source
-// <i> Default: DISABLE
-#define RTE_LPI2S_EXT_CLOCK_SOURCE_ENABLE  0
-#if RTE_LPI2S_EXT_CLOCK_SOURCE_ENABLE
-// <o> LPI2S External clock source in Hz
-// <i> Defines LPI2S External clock source in Hz
-// <i> Default: 0
-#define RTE_LPI2S_EXT_CLOCK_SOURCE     0
-#endif
-
 // <o> LPI2S DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1876,7 +2126,21 @@
 // <i> Defines UART0 clock source.
 // <i> Default: CLK_100MHz
 #define RTE_UART0_CLK_SOURCE    1
-#endif
+
+// <o> UART0 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART0
+// <i> Default: ENABLE
+#define RTE_UART0_DMA_ENABLE   1
+
+// <o> UART0 DMA IRQ priority <0-255>
+// <i> Defines UART0 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART0_DMA_IRQ_PRI  0
+
+#endif //UART0
+
 // </e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 
 
@@ -1915,7 +2179,21 @@
 // <i> Defines UART1 clock source.
 // <i> Default: CLK_100MHz
 #define RTE_UART1_CLK_SOURCE    1
-#endif
+
+// <o> UART1 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART1
+// <i> Default: ENABLE
+#define RTE_UART1_DMA_ENABLE   1
+
+// <o> UART1 DMA IRQ priority <0-255>
+// <i> Defines UART1 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART1_DMA_IRQ_PRI  0
+
+#endif //UART1
+
 // </e> UART1 (Universal asynchronous receiver transmitter) [Driver_USART1]
 
 
@@ -1954,7 +2232,21 @@
 // <i> Defines UART2 clock source.
 // <i> Default: CLK_100MHz
 #define RTE_UART2_CLK_SOURCE    1
-#endif
+
+// <o> UART2 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART2
+// <i> Default: ENABLE
+#define RTE_UART2_DMA_ENABLE   1
+
+// <o> UART2 DMA IRQ priority <0-255>
+// <i> Defines UART2 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART2_DMA_IRQ_PRI  0
+
+#endif //UART2
+
 // </e> UART2 (Universal asynchronous receiver transmitter) [Driver_USART2]
 
 
@@ -1993,7 +2285,21 @@
 // <i> Defines UART3 clock source.
 // <i> Default: CLK_100MHz
 #define RTE_UART3_CLK_SOURCE    1
-#endif
+
+// <o> UART3 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART3
+// <i> Default: ENABLE
+#define RTE_UART3_DMA_ENABLE   1
+
+// <o> UART3 DMA IRQ priority <0-255>
+// <i> Defines UART3 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART3_DMA_IRQ_PRI  0
+
+#endif //UART3
+
 // </e> UART3 (Universal asynchronous receiver transmitter) [Driver_USART3]
 
 
@@ -2041,7 +2347,28 @@
 #define RTE_UART4_RS485_DE_TO_RE_TURN_AROUND_TIME_16BIT     (0x01)
 #define RTE_UART4_RS485_RE_TO_DE_TURN_AROUND_TIME_16BIT     (0x03)
 #endif
-#endif
+
+// <o> UART4 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART4
+// <i> Default: ENABLE
+#define RTE_UART4_DMA_ENABLE   1
+
+// <o> UART4 DMA Selection
+//    <0=> DMA1(M55-HP)
+//    <1=> DMA0
+// <i> Defines Select DMA0 for UART4. By default DMA0 will be considered.
+// <i> Default: DMA0
+#define RTE_UART4_SELECT_DMA0  1
+
+// <o> UART4 DMA IRQ priority <0-255>
+// <i> Defines UART4 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART4_DMA_IRQ_PRI  0
+
+#endif //UART4
+
 // </e> UART4 (Universal asynchronous receiver transmitter) [Driver_USART4]
 
 
@@ -2089,7 +2416,28 @@
 #define RTE_UART5_RS485_DE_TO_RE_TURN_AROUND_TIME_16BIT     (0x01)
 #define RTE_UART5_RS485_RE_TO_DE_TURN_AROUND_TIME_16BIT     (0x03)
 #endif
-#endif
+
+// <o> UART5 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART5
+// <i> Default: ENABLE
+#define RTE_UART5_DMA_ENABLE   1
+
+// <o> UART5 DMA Selection
+//    <0=> DMA1(M55-HP)
+//    <1=> DMA0
+// <i> Defines Select DMA0 for UART5. By default DMA0 will be considered
+// <i> Default: DMA0
+#define RTE_UART5_SELECT_DMA0  1
+
+// <o> UART5 DMA IRQ priority <0-255>
+// <i> Defines UART5 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART5_DMA_IRQ_PRI  0
+
+#endif //UART5
+
 // </e> UART5 (Universal asynchronous receiver transmitter) [Driver_USART5]
 
 
@@ -2137,7 +2485,28 @@
 #define RTE_UART6_RS485_DE_TO_RE_TURN_AROUND_TIME_16BIT     (0x01)
 #define RTE_UART6_RS485_RE_TO_DE_TURN_AROUND_TIME_16BIT     (0x03)
 #endif
-#endif
+
+// <o> UART6 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART6
+// <i> Default: ENABLE
+#define RTE_UART6_DMA_ENABLE   1
+
+// <o> UART6 DMA Selection
+//    <0=> DMA1(M55-HP)
+//    <1=> DMA0
+// <i> Defines Select DMA0 for UART6. By default DMA0 will be considered
+// <i> Default: DMA0
+#define RTE_UART6_SELECT_DMA0  1
+
+// <o> UART6 DMA IRQ priority <0-255>
+// <i> Defines UART6 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART6_DMA_IRQ_PRI  0
+
+#endif //UART6
+
 // </e> UART6 (Universal asynchronous receiver transmitter) [Driver_USART6]
 
 
@@ -2185,7 +2554,28 @@
 #define RTE_UART7_RS485_DE_TO_RE_TURN_AROUND_TIME_16BIT     (0x01)
 #define RTE_UART7_RS485_RE_TO_DE_TURN_AROUND_TIME_16BIT     (0x03)
 #endif
-#endif
+
+// <o> UART7 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for UART7
+// <i> Default: ENABLE
+#define RTE_UART7_DMA_ENABLE   1
+
+// <o> UART7 DMA Selection
+//    <0=> DMA1(M55-HP)
+//    <1=> DMA0
+// <i> Defines Select DMA0 for UART7. By default DMA0 will be considered
+// <i> Default: DMA0
+#define RTE_UART7_SELECT_DMA0  1
+
+// <o> UART7 DMA IRQ priority <0-255>
+// <i> Defines UART7 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_UART7_DMA_IRQ_PRI  0
+
+#endif //UART7
+
 // </e> UART7 (Universal asynchronous receiver transmitter) [Driver_USART7]
 
 
@@ -2219,7 +2609,28 @@
 // <i> Defines Interrupt priority for LPUART.
 // <i> Default: 0
 #define RTE_LPUART_IRQ_PRI       0
-#endif
+
+// <o> LPUART DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for LPUART
+// <i> Default: ENABLE
+#define RTE_LPUART_DMA_ENABLE    1
+
+// <o> LPUART DMA Selection
+//    <0=> DMA2
+//    <1=> DMA0
+// <i> Defines Select DMA0 for LPUART. By default DMA0 will be considered
+// <i> Default: DMA0
+#define RTE_LPUART_SELECT_DMA0   1
+
+// <o> LPUART DMA IRQ priority <0-255>
+// <i> Defines LPUART DMA Interrupt priority
+// <i> Default: 0
+#define RTE_LPUART_DMA_IRQ_PRI   0
+
+#endif //RTE_LPUART
+
 // </e> LPUART (Low-Power Universal asynchronous receiver transmitter) [Driver_USARTLP]
 // </h> UART (Universal asynchronous receiver transmitter)
 
@@ -2227,9 +2638,7 @@
 // <h> LPTIMER (Low power timer)
 // <e> LPTIMER (Low power timer) [Driver_LPTIMER]
 // <i> Configuration settings for Driver_LPTIMER in component ::Drivers:LPTIMER
-#if RTE_RTSS_M55_HE
 #define RTE_LPTIMER    1
-#endif
 
 #if RTE_LPTIMER
 
@@ -5847,13 +6256,6 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC120_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <o> Test Signal enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
-// <i> Default: DISABLE
-#define RTE_ADC120_TEST_EN                  0
-
 // <o> Differential mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
@@ -5923,13 +6325,6 @@
 // <i> Defines shift averaged value before loading in sample register.
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC121_SHIFT_LEFT_OR_RIGHT     (1)
-
-// <o> Test Signal enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
-// <i> Default: DISABLE
-#define RTE_ADC121_TEST_EN                  0
 
 // <o> Differential mode enable
 //     <0=> DISABLE
@@ -6001,13 +6396,6 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC122_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <o> Test Signal enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines Enable test signal to go to the test MUX: if "1" otherwise off
-// <i> Default: DISABLE
-#define RTE_ADC122_TEST_EN                  0
-
 // <o> Differential mode enable
 //     <0=> DISABLE
 //     <1=> ENABLE
@@ -6042,23 +6430,63 @@
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 // </h> ADC (Analog to Digital Converter)
 
-// <e> ADC12 common bits for each instance
-// <i> Configuration settings for ADC12 instances ::Drivers:ADC12
-#if (RTE_ADC120 | RTE_ADC121 | RTE_ADC122)
-#define RTE_ADC12_CONFG_RESERVED_bits_18_23           7
-#define RTE_ADC12_CONFG_amux_cont                     0
-#endif
-// </e> ADC12 commmon bit for each instance
-
 // <h> CRC (Cyclic Redundancy Check)
 // <e> CRC0 (Cyclic Redundancy Check) [Driver_CRC0]
 // <i> Configuration settings for Driver_CRC0 in component ::Drivers:CRC
 #define RTE_CRC0      1
+#if RTE_CRC0
+
+// <o> CRC0 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for CRC0
+// <i> Default: 0
+#define RTE_CRC0_DMA_ENABLE    0
+#if RTE_CRC0_DMA_ENABLE
+
+// <o RTE_CRC0_SELECT_DMA> CRC0 DMA Selection
+//    <0=> DMA0
+//    <1=> DMA1
+//    <2=> DMA2
+// <i> Defines Select DMA for CRC0. By default DMA0 will be considered
+// <i> Default: 0
+#define RTE_CRC0_SELECT_DMA    0
+#endif
+
+// <o> CRC0 DMA IRQ priority <0-255>
+// <i> Defines CRC0 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_CRC0_DMA_IRQ_PRI   0
+#endif
 // </e> CRC0 (Cyclic Redundancy Check) [Driver_CRC0]
 
 // <e> CRC1 (Cyclic Redundancy Check) [Driver_CRC1]
 // <i> Configuration settings for Driver_CRC1 in component ::Drivers:CRC
 #define RTE_CRC1      1
+#if RTE_CRC1
+
+// <o> CRC1 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for CRC1
+// <i> Default: 0
+#define RTE_CRC1_DMA_ENABLE    0
+#if RTE_CRC1_DMA_ENABLE
+
+// <o RTE_CRC1_SELECT_DMA> CRC1 DMA Selection
+//    <0=> DMA0
+//    <1=> DMA1
+//    <2=> DMA2
+// <i> Defines Select DMA for CRC1. By default DMA0 will be considered
+// <i> Default: 0
+#define RTE_CRC1_SELECT_DMA    0
+#endif
+
+// <o> CRC1 DMA IRQ priority <0-255>
+// <i> Defines CRC1 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_CRC1_DMA_IRQ_PRI   0
+#endif
 // </e> CRC1 (Cyclic Redundancy Check) [Driver_CRC1]
 // </h>
 
@@ -6370,6 +6798,18 @@
 #define RTE_I2C3_IRQ_PRIORITY        0
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C3]
+
+// <e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
+// <i> Configuration settings for Driver_LPI2C in component ::Drivers:LPI2C
+#define RTE_LPI2C   1
+#if RTE_LPI2C
+
+// <o> LPI2C IRQ PRIORITY <0-225>
+// <i> defines LPI2C interrupt priority
+// <i> default: 0
+#define RTE_LPI2C_IRQ_PRIORITY       0
+#endif
+// </e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
 // </h>
 
 // <e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
@@ -7638,13 +8078,105 @@
 // <i> Configuration settings for Driver_PDM in component ::Drivers:PDM
 #define RTE_PDM      1
 #if RTE_PDM
+
+// <o> PDM DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for PDM
+// <i> Default: ENABLE
+#define RTE_PDM_DMA_ENABLE        1
+
+// <o> PDM DMA IRQ priority <0-255>
+// <i> Defines PDM DMA Interrupt priority
+// <i> Default: 0
+#define RTE_PDM_DMA_IRQ_PRIORITY  0
+
 // <o> PDM IRQ priority <0-255>
 // <i> Defines Interrupt priority for PDM.
 // <i> Default: 0
 #define RTE_PDM_IRQ_PRIORITY   0
+
+// <o> PDM Fifo watermark <0-7>
+// <i> Defines number of PCM samples in the internal FIFO
+// <i> Default: 5
+#define RTE_PDM_FIFO_WATERMARK   5
+
 #endif
 // </e> PDM (Pulse density modulation) [Driver_PDM]
 
 // </h> PDM (Pulse density modulation)
+
+#if defined(M55_HE)
+// <h> LPPDM(Low Power Pulse Density Modulation)
+// <e> LPPDM (Low Power Pulse density modulation) [Driver_LPPDM]
+// <i> Configuration settings for Driver_LPPDM in component ::Drivers:LPPDM
+#define RTE_LPPDM      1
+
+#if RTE_LPPDM
+
+// <o> LPPDM IRQ priority <0-255>
+// <i> Defines Interrupt priority for LPPDM.
+// <i> Default: 0
+#define RTE_LPPDM_IRQ_PRIORITY   0
+
+// <o> LPPDM Fifo watermark <0-7>
+// <i> Defines number of PCM samples in the internal FIFO
+// <i> Default: 5
+#define RTE_LPPDM_FIFO_WATERMARK   5
+
+// <o> LPPDM DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for LPPDM
+// <i> Default: ENABLE
+#define RTE_LPPDM_DMA_ENABLE    1
+#if RTE_LPPDM_DMA_ENABLE
+
+// <o> LPPDM DMA Selection
+//    <0=> DMA2
+//    <1=> DMA0
+// <i> Defines Select DMA0 for LPPDM. By default DMA2 will be considered
+// <i> Default: DMA2
+#define RTE_LPPDM_SELECT_DMA0        0
+
+// <o> PDM DMA IRQ priority <0-255>
+// <i> Defines PDM DMA Interrupt priority
+// <i> Default: 0
+#define RTE_LPPDM_DMA_IRQ_PRIORITY  0
+#endif
+#endif
+// </e> LPPDM (Low Power Pulse density modulation) [Driver_LPPDM]
+#endif //defined(M55_HE)
+// </h> LPPDM (Low Power Pulse density modulation)
+
+// <h> CANFD (Controller Area Network - Fast Mode)
+// <e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
+// <i> Configuration settings for Driver_CANFD in component ::Drivers:CANFD
+#define RTE_CANFD 1
+
+#ifdef RTE_CANFD
+
+// <o> CANFD IRQ priority <0-255>
+// <i> Defines Interrupt priority for CANFD.
+// <i> Default: 0
+#define RTE_CANFD_IRQ_PRIORITY              0
+
+// <o> CANFD Clock Source
+//    <0=> 38.4 MHz Clock
+//    <1=> 160 MHz Clock
+// <i> Defines Clock Source for CANFD.
+// <i> Default: 160 MHz
+#define RTE_CANFD_CLK_SOURCE                1
+
+// <o> CANFD Clock Speed (Hz) <160000-80000000>
+// <i> Defines Clock Speed for CANFD.
+// <i> Maximum Clock speed is 80MHz
+// <i> Recommended speeds with 160MHz clock source: 20MHz, 40MHz, 80MHz
+// <i> Default: 20MHz
+#define RTE_CANFD_CLK_SPEED                 20000000
+
+#endif
+// </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
+// </h> CANFD (Controller Area Network - Fast Mode)
 
 #endif  /* __RTE_DEVICE_H */

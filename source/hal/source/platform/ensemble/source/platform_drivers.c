@@ -115,7 +115,7 @@ int platform_init(void)
 
     HWSEMdrv->Initialize(NULL);
     /* Only 1 core will do the pinmux */
-    if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
+    if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
         /* We're first to acquire the lock - we do it */
         BOARD_Power_Init();
         BOARD_Clock_Init();
