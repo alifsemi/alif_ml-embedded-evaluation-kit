@@ -382,7 +382,7 @@ def set_up_resources(
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
-    vela_version = "3.8.0"
+    vela_version = "3.9.0"
     py3_version_minimum = (3, 9)
 
     # Is Python minimum requirement matched?
