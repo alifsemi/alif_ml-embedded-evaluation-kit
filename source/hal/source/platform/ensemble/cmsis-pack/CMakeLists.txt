@@ -53,6 +53,7 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 target_include_directories(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include/config
     ${ENSEMBLE_CMSIS_PATH}/drivers/include
     ${ENSEMBLE_CMSIS_PATH}/components/Include
     ${BOARDLIB_PATH}
@@ -113,7 +114,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DMA_Opcode.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_init.c

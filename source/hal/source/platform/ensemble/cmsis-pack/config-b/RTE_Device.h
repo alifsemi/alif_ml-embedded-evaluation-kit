@@ -900,7 +900,7 @@
 
 // <e> TOUCH_SCREEN (touch screen) [Driver_Touch_Screen]
 // <i> Configuration settings for Driver_Touch_Screen in component ::Drivers:touch screen
-#define RTE_TOUCH_SCREEN 1
+#define RTE_TOUCH_SCREEN                 1
 
 #if RTE_TOUCH_SCREEN
 
@@ -909,7 +909,7 @@
 //     <1=> ENABLE
 // <i> Defines GT911 Touch screen
 // <i> Default: ENABLE
-#define RTE_GT911 1
+#define RTE_GT911                        1
 
 #if RTE_GT911
 
@@ -921,26 +921,26 @@
 //     <5=> 5
 // <i> defines select active touch points
 // <i> default: 5
-#define RTE_ACTIVE_TOUCH_POINTS     5
+#define RTE_ACTIVE_TOUCH_POINTS          5
 
-// <o> GT911 Touch screen reset pin GPIO port number
+// <o> GT911 Touch screen reset pin GPIO port number range <0-15>
 // <i> Defines GT911 Touch screen reset pin GPIO port number.
 // <i> Default: 4
 #define RTE_GT911_TOUCH_RESET_GPIO_PORT   BOARD_TOUCH_RESET_GPIO_PORT
 
-// <o> GT911 Touch screen reset pin number
+// <o> GT911 Touch screen reset pin number range <0-7>
 // <i> Defines GT911 Touch screen reset pin number.
-// <i> Default: 2
+// <i> Default: 0
 #define RTE_GT911_TOUCH_RESET_PIN_NO      BOARD_TOUCH_RESET_PIN_NO
 
-// <o> GT911 Touch screen INT pin GPIO port number
+// <o> GT911 Touch screen INT pin GPIO port number range <0-15>
 // <i> Defines GT911 Touch screen INT pin GPIO port number.
-// <i> Default: 2
+// <i> Default: 9
 #define RTE_GT911_TOUCH_INT_GPIO_PORT     BOARD_TOUCH_INT_GPIO_PORT
 
-// <o> GT911 Touch screen INT pin number
+// <o> GT911 Touch screen INT pin number range <0-7>
 // <i> Defines GT911 Touch screen INT pin number.
-// <i> Default: 20
+// <i> Default: 4
 #define RTE_GT911_TOUCH_INT_PIN_NO        BOARD_TOUCH_INT_PIN_NO
 
 // <o RTE_GT911_TOUCH_I2C_INSTANCE> Select GT911 Touchscreen i2c instance
@@ -951,7 +951,7 @@
 //     <3=>   I2C3
 //     <I3C=> I2C OVER I3C
 // <i> Default: 1
-#define RTE_GT911_TOUCH_I2C_INSTANCE                 BOARD_TOUCH_I2C_INSTANCE
+#define RTE_GT911_TOUCH_I2C_INSTANCE     BOARD_TOUCH_I2C_INSTANCE
 #endif
 
 #endif
@@ -997,6 +997,18 @@
 // <i> Defines CDC200 pixel format
 // <i> Default: RGB888
 #define RTE_CDC200_PIXEL_FORMAT              2
+
+// <o> CDC200 Constant alpha <0-255>
+// <i> Defines CDC200 constant alpha range from 0 (fully transparent) to 255 or 1.0 (fully opaque).
+// <i> Default: 255
+#define RTE_CDC200_CONSTANT_ALPHA            255
+
+// <o> CDC200 blending factor
+//     <0=> CONST_ALPHA
+//     <1=> PIXEL_ALPHA_X_CONST_ALPHA
+// <i> Defines CDC200 blending factor selection.
+// <i> Default: PIXEL_ALPHA_X_CONST_ALPHA
+#define RTE_CDC200_BLEND_FACTOR              1
 
 // <o> CDC200 DPI interface FPS
 // <i> Defines CDC200 DPI interface Framrate per second.
@@ -1102,14 +1114,6 @@
 // <i> Default: 0
 #define RTE_SPI0_IRQ_PRIORITY                   0
 
-// <o> SPI0 frame format
-//     <0=> SPI
-//     <1=> SSP
-//     <2=> MicroWire
-// <i> Defines frame format for SPI0.
-// <i> Default: SPI
-#define RTE_SPI0_SPI_FRAME_FORMAT               0
-
 // <o> SPI0 TX FIFO Start level <0-15>
 // <i> Defines TX FIFO transfer start level for SPI0.
 // <i> Default: 0
@@ -1177,8 +1181,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for SPI0
-// <i> Default: ENABLE
-#define RTE_SPI0_DMA_ENABLE                     1
+// <i> Default: DISABLE
+#define RTE_SPI0_DMA_ENABLE                     0
 
 // <o> SPI0 DMA IRQ priority <0-255>
 // <i> Defines SPI0 DMA Interrupt priority
@@ -1198,14 +1202,6 @@
 // <i> Defines Interrupt priority for SPI1.
 // <i> Default: 0
 #define RTE_SPI1_IRQ_PRIORITY                   0
-
-// <o> SPI1 frame format
-//     <0=> SPI
-//     <1=> SSP
-//     <2=> MicroWire
-// <i> Defines frame format for SPI1.
-// <i> Default: SPI
-#define RTE_SPI1_SPI_FRAME_FORMAT               0
 
 // <o> SPI1 TX FIFO Start level <0-15>
 // <i> Defines TX FIFO transfer start level for SPI1.
@@ -1274,8 +1270,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for SPI1
-// <i> Default: ENABLE
-#define RTE_SPI1_DMA_ENABLE                     1
+// <i> Default: DISABLE
+#define RTE_SPI1_DMA_ENABLE                     0
 
 // <o> SPI1 DMA IRQ priority <0-255>
 // <i> Defines SPI1 DMA Interrupt priority
@@ -1294,14 +1290,6 @@
 // <i> Defines Interrupt priority for SPI2.
 // <i> Default: 0
 #define RTE_SPI2_IRQ_PRIORITY                   0
-
-// <o> SPI2 frame format
-//     <0=> SPI
-//     <1=> SSP
-//     <2=> MicroWire
-// <i> Defines frame format for SPI2.
-// <i> Default: SPI
-#define RTE_SPI2_SPI_FRAME_FORMAT               0
 
 // <o> SPI2 TX FIFO Start level <0-15>
 // <i> Defines TX FIFO transfer start level for SPI2.
@@ -1370,8 +1358,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for SPI2
-// <i> Default: ENABLE
-#define RTE_SPI2_DMA_ENABLE                     1
+// <i> Default: DISABLE
+#define RTE_SPI2_DMA_ENABLE                     0
 
 // <o> SPI2 DMA IRQ priority <0-255>
 // <i> Defines SPI2 DMA Interrupt priority
@@ -1391,14 +1379,6 @@
 // <i> Defines Interrupt priority for SPI3.
 // <i> Default: 0
 #define RTE_SPI3_IRQ_PRIORITY                   0
-
-// <o> SPI3 frame format
-//     <0=> SPI
-//     <1=> SSP
-//     <2=> MicroWire
-// <i> Defines frame format for SPI3.
-// <i> Default: SPI
-#define RTE_SPI3_SPI_FRAME_FORMAT               0
 
 // <o> SPI3 TX FIFO Start level <0-15>
 // <i> Defines TX FIFO transfer start level for SPI3.
@@ -1467,8 +1447,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for SPI3
-// <i> Default: ENABLE
-#define RTE_SPI3_DMA_ENABLE                     1
+// <i> Default: DISABLE
+#define RTE_SPI3_DMA_ENABLE                     0
 
 // <o> SPI3 DMA IRQ priority <0-255>
 // <i> Defines SPI3 DMA Interrupt priority
@@ -1489,14 +1469,6 @@
 // <i> Defines Interrupt priority for LPSPI.
 // <i> Default: 0
 #define RTE_LPSPI_IRQ_PRIORITY                   0
-
-// <o> LPSPI frame format
-//     <0=> SPI
-//     <1=> SSP
-//     <2=> MicroWire
-// <i> Defines frame format for LPSPI.
-// <i> Default: SPI
-#define RTE_LPSPI_SPI_FRAME_FORMAT               0
 
 // <o> LPSPI TX FIFO Start level <0-15>
 // <i> Defines TX FIFO transfer start level for LPSPI.
@@ -1560,8 +1532,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPSPI
-// <i> Default: ENABLE
-#define RTE_LPSPI_DMA_ENABLE                     1
+// <i> Default: DISABLE
+#define RTE_LPSPI_DMA_ENABLE                     0
 #if RTE_LPSPI_DMA_ENABLE
 
 // <o> LPSPI DMA Selection
@@ -6217,12 +6189,32 @@
 // </e> DAC1 (Digital to Analog converter) [Driver_DAC1]
 // </h>
 
-// <h> ADC12 (Analog to Digital Converter)
-// <e> ADC0 (Analog to Digital Converter 0) [Driver_ADC0]
-// <i> Configuration settings for Driver_ADC0 in component ::Drivers:ADC
+// <h> ADC (Analog to Digital Converter)
+// <e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
+// <i> Configuration settings for Driver_ADC120 in component ::Drivers:ADC12
 #define RTE_ADC120     1
 #if RTE_ADC120
 #define RTE_ADC120_IRQ_PRIORITY        0
+
+// <o> ADC120 DONE0 IRQ PRIORITY <0-225>
+// <i> defines ADC120 done0 interrupt priority
+// <i> default: 0
+#define RTE_ADC120_DONE0_IRQ_PRIORITY       0
+
+// <o> ADC120 DONE1 IRQ PRIORITY <0-225>
+// <i> defines ADC120 interrupt priority
+// <i> default: 0
+#define RTE_ADC120_DONE1_IRQ_PRIORITY       0
+
+// <o> ADC120 CMPA IRQ PRIORITY <0-225>
+// <i> defines ADC120 interrupt priority
+// <i> default: 0
+#define RTE_ADC120_CMPA_IRQ_PRIORITY        0
+
+// <o> ADC120 CMPB IRQ PRIORITY <0-225>
+// <i> defines ADC120 interrupt priority
+// <i> default: 0
+#define RTE_ADC120_CMPB_IRQ_PRIORITY        0
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
@@ -6247,7 +6239,7 @@
 // <o> Number of bits to shift <0-8>
 // <i> Defines How much bit to shift before storing in sample register.
 // <i> Default: 8
-#define RTE_ADC120_SHIFT_N_BIT             (8)
+#define RTE_ADC120_SHIFT_N_BIT             (0)
 
 // <o> Left or Right shift
 //     <0=> LEFT SHIFT
@@ -6256,12 +6248,30 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC120_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <o> Differential mode enable
+// <e> RTE_ADC121_DIFFERENTIAL_EN
+// <i> Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+#define RTE_ADC120_DIFFERENTIAL_EN          0
+
+// <o> Enable PGA
 //     <0=> DISABLE
 //     <1=> ENABLE
-// <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+// <i> Defines Enable ADC120 PGA enable
 // <i> Default: DISABLE
-#define RTE_ADC120_DIFFERENTIAL_EN          0
+#define RTE_ADC120_PGA_EN                  (0)
+
+// <o> PGA gain value
+//     <0=> 0 dB
+//     <1=> 6 dB
+//     <2=> 12 dB
+//     <3=> 18 dB
+//     <4=> 24 dB
+//     <5=> 30 dB
+//     <6=> 36 dB
+//     <7=> 42 dB
+// <i> Defines Select PGA gain value
+// <i> Default: 0
+#define RTE_ADC120_PGA_GAIN                (0)
+// </e> RTE_ADC121_DIFFERENTIAL_EN
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
@@ -6293,6 +6303,26 @@
 // <i> Configuration settings for Driver_ADC121 in component ::Drivers:ADC
 #define RTE_ADC121   1
 #if RTE_ADC121
+
+// <o> ADC121 DONE0 IRQ PRIORITY <0-225>
+// <i> defines ADC121 done0 interrupt priority
+// <i> default: 0
+#define RTE_ADC121_DONE0_IRQ_PRIORITY       0
+
+// <o> ADC121 DONE1 IRQ PRIORITY <0-225>
+// <i> defines ADC121 interrupt priority
+// <i> default: 0
+#define RTE_ADC121_DONE1_IRQ_PRIORITY       0
+
+// <o> ADC121 CMPA IRQ PRIORITY <0-225>
+// <i> defines ADC121 interrupt priority
+// <i> default: 0
+#define RTE_ADC121_CMPA_IRQ_PRIORITY        0
+
+// <o> ADC121 CMPB IRQ PRIORITY <0-225>
+// <i> defines ADC121 interrupt priority
+// <i> default: 0
+#define RTE_ADC121_CMPB_IRQ_PRIORITY        0
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
@@ -6326,12 +6356,30 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC121_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <o> Differential mode enable
+// <e> RTE_ADC121_DIFFERENTIAL_EN
+// <i> Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+#define RTE_ADC121_DIFFERENTIAL_EN          0
+
+// <o> Pga enable
 //     <0=> DISABLE
 //     <1=> ENABLE
-// <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+// <i> Defines Enable ADC121 using PGA gain
 // <i> Default: DISABLE
-#define RTE_ADC121_DIFFERENTIAL_EN          0
+#define RTE_ADC121_PGA_EN                  (0)
+
+// <o> PGA gain value
+//     <0=> 0 dB
+//     <1=> 6 dB
+//     <2=> 12 dB
+//     <3=> 18 dB
+//     <4=> 24 dB
+//     <5=> 30 dB
+//     <6=> 36 dB
+//     <7=> 42 dB
+// <i> Defines Select PGA gain value
+// <i> Default: 0
+#define RTE_ADC121_PGA_GAIN                (0)
+// </e> RTE_ADC121_DIFFERENTIAL_EN
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
@@ -6363,6 +6411,26 @@
 // <i> Configuration settings for Driver_ADC122 in component ::Drivers:ADC
 #define RTE_ADC122   1
 #if RTE_ADC122
+
+// <o> ADC122 DONE0 IRQ PRIORITY <0-225>
+// <i> defines ADC122 done0 interrupt priority
+// <i> default: 0
+#define RTE_ADC122_DONE0_IRQ_PRIORITY       0
+
+// <o> ADC122 DONE1 IRQ PRIORITY <0-225>
+// <i> defines ADC122 interrupt priority
+// <i> default: 0
+#define RTE_ADC122_DONE1_IRQ_PRIORITY       0
+
+// <o> ADC122 CMPA IRQ PRIORITY <0-225>
+// <i> defines ADC122 interrupt priority
+// <i> default: 0
+#define RTE_ADC122_CMPA_IRQ_PRIORITY        0
+
+// <o> ADC122 CMPB IRQ PRIORITY <0-225>
+// <i> defines ADC122 interrupt priority
+// <i> default: 0
+#define RTE_ADC122_CMPB_IRQ_PRIORITY        0
 
 // <o> Input channel number <0-8>
 // <i> Defines select input channel number.
@@ -6396,12 +6464,30 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC122_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <o> Differential mode enable
+// <e> RTE_ADC122_DIFFERENTIAL_EN
+// <i> Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+#define RTE_ADC122_DIFFERENTIAL_EN          0
+
+// <o> Enable PGA ADC122
 //     <0=> DISABLE
 //     <1=> ENABLE
-// <i> Defines Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
+// <i> Defines Enable ADC122 using PGA gain
 // <i> Default: DISABLE
-#define RTE_ADC122_DIFFERENTIAL_EN          0
+#define RTE_ADC122_PGA_EN                  (0)
+
+// <o> PGA gain value
+//     <0=> 0 dB
+//     <1=> 6 dB
+//     <2=> 12 dB
+//     <3=> 18 dB
+//     <4=> 24 dB
+//     <5=> 30 dB
+//     <6=> 36 dB
+//     <7=> 42 dB
+// <i> Defines Select PGA gain value
+// <i> Default: 0
+#define RTE_ADC122_PGA_GAIN                (0)
+// </e> RTE_ADC122_DIFFERENTIAL_EN
 
 // <o> Comparator mode enable
 //     <0=> DISABLE
@@ -6428,6 +6514,101 @@
 
 #endif
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
+
+// <e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
+// <i> Configuration settings for Driver_ADC24 in component ::Drivers:ADC
+#define RTE_ADC24   1
+#if RTE_ADC24
+
+// <o> ADC24 DONE0 IRQ PRIORITY <0-225>
+// <i> defines ADC24 done0 interrupt priority
+// <i> default: 0
+#define RTE_ADC24_DONE0_IRQ_PRIORITY        0
+
+// <o> ADC24 DONE1 IRQ PRIORITY <0-225>
+// <i> defines ADC24 interrupt priority
+// <i> default: 0
+#define RTE_ADC24_DONE1_IRQ_PRIORITY        0
+
+// <o> ADC24 CMPA IRQ PRIORITY <0-225>
+// <i> defines ADC24 interrupt priority
+// <i> default: 0
+#define RTE_ADC24_CMPA_IRQ_PRIORITY         0
+
+// <o> ADC24 CMPB IRQ PRIORITY <0-225>
+// <i> defines ADC24 interrupt priority
+// <i> default: 0
+#define RTE_ADC24_CMPB_IRQ_PRIORITY         0
+
+// <o> Input channel number <0-4>
+// <i> Defines select input channel number.
+// <i> Default: 0
+#define RTE_ADC24_INPUT_NUM                (0)
+
+// <o> Clock Divider <2-64>
+// <i> Defines Clock divider applied to main clock
+// <i> Default: 2
+#define RTE_ADC24_CLOCK_DIV                (2)
+
+// <o> Number of average sample <0-256>
+// <i> Defines Number of sample to be taken and it must be power of 2
+// <i> Default: 256
+#define RTE_ADC24_AVG_SAMPLE_NUM           (256)
+
+// <o> Number of bits to shift <0-8>
+// <i> Defines How much bit to shift before storing in sample register.
+// <i> Default: 8
+#define RTE_ADC24_SHIFT_N_BIT              (8)
+
+// <o> Left or Right shift
+//     <0=> LEFT SHIFT
+//     <1=> RIGHT SHIFT
+// <i> Defines shift averaged value before loading in sample register.
+// <i> Default: RIGHT SHIFT
+#define RTE_ADC24_SHIFT_LEFT_OR_RIGHT      (1)
+
+// <o> Ouput rate select
+//     <0=> 1 KS/s
+//     <1=> 2 KS/s
+//     <2=> 4 KS/s
+//     <3=> 8 KS/s
+//     <4=> 16 KS/s
+// <i> Defines Select adc24 output rate
+// <i> Default: 0
+#define RTE_ADC24_OUTPUT_RATE              (0)
+
+// <o> PGA enable
+//     <0=> DISABLE
+//     <1=> ENABLE
+// <i> Defines Enable PGA to set PGA gain
+// <i> Default: DISABLE
+#define RTE_ADC24_PGA_EN                   (0)
+
+// <o> PGA gain value
+//     <0=> 0 dB
+//     <1=> 6 dB
+//     <2=> 12 dB
+//     <3=> 18 dB
+//     <4=> 24 dB
+//     <5=> 30 dB
+//     <6=> 36 dB
+//     <7=> 42 dB
+// <i> Defines Select PGA gain value
+// <i> Default: 0
+#define RTE_ADC24_PGA_GAIN                 (0)
+
+// <o> Bias Control
+//     <0=> 5 uA
+//     <1=> 6.25 uA
+//     <2=> 12 dB
+//     <3=> 7.5 uA
+//     <4=> 8.75 uA
+// <i> Defines Bias control
+// <i> Default: 3
+#define RTE_ADC24_BIAS                     (3)
+
+#endif
+// </e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
 // </h> ADC (Analog to Digital Converter)
 
 // <h> CRC (Cyclic Redundancy Check)
