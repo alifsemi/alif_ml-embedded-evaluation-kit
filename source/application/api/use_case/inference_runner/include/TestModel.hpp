@@ -35,7 +35,7 @@ namespace app {
     private:
 
         /* No need to define individual ops at the cost of extra memory. */
-        tflite::MicroMutableOpResolver<kNumberOperators> m_opResolver;
+        tflite::MicroMutableOpResolver<kNumberOperators> m_opResolver = CreateAllOpsResolver();
     };
 
 } /* namespace app */
