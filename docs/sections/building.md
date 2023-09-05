@@ -34,7 +34,7 @@ This section assumes that you are using an **x86_64 Linux** build machine.
 
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
-- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.16, or higher, is installed and available
+- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.19, or higher, is installed and available
   on the path.
 
 > **Note**: There is a known issue with Arm GNU Embedded Toolchain version 12.2.Rel1. See
@@ -47,11 +47,9 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```
 
     ```log
-    Product: ARM Compiler 6.16 Professional
-    Component: ARM Compiler 6.16
+    Product: Keil MDK Community
+    Component: ARM Compiler for Embedded 6.19
     ```
-
-> **Note:** To compile for Arm® Cortex™-M85 CPU (default CPU for Arm® Corstone-310), 6.18 is the minimum version required.
 
   Alternatively, use:
 
