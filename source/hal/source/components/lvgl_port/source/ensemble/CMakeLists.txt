@@ -17,6 +17,9 @@ project(lvgl_port
 set(ROTATE_DISPLAY "0" CACHE STRING "Rotate display by 0, 90, 180 or 270 degrees")
 set_property(CACHE ROTATE_DISPLAY PROPERTY STRINGS "0" "90" "180" "270")
 
+set(LV_THEME_DEFAULT_DARK "0" CACHE STRING "0: Light mode; 1: Dark mode")
+set_property(CACHE LV_THEME_DEFAULT_DARK PROPERTY STRINGS "0" "1")
+
 ## LVGL and Arm-2D libraries
 include(${CMAKE_SCRIPTS_DIR}/Arm-2D.cmake)
 target_include_directories(${ARM_2D_TARGET} PUBLIC
@@ -45,7 +48,9 @@ target_include_directories(${LVGL_TARGET} PRIVATE
 # Compile definitions
 target_compile_definitions(${LVGL_TARGET}
     PRIVATE
-    ROTATE_DISPLAY=${ROTATE_DISPLAY})
+    ROTATE_DISPLAY=${ROTATE_DISPLAY}
+    PUBLIC
+    LV_THEME_DEFAULT_DARK=${LV_THEME_DEFAULT_DARK})
 
 target_link_libraries(${LVGL_TARGET} PRIVATE
     cmsis_ensemble

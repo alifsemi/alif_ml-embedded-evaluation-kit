@@ -148,7 +148,7 @@ void lv_port_disp_init(void)
         for (uint32_t i = 0; i < children; i++) {
             lv_obj_add_flag(lv_obj_get_child(screen, i), LV_OBJ_FLAG_HIDDEN);
         }
-        lv_obj_remove_style_all(screen);
+        lv_theme_apply(screen);
         lv_port_unlock(lv_lock_state);
         return;
     }
