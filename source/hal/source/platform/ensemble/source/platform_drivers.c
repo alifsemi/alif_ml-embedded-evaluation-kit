@@ -324,9 +324,9 @@ void MPU_Load_Regions(void)
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, 2)
     },
 #if LP_PERIPHERAL_BASE != 0x70000000
-    { // SSE-700 AON registers (1A600000)
-    .RBAR = ARM_MPU_RBAR(0x1A600000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x1A60FFFF, 0)
+    { // SSE-700 Host Peripheral Region (1A000000)
+    .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, 0)
     },
 #endif
     { // DTCM (20000000)
