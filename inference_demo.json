@@ -14,5 +14,11 @@
         "cpu_id": "M55_HE",
         "flags": ["boot"],
         "signed": false
+    },
+    "DEVICE": {
+        "disabled" : false,
+        "binary": "app-device-config.json",
+        "version" : "0.5.00",
+        "signed": true
     }
 }
