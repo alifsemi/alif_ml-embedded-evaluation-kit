@@ -19,6 +19,7 @@
 #include "camera.h"
 #include "board.h"
 #include "base_def.h"
+#include "timer_ensemble.h"
 #include "delay.h"
 #include <tgmath.h>
 #include <string.h>
@@ -231,10 +232,10 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
      * while stopped at an appropriate breakpoint below.
      */
     write_tiff_header(&rgb_image.tiff_header, CIMAGE_X, CIMAGE_Y);
-    tprof1 = ARM_PMU_Get_CCNTR();
+    tprof1 = Get_SysTick_Cycle_Count32();
     // RGB conversion and frame resize
     dc1394_bayer_Simple(raw_image, rgb_image.image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
-    tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
+    tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
 
 #if !FAKE_CAMERA
     // Use pixel analysis from bayer_to_RGB to adjust gain
@@ -247,9 +248,9 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     crop_and_interpolate(rgb_image.image_data, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
     // Rewrite the TIFF header for the new size
     write_tiff_header(&rgb_image.tiff_header, ml_width, ml_height);
-    tprof4 = ARM_PMU_Get_CCNTR();
+    tprof4 = Get_SysTick_Cycle_Count32();
     // Color correction for white balance
     white_balance(ml_width, ml_height, rgb_image.image_data, rgb_image.image_data);
-    tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
+    tprof4 = Get_SysTick_Cycle_Count32() - tprof4;
     return rgb_image.image_data;
 }

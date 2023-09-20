@@ -138,27 +138,27 @@ using namespace arm::app::ad;
 
         const int16_t* inferenceWindow = audio_inf;
 
-        uint32_t start = ARM_PMU_Get_CCNTR();
+        uint32_t start = Get_SysTick_Cycle_Count32();
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(inferenceWindow, preProcess.GetAudioWindowSize())) {
             printf_err("Pre-processing failed.");
             return false;
         }
-        printf("Preprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+        printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
-        start = ARM_PMU_Get_CCNTR();
+        start = Get_SysTick_Cycle_Count32();
         if (!RunInference(model, profiler)) {
             printf_err("Inference failed.");
             return false;
         }
-        printf("Inference time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+        printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
-        start = ARM_PMU_Get_CCNTR();
+        start = Get_SysTick_Cycle_Count32();
         if (!postProcess.DoPostProcess()) {
             printf_err("Post-processing failed.");
             return false;
         }
-        printf("Postprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+        printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
         /* Add results from this window to our final results vector. */
         result += 0 - postProcess.GetOutputValue(0);

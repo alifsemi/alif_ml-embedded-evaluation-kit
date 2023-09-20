@@ -15,13 +15,12 @@
 #include <tgmath.h>
 #include "image_processing.h"
 
+#include "timer_ensemble.h"
 #include "RTE_Components.h"
 
 #if __ARM_FEATURE_MVE & 1
 #include <arm_mve.h>
 #endif
-
-#include "RTE_Components.h"
 
 int frame_crop(const void *input_fb,
 		       uint32_t ip_row_size,
@@ -382,7 +381,7 @@ int crop_and_interpolate( uint8_t *image,
     if (bpp != 24) {
         abort();
     }
-    tprof2 = ARM_PMU_Get_CCNTR();
+    tprof2 = Get_SysTick_Cycle_Count32();
     // What are dimensions that maintain aspect ratio?
     calculate_crop_dims(srcWidth, srcHeight, dstWidth, dstHeight, &cropWidth, &cropHeight);
     // Now crop to that dimension, in place
@@ -398,12 +397,12 @@ int crop_and_interpolate( uint8_t *image,
 		bpp);
 
     if( res < 0 ) { return res; }
-    tprof2 = ARM_PMU_Get_CCNTR() - tprof2;
+    tprof2 = Get_SysTick_Cycle_Count32() - tprof2;
 
-    tprof3 = ARM_PMU_Get_CCNTR();
+    tprof3 = Get_SysTick_Cycle_Count32();
     // Finally, interpolate down to desired dimensions, in place
     int result = resize_image_A(image, cropWidth, cropHeight, image, dstWidth, dstHeight, bpp/8);
-    tprof3 = ARM_PMU_Get_CCNTR() - tprof3;
+    tprof3 = Get_SysTick_Cycle_Count32() - tprof3;
     return result;
 }
 
