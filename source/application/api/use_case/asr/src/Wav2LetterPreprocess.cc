@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ namespace app {
                                         mfccWindow,
                                         mfccWindow + this->m_mfccWindowLen);
             auto mfcc = this->m_mfcc.MfccCompute(mfccAudioData);
-            for (size_t i = 0; i < this->m_mfccBuf.size(0); ++i) {
+            for (size_t i = 0; i < this->m_mfccBuf.dimSize(0); ++i) {
                 this->m_mfccBuf(i, mfccBufIdx) = mfcc[i];
             }
             ++mfccBufIdx;
@@ -126,16 +126,16 @@ namespace app {
             -0.03679654,     -0.04329004,     -0.03679654,
             -0.01731602,      0.01515152,      0.06060606};
 
-        if (delta1.size(0) == 0 || delta2.size(0) != delta1.size(0) ||
-            mfcc.size(0) == 0 || mfcc.size(1) == 0) {
+        if (delta1.dimSize(0) == 0 || delta2.dimSize(0) != delta1.dimSize(0) ||
+            mfcc.dimSize(0) == 0 || mfcc.dimSize(1) == 0) {
             return false;
         }
 
         /* Get the middle index; coeff vec len should always be odd. */
         const size_t coeffLen = delta1Coeffs.size();
         const size_t fMidIdx = (coeffLen - 1)/2;
-        const size_t numFeatures = mfcc.size(0);
-        const size_t numFeatVectors = mfcc.size(1);
+        const size_t numFeatures    = mfcc.dimSize(0);
+        const size_t numFeatVectors = mfcc.dimSize(1);
 
         /* Iterate through features in MFCC vector. */
         for (size_t i = 0; i < numFeatures; ++i) {
@@ -169,7 +169,7 @@ namespace app {
 
     void AsrPreProcess::StandardizeVecF32(Array2d<float>& vec)
     {
-        auto mean = math::MathUtils::MeanF32(vec.begin(), vec.totalSize());
+        auto mean   = math::MathUtils::MeanF32(vec.begin(), vec.totalSize());
         auto stddev = math::MathUtils::StdDevF32(vec.begin(), vec.totalSize(), mean);
 
         debug("Mean: %f, Stddev: %f\n", mean, stddev);

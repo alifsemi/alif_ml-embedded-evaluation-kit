@@ -18,18 +18,13 @@
 #include "log_macros.h"
 
 #include <cinttypes>
+#include <memory>
 
-/* Initialise the model */
-arm::app::Model::~Model()
-{
-    delete this->m_pInterpreter;
-    /**
-     * No clean-up function available for allocator in TensorFlow Lite Micro yet.
-     **/
-}
+arm::app::Model::~Model() = default;
 
 arm::app::Model::Model() : m_inited(false), m_type(kTfLiteNoType) {}
 
+/* Initialise the model */
 bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
                            uint32_t tensorArenaSize,
                            const uint8_t* nnModelAddr,
@@ -83,8 +78,8 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
         debug("Using existing allocator @ 0x%p\n", this->m_pAllocator);
     }
 
-    this->m_pInterpreter =
-        new ::tflite::MicroInterpreter(this->m_pModel, this->GetOpResolver(), this->m_pAllocator);
+    this->m_pInterpreter = std::make_unique<tflite::MicroInterpreter>(
+        this->m_pModel, this->GetOpResolver(), this->m_pAllocator);
 
     if (!this->m_pInterpreter) {
         printf_err("Failed to allocate interpreter\n");
@@ -97,7 +92,6 @@ bool arm::app::Model::Init(uint8_t* tensorArenaAddr,
 
     if (allocate_status != kTfLiteOk) {
         printf_err("tensor allocation failed!\n");
-        delete this->m_pInterpreter;
         return false;
     }
 
@@ -199,7 +193,7 @@ void arm::app::Model::LogInterpreterInfo()
     for (size_t i = 0; i < nOperators; ++i) {
         const tflite::Operator* op         = subgraph->operators()->Get(i);
         const tflite::OperatorCode* opcode = opcodes->Get(op->opcode_index());
-        const TfLiteRegistration_V1* reg      = nullptr;
+        const TFLMRegistration* reg        = nullptr;
 
         tflite::GetRegistrationFromOpCode(opcode, this->GetOpResolver(), &reg);
         std::string opName;

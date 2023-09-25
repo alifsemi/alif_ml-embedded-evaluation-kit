@@ -30,19 +30,16 @@
     #pragma clang diagnostic ignored "-Wunused-parameter"
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/all_ops_resolver.h"
     #pragma clang diagnostic pop
 #elif defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-parameter"
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/all_ops_resolver.h"
     #pragma GCC diagnostic pop
 #else
     #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
     #include "tensorflow/lite/micro/micro_interpreter.h"
-    #include "tensorflow/lite/micro/all_ops_resolver.h"
 #endif
 
 #include "tensorflow/lite/c/common.h"

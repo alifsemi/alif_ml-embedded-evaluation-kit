@@ -34,7 +34,7 @@ This section assumes that you are using an **x86_64 Linux** build machine.
 
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
-- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.16, or higher, is installed and available
+- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.19, or higher, is installed and available
   on the path.
 
 > **Note**: There is a known issue with Arm GNU Embedded Toolchain version 12.2.Rel1. See
@@ -47,11 +47,9 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
     ```
 
     ```log
-    Product: ARM Compiler 6.16 Professional
-    Component: ARM Compiler 6.16
+    Product: Keil MDK Community
+    Component: ARM Compiler for Embedded 6.19
     ```
-
-> **Note:** To compile for Arm® Cortex™-M85 CPU (default CPU for Arm® Corstone-310), 6.18 is the minimum version required.
 
   Alternatively, use:
 
@@ -155,6 +153,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   - xxd
   - unzip
   - Python Pillow
+  - curl
 
 > **Note:** Due to the fast paced nature of development, this list might not be exhaustive.
 Please refer to Tensorflow Lite Micro documentation for more info.
@@ -198,7 +197,7 @@ The build parameters are:
   These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
   points to the `dependencies/cmsis`, `dependencies/cmsis-dsp` and `dependencies/cmsis-nn` git submodules.
   Repositories are hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git),
-  [CMSIS-DPS](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
+  [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
