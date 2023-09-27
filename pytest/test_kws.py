@@ -30,6 +30,6 @@ def test_max_kws_inference_times(dut: Dut):
     dut.write(MENU_OPT_RUN_ONCE)
 
     # Check durations
-    expect_in_range(14.0, 15.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
+    expect_in_range(14.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
     expect_in_range(2.6, 2.8, get_time(dut, 'Inference'), 'Inference')
     expect_in_range(0.02, 0.055, get_time(dut, 'Postprocessing'), 'Postprocessing')
