@@ -132,7 +132,7 @@ namespace app {
         }
 
  uint32_t lv_lock_state = lv_port_lock();
-        tprof5 = ARM_PMU_Get_CCNTR();
+        tprof5 = Get_SysTick_Cycle_Count32();
         /* Display this image on the LCD. */
 #ifdef USE_LVGL_ZOOM
         write_to_lvgl_buf(
@@ -140,7 +140,7 @@ namespace app {
         write_to_lvgl_buf_doubled(
 #endif
                 MIMAGE_X, MIMAGE_Y, image_data, &lvgl_image[0][0]);
-        tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
+        tprof5 = Get_SysTick_Cycle_Count32() - tprof5;
         lv_obj_invalidate(ScreenLayoutImageObject());
 
         if (SKIP_MODEL || !run_requested()) {

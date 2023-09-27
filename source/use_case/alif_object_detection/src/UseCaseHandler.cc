@@ -48,7 +48,7 @@
 
 namespace {
 lv_style_t boxStyle;
-lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 448x448x4 = 802,856
+lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 192x192x2 = 73,728
 };
 
 using arm::app::Profiler;
@@ -176,7 +176,7 @@ using namespace arm::app::object_detection;
             const size_t copySz = inputTensor->bytes;
 
 #if SHOW_INF_TIME
-        uint32_t inf_prof = ARM_PMU_Get_CCNTR();
+        uint32_t inf_prof = Get_SysTick_Cycle_Count32();
 #endif
 
             /* Run the pre-processing, inference and post-processing. */
@@ -198,7 +198,7 @@ using namespace arm::app::object_detection;
             }
 
 #if SHOW_INF_TIME
-            inf_prof = ARM_PMU_Get_CCNTR() - inf_prof;
+            inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
             lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "Inference time: %.3f ms", (double)inf_prof / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Inferences / sec: %.2f", (double) SystemCoreClock / inf_prof);
             //lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Inferences / second: %.2f", (double) SystemCoreClock / (inf_loop_time_end - inf_loop_time_start));

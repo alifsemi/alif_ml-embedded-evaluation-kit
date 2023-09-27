@@ -38,7 +38,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdatomic.h>
-#include "Driver_PINMUX_AND_PINPAD.h"
 #include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
@@ -71,77 +70,6 @@ const char * tr_prefix = NULL;
 uint16_t prefix_len;
 #define MAX_TRACE_LEN 256
 
-static int hardware_init(void)
-{
-    int32_t ret;
-
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
-
-#if CONSOLE_UART == 2
-    /* PINMUX UART2_A */
-
-    /* Configure GPIO Pin : P1_11 as UART2_TX_A */
-    ret = PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_11, PINMUX_ALTERNATE_FUNCTION_1);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-#elif CONSOLE_UART == 4
-    /* PINMUX UART4_A */
-
-    /* Configure GPIO Pin : P1_3 as UART4_TX_A */
-    ret = PINMUX_Config (PORT_NUMBER_1, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_1);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-#else
-    #error "Unsupported UART!"
-#endif
-
-#elif TARGET_BOARD == BOARD_DevKit
-
-#if CONSOLE_UART == 2
-    /* PINMUX UART2_B */
-
-    /* Configure GPIO Pin : P3_16 as UART2_RX_B */
-    ret = PINMUX_Config (PORT_NUMBER_3, PIN_NUMBER_16, PINMUX_ALTERNATE_FUNCTION_2);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-
-    /* Configure GPIO Pin : P3_17 as UART2_TX_B */
-    ret = PINMUX_Config (PORT_NUMBER_3, PIN_NUMBER_17, PINMUX_ALTERNATE_FUNCTION_2);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-#elif CONSOLE_UART == 4
-    /* PINMUX UART4_B */
-
-    /* Configure GPIO Pin : P3_1 as UART4_RX_B */
-    ret = PINMUX_Config (PORT_NUMBER_3, PIN_NUMBER_1, PINMUX_ALTERNATE_FUNCTION_1);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-
-    /* Configure GPIO Pin : P3_2 as UART4_TX_B */
-    ret = PINMUX_Config (PORT_NUMBER_3, PIN_NUMBER_2, PINMUX_ALTERNATE_FUNCTION_1);
-    if(ret != ARM_DRIVER_OK)
-    {
-        return -1;
-    }
-#else
-    #error "Unsupported UART!"
-#endif
-
-#endif
-
-    return 0;
-}
-
 void myUART_callback(uint32_t event)
 {
     uart_event = event;
@@ -156,14 +84,6 @@ int tracelib_init(const char * prefix)
         prefix_len = strlen(tr_prefix);
     } else {
         prefix_len = 0;
-    }
-
-
-    /* Initialize UART hardware pins using PinMux Driver. */
-    ret = hardware_init();
-    if(ret != 0)
-    {
-        return ret;
     }
 
     /* Initialize UART driver */

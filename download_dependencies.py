@@ -39,6 +39,8 @@ CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb
 CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip"
 CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.08.zip"
 CMSIS_ENSEMBLE = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/5bfce4020fa27d91fcd950725d35ecee8ba364ad.zip"
+CMSIS_ENSEMBLE_B = "https://github.com/alifsemi/b0-cmsis-dfp_DEV/archive/48b91a4aa0577ce45cb06470015b6578b765b920.zip"
+BOARDLIB = "https://github.com/alifsemi/boardlib_DEV/archive/3a0953ebbd4a40da4e60848088e3c9548ae4bf15.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.08.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.08.tar.gz"
 LVGL = "https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.7.zip"
@@ -88,6 +90,10 @@ def main(dependencies_path: Path):
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
     download(CMSIS_ENSEMBLE,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble"))
+    download(CMSIS_ENSEMBLE_B,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble-b"))
+    download(BOARDLIB,
+             lambda file: unzip(file.name, to_path=dependencies_path / "boardlib"))
     download(ETHOS_U_CORE_DRIVER,
              lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
     download(ETHOS_U_CORE_PLATFORM,

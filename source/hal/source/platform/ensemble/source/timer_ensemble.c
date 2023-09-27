@@ -37,7 +37,6 @@
 #include "log_macros.h"
 #include "RTE_Device.h"
 #include "RTE_Components.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
 
 #include CMSIS_device_header
 

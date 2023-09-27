@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef DRIVER_CPI_H_
-#define DRIVER_CPI_H_
+#ifndef CAMERA_H_
+#define CAMERA_H_
 
 #include <stdint.h>
 
@@ -36,4 +36,4 @@ int32_t camera_vsync(uint32_t timeout_ms);
 int32_t camera_wait(uint32_t timeout_ms);
 
 
-#endif /* DRIVER_CPI_H_ */
+#endif /* CAMERA_H_ */

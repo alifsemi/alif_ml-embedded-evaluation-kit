@@ -17,6 +17,7 @@
 
 extern "C" {
 LV_IMG_DECLARE(Alif240);
+LV_IMG_DECLARE(Alif240_white);
 }
 namespace alif {
 namespace app {
@@ -45,7 +46,12 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
 
     static lv_style_t style;
     lv_style_init(&style);
-    lv_style_set_bg_color(&style, lv_color_hex(0xffffff));
+#if LV_THEME_DEFAULT_DARK == 0
+    lv_style_set_bg_color(&style, lv_color_white());
+#else
+    lv_style_set_bg_color(&style, lv_color_black());
+#endif
+
     lv_style_set_text_font(&style, &lv_font_montserrat_28);
     lv_obj_add_style(screen, &style, LV_PART_MAIN);
 
@@ -92,7 +98,12 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     /* (Serves to determine screen layout, as layout can get weird for zoomed image widgets) */
     imageHolder = lv_obj_create(screen);
     lv_obj_move_background(imageHolder);
+#if LV_THEME_DEFAULT_DARK == 0
     lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x666666), LV_PART_MAIN);
+#else
+    lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x444444), LV_PART_MAIN);
+#endif
+
     lv_obj_set_style_radius(imageHolder, 4 * DISP_SCALE, LV_PART_MAIN);
     lv_obj_add_style(imageHolder, &noBorder, LV_PART_MAIN);
     lv_obj_add_style(imageHolder, &imageHolderPadding, LV_PART_MAIN);
@@ -107,6 +118,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
         lv_obj_set_width(resultHolder, LV_PCT(100));
     }
     lv_obj_set_flex_grow(resultHolder, 1);
+    lv_obj_set_style_bg_opa(resultHolder, LV_OPA_TRANSP, LV_PART_MAIN);
 
     lv_obj_add_style(resultHolder, &noBorder, LV_PART_MAIN);
     lv_obj_add_style(resultHolder, &resultPadding, LV_PART_MAIN);
@@ -116,7 +128,11 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_style_set_text_font(&confident, &lv_font_montserrat_32);
 
     lv_style_init(&weak);
+#if LV_THEME_DEFAULT_DARK == 0
     lv_style_set_text_color(&weak, lv_color_hex(0xcccccc));
+#else
+    lv_style_set_text_color(&weak, lv_color_hex(0x888888));
+#endif
     lv_style_set_text_font(&weak, &lv_font_montserrat_24);
 
     lv_style_init(&tiny);
@@ -175,7 +191,11 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
 
     /* Add a logo */
     lv_obj_t *alifObj = lv_img_create(resultHolder);
+#if LV_THEME_DEFAULT_DARK == 0
     lv_img_set_src(alifObj, &Alif240);
+#else
+    lv_img_set_src(alifObj, &Alif240_white);
+#endif
     lv_obj_set_align(alifObj, LV_ALIGN_BOTTOM_MID);
     lv_obj_move_background(alifObj);
 

@@ -61,6 +61,10 @@ if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
     set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
 endif()
 
+if (NOT DEFINED ETHOS_U_NPU_PORTS)
+    set(ETHOS_U_NPU_PORTS 2)
+endif()
+
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
     if (ETHOS_U_NPU_ID STREQUAL U55)
         set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
@@ -103,6 +107,7 @@ endif()
 # NOTE: The above scheme is completely dependent on Vela and could potentially
 #       change.
 #
+if (ETHOS_U_NPU_PORTS EQUAL 2)
 # Common definitions:
 # For Ethos-U55/U65, Region configs are set as:
 #   0 or 1 = AXI0
@@ -124,6 +129,18 @@ if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
 else()
     target_compile_definitions(ethosu_core_driver PRIVATE
         NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
+endif()
+else()
+target_compile_definitions(ethosu_core_driver PRIVATE
+    NPU_QCONFIG=1       # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_0=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_1=0   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_2=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_3=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_4=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_5=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_6=1   # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_7=1)  # AXI0=M0 for U55/U65
 endif()
 
 # Although this is system implementation dependent the platforms we build for should support the

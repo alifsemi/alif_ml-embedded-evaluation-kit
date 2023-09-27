@@ -1,0 +1,14 @@
+reedsolo==1.5.4 --no-binary=reedsolo
+pytest
+pytest-embedded
+pytest-embedded-serial
+pytest-embedded-idf
+pytest-embedded-serial-esp
+esptool
+pytest-lazy-fixture
+joulescope
+pytest-html-reporter --no-binary=pytest-html-reporter
+junitparser --no-binary=junitparser
+future --no-binary=future
+pytest-random-order
+yepkit-pykush --no-binary=yepkit-pykush

@@ -31,6 +31,7 @@
 #include "KwsClassifier.hpp"
 #include "MicroNetKwsModel.hpp"
 #include "hal.h"
+#include "timer_ensemble.h"
 #include "AudioUtils.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
@@ -103,7 +104,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
 
     /* KWS inference handler. */
-    bool ClassifyAudioHandler(ApplicationContext& ctx)
+    bool ClassifyAudioHandler(ApplicationContext& ctx, bool oneshot)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model = ctx.Get<Model&>("model");
@@ -183,27 +184,27 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
             const int16_t* inferenceWindow = audio_inf;
 
-            uint32_t start = ARM_PMU_Get_CCNTR();
+            uint32_t start = Get_SysTick_Cycle_Count32();
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
-            printf("Preprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
-            start = ARM_PMU_Get_CCNTR();
+            start = Get_SysTick_Cycle_Count32();
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
                 return false;
             }
-            printf("Inference time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
-            start = ARM_PMU_Get_CCNTR();
+            start = Get_SysTick_Cycle_Count32();
             if (!postProcess.DoPostProcess()) {
                 printf_err("Post-processing failed.");
                 return false;
             }
-            printf("Postprocessing time = %.3f ms\n", (double) (ARM_PMU_Get_CCNTR() - start) / SystemCoreClock * 1000);
+            printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
             /* Add results from this window to our final results vector. */
             if (infResults.size() == RESULTS_MEMORY) {
@@ -228,8 +229,8 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             profiler.PrintProfilingResult();
 
             ++index;
-
-        } while (true);
+        } while (!oneshot);
+        return true;
     }
 
     static bool PresentInferenceResult(const std::vector<kws::KwsResult>& results)

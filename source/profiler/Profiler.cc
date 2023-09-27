@@ -184,7 +184,9 @@ namespace app {
 
         ProfileResult result{};
         result.name = this->m_name;
-        result.samplesNum = this->m_profStats[name][0].samplesNum;
+        if (!this->m_profStats[name].empty()) {
+            result.samplesNum = this->m_profStats[name][0].samplesNum;
+        }
 
         for (Statistics& stat : this->m_profStats[name]) {
             result.data.emplace_back(stat);

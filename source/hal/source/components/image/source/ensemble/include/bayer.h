@@ -86,4 +86,7 @@ typedef enum {
     DC1394_BASLER_UNKNOWN_SFF_CHUNK    = -39
 } dc1394error_t;
 
+dc1394error_t
+dc1394_bayer_Simple(const uint8_t * restrict bayer, uint8_t * restrict rgb, int sx, int sy, int tile);
+
 #endif
