@@ -20,8 +20,6 @@
 #include <cinttypes>
 #include <memory>
 
-arm::app::Model::~Model() = default;
-
 arm::app::Model::Model() : m_inited(false), m_type(kTfLiteNoType) {}
 
 /* Initialise the model */
