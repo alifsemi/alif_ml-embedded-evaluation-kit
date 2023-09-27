@@ -60,6 +60,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    Main.o (+RO)
    platform_drivers.o (+RO)
    *(InRoot$$Sections)
+   *(.init_array)
    *liblvgl.a(+RO)
    *libArm-2D.a(+RO)
    *libcmsis_ensemble.a(+RO)

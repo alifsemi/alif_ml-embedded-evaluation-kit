@@ -57,6 +57,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    ; where the usual attempts to put inference code into ITCM dont fit
    *(RESET, +First)
    *(InRoot$$Sections)
+   *(.init_array)
    *(+RO)
   }
 
