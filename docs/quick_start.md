@@ -37,14 +37,14 @@ To get started quickly, please follow these steps:
     [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
 
     ```commandline
-    python3 ./build_default.py
+    python3.9 ./build_default.py
     ```
 
     > **Note** The preceding command assumes you are using the GNU Arm Embedded toolchain. If you are using the Arm
     > Compiler instead, you can override the default selection by executing:
 
     ```commandline
-    python3 ./build_default.py --toolchain arm
+    python3.9 ./build_default.py --toolchain arm
     ```
 
 5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
@@ -71,7 +71,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==3.8.0
+env/bin/python3 -m pip install ethos-u-vela==3.9.0
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \

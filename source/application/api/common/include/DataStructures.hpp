@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #define DATA_STRUCTURES_HPP
 
 #include <iterator>
+#include <vector>
 
 namespace arm {
 namespace app {
@@ -49,21 +50,17 @@ namespace app {
         {
             if (rows == 0 || cols == 0) {
                 printf("Array2d constructor has 0 size.\n");
-                m_data = nullptr;
                 return;
             }
-            m_data = new T[rows * cols];
+            m_data = std::vector<T>(rows * cols);
         }
 
-        ~Array2d()
-        {
-            delete[] m_data;
-        }
+        ~Array2d() = default;
 
         T& operator() (unsigned int row, unsigned int col)
         {
 #if defined(DEBUG)
-            if (row >= m_rows || col >= m_cols ||  m_data == nullptr) {
+            if (row >= m_rows || col >= m_cols || m_data.empty()) {
                 printf_err("Array2d subscript out of bounds.\n");
             }
 #endif /* defined(DEBUG) */
@@ -73,7 +70,7 @@ namespace app {
         T operator() (unsigned int row, unsigned int col) const
         {
 #if defined(DEBUG)
-            if (row >= m_rows || col >= m_cols ||  m_data == nullptr) {
+            if (row >= m_rows || col >= m_cols || m_data.empty()) {
                 printf_err("const Array2d subscript out of bounds.\n");
             }
 #endif /* defined(DEBUG) */
@@ -84,7 +81,7 @@ namespace app {
          * @brief  Gets rows number of the current array2d.
          * @return Number of rows.
          */
-        size_t size(size_t dim)
+        size_t dimSize(size_t dim)
         {
             switch (dim)
             {
@@ -111,15 +108,15 @@ namespace app {
         using iterator=T*;
         using const_iterator=T const*;
 
-        iterator begin() { return m_data; }
-        iterator end() { return m_data + totalSize(); }
-        const_iterator begin() const { return m_data; }
-        const_iterator end() const { return m_data + totalSize(); };
+        iterator begin() { return m_data.data(); }
+        iterator end() { return m_data.data() + totalSize(); }
+        const_iterator begin() const { return m_data.data(); }
+        const_iterator end() const { return m_data.data() + totalSize(); };
 
     private:
         size_t m_rows;
         size_t m_cols;
-        T* m_data;
+        std::vector<T> m_data;
     };
 
 } /* namespace app */
