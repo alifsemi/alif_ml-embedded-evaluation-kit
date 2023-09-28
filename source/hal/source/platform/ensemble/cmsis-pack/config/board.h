@@ -22,7 +22,7 @@
 
 #if (TARGET_BOARD == BOARD_DevKit)
 #define BOARD_IS_ALIF_DEVKIT_VARIANT
-#include "devkit/board_defs.h"
+#include "devkit_gen1/board_defs.h"
 #elif (TARGET_BOARD == BOARD_AppKit_Alpha1)
 #define BOARD_IS_ALIF_APPKIT_ALPHA1_VARIANT
 #include "appkit_alpha1/board_defs.h"
