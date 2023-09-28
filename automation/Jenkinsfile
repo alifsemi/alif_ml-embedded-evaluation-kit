@@ -13,15 +13,13 @@ pipeline {
                 }
             }
         }
-        // Dependencies are set using git submodule for now due to private dependency repositories.
-        // To be re-enabled again once boardlib and cmsis for B are publicly available.
-        // stage('Download dependencies') {
-        //     steps {
-        //         script {
-        //             common_funcs.download_dependencies()
-        //         }
-        //     }
-        // }
+        stage('Download dependencies') {
+            steps {
+                script {
+                    common_funcs.download_dependencies()
+                }
+            }
+        }
         stage('Setup resources') {
             steps {
                 script {
