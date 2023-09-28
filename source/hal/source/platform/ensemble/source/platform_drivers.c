@@ -115,7 +115,11 @@ int platform_init(void)
 
     HWSEMdrv->Initialize(NULL);
     /* Only 1 core will do the pinmux */
+#if LP_PERIPHERAL_BASE == 0x70000000 // Old core, so old CMSIS pack
+    if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
+#else
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
+#endif
         /* We're first to acquire the lock - we do it */
         BOARD_Power_Init();
         BOARD_Clock_Init();

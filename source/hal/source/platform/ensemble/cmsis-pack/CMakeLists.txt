@@ -73,6 +73,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DMA_Opcode.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_Camera_Controller.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
