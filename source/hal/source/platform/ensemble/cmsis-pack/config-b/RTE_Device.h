@@ -57,158 +57,6 @@
 // <i> Default: 0x18
 #define RTE_CPI_FIFO_WRITE_WATERMARK                          0x18
 
-// <o> CPI Color mode
-//     <0=> IPI-16 RAW 6
-//     <1=> IPI-16 RAW 7
-//     <2=> IPI-16 RAW 8
-//     <3=> IPI-16 RAW 10
-//     <4=> IPI-16 RAW 12
-//     <5=> IPI-16 RAW 14
-//     <6=> IPI-16 RAW 16
-//     <7=> IPI-48 RGB444
-//     <8=> IPI-48 RGB555
-//     <9=> IPI-48 RGB666
-//     <10=> IPI-48 XRGB888
-//     <11=> IPI-48 RGBX888
-//     <12=> IPI-48 RAW 32
-//     <13=> IPI-48 RAW 48
-// <i> Defines CPI color mode.
-// <i> Default: 0
-#define RTE_CPI_COLOR_MODE                                    2
-
-// <e> ARX3A0 [Driver_ARX3A0]
-// <o> Enable/Disable ARX3A0 camera sensor
-//     <0=> disable
-//     <1=> enable
-// <i> define if to enable or disable ARX3A0 camera sensor
-// <i> default: enable
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_ENABLE                   1
-
-#if (RTE_ARX3A0_CAMERA_SENSOR_CPI_ENABLE)
-
-// <o> Select camera ARX3A0 pixel clock polarity
-//     <0=> not invert camera pixclk
-//     <1=> invert camera pixclk
-// <i> Defines camera pixel ARX3A0 clock polarity
-// <i> Default: not invert camera pixclk
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_PIXEL_CLK_POL            0
-
-// <o> Select camera ARX3A0 frame per second
-//     <5=>   5 FPS
-//     <40=> 40 FPS
-//     <60=> 60 FPS
-//     <90=> 90 FPS
-// <i> Defines camera ARX3A0 frame per second
-// <i> Default: 90 FPS
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CFG_FPS                  40
-
-// <o> Select camera ARX3A0 frequency
-// <i> Defines camera ARX3A0 frequency
-// <i> Default: 400000000
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_FREQ                     400000000
-
-// <o> Select camera sensor ARX3A0 CPI clock source division [Divisor] <2-511>
-// <i> Defines camera sensor ARX3A0 CPI clock source division
-// <i> Default: 20
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CLK_SCR_DIV              20
-
-// <o> Select camera ARX3A0 HSYNC polarity
-//     <0=>  not invert HSYNC input
-//     <1=>  invert HSYNC input
-// <i> Defines camera ARX3A0 HSYNC polarity
-// <i> Default:  not invert VSYNC input
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_HSYNC_POL                0
-
-// <o> Select camera ARX3A0 VSYNC polarity
-//     <0=> not invert VSYNC input
-//     <1=> invert VSYNC input
-// <i> Defines camera ARX3A0 VSYNC polarity
-// <i> Default:  not invert VSYNC input
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_POL                0
-
-// <o> Select camera ARX3A0 VSYNC wait
-//     <0=> vsync wait disable
-//     <1=> vsync wait enable
-// <i> Defines camera ARX3A0 VSYNC wait
-// <i> Default: vsync wait disable
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_WAIT               1
-
-// <o> Select camera ARX3A0 HSYNC mode
-//     <0=> sync enable
-//     <1=> data enable
-// <i> Defines camera ARX3A0 HSYNC mode
-// <i> Default: sync enable
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_VSYNC_MODE               0
-
-// <o> Select video data mode
-//     <0=> 1 bit
-//     <1=> 2 bit
-//     <2=> 4 bit
-//     <3=> 8 bit
-//     <4=> 16 bit
-//     <5=> 32 bit
-//     <6=> 64 bit
-// <i> Defines video data mode
-// <i> Default: 8 bit
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_MODE                3
-
-// <o> Select Data Endianness
-//     <0=> LSB First
-//     <1=> MSB First
-// <i> Select MSB/LSB
-// <i> Default: LSB
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_ENDIANNESS          0
-
-// <o> Select CODE10ON8
-//     <0=> Disable
-//     <1=> Enable
-// <i> Defines transfer 10-bit coding over 8-bit data bus.
-// <i> Default: 8 bit
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_CODE10ON8                0
-
-// <o> Select camera ARX3A0 data mask
-//     <0=> 16 bit
-//     <1=> 10 bit
-//     <2=> 12 bit
-//     <3=> 14 bit
-// <i> Defines camera ARX3A0 data mask
-// <i> no impact on 8-bit mode
-// <i> Default: 10 bit
-#define RTE_ARX3A0_CAMERA_SENSOR_CPI_DATA_MASK                1
-
-// <o> Select camera sensor ARX3A0 reset pin number
-// <i> Defines camera sensor ARX3A0 reset pin number
-// <i> Default: 1
-#define RTE_ARX3A0_CAMERA_SENSOR_RESET_PIN_NO                 BOARD_CAMERA_RESET_PIN_NO
-
-// <o> Select camera sensor ARX3A0 reset GPIO port
-// <i> Defines camera sensor ARX3A0 reset GPIO port
-// <i> Default: 9
-#define RTE_ARX3A0_CAMERA_SENSOR_RESET_GPIO_PORT              BOARD_CAMERA_RESET_GPIO_PORT
-
-// <o> Select camera sensor ARX3A0 power pin number
-// <i> Defines camera sensor ARX3A0 power pin number
-// <i> Default: 5
-#define RTE_ARX3A0_CAMERA_SENSOR_POWER_PIN_NO                 BOARD_CAMERA_POWER_PIN_NO
-
-// <o> Select camera sensor ARX3A0 power GPIO port
-// <i> Defines camera sensor ARX3A0 power GPIO port
-// <i> Default: 7
-#define RTE_ARX3A0_CAMERA_SENSOR_POWER_GPIO_PORT              BOARD_CAMERA_POWER_GPIO_PORT
-
-// <o RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor ARX3A0 i2c instance
-// <i> Defines camera sensor ARX3A0 i2c instance
-//     <0=>   I2C0
-//     <1=>   I2C1
-//     <2=>   I2C2
-//     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
-// <i> Default: 1
-#define RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
-
-#endif
-// </e> ARX3A0 [Driver_ARX3A0]
-
 // <e> MT9M114 [Driver_MT9M114]
 // <o> Enable/Disable MT9M114 camera sensor
 //     <0=> disable
@@ -286,6 +134,16 @@
 // <i> Defines camera MT9M114 data mask
 // <i> Default: 10 bit
 #define RTE_MT9M114_CAMERA_SENSOR_CPI_DATA_MASK               1
+
+// <o> select MT9M114 frame height
+// <i> defines select MT9M114 frame height.
+// <i> default: 480
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT                480
+
+// <o> select MT9M114 frame width
+// <i> defines select MT9M114 frame width.
+// <i> default: 640
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH                 640
 
 // <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
 // <i> Defines camera sensor MT9M114 i2c instance
@@ -398,6 +256,16 @@
 // <i> Default: 8 bit
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_CODE10ON8             0
 
+// <o> select MT9M114 frame height
+// <i> defines select MT9M114 frame height.
+// <i> default: 480
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT                480
+
+// <o> select MT9M114 frame width
+// <i> defines select MT9M114 frame width.
+// <i> default: 640
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH                 640
+
 // <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
 // <i> Defines camera sensor MT9M114 i2c instance
 //     <0=>   I2C0
@@ -419,62 +287,12 @@
 #define RTE_MIPI_CSI2                                           1
 #if RTE_MIPI_CSI2
 
-// <o> select clock mode
-//     <1=> non continuous clock mode
-//     <0=> continuous clock mode
-// <i> defines clock mode for mipi csi2
-// <i> default: non continuous clock mode
-#define RTE_MIPI_CSI2_NON_CONTINUOUS_CLOCK_MODE                 1
-
-// <o> select CSI2 pixel clock divider [Divisor] <2-511>
-// <i> defines select CSI2 pixel clock divider value.
-// <i> default: 2
-#define RTE_MIPI_CSI2_PIXCLK_DIV                                2
-
-// <o> select number of lanes in DPHY
-//     <1=> one lane
-//     <2=> two lane
-// <i> defines select number of lanes in DPHY.
-// <i> default: two lane
-#define RTE_MIPI_CSI2_N_LANES                                   2
-
-// <o> select number of virtual channel ID
-//     <0=> one virtual channel
-// <i> defines select number of virtual channel IDs.
-// <i> default: one virtual channel
-#define RTE_MIPI_CSI2_VC_ID                                     0
-
-// <o> select CSI2 Data type
-//     <24=> YUV420_8
-//     <25=> YUV420_10
-//     <26=> YUV420_8_LEGACY
-//     <28=> YUV420_8_SHIFT
-//     <29=> YUV420_10_SHIFT
-//     <30=> YUV422_8
-//     <31=> YUV422_10
-//     <32=> RGB444
-//     <33=> RGB555
-//     <34=> RGB565
-//     <35=> RGB666
-//     <36=> RGB888
-//     <40=> RAW6
-//     <41=> RAW7
-//     <42=> RAW8
-//     <43=> RAW10
-//     <44=> RAW12
-//     <45=> RAW14
-//     <46=> RAW16
-//     <48=> USER_DEFINED_1
-//     <49=> USER_DEFINED_2
-//     <50=> USER_DEFINED_3
-//     <51=> USER_DEFINED_4
-//     <52=> USER_DEFINED_5
-//     <53=> USER_DEFINED_6
-//     <54=> USER_DEFINED_7
-//     <55=> USER_DEFINED_8
-// <i> defines select CSI2 Data type
-// <i> default: RAW10
-#define RTE_MIPI_CSI2_DATA_TYPE                                 43
+// <o> CSI pixel clock select
+//     <0=>  400 MHz clock source (PLL_CLK1/2)
+//     <1=>  480 MHz clock source (PLL_CLK3)
+// <i> Defines CSI pixel clock select
+// <i> Default: 400 MHz clock source (PLL_CLK1/2)
+#define RTE_CSI2_PIX_CLK_SEL                                 0
 
 // <o> select IPI mode
 //     <0=> camera mode
@@ -482,13 +300,6 @@
 // <i> defines select IPI mode
 // <i> default: camera mode
 #define RTE_MIPI_CSI2_IPI_MODE                                  0
-
-// <o> select color component
-//     <0=> 48 bit interface
-//     <1=> 16 bit interface
-// <i> defines select color component
-// <i> default: 16 bit interface
-#define RTE_MIPI_CSI2_COLOR_COP                                 1
 
 // <o> select memory flush
 //     <0=> manual
@@ -628,6 +439,111 @@
 // <i> Defines CSI2 interrupt priority.
 // <i> Default: 0
 #define RTE_MIPI_CSI2_IRQ_PRI                                   0
+
+// <e> ARX3A0 [Driver_ARX3A0]
+// <o> Enable/Disable ARX3A0 camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable ARX3A0 camera sensor
+// <i> default: enable
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE             1
+
+#if (RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE)
+
+// <o> Select camera ARX3A0 frame per second
+//     <5=>   5 FPS
+//     <40=> 40 FPS
+//     <60=> 60 FPS
+//     <90=> 90 FPS
+// <i> Defines camera ARX3A0 frame per second
+// <i> Default: 90 FPS
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_CFG_FPS                 40
+
+// <o> Select camera ARX3A0 frequency
+// <i> Defines camera ARX3A0 frequency
+// <i> Default: 400000000
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_FREQ                    400000000
+
+// <o> select ARX3A0 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default: 43(RAW10)
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_DATA_TYPE               43
+
+// <o> select ARX3A0 clock mode
+//     <0=> CONTINUOUS CLOCK_MODE
+//     <1=> NON CONTINUOUS CLOCK MODE
+// <i> defines ARX3A0 clock mode for mipi csi2
+// <i> default: 1 (non continuous clock mode)
+#define RTE_ARX3A0_CAMERA_SENSOR_CLOCK_MODE                  1
+
+// <o> select ARX3A0 number of lanes in DPHY
+// <i> defines select ARX3A0 number of lanes in DPHY.
+// <i> default: 2 two lane
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_N_LANES                 2
+
+// <o> select ARX3A0 virtual channel ID
+// <i> defines select ARX3A0 virtual channel ID.
+// <i> default: 0
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_VC_ID                   0
+
+// <o> select ARX3A0 override CPI color mode
+// <i> defines select ARX3A0 override CPI color mode.
+// <i> default: 1 (Ensable)
+#define RTE_ARX3A0_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE     1
+
+// <o> select ARX3A0 CPI color mode
+// <i> defines select ARX3A0 CPI color mode.
+// <i> default: 2  (IPI-16 RAW 8)
+#define RTE_ARX3A0_CAMERA_SENSOR_CPI_COLOR_MODE              2
+
+// <o> select ARX3A0 frame height
+// <i> defines select ARX3A0 frame height.
+// <i> default: 560
+#define RTE_ARX3A0_CAMERA_SENSOR_FRAME_HEIGHT                560
+
+// <o> select ARX3A0 frame width
+// <i> defines select ARX3A0 frame width.
+// <i> default: 560
+#define RTE_ARX3A0_CAMERA_SENSOR_FRAME_WIDTH                 560
+
+// <o> Select camera sensor ARX3A0 CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor ARX3A0 CSI clock source division
+// <i> Default: 20
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_CLK_SCR_DIV             20
+
+// <o> Select camera sensor ARX3A0 reset pin number
+// <i> Defines camera sensor ARX3A0 reset pin number
+// <i> Default: 1
+#define RTE_ARX3A0_CAMERA_SENSOR_RESET_PIN_NO                BOARD_CAMERA_RESET_PIN_NO
+
+// <o> Select camera sensor ARX3A0 reset GPIO port
+// <i> Defines camera sensor ARX3A0 reset GPIO port
+// <i> Default: 9
+#define RTE_ARX3A0_CAMERA_SENSOR_RESET_GPIO_PORT             BOARD_CAMERA_RESET_GPIO_PORT
+
+// <o> Select camera sensor ARX3A0 power pin number
+// <i> Defines camera sensor ARX3A0 power pin number
+// <i> Default: 5
+#define RTE_ARX3A0_CAMERA_SENSOR_POWER_PIN_NO                BOARD_CAMERA_POWER_PIN_NO
+
+// <o> Select camera sensor ARX3A0 power GPIO port
+// <i> Defines camera sensor ARX3A0 power GPIO port
+// <i> Default: 7
+#define RTE_ARX3A0_CAMERA_SENSOR_POWER_GPIO_PORT             BOARD_CAMERA_POWER_GPIO_PORT
+
+// <o RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor ARX3A0 i2c instance
+// <i> Defines camera sensor ARX3A0 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE                BOARD_CAMERA_I2C_INSTANCE
+
+#endif
+// </e> ARX3A0 [Driver_ARX3A0]
+
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
 
@@ -1606,15 +1522,28 @@
 #endif
 #define RTE_OSPI1_CHIP_SELECTION_PIN              0
 #define RTE_OSPI1_RX_SAMPLE_DELAY                 0
-#define RTE_OSPI1_DDR_DRIVE_EDGE                  0
-#define RTE_OSPI1_RXDS_DELAY                      16
+#define RTE_OSPI1_DDR_DRIVE_EDGE                  1
+#define RTE_OSPI1_RXDS_DELAY                      11
 #endif
 // </e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
+
 //</h>
-// <e> FLASH (OSPI ISSI FLASH) [Driver_Flash]
+// <e> FLASH (ISSI FLASH) [Driver_Flash]
 // <i> Configuration settings for Driver_Flash in component ::Drivers:Flash
-#define RTE_OSPI_ISSI_FLASH               1
-// </e> FLASH (OSPI ISSI FLASH) [Driver_Flash]
+#define RTE_ISSI_FLASH               1
+#if RTE_ISSI_FLASH
+
+// <o> ISSI FLASH OSPI Instance
+// <i> Defines the OSPI controller instance the ISSI flash is connected to
+// <i> Default: 1
+#define RTE_ISSI_FLASH_OSPI_DRV_NUM             1
+
+// <o> ISSI FLASH OSPI Bus speed
+// <i> Defines the OSPI Bus speed
+// <i> Default: 100000000
+#define RTE_ISSI_FLASH_OSPI_BUS_SPEED           100000000
+#endif
+// </e> FLASH (ISSI FLASH) [Driver_Flash]
 
 
 // <h> I2S  (Integrated Interchip Sound)
@@ -2728,11 +2657,6 @@
 #define RTE_RTC0                1
 
 #if RTE_RTC0
-
-// <o> RTC0 PRESCALER VALUE
-// <i> Defines prescaler value for RTC0.
-// <i> Default: 32768
-#define RTE_RTC0_DEFAULT_PRESCALER_VALUE    32768
 
 // <o> RTC0 IRQ priority <0-255>
 // <i> Defines Interrupt priority for RTC0.
@@ -4081,14 +4005,14 @@
 //    <1=> HIGH
 // <i> Defines Driver A start state for UT channel 6.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL6_DRV_A_START_STATE       3
+#define RTE_UTIMER_CHANNEL6_DRV_A_START_STATE       0
 
 // <o> CHANNEL6 DRIVER A STOP STATE
 //    <0=> LOW
 //    <1=> HIGH
 // <i> Defines Driver A stop state for UT channel 6.
 // <i> Default: LOW
-#define RTE_UTIMER_CHANNEL6_DRV_A_STOP_STATE        3
+#define RTE_UTIMER_CHANNEL6_DRV_A_STOP_STATE        0
 
 // <o> CHANNEL6 DRIVER A AT COMP MATCH
 //    <0=> NO CHANGE
@@ -4097,7 +4021,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at compare match for UT channel 6.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_MATCH_COUNT  0
+#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_MATCH_COUNT  3
 
 // <o> CHANNEL6 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
@@ -4106,7 +4030,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at cycle end for UT channel 6.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_CYCLE_END    0
+#define RTE_UTIMER_CHANNEL6_DRV_A_OP_AT_CYCLE_END    3
 
 // <o> CHANNEL6 DRIVER B START STATE
 //    <0=> LOW
@@ -4159,14 +4083,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 6.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL6_BUFFERING_TYPE          0
 
 // <o> CHANNEL6 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 6.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL6_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL6_BUFFER_OPERATION        0
 
 // <o> CHANNEL6 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -6221,7 +6145,7 @@
 // <i> Default: 0
 #define RTE_ADC120_INPUT_NUM               (0)
 
-// <o> Clock Divider <2-64>
+// <o> Clock Divider <2-16>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
 #define RTE_ADC120_CLOCK_DIV               (2)
@@ -6248,7 +6172,7 @@
 // <i> Default: RIGHT SHIFT
 #define RTE_ADC120_SHIFT_LEFT_OR_RIGHT     (1)
 
-// <e> RTE_ADC121_DIFFERENTIAL_EN
+// <e> RTE_ADC120_DIFFERENTIAL_EN
 // <i> Enable differential Mode: 1 ==> in1/2, in3/4, in5/6 will be differential  other wise all single ended
 #define RTE_ADC120_DIFFERENTIAL_EN          0
 
@@ -6329,7 +6253,7 @@
 // <i> Default: 0
 #define RTE_ADC121_INPUT_NUM               (0)
 
-// <o> Clock Divider <2-64>
+// <o> Clock Divider <2-16>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
 #define RTE_ADC121_CLOCK_DIV               (2)
@@ -6437,7 +6361,7 @@
 // <i> Default: 0
 #define RTE_ADC122_INPUT_NUM               (0)
 
-// <o> Clock Divider <2-64>
+// <o> Clock Divider <2-16>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
 #define RTE_ADC122_CLOCK_DIV               (2)
@@ -6545,7 +6469,7 @@
 // <i> Default: 0
 #define RTE_ADC24_INPUT_NUM                (0)
 
-// <o> Clock Divider <2-64>
+// <o> Clock Divider <2-16>
 // <i> Defines Clock divider applied to main clock
 // <i> Default: 2
 #define RTE_ADC24_CLOCK_DIV                (2)
@@ -6832,28 +6756,51 @@
 // </e> HWSEM15 (Hardware Semaphore) [Driver_HWSEM15]
 // </h>
 
-// <h> CMP (Analog Comparator )
+// <h> High speed Analog Comparator
 // <e> CMP0 (Analog Comparator ) [Driver_CMP0]
 // <i> Configuration settings for Driver_CMP0 in component ::Drivers:Comparator
 #define RTE_HSCMP0    1
 #if RTE_HSCMP0
 
+// <o> CMP0 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CMP0.
+// <i> Default: 0
 #define RTE_CMP0_IRQ_PRIORITY        0
 
-#define RTE_CMP0_POSITIVE_PIN_PO_00  0
-#define RTE_CMP0_POSITIVE_PIN_PO_06  1
-#define RTE_CMP0_POSITIVE_PIN_PO_12  2
-#define RTE_CMP0_POSITIVE_PIN_PO_04  3
+// <o> Select positive terminal
+//     <0=> PIN_P0_0
+//     <1=> PIN_P0_6
+//     <2=> PIN_P1_4
+//     <3=> PIN_P0_4
+// <i> Defines:select input to the positive terminal of comparator;
+// <i> 00 = P0_0; 01 = P0_6; 10 = P1_4; 11 = P0_4
+// Default : 0
+#define RTE_CMP0_SEL_POSITIVE        0
 
-#define RTE_CMP0_7MV_HYSTERISIS      7
-#define RTE_CMP0_0MV_HYSTERISIS      0
+// <o> Select negative terminal
+//     <0=> PIN_P2_0
+//     <1=> PIN_P2_1
+//     <2=> PIN_INT_VREF
+//     <3=> PIN_DAC6
+// <i> Defines: select input to the negative terminal of comparator;
+// <i> 00 = P2_0; 01 = P2_1; 10 = Internal Vref; 11 = DAC6
+// Default : 3
+#define RTE_CMP0_SEL_NEGATIVE        3
 
-#define RTE_CMP0_SEL_POSITIVE        RTE_CMP0_POSITIVE_PIN_PO_00
-#define RTE_CMP0_SEL_NEGATIVE        RTE_CMP_NEGATIVE_PO_16
-#define RTE_CMP0_SEL_HYSTERISIS      RTE_CMP0_7MV_HYSTERISIS
-
-#define RTE_CMP0_PIN_P0_17           0xB2000000
-#define RTE_CMP0_OUTPUT_MUX_SEL      RTE_CMP0_PIN_P0_17
+// <o> Select Hysteresis level
+//     <0=> 0mV
+//     <1=> 6mV
+//     <2=> 12mV
+//     <3=> 18mV
+//     <4=> 24mV
+//     <5=> 30mV
+//     <6=> 36mV
+//     <7=> 42mV
+// <i> Defines: Select comparator hysteresis level, step size is 6mv;
+// <i> 000 = 0mv; 001 = 6mv; 010 = 12mv; 011 = 18mv; 100 = 24mv; 101 = 30mv;
+// <i> 110 = 36mv; 111 = 42mV
+// <i> Default: 7
+#define RTE_CMP0_SEL_HYSTERISIS      7
 
 #endif
 // </e> CMP0 (Analog Comparator) [Driver_CMP0]
@@ -6863,22 +6810,45 @@
 #define RTE_HSCMP1    1
 #if RTE_HSCMP1
 
+// <o> CMP1 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CMP1.
+// <i> Default: 0
 #define RTE_CMP1_IRQ_PRIORITY        0
 
-#define RTE_CMP1_POSITIVE_PIN_PO_01  0
-#define RTE_CMP1_POSITIVE_PIN_PO_07  1
-#define RTE_CMP1_POSITIVE_PIN_PO_13  2
-#define RTE_CMP1_POSITIVE_PIN_PO_05  3
+// <o> Select positive terminal
+//     <0=> PIN_P0_1
+//     <1=> PIN_P0_7
+//     <2=> PIN_P1_5
+//     <3=> PIN_P0_5
+// <i> Defines:select input to the positive terminal of comparator;
+// <i> 00 = P0_1; 01 = P0_7; 10 = P1_5; 11 = P0_5
+// Default : 0
+#define RTE_CMP1_SEL_POSITIVE        0
 
-#define RTE_CMP1_7MV_HYSTERISIS      7
-#define RTE_CMP1_0MV_HYSTERISIS      0
+// <o> Select negative terminal
+//     <0=> PIN_P2_0
+//     <1=> PIN_P2_1
+//     <2=> PIN_INT_VREF
+//     <3=> PIN_DAC6
+// <i> Defines: select input to the negative terminal of comparator;
+// <i> 00 = P2_0; 01 = P2_1; 10 = Internal Vref; 11 = DAC6
+// Default : 3
+#define RTE_CMP1_SEL_NEGATIVE        3
 
-#define RTE_CMP1_SEL_POSITIVE        RTE_CMP1_POSITIVE_PIN_PO_01
-#define RTE_CMP1_SEL_NEGATIVE        RTE_CMP_NEGATIVE_PO_16
-#define RTE_CMP1_SEL_HYSTERISIS      RTE_CMP0_7MV_HYSTERISIS
-
-#define RTE_CMP1_PIN_P0_17           0xB3000000
-#define RTE_CMP1_OUTPUT_MUX_SEL      RTE_CMP1_PIN_P0_17
+// <o> Select Hysteresis level
+//     <0=> 0mV
+//     <1=> 6mV
+//     <2=> 12mV
+//     <3=> 18mV
+//     <4=> 24mV
+//     <5=> 30mV
+//     <6=> 36mV
+//     <7=> 42mV
+// <i> Defines: Select comparator hysteresis level, step size is 6mv;
+// <i> 000 = 0mv; 001 = 6mv; 010 = 12mv; 011 = 18mv; 100 = 24mv; 101 = 30mv;
+// <i> 110 = 36mv; 111 = 42mV
+// <i> Default: 7
+#define RTE_CMP1_SEL_HYSTERISIS      7
 
 #endif
 // </e> CMP1 (Analog Comparator) [Driver_CMP1]
@@ -6888,22 +6858,45 @@
 #define RTE_HSCMP2    1
 #if RTE_HSCMP2
 
+// <o> CMP2 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CMP2.
+// <i> Default: 0
 #define RTE_CMP2_IRQ_PRIORITY        0
 
-#define RTE_CMP2_POSITIVE_PIN_PO_02  0
-#define RTE_CMP2_POSITIVE_PIN_PO_08  1
-#define RTE_CMP2_POSITIVE_PIN_PO_14  2
-#define RTE_CMP2_POSITIVE_PIN_PO_10  3
+// <o> Select positive terminal
+//     <0=> PIN_P0_2
+//     <1=> PIN_P1_0
+//     <2=> PIN_P1_6
+//     <3=> PIN_P1_2
+// <i> Defines:select input to the positive terminal of comparator;
+// <i> 00 = P0_2; 01 = P1_0; 10 = P1_6; 11 = P1_2
+// Default : 0
+#define RTE_CMP2_SEL_POSITIVE        0
 
-#define RTE_CMP2_7MV_HYSTERISIS      7
-#define RTE_CMP2_0MV_HYSTERISIS      0
+// <o> Select negative terminal
+//     <0=> PIN_P2_0
+//     <1=> PIN_P2_1
+//     <2=> PIN_INT_VREF
+//     <3=> PIN_DAC6
+// <i> Defines: select input to the negative terminal of comparator;
+// <i> 00 = P2_0; 01 = P2_1; 10 = Internal Vref; 11 = DAC6
+// Default : 3
+#define RTE_CMP2_SEL_NEGATIVE        3
 
-#define RTE_CMP2_SEL_POSITIVE        RTE_CMP2_POSITIVE_PIN_PO_02
-#define RTE_CMP2_SEL_NEGATIVE        RTE_CMP_NEGATIVE_PO_16
-#define RTE_CMP2_SEL_HYSTERISIS      RTE_CMP2_7MV_HYSTERISIS
-
-#define RTE_CMP2_OUTPUT_PIN_P0_17    0xB4000000
-#define RTE_CMP2_OUTPUT_MUX_SEL      RTE_CMP2_OUTPUT_PIN_P0_17
+// <o> Select Hysteresis level
+//     <0=> 0mV
+//     <1=> 6mV
+//     <2=> 12mV
+//     <3=> 18mV
+//     <4=> 24mV
+//     <5=> 30mV
+//     <6=> 36mV
+//     <7=> 42mV
+// <i> Defines: Select comparator hysteresis level, step size is 6mv;
+// <i> 000 = 0mv; 001 = 6mv; 010 = 12mv; 011 = 18mv; 100 = 24mv; 101 = 30mv;
+// <i> 110 = 36mv; 111 = 42mV
+// <i> Default: 7
+#define RTE_CMP2_SEL_HYSTERISIS      7
 
 #endif
 // </e> CMP2 (Analog Comparator) [Driver_CMP2]
@@ -6913,70 +6906,188 @@
 #define RTE_HSCMP3    1
 #if RTE_HSCMP3
 
+// <o> CMP3 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CMP3.
+// <i> Default: 0
 #define RTE_CMP3_IRQ_PRIORITY        0
 
-#define RTE_CMP3_POSITIVE_PIN_PO_03  0
-#define RTE_CMP3_POSITIVE_PIN_PO_09  1
-#define RTE_CMP3_POSITIVE_PIN_PO_15  2
-#define RTE_CMP3_POSITIVE_PIN_PO_11  3
+// <o> Select positive terminal
+//     <0=> PIN_P0_3
+//     <1=> PIN_P1_1
+//     <2=> PIN_P1_7
+//     <3=> PIN_P1_3
+// <i> Defines:select input to the positive terminal of comparator;
+// <i> 00 = P0_3; 01 = P1_1; 10 = P1_7; 11 = P1_3
+// Default : 0
+#define RTE_CMP3_SEL_POSITIVE        0
 
-#define RTE_CMP3_7MV_HYSTERISIS      7
-#define RTE_CMP3_0MV_HYSTERISIS      0
+// <o> Select negative terminal
+//     <0=> PIN_P2_0
+//     <1=> PIN_P2_1
+//     <2=> PIN_INT_VREF
+//     <3=> PIN_DAC6
+// <i> Defines: select input to the negative terminal of comparator;
+// <i> 00 = P2_0; 01 = P2_1; 10 = Internal Vref; 11 = DAC6
+// Default : 3
+#define RTE_CMP3_SEL_NEGATIVE        3
 
-#define RTE_CMP3_SEL_POSITIVE        RTE_CMP3_POSITIVE_PIN_PO_03
-#define RTE_CMP3_SEL_NEGATIVE        RTE_CMP_NEGATIVE_PO_16
-#define RTE_CMP3_SEL_HYSTERISIS      RTE_CMP3_7MV_HYSTERISIS
-
-
-#define RTE_CMP3_PIN_P0_17           0xB5000000
-#define RTE_CMP3_OUTPUT_MUX_SEL      RTE_CMP3_PIN_P0_17
+// <o> Select Hysteresis level
+//     <0=> 0mV
+//     <1=> 6mV
+//     <2=> 12mV
+//     <3=> 18mV
+//     <4=> 24mV
+//     <5=> 30mV
+//     <6=> 36mV
+//     <7=> 42mV
+// <i> Defines: Select comparator hysteresis level, step size is 6mv;
+// <i> 000 = 0mv; 001 = 6mv; 010 = 12mv; 011 = 18mv; 100 = 24mv; 101 = 30mv;
+// <i> 110 = 36mv; 111 = 42mV
+// <i> Default: 7
+#define RTE_CMP3_SEL_HYSTERISIS      7
 
 #endif
-// </e> CMP3 (Analog Comparator) [Driver_CMP0]
-// </h>
+// </e> CMP3 (Analog Comparator) [Driver_CMP3]
 
-// <e> Comparator common bits for each instance
-// <i> Configuration settings for Comparator instances ::Drivers:Comparator
-#if (RTE_HSCMP0 |RTE_HSCMP1 |RTE_HSCMP2 |RTE_HSCMP3 )
+#if defined(M55_HE)
+// <e> LPCMP (Low Power Analog Comparator) [Driver_LPCMP]
+// <i> Configuration settings for Driver_LPCMP in component ::Drivers:LPCMP
+#define RTE_LPCMP      1
 
-#define RTE_CMP_NEGATIVE_PO_16       0
-#define RTE_CMP_NEGATIVE_PO_17       1
-#define RTE_CMP_NEGATIVE_INT_VREF    2
-#define RTE_CMP_NEGATIVE_DAC6        3
+#if RTE_LPCMP
+
+// <o> LPCMP IRQ priority <0-255>
+// <i> Defines Interrupt priority for LPCMP.
+// <i> Default: 0
+#define RTE_LPCMP_IRQ_PRIORITY        0
+
+// <o> Select positive terminal
+//     <0=> PIN_P2_4
+//     <1=> PIN_P2_5
+//     <2=> PIN_P2_6
+//     <3=> PIN_P2_7
+// <i> Defines:select input to the positive terminal of LPCMP;
+// <i> 00 = P2_4; 01 = P2_5; 10 = P2_6; 11 = P2_7
+// Default : 0
+#define RTE_LPCMP_SEL_POSITIVE        0
+
+// <o> Select negative terminal
+//     <0=> AON_VREF
+//     <1=> PIN_P2_0
+//     <2=> PIN_P2_1
+//     <3=> PIN_P2_2
+// <i> Defines: select input to the negative terminal of LPCMP;
+// <i> 00 = AON Vref(0.8v); 01 = P2_0; 10 = P2_1 Vref; 11 = P2_2
+// Default : 0
+#define RTE_LPCMP_SEL_NEGATIVE        0
+
+// <o> Select Hysteresis level
+//     <0=> 0mV
+//     <1=> 6mV
+//     <2=> 12mV
+//     <3=> 18mV
+//     <4=> 24mV
+//     <5=> 30mV
+//     <6=> 36mV
+//     <7=> 42mV
+// <i> Defines: Select LPCMP hysteresis level, step size is 6mv;
+// <i> 000 = 0mv; 001 = 6mv; 010 = 12mv; 011 = 18mv; 100 = 24mv; 101 = 30mv;
+// <i> 110 = 36mv; 111 = 42mV
+// <i> Default: 7
+#define RTE_LPCMP_SEL_HYSTERISIS      7
 
 #endif
-// </e> Comparator commmon bit for each instance
+// </e> LPCMP (Low Power Analog Comparator) [Driver_LPCMP]
+#endif //defined(M55_HE)
+// </h> CMP (Analog Comparator)
 
 // <h> I2C (Inter Integrated Circuit)
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C0]
 // <i> Configuration settings for Driver_I2C0 in component ::Drivers:I2C
-#define RTE_I2C0      1
+#define RTE_I2C0                     1
+
 #if RTE_I2C0
+
+// <o> I2C0 IRQ priority <0-255>
+// <i> Defines Interrupt priority for I2C0.
+// <i> Default: 0
 #define RTE_I2C0_IRQ_PRIORITY        0
+// <o> I2C0 TX FIFO threshold <0-31>
+// <i> Defines TX FIFO threshold for I2C0.
+// <i> Default: 16
+#define RTE_I2C0_TX_FIFO_THRESHOLD   16
+
+// <o> I2C0 RX FIFO threshold <0-31>
+// <i> Defines RX FIFO threshold for I2C0.
+// <i> Default: 16
+#define RTE_I2C0_RX_FIFO_THRESHOLD   16
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C0]
 
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C1]
 // <i> Configuration settings for Driver_I2C1 in component ::Drivers:I2C
-#define RTE_I2C1      1
+
+#define RTE_I2C1                     1
 #if RTE_I2C1
+
+// <o> I2C1 IRQ priority <0-255>
+// <i> Defines Interrupt priority for I2C1.
+// <i> Default: 0
 #define RTE_I2C1_IRQ_PRIORITY        0
+// <o> I2C1 TX FIFO threshold <0-31>
+// <i> Defines TX FIFO threshold for I2C1.
+// <i> Default: 16
+#define RTE_I2C1_TX_FIFO_THRESHOLD   16
+
+// <o> I2C1 RX FIFO threshold <0-31>
+// <i> Defines RX FIFO threshold for I2C1.
+// <i> Default: 16
+#define RTE_I2C1_RX_FIFO_THRESHOLD   16
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C1]
 
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C2]
 // <i> Configuration settings for Driver_I2C2 in component ::Drivers:I2C
-#define RTE_I2C2      1
+
+#define RTE_I2C2                     1
 #if RTE_I2C2
+
+// <o> I2C2 IRQ priority <0-255>
+// <i> Defines Interrupt priority for I2C2.
+// <i> Default: 0
 #define RTE_I2C2_IRQ_PRIORITY        0
+// <o> I2C2 TX FIFO threshold <0-31>
+// <i> Defines TX FIFO threshold for I2C2.
+// <i> Default: 16
+#define RTE_I2C2_TX_FIFO_THRESHOLD   16
+
+// <o> I2C2 RX FIFO threshold <0-31>
+// <i> Defines RX FIFO threshold for I2C2.
+// <i> Default: 16
+#define RTE_I2C2_RX_FIFO_THRESHOLD   16
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C2]
 
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C3]
 // <i> Configuration settings for Driver_I2C3 in component ::Drivers:I2C
-#define RTE_I2C3      1
+
+#define RTE_I2C3                     1
+
 #if RTE_I2C3
+
+// <o> I2C3 IRQ priority <0-255>
+// <i> Defines Interrupt priority for I2C3.
+// <i> Default: 0
 #define RTE_I2C3_IRQ_PRIORITY        0
+// <o> I2C3 TX FIFO threshold <0-31>
+// <i> Defines TX FIFO threshold for I2C3.
+// <i> Default: 16
+#define RTE_I2C3_TX_FIFO_THRESHOLD   16
+
+// <o> I2C3 RX FIFO threshold <0-31>
+// <i> Defines RX FIFO threshold for I2C3.
+// <i> Default: 16
+#define RTE_I2C3_RX_FIFO_THRESHOLD   16
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C3]
 

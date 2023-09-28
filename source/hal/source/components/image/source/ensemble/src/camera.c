@@ -25,6 +25,7 @@ static const ARM_DRIVER_CAMERA_CONTROLLER * const camera = &Driver_CAMERA0;
 #define CPI_EVENTS_CONFIGURE                    CAMERA_EVENTS_CONFIGURE
 #define CPI_CAMERA_SENSOR_GAIN                  CAMERA_SENSOR_GAIN
 #define ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED    ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED
+#define RESOLUTION_PARAMETER                    CAMERA_RESOLUTION_560x560
 
 #ifdef BOARD_CAMERA_POWER_GPIO_PORT
 #define MANUAL_CAMERA_POWER
@@ -63,7 +64,11 @@ int32_t camera_init(uint8_t* buffer)
     //////////////////////////////////////////////////////////////////////////////
     // Camera initialization
     //////////////////////////////////////////////////////////////////////////////
-    int32_t res = camera->Initialize(CAMERA_RESOLUTION_560x560, CameraEventHandler);
+#ifdef RESOLUTION_PARAMETER
+    int32_t res = camera->Initialize(RESOLUTION_PARAMETER, CameraEventHandler);
+#else
+    int32_t res = camera->Initialize(CameraEventHandler);
+#endif
 
     if (res != ARM_DRIVER_OK) {
         return res;
@@ -74,7 +79,11 @@ int32_t camera_init(uint8_t* buffer)
         return res;
     }
 
-    res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, CAMERA_RESOLUTION_560x560);
+#ifdef RESOLUTION_PARAMETER
+    res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, RESOLUTION_PARAMETER);
+#else
+    res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, 0);
+#endif
     if (res != ARM_DRIVER_OK) {
         return res;
     }
