@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,28 +13,34 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """
-This script will provide you with an example of how to perform post-training quantization in TensorFlow.
+This script will provide you with an example of how to perform
+post-training quantization in TensorFlow.
 
-The output from this example will be a TensorFlow Lite model file where weights and activations are quantized to 8bit
-integer values.
+The output from this example will be a TensorFlow Lite model file
+where weights and activations are quantized to 8bit integer values.
 
-Quantization helps reduce the size of your models and is necessary for running models on certain hardware such as Arm
-Ethos NPU.
+Quantization helps reduce the size of your models and is necessary
+for running models on certain hardware such as Arm Ethos NPU.
 
-In addition to quantizing weights, post-training quantization uses a calibration dataset to
-capture the minimum and maximum values of all variable tensors in your model.
-By capturing these ranges it is possible to fully quantize not just the weights of the model but also the activations.
+In addition to quantizing weights, post-training quantization uses
+a calibration dataset to capture the minimum and maximum values of
+all variable tensors in your model.  By capturing these ranges it
+is possible to fully quantize not just the weights of the model
+but also the activations.
 
-Depending on the model you are quantizing there may be some accuracy loss, but for a lot of models the loss should
-be minimal.
+Depending on the model you are quantizing there may be some accuracy loss,
+but for a lot of models the loss should be minimal.
 
-If you are targetting an Arm Ethos-U55 NPU then the output TensorFlow Lite file will also need to be passed through the Vela
+If you are targeting an Arm Ethos-U55 NPU then the output
+TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used.
 
-For more information on using Vela see: https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/about/
-For more information on post-training quantization
-see: https://www.tensorflow.org/lite/performance/post_training_integer_quant
+For more information on using Vela see:
+    https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/about/
+For more information on post-training quantization see:
+    https://www.tensorflow.org/lite/performance/post_training_integer_quant
 """
+
 import pathlib
 
 import numpy as np
@@ -44,7 +50,8 @@ from training_utils import get_data, create_model
 
 
 def post_training_quantize(keras_model, sample_data):
-    """Quantize Keras model using post-training quantization with some sample data.
+    """
+    Quantize Keras model using post-training quantization with some sample data.
 
     TensorFlow Lite will have fp32 inputs/outputs and the model will handle quantizing/dequantizing.
 
@@ -76,8 +83,14 @@ def post_training_quantize(keras_model, sample_data):
     return tflite_model
 
 
-def evaluate_tflite_model(tflite_save_path, x_test, y_test):
-    """Calculate the accuracy of a TensorFlow Lite model using TensorFlow Lite interpreter.
+# pylint: disable=duplicate-code
+def evaluate_tflite_model(
+        tflite_save_path: pathlib.Path,
+        x_test: np.ndarray,
+        y_test: np.ndarray
+):
+    """
+    Calculate the accuracy of a TensorFlow Lite model using TensorFlow Lite interpreter.
 
     Args:
         tflite_save_path: Path to TensorFlow Lite model to test.
@@ -106,6 +119,9 @@ def evaluate_tflite_model(tflite_save_path, x_test, y_test):
 
 
 def main():
+    """
+    Run post-training quantization
+    """
     x_train, y_train, x_test, y_test = get_data()
     model = create_model()
 
@@ -117,7 +133,7 @@ def main():
     model.fit(x=x_train, y=y_train, batch_size=128, epochs=5, verbose=1, shuffle=True)
 
     # Test the fp32 model accuracy.
-    test_loss, test_acc = model.evaluate(x_test, y_test)
+    test_loss, test_acc = model.evaluate(x_test, y_test)  # pylint: disable=unused-variable
     print(f"Test accuracy float: {test_acc:.3f}")
 
     # Quantize and export the resulting TensorFlow Lite model to file.
@@ -132,7 +148,12 @@ def main():
 
     # Test the quantized model accuracy. Save time by only testing a subset of the whole data.
     num_test_samples = 1000
-    evaluate_tflite_model(quant_model_save_path, x_test[0:num_test_samples], y_test[0:num_test_samples])
+    evaluate_tflite_model(
+        quant_model_save_path,
+        x_test[0:num_test_samples],
+        y_test[0:num_test_samples]
+    )
+# pylint: enable=duplicate-code
 
 
 if __name__ == "__main__":

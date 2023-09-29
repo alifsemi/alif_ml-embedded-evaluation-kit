@@ -1,0 +1,8 @@
+{
+  "cmsis": "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb8dc6c9407fac3a0f3.zip",
+  "cmsis-dsp": "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip",
+  "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/refs/85164a811917770d7027a12a57ed3b469dac6537.zip",
+  "core-driver": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.08.tar.gz",
+  "core-platform": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.08.tar.gz",
+  "tensorflow": "https://github.com/tensorflow/tflite-micro/archive/568d181ccc1f60e49742fd43b7f97141ee8d45fc.zip"
+}

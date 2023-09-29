@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+"""
+Script to set up default resources for ML Embedded Evaluation Kit
+"""
+import dataclasses
 import errno
 import fnmatch
 import json
@@ -22,207 +26,21 @@ import re
 import shutil
 import subprocess
 import sys
+import typing
 import urllib.request
 import venv
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from collections import namedtuple
-from urllib.error import URLError
+from dataclasses import dataclass
 from pathlib import Path
+from urllib.error import URLError
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 
-
-json_uc_res = [
-    {
-        "use_case_name": "ad",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/"
-        ],
-        "resources": [
-            {
-                "name": "ad_medium_int8.tflite",
-                "url": "{url_prefix:0}ad_medium_int8.tflite",
-            },
-            {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
-            {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"},
-        ],
-    },
-    {
-        "use_case_name": "asr",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/"
-        ],
-        "resources": [
-            {
-                "name": "wav2letter_pruned_int8.tflite",
-                "url": "{url_prefix:0}wav2letter_pruned_int8.tflite",
-            },
-            {
-                "name": "ifm0.npy",
-                "url": "{url_prefix:0}testing_input/input_2_int8/0.npy",
-            },
-            {
-                "name": "ofm0.npy",
-                "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
-            },
-        ],
-    },
-    {
-        "use_case_name": "img_class",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/"
-        ],
-        "resources": [
-            {
-                "name": "mobilenet_v2_1.0_224_INT8.tflite",
-                "url": "{url_prefix:0}mobilenet_v2_1.0_224_INT8.tflite",
-            },
-            {
-                "name": "ifm0.npy",
-                "url": "{url_prefix:0}testing_input/tfl.quantize/0.npy",
-            },
-            {
-                "name": "ofm0.npy",
-                "url": "{url_prefix:0}testing_output/MobilenetV2/Predictions/Reshape_11/0.npy",
-            },
-        ],
-    },
-    {
-        "use_case_name": "object_detection",
-        "url_prefix": [
-            "https://github.com/emza-vs/ModelZoo/blob/v1.0/object_detection/"
-        ],
-        "resources": [
-            {
-                "name": "yolo-fastest_192_face_v4.tflite",
-                "url": "{url_prefix:0}yolo-fastest_192_face_v4.tflite?raw=true",
-            }
-        ],
-    },
-    {
-        "use_case_name": "kws",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/"
-        ],
-        "resources": [
-            {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
-            {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"},
-            {
-                "name": "kws_micronet_m.tflite",
-                "url": "{url_prefix:0}kws_micronet_m.tflite",
-            },
-        ],
-    },
-    {
-        "use_case_name": "vww",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/"
-        ],
-        "resources": [
-            {
-                "name": "vww4_128_128_INT8.tflite",
-                "url": "{url_prefix:0}vww4_128_128_INT8.tflite",
-            },
-            {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
-            {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"},
-        ],
-    },
-    {
-        "use_case_name": "kws_asr",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/",
-            "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/",
-        ],
-        "resources": [
-            {
-                "name": "wav2letter_pruned_int8.tflite",
-                "url": "{url_prefix:0}wav2letter_pruned_int8.tflite",
-            },
-            {
-                "sub_folder": "asr",
-                "name": "ifm0.npy",
-                "url": "{url_prefix:0}testing_input/input_2_int8/0.npy",
-            },
-            {
-                "sub_folder": "asr",
-                "name": "ofm0.npy",
-                "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
-            },
-            {
-                "sub_folder": "kws",
-                "name": "ifm0.npy",
-                "url": "{url_prefix:1}testing_input/input/0.npy",
-            },
-            {
-                "sub_folder": "kws",
-                "name": "ofm0.npy",
-                "url": "{url_prefix:1}testing_output/Identity/0.npy",
-            },
-            {
-                "name": "kws_micronet_m.tflite",
-                "url": "{url_prefix:1}kws_micronet_m.tflite",
-            },
-        ],
-    },
-    {
-        "use_case_name": "noise_reduction",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/"
-        ],
-        "resources": [
-            {"name": "rnnoise_INT8.tflite", "url": "{url_prefix:0}rnnoise_INT8.tflite"},
-            {
-                "name": "ifm0.npy",
-                "url": "{url_prefix:0}testing_input/main_input_int8/0.npy",
-            },
-            {
-                "name": "ifm1.npy",
-                "url": "{url_prefix:0}testing_input/vad_gru_prev_state_int8/0.npy",
-            },
-            {
-                "name": "ifm2.npy",
-                "url": "{url_prefix:0}testing_input/noise_gru_prev_state_int8/0.npy",
-            },
-            {
-                "name": "ifm3.npy",
-                "url": "{url_prefix:0}testing_input/denoise_gru_prev_state_int8/0.npy",
-            },
-            {
-                "name": "ofm0.npy",
-                "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
-            },
-            {
-                "name": "ofm1.npy",
-                "url": "{url_prefix:0}testing_output/Identity_1_int8/0.npy",
-            },
-            {
-                "name": "ofm2.npy",
-                "url": "{url_prefix:0}testing_output/Identity_2_int8/0.npy",
-            },
-            {
-                "name": "ofm3.npy",
-                "url": "{url_prefix:0}testing_output/Identity_3_int8/0.npy",
-            },
-            {
-                "name": "ofm4.npy",
-                "url": "{url_prefix:0}testing_output/Identity_4_int8/0.npy",
-            },
-        ],
-    },
-    {
-        "use_case_name": "inference_runner",
-        "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/dnn_small/tflite_int8/"
-        ],
-        "resources": [
-            {
-                "name": "dnn_s_quantized.tflite",
-                "url": "{url_prefix:0}dnn_s_quantized.tflite",
-            }
-        ],
-    },
-]
+# Supported version of Python and Vela
+VELA_VERSION = "3.9.0"
+py3_version_minimum = (3, 9)
 
 # Valid NPU configurations:
 valid_npu_config_names = [
@@ -250,10 +68,57 @@ NPUConfig = namedtuple(
     ],
 )
 
+
+@dataclass(frozen=True)
+class UseCaseResource:
+    """
+    Represent a use case's resource
+    """
+    name: str
+    url: str
+    sub_folder: typing.Optional[str] = None
+
+
+@dataclass(frozen=True)
+class UseCase:
+    """
+    Represent a use case
+    """
+    name: str
+    url_prefix: str
+    resources: typing.List[UseCaseResource]
+
+
 # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
 # The internal SRAM size for Corstone-310 implementation on MPS3 specified by AN555
 # is 4MB, but we are content with the 2MB specified below.
-mps3_max_sram_sz = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
+MPS3_MAX_SRAM_SZ = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
+
+
+def load_use_case_resources(current_file_dir: Path) -> typing.List[UseCase]:
+    """
+    Load use case metadata resources
+
+    Parameters
+    ----------
+    current_file_dir:   Directory of the current script
+
+    Returns
+    -------
+    The use cases resources object parsed to a dict
+    """
+
+    resources_path = current_file_dir / "scripts" / "py" / "use_case_resources.json"
+    with open(resources_path, encoding="utf8") as f:
+        use_cases = json.load(f)
+        return [
+            UseCase(
+                name=u["name"],
+                url_prefix=u["url_prefix"],
+                resources=[UseCaseResource(**r) for r in u["resources"]],
+            )
+            for u in use_cases
+        ]
 
 
 def call_command(command: str, verbose: bool = True) -> str:
@@ -266,21 +131,22 @@ def call_command(command: str, verbose: bool = True) -> str:
     """
     if verbose:
         logging.info(command)
-    proc = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
-    )
-    log = proc.stdout.decode("utf-8")
-    if proc.returncode == 0 and verbose:
+    try:
+        proc = subprocess.run(
+            command, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+        )
+        log = proc.stdout.decode("utf-8")
         logging.info(log)
-    else:
+        return log
+    except subprocess.CalledProcessError as err:
+        log = err.stdout.decode("utf-8")
         logging.error(log)
-    proc.check_returncode()
-    return log
+        raise err
 
 
 def get_default_npu_config_from_name(
-    config_name: str, arena_cache_size: int = 0
-) -> NPUConfig:
+        config_name: str, arena_cache_size: int = 0
+) -> typing.Optional[NPUConfig]:
     """
     Gets the file suffix for the TFLite file from the
     `accelerator_config` string.
@@ -314,15 +180,15 @@ def get_default_npu_config_from_name(
     system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
     memory_modes_arena = {
         # For shared SRAM memory mode, we use the MPS3 SRAM size by default.
-        "Shared_Sram": mps3_max_sram_sz if arena_cache_size <= 0 else arena_cache_size,
+        "Shared_Sram": MPS3_MAX_SRAM_SZ if arena_cache_size <= 0 else arena_cache_size,
         # For dedicated SRAM memory mode, we do not override the arena size. This is expected to
         # be defined in the Vela configuration file instead.
         "Dedicated_Sram": None if arena_cache_size <= 0 else arena_cache_size,
     }
 
-    for i in range(len(strings_ids)):
-        if config_name.startswith(strings_ids[i]):
-            npu_config_id = config_name.replace(strings_ids[i], prefix_ids[i])
+    for i, string_id in enumerate(strings_ids):
+        if config_name.startswith(string_id):
+            npu_config_id = config_name.replace(string_id, prefix_ids[i])
             return NPUConfig(
                 config_name=config_name,
                 memory_mode=memory_modes[i],
@@ -335,22 +201,385 @@ def get_default_npu_config_from_name(
     return None
 
 
-def remove_tree_dir(dir_path):
+def remove_tree_dir(dir_path: Path):
+    """
+    Delete and re-create a directory
+
+    Parameters
+    ----------
+    dir_path    : The directory path
+    """
     try:
         # Remove the full directory.
         shutil.rmtree(dir_path)
         # Re-create an empty one.
         os.mkdir(dir_path)
-    except Exception as e:
-        logging.error(f"Failed to delete {dir_path}.")
+    except OSError:
+        logging.error("Failed to delete %s.", dir_path)
+
+
+def initialize_use_case_resources_directory(
+        use_case: UseCase,
+        metadata: typing.Dict,
+        download_dir: Path,
+        check_clean_folder: bool,
+        setup_script_hash_verified: bool,
+):
+    """
+    Initialize the resources_downloaded directory for a use case
+
+    @param use_case:                    The use case
+    @param metadata:                    The metadata
+    @param download_dir:                The parent directory
+    @param check_clean_folder:          Whether to clean the folder
+    @param setup_script_hash_verified:  Whether the hash of this script is verified
+    """
+    try:
+        #  Does the usecase_name download dir exist?
+        (download_dir / use_case.name).mkdir()
+    except OSError as err:
+        if err.errno == errno.EEXIST:
+            # The usecase_name download dir exist.
+            if check_clean_folder and not setup_script_hash_verified:
+                for idx, metadata_uc_url_prefix in enumerate(
+                        [
+                            f
+                            for f in metadata["resources_info"]
+                            if f["name"] == use_case.name
+                        ][0]["url_prefix"]
+                ):
+                    if metadata_uc_url_prefix != use_case.url_prefix[idx]:
+                        logging.info("Removing %s resources.", use_case.name)
+                        remove_tree_dir(download_dir / use_case.name)
+                        break
+        elif err.errno != errno.EEXIST:
+            logging.error("Error creating %s directory.", use_case.name)
+            raise
+
+
+def download_file(url: str, dest: Path):
+    """
+    Download a file
+
+    @param url:     The URL of the file to download
+    @param dest:    The destination of downloaded file
+    """
+    try:
+        with urllib.request.urlopen(url) as g:
+            with open(dest, "b+w") as f:
+                f.write(g.read())
+                logging.info("- Downloaded %s to %s.", url, dest)
+    except URLError:
+        logging.error("URLError while downloading %s.", url)
+        raise
+
+
+def download_resources(
+        use_case: UseCase,
+        metadata: typing.Dict,
+        download_dir: Path,
+        check_clean_folder: bool,
+        setup_script_hash_verified: bool,
+):
+    """
+    Download the resources associated with a use case
+
+    @param use_case:                    The use case
+    @param metadata:                    The metadata
+    @param download_dir:                The parent directory
+    @param check_clean_folder:          Whether to clean the folder
+    @param setup_script_hash_verified:  Whether the hash is already verified
+    """
+    initialize_use_case_resources_directory(
+        use_case,
+        metadata,
+        download_dir,
+        check_clean_folder,
+        setup_script_hash_verified
+    )
+
+    reg_expr_str = r"{url_prefix:(.*\d)}"
+    reg_expr_pattern = re.compile(reg_expr_str)
+    for res in use_case.resources:
+        res_name = res.name
+        url_prefix_idx = int(reg_expr_pattern.search(res.url).group(1))
+        res_url = use_case.url_prefix[url_prefix_idx] + re.sub(
+            reg_expr_str, "", res.url
+        )
+
+        sub_folder = ""
+        if res.sub_folder is not None:
+            try:
+                #  Does the usecase_name/sub_folder download dir exist?
+                (download_dir / use_case.name / res.sub_folder).mkdir()
+            except OSError as err:
+                if err.errno != errno.EEXIST:
+                    logging.error(
+                        "Error creating %s/%s directory.",
+                        use_case.name,
+                        res.sub_folder
+                    )
+                    raise
+            sub_folder = res.sub_folder
+
+        res_dst = download_dir / use_case.name / sub_folder / res_name
+
+        if res_dst.is_file():
+            logging.info("File %s exists, skipping download.", res_dst)
+        else:
+            download_file(res_url, res_dst)
+
+
+def run_vela(
+        config: NPUConfig,
+        env_activate_cmd: str,
+        model: Path,
+        config_file: Path,
+        output_dir: Path
+) -> bool:
+    """
+    Run vela on the specified model
+    @param config:              The NPU configuration
+    @param env_activate_cmd:    The Python venv activation command
+    @param model:               The model
+    @param config_file:         The vela config file
+    @param output_dir:          The output directory
+    @return:                    True if the optimisation was skipped, false otherwise
+    """
+    # model name after compiling with vela is an initial model name + _vela suffix
+    vela_optimised_model_path = model.parent / (model.stem + "_vela.tflite")
+
+    vela_command_arena_cache_size = ""
+
+    if config.arena_cache_size:
+        vela_command_arena_cache_size = (
+            f"--arena-cache-size={config.arena_cache_size}"
+        )
+
+    vela_command = (
+            f"{env_activate_cmd} && vela {model} "
+            + f"--accelerator-config={config.config_name} "
+            + "--optimise Performance "
+            + f"--config {config_file} "
+            + f"--memory-mode={config.memory_mode} "
+            + f"--system-config={config.system_config} "
+            + f"--output-dir={output_dir} "
+            + f"{vela_command_arena_cache_size}"
+    )
+
+    # We want the name to include the configuration suffix. For example: vela_H128,
+    # vela_Y512 etc.
+    new_suffix = "_vela_" + config.ethos_u_config_id + ".tflite"
+    new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
+
+    skip_optimisation = new_vela_optimised_model_path.is_file()
+
+    if skip_optimisation:
+        logging.info(
+            "File %s exists, skipping optimisation.",
+            new_vela_optimised_model_path
+        )
+    else:
+        call_command(vela_command)
+
+        # Rename default vela model.
+        vela_optimised_model_path.rename(new_vela_optimised_model_path)
+        logging.info(
+            "Renaming %s to %s.",
+            vela_optimised_model_path,
+            new_vela_optimised_model_path
+        )
+
+    return skip_optimisation
+
+
+def run_vela_on_all_models(
+        current_file_dir: Path,
+        download_dir: Path,
+        env_activate_cmd: str,
+        arena_cache_size: int,
+        npu_config_names: typing.List[str]
+):
+    """
+    Run vela on downloaded models for the specified NPU configurations
+
+    @param current_file_dir:    Path to the current directory
+    @param download_dir:        Path to the downloaded resources directory
+    @param env_activate_cmd:    Command used to activate Python venv
+    @param npu_config_names:    Names of NPU configurations for which to run Vela
+    @param arena_cache_size:    The arena cache size
+    """
+    config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
+    models = [
+        Path(dirpath) / f
+        for dirpath, dirnames, files in os.walk(download_dir)
+        for f in fnmatch.filter(files, "*.tflite")
+        if "vela" not in f
+    ]
+
+    # Get npu config tuple for each config name in a list:
+    npu_configs = [
+        get_default_npu_config_from_name(name, arena_cache_size)
+        for name in npu_config_names
+    ]
+
+    logging.info("All models will be optimised for these configs:")
+    for config in npu_configs:
+        logging.info(config)
+
+    optimisation_skipped = False
+
+    for model in models:
+        for config in npu_configs:
+            optimisation_skipped = run_vela(
+                config,
+                env_activate_cmd,
+                model,
+                config_file,
+                output_dir=model.parent
+            ) or optimisation_skipped
+
+    # If any optimisation was skipped, show how to regenerate:
+    if optimisation_skipped:
+        logging.warning("One or more optimisations were skipped.")
+        logging.warning(
+            "To optimise all the models, please remove the directory %s.",
+            download_dir
+        )
+
+
+def initialize_resources_directory(
+        download_dir: Path,
+        check_clean_folder: bool,
+        metadata_file_path: Path,
+        setup_script_hash: str
+) -> typing.Tuple[typing.Dict, bool]:
+    """
+    Sets up the resources_downloaded directory and checks to see if this script
+    has been modified since the last time resources were downloaded
+
+    @param download_dir:        Path to the resources_downloaded directory
+    @param check_clean_folder:  Determines whether to clean the downloads directory
+    @param metadata_file_path:  Path to the metadata file
+    @param setup_script_hash:   The md5 hash of this script
+    @return:                    The metadata and a boolean to indicate whether this
+                                script has changed since it was last run
+    """
+    metadata_dict = {}
+    setup_script_hash_verified = False
+
+    if download_dir.is_dir():
+        logging.info("'resources_downloaded' directory exists.")
+        # Check and clean?
+        if check_clean_folder and metadata_file_path.is_file():
+            with open(metadata_file_path, encoding="utf8") as metadata_file:
+                metadata_dict = json.load(metadata_file)
+
+            vela_in_metadata = metadata_dict["ethosu_vela_version"]
+            if vela_in_metadata != VELA_VERSION:
+                # Check if all the resources needs to be removed and regenerated.
+                # This can happen when the Vela version has changed.
+                logging.info(
+                    ("Vela version in metadata is %s, current %s."
+                     " Removing the resources and re-download them.",
+                     vela_in_metadata,
+                     VELA_VERSION
+                     )
+                )
+                remove_tree_dir(download_dir)
+                metadata_dict = {}
+            else:
+                # Check if the set_up_default_resorces.py has changed from last setup
+                setup_script_hash_verified = (
+                        metadata_dict.get("set_up_script_md5sum")
+                        == setup_script_hash
+                )
+    else:
+        download_dir.mkdir()
+
+    return metadata_dict, setup_script_hash_verified
+
+
+def set_up_python_venv(
+        download_dir: Path,
+        additional_requirements_file: Path = ""
+):
+    """
+    Set up the Python environment with which to set up the resources
+
+    @param download_dir:                    Path to the resources_downloaded directory
+    @param additional_requirements_file:    Optional additional requirements file
+    @return:                                Path to the venv Python binary + activate command
+    """
+    env_dirname = "env"
+    env_path = download_dir / env_dirname
+
+    venv_builder = venv.EnvBuilder(with_pip=True, upgrade_deps=True)
+    venv_context = venv_builder.ensure_directories(env_dir=env_path)
+
+    env_python = Path(venv_context.env_exe)
+
+    if not env_python.is_file():
+        # Create the virtual environment using current interpreter's venv
+        # (not necessarily the system's Python3)
+        venv_builder.create(env_dir=env_path)
+
+    if sys.platform == "win32":
+        env_activate = Path(f"{venv_context.bin_path}/activate.bat")
+        env_activate_cmd = str(env_activate)
+    else:
+        env_activate = Path(f"{venv_context.bin_path}/activate")
+        env_activate_cmd = f". {env_activate}"
+
+    if not env_activate.is_file():
+        venv_builder.install_scripts(venv_context, venv_context.bin_path)
+
+    # 1.3 Install additional requirements first, if a valid file has been provided
+    if additional_requirements_file and os.path.isfile(additional_requirements_file):
+        command = f"{env_python} -m pip install -r {additional_requirements_file}"
+        call_command(command)
+
+    # 1.4 Make sure to have all the main requirements
+    requirements = [f"ethos-u-vela=={VELA_VERSION}"]
+    command = f"{env_python} -m pip freeze"
+    packages = call_command(command)
+    for req in requirements:
+        if req not in packages:
+            command = f"{env_python} -m pip install {req}"
+            call_command(command)
+
+    return env_path, env_activate_cmd
+
+
+def update_metadata(
+        metadata_dict: typing.Dict,
+        setup_script_hash: str,
+        json_uc_res: typing.List[UseCase],
+        metadata_file_path: Path
+):
+    """
+    Update the metadata file
+
+    @param metadata_dict:       The metadata dictionary to update
+    @param setup_script_hash:   The setup script hash
+    @param json_uc_res:         The use case resources metadata
+    @param metadata_file_path   The metadata file path
+    """
+    metadata_dict["ethosu_vela_version"] = VELA_VERSION
+    metadata_dict["set_up_script_md5sum"] = setup_script_hash.strip("\n")
+    metadata_dict["resources_info"] = [dataclasses.asdict(uc) for uc in json_uc_res]
+
+    with open(metadata_file_path, "w", encoding="utf8") as metadata_file:
+        json.dump(metadata_dict, metadata_file, indent=4)
 
 
 def set_up_resources(
-    run_vela_on_models: bool = False,
-    additional_npu_config_names: tuple = (),
-    arena_cache_size: int = 0,
-    check_clean_folder: bool = False,
-    additional_requirements_file: str = "") -> (Path, Path):
+        run_vela_on_models: bool = False,
+        additional_npu_config_names: tuple = (),
+        arena_cache_size: int = 0,
+        check_clean_folder: bool = False,
+        additional_requirements_file: Path = ""
+) -> Path:
     """
     Helpers function that retrieve the output from a command.
 
@@ -381,145 +610,39 @@ def set_up_resources(
     download_dir = current_file_dir / "resources_downloaded"
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
-    metadata_dict = dict()
-    vela_version = "3.9.0"
-    py3_version_minimum = (3, 9)
-
     # Is Python minimum requirement matched?
-    py3_version = sys.version_info
-    if py3_version < py3_version_minimum:
-        raise Exception(
-            "ERROR: Python3.9+ is required, please see the documentation on how to update it."
+    if sys.version_info < py3_version_minimum:
+        raise RuntimeError(
+            f"ERROR: Python{'.'.join(str(i) for i in py3_version_minimum)}+ is required,"
+            f" please see the documentation on how to update it."
         )
-    else:
-        logging.info(f"Using Python version: {py3_version}")
+    logging.info("Using Python version: %s", sys.version_info)
 
-    setup_script_hash_verified = False
+    json_uc_res = load_use_case_resources(current_file_dir)
     setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
 
-    try:
-        #   1.1 Does the download dir exist?
-        download_dir.mkdir()
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            logging.info("'resources_downloaded' directory exists.")
-            # Check and clean?
-            if check_clean_folder and metadata_file_path.is_file():
-                with open(metadata_file_path) as metadata_file:
-                    metadata_dict = json.load(metadata_file)
-                    vela_in_metadata = metadata_dict["ethosu_vela_version"]
-                    if vela_in_metadata != vela_version:
-                        # Check if all the resources needs to be removed and regenerated.
-                        # This can happen when the Vela version has changed.
-                        logging.info(
-                            f"Vela version in metadata is {vela_in_metadata}, current {vela_version}. Removing the resources and re-download them."
-                        )
-                        remove_tree_dir(download_dir)
-                        metadata_dict = dict()
-                    else:
-                        # Check if the set_up_default_resorces.py has changed from last setup
-                        setup_script_hash_verified = (
-                            metadata_dict.get("set_up_script_md5sum")
-                            == setup_script_hash
-                        )
-        else:
-            raise
+    metadata_dict, setup_script_hash_verified = initialize_resources_directory(
+        download_dir,
+        check_clean_folder,
+        metadata_file_path,
+        setup_script_hash
+    )
 
-    # 1.2 Does the virtual environment exist?
-    env_dirname = "env"
-    env_path = download_dir / env_dirname
-
-    venv_builder = venv.EnvBuilder(with_pip=True, upgrade_deps=True)
-    venv_context = venv_builder.ensure_directories(env_dir=env_path)
-
-    env_python = Path(venv_context.env_exe)
-
-    if sys.platform == "win32":
-        env_activate = f"{venv_context.bin_path}/activate.bat"
-    else:
-        env_activate = f". {venv_context.bin_path}/activate"
-
-    if not env_python.is_file():
-        # Create the virtual environment using current interpreter's venv
-        # (not necessarily the system's Python3)
-        venv_builder.create(env_dir=env_path)
-
-    # 1.3 Install additional requirements first, if a valid file has been provided
-    if additional_requirements_file and os.path.isfile(additional_requirements_file):
-        command = f"{env_python} -m pip install -r {additional_requirements_file}"
-        call_command(command)
-
-    # 1.4 Make sure to have all the main requirements
-    requirements = [f"ethos-u-vela=={vela_version}"]
-    command = f"{env_python} -m pip freeze"
-    packages = call_command(command)
-    for req in requirements:
-        if req not in packages:
-            command = f"{env_python} -m pip install {req}"
-            call_command(command)
+    env_path, env_activate = set_up_python_venv(
+        download_dir,
+        additional_requirements_file
+    )
 
     # 2. Download models
     logging.info("Downloading resources.")
-    for uc in json_uc_res:
-        use_case_name = uc["use_case_name"]
-        res_url_prefix = uc["url_prefix"]
-        try:
-            #  Does the usecase_name download dir exist?
-            (download_dir / use_case_name).mkdir()
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                # The usecase_name download dir exist.
-                if check_clean_folder and not setup_script_hash_verified:
-                    for idx, metadata_uc_url_prefix in enumerate(
-                        [
-                            f
-                            for f in metadata_dict["resources_info"]
-                            if f["use_case_name"] == use_case_name
-                        ][0]["url_prefix"]
-                    ):
-                        if metadata_uc_url_prefix != res_url_prefix[idx]:
-                            logging.info(f"Removing {use_case_name} resources.")
-                            remove_tree_dir(download_dir / use_case_name)
-                            break
-            elif e.errno != errno.EEXIST:
-                logging.error(f"Error creating {use_case_name} directory.")
-                raise
-
-        reg_expr_str = r"{url_prefix:(.*\d)}"
-        reg_expr_pattern = re.compile(reg_expr_str)
-        for res in uc["resources"]:
-            res_name = res["name"]
-            url_prefix_idx = int(reg_expr_pattern.search(res["url"]).group(1))
-            res_url = res_url_prefix[url_prefix_idx] + re.sub(
-                reg_expr_str, "", res["url"]
-            )
-
-            sub_folder = ""
-            if "sub_folder" in res:
-                try:
-                    #  Does the usecase_name/sub_folder download dir exist?
-                    (download_dir / use_case_name / res["sub_folder"]).mkdir()
-                except OSError as e:
-                    if e.errno != errno.EEXIST:
-                        logging.error(
-                            f"Error creating {use_case_name} / {res['sub_folder']} directory."
-                        )
-                        raise
-                sub_folder = res["sub_folder"]
-
-            res_dst = download_dir / use_case_name / sub_folder / res_name
-
-            if res_dst.is_file():
-                logging.info(f"File {res_dst} exists, skipping download.")
-            else:
-                try:
-                    g = urllib.request.urlopen(res_url)
-                    with open(res_dst, "b+w") as f:
-                        f.write(g.read())
-                        logging.info(f"- Downloaded {res_url} to {res_dst}.")
-                except URLError:
-                    logging.error(f"URLError while downloading {res_url}.")
-                    raise
+    for use_case in json_uc_res:
+        download_resources(
+            use_case,
+            metadata_dict,
+            download_dir,
+            check_clean_folder,
+            setup_script_hash_verified
+        )
 
     # 3. Run vela on models in resources_downloaded
     # New models will have same name with '_vela' appended.
@@ -530,90 +653,25 @@ def set_up_resources(
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.
     if run_vela_on_models is True:
-        config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
-        models = [
-            Path(dirpath) / f
-            for dirpath, dirnames, files in os.walk(download_dir)
-            for f in fnmatch.filter(files, "*.tflite")
-            if "vela" not in f
-        ]
-
         # Consolidate all config names while discarding duplicates:
-        config_names = list(set(default_npu_config_names + additional_npu_config_names))
-
-        # Get npu config tuple for each config name in a list:
-        npu_configs = [
-            get_default_npu_config_from_name(name, arena_cache_size)
-            for name in config_names
-        ]
-
-        logging.info(f"All models will be optimised for these configs:")
-        for config in npu_configs:
-            logging.info(config)
-
-        optimisation_skipped = False
-
-        for model in models:
-            output_dir = model.parent
-            # model name after compiling with vela is an initial model name + _vela suffix
-            vela_optimised_model_path = model.parent / (model.stem + "_vela.tflite")
-
-            for config in npu_configs:
-                vela_command_arena_cache_size = ""
-
-                if config.arena_cache_size:
-                    vela_command_arena_cache_size = (
-                        f"--arena-cache-size={config.arena_cache_size}"
-                    )
-
-                vela_command = (
-                    f"{env_activate} && vela {model} "
-                    + f"--accelerator-config={config.config_name} "
-                    + "--optimise Performance "
-                    + f"--config {config_file} "
-                    + f"--memory-mode={config.memory_mode} "
-                    + f"--system-config={config.system_config} "
-                    + f"--output-dir={output_dir} "
-                    + f"{vela_command_arena_cache_size}"
-                )
-
-                # We want the name to include the configuration suffix. For example: vela_H128,
-                # vela_Y512 etc.
-                new_suffix = "_vela_" + config.ethos_u_config_id + ".tflite"
-                new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
-
-                if new_vela_optimised_model_path.is_file():
-                    logging.info(
-                        f"File {new_vela_optimised_model_path} exists, skipping optimisation."
-                    )
-                    optimisation_skipped = True
-                    continue
-
-                call_command(vela_command)
-
-                # Rename default vela model.
-                vela_optimised_model_path.rename(new_vela_optimised_model_path)
-                logging.info(
-                    f"Renaming {vela_optimised_model_path} to {new_vela_optimised_model_path}."
-                )
-
-        # If any optimisation was skipped, show how to regenerate:
-        if optimisation_skipped:
-            logging.warning("One or more optimisations were skipped.")
-            logging.warning(
-                f"To optimise all the models, please remove the directory {download_dir}."
-            )
+        run_vela_on_all_models(
+            current_file_dir,
+            download_dir,
+            env_activate,
+            arena_cache_size,
+            npu_config_names=list(set(default_npu_config_names + list(additional_npu_config_names)))
+        )
 
     # 4. Collect and write metadata
     logging.info("Collecting and write metadata.")
-    metadata_dict["ethosu_vela_version"] = vela_version
-    metadata_dict["set_up_script_md5sum"] = setup_script_hash.strip("\n")
-    metadata_dict["resources_info"] = json_uc_res
+    update_metadata(
+        metadata_dict,
+        setup_script_hash.strip("\n"),
+        json_uc_res,
+        metadata_file_path
+    )
 
-    with open(metadata_file_path, "w") as metadata_file:
-        json.dump(metadata_dict, metadata_file, indent=4)
-
-    return download_dir, env_path
+    return env_path
 
 
 if __name__ == "__main__":
