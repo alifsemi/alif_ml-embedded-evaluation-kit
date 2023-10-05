@@ -73,6 +73,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DMA_Opcode.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_Camera_Controller.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
@@ -128,8 +129,9 @@ target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${BOARDLIB_PATH}/appkit_alpha1/board_init.c
     ${BOARDLIB_PATH}/appkit_alpha2/board_init.c
-    ${BOARDLIB_PATH}/devkit/board_init.c
-    ${BOARDLIB_PATH}/devkit_b0/board_init.c
+    ${BOARDLIB_PATH}/appkit_gen2/board_init.c
+    ${BOARDLIB_PATH}/devkit_gen1/board_init.c
+    ${BOARDLIB_PATH}/devkit_gen2/board_init.c
     ${BOARDLIB_PATH}/devkit_b0_cob/board_init.c
     )
 
