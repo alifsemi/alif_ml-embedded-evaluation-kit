@@ -17,19 +17,18 @@
 /* Project Includes */
 #include <RTE_Device.h>
 #include <Driver_SAI.h>
-#include <Driver_PINMUX_AND_PINPAD.h>
+
+#include "board.h"
 
 #include "mic_listener.h"
 
-#if TARGET_BOARD >= BOARD_AppKit_Alpha1
-#define I2S_BUS_NUMBER 1   // Alif AI/ML App Kit
-#elif TARGET_BOARD == BOARD_DevKit
-#define I2S_BUS_NUMBER 2   // Alif Development Kit
-#endif
-
 ARM_DRIVER_SAI       *i2s_drv;
 
-extern ARM_DRIVER_SAI ARM_Driver_SAI_(I2S_BUS_NUMBER);
+#define Driver_SAI4 Driver_SAILP
+
+extern ARM_DRIVER_SAI ARM_Driver_SAI_(BOARD_I2S_INSTANCE);
+
+
 
 voice_callback_t rx_callback;
 
@@ -51,61 +50,13 @@ void i2s_callback(uint32_t event)
     }
 }
 
-/**
-  \fn          void i2s_pinmux_config(void)
-  \brief       Initialize the pinmux for I2S RX
-  \return      status
-*/
-void i2s_pinmux_config(void)
-{
-#if I2S_BUS_NUMBER == 0
-
-    /* AppKit MIC1 pair */
-    /* Configure I2S0 WS B */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_31, PINMUX_ALTERNATE_FUNCTION_3);
-
-    /* Configure I2S0 SCLK B */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_30, PINMUX_ALTERNATE_FUNCTION_2);
-
-    /* Configure I2S0 SDI B */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_28, PINMUX_ALTERNATE_FUNCTION_3);
-
-#elif I2S_BUS_NUMBER == 1
-
-    /* AppKit MIC2 pair */
-    /* Configure I2S1 WS B */
-    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_3);
-
-    /* Configure I2S1 SCK B */
-    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_6, PINMUX_ALTERNATE_FUNCTION_2);
-
-    /* Configure I2S1 SDI B */
-    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_3);
-
-#elif I2S_BUS_NUMBER == 2
-
-    /* Configure I2S2 WS A */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_2);
-
-    /* Configure I2S2 SCLK A */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_3, PINMUX_ALTERNATE_FUNCTION_3);
-
-    /* Configure I2S2 SDI A */
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_1, PINMUX_ALTERNATE_FUNCTION_3);
-
-#endif
-}
-
 int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
 {
     ARM_SAI_CAPABILITIES cap;
     int32_t status;
 
-    /* Configure the I2S pins */
-    i2s_pinmux_config();
-
     /* Use the I2S2 as Receiver */
-    i2s_drv = &ARM_Driver_SAI_(I2S_BUS_NUMBER);
+    i2s_drv = &ARM_Driver_SAI_(BOARD_I2S_INSTANCE);
 
     /* Verify if I2S protocol is supported */
     cap = i2s_drv->GetCapabilities();

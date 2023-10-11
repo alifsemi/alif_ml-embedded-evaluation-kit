@@ -29,10 +29,20 @@
 
 function(set_platform_global_defaults)
     set(TARGET_BOARD "DevKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit_Alpha1" "AppKit_Alpha2")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard" "AppKit_Alpha1" "AppKit_Alpha2")
+
+    set(TARGET_REVISION "A" CACHE STRING "Chip revision")
+    set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
+
+    if (TARGET_REVISION STREQUAL "A")
+        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
+    else()
+        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble-b PARENT_SCOPE)
+    endif()
+    set(BOARDLIB_PATH ${DEPENDENCY_ROOT_DIR}/boardlib PARENT_SCOPE)
 
     message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
-    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM}")
+    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION}")
 
     set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
 
@@ -46,14 +56,30 @@ function(set_platform_global_defaults)
 
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
         set(ETHOS_U_NPU_CONFIG_ID "H256"    CACHE STRING "Ethos-U NPU configuration" FORCE)
+        set(ENSEMBLE_CORE         "M55_HP")
     else()
         set(ETHOS_U_NPU_CONFIG_ID "H128"    CACHE STRING "Ethos-U NPU configuration" FORCE)
+        set(ENSEMBLE_CORE         "M55_HE")
     endif()
+    set(ENSEMBLE_CORE "${ENSEMBLE_CORE}" PARENT_SCOPE)
+    add_compile_definitions(${ENSEMBLE_CORE})
+
     message(STATUS "Forced ETHOS_U_NPU_CONFIG_ID to ${ETHOS_U_NPU_CONFIG_ID}")
     set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
     set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
+
+    # Second AXI port M1 can't reach MRAM or OSPI on Ensemble B; overall performance loss of using
+    # only one port is minimal in most cases, so simplest just to always disable by default, rather than
+    # attempt to have any sort of dynamic switching based on model location.
+    #
+    # If not using MRAM or OSPI for the model data, then the user can set this back to two.
+    if (TARGET_REVISION STREQUAL "B")
+        set(ETHOS_U_NPU_PORTS "1"          CACHE STRING "Ethos-U AXI ports")
+    else()
+        set(ETHOS_U_NPU_PORTS "2"          CACHE STRING "Ethos-U AXI ports")
+    endif()
 
 endfunction()
 

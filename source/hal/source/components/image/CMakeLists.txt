@@ -56,15 +56,11 @@ target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     PRIVATE
     source/ensemble/image_ensemble.c
     source/ensemble/src/bayer2rgb.c
+    source/ensemble/src/tiff.c
     source/ensemble/src/image_processing.c
     source/ensemble/src/color_correction.c
-    source/ensemble/src/Driver_CPI.c
+    source/ensemble/src/camera.c
     )
-
-# Ensemble TARGET_BOARD needs to be set
-target_compile_definitions(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
-    PRIVATE
-    TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -79,6 +75,7 @@ target_link_libraries(${IMAGE_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${IMAGE_IFACE_TARGET}
     log
     cmsis_ensemble
+    platform_drivers_core
     rte_components)
 
 # Display status

@@ -2,6 +2,9 @@ def common_funcs
 
 pipeline {
     agent { label 'build2' }
+    environment {
+        LOG_JUNIT_RESULTS = 'true'
+    }
     stages {
         stage('Init') {
             steps {
@@ -49,6 +52,13 @@ pipeline {
                             common_funcs.build_he_tcm("Release", "gcc");
                         }
                     }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
                 }
                 stage('Build HE-TCM GCC Debug') {
                     steps {
@@ -59,13 +69,49 @@ pipeline {
                 }
             }
         }
+        stage('Test KWS HE Release') {
+            agent { label 'tester_B' }
+            steps {
+                unstash name: "test_build_gnu_kws_he_release"
+                script {
+                    try {
+                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
+                    } catch (Exception e) {
+                        echo 'Exception occurred: ' + e.toString()
+                        stageResult: 'UNSTABLE'
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                    junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+                }
+                cleanup {
+                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                }
+            }
+        }
+        stage('Report Junit to Influx') {
+            agent any
+            options { skipDefaultCheckout() }
+            steps {
+                script {
+                    try {
+                        influxDbPublisher(selectedTarget: 'JUnit-report-testapp')
+                    } catch (Exception e) {
+                        echo 'Exception occurred: ' + e.toString()
+                    }
+                }
+            }
+        }
     }
     post {
-        always {
-          archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-        }
         cleanup {
-          cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
         }
     }
 }

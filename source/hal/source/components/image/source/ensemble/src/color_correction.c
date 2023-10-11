@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 
 #include "base_def.h"
@@ -102,8 +103,10 @@ static void bulk_color_correction(const uint8_t *sp, uint8_t *dp, ptrdiff_t len,
 	const uint16x8_t pixel_offsets = vmulq_n_u16(vidupq_n_u16(0, 1), 3);
 
 	while (len > 0) {
+#if __CM55_REV == 0x0001 // Only worthwhile with r0p1 in A silicon
 		// Fetching two iterations ahead seems optimal for RTSS-HP fetching from SRAM0
 		__builtin_prefetch(sp + 3 * 8 * 2);
+#endif
 		float16x8_t r = vcvtq(vldrbq_gather_offset(sp + 0, pixel_offsets));
 		float16x8_t g = vcvtq(vldrbq_gather_offset(sp + 1, pixel_offsets));
 		float16x8_t b = vcvtq(vldrbq_gather_offset(sp + 2, pixel_offsets));
@@ -154,7 +157,7 @@ static inline float rec709_oetf(float lum)
     if (lum < 0.018f) {
         return 4.5f * lum;
     } else {
-        return 1.099f * pow(lum, 0.45f) - 0.099f;
+        return 1.099f * powf(lum, 0.45f) - 0.099f;
     }
 }
 

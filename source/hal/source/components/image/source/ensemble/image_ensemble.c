@@ -9,40 +9,61 @@
  */
 
 #include "RTE_Components.h"
+#include "RTE_Device.h"
 
 #include "log_macros.h"
 #include "image_data.h"
 #include "image_processing.h"
-#include "Driver_CPI.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
-#include "Driver_GPIO.h"
+#include "bayer.h"
+#include "tiff.h"
+#include "camera.h"
+#include "board.h"
 #include "base_def.h"
+#include "timer_ensemble.h"
 #include "delay.h"
 #include <tgmath.h>
 #include <string.h>
 
-static uint8_t rgb_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));      // 560x560x3 = 940,800
-static uint8_t raw_image[CIMAGE_X*CIMAGE_Y*RGB_BYTES] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560x3 = 940,800
+/* Camera fills the raw_image buffer.
+ * Bayer->RGB conversion transfers into the rgb_image buffer.
+ * Following steps (crop, interpolate, colour correct) all occur in the rgb_image buffer in-place.
+ */
 
-extern ARM_DRIVER_GPIO Driver_GPIO1;
+static struct {
+	tiff_header_t tiff_header;
+	uint8_t image_data[CIMAGE_X * CIMAGE_Y * RGB_BYTES]; // 560x560x3 = 940,800
+} rgb_image __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));
+static uint8_t raw_image[CIMAGE_X * CIMAGE_Y] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560 = 313,600
+
+#define FAKE_CAMERA 0
+
+#if RTE_SILICON_REV_A
+#define BAYER_FORMAT DC1394_COLOR_FILTER_BGGR
+#else
+#define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
+#endif
 
 int image_init()
 {
+#if FAKE_CAMERA
+    return 0;
+#else
     DEBUG_PRINTF("image_init(IN)\n");
     int err = camera_init(raw_image);
     DEBUG_PRINTF("image_init(), camera_init: %d\n", err);
 	if (err != 0) {
 		while(1) {
-			Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_LOW);
+		    BOARD_LED1_Control(BOARD_LED_STATE_LOW);
 			sleep_or_wait_msec(300);
-			Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_HIGH);
+            BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
 			sleep_or_wait_msec(300);
 		}
 	}
 	DEBUG_PRINTF("Camera initialized... \n");
-	Driver_GPIO1.SetValue(PIN_NUMBER_14, GPIO_PIN_OUTPUT_STATE_HIGH);
+    BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
 
     return err;
+#endif
 }
 
 static float current_log_gain = 0.0;
@@ -162,15 +183,14 @@ static void process_autogain(void)
     }
 }
 
-#define FAKE_CAMERA 0
-
 const uint8_t *get_image_data(int ml_width, int ml_height)
 {
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 #if !FAKE_CAMERA
     camera_start(CAMERA_MODE_SNAPSHOT);
-    // It's a huge buffer (941920 bytes) - actually doing it by address can take 0.5ms, while
+    camera_wait(100);
+    // It's a big buffer (313,600 bytes) - actually doing it by address can take 0.175ms, while
     // a global clean+invalidate is 0.023ms. (Although there will be a reload cost
     // on stuff we lost).
     // Notably, just invalidate is faster at 0.015ms, but we'd have to be sure
@@ -179,7 +199,6 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     // So maybe go to global if >128K, considering cost of refills?
     //SCB_InvalidateDCache_by_Addr(raw_image, sizeof raw_image);
     SCB_CleanInvalidateDCache();
-    camera_wait(100);
 #else
     static int roll = 0;
     for (int y = 0; y < CIMAGE_Y; y+=2) {
@@ -193,24 +212,45 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     		float r = barr * intensity + 0.5f;
     		float g = barg * intensity + 0.5f;
     		float b = barb * intensity + 0.5f;
-    		p[0]        = b; p[1]            = g;
-    		p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
+            if (BAYER_FORMAT == DC1394_COLOR_FILTER_BGGR) {
+                p[0]        = b; p[1]            = g;
+                p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
+            } else if (BAYER_FORMAT == DC1394_COLOR_FILTER_GRBG) {
+                p[0]        = g; p[1]            = r;
+                p[CIMAGE_X] = b; p[CIMAGE_X + 1] = g;
+            }
     		p += 2;
     	}
     }
     roll = (roll + 1) % CIMAGE_Y;
 #endif
-    tprof1 = ARM_PMU_Get_CCNTR();
+
+    /* TIFF image can be dumped in Arm Development Studio using the command
+     *
+     *     dump value camera.tiff rgb_image
+     *
+     * while stopped at an appropriate breakpoint below.
+     */
+    write_tiff_header(&rgb_image.tiff_header, CIMAGE_X, CIMAGE_Y);
+    tprof1 = Get_SysTick_Cycle_Count32();
     // RGB conversion and frame resize
-    bayer_to_RGB(raw_image, rgb_image);
-    tprof1 = ARM_PMU_Get_CCNTR() - tprof1;
+    dc1394_bayer_Simple(raw_image, rgb_image.image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
+    tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
+
+#if !FAKE_CAMERA
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
+#endif
+    if ((size_t) ml_width * ml_height * RGB_BYTES > sizeof raw_image) {
+        return NULL;
+    }
     // Cropping and scaling
-    crop_and_interpolate(rgb_image, CIMAGE_X, CIMAGE_Y, raw_image, ml_width, ml_height, RGB_BYTES * 8);
-    tprof4 = ARM_PMU_Get_CCNTR();
+    crop_and_interpolate(rgb_image.image_data, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
+    // Rewrite the TIFF header for the new size
+    write_tiff_header(&rgb_image.tiff_header, ml_width, ml_height);
+    tprof4 = Get_SysTick_Cycle_Count32();
     // Color correction for white balance
-    white_balance(ml_width, ml_height, raw_image, rgb_image);
-    tprof4 = ARM_PMU_Get_CCNTR() - tprof4;
-    return rgb_image;
+    white_balance(ml_width, ml_height, rgb_image.image_data, rgb_image.image_data);
+    tprof4 = Get_SysTick_Cycle_Count32() - tprof4;
+    return rgb_image.image_data;
 }

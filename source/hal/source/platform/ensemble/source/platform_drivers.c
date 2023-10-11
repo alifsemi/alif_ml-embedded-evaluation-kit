@@ -39,8 +39,8 @@
 
 #include "RTE_Device.h"
 #include "RTE_Components.h"
-#include "Driver_PINMUX_AND_PINPAD.h"
-#include "Driver_GPIO.h"
+#include "Driver_HWSEM.h"
+#include "board.h"
 #include "uart_tracelib.h"
 #include "services_lib_api.h"
 #include "services_main.h"
@@ -66,9 +66,6 @@ uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 static const char* s_platform_name = DESIGN_NAME;
 
 static void MHU_msg_received(void* data);
-extern ARM_DRIVER_GPIO Driver_GPIO1;
-extern ARM_DRIVER_GPIO Driver_GPIO2;
-extern ARM_DRIVER_GPIO Driver_GPIO3;
 
 // IPC callback
 static void ipc_rx_callback(void *data)
@@ -78,6 +75,8 @@ static void ipc_rx_callback(void *data)
     uint16_t id = payload->id;
     printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
+
+#ifdef COPY_VECTORS
 
 static VECTOR_TABLE_Type MyVectorTable[496] __attribute__((aligned (2048))) __attribute__((section (".bss.noinit.ram_vectors")));
 
@@ -92,13 +91,16 @@ static void copy_vtor_table_to_ram()
     SCB->VTOR = (uint32_t) MyVectorTable;
     __DSB();
 }
+#endif
 
 int platform_init(void)
 {
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
+#ifdef COPY_VECTORS
     copy_vtor_table_to_ram();
+#endif
 
     if (0 != Init_SysTick()) {
         printf("Failed to initialise system tick config\n");
@@ -107,6 +109,30 @@ int platform_init(void)
     /* Forces retarget code to be included in build */
     extern void _clock_init(void);
     _clock_init();
+
+    extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
+    ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
+
+    HWSEMdrv->Initialize(NULL);
+    /* Only 1 core will do the pinmux */
+#if LP_PERIPHERAL_BASE == 0x70000000 // Old core, so old CMSIS pack
+    if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
+#else
+    if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
+#endif
+        /* We're first to acquire the lock - we do it */
+        BOARD_Power_Init();
+        BOARD_Clock_Init();
+        BOARD_Pinmux_Init();
+
+        /* Lock a second time to raise the count to 2 - the signal that we've finished */
+        HWSEMdrv->Lock();
+    } else {
+        /* Someone else got there first - they did it or are doing it. Wait until we see count 2 indicating they've finished */
+        while (HWSEMdrv->GetCount() < 2);
+    }
+
+    HWSEMdrv->Uninitialize();
 
     tracelib_init(NULL);
 
@@ -147,63 +173,8 @@ void init_trigger_rx(void)
 {
     services_init(MHU_msg_received);
 
-#if TARGET_BOARD == BOARD_AppKit_Alpha1
-
-    Driver_GPIO2.Initialize(PIN_NUMBER_7, NULL);
-    Driver_GPIO2.PowerControl(PIN_NUMBER_7, ARM_POWER_FULL);
-    Driver_GPIO2.SetValue(PIN_NUMBER_7, GPIO_PIN_OUTPUT_STATE_HIGH);
-    Driver_GPIO2.SetDirection(PIN_NUMBER_7, GPIO_PIN_DIRECTION_OUTPUT);
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_7, PINMUX_ALTERNATE_FUNCTION_0);
-
-#elif TARGET_BOARD == BOARD_AppKit_Alpha2
-
-    Driver_GPIO2.Initialize(PIN_NUMBER_26, NULL);
-    Driver_GPIO2.PowerControl(PIN_NUMBER_26, ARM_POWER_FULL);
-    Driver_GPIO2.SetValue(PIN_NUMBER_26, GPIO_PIN_OUTPUT_STATE_HIGH);
-    Driver_GPIO2.SetDirection(PIN_NUMBER_26, GPIO_PIN_DIRECTION_OUTPUT);
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_26, PINMUX_ALTERNATE_FUNCTION_0);
-
-    // Initialize GPIOs to capture the buttons state
-
-    Driver_GPIO2.Initialize(PIN_NUMBER_27, NULL);
-    Driver_GPIO2.PowerControl(PIN_NUMBER_27, ARM_POWER_FULL);
-    Driver_GPIO2.SetDirection(PIN_NUMBER_27, GPIO_PIN_DIRECTION_INPUT);
-    PINMUX_Config(PORT_NUMBER_2, PIN_NUMBER_27, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_2, PIN_NUMBER_27, PAD_FUNCTION_READ_ENABLE | \
-                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
-                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
-
-    Driver_GPIO3.Initialize(PIN_NUMBER_18, NULL);
-    Driver_GPIO3.PowerControl(PIN_NUMBER_18, ARM_POWER_FULL);
-    Driver_GPIO3.SetDirection(PIN_NUMBER_18, GPIO_PIN_DIRECTION_INPUT);
-    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_18, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_18, PAD_FUNCTION_READ_ENABLE | \
-                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
-                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
-
-#elif TARGET_BOARD == BOARD_DevKit
-
-    // Initialize GPIOs to capture the buttons state
-
-    Driver_GPIO1.Initialize(PIN_NUMBER_12, NULL);
-    Driver_GPIO1.PowerControl(PIN_NUMBER_12, ARM_POWER_FULL);
-    Driver_GPIO1.SetDirection(PIN_NUMBER_12, GPIO_PIN_DIRECTION_INPUT);
-    PINMUX_Config(PORT_NUMBER_1, PIN_NUMBER_12, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_1, PIN_NUMBER_12, PAD_FUNCTION_READ_ENABLE | \
-                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
-                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
-
-    Driver_GPIO3.Initialize(PIN_NUMBER_4, NULL);
-    Driver_GPIO3.PowerControl(PIN_NUMBER_4, ARM_POWER_FULL);
-    Driver_GPIO3.SetDirection(PIN_NUMBER_4, GPIO_PIN_DIRECTION_INPUT);
-    PINMUX_Config(PORT_NUMBER_3, PIN_NUMBER_4, PINMUX_ALTERNATE_FUNCTION_0);
-    PINPAD_Config(PORT_NUMBER_3, PIN_NUMBER_4, PAD_FUNCTION_READ_ENABLE | \
-                                            PAD_FUNCTION_SCHMITT_TRIGGER_ENABLE | \
-                                            PAD_FUNCTION_DRIVER_DISABLE_STATE_WITH_HIGH_Z);
-
-#else
-    #error "TARGET_BOARD does not seem to be defined"
-#endif
+    BOARD_BUTTON1_Init(NULL);
+    BOARD_BUTTON2_Init(NULL);
 }
 
 void init_trigger_tx(void)
@@ -211,12 +182,12 @@ void init_trigger_tx(void)
     services_init(ipc_rx_callback);
 }
 
-#if TARGET_BOARD == BOARD_AppKit_Alpha1
+#if BOARD_BUTTON_COUNT < 2
 static atomic_int do_inference_once = false;
 #else
 static atomic_int do_inference_once = true;
-static bool last_btn0 = false;
 static bool last_btn1 = false;
+static bool last_btn2 = false;
 #endif
 
 static void MHU_msg_received(void* data)
@@ -246,7 +217,7 @@ static void MHU_msg_received(void* data)
 
 bool run_requested(void)
 {
-#if TARGET_BOARD == BOARD_AppKit_Alpha1
+#if BOARD_BUTTON_COUNT < 2
 
     bool ret = true;
     if (do_inference_once)
@@ -255,56 +226,30 @@ bool run_requested(void)
     }
     return ret;
 
-#elif TARGET_BOARD == BOARD_AppKit_Alpha2
+#else
 
     bool ret = true;
-    bool new_btn0, new_btn1;
-    uint32_t pin_state0, pin_state1;
+    bool new_btn1, new_btn2;
+    BOARD_BUTTON_STATE btn_state1, btn_state2;
 
     // Get new button state (active low)
-    Driver_GPIO3.GetValue(PIN_NUMBER_18, &pin_state0);
-    new_btn0 = pin_state0 == 0;
-    Driver_GPIO2.GetValue(PIN_NUMBER_27, &pin_state1);
-    new_btn1 = pin_state1 == 0;
+    BOARD_BUTTON1_GetState(&btn_state1);
+    BOARD_BUTTON2_GetState(&btn_state2);
+    new_btn1 = btn_state1 == BOARD_BUTTON_STATE_LOW;
+    new_btn2 = btn_state2 == BOARD_BUTTON_STATE_LOW;
 
     if (do_inference_once)
     {
         // Edge detector - run inference on the positive edge of the button pressed signal
-        ret = !last_btn0 && new_btn0;
+        ret = !last_btn1 && new_btn1;
     }
-    if (new_btn1 && last_btn1 != new_btn1)
+    if (new_btn2 && last_btn2 != new_btn2)
     {
         // Switch single shot and continuous inference mode
         do_inference_once ^= 1;
     }
-    last_btn0 = new_btn0;
     last_btn1 = new_btn1;
-    return ret;
-
-#elif TARGET_BOARD == BOARD_DevKit
-
-    bool ret = true;
-    bool new_btn0, new_btn1;
-    uint32_t pin_state0, pin_state1;
-
-    // Get new button state (active low)
-    Driver_GPIO1.GetValue(PIN_NUMBER_12, &pin_state0);
-    new_btn0 = pin_state0 == 0;
-    Driver_GPIO3.GetValue(PIN_NUMBER_4, &pin_state1);
-    new_btn1 = pin_state1 == 0;
-
-    if (do_inference_once)
-    {
-        // Edge detector - run inference on the positive edge of the button pressed signal
-        ret = !last_btn0 && new_btn0;
-    }
-    if (new_btn1 && last_btn1 != new_btn1)
-    {
-        // Switch single shot and continuous inference mode
-        do_inference_once ^= 1;
-    }
-    last_btn0 = new_btn0;
-    last_btn1 = new_btn1;
+    last_btn2 = new_btn2;
     return ret;
 
 #endif
@@ -382,11 +327,13 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, 2)
     },
-    { // LP- Peripheral & PINMUX Regions
-    .RBAR = ARM_MPU_RBAR(LP_PERIPHERAL_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(LP_PERIPHERAL_BASE + 0x01FFFFFF, 0)
+#if LP_PERIPHERAL_BASE != 0x70000000
+    { // SSE-700 Host Peripheral Region (1A000000)
+    .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, 0)
     },
-    { // DTCM
+#endif
+    { // DTCM (20000000)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
     },
@@ -409,7 +356,13 @@ void MPU_Load_Regions(void)
   #error device not specified!
 #endif
     },
-    { // MRAM
+#if LP_PERIPHERAL_BASE == 0x70000000
+    { // LP- Peripheral & PINMUX Regions (70000000)
+    .RBAR = ARM_MPU_RBAR(0x70000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x71FFFFFF, 0)
+    },
+#endif
+    { // MRAM (80000000)
     .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1)
     },

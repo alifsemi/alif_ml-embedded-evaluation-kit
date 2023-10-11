@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #define INF_RUNNER_TESTMODEL_HPP
 
 #include "Model.hpp"
+#include "MicroMutableAllOpsResolver.hpp"
 
 namespace arm {
 namespace app {
@@ -26,7 +27,7 @@ namespace app {
 
     protected:
         /** @brief   Gets the reference to op resolver interface class. */
-        const tflite::AllOpsResolver& GetOpResolver() override;
+        const tflite::MicroMutableOpResolver<kNumberOperators>& GetOpResolver() override;
 
         /** @brief   Adds operations to the op resolver instance, not needed as using AllOpsResolver. */
         bool EnlistOperations() override {return false;}
@@ -34,7 +35,7 @@ namespace app {
     private:
 
         /* No need to define individual ops at the cost of extra memory. */
-        tflite::AllOpsResolver m_opResolver;
+        tflite::MicroMutableOpResolver<kNumberOperators> m_opResolver = CreateAllOpsResolver();
     };
 
 } /* namespace app */

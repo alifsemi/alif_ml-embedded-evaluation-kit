@@ -137,7 +137,7 @@ def run(
 
     make_command = f"{cmake_path} --build {build_dir} -j{make_jobs}"
     if make_verbose:
-        make_command += "--verbose"
+        make_command += " --verbose"
     logging.info(f"\n\n\n{make_command}\n\n\n")
     state = subprocess.run(
         make_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT

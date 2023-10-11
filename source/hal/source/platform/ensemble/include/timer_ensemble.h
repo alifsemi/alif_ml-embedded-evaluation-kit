@@ -44,5 +44,8 @@ void SysTick_Handler(void);
 
 int Init_SysTick(void);
 uint32_t Get_SysTick_Count(void);
+uint64_t Get_SysTick_Cycle_Count(void);
+
+#define Get_SysTick_Cycle_Count32() ((uint32_t) Get_SysTick_Cycle_Count())
 
 #endif /* TIMER_ENSEMBLE_H */

@@ -46,6 +46,8 @@ set_property(CACHE CONSOLE_UART PROPERTY STRINGS "2" "4")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
+set(COPY_VECTORS ON CACHE BOOL "Copy vectors - can be turned off if not booting from MRAM")
+
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
     message(FATAL_ERROR "No ${PLATFORM_DRIVERS_TARGET} support for this target.")
@@ -55,13 +57,11 @@ set(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED OFF)
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-    set(ENSEMBLE_CORE       "M55_HP")
     set(SYSTEM_CORE_CLOCK    "400000000"    CACHE STRING "System peripheral clock (Hz)")
 endif()
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HE)
-    set(ENSEMBLE_CORE       "M55_HE")
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
 endif()
 
@@ -75,7 +75,6 @@ math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMA
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
-add_compile_definitions("${ENSEMBLE_CORE}")
 #set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
 # 2. Create static libraries
@@ -103,9 +102,12 @@ include
 )
 
 target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
-    TARGET_BOARD=BOARD_${TARGET_BOARD}
     CONSOLE_UART=${CONSOLE_UART}
 )
+
+if (COPY_VECTORS)
+    target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE COPY_VECTORS)
+endif()
 
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_CORE}

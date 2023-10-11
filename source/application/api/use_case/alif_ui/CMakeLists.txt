@@ -38,7 +38,8 @@ project(${ALIF_UI_API_TARGET}
 add_library(${ALIF_UI_API_TARGET} STATIC
         src/lv_paint_utils.c
         src/ScreenLayout.cc
-        src/Alif240.c)
+        src/Alif240.c
+        src/Alif240_white.c)
 
 target_include_directories(${ALIF_UI_API_TARGET} PUBLIC include)
 

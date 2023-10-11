@@ -58,6 +58,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    Main.o (+RO)
    platform_drivers.o (+RO)
    *(InRoot$$Sections)
+   *(.init_array)
    *liblvgl.a(+RO)
    *libArm-2D.a(+RO)
    *libcmsis_ensemble.a(+RO)
@@ -108,14 +109,3 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
   PADDING COMBINED_SRAM_BASE+COMBINED_SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
-
-#if 0
-#define _PARTITION_ADDRESS          0x8057F000
-#define _PARTITION_SIZE             0x1000
-
-LR_PARTITION _PARTITION_ADDRESS  _PARTITION_SIZE
-{
-	RESERVED +0 FILL 0 (_PARTITION_SIZE - 16) {}
-	ATOC +0 16 { *(:gdef:__mram_atoc) }
-}
-#endif

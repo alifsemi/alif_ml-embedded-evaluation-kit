@@ -146,7 +146,7 @@ namespace app {
         }
 
         uint32_t lv_lock_state = lv_port_lock();
-        tprof5 = ARM_PMU_Get_CCNTR();
+        tprof5 = Get_SysTick_Cycle_Count32();
         /* Display this image on the LCD. */
 #ifdef USE_LVGL_ZOOM
         write_to_lvgl_buf(
@@ -154,7 +154,7 @@ namespace app {
         write_to_lvgl_buf_doubled(
 #endif
                 MIMAGE_X, MIMAGE_Y, image_data, &lvgl_image[0][0]);
-        tprof5 = ARM_PMU_Get_CCNTR() - tprof5;
+        tprof5 = Get_SysTick_Cycle_Count32() - tprof5;
 
         lv_obj_invalidate(ScreenLayoutImageObject());
 
@@ -183,7 +183,7 @@ namespace app {
         const size_t imgSz = inputTensor->bytes;
 
 #if SHOW_INF_TIME
-        uint32_t inf_prof = ARM_PMU_Get_CCNTR();
+        uint32_t inf_prof = Get_SysTick_Cycle_Count32();
 #endif
 
         /* Run the pre-processing, inference and post-processing. */
@@ -203,7 +203,7 @@ namespace app {
         }
 
 #if SHOW_INF_TIME
-        inf_prof = ARM_PMU_Get_CCNTR() - inf_prof;
+        inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
 #endif
 
         /* Add results to context for access outside handler. */

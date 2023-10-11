@@ -71,12 +71,12 @@ json_uc_res = [
     {
         "use_case_name": "tiny_asr",
         "url_prefix": [
-            "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_int8/"
+            "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_pruned_int8/"
         ],
         "resources": [
             {
-                "name": "tiny_wav2letter_int8.tflite",
-                "url": "{url_prefix:0}tiny_wav2letter_int8.tflite",
+                "name": "tiny_wav2letter_pruned_int8.tflite",
+                "url": "{url_prefix:0}tiny_wav2letter_pruned_int8.tflite",
             },
             {
                 "name": "ifm0.npy",
@@ -402,7 +402,7 @@ def set_up_resources(
     metadata_file_path = download_dir / "resources_downloaded_metadata.json"
 
     metadata_dict = dict()
-    vela_version = "3.8.0"
+    vela_version = "3.9.0"
     py3_version_minimum = (3, 9)
 
     # Is Python minimum requirement matched?
@@ -448,13 +448,21 @@ def set_up_resources(
     # 1.2 Does the virtual environment exist?
     env_dirname = "env"
     env_path = download_dir / env_dirname
-    env_python = str(env_path / "bin" / "python3")
-    env_activate = str(env_path / "bin" / "activate")
 
-    if not env_path.is_dir():
+    venv_builder = venv.EnvBuilder(with_pip=True, upgrade_deps=True)
+    venv_context = venv_builder.ensure_directories(env_dir=env_path)
+
+    env_python = Path(venv_context.env_exe)
+
+    if sys.platform == "win32":
+        env_activate = f"{venv_context.bin_path}/activate.bat"
+    else:
+        env_activate = f". {venv_context.bin_path}/activate"
+
+    if not env_python.is_file():
         # Create the virtual environment using current interpreter's venv
         # (not necessarily the system's Python3)
-        venv.create(env_dir=env_path, with_pip=True, upgrade_deps=True)
+        venv_builder.create(env_dir=env_path)
 
     # 1.3 Install additional requirements first, if a valid file has been provided
     if additional_requirements_file and os.path.isfile(additional_requirements_file):
@@ -579,7 +587,7 @@ def set_up_resources(
                     )
 
                 vela_command = (
-                    f". {env_activate} && vela {model} "
+                    f"{env_activate} && vela {model} "
                     + f"--accelerator-config={config.config_name} "
                     + "--optimise Performance "
                     + f"--config {config_file} "

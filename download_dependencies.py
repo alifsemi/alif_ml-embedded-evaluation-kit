@@ -34,13 +34,15 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/384dd272f28ea7a99f5f7c211c9791f73cdb301b.zip"
-CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/e94a96201a97be3e84d3d6ef081d2f0f7db9b5fd.zip"
-CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.14.4.zip"
-CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/v4.1.0.zip"
+TF = "https://github.com/tensorflow/tflite-micro/archive/80cb11b131e9738dc60b2db3e2f1f8e2425ded52.zip"
+CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb8dc6c9407fac3a0f3.zip"
+CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip"
+CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.08.zip"
 CMSIS_ENSEMBLE = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/5bfce4020fa27d91fcd950725d35ecee8ba364ad.zip"
-ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.05.tar.gz"
-ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.05.tar.gz"
+CMSIS_ENSEMBLE_B = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/refs/tags/v0.9.6.zip"
+BOARDLIB = "https://github.com/alifsemi/alif_boardlib/archive/64067e673171fb7a80272421e537a5f8064bb323.zip"
+ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.08.tar.gz"
+ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.08.tar.gz"
 LVGL = "https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.7.zip"
 ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.3.zip"
 
@@ -88,6 +90,10 @@ def main(dependencies_path: Path):
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
     download(CMSIS_ENSEMBLE,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble"))
+    download(CMSIS_ENSEMBLE_B,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble-b"))
+    download(BOARDLIB,
+             lambda file: unzip(file.name, to_path=dependencies_path / "boardlib"))
     download(ETHOS_U_CORE_DRIVER,
              lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
     download(ETHOS_U_CORE_PLATFORM,

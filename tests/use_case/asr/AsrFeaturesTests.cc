@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,14 +100,14 @@ TEST_CASE("Floating point asr features calculation", "[ASR]")
         /* First 4 and last 4 values are different because we pad AFTER diff calculated. */
         for (size_t i = 0; i < numMfccFeats; ++i) {
             const float* start_goldenDelta1Buf = goldenDelta1Buf[i].data() + 4;
-            const float* start_delta1 = delta1Buf.begin() + i * delta1Buf.size(1) + 4;
+            const float* start_delta1 = delta1Buf.begin() + i * delta1Buf.dimSize(1) + 4;
             std::vector<float> goldenDataDelta1(start_goldenDelta1Buf, start_goldenDelta1Buf + numFeatVectors - 8);
             std::vector<float> tensorDataDelta1(start_delta1, start_delta1 + numFeatVectors - 8);
 
             CheckOutputs<float>(goldenDataDelta1,tensorDataDelta1);
 
             const float* start_goldenDelta2Buf = goldenDelta2Buf[i].data() + 4;
-            const float* start_delta2 = delta2Buf.begin() + i * delta2Buf.size(1) + 4;
+            const float* start_delta2 = delta2Buf.begin() + i * delta2Buf.dimSize(1) + 4;
             std::vector<float> goldenDataDelta2(start_goldenDelta2Buf, start_goldenDelta2Buf + numFeatVectors - 8);
             std::vector<float> tensorDataDelta2(start_delta2, start_delta2 + numFeatVectors - 8);
 

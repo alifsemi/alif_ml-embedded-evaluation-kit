@@ -39,6 +39,14 @@ USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0,
     0.5
     STRING)
 
+USER_OPTION(${use_case}_USE_APP_MENU "Show application menu"
+    OFF
+    BOOL)
+
+set(${use_case}_COMPILE_DEFS
+    USE_APP_MENU=$<BOOL:${${use_case}_USE_APP_MENU}>
+)
+
 # Generate labels file
 set(${use_case}_LABELS_CPP_FILE Labels)
 generate_labels_code(

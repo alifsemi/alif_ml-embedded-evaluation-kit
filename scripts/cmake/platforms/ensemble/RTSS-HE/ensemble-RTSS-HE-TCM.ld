@@ -37,7 +37,6 @@ MEMORY
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
-  TOC   (r)   : ORIGIN = 0x8057FFF0, LENGTH = 16
 }
 
 ENTRY(Reset_Handler)
@@ -205,14 +204,4 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > MRAM
-
-  /* Magic number (0xFFA0A710) + (0 = A32_0, 1 = A32_1, 2 = CM55HP, 3 = CM55HE)
-  .mini_toc :
-  {
-    LONG (0xffffffff)
-    LONG (0xFFA0A710 + 3)
-    LONG (__ROM_BASE)
-    LONG (0)
-  } > TOC
-  */
 }

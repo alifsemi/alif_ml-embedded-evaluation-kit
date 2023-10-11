@@ -1,3 +1,8 @@
+Changes in 23.08
+    * Support for 23.08 NPU components and dependencies (core-driver, core-platform, Vela 3.9.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
+    * Update Python package requirements for compatibility reasons.
+    * Increase minimum requirements of Armclang to 6.19
+
 Changes in 23.05
     * Support for 23.05 NPU components and dependencies (core-driver, core-platform, Vela 3.8.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
     * Minor updates to CMSIS-pack dependencies.
