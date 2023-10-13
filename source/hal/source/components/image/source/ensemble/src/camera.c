@@ -15,6 +15,7 @@
 
 /* Project Includes */
 #include "camera.h"
+#include "Driver_GPIO.h"
 
 #ifndef RTE_CPI
 #include "Driver_Camera_Controller.h"
