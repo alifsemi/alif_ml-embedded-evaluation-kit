@@ -13,9 +13,7 @@
 #ifndef __RTE_DEVICE_H
 #define __RTE_DEVICE_H
 
-#define BOARD_DevKit        1
-#define BOARD_AppKit_Alpha1 2
-#define BOARD_AppKit_Alpha2 3
+#include "board.h"
 
 // <e> SILICON_REV_A  (Silicon Revison)
 // <i> Select if the Chip Silicon Rev is Ax

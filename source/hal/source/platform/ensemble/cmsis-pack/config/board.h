@@ -17,6 +17,10 @@
 #ifndef __BOARD_LIB_H
 #define __BOARD_LIB_H
 
+#define BOARD_DevKit        1
+#define BOARD_AppKit_Alpha1 2
+#define BOARD_AppKit_Alpha2 3
+
 /* board_init.c assumes this exists */
 #define HW_REG32(u,v) *((volatile uint32_t*)(u + v))
 
