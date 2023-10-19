@@ -24,10 +24,10 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 from pathlib import Path
 
-TF = "https://github.com/tensorflow/tflite-micro/archive/80cb11b131e9738dc60b2db3e2f1f8e2425ded52.zip"
+TF = "https://github.com/tensorflow/tflite-micro/archive/568d181ccc1f60e49742fd43b7f97141ee8d45fc.zip"
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb8dc6c9407fac3a0f3.zip"
 CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip"
-CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.08.zip"
+CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/85164a811917770d7027a12a57ed3b469dac6537.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.08.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.08.tar.gz"
 
