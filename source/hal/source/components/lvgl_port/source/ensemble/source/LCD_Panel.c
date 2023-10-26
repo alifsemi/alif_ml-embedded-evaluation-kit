@@ -73,6 +73,12 @@ void LCD_enable_tear_interrupt(void (*handler)(void), uint8_t prio)
 
 int Display_initialization(uint8_t *buffer)
 {
+    // enable peripheral clocks
+    enable_cgu_clk38p4m();
+    enable_cgu_clk160m();
+    enable_cgu_clk100m();
+    enable_cgu_clk20m();
+
 	////////////////////////////////////////////////////////////////////////////
 	// MIPI DPI Controller Setup (CDC200)
 	////////////////////////////////////////////////////////////////////////////
