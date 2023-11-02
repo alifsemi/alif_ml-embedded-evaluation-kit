@@ -26,6 +26,7 @@ def expect_in_range(min, max, value, timestring):
 
 
 def test_max_kws_inference_times(dut: Dut):
+    dut.write("")
     # Start one-shot test
     dut.write(MENU_OPT_RUN_ONCE)
 

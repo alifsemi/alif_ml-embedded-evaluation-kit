@@ -553,49 +553,10 @@
 
 #if RTE_MIPI_DSI
 
-// <o> Number of data lanes
-//     <1=> ONE
-//     <2=> TWO
-// <i> Defines Number of data lanes
-// <i> Default: TWO
-#define RTE_MIPI_DSI_N_LANES                    0x2
-
-// <o> Virtual channel ID
-// <i> Defines Virtual Channel ID
-// <i> Default: 0
-#define RTE_MIPI_DSI_VC_ID                      0
-
-// <o> DPHY Clock Mode
-//     <0=> CONTINUOUS CLOCK_MODE
-//     <1=> NON CONTINUOUS CLOCK MODE
-// <i> Defines DPHY Clock Mode
-// <i> Default: NON CONTINUOUS CLOCK MODE
-#define RTE_MIPI_DSI_NON_CONTINUOUS_CLOCK_MODE  1
-
 // <o> DPHY PLL input division factor
 // <i> Defines DPHY PLL input division factor
 // <i> Default: 3
 #define RTE_MIPI_DSI_PLL_INPUT_DIV_FACTOR_N     3
-
-// <o> DPHY clock lane HS to LP transition time.
-// <i> Defines DPHY clock lane HS to LP transition time.
-// <i> Default: 35
-#define RTE_MIPI_DSI_PHY_CLKHS2LP_TIME          35
-
-// <o> DPHY clock lane LP to HS transition time.
-// <i> Defines DPHY clock lane LP to HS transition time.
-// <i> Default: 51
-#define RTE_MIPI_DSI_PHY_CLKLP2HS_TIME          51
-
-// <o> DPHY data lane HS to LP transition time.
-// <i> Defines DPHY data lane HS to LP transition time.
-// <i> Default: 20
-#define RTE_MIPI_DSI_PHY_HS2LP_TIME             20
-
-// <o> DPHY data lane LP to HS transition time.
-// <i> Defines DPHY data lane LP to HS transition time.
-// <i> Default: 40
-#define RTE_MIPI_DSI_PHY_LP2HS_TIME             40
 
 // <o> DSI TX escape clock division value.
 // <i> Defines DSI TX escape clock division value.
@@ -619,49 +580,6 @@
 // <i> Defines Size of the NULL packet.
 // <i> Default: 0
 #define RTE_MIPI_DSI_VID_NULL_SIZE              0
-
-// <o> DPI interface color code
-//     <1=> 16bit
-//     <4=> 18bit
-//     <5=> 24bit
-// <i> Defines Color code for DPI Interface
-// <i> Default: 24bit
-#define RTE_MIPI_DSI_DPI_COLOR_CODE             5
-
-// <o> DPI DATAEN pin active state
-//     <0=> ACTIVE HIGH
-//     <1=> ACTIVE LOW
-// <i> Defines DPI DATAEN pin active state
-// <i> Default: ACTIVE HIGH
-#define RTE_MIPI_DSI_DPI_DATAEN_ACTIVE_LOW      0
-
-// <o> DPI VSYNC pin active state
-//     <0=> ACTIVE HIGH
-//     <1=> ACTIVE LOW
-// <i> Defines DPI VSYNC pin active state
-// <i> Default: ACTIVE LOW
-#define RTE_MIPI_DSI_DPI_VSYNC_ACTIVE_LOW       1
-
-// <o> DPI HSYNC pin active state
-//     <0=> ACTIVE HIGH
-//     <1=> ACTIVE LOW
-// <i> Defines DPI HSYNC pin active state
-// <i> Default: ACTIVE LOW
-#define RTE_MIPI_DSI_DPI_HSYNC_ACTIVE_LOW       1
-
-// <o> DPI SHUTD pin active state
-//     <0=> ACTIVE HIGH
-//     <1=> ACTIVE LOW
-// <i> Defines DPI SHUTD pin active state
-// <i> Default: ACTIVE HIGH
-#define RTE_MIPI_DSI_DPI_SHUTD_ACTIVE_LOW       0
-
-// <o> DPI COLORM pin active state
-//     <0=> ACTIVE HIGH
-//     <1=> ACTIVE LOW
-// <i> Defines DPI COLORM pin active state
-// <i> Default: ACTIVE HIGH
-#define RTE_MIPI_DSI_DPI_COLORM_ACTIVE_LOW      0
 
 // <o> DSI IRQ priority <0-255>
 // <i> Defines Interrupt priority.
@@ -697,7 +615,34 @@
 // <o> ILI9806 LCD panel maximum bitrate in mbps
 // <i> Defines ILI9806 LCD panel maximum bitrate in mbps.
 // <i> Default: 500
-#define RTE_ILI9806E_PANEL_MAX_BITRATE_MBPS              500
+#define RTE_ILI9806E_PANEL_MAX_BITRATE_MBPS          500
+
+// <o> DSI color mode
+//     <1=> 16bit
+//     <4=> 18bit
+//     <5=> 24bit
+// <i> Defines Color mode for display panel
+// <i> Default: 24bit
+#define RTE_ILI9806E_PANEL_DSI_COLOR_MODE            5
+
+// <o> DPHY Clock Mode
+//     <0=> CONTINUOUS CLOCK_MODE
+//     <1=> NON CONTINUOUS CLOCK MODE
+// <i> Defines DPHY Clock Mode
+// <i> Default: NON CONTINUOUS CLOCK MODE
+#define RTE_ILI9806E_PANEL_DPHY_CLOCK_MODE           1
+
+// <o> Number of data lanes
+//     <1=> ONE
+//     <2=> TWO
+// <i> Defines Number of data lanes
+// <i> Default: TWO
+#define RTE_ILI9806E_PANEL_DSI_N_LANES               0x2
+
+// <o> Virtual channel ID
+// <i> Defines Virtual Channel ID
+// <i> Default: 0
+#define RTE_ILI9806E_PANEL_DSI_VC_ID                 0
 
 // <o> ILI9806 LCD panel reset pin number
 // <i> Defines ILI9806 LCD panel reset pin number.
@@ -910,6 +855,9 @@
 //     <0=> ARGB8888
 //     <1=> RGB888
 //     <2=> RGB565
+//     <3=> RGBA8888
+//     <6=> ARGB1555
+//     <7=> ARGB4444
 // <i> Defines CDC200 pixel format
 // <i> Default: RGB888
 #define RTE_CDC200_PIXEL_FORMAT              2
@@ -940,45 +888,73 @@
 
 #if RTE_ILI6122_PANEL
 
+// <o> CDC HSYNC pin active state
+//     <0=> ACTIVE LOW
+//     <1=> ACTIVE HIGH
+// <i> Defines CDC HSYNC pin active state
+// <i> Default: ACTIVE LOW
+#define RTE_ILI6122_PANEL_CDC_HSYNC_ACTIVE_LOW       0
+
+// <o> CDC VSYNC pin active state
+//     <0=> ACTIVE LOW
+//     <1=> ACTIVE HIGH
+// <i> Defines CDC VSYNC pin active state
+// <i> Default: ACTIVE LOW
+#define RTE_ILI6122_PANEL_CDC_VSYNC_ACTIVE_LOW       0
+
+// <o> CDC Pixel Clock Output pin active state
+//     <0=> FEED THROUGH
+//     <1=> INVERTED
+// <i> Defines CDC Pixel Clock pin active state
+// <i> Default: FEED THROUGH
+#define RTE_ILI6122_PANEL_CDC_PIXCLK_FEED_THROUGH    0
+
+// <o> CDC BLANKING pin active state
+//     <0=> ACTIVE LOW
+//     <1=> ACTIVE HIGH
+// <i> Defines CDC BLANKINg pin active state
+// <i> Default: ACTIVE LOW
+#define RTE_ILI6122_PANEL_CDC_BLANK_ACTIVE_LOW       0
+
 // <o> Panel hsync time in pixels
 // <i> Defines ILI6122 LCD panel hsync time in pixels.
 // <i> Default: 1
-#define RTE_PANEL_HSYNC_TIME            1
+#define RTE_PANEL_HSYNC_TIME                         1
 
 // <o> Panel hbp time in pixels
 // <i> Defines ILI6122 LCD panel hbp time in pixels.
 // <i> Default: 46
-#define RTE_PANEL_HBP_TIME              46
+#define RTE_PANEL_HBP_TIME                           46
 
 // <o> Panel hfp time in pixels
 // <i> Defines ILI6122 LCD panel hfp time in pixels.
 // <i> Default: 210
-#define RTE_PANEL_HFP_TIME              210
+#define RTE_PANEL_HFP_TIME                           210
 
 // <o> Panel hactive pixels
 // <i> Defines ILI6122 LCD panel hactive pixels.
 // <i> Default: 800
-#define RTE_PANEL_HACTIVE_TIME          800
+#define RTE_PANEL_HACTIVE_TIME                       800
 
 // <o> Panel vsync time in lines
 // <i> Defines ILI6122 LCD panel vsync time in lines.
 // <i> Default: 1
-#define RTE_PANEL_VSYNC_LINE            1
+#define RTE_PANEL_VSYNC_LINE                         1
 
 // <o> Panel vbp time in lines
 // <i> Defines ILI6122 LCD panel vbp time in lines.
 // <i> Default: 23
-#define RTE_PANEL_VBP_LINE              23
+#define RTE_PANEL_VBP_LINE                           23
 
 // <o> Panel vfp time in lines
 // <i> Defines ILI6122 LCD panel vfp time in lines.
 // <i> Default: 22
-#define RTE_PANEL_VFP_LINE              22
+#define RTE_PANEL_VFP_LINE                           22
 
 // <o> Panel vactive lines
 // <i> Defines ILI6122 LCD panel vactive lines.
 // <i> Default: 480
-#define RTE_PANEL_VACTIVE_LINE          480
+#define RTE_PANEL_VACTIVE_LINE                       480
 #endif
 
 #endif
@@ -1484,22 +1460,87 @@
 // <e> OSPI0 (Octal Serial Peripheral Interface 0) [Driver_OSPI]
 // <i> Configuration settings for Driver_OSPI in component ::Drivers:OSPI
 #define RTE_OSPI0                               1
-#ifdef RTE_OSPI0
+#if RTE_OSPI0
+// <o> OSPI0 IRQ priority <0-255>
+// <i> Defines OSPI0 Interrupt priority
+// <i> Default: 0
 #define RTE_OSPI0_IRQ_PRIORITY                    0
+
+// <o> OSPI0 Frame format
+//    <0=> Standard
+//    <1=> Dual
+//    <2=> Quad
+//    <3=> Octal
+// <i> Defines OSPI0 Frame format
+// <i> Default: Octal
 #define RTE_OSPI0_SPI_FRAME_FORMAT                3
+
+// <o> OSPI0 TX FIFO Start level <0-255>
+// <i> Defines TX FIFO transfer start level for OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_TX_FIFO_LEVEL_TO_START_TRANSFER 0
+
+// <o> OSPI0 load dummy data
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Load dummy data to start transfer for OSPI0
+// <i> Default: DISABLE
 #define RTE_OSPI0_TX_LOAD_DUMMY_TO_START_LEVEL    0
+
+// <o> OSPI0 TX FIFO threshold <0-255>
+// <i> Defines TX FIFO threshold for OSPI0
+// <i> Default: 64
 #define RTE_OSPI0_TX_FIFO_THRESHOLD               64
+
+// <o> OSPI0 RX FIFO threshold <0-255>
+// <i> Defines RX FIFO threshold for OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_RX_FIFO_THRESHOLD               0
+
+// <o> OSPI0 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Enable DMA for OSPI0
+// <i> Default: DISABLE
 #define RTE_OSPI0_DMA_ENABLE                      0
 #if RTE_OSPI0_DMA_ENABLE
+
+// <o> OSPI0 TX DMA Data level
+// <i> Defines TX DMA Data level for OSPI0
+// <i> Default: 64
 #define RTE_OSPI0_TX_DMA_DATA_LEVEL               64
+
+// <o> OSPI0 RX DMA Data level
+// <i> Defines RX DMA Data level for OSPI0
+// <i> Default: 15
 #define RTE_OSPI0_RX_DMA_DATA_LEVEL               15
+
+// <o> OSPI0 DMA IRQ priority <0-255>
+// <i> Defines OSPI0 DMA Interrupt priority
+// <i> Default: 0
 #define RTE_OSPI0_DMA_IRQ_PRIORITY                0
 #endif
+
+// <o> OSPI0 slave selection
+//    <0=> SS_0
+//    <1=> SS_1
+// <i> Defines the slave select line for OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_CHIP_SELECTION_PIN              0
+
+// <o> OSPI0 RX SAMPLE DELAY
+// <i> Defines RX SAMPLE DELAY for OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_RX_SAMPLE_DELAY                 0
+
+// <o> OSPI0 DDR DRIVE EDGE
+// <i> Defines DDR DRIVE EDGE for OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_DDR_DRIVE_EDGE                  0
+
+// <o> OSPI0 RXDS Delay <0-16>
+// <i> Defines the delay applied to the RXDS signal of OSPI0
+// <i> Default: 0
 #define RTE_OSPI0_RXDS_DELAY                      0
 #endif
 // </e> OSPI0 (Octal Serial Peripheral Interface 0) [Driver_OSPI]
@@ -1507,22 +1548,87 @@
 // <e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
 // <i> Configuration settings for Driver_OSPI in component ::Drivers:OSPI
 #define RTE_OSPI1                               1
-#ifdef RTE_OSPI1
+#if RTE_OSPI1
+// <o> OSPI1 IRQ priority <0-255>
+// <i> Defines OSPI1 Interrupt priority
+// <i> Default: 0
 #define RTE_OSPI1_IRQ_PRIORITY                    0
+
+// <o> OSPI1 Frame format
+//    <0=> Standard
+//    <1=> Dual
+//    <2=> Quad
+//    <3=> Octal
+// <i> Defines OSPI0 Frame format
+// <i> Default: Octal
 #define RTE_OSPI1_SPI_FRAME_FORMAT                3
+
+// <o> OSPI1 TX FIFO Start level <0-255>
+// <i> Defines TX FIFO transfer start level for OSPI1
+// <i> Default: 0
 #define RTE_OSPI1_TX_FIFO_LEVEL_TO_START_TRANSFER 0
+
+// <o> OSPI1 load dummy data
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Load dummy data to start transfer for OSPI1
+// <i> Default: DISABLE
 #define RTE_OSPI1_TX_LOAD_DUMMY_TO_START_LEVEL    0
+
+// <o> OSPI1 TX FIFO threshold <0-255>
+// <i> Defines TX FIFO threshold for OSPI1
+// <i> Default: 64
 #define RTE_OSPI1_TX_FIFO_THRESHOLD               64
+
+// <o> OSPI1 RX FIFO threshold <0-255>
+// <i> Defines RX FIFO threshold for OSPI1
+// <i> Default: 0
 #define RTE_OSPI1_RX_FIFO_THRESHOLD               0
+
+// <o> OSPI1 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Enable DMA for OSPI1
+// <i> Default: DISABLE
 #define RTE_OSPI1_DMA_ENABLE                      0
 #if RTE_OSPI1_DMA_ENABLE
+
+// <o> OSPI1 TX DMA Data level
+// <i> Defines TX DMA Data level for OSPI1
+// <i> Default: 130
 #define RTE_OSPI1_TX_DMA_DATA_LEVEL               130
+
+// <o> OSPI1 RX DMA Data level
+// <i> Defines RX DMA Data level for OSPI1
+// <i> Default: 15
 #define RTE_OSPI1_RX_DMA_DATA_LEVEL               15
+
+// <o> OSPI1 DMA IRQ priority <0-255>
+// <i> Defines OSPI1 DMA Interrupt priority
+// <i> Default: 0
 #define RTE_OSPI1_DMA_IRQ_PRIORITY                0
 #endif
+
+// <o> OSPI1 slave selection
+//    <0=> SS_0
+//    <1=> SS_1
+// <i> Defines the slave select line for OSPI1.
+// <i> Default: 0
 #define RTE_OSPI1_CHIP_SELECTION_PIN              0
+
+// <o> OSPI1 RX SAMPLE DELAY
+// <i> Defines RX SAMPLE DELAY for OSPI1
+// <i> Default: 0
 #define RTE_OSPI1_RX_SAMPLE_DELAY                 0
+
+// <o> OSPI1 DDR DRIVE EDGE
+// <i> Defines DDR DRIVE EDGE for OSPI1
+// <i> Default: 1
 #define RTE_OSPI1_DDR_DRIVE_EDGE                  1
+
+// <o> OSPI1 RXDS Delay <0-16>
+// <i> Defines the delay applied to the RXDS signal of OSPI1
+// <i> Default: 11
 #define RTE_OSPI1_RXDS_DELAY                      11
 #endif
 // </e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
@@ -1559,7 +1665,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S0 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S0_WSS_CLOCK_CYCLES 2
+#define RTE_I2S0_WSS_CLOCK_CYCLES   2
 
 // <o> I2S0 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -1569,7 +1675,7 @@
 //    <4=> SCLKG_CLOCK_CYCLES_24
 // <i> Defines I2S0 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
-#define RTE_I2S0_SCLKG_CLOCK_CYCLES 0
+#define RTE_I2S0_SCLKG_CLOCK_CYCLES   0
 
 // <o> I2S0 RX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1590,7 +1696,7 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S0 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
-#define RTE_I2S0_RX_TRIG_LVL 7
+#define RTE_I2S0_RX_TRIG_LVL   7
 
 // <o> I2S0 TX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1611,12 +1717,12 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S0 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
-#define RTE_I2S0_TX_TRIG_LVL 8
+#define RTE_I2S0_TX_TRIG_LVL   8
 
 // <o> I2S0 IRQ priority <0-255>
 // <i> Defines I2S0 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S0_IRQ_PRI     10
+#define RTE_I2S0_IRQ_PRI   10
 
 // <o> I2S0 DMA ENABLE
 //    <0=> DISABLE
@@ -1628,7 +1734,7 @@
 // <o> I2S0 DMA IRQ priority <0-255>
 // <i> Defines I2S0 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2S0_DMA_IRQ_PRI  0
+#define RTE_I2S0_DMA_IRQ_PRI   0
 
 #endif
 // </e> I2S0 (Integrated Interchip Sound 0) [Driver_SAI0]
@@ -1646,7 +1752,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S1 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S1_WSS_CLOCK_CYCLES 2
+#define RTE_I2S1_WSS_CLOCK_CYCLES   2
 
 // <o> I2S1 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -1656,7 +1762,7 @@
 //    <4=> SCLKG_CLOCK_CYCLES_24
 // <i> Defines I2S1 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
-#define RTE_I2S1_SCLKG_CLOCK_CYCLES 0
+#define RTE_I2S1_SCLKG_CLOCK_CYCLES   0
 
 // <o> I2S1 RX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1677,7 +1783,7 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S1 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
-#define RTE_I2S1_RX_TRIG_LVL 7
+#define RTE_I2S1_RX_TRIG_LVL   7
 
 // <o> I2S1 TX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1698,12 +1804,12 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S1 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
-#define RTE_I2S1_TX_TRIG_LVL 8
+#define RTE_I2S1_TX_TRIG_LVL   8
 
 // <o> I2S1 IRQ priority <0-255>
 // <i> Defines I2S1 Interrupt priority
-// <i> Default: 0
-#define RTE_I2S1_IRQ_PRI     10
+// <i> Default: 1
+#define RTE_I2S1_IRQ_PRI   10
 
 // <o> I2S1 DMA ENABLE
 //    <0=> DISABLE
@@ -1715,14 +1821,14 @@
 // <o> I2S1 DMA IRQ priority <0-255>
 // <i> Defines I2S1 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2S1_DMA_IRQ_PRI  0
+#define RTE_I2S1_DMA_IRQ_PRI   0
 #endif
 // </e> I2S1 (Integrated Interchip Sound 1) [Driver_SAI1]
 
 
 // <e> I2S2 (Integrated Interchip Sound 2) [Driver_SAI2]
 // <i> Configuration settings for Driver_SAI2 in component ::Drivers:SAI
-#define RTE_I2S2 1
+#define RTE_I2S2   1
 
 #if RTE_I2S2
 
@@ -1732,7 +1838,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S2 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S2_WSS_CLOCK_CYCLES 2
+#define RTE_I2S2_WSS_CLOCK_CYCLES   2
 
 // <o> I2S2 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -1742,7 +1848,7 @@
 //    <4=> SCLKG_CLOCK_CYCLES_24
 // <i> Defines I2S2 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
-#define RTE_I2S2_SCLKG_CLOCK_CYCLES 0
+#define RTE_I2S2_SCLKG_CLOCK_CYCLES   0
 
 // <o> I2S2 RX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1763,7 +1869,7 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S2 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
-#define RTE_I2S2_RX_TRIG_LVL 7
+#define RTE_I2S2_RX_TRIG_LVL   7
 
 // <o> I2S2 TX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1784,12 +1890,12 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S2 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
-#define RTE_I2S2_TX_TRIG_LVL 8
+#define RTE_I2S2_TX_TRIG_LVL   8
 
 // <o> I2S2 IRQ priority <0-255>
 // <i> Defines I2S2 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S2_IRQ_PRI     10
+#define RTE_I2S2_IRQ_PRI   10
 
 // <o> I2S2 DMA ENABLE
 //    <0=> DISABLE
@@ -1801,7 +1907,7 @@
 // <o> I2S2 DMA IRQ priority <0-255>
 // <i> Defines I2S2 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2S2_DMA_IRQ_PRI  0
+#define RTE_I2S2_DMA_IRQ_PRI   0
 #endif
 // </e> I2S2 (Integrated Interchip Sound 2) [Driver_SAI2]
 
@@ -1818,7 +1924,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S3 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S3_WSS_CLOCK_CYCLES 2
+#define RTE_I2S3_WSS_CLOCK_CYCLES   2
 
 // <o> I2S3 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -1828,7 +1934,7 @@
 //    <4=> SCLKG_CLOCK_CYCLES_24
 // <i> Defines I2S3 SCLK Gating
 // <i> Default: NO_CLOCK_GATING
-#define RTE_I2S3_SCLKG_CLOCK_CYCLES 0
+#define RTE_I2S3_SCLKG_CLOCK_CYCLES   0
 
 // <o> I2S3 RX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1849,7 +1955,7 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S3 receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
-#define RTE_I2S3_RX_TRIG_LVL 7
+#define RTE_I2S3_RX_TRIG_LVL   7
 
 // <o> I2S3 TX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1870,12 +1976,12 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines I2S3 transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
-#define RTE_I2S3_TX_TRIG_LVL 8
+#define RTE_I2S3_TX_TRIG_LVL   8
 
 // <o> I2S3 IRQ priority <0-255>
 // <i> Defines I2S3 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S3_IRQ_PRI     10
+#define RTE_I2S3_IRQ_PRI   10
 
 // <o> I2S3 DMA ENABLE
 //    <0=> DISABLE
@@ -1916,7 +2022,7 @@
 //    <4=> SCLKG_CLOCK_CYCLES_24
 // <i> Defines LPI2S SCLK Gating
 // <i> Default: NO_CLOCK_GATING
-#define RTE_LPI2S_SCLKG_CLOCK_CYCLES     0
+#define RTE_LPI2S_SCLKG_CLOCK_CYCLES   0
 
 // <o> LPI2S RX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1937,7 +2043,7 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines LPI2S receive fifo trigger level
 // <i> Default: TRIGGER_LEVEL_8
-#define RTE_LPI2S_RX_TRIG_LVL    7
+#define RTE_LPI2S_RX_TRIG_LVL   7
 
 // <o> LPI2S TX FIFO TRIGGER LEVEL
 //    <0=>  TRIGGER_LEVEL_1
@@ -1958,19 +2064,19 @@
 //    <15=> TRIGGER_LEVEL_16
 // <i> Defines LPI2S transfer fifo trigger level
 // <i> Default: TRIGGER_LEVEL_9
-#define RTE_LPI2S_TX_TRIG_LVL     8
+#define RTE_LPI2S_TX_TRIG_LVL   8
 
 // <o> LPI2S IRQ priority <0-255>
 // <i> Defines LPI2S Interrupt priority
-// <i> Default: 0
-#define RTE_LPI2S_IRQ_PRI        0
+// <i> Default: 1
+#define RTE_LPI2S_IRQ_PRI   0
 
 // <o> LPI2S DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPI2S
 // <i> Default: ENABLE
-#define RTE_LPI2S_DMA_ENABLE    1
+#define RTE_LPI2S_DMA_ENABLE   1
 #if RTE_LPI2S_DMA_ENABLE
 
 // <o> LPI2S DMA Selection
@@ -1978,7 +2084,7 @@
 //    <1=> DMA0
 // <i> Defines Select DMA0 for LPI2S. By default DMA2 will be considered
 // <i> Default: DMA2
-#define RTE_LPI2S_SELECT_DMA0 0
+#define RTE_LPI2S_SELECT_DMA0   0
 #endif
 
 // <o> LPI2S DMA IRQ priority <0-255>
@@ -2131,7 +2237,7 @@
 //    <0=> CLK_38.4MHz
 //    <1=> CLK_100MHz
 // <i> Defines UART2 clock source.
-// <i> Default: CLK_100MHz
+// <i> Default: CLK_38.4MHz
 #define RTE_UART2_CLK_SOURCE    1
 
 // <o> UART2 DMA ENABLE
@@ -6600,6 +6706,10 @@
 // <i> Configuration settings for Driver_HWSEM0 in component ::Drivers:HWSEM
 #define RTE_HWSEM0                                     1
 #if RTE_HWSEM0
+
+// <o> HWSEM0 IRQ priority <0-255>
+// <i> Defines HWSEM0 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM0_IRQPRIORITY                         0
 #endif
 
@@ -6610,6 +6720,10 @@
 // <i> Configuration settings for Driver_HWSEM1 in component ::Drivers:HWSEM
 #define RTE_HWSEM1                                     1
 #if RTE_HWSEM1
+
+// <o> HWSEM1 IRQ priority <0-255>
+// <i> Defines HWSEM1 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM1_IRQPRIORITY                         0
 #endif
 
@@ -6620,6 +6734,10 @@
 // <i> Configuration settings for Driver_HWSEM2 in component ::Drivers:HWSEM
 #define RTE_HWSEM2                                     1
 #if RTE_HWSEM2
+
+// <o> HWSEM2 IRQ priority <0-255>
+// <i> Defines HWSEM2 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM2_IRQPRIORITY                         0
 #endif
 
@@ -6630,6 +6748,10 @@
 // <i> Configuration settings for Driver_HWSEM3 in component ::Drivers:HWSEM
 #define RTE_HWSEM3                                     1
 #if RTE_HWSEM3
+
+// <o> HWSEM3 IRQ priority <0-255>
+// <i> Defines HWSEM3 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM3_IRQPRIORITY                         0
 #endif
 
@@ -6640,6 +6762,10 @@
 // <i> Configuration settings for Driver_HWSEM4 in component ::Drivers:HWSEM
 #define RTE_HWSEM4                                     1
 #if RTE_HWSEM4
+
+// <o> HWSEM4 IRQ priority <0-255>
+// <i> Defines HWSEM4 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM4_IRQPRIORITY                         0
 #endif
 
@@ -6650,6 +6776,10 @@
 // <i> Configuration settings for Driver_HWSEM5 in component ::Drivers:HWSEM
 #define RTE_HWSEM5                                     1
 #if RTE_HWSEM5
+
+// <o> HWSEM5 IRQ priority <0-255>
+// <i> Defines HWSEM5 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM5_IRQPRIORITY                         0
 #endif
 
@@ -6660,6 +6790,10 @@
 // <i> Configuration settings for Driver_HWSEM6 in component ::Drivers:HWSEM
 #define RTE_HWSEM6                                     1
 #if RTE_HWSEM6
+
+// <o> HWSEM6 IRQ priority <0-255>
+// <i> Defines HWSEM6 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM6_IRQPRIORITY                         0
 #endif
 
@@ -6670,6 +6804,10 @@
 // <i> Configuration settings for Driver_HWSEM7 in component ::Drivers:HWSEM
 #define RTE_HWSEM7                                     1
 #if RTE_HWSEM7
+
+// <o> HWSEM7 IRQ priority <0-255>
+// <i> Defines HWSEM7 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM7_IRQPRIORITY                         0
 #endif
 
@@ -6680,6 +6818,10 @@
 // <i> Configuration settings for Driver_HWSEM8 in component ::Drivers:HWSEM
 #define RTE_HWSEM8                                     1
 #if RTE_HWSEM8
+
+// <o> HWSEM8 IRQ priority <0-255>
+// <i> Defines HWSEM8 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM8_IRQPRIORITY                         0
 #endif
 
@@ -6690,6 +6832,10 @@
 // <i> Configuration settings for Driver_HWSEM9 in component ::Drivers:HWSEM
 #define RTE_HWSEM9                                     1
 #if RTE_HWSEM9
+
+// <o> HWSEM9 IRQ priority <0-255>
+// <i> Defines HWSEM9 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM9_IRQPRIORITY                         0
 #endif
 
@@ -6700,6 +6846,10 @@
 // <i> Configuration settings for Driver_HWSEM10 in component ::Drivers:HWSEM
 #define RTE_HWSEM10                                     1
 #if RTE_HWSEM10
+
+// <o> HWSEM10 IRQ priority <0-255>
+// <i> Defines HWSEM10 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM10_IRQPRIORITY                         0
 #endif
 
@@ -6710,6 +6860,10 @@
 // <i> Configuration settings for Driver_HWSEM11 in component ::Drivers:HWSEM
 #define RTE_HWSEM11                                     1
 #if RTE_HWSEM11
+
+// <o> HWSEM11 IRQ priority <0-255>
+// <i> Defines HWSEM11 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM11_IRQPRIORITY                         0
 #endif
 
@@ -6720,6 +6874,10 @@
 // <i> Configuration settings for Driver_HWSEM12 in component ::Drivers:HWSEM
 #define RTE_HWSEM12                                     1
 #if RTE_HWSEM12
+
+// <o> HWSEM12 IRQ priority <0-255>
+// <i> Defines HWSEM12 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM12_IRQPRIORITY                         0
 #endif
 
@@ -6730,6 +6888,10 @@
 // <i> Configuration settings for Driver_HWSEM13 in component ::Drivers:HWSEM
 #define RTE_HWSEM13                                     1
 #if RTE_HWSEM13
+
+// <o> HWSEM13 IRQ priority <0-255>
+// <i> Defines HWSEM13 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM13_IRQPRIORITY                         0
 #endif
 
@@ -6740,6 +6902,10 @@
 // <i> Configuration settings for Driver_HWSEM14 in component ::Drivers:HWSEM
 #define RTE_HWSEM14                                     1
 #if RTE_HWSEM14
+
+// <o> HWSEM14 IRQ priority <0-255>
+// <i> Defines HWSEM14 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM14_IRQPRIORITY                         0
 #endif
 
@@ -6750,6 +6916,10 @@
 // <i> Configuration settings for Driver_HWSEM15 in component ::Drivers:HWSEM
 #define RTE_HWSEM15                                     1
 #if RTE_HWSEM15
+
+// <o> HWSEM15 IRQ priority <0-255>
+// <i> Defines HWSEM15 Interrupt priority
+// <i> Default: 0
 #define RTE_HWSEM15_IRQPRIORITY                         0
 #endif
 
@@ -7093,6 +7263,7 @@
 
 // <e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
 // <i> Configuration settings for Driver_LPI2C in component ::Drivers:LPI2C
+#if defined(M55_HE)
 #define RTE_LPI2C   1
 #if RTE_LPI2C
 
@@ -7102,16 +7273,19 @@
 #define RTE_LPI2C_IRQ_PRIORITY       0
 #endif
 // </e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
+#endif //defined(M55_HE)
 // </h>
 
 // <e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
 // <i> Configuration settings for Driver_DMA0 in component ::Drivers:DMA
 #define RTE_DMA0      1
 #if RTE_DMA0
-//   DMA APB Interface to be used <0-1>
-//   0 - Secure APB interface, 1 - Non-Secure
-//   Default: 0
-#define RTE_DMA0_APB_INTERFACE 0
+
+// <o> DMA APB Interface to be used
+//   <0=> Secure APB interface
+//   <1=> Non-Secure
+// <i> Default: 0
+#define RTE_DMA0_APB_INTERFACE  0
 // <o> DMA0 Abort interrupt priority <0-255>
 // <i> Defines DMA0 Abort interrupt priority.
 // <i> Default: 0
@@ -7133,10 +7307,12 @@
 // <i> Configuration settings for Driver_DMA1 in component ::Drivers:DMA
 #define RTE_DMA1      1
 #if RTE_DMA1
-//   DMA APB Interface to be used <0-1>
-//   0 - Secure APB interface, 1 - Non-Secure
-//   Default: 0
-#define RTE_DMA1_APB_INTERFACE 0
+
+// <o> DMA APB Interface to be used
+//   <0=> Secure APB interface
+//   <1=> Non-Secure
+// <i> Default: 0
+#define RTE_DMA1_APB_INTERFACE  0
 // <o> DMA1 Abort interrupt priority <0-255>
 // <i> Defines DMA1 Abort interrupt priority.
 // <i> Default: 0
@@ -7160,10 +7336,12 @@
 
 #define RTE_DMA2      1
 #if RTE_DMA2
-//   DMA APB Interface to be used <0-1>
-//   0 - Secure APB interface, 1 - Non-Secure
-//   Default: 0
-#define RTE_DMA2_APB_INTERFACE 0
+
+// <o> DMA APB Interface to be used
+//   <0=> Secure APB interface
+//   <1=> Non-Secure
+// <i> Default: 0
+#define RTE_DMA2_APB_INTERFACE  0
 // <o> DMA2 Abort interrupt priority <0-255>
 // <i> Defines DMA2 Abort interrupt priority.
 // <i> Default: 0
@@ -8471,4 +8649,30 @@
 // </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
 // </h> CANFD (Controller Area Network - Fast Mode)
 
+// <h> SDC (Secure Digital Controller)
+// <e> SDC (Secure Digital Controller 0) [Driver_SDC0]
+// <i> Configuration settings for Driver_SDC0 in component ::Drivers:SDC
+#define RTE_SDC   1
+
+#if RTE_SDC
+
+//    <o> SDC BUS WIDTH SELECT
+//    <0=> BUS_WIDTH_1BIT
+//    <1=> BUS_WIDTH_4BIT
+// <i> Defines SDC0 size of bus width
+// <i> Default: BUS_WIDTH_4BIT
+#define RTE_SDC_BUS_WIDTH 0
+
+//    <o> SDC DMA SELECT
+//    <0=> SDMA
+//    <1=> ADMA2
+// <i> Defines SDC0 DMA select
+// <i> Default: ADMA2
+#define RTE_SDC_DMA_SELECT 1
+
+#endif
+// </e> SDC0 (Secure Digital Controller 0) [Driver_SDC0]
+// </h> SDC (Secure Digital Controller)
+
 #endif  /* __RTE_DEVICE_H */
+

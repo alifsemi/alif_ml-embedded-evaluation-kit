@@ -95,6 +95,8 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cdc.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cpi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/csi.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/dma_ctrl.c
+    ${ENSEMBLE_CMSIS_PATH}/drivers/source/dma_op.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/dsi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i2c.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/i3c.c
