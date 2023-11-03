@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,9 +38,9 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 20 && \
     update-alternatives --set python3 /usr/bin/python3.9 && python3 --version
 
-# Download and install gcc 11.2
-RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \
-    echo "8c5acd5ae567c0100245b0556941c237369f210bceb196edfe5a2e7532c60326 gcc-arm-none-eabi.tar.xz" | sha256sum -c && \
+# Download and install gcc 13.2
+RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \
+    echo "6cd1bbc1d9ae57312bcd169ae283153a9572bd6a8e4eeae2fedfbc33b115fdbb gcc-arm-none-eabi.tar.xz" | sha256sum -c && \
     mkdir /opt/gcc-arm-none-eabi && \
     tar -xf  gcc-arm-none-eabi.tar.xz -C /opt/gcc-arm-none-eabi --strip-components 1 && \
     rm gcc-arm-none-eabi.tar.xz

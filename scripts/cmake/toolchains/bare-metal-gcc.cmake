@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 - 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,6 @@ set(CMAKE_CXX_COMPILER              ${TRIPLET}-g++)
 set(CMAKE_CROSSCOMPILING            true)
 set(CMAKE_SYSTEM_NAME               Generic)
 
-set(MIN_GCC_VERSION                 10.2.1)
-
 # Skip compiler test execution
 set(CMAKE_C_COMPILER_WORKS          1)
 set(CMAKE_CXX_COMPILER_WORKS        1)
@@ -35,6 +33,7 @@ endif()
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     # Flags for cortex-m55
+    set(MIN_GCC_VERSION             10.2.1)
     set(CPU_ID                      M55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
@@ -44,13 +43,17 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85)
     # Flags for cortex-m85
-    # @TODO: Current versions of GNU compiler do not support Cortex-M85, we compile for Cortex-M55 instead.
-    message(WARNING                 "Arm GNU Toolchain does not support Arm Cortex-M85 yet, switching to Cortex-M55.")
-    set(CMAKE_SYSTEM_PROCESSOR      cortex-m55 CACHE STRING "Cortex-M CPU to use" FORCE)
-    # No need to duplicate the definitions here.
-    # Flags from Cortex-M55 will be added as this toolchain file will be read by CMake again.
+    set(MIN_GCC_VERSION             13.2.1)
+    set(CPU_ID                      M85)
+    set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
+    set(ARM_CPU                     "ARMC${CPU_ID}")
+    set(CPU_HEADER_FILE             "${ARM_CPU}.h")
+    set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
+    set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
 elseif (CMAKE_SYSTEM_ARCH STREQUAL armv8.1-m.main)
     # Flags for generic target armv8.1-m.main (will work for cortex-m55 and cortex-m85
+    set(MIN_GCC_VERSION             10.2.1)
     set(CPU_ID                      ARMv81MML_DSP_DP_MVE_FP)
     set(ARM_CPU                     "ARMv81MML")
     set(CPU_COMPILE_DEF             ${CPU_ID})
@@ -61,6 +64,10 @@ elseif (CMAKE_SYSTEM_ARCH STREQUAL armv8.1-m.main)
     set(CPU_LINK_OPT                "--cpu=8.1-M.Main.mve.fp")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m33)
     # Flags for cortex-m33 to go here
+endif()
+
+if (NOT DEFINED MIN_GCC_VERSION)
+    set(MIN_GCC_VERSION             10.2.1)
 endif()
 
 set(${CPU_COMPILE_DEF}              1)

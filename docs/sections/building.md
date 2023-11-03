@@ -34,8 +34,9 @@ This section assumes that you are using an **x86_64 Linux** build machine.
 
 Before proceeding, it is *essential* to ensure that the following prerequisites have been fulfilled:
 
-- GNU Arm embedded toolchain 10.2.1 (or higher) or the Arm Compiler version 6.19, or higher, is installed and available
-  on the path.
+- At least GNU Arm embedded toolchain 10.2.1, if building for SSE-300, is installed and available on the path
+- At least GNU Arm embedded toolchain 13.2.1, if building for SSE-310, is installed and available on the path
+- Alternatively, Arm Compiler version 6.19 or higher is installed and available on the path.
 
 > **Note**: There is a known issue with Arm GNU Embedded Toolchain version 12.2.Rel1. See
 > [Internal Compiler Error](./troubleshooting.md#internal-compiler-error) for details.
