@@ -1,9 +1,9 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -17,6 +17,10 @@
 #endif
 #include "board.h"
 #include "delay.h"
+
+#if !RTE_SILICON_REV_A
+#include "power.h"
+#endif
 
 extern ARM_DRIVER_CDC200 Driver_CDC200;
 
@@ -78,6 +82,12 @@ int Display_initialization(uint8_t *buffer)
     enable_cgu_clk160m();
     enable_cgu_clk100m();
     enable_cgu_clk20m();
+
+#if !RTE_SILICON_REV_A
+    /* Enable MIPI power */
+    enable_mipi_dphy_power();
+    disable_mipi_dphy_isolation();
+#endif
 
 	////////////////////////////////////////////////////////////////////////////
 	// MIPI DPI Controller Setup (CDC200)
