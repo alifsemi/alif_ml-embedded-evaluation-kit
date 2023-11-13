@@ -78,8 +78,7 @@ SECTIONS
      * This code is instead placed on BRAM. See comment in the BRAM
      * section for details.
      */
-    *(EXCLUDE_FILE(*all_ops_resolver.o
-                   *hal.c.obj
+    *(EXCLUDE_FILE(*hal.c.obj
                    *_allocator.o
                    *flatbuffer*.o
                    *lcd*.obj
@@ -235,14 +234,6 @@ SECTIONS
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
 
-    /**
-     * Place the all ops resolver code data here. This accounts
-     * for ~4k worth of saving on the ITCM load region. It is
-     * only designed to be included (by default) for the inference
-     * runner use case.
-     **/
-    *all_ops_resolver.o (*.text*)
-    . = ALIGN(4);
     *hal.c.obj (*.text*)
     . = ALIGN(4);
     *_allocator.o (*.text*)

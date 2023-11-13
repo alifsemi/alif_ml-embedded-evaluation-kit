@@ -14,7 +14,7 @@ Contributions are only accepted under the following conditions:
   This can be done automatically by adding the `-s` option to your `git commit` command.
   You must use your real name, no pseudonyms or anonymous contributions are accepted.
 
-- You give permission according to the [Apache License 2.0](../LICENSE_APACHE_2.0.txt).
+- You give permission according to the [Apache License 2.0](../../LICENSE_APACHE_2.0.txt).
 
   In each source file, include the following copyright notice:
 
@@ -42,7 +42,7 @@ Contributions are only accepted under the following conditions:
 This repository follows a set of guidelines, best practices, programming styles and conventions,
 see:
 
-- [Coding standards and guidelines](./docs/sections/coding_guidelines.md)
+- [Coding standards and guidelines](./docs/sections/coding_guidelines.md#Coding-standards-and-guidelines)
     - [Introduction](./docs/sections/coding_guidelines.md#introduction)
     - [Language version](./docs/sections/coding_guidelines.md#language-version)
     - [File naming](./docs/sections/coding_guidelines.md#file-naming)

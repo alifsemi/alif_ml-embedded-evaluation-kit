@@ -71,7 +71,7 @@ SECTIONS
      * This code is instead placed on BRAM. See comment in the BRAM
      * section for details.
      */
-    *(EXCLUDE_FILE(*all_ops_resolver.o
+    *(EXCLUDE_FILE(*MicroMutableAllOpsResolver*.obj
                    *hal.c.obj
                    *_allocator.o
                    *flatbuffer*.o
@@ -189,6 +189,8 @@ SECTIONS
     /* labels */
     *(labels)
     . = ALIGN (16);
+    *Labels*.obj (*.rodata*)
+    . = ALIGN (16);
     /* activation buffers a.k.a tensor arena when memory mode dedicated sram */
     *(activation_buf_dram)
     . = ALIGN (16);
@@ -236,11 +238,11 @@ SECTIONS
 
     /**
      * Place the all ops resolver code data here. This accounts
-     * for ~4k worth of saving on the ITCM load region. It is
+     * for ~9k worth of saving on the ITCM load region. It is
      * only designed to be included (by default) for the inference
      * runner use case.
      **/
-    *all_ops_resolver.o (*.text*)
+    *MicroMutableAllOpsResolver*.obj (*.text*)
     . = ALIGN(4);
     *hal.c.obj (*.text*)
     . = ALIGN(4);

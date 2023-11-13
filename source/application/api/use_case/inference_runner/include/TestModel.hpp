@@ -23,20 +23,19 @@
 namespace arm {
 namespace app {
 
-    class TestModel : public Model {
+   class TestModel : public Model {
 
-    protected:
-        /** @brief   Gets the reference to op resolver interface class. */
-        const tflite::MicroMutableOpResolver<kNumberOperators>& GetOpResolver() override;
+   protected:
+       /** @brief   Gets the reference to op resolver interface class. */
+       const tflite::MicroOpResolver& GetOpResolver() override;
 
-        /** @brief   Adds operations to the op resolver instance, not needed as using AllOpsResolver. */
-        bool EnlistOperations() override {return false;}
+       /** @brief   Adds operations to the op resolver instance. */
+       bool EnlistOperations() override;
 
-    private:
-
-        /* No need to define individual ops at the cost of extra memory. */
-        tflite::MicroMutableOpResolver<kNumberOperators> m_opResolver = CreateAllOpsResolver();
-    };
+   private:
+       /* A mutable op resolver instance including every operation for Inference runner. */
+       tflite::MicroMutableOpResolver<kNumberOperators> m_opResolver;
+   };
 
 } /* namespace app */
 } /* namespace arm */

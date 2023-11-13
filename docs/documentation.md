@@ -13,6 +13,7 @@
   - [Memory Considerations](./documentation.md#memory-considerations)
   - [Troubleshooting](./documentation.md#troubleshooting)
   - [Appendix](./documentation.md#appendix)
+  - [Contributing](./documentation.md#contributing)
   - [FAQ](./documentation.md#faq)
 
 ## Trademarks
