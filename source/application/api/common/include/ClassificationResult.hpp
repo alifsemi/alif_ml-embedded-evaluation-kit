@@ -17,6 +17,7 @@
 #ifndef CLASSIFICATION_RESULT_HPP
 #define CLASSIFICATION_RESULT_HPP
 
+#include <cstdint>
 #include <string>
 
 namespace arm {
