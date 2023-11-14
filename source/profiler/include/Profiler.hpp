@@ -19,6 +19,7 @@
 
 #include "hal.h"
 
+#include <cstdint>
 #include <string>
 #include <map>
 #include <vector>
