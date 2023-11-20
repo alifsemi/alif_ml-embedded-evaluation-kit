@@ -38,8 +38,8 @@ TF = "https://github.com/tensorflow/tflite-micro/archive/80cb11b131e9738dc60b2db
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb8dc6c9407fac3a0f3.zip"
 CMSIS_DSP = "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip"
 CMSIS_NN = "https://github.com/ARM-software/CMSIS-NN/archive/refs/tags/23.08.zip"
-CMSIS_ENSEMBLE = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/5bfce4020fa27d91fcd950725d35ecee8ba364ad.zip"
-CMSIS_ENSEMBLE_B = "https://github.com/alifsemi/b0-cmsis-dfp_DEV/archive/725cf94ad2e0d7f4adb56f11b18f73fceb86ee40.zip"
+CMSIS_ENSEMBLE_A = "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/5bfce4020fa27d91fcd950725d35ecee8ba364ad.zip"
+CMSIS_ENSEMBLE = "https://github.com/alifsemi/b0-cmsis-dfp_DEV/archive/725cf94ad2e0d7f4adb56f11b18f73fceb86ee40.zip"
 BOARDLIB = "https://github.com/alifsemi/boardlib_DEV/archive/f8269298d07b9f42bd23ae867f4d7539695ea171.zip"
 ETHOS_U_CORE_DRIVER = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.08.tar.gz"
 ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.08.tar.gz"
@@ -88,10 +88,10 @@ def main(dependencies_path: Path):
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-dsp"))
     download(CMSIS_NN,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
+    download(CMSIS_ENSEMBLE_A,
+             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble-a"))
     download(CMSIS_ENSEMBLE,
              lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble"))
-    download(CMSIS_ENSEMBLE_B,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble-b"))
     download(BOARDLIB,
              lambda file: unzip(file.name, to_path=dependencies_path / "boardlib"))
     download(ETHOS_U_CORE_DRIVER,
