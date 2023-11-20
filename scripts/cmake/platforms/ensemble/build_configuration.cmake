@@ -31,7 +31,7 @@ function(set_platform_global_defaults)
     set(TARGET_BOARD "DevKit" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard" "AppKit_Alpha1" "AppKit_Alpha2")
 
-    set(TARGET_REVISION "A" CACHE STRING "Chip revision")
+    set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
 
     if (TARGET_REVISION STREQUAL "A")
