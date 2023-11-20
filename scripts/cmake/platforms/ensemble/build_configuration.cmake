@@ -35,9 +35,9 @@ function(set_platform_global_defaults)
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
 
     if (TARGET_REVISION STREQUAL "A")
-        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
+        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble-a PARENT_SCOPE)
     else()
-        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble-b PARENT_SCOPE)
+        set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
     endif()
     set(BOARDLIB_PATH ${DEPENDENCY_ROOT_DIR}/boardlib PARENT_SCOPE)
 
