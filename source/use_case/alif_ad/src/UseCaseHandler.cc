@@ -29,8 +29,6 @@
 #include "services_lib_api.h"
 #include "services_main.h"
 
-#include "arm_math_f16.h"
-#include "arm_mve.h"
 #include <atomic>
 #include <vector>
 
