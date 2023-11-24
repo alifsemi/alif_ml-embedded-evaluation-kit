@@ -16,7 +16,9 @@
 #include "RTE_Components.h"
 
 #include "arm_math_f16.h"
+#if __ARM_FEATURE_MVE
 #include "arm_mve.h"
+#endif
 
 #include "audio_data.h"
 #include "mic_listener.h"
@@ -26,6 +28,13 @@
 #define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 1
 #else
 #define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 0
+#endif
+
+#if !(__ARM_FEATURE_MVE & 1)
+static int32_t srshr(int32_t n, unsigned shift)
+{
+    return (n + (1 << (shift - 1))) >> shift;
+}
 #endif
 
 #define AUDIO_REC_SAMPLES 512
@@ -90,7 +99,8 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
     int32_t offset = current_dc;
     int64_t sum = 0;
     int samples_to_go = len;
-    while (samples_to_go >= 8 && ENABLE_MVE_COPY_AUDIO_REC_TO_IN) {
+#if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
+    while (samples_to_go >= 8) {
         // Use 4-way deinterleave to load 4 sets of L/R/L/R.
         // Four vectors in produce one vector out, due to stereo->mono
         // conversion and 32-bit to 16-bit reduction.
@@ -127,6 +137,7 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
         output += 8;
         samples_to_go -= 8;
     }
+#endif // ENABLE_MVE_COPY_AUDIO_REC_TO_IN
     while (samples_to_go > 0) {
 #if AUDIO_MICS == AUDIO_LR_MIX
         // Average left and right
@@ -226,6 +237,7 @@ int wait_for_audio(void)
 static void convert_to_s16_from_f16_with_gain(void *ptr, int length, float16_t gain)
 {
     while (length > 0) {
+#if __ARM_FEATURE_MVE & 2
         // Check whether we're doing 8 or fewer
         mve_pred16_t p = vctp16q(length);
         // Load up to 8 samples
@@ -238,6 +250,14 @@ static void convert_to_s16_from_f16_with_gain(void *ptr, int length, float16_t g
         vst1q_p_s16(ptr, data, p);
         ptr = (int16_t *) ptr + 8;
         length -= 8;
+#else
+        float16_t fp = *(float16_t *) ptr;
+        fp *= gain;
+        int16_t data = (int16_t) (fp * 0x1p15f);
+        *(int16_t *) ptr = data;
+        ptr = (int16_t *) ptr + 1;
+        length -= 1;
+#endif
     }
 }
 

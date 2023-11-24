@@ -22,7 +22,11 @@
 #endif
 
 #define SKIP_COLOR_CORRECTION 0
+#if __ARM_FEATURE_MVE & 1
 #define PIXELWISE_COLOR_CORRECTION 0
+#else
+#define PIXELWISE_COLOR_CORRECTION 1
+#endif
 
 /* Matrix coefficients - C_RG means red input contribution to green output */
 #if 0
