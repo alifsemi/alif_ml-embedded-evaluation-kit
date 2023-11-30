@@ -42,7 +42,7 @@ def download(
         temp.seek(0)
         logging.info("Finished downloading %s.", url_file)
         if url_file.endswith(".tar.gz"):
-            untar(temp, to_path)
+            untar(temp.name, to_path)
         else:
             unzip(temp, to_path)
 

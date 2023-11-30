@@ -21,10 +21,12 @@ RUN apt-get update && \
     apt-get install -y \
     make \
     git \
-    python3.9 \
+    python3.10 \
     python3-pip \
-    python3.9-dev \
-    python3.9-venv \
+    python3.10-dev \
+    python3.10-venv \
+    g++-10 \
+    gcc-10 \
     unzip \
     curl \
     wget \
@@ -33,10 +35,19 @@ RUN apt-get update && \
     sudo \
     telnet
 
-# Set Python3.9 as default
+# Set Python3.10 as default
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 20 && \
-    update-alternatives --set python3 /usr/bin/python3.9 && python3 --version
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 20 && \
+    update-alternatives --set python3 /usr/bin/python3.10 && python3 --version
+
+# Update symlinks for gcc
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 20 && \
+    update-alternatives --set gcc /usr/bin/gcc-10 && gcc --version
+# Update symlinks for g++
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 20 && \
+    update-alternatives --set g++ /usr/bin/g++-10 && g++ --version \
 
 # Download and install gcc 13.2
 RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \

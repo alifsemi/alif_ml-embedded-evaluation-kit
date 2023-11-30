@@ -103,6 +103,9 @@ LOAD_REGION_1       0x70000000                  0x02000000
 
         ; activation buffers a.k.a tensor arena when memory mode dedicated sram
         *.o (activation_buf_dram)
+
+        ; Temporary solution to move s4 operations here.
+        *s4*.o (+RO +RW +ZI)
     }
 
     ;-----------------------------------------------------

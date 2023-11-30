@@ -77,7 +77,8 @@ SECTIONS
                    *flatbuffer*.o
                    *lcd*.obj
                    *Profiler*.obj
-                   *timing_adapter.c.obj)
+                   *timing_adapter.c.obj
+                   *s4*.o)
     .text*)
 
     KEEP(*(.init))
@@ -200,6 +201,8 @@ SECTIONS
   {
     . = ALIGN(4);
     *Profiler*.obj (*.text*)
+    . = ALIGN(4);
+    *s4*.o (*.text*)  /* Temporary solution to move s4 operations to DDR. */
     . = ALIGN(4);
   } > DDR AT > DDR
 

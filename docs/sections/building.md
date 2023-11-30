@@ -90,17 +90,17 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
-- Python 3.9 or above is installed. Check your current installed version of Python by running:
+- Python 3.10 or above is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
     ```
 
     ```log
-    Python 3.9.7
+    Python 3.10.12
     ```
 
-  > **Note:** If you have an older version of Python installed (< 3.9) see the
+  > **Note:** If you have an older version of Python installed (< 3.10) see the
   > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   > for instruction on how to install and use it.
   > **Note:** This scenario might be true if you are using an Arm Virtual Hardware instance.
@@ -121,7 +121,7 @@ Before proceeding, it is *essential* to ensure that the following prerequisites 
   ```
 
   ```log
-  pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.9)
+  pip 22.0.2 from /usr/lib/python3/dist-packages/pip
   ```
 
 - Make
@@ -357,11 +357,11 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU.
 
-> **Note:** This script requires Python version 3.9 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
-> are satisfied. If your environment points to system installed Python3 that is an older version than 3.9, choose the
+> **Note:** This script requires Python version 3.10 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
+> are satisfied. If your environment points to system installed Python3 that is an older version than 3.10, choose the
 > required version explicitly after installing it:
 > ```sh
-> python3.9 ./set_up_default_resources.py
+> python3.10 ./set_up_default_resources.py
 > ```
 >
 > **Note:** This script also installs required version of CMake into the virtual environment, which can be used by activating it.
