@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV EVAL_KIT_DIR "/home/ml-embedded-evaluation-kit"
 
@@ -25,8 +25,6 @@ RUN apt-get update && \
     python3-pip \
     python3.10-dev \
     python3.10-venv \
-    g++-10 \
-    gcc-10 \
     unzip \
     curl \
     wget \
@@ -34,29 +32,18 @@ RUN apt-get update && \
     libsndfile1 \
     sudo \
     telnet
+    
+# Check versions
+RUN gcc --version && g++ --version && python3 --version
 
-# Set Python3.10 as default
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 10 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 20 && \
-    update-alternatives --set python3 /usr/bin/python3.10 && python3 --version
-
-# Update symlinks for gcc
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 20 && \
-    update-alternatives --set gcc /usr/bin/gcc-10 && gcc --version
-# Update symlinks for g++
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 20 && \
-    update-alternatives --set g++ /usr/bin/g++-10 && g++ --version \
-
-# Download and install gcc 13.2
+# Download and install GNU GCC 13.2 embedded toolchain
 RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \
     echo "6cd1bbc1d9ae57312bcd169ae283153a9572bd6a8e4eeae2fedfbc33b115fdbb gcc-arm-none-eabi.tar.xz" | sha256sum -c && \
     mkdir /opt/gcc-arm-none-eabi && \
     tar -xf  gcc-arm-none-eabi.tar.xz -C /opt/gcc-arm-none-eabi --strip-components 1 && \
     rm gcc-arm-none-eabi.tar.xz
 
-# Download and install the Corstone_SSE-300 FVP
+# Download and install the Arm Corstone_SSE-300 FVP
 RUN wget https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-300/FVP_Corstone_SSE-300_11.16_26.tgz 2>/dev/null && \
     echo "e26139be756b5003a30d978c629de638aed1934d597dc24a17043d4708e934d7 FVP_Corstone_SSE-300_11.16_26.tgz" | sha256sum -c && \
     mkdir -p /home/FVP_Corstone_SSE-300/ && \
