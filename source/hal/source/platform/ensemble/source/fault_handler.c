@@ -350,6 +350,9 @@ static void CommonFaultHandler(enum FaultType type, uint32_t * restrict sp, uint
     regs[15] = sp[6];
     regs[16] = sp[7];
 
+    // Clear IT/ECI/ICI bits in the fault frame - we're not resuming from the exception location
+    sp[7] &= ~((3 << 25) | (0x3F << 10));
+
     // Modify the fault frame so we "return" to the FaultDump routine, which hopefully will execute okay
     sp[6] = (uint32_t) FaultDump;
 }
