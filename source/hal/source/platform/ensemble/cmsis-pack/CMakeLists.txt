@@ -111,7 +111,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/ospi.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/driver_phy.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/IS25WX256.c
-    config-b/drv_pinmux_new.c
     )
 endif()
 
