@@ -27,7 +27,7 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00001000;
+__STACK_SIZE = 0x00001800;
 __HEAP_SIZE  = 0x00006000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
@@ -110,7 +110,7 @@ SECTIONS
 
   .text.itcm.at_mram : ALIGN(8)
   {
-    /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
+    /* ITCM has non-startup code, except for non-fast LVGL, and RAM vectors */
     *(.text*)
     *(fast_code)
   } > ITCM AT> MRAM
@@ -121,7 +121,6 @@ SECTIONS
     *(vtable)
     *(.data)
     *(.data*)
-    *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
 
