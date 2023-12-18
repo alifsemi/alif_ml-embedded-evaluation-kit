@@ -38,6 +38,7 @@ static int32_t srshr(int32_t n, unsigned shift)
 #endif
 
 #define AUDIO_REC_SAMPLES 512
+#define AUDIO_REC_WIDTH 32
 
 #define AUDIO_L_ONLY 1
 #define AUDIO_R_ONLY 2
@@ -49,16 +50,25 @@ static int32_t srshr(int32_t n, unsigned shift)
 //#define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second
 #define MAX_GAIN_INC_PER_STRIDE 1.12201845f // 1dB, so 2dB per second
 
-//#define STORE_AUDIO
+// Define with number of raw samples to store, for debugging
+//#define STORE_AUDIO (16000*10)
 
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int samples);
+// Two options for input format
+#if AUDIO_REC_WIDTH == 32
+// Note that we use 32-bit input for any >16-bit precision. The I2S peripheral has a 24-bit
+// mode but doesn't sign extend, so 32-bit is easier to work with.
+#define audio_rec_t int32_t
+#else
+#define audio_rec_t int16_t
+#endif
 
-// 24-bit stereo record buffer
-static int32_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec"))); // stereo record buffer
+static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * __RESTRICT rec, int samples);
+
+// Stereo record buffer
+static audio_rec_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec"))); // stereo record buffer
 
 #ifdef STORE_AUDIO
-#define AUDIO_STORE_SAMPLES (AUDIO_SAMPLES*10)
-int32_t audio_store[AUDIO_STORE_SAMPLES * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
+audio_rec_t audio_store[STORE_AUDIO * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
 static size_t store_pos;
 #endif
 
@@ -89,18 +99,21 @@ static void audio_start_next_rx(int data_to_go)
 }
 
 // Perform stereo->mono conversion and DC adjustment as we copy
-// Gain will be handled later. Note that we use 32-bit input -
-// the microphone provides 18 bits of precision. Using 24-bit
-// mode gives us non-sign-extended data, so 32-bit is nicer.
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RESTRICT rec, int len)
+// Gain will be handled later.
+static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * __RESTRICT rec, int len)
 {
-    const int32_t *input = rec;
+    const audio_rec_t *input = rec;
     float16_t *output = in;
     int32_t offset = current_dc;
+#if AUDIO_REC_WIDTH == 32
     int64_t sum = 0;
+#else
+    int32_t sum = 0;
+#endif
     int samples_to_go = len;
 #if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
     while (samples_to_go >= 8) {
+#if AUDIO_REC_WIDTH == 32
         // Use 4-way deinterleave to load 4 sets of L/R/L/R.
         // Four vectors in produce one vector out, due to stereo->mono
         // conversion and 32-bit to 16-bit reduction.
@@ -131,6 +144,27 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
         float16x8_t mono_f16 = vuninitializedq_f16();
         mono_f16 = vcvtbq_f16_f32(mono_f16, mono_f32.val[0]);
         mono_f16 = vcvttq_f16_f32(mono_f16, mono_f32.val[1]);
+#else // AUDIO_REC_WIDTH == 16
+        // Classic 2-way deinterleave to get L and R
+        int16x8x2_t stereo = vld2q(input);
+#if AUDIO_MICS == AUDIO_LR_MIX
+        // Average left and right
+        int16x8_t mono = vrhaddq(stereo.val[0], stereo.val[1]);
+#elif AUDIO_MICS == AUDIO_L_ONLY
+        int16x8_t mono = stereo.val[0];
+#elif AUDIO_MICS == AUDIO_R_ONLY
+        int16x8_t mono = stereo.val[1];
+#else
+#error "which microphone?"
+#endif
+        // Add it up to track the pre-adjustment mean (32-bit sum - VADDLV only available for 32-bit vectors)
+        sum = vaddvaq(sum, mono);
+        // Subtract the current DC offset (necessary to not lose accuracy
+        // when converting to float16)
+        mono = vqsubq(mono, offset);
+        // Convert to float16, in range -1,+1
+        float16x8_t mono_f16 = vcvtq_n(mono, 15);
+#endif // AUDIO_REC_WIDTH
         // Store 8 output values.
         vst1q(output, mono_f16);
         input += 16;
@@ -155,7 +189,11 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const int32_t * __RE
         // when converting to float16)
         mono = __QSUB(mono, offset);
         // Convert to float32, in range -1,+1, so as not to overflow float16
+#if AUDIO_REC_WIDTH == 32
         float mono_f32 = mono * 0x1p-31f;
+#else
+        float mono_f32 = mono * 0x1p-15f;
+#endif
         // Convert to float16
         *output++ = (float16_t) mono_f32;
         input += 2;
