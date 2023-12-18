@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
 
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -30,14 +30,13 @@
 __STACK_SIZE = 0x00001800;
 __HEAP_SIZE  = 0x00006000;
 __ROM_BASE = 0x80008000;
-__ROM_SIZE = 0x0047F000;
+__ROM_SIZE = 0x00178000;
 
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00040000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
   SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
-  SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
 }
 
@@ -98,8 +97,6 @@ SECTIONS
     LONG (SIZEOF(.bss)/4)
     LONG (ADDR(.bss.sram0))
     LONG (SIZEOF(.bss.sram0)/4)
-    LONG (ADDR(.bss.sram1))
-    LONG (SIZEOF(.bss.sram1)/4)
     __zero_table_end__ = .;
   } > MRAM
 
@@ -110,7 +107,7 @@ SECTIONS
 
   .text.itcm.at_mram : ALIGN(8)
   {
-    /* ITCM has non-startup code, except for non-fast LVGL, and RAM vectors */
+    /* ITCM has non-startup code and RAM vectors */
     *(.text*)
     *(fast_code)
   } > ITCM AT> MRAM
@@ -131,7 +128,7 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     __exidx_end = .;
 
-  } > DTCM AT> MRAM 
+  } > DTCM AT> MRAM
 
   /* Place non-zero code/data here if required in SRAM0 */
   .data.sram0.at_mram : ALIGN(8)
@@ -145,12 +142,8 @@ SECTIONS
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.lcd_image_buf)
-  } > SRAM0
-
-  .bss.sram1 (NOLOAD) : ALIGN(8)
-  {
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
-  } > SRAM1
+  } > SRAM0
 
   .bss.itcm (NOLOAD) : ALIGN(8)
   {
@@ -186,7 +179,7 @@ SECTIONS
 
   .readonly.at_mram : ALIGN(8)
   {
-    /* Use wildcards to mop up any read-only not directed to TCM */ 
+    /* Use wildcards to mop up any read-only not directed to TCM */
     KEEP(*(.init))
     KEEP(*(.fini))
 

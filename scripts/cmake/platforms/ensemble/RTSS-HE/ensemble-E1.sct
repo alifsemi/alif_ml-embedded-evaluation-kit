@@ -1,7 +1,7 @@
 #! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 
-;/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+;/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
 ; * Use, distribution and modification of this code is permitted under the
 ; * terms stated in the Alif Semiconductor Software License Agreement
 ; *
@@ -14,11 +14,9 @@
 /*On chip RAM Regions */
 #define SRAM0_BASE                0x02000000
 #define SRAM0_SIZE                0x00400000		/* 4M */
-#define SRAM1_BASE                0x08000000
-#define SRAM1_SIZE                0x00280000		/* 2.5M */
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
-#define MRAM_SIZE                 0x00580000		/* 5.5M */
+#define MRAM_SIZE                 0x00180000		/* 1.5M */
 
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM4 is mapped as ITCM */
@@ -104,13 +102,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
-  }
-
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE-16  {  ; 2.5MB ----------------------------
-
       ; activation buffers a.k.a tensor arena when memory mode dedicated sram
       * (.bss.NoInit.activation_buf_sram)
   }
-
-  PADDING SRAM1_BASE+SRAM1_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
