@@ -40,9 +40,8 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-# This currently is also used to infer roles for the dual-CPU bits
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application")
-set_property(CACHE CONSOLE_UART PROPERTY STRINGS "2" "4")
+set_property(CACHE CONSOLE_UART PROPERTY STRINGS "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
