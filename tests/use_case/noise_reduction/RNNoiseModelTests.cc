@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,26 +104,6 @@ public:
 
 };
 
-template <class T>
-void printArray(size_t dataSz, T data){
-    char strhex[8];
-    std::string strdump;
-
-    for (size_t i = 0; i < dataSz; ++i) {
-        if (0 == i % 8) {
-            printf("%s\n\t", strdump.c_str());
-            strdump.clear();
-        }
-        snprintf(strhex, sizeof(strhex) - 1,
-                 "0x%02x, ", data[i]);
-        strdump += std::string(strhex);
-    }
-
-    if (!strdump.empty()) {
-        printf("%s\n", strdump.c_str());
-    }
-}
-
 /* This is true for gcc x86 platform, not guaranteed for other compilers and platforms. */
 TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
 {
@@ -134,13 +114,9 @@ TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
                arm::app::rnn::GetModelLen());
 
     auto map = model.GetStateMap();
-
     for(auto& mapping: map) {
         TfLiteTensor* gruOut = model.GetOutputTensor(mapping.first);
         auto* outGruState = tflite::GetTensorData<uint8_t>(gruOut);
-
-        printf("gru out state:");
-        printArray(gruOut->bytes, outGruState);
 
         for (size_t tIndex = 0;  tIndex < gruOut->bytes; tIndex++) {
             REQUIRE(outGruState[tIndex] == 0);

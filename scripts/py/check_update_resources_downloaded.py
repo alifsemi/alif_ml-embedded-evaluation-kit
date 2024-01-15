@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +13,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+"""
+Contains methods to check if the downloaded resources need to be refreshed
+"""
+import hashlib
 import json
 import sys
-import hashlib
+import typing
 from argparse import ArgumentParser
 from pathlib import Path
 
 
-def get_md5sum_for_file(filepath: str) -> str:
+def get_md5sum_for_file(
+        filepath: typing.Union[str, Path]
+) -> str:
     """
     Function to calculate md5sum for contents of a given file.
 
@@ -41,7 +46,7 @@ def get_md5sum_for_file(filepath: str) -> str:
 
 
 def check_update_resources_downloaded(
-    resource_downloaded_dir: str, set_up_script_path: str
+        resource_downloaded_dir: str, set_up_script_path: str
 ):
     """
     Function that check if the resources downloaded need to be refreshed.
@@ -55,27 +60,27 @@ def check_update_resources_downloaded(
     metadata_file_path = Path(resource_downloaded_dir) / "resources_downloaded_metadata.json"
 
     if metadata_file_path.is_file():
-        with open(metadata_file_path) as metadata_json:
-
+        with open(metadata_file_path, encoding="utf8") as metadata_json:
             metadata_dict = json.load(metadata_json)
-            md5_key = 'set_up_script_md5sum'
-            set_up_script_md5sum_metadata = ''
 
-            if md5_key in metadata_dict.keys():
-                set_up_script_md5sum_metadata = metadata_dict["set_up_script_md5sum"]
+        md5_key = 'set_up_script_md5sum'
+        set_up_script_md5sum_metadata = ''
 
-            set_up_script_md5sum_current = get_md5sum_for_file(set_up_script_path)
+        if md5_key in metadata_dict.keys():
+            set_up_script_md5sum_metadata = metadata_dict["set_up_script_md5sum"]
 
-            if set_up_script_md5sum_current == set_up_script_md5sum_metadata:
-                return 0
+        set_up_script_md5sum_current = get_md5sum_for_file(set_up_script_path)
 
-            # Return code 1 if the resources need to be refreshed.
-            print('Error: hash mismatch!')
-            print(f'Metadata: {set_up_script_md5sum_metadata}')
-            print(f'Current : {set_up_script_md5sum_current}')
-            return 1
+        if set_up_script_md5sum_current == set_up_script_md5sum_metadata:
+            return 0
 
-    # Return error code 2 if the file doesn't exists.
+        # Return code 1 if the resources need to be refreshed.
+        print('Error: hash mismatch!')
+        print(f'Metadata: {set_up_script_md5sum_metadata}')
+        print(f'Current : {set_up_script_md5sum_current}')
+        return 1
+
+    # Return error code 2 if the file doesn't exist.
     print(f'Error: could not find {metadata_file_path}')
     return 2
 
@@ -99,7 +104,8 @@ if __name__ == "__main__":
         raise ValueError(f'Invalid script path: {args.setup_script_path}')
 
     # Check the resources are downloaded as expected
-    status = check_update_resources_downloaded(
-                args.resource_downloaded_dir,
-                args.setup_script_path)
-    sys.exit(status)
+    STATUS = check_update_resources_downloaded(
+        args.resource_downloaded_dir,
+        args.setup_script_path
+    )
+    sys.exit(STATUS)

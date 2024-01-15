@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 #include "Classifier.hpp"
 
 #include <catch.hpp>
-
 
 template<typename T>
 void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults, T defaultTensorValue) {

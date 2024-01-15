@@ -1,3 +1,10 @@
+Changes in 23.11
+    * Support for 23.11 NPU components and dependencies (core-driver, core-platform, Vela 3.10.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
+    * Increase minimum requirements of Python to 3.10
+    * Update Python files to conform to Pylint
+    * Adding support for Arm Cortex-M85 with GCC
+    * Updates to documentation
+
 Changes in 23.08
     * Support for 23.08 NPU components and dependencies (core-driver, core-platform, Vela 3.9.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
     * Update Python package requirements for compatibility reasons.

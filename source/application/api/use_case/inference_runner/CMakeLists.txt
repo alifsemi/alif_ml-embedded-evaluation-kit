@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@ project(${INFERENCE_RUNNER_API_TARGET}
         LANGUAGES       C CXX)
 
 # Create static library
-add_library(${INFERENCE_RUNNER_API_TARGET} STATIC src/TestModel.cc)
+add_library(${INFERENCE_RUNNER_API_TARGET} STATIC src/TestModel.cc src/MicroMutableAllOpsResolver.cc)
 
 target_include_directories(${INFERENCE_RUNNER_API_TARGET} PUBLIC include)
 
