@@ -48,7 +48,7 @@ int arm_ethosu_timing_adapter_init(void)
     }
 
     ta_set_all(&ta_0, &ta_0_settings);
-    info("TA0 values set\n");
+    info("Configured TA0@0x%" PRIx32 "\n", TA0_BASE);
 #endif /* defined (TA0_BASE) */
 
 #if defined(TA1_BASE)
@@ -76,7 +76,7 @@ int arm_ethosu_timing_adapter_init(void)
     }
 
     ta_set_all(&ta_1, &ta_1_settings);
-    info("TA1 values set\n");
+    info("Configured TA1@0x%" PRIx32 "\n", TA1_BASE);
 #endif /* defined (TA1_BASE) */
 
     return 0;

@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,12 @@
 #include "uart_stdout.h"    /* stdout over UART. */
 #include "smm_mps3.h"       /* Memory map for MPS3. */
 
-#include <string.h>         /* For strncpy */
-
 #if defined(ARM_NPU)
 #include "ethosu_npu_init.h"
 
 #if defined(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
 #include "ethosu_ta_init.h"
 #endif /* ETHOS_U_NPU_TIMING_ADAPTER_ENABLED */
-
-#if defined(ETHOS_U_BASE_ADDR)
-    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
-        #error "NPU component configured with incorrect NPU base address."
-    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) && (SEC_ETHOS_U_NPU_BASE == ETHOS_U_BASE_ADDR) */
-#else
-    #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
-#endif /* defined(ETHOS_U_BASE_ADDR) */
 
 #endif /* ARM_NPU */
 

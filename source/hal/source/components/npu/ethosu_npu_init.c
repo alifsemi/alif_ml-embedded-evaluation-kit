@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,30 @@
 #include "ethosu_mem_config.h"      /* Arm Ethos-U memory config */
 #include "ethosu_driver.h"          /* Arm Ethos-U driver header */
 
-struct ethosu_driver ethosu_drv; /* Default Ethos-U device driver */
+/* Mandatory definition checks. */
+#if !defined(ETHOS_U_BASE_ADDR)
+#error "NPU base address is undefined."
+#endif /* defnied(ETHOS_U_BASE_ADDR) */
+
+#if !defined(ETHOS_U_IRQN)
+#error "Arm NPU interrupt number is undefined."
+#endif /* !defined(ETHOS_U_IRQN) */
+
+#if !defined(ETHOS_U_SEC_ENABLED)
+#error "Arm NPU security mode is undefined."
+#endif /* !defined(ETHOS_U_SEC_ENABLED) */
+
+#if !defined(ETHOS_U_PRIV_ENABLED)
+#error "Arm NPU privilege mode is undefined."
+#endif /* !defined(ETHOS_U_PRIV_ENABLED) */
 
 #if defined(ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0)
 static uint8_t cache_arena[ETHOS_U_CACHE_BUF_SZ] CACHE_BUF_ATTRIBUTE;
 #else  /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
 static uint8_t *cache_arena = NULL;
 #endif /* defined (ETHOS_U_CACHE_BUF_SZ) && (ETHOS_U_CACHE_BUF_SZ > 0) */
+
+struct ethosu_driver ethosu_drv; /* Default Ethos-U device driver */
 
 static uint8_t *get_cache_arena()
 {
@@ -82,16 +99,15 @@ int arm_ethosu_npu_init(void)
 
     /* Initialise Ethos-U device */
     void* const ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
+    info("Initialising Ethos-U device@0x%" PRIx32 "\n", ETHOS_U_BASE_ADDR);
 
-    if (0 != (err = ethosu_init(
-                  &ethosu_drv,            /* Ethos-U driver device pointer */
-                  ethosu_base_address,    /* Ethos-U NPU's base address. */
-                  get_cache_arena(),      /* Pointer to fast mem area - NULL for U55. */
-                  get_cache_arena_size(), /* Fast mem region size. */
-                  ETHOS_U_SEC_ENABLED,    /* Security enable. */
-                  ETHOS_U_PRIV_ENABLED))) /* Privilege enable. */
-    {
-        printf_err("failed to initialise Ethos-U device\n");
+    if (0 != (err = ethosu_init(&ethosu_drv,         /* Ethos-U driver device pointer */
+                                ethosu_base_address, /* Ethos-U NPU's base address. */
+                                get_cache_arena(),   /* Pointer to fast mem area - NULL for U55. */
+                                get_cache_arena_size(), /* Fast mem region size. */
+                                ETHOS_U_SEC_ENABLED,    /* Security enable. */
+                                ETHOS_U_PRIV_ENABLED))) /* Privilege enable. */ {
+        printf_err("Failed to initialise Ethos-U device\n");
         return err;
     }
 
