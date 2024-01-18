@@ -32,6 +32,7 @@
 
 #include "uart_tracelib.h"
 #include "itm_tracelib.h"
+#include "stm_tracelib.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -39,7 +40,7 @@
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-// CMake passes in USE_UART, USE_ITM and USE_SEMIHOSTING
+// CMake passes in USE_UART, USE_ITM, USE_STM and USE_SEMIHOSTING
 // Any or all can be set
 
 #define CNTLQ     0x11
@@ -58,8 +59,10 @@ uint16_t prefix_len;
 #define MAX_TRACE_LEN 256
 
 #ifdef M55_HP
+#define STM_CHANNEL 0
 #define ITM_CHANNEL 0
 #else
+#define STM_CHANNEL 1
 #define ITM_CHANNEL 1
 #endif
 
@@ -74,6 +77,9 @@ int tracelib_init(const char * prefix)
         prefix_len = 0;
     }
 
+#ifdef USE_STM
+    stm_init(STM_CHANNEL);
+#endif
 #ifdef USE_ITM
     itm_init(ITM_CHANNEL);
 #endif
@@ -93,6 +99,9 @@ int tracelib_init(const char * prefix)
 int send_str(const char* str, uint32_t len)
 {
     int ret = 0;
+#ifdef USE_STM
+    stm_send(STM_CHANNEL, str, len);
+#endif
 #ifdef USE_ITM
     itm_send(ITM_CHANNEL, str, len);
 #endif
