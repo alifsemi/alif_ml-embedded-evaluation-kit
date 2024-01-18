@@ -36,7 +36,7 @@
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-#include "uart_tracelib.h"
+#include "tracelib.h"
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6100100)
 /* Arm compiler re-targeting */

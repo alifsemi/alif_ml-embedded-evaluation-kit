@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef UART_TRACELIB_H_
-#define UART_TRACELIB_H_
+#ifndef ITM_TRACELIB_H_
+#define ITM_TRACELIB_H_
 
 #include <stdint.h>
 
@@ -17,14 +17,12 @@
 extern "C" {
 #endif
 
-int uart_init(void);
+void itm_init(uint8_t channel);
 
-int uart_send(const char* str, uint32_t len);
-
-char uart_getchar(void);
+void itm_send(uint8_t channel, const char* str, uint32_t len);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* UART_TRACELIB_H_ */
+#endif /* ITM_TRACELIB_H_ */

@@ -41,7 +41,7 @@
 #include "RTE_Components.h"
 #include "Driver_HWSEM.h"
 #include "board.h"
-#include "uart_tracelib.h"
+#include "tracelib.h"
 #include "services_lib_api.h"
 #include "services_main.h"
 
@@ -106,9 +106,11 @@ int platform_init(void)
         printf("Failed to initialise system tick config\n");
     }
 
+#ifndef USE_SEMIHOSTING
     /* Forces retarget code to be included in build */
     extern void _clock_init(void);
     _clock_init();
+#endif
 
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
