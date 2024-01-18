@@ -41,7 +41,7 @@
 #include "RTE_Components.h"
 #include "Driver_HWSEM.h"
 #include "board.h"
-#include "uart_tracelib.h"
+#include "tracelib.h"
 #include "services_lib_api.h"
 #include "services_main.h"
 

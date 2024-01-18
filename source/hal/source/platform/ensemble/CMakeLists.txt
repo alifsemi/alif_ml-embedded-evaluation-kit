@@ -40,8 +40,8 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-set(CONSOLE_UART 2 CACHE STRING "Console UART for the application")
-set_property(CACHE CONSOLE_UART PROPERTY STRINGS "0" "1" "2" "3" "4" "5" "6" "7" "LP")
+set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
+set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
 
@@ -100,8 +100,9 @@ INTERFACE
 include
 )
 
-target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
+target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     CONSOLE_UART=${CONSOLE_UART}
+    $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:USE_UART>
 )
 
 if (COPY_VECTORS)
@@ -114,7 +115,8 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/fault_handler.c
     source/timer_ensemble.c
     source/platform_drivers.c
-    source/uart_tracelib.c
+    $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:source/uart_tracelib.c>
+    source/tracelib.c
     source/retarget_ensemble.c
     source/delay.c
     )
