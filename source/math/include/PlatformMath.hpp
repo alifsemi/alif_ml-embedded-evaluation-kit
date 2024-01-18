@@ -180,7 +180,7 @@ namespace math {
         arm_sqrt_f32(input, &output);
         return output;
 #else  /* __ARM_FEATURE_DSP */
-        return std::sqrtf(input);
+        return sqrtf(input);
 #endif /* __ARM_FEATURE_DSP */
     }
 
