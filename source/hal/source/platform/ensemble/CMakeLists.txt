@@ -41,6 +41,8 @@ project(${PLATFORM_DRIVERS_TARGET}
     LANGUAGES       C CXX ASM)
 
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
+set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
+
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
@@ -103,6 +105,7 @@ include
 target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     CONSOLE_UART=${CONSOLE_UART}
     $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:USE_UART>
+    # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
 )
 
 if (COPY_VECTORS)

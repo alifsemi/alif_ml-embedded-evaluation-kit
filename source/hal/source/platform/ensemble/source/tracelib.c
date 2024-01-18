@@ -38,7 +38,8 @@
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-// CMake passes in USE_UART
+// CMake passes in USE_UART and USE_SEMIHOSTING
+// Any or all can be set
 
 #define CNTLQ     0x11
 #define CNTLS     0x13
@@ -88,6 +89,9 @@ int send_str(const char* str, uint32_t len)
         return ret;
     }
 #endif
+#ifdef USE_SEMIHOSTING
+    ret = fwrite(str, 1, len, stdout) == len ? 0 : -1;
+#endif
     return ret;
 }
 
@@ -108,7 +112,7 @@ void tracef(const char * format, ...)
     }
 }
 
-#if defined USE_UART
+#if defined USE_UART || defined USE_SEMIHOSTING
 static char UartPutc(char ch)
 {
     if (ch == '\n') {
@@ -122,7 +126,11 @@ static char UartPutc(char ch)
 static char UartGetc(void)
 {
     char c;
+#ifdef USE_UART
     c = uart_getchar();
+#elif defined USE_SEMIHOSTING
+    c = (char) getchar();
+#endif
     return c;
 }
 
@@ -174,7 +182,7 @@ unsigned int GetLine(char *lp, unsigned int len)
     *lp = 0;                            /* mark end of string             */
     return 1;
 }
-#else // USE_UART
+#else // USE_UART || USE_SEMIHOSTING
 unsigned int GetLine(char *user_input, unsigned int size)
 {
     (void) user_input;
@@ -182,6 +190,6 @@ unsigned int GetLine(char *user_input, unsigned int size)
 
     return 0;
 }
-#endif // USE_UART
+#endif // USE_UART || USE_SEMIHOSTING
 
 /************************ (C) COPYRIGHT ALIF SEMICONDUCTOR *****END OF FILE****/

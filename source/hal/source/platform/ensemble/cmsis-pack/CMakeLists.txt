@@ -159,7 +159,7 @@ target_link_libraries(${CMSIS_DEVICE_TARGET}
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)
-    configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
+    configure_semihosting(${CMSIS_DEVICE_TARGET} ${CONSOLE_SEMIHOSTING})
 endif()
 
 # 4 Display status:arm_ethosu_npu_irq_handler
