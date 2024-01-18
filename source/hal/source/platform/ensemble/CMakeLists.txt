@@ -41,6 +41,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     LANGUAGES       C CXX ASM)
 
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
+set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
 
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
@@ -105,6 +106,7 @@ include
 target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     CONSOLE_UART=${CONSOLE_UART}
     $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:USE_UART>
+    $<$<BOOL:${CONSOLE_ITM}>:USE_ITM>
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
 )
 
@@ -119,6 +121,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/timer_ensemble.c
     source/platform_drivers.c
     $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:source/uart_tracelib.c>
+    $<$<BOOL:${CONSOLE_ITM}>:source/itm_tracelib.c>
     source/tracelib.c
     source/retarget_ensemble.c
     source/delay.c
