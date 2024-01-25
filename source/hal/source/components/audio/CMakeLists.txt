@@ -1,6 +1,6 @@
 # /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
 #
-#/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+#/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
 # * Use, distribution and modification of this code is permitted under the
 # * terms stated in the Alif Semiconductor Software License Agreement
 # *
@@ -81,11 +81,19 @@ target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PRIVATE
     ${AUDIO_IFACE_TARGET}
     arm_math)
 
+set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
+set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
+
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${AUDIO_ENSEMBLE_COMPONENT_TARGET})
+message(STATUS "Microphone type                        : " ${TARGET_MICS})
 message(STATUS "*******************************************************")
+
+target_compile_definitions(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
+        PRIVATE
+        USE_${TARGET_MICS}_MICS)
 
 # Create static library for Data Stubs
 set(AUDIO_STUBS_COMPONENT_TARGET audio_stubs)

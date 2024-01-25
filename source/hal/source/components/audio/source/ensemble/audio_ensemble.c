@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement 
  *
@@ -38,7 +38,12 @@ static int32_t srshr(int32_t n, unsigned shift)
 #endif
 
 #define AUDIO_REC_SAMPLES 512
+
+#ifdef USE_I2S_MICS
 #define AUDIO_REC_WIDTH 32
+#elif defined(USE_PDM_MICS)
+#define AUDIO_REC_WIDTH 16
+#endif
 
 #define AUDIO_L_ONLY 1
 #define AUDIO_R_ONLY 2
@@ -58,8 +63,10 @@ static int32_t srshr(int32_t n, unsigned shift)
 // Note that we use 32-bit input for any >16-bit precision. The I2S peripheral has a 24-bit
 // mode but doesn't sign extend, so 32-bit is easier to work with.
 #define audio_rec_t int32_t
-#else
+#elif AUDIO_REC_WIDTH == 16
 #define audio_rec_t int16_t
+#else
+#error "AUDIO_REC_WIDTH must be 16 or 32"
 #endif
 
 static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * __RESTRICT rec, int samples);
@@ -236,9 +243,9 @@ void audio_set_callback(audio_callback_t callback)
     user_audio_callback = callback;
 }
 
-int audio_init(int sampling_rate, int wlen)
+int audio_init(int sampling_rate)
 {
-    int32_t err = init_microphone(sampling_rate, wlen);
+    int32_t err = init_microphone(sampling_rate, AUDIO_REC_WIDTH);
 
     if (err == 0) {
         // Enable microphone

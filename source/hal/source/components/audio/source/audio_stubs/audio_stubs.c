@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement 
  *
@@ -11,10 +11,9 @@
 #include "audio_data.h"
 #include <string.h>
 
-int audio_init(int sampling_rate, int wlen)
+int audio_init(int sampling_rate)
 {
     (void) sampling_rate;
-    (void) wlen;
     return -1;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement 
  *
@@ -20,7 +20,7 @@
  */
 typedef void (*audio_callback_t)(uint32_t data);
 
-int audio_init(int sampling_rate, int wlen);
+int audio_init(int sampling_rate);
 
 /* Call is asynchronous - use wait call, audio_get_samples_received or callback to monitor progress. Data is not valid until preprocessing is run */
 int get_audio_data(int16_t *data, int len);
