@@ -120,6 +120,6 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
 LR_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE  {
   ER_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE {
-    *(nn_model_ospi_flash)
+    *(nn_model_ext_flash)
   }
 }

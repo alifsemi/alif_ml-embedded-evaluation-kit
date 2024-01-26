@@ -19,13 +19,9 @@ list(APPEND ${use_case}_API_LIST "asr")
 
 set_input_file_path_user_option(".wav" ${use_case})
 
-USER_OPTION(${use_case}_MODEL_IN_OSPI_FLASH "Run model from external OSPI flash"
+USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
     ON
     BOOL)
-
-if (${use_case}_MODEL_IN_OSPI_FLASH)
-    set(${use_case}_COMPILE_DEFS "MODEL_IN_OSPI_FLASH")
-endif()
 
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_wav2letter.txt

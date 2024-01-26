@@ -215,9 +215,6 @@ foreach(use_case ${USE_CASES})
         set_source_files_properties(${UC_SRC}
             PROPERTIES COMPILE_DEFINITIONS
             "${${use_case}_COMPILE_DEFS}")
-        set_source_files_properties(${SRC_GEN}
-            PROPERTIES COMPILE_DEFINITIONS
-            "${${use_case}_COMPILE_DEFS}")
     endif()
 
     set(UC_LIB_NAME ${use_case})
@@ -236,6 +233,12 @@ foreach(use_case ${USE_CASES})
     # Set the activation buffer size
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
+
+    # Set model in external flash
+    if (${use_case}_MODEL_IN_EXT_FLASH)
+        target_compile_definitions(${UC_LIB_NAME} PUBLIC
+            MODEL_IN_EXT_FLASH=1)
+    endif()
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log
@@ -270,7 +273,7 @@ foreach(use_case ${USE_CASES})
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
 
     platform_custom_post_build(TARGET_NAME ${TARGET_NAME}
-                               MODEL_IN_OSPI_FLASH "${${use_case}_MODEL_IN_OSPI_FLASH}")
+                               MODEL_IN_EXT_FLASH ${${use_case}_MODEL_IN_EXT_FLASH})
 
 endforeach()
 

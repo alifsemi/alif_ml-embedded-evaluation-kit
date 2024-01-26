@@ -84,10 +84,8 @@ function(set_platform_global_defaults)
 endfunction()
 
 function(platform_custom_post_build)
-    set(oneValueArgs TARGET_NAME)
+    set(oneValueArgs TARGET_NAME MODEL_IN_EXT_FLASH)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
-    set(ospiFlashArgs MODEL_IN_OSPI_FLASH)
-    cmake_parse_arguments(PARSED "" "${ospiFlashArgs}" "" ${ARGN} )
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
 
@@ -111,9 +109,9 @@ function(platform_custom_post_build)
     set(LINKER_OUTPUT_BIN_TAGS  "mram.bin")
 
     # Create the ospi flash binaries if enabled
-    if(PARSED_MODEL_IN_OSPI_FLASH STREQUAL "ON")
-        list(APPEND LINKER_SECTION_TAGS "*.at_ospi_flash")
-        list(APPEND LINKER_OUTPUT_BIN_TAGS "ospi_flash.bin")
+    if(PARSED_MODEL_IN_EXT_FLASH)
+        list(APPEND LINKER_SECTION_TAGS "*.at_ext_flash")
+        list(APPEND LINKER_OUTPUT_BIN_TAGS "ext_flash.bin")
     endif()
 
     add_bin_generation_command(

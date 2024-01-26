@@ -221,8 +221,8 @@ SECTIONS
     KEEP(*(.eh_frame*))
   } > MRAM
 
-  .readonly.at_ospi_flash : ALIGN(8)
+  .readonly.at_ext_flash : ALIGN(8)
   {
-    *(nn_model_ospi_flash)
+    *(nn_model_ext_flash)
   } > OSPI_FLASH
 }

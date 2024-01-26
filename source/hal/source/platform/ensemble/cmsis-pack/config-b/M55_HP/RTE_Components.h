@@ -32,5 +32,6 @@
 #define RTE_Drivers_MIPI_CSI2 1
 #define RTE_Drivers_DMA 1
 #define RTE_Drivers_MIPI_DSI_ILI9806E_PANEL 1
-
+#define RTE_Drivers_ISSI_FLASH 1
+#define RTE_Drivers_OSPI     1
 #endif /* RTE_COMPONENTS_H */

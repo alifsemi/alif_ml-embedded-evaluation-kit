@@ -40,8 +40,8 @@
 /* We want all buffers/sections to be aligned to 16 byte.  */
 #define ALIGNMENT_REQ               aligned(BYTE_ALIGNMENT)
 
-#if defined(MODEL_IN_OSPI_FLASH)
-#define MODEL_SECTION               section("nn_model_ospi_flash")
+#if defined(MODEL_IN_EXT_FLASH)
+#define MODEL_SECTION               section("nn_model_ext_flash")
 #else
 #define MODEL_SECTION               section("nn_model")
 #endif

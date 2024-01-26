@@ -44,6 +44,7 @@ set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
 set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
 set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as they have ITM. so no user-visible option
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
+set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
 
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
@@ -109,6 +110,7 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:USE_UART>
     $<$<BOOL:${CONSOLE_STM}>:USE_STM>
     $<$<BOOL:${CONSOLE_ITM}>:USE_ITM>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:OSPI_FLASH_SUPPORT>
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
 )
 
@@ -128,6 +130,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/tracelib.c
     source/retarget_ensemble.c
     source/delay.c
+    $<$<NOT:$<STREQUAL:${TARGET_REVISION},A>>:source/ospi_flash.c>
     )
 
 ## Directory for additional components required by MPS3:
