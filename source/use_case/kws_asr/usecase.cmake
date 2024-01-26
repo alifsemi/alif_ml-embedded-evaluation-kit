@@ -19,6 +19,14 @@ list(APPEND ${use_case}_API_LIST "kws" "asr")
 
 set_input_file_path_user_option(".wav" ${use_case})
 
+USER_OPTION(${use_case}_MODEL_IN_OSPI_FLASH "Run model from external OSPI flash"
+    ON
+    BOOL)
+
+if (${use_case}_MODEL_IN_OSPI_FLASH)
+    set(${use_case}_COMPILE_DEFS "MODEL_IN_OSPI_FLASH")
+endif()
+
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
     16000
     STRING)
