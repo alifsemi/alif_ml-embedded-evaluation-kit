@@ -29,6 +29,7 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "uart_tracelib.h"
 #include "itm_tracelib.h"
