@@ -34,38 +34,45 @@ pipeline {
         stage('Build HP GCC Release') {
             steps {
                 script {
-                    common_funcs.build_hp("Release", "gcc");
+                    common_funcs.build_hp("Release", "gcc", "B");
                 }
             }
         }
         // Remaining builds can be parallel
         stage('More builds') {
             parallel {
+                stage('Build HP GCC Release (rev. A)') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "gcc", "A");
+                        }
+                    }
+                }
                 stage('Build HP GCC Debug') {
                     steps {
                         script {
-                            common_funcs.build_hp("Debug", "gcc");
+                            common_funcs.build_hp("Debug", "gcc", "B");
                         }
                     }
                 }
                 stage('Build HE-TCM GCC Release') {
                     steps {
                         script {
-                            common_funcs.build_he_tcm("Release", "gcc");
+                            common_funcs.build_he_tcm("Release", "gcc", "B");
                         }
                     }
                     post {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
-                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release/bin/sectors/alif_kws/mram.bin"
+                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release_rev_b/bin/sectors/alif_kws/mram.bin"
                         }
                     }
                 }
                 stage('Build HE-TCM GCC Debug') {
                     steps {
                         script {
-                            common_funcs.build_he_tcm("Debug", "gcc");
+                            common_funcs.build_he_tcm("Debug", "gcc", "B");
                         }
                     }
                 }
@@ -77,7 +84,7 @@ pipeline {
                 unstash name: "test_build_gnu_kws_he_release"
                 script {
                     try {
-                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
+                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_rev_b/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
                     } catch (Exception e) {
                         echo 'Exception occurred: ' + e.toString()
                         stageResult: 'UNSTABLE'
