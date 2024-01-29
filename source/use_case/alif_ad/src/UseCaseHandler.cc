@@ -109,7 +109,7 @@ using namespace arm::app::ad;
         int err;
 
         if (index == 0) {
-            err = hal_audio_init(audio::AdMelSpectrogram::ms_defaultSamplingFreq, 32);
+            err = hal_audio_init(audio::AdMelSpectrogram::ms_defaultSamplingFreq);
             if (err) {
                 printf_err("hal_audio_init failed with error: %d\n", err);
                 return false;

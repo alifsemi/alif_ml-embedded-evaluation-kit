@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
 
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -153,6 +153,7 @@ int platform_init(void)
     if (0 != (state = arm_ethosu_npu_init())) {
         return state;
     }
+    NVIC_SetPriority((IRQn_Type)ETHOS_U_IRQN, 0x60);
 
 #endif /* ARM_NPU */
 

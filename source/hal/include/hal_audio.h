@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement 
  *
@@ -25,7 +25,7 @@
  * @brief init audio
  *
  */
-#define hal_audio_init(rate, wlen)          audio_init(rate, wlen)
+#define hal_audio_init(rate)          audio_init(rate)
 
 #define hal_set_audio_callback(cb)          audio_set_callback(cb)
 /**
