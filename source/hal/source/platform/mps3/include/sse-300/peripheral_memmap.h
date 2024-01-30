@@ -34,7 +34,7 @@
 #define FMC_CMDSK_GPIO_BASE2        (0x41106000)       /* FMC_CMDSK_GPIO_BASE 2 Base Address (4KB)*/
 #define FMC_USER_AHB_BASE           (0x41107000)          /* FMC_USER_AHB_BASE     Base Address (4KB)*/
 
-#define DMA0_BASE                (0x41200000)       /* DMA0 (4KB) */
+/* Note: DMA0_BASE does not exist for Corstone-300 */
 #define DMA1_BASE                (0x41201000)       /* DMA1 (4KB) */
 #define DMA2_BASE                (0x41202000)       /* DMA2 (4KB) */
 #define DMA3_BASE                (0x41203000)       /* DMA3 (4KB) */
@@ -97,7 +97,6 @@
 #define SEC_AHB_USER2_BASE       (0x51106000)       /* AHB USER 2 Base Address (4KB)*/
 #define SEC_AHB_USER3_BASE       (0x51107000)       /* AHB USER 3 Base Address (4KB)*/
 
-#define SEC_DMA0_BASE            (0x51200000)       /* DMA0 (4KB) */
 #define SEC_DMA1_BASE            (0x51201000)       /* DMA1 (4KB) */
 #define SEC_DMA2_BASE            (0x51202000)       /* DMA2 (4KB) */
 #define SEC_DMA3_BASE            (0x51203000)       /* DMA3 (4KB) */
