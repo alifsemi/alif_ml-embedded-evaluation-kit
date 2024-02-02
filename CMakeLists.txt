@@ -234,6 +234,12 @@ foreach(use_case ${USE_CASES})
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
+    # Set model in external flash
+    if (${use_case}_MODEL_IN_EXT_FLASH)
+        target_compile_definitions(${UC_LIB_NAME} PUBLIC
+            MODEL_IN_EXT_FLASH=1)
+    endif()
+
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log
         arm_math
@@ -266,7 +272,8 @@ foreach(use_case ${USE_CASES})
 
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
 
-    platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
+    platform_custom_post_build(TARGET_NAME ${TARGET_NAME}
+                               MODEL_IN_EXT_FLASH ${${use_case}_MODEL_IN_EXT_FLASH})
 
 endforeach()
 

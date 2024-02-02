@@ -19,6 +19,9 @@
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
+/* External OSPI flash */
+#define OSPI_FLASH_BASE           0xC0000000
+#define OSPI_FLASH_SIZE           0x02000000        /* 32M */
 
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM4 is mapped as ITCM */
@@ -113,4 +116,10 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
 
   PADDING SRAM1_BASE+SRAM1_SIZE-16 ALIGN 16 FILL 0 16  {  }
+}
+
+LR_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE  {
+  ER_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE {
+    *(nn_model_ext_flash)
+  }
 }

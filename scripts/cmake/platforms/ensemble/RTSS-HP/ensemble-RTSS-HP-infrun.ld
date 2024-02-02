@@ -31,6 +31,8 @@ __STACK_SIZE = 0x00008000;
 __HEAP_SIZE  = 0x00010000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
+__OSPI_FLASH_BASE = 0xC0000000;
+__OSPI_FLASH_SIZE = 0x02000000;
 
 MEMORY
 {
@@ -39,6 +41,7 @@ MEMORY
   SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
   SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
 
 ENTRY(Reset_Handler)
@@ -217,4 +220,9 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > MRAM
+
+  .readonly.at_ext_flash : ALIGN(8)
+  {
+    *(nn_model_ext_flash)
+  } > OSPI_FLASH
 }
