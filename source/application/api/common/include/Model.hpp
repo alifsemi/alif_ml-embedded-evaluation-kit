@@ -33,7 +33,7 @@ namespace app {
         Model();
 
         /** @brief Destructor. */
-        ~Model();
+        virtual ~Model() = default;
 
         /** @brief  Gets the pointer to the model's input tensor at given input index. */
         TfLiteTensor* GetInputTensor(size_t index) const;

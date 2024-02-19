@@ -78,8 +78,9 @@ endif()
 
 if (TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
     message(STATUS "Refreshing TensorFlow Lite Micro's third party downloads...")
+    set(ENV{PATH} "${ENV_PATH}")
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
+        COMMAND
         make -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile clean_downloads third_party_downloads
         RESULT_VARIABLE return_code
         WORKING_DIRECTORY ${TENSORFLOW_SRC_PATH})
@@ -102,7 +103,7 @@ message(STATUS "TensorFlow Lite Micro build to be called for these targets: ${MA
 add_custom_target(tensorflow_build ALL
 
     # Command to build the TensorFlow Lite Micro library
-    COMMAND ${CMAKE_COMMAND} -E env PATH=${ENV_PATH}
+    COMMAND ${CMAKE_COMMAND} -E env PATH="${ENV_PATH}"
         make -j${PARALLEL_JOBS} -f ${TENSORFLOW_LITE_MICRO_PATH}/tools/make/Makefile ${MAKE_TARGETS_LIST}
         TARGET_TOOLCHAIN_ROOT=${TENSORFLOW_LITE_MICRO_TARGET_TOOLCHAIN_ROOT}
         TOOLCHAIN=${TENSORFLOW_LITE_MICRO_TOOLCHAIN}

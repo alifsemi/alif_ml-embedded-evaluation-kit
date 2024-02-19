@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -149,13 +149,10 @@ static int verify_platform(void)
         if (EXTRACT_BITS(id, 7, 4) == 3) {
             info ("CPU: Cortex-M85 r%dp%d\n\n",
                   EXTRACT_BITS(id, 23, 20),EXTRACT_BITS(id, 3, 0));
-            /* @TODO: Remove CPU_CORTEX_M55 from here once CMake min version is > 3.21.0 or when
-             * toolchains officially support Cortex-M85. Currently, for CMake versions older than
-             * this, Cortex-M85 is built using Cortex-M55 flags. */
-#if defined (CPU_CORTEX_M55) || defined (ARMv81MML_DSP_DP_MVE_FP) || defined(CPU_CORTEX_M85)
+#if defined (ARMv81MML_DSP_DP_MVE_FP) || defined (CPU_CORTEX_M85)
             /* CPU ID should be "0x_41_0f_d2_30" for Cortex-M85 */
             return 0;
-#endif /* (CPU_CORTEX_M55) || (ARMv81MML_DSP_DP_MVE_FP) || (CPU_CORTEX_M85) */
+#endif /* (ARMv81MML_DSP_DP_MVE_FP) || (CPU_CORTEX_M85) */
         } else if (EXTRACT_BITS(id, 7, 4) == 2) {
             info ("CPU: Cortex-M55 r%dp%d\n\n",
                 EXTRACT_BITS(id, 23, 20),EXTRACT_BITS(id, 3, 0));
@@ -185,7 +182,7 @@ static int verify_platform(void)
             EXTRACT_BITS(id, 3, 0));
     }
 
-    /* If the CPU is anything other than M33 or M55, we return 1 */
+    /* If the CPU is anything other than M33, M55 or M85, we return 1 */
     printf_err("CPU mismatch!\n");
     return 1;
 }

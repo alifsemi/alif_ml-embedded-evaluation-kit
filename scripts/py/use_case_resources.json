@@ -1,0 +1,210 @@
+[
+  {
+    "name": "ad",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/"
+    ],
+    "resources": [
+      {
+        "name": "ad_medium_int8.tflite",
+        "url": "{url_prefix:0}ad_medium_int8.tflite"
+      },
+      {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
+      {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"}
+    ]
+  },
+  {
+    "name": "asr",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/"
+    ],
+    "resources": [
+      {
+        "name": "wav2letter_pruned_int8.tflite",
+        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite"
+      },
+      {
+        "name": "ifm0.npy",
+        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy"
+      },
+      {
+        "name": "ofm0.npy",
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+      }
+    ]
+  },
+  {
+    "name": "tiny_asr",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/61e9a318a3e9333fd89fe43f9fd7a83ab1eb8171/models/speech_recognition/tiny_wav2letter/tflite_pruned_int8/"
+    ],
+    "resources": [
+      {
+        "name": "tiny_wav2letter_pruned_int8.tflite",
+        "url": "{url_prefix:0}tiny_wav2letter_pruned_int8.tflite"
+      },
+      {
+        "name": "ifm0.npy",
+        "url": "{url_prefix:0}testing_input/input_1_int8/0.npy"
+      },
+      {
+        "name": "ofm0.npy",
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+      }
+    ]
+  },
+  {
+    "name": "img_class",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8/"
+    ],
+    "resources": [
+      {
+        "name": "mobilenet_v2_1.0_224_INT8.tflite",
+        "url": "{url_prefix:0}mobilenet_v2_1.0_224_INT8.tflite"
+      },
+      {
+        "name": "ifm0.npy",
+        "url": "{url_prefix:0}testing_input/tfl.quantize/0.npy"
+      },
+      {
+        "name": "ofm0.npy",
+        "url": "{url_prefix:0}testing_output/MobilenetV2/Predictions/Reshape_11/0.npy"
+      }
+    ]
+  },
+  {
+    "name": "object_detection",
+    "url_prefix": [
+      "https://github.com/emza-vs/ModelZoo/blob/v1.0/object_detection/"
+    ],
+    "resources": [
+      {
+        "name": "yolo-fastest_192_face_v4.tflite",
+        "url": "{url_prefix:0}yolo-fastest_192_face_v4.tflite?raw=true"
+      }
+    ]
+  },
+  {
+    "name": "kws",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/"
+    ],
+    "resources": [
+      {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
+      {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"},
+      {
+        "name": "kws_micronet_m.tflite",
+        "url": "{url_prefix:0}kws_micronet_m.tflite"
+      }
+    ]
+  },
+  {
+    "name": "vww",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/"
+    ],
+    "resources": [
+      {
+        "name": "vww4_128_128_INT8.tflite",
+        "url": "{url_prefix:0}vww4_128_128_INT8.tflite"
+      },
+      {"name": "ifm0.npy", "url": "{url_prefix:0}testing_input/input/0.npy"},
+      {"name": "ofm0.npy", "url": "{url_prefix:0}testing_output/Identity/0.npy"}
+    ]
+  },
+  {
+    "name": "kws_asr",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/",
+      "https://github.com/ARM-software/ML-zoo/raw/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8/"
+    ],
+    "resources": [
+      {
+        "name": "wav2letter_pruned_int8.tflite",
+        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite"
+      },
+      {
+        "sub_folder": "asr",
+        "name": "ifm0.npy",
+        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy"
+      },
+      {
+        "sub_folder": "asr",
+        "name": "ofm0.npy",
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+      },
+      {
+        "sub_folder": "kws",
+        "name": "ifm0.npy",
+        "url": "{url_prefix:1}testing_input/input/0.npy"
+      },
+      {
+        "sub_folder": "kws",
+        "name": "ofm0.npy",
+        "url": "{url_prefix:1}testing_output/Identity/0.npy"
+      },
+      {
+        "name": "kws_micronet_m.tflite",
+        "url": "{url_prefix:1}kws_micronet_m.tflite"
+      }
+    ]
+  },
+  {
+    "name": "noise_reduction",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/"
+    ],
+    "resources": [
+      {"name": "rnnoise_INT8.tflite", "url": "{url_prefix:0}rnnoise_INT8.tflite"},
+      {
+        "name": "ifm0.npy",
+        "url": "{url_prefix:0}testing_input/main_input_int8/0.npy"
+      },
+      {
+        "name": "ifm1.npy",
+        "url": "{url_prefix:0}testing_input/vad_gru_prev_state_int8/0.npy"
+      },
+      {
+        "name": "ifm2.npy",
+        "url": "{url_prefix:0}testing_input/noise_gru_prev_state_int8/0.npy"
+      },
+      {
+        "name": "ifm3.npy",
+        "url": "{url_prefix:0}testing_input/denoise_gru_prev_state_int8/0.npy"
+      },
+      {
+        "name": "ofm0.npy",
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+      },
+      {
+        "name": "ofm1.npy",
+        "url": "{url_prefix:0}testing_output/Identity_1_int8/0.npy"
+      },
+      {
+        "name": "ofm2.npy",
+        "url": "{url_prefix:0}testing_output/Identity_2_int8/0.npy"
+      },
+      {
+        "name": "ofm3.npy",
+        "url": "{url_prefix:0}testing_output/Identity_3_int8/0.npy"
+      },
+      {
+        "name": "ofm4.npy",
+        "url": "{url_prefix:0}testing_output/Identity_4_int8/0.npy"
+      }
+    ]
+  },
+  {
+    "name": "inference_runner",
+    "url_prefix": [
+      "https://github.com/ARM-software/ML-zoo/raw/68b5fbc77ed28e67b2efc915997ea4477c1d9d5b/models/keyword_spotting/dnn_small/tflite_int8/"
+    ],
+    "resources": [
+      {
+        "name": "dnn_s_quantized.tflite",
+        "url": "{url_prefix:0}dnn_s_quantized.tflite"
+      }
+    ]
+  }
+]

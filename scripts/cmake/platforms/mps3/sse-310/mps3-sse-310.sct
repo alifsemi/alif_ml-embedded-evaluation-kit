@@ -109,6 +109,7 @@ LOAD_REGION_1       0x70000000                  0x02000000
 
         ; labels
         *.o (labels)
+        Labels.o (+RO-DATA)
 
         ; activation buffers a.k.a tensor arena when memory mode dedicated sram
         *.o (activation_buf_dram)
