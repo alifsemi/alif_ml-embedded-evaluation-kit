@@ -56,6 +56,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include/config
     ${ENSEMBLE_CMSIS_PATH}/drivers/include
     ${ENSEMBLE_CMSIS_PATH}/components/Include
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/config
     ${BOARDLIB_PATH}
     )
 
@@ -90,6 +91,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/clk.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
