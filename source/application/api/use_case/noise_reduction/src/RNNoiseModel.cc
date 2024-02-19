@@ -24,6 +24,7 @@ const tflite::MicroOpResolver& arm::app::RNNoiseModel::GetOpResolver()
 
 bool arm::app::RNNoiseModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddUnpack();
     this->m_opResolver.AddFullyConnected();
     this->m_opResolver.AddSplit();
@@ -38,6 +39,7 @@ bool arm::app::RNNoiseModel::EnlistOperations()
     this->m_opResolver.AddQuantize();
     this->m_opResolver.AddConcatenation();
     this->m_opResolver.AddRelu();
+#endif
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

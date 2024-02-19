@@ -118,6 +118,10 @@ if (NOT TARGET_PLATFORM STREQUAL native)
 
     # If we need NPU libraries:
     if (ETHOS_U_NPU_ENABLED)
+        USER_OPTION(ETHOS_U_NPU_ASSUMED "Assume models will be handled by the Ethos-U whenever possible, so do not include redundant software operators in use cases."
+            ON
+            BOOL)
+
         USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
             "Path to Ethos-U NPU timing adapter sources"
             "${DEPENDENCY_ROOT_DIR}/core-platform/drivers/timing_adapter"
