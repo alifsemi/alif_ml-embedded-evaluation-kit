@@ -104,19 +104,6 @@ pipeline {
                 }
             }
         }
-        stage('Report Junit to Influx') {
-            agent any
-            options { skipDefaultCheckout() }
-            steps {
-                script {
-                    try {
-                        influxDbPublisher(selectedTarget: 'JUnit-report-testapp')
-                    } catch (Exception e) {
-                        echo 'Exception occurred: ' + e.toString()
-                    }
-                }
-            }
-        }
     }
     post {
         cleanup {
