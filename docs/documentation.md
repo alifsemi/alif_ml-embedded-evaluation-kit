@@ -45,9 +45,9 @@ Before starting the setup process, please make sure that you have:
     <https://developer.arm.com/downloads/-/download-fpga-images>. You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
     application.
-  - `Arm® Corstone™-300` based FVP for MPS3 is available from:
-    <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>.
-  - `Arm® Corstone™-310` based FVP is available under Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
+  - Both `Arm® Corstone™-300` and `Arm® Corstone™-310` based FVPs for MPS3 are available from:
+    <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>
+    and as Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
 
 > **Note:**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
 > notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built

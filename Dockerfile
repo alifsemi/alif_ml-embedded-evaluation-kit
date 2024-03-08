@@ -44,12 +44,12 @@ RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binr
     rm gcc-arm-none-eabi.tar.xz
 
 # Download and install the Arm Corstone_SSE-300 FVP
-RUN wget https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-300/FVP_Corstone_SSE-300_11.16_26.tgz 2>/dev/null && \
-    echo "e26139be756b5003a30d978c629de638aed1934d597dc24a17043d4708e934d7 FVP_Corstone_SSE-300_11.16_26.tgz" | sha256sum -c && \
+RUN wget https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-300/FVP_Corstone_SSE-300_11.24_13_Linux64.tgz 2>/dev/null && \
+    echo "6ea4096ecf8a8c06d6e76e21cae494f0c7139374cb33f6bc3964d189b84539a9 FVP_Corstone_SSE-300_11.24_13_Linux64.tgz" | sha256sum -c && \
     mkdir -p /home/FVP_Corstone_SSE-300/ && \
-    tar -xf FVP_Corstone_SSE-300_11.16_26.tgz -C /home/FVP_Corstone_SSE-300/ && \
+    tar -xf FVP_Corstone_SSE-300_11.24_13_Linux64.tgz -C /home/FVP_Corstone_SSE-300/ && \
     bash /home/FVP_Corstone_SSE-300/FVP_Corstone_SSE-300.sh --no-interactive --i-agree-to-the-contained-eula -d /home/FVP_Corstone_SSE-300 && \
-    rm FVP_Corstone_SSE-300_11.16_26.tgz
+    rm FVP_Corstone_SSE-300_11.24_13_Linux64.tgz
 
 # Clone the ml-embedded-evaluation-kit repository
 RUN git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit" ${EVAL_KIT_DIR}
@@ -67,8 +67,8 @@ RUN python3 ./set_up_default_resources.py
 ENV PATH="${EVAL_KIT_DIR}/resources_downloaded/env/bin:/opt/gcc-arm-none-eabi/bin:${PATH}"
 
 # FVP binary paths:
-ENV FVP_ETHOS_U55="/home/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55"
-ENV FVP_ETHOS_U65="/home/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65"
+ENV FVP_ETHOS_U55="/home/FVP_Corstone_SSE-300/models/Linux64_GCC-9.3/FVP_Corstone_SSE-300_Ethos-U55"
+ENV FVP_ETHOS_U65="/home/FVP_Corstone_SSE-300/models/Linux64_GCC-9.3/FVP_Corstone_SSE-300_Ethos-U65"
 
 # Default FVP arguments for no GUI and telnet pop ups:
 ENV FVP_ARGS="-C mps3_board.telnetterminal0.start_telnet=0 -C mps3_board.uart0.out_file='-' -C mps3_board.uart0.shutdown_on_eot=1 -C mps3_board.visualisation.disable-visualisation=1"
