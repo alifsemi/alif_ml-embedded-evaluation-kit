@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+"""
+Script to build the ML Embedded Evaluation kit using default configuration
+"""
 import logging
 import multiprocessing
 import os
@@ -22,6 +25,7 @@ import sys
 import threading
 from argparse import ArgumentDefaultsHelpFormatter
 from argparse import ArgumentParser
+from collections import namedtuple
 from pathlib import Path
 
 from set_up_default_resources import default_npu_config_names
@@ -29,75 +33,106 @@ from set_up_default_resources import get_default_npu_config_from_name
 from set_up_default_resources import set_up_resources
 from set_up_default_resources import valid_npu_config_names
 
+BuildArgs = namedtuple(
+    "BuildArgs",
+    [
+        "toolchain",
+        "download_resources",
+        "run_vela_on_models",
+        "npu_config_name",
+        "make_jobs",
+        "make_verbose",
+    ],
+)
+
 
 class PipeLogging(threading.Thread):
+    """
+    Class used to log stdout from subprocesses
+    """
+
     def __init__(self, log_level):
         threading.Thread.__init__(self)
-        self.logLevel = log_level
-        self.fileRead, self.fileWrite = os.pipe()
-        self.pipeIn = os.fdopen(self.fileRead)
+        self.log_level = log_level
+        self.file_read, self.file_write = os.pipe()
+        self.pipe_in = os.fdopen(self.file_read)
         self.daemon = False
         self.start()
 
     def fileno(self):
-        return self.fileWrite
+        """
+        Get self.file_write
+
+        Returns
+        -------
+        self.file_write
+        """
+        return self.file_write
 
     def run(self):
-        for line in iter(self.pipeIn.readline, ""):
-            logging.log(self.logLevel, line.strip("\n"))
+        """
+        Log the contents of self.pipe_in
+        """
+        for line in iter(self.pipe_in.readline, ""):
+            logging.log(self.log_level, line.strip("\n"))
 
-        self.pipeIn.close()
+        self.pipe_in.close()
 
     def close(self):
-        os.close(self.fileWrite)
+        """
+        Close the pipe
+        """
+        os.close(self.file_write)
 
 
-def run(
-    toolchain: str,
-    download_resources: bool,
-    run_vela_on_models: bool,
-    npu_config_name: str,
-    make_jobs: int,
-    make_verbose: bool,
-):
+def get_toolchain_file_name(toolchain: str) -> str:
     """
-    Run the helpers scripts.
+    Get the name of the toolchain file for the toolchain.
 
-    Parameters:
+    Parameters
     ----------
-    toolchain (str)          :    Specifies if 'gnu' or 'arm' toolchain needs to be used.
-    download_resources (bool):    Specifies if 'Download resources' step is performed.
-    run_vela_on_models (bool):    Only if `download_resources` is True, specifies if run vela on downloaded models.
-    npu_config_name(str)     :    Ethos-U NPU configuration name. See "valid_npu_config_names"
+    toolchain   : name of the specified toolchain
+
+    Returns
+    -------
+    name of the toolchain file corresponding to the specified
+    toolchain
     """
-
-    current_file_dir = Path(__file__).parent.resolve()
-
-    # 1. Make sure the toolchain is supported, and set the right one here
-    supported_toolchain_ids = ["gnu", "arm"]
-    assert (
-        toolchain in supported_toolchain_ids
-    ), f"Toolchain must be from {supported_toolchain_ids}"
     if toolchain == "arm":
-        toolchain_file_name = "bare-metal-armclang.cmake"
-    elif toolchain == "gnu":
-        toolchain_file_name = "bare-metal-gcc.cmake"
+        return "bare-metal-armclang.cmake"
 
-    # 2. Download models if specified
-    if download_resources is True:
-        logging.info("Downloading resources.")
-        (download_dir, env_path) = set_up_resources(
-            run_vela_on_models=run_vela_on_models,
-            additional_npu_config_names=[npu_config_name],
-            additional_requirements_file=current_file_dir / "scripts" / "py" / "requirements.txt"
-        )
+    if toolchain == "gnu":
+        return "bare-metal-gcc.cmake"
 
-    # 3. Build default configuration
-    logging.info("Building default configuration.")
-    target_platform = "mps3"
-    target_subsystem = "sse-300"
-    ethos_u_cfg = get_default_npu_config_from_name(npu_config_name)
-    build_dir = current_file_dir / f"cmake-build-{target_platform}-{target_subsystem}-{npu_config_name}-{toolchain}"
+    raise ValueError("Toolchain must be one of: gnu, arm")
+
+
+def prep_build_dir(
+        current_file_dir: Path,
+        target_platform: str,
+        target_subsystem: str,
+        npu_config_name: str,
+        toolchain: str
+) -> Path:
+    """
+    Create or clean the build directory for this project.
+
+    Parameters
+    ----------
+    current_file_dir    : The current directory of the running script
+    target_platform     : The name of the target platform, e.g. "mps3"
+    target_subsystem:   : The name of the target subsystem, e.g. "sse-300"
+    npu_config_name     : The NPU config name, e.g. "ethos-u55-32"
+    toolchain           : The name of the specified toolchain, e.g."arm"
+
+    Returns
+    -------
+    The path to the build directory
+    """
+    build_dir = (
+            current_file_dir /
+            f"cmake-build-{target_platform}-{target_subsystem}-{npu_config_name}-{toolchain}"
+    )
 
     try:
         build_dir.mkdir()
@@ -109,44 +144,110 @@ def run(
                     filepath.unlink()
                 elif filepath.is_dir():
                     shutil.rmtree(filepath)
-            except Exception as e:
-                logging.error(f"Failed to delete {filepath}. Reason: {e}")
+            except OSError as err:
+                logging.error("Failed to delete %s. Reason: %s", filepath, err)
+
+    return build_dir
+
+
+def run_command(
+        command: str,
+        logpipe: PipeLogging,
+        fail_message: str
+):
+    """
+    Run a command and exit upon failure.
+
+    Parameters
+    ----------
+    command         : The command to run
+    logpipe         : The PipeLogging object to capture stdout
+    fail_message    : The message to log upon a non-zero exit code
+    """
+    logging.info("\n\n\n%s\n\n\n", command)
+
+    try:
+        subprocess.run(
+            command, check=True, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
+        )
+    except subprocess.CalledProcessError as err:
+        logging.error(fail_message)
+        logpipe.close()
+        sys.exit(err.returncode)
+
+
+def run(args: BuildArgs):
+    """
+    Run the helpers scripts.
+
+    Parameters:
+    ----------
+    args (BuildArgs)    :   Parsed set of build args expecting:
+                            - toolchain
+                            - download_resources
+                            - run_vela_on_models
+                            - np_config_name
+    toolchain (str)             :   Specifies if 'gnu' or 'arm' toolchain needs to be used.
+    download_resources (bool)   :   Specifies if 'Download resources' step is performed.
+    run_vela_on_models (bool)   :   Only if `download_resources` is True, specifies if
+                                    run vela on downloaded models.
+    npu_config_name(str)        :   Ethos-U NPU configuration name. See "valid_npu_config_names"
+    """
+
+    current_file_dir = Path(__file__).parent.resolve()
+
+    # 1. Make sure the toolchain is supported, and set the right one here
+    toolchain_file_name = get_toolchain_file_name(args.toolchain)
+
+    # 2. Download models if specified
+    if args.download_resources is True:
+        logging.info("Downloading resources.")
+        env_path = set_up_resources(
+            run_vela_on_models=args.run_vela_on_models,
+            additional_npu_config_names=(args.npu_config_name,),
+            additional_requirements_file=current_file_dir / "scripts" / "py" / "requirements.txt"
+        )
+
+    # 3. Build default configuration
+    logging.info("Building default configuration.")
+    target_platform = "mps3"
+    target_subsystem = "sse-300"
+
+    build_dir = prep_build_dir(
+        current_file_dir,
+        target_platform,
+        target_subsystem,
+        args.npu_config_name,
+        args.toolchain
+    )
 
     logpipe = PipeLogging(logging.INFO)
 
-    cmake_toolchain_file = current_file_dir / "scripts" / "cmake" / "toolchains" / toolchain_file_name
+    cmake_toolchain_file = (
+            current_file_dir /
+            "scripts" /
+            "cmake" /
+            "toolchains" /
+            toolchain_file_name
+    )
+    ethos_u_cfg = get_default_npu_config_from_name(args.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
     cmake_command = (
         f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
-        + f" -DTARGET_SUBSYSTEM={target_subsystem}"
-        + f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
-        + f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
-        + f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
-        + f" -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
+        f" -DTARGET_SUBSYSTEM={target_subsystem}"
+        f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
+        f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
+        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
+        " -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
     )
 
-    logging.info(f"\n\n\n{cmake_command}\n\n\n")
-    state = subprocess.run(
-        cmake_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
-    )
+    run_command(cmake_command, logpipe, fail_message="Failed to configure the project.")
 
-    if state.returncode != 0:
-        logging.error("Failed to configure the project.")
-        logpipe.close()
-        sys.exit(state.returncode)
-
-    make_command = f"{cmake_path} --build {build_dir} -j{make_jobs}"
-    if make_verbose:
+    make_command = f"{cmake_path} --build {build_dir} -j{args.make_jobs}"
+    if args.make_verbose:
         make_command += " --verbose"
-    logging.info(f"\n\n\n{make_command}\n\n\n")
-    state = subprocess.run(
-        make_command, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
-    )
 
-    if state.returncode != 0:
-        logging.error("Failed to build project.")
-        logpipe.close()
-        sys.exit(state.returncode)
+    run_command(make_command, logpipe, fail_message="Failed to build project.")
 
     logpipe.close()
 
@@ -185,18 +286,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--make-verbose", help="Make runs with VERBOSE=1", action="store_true"
     )
-    args = parser.parse_args()
+    parsed_args = parser.parse_args()
 
     logging.basicConfig(
         filename="log_build_default.log", level=logging.DEBUG, filemode="w"
     )
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    run(
-        args.toolchain.lower(),
-        not args.skip_download,
-        not args.skip_vela,
-        args.npu_config_name,
-        args.make_jobs,
-        args.make_verbose,
+    build_args = BuildArgs(
+        toolchain=parsed_args.toolchain.lower(),
+        download_resources=not parsed_args.skip_download,
+        run_vela_on_models=not parsed_args.skip_vela,
+        npu_config_name=parsed_args.npu_config_name,
+        make_jobs=parsed_args.make_jobs,
+        make_verbose=parsed_args.make_verbose
     )
+
+    run(build_args)

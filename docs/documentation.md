@@ -13,6 +13,7 @@
   - [Memory Considerations](./documentation.md#memory-considerations)
   - [Troubleshooting](./documentation.md#troubleshooting)
   - [Appendix](./documentation.md#appendix)
+  - [Contributing](./documentation.md#contributing)
   - [FAQ](./documentation.md#faq)
 
 ## Trademarks
@@ -394,6 +395,11 @@ Please refer to:
 
 - [Appendix](./sections/appendix.md#appendix)
   - [Cortex-M55 Memory map overview](./sections/appendix.md#arm_cortex_m55-memory-map-overview-for-corstone_300-reference-design)
+
+## Contributing
+
+Guidelines to contributing changes can be found [here](./sections/contributing.md#contributions)
+
 
 ## FAQ
 

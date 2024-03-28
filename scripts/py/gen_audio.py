@@ -1,6 +1,6 @@
 #!env/bin/python3
 
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,34 +17,99 @@
 """
 Utility script to convert an audio clip into eval platform desired spec.
 """
-import soundfile as sf
-
 from argparse import ArgumentParser
 from os import path
 
-from gen_utils import AudioUtils
+import soundfile as sf
+
+from gen_utils import GenUtils
 
 parser = ArgumentParser()
-parser.add_argument("--audio_path", help="Audio file path", required=True)
-parser.add_argument("--output_dir", help="Output directory", required=True)
-parser.add_argument("--sampling_rate", type=int, help="target sampling rate.", default=16000)
-parser.add_argument("--mono", type=bool, help="convert signal to mono.", default=True)
-parser.add_argument("--offset", type=float, help="start reading after this time (in seconds).", default=0)
-parser.add_argument("--duration", type=float, help="only load up to this much audio (in seconds).", default=0)
-parser.add_argument("--res_type", type=AudioUtils.res_data_type, help=f"Resample type: {AudioUtils.res_type_list()}.", default='kaiser_best')
-parser.add_argument("--min_samples", type=int, help="Minimum sample number.", default=16000)
-parser.add_argument("-v", "--verbosity", action="store_true")
-args = parser.parse_args()
+
+# pylint: disable=duplicate-code
+parser.add_argument(
+    "--audio_path",
+    help="Audio file path",
+    required=True
+)
+
+parser.add_argument(
+    "--output_dir",
+    help="Output directory",
+    required=True
+)
+
+parser.add_argument(
+    "--sampling_rate",
+    type=int,
+    help="target sampling rate.",
+    default=16000
+)
+
+parser.add_argument(
+    "--mono",
+    type=bool,
+    help="convert signal to mono.",
+    default=True
+)
+
+parser.add_argument(
+    "--offset",
+    type=float,
+    help="start reading after this time (in seconds).",
+    default=0
+)
+
+parser.add_argument(
+    "--duration",
+    type=float,
+    help="only load up to this much audio (in seconds).",
+    default=0
+)
+
+parser.add_argument(
+    "--res_type",
+    type=GenUtils.res_data_type,
+    help=f"Resample type: {GenUtils.res_type_list()}.",
+    default='kaiser_best'
+)
+
+parser.add_argument(
+    "--min_samples",
+    type=int,
+    help="Minimum sample number.",
+    default=16000
+)
+
+parser.add_argument(
+    "-v",
+    "--verbosity",
+    action="store_true"
+)
+# pylint: enable=duplicate-code
+
+parsed_args = parser.parse_args()
 
 
 def main(args):
-    audio_data, samplerate = AudioUtils.load_resample_audio_clip(args.audio_path,
-                                                args.sampling_rate,
-                                                args.mono,  args.offset,
-                                                args.duration, args.res_type,
-                                                args.min_samples)
-    sf.write(path.join(args.output_dir, path.basename(args.audio_path)), audio_data, samplerate)
+    """
+    Generate the new audio file
+    @param args:    Parsed args
+    """
+    audio_sample = GenUtils.read_audio_file(
+        args.audio_path, args.offset, args.duration
+    )
+
+    resampled_audio = GenUtils.resample_audio_clip(
+        audio_sample, args.sampling_rate, args.mono, args.res_type, args.min_samples
+    )
+
+    sf.write(
+        path.join(args.output_dir, path.basename(args.audio_path)),
+        resampled_audio.data,
+        resampled_audio.sample_rate
+    )
 
 
 if __name__ == '__main__':
-    main(args)
+    main(parsed_args)

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,12 +175,12 @@ TEST_CASE("Common: Slide Index")
     REQUIRE(slider.Index() == 0);
     for (int i = 0; i < 5; i++) {
         slider.Next();
-        REQUIRE(slider.Index() == i);
+        REQUIRE(static_cast<int>(slider.Index()) == i);
     }
 }
 
 
-TEST_CASE("Common: Total strides") 
+TEST_CASE("Common: Total strides")
 {
     std::vector<int> test{1, 2, 3, 4, 5};
 

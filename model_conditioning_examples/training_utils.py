@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +49,8 @@ def create_model():
     """
 
     keras_model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv2D(32, 3, padding='same', input_shape=(28, 28, 1), activation=tf.nn.relu),
+        tf.keras.layers.Conv2D(32, 3, padding='same',
+                               input_shape=(28, 28, 1), activation=tf.nn.relu),
         tf.keras.layers.Conv2D(32, 3, padding='same', activation=tf.nn.relu),
         tf.keras.layers.MaxPool2D(),
         tf.keras.layers.Conv2D(32, 3, padding='same', activation=tf.nn.relu),
