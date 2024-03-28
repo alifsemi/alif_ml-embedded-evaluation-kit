@@ -1,4 +1,4 @@
-;  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+;  SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 ;  SPDX-License-Identifier: Apache-2.0
 ;
 ;  Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,9 +99,13 @@ LOAD_REGION_1       0x70000000                  0x02000000
 
         ; labels
         *.o (labels)
+        Labels.o (+RO-DATA)
 
         ; activation buffers a.k.a tensor arena when memory mode dedicated sram
         *.o (activation_buf_dram)
+
+        ; Temporary solution to move s4 operations here.
+        *s4*.o (+RO +RW +ZI)
     }
 
     ;-----------------------------------------------------

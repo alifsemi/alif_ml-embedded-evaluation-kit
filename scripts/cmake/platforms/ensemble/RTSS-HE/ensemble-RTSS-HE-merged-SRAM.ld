@@ -72,6 +72,8 @@ SECTIONS
     *libalif_ui_api.a:*(.text* .rodata*)
     *libg.a:*printf*(.text* .rodata*)
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM

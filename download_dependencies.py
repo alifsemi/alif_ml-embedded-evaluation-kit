@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-
-# This file was ported to work on Alif Semiconductor Ensemble family of devices.
-
-#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
-#  Use, distribution and modification of this code is permitted under the
-#  terms stated in the Alif Semiconductor Software License Agreement
-#
-#  You should have received a copy of the Alif Semiconductor Software
-#  License Agreement with this file. If not, please write to:
-#  contact@alifsemi.com, or visit: https://alifsemi.com/license
-
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +15,15 @@
 #  limitations under the License.
 
 """This script does effectively the same as "git submodule update --init" command."""
+import json
 import logging
 import sys
 import tarfile
 import tempfile
+import typing
+from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
-from pathlib import Path
 
 TF = "https://github.com/tensorflow/tflite-micro/archive/80cb11b131e9738dc60b2db3e2f1f8e2425ded52.zip"
 CMSIS = "https://github.com/ARM-software/CMSIS_5/archive/a75f01746df18bb5b929dfb8dc6c9407fac3a0f3.zip"
@@ -46,64 +37,81 @@ ETHOS_U_CORE_PLATFORM = "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-plat
 LVGL = "https://github.com/lvgl/lvgl/archive/refs/tags/v8.3.7.zip"
 ARM2D = "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.1.3.zip"
 
+def download(
+        url_file: str,
+        to_path: Path,
+):
+    """
+    Download a file from the specified URL
 
-def download(url_file: str, post_process=None):
+    @param url_file:    The URL of the file to download
+    @param to_path:     The location to download the file to
+    """
     with urlopen(url_file) as response, tempfile.NamedTemporaryFile() as temp:
-        logging.info(f"Downloading {url_file} ...")
+        logging.info("Downloading %s ...", url_file)
         temp.write(response.read())
         temp.seek(0)
-        logging.info(f"Finished downloading {url_file}.")
-        if post_process:
-            post_process(temp)
+        logging.info("Finished downloading %s.", url_file)
+        if url_file.endswith(".tar.gz"):
+            untar(temp.name, to_path)
+        else:
+            unzip(temp, to_path)
 
 
-def unzip(file, to_path):
-    with ZipFile(file) as z:
-        for archive_path in z.infolist():
+def unzip(
+        file: typing.IO[bytes],
+        to_path: Path
+):
+    """
+    Unzip the specified file
+
+    @param file:    The file to unzip
+    @param to_path: The location to extract to
+    """
+    with ZipFile(file) as f:
+        for archive_path in f.infolist():
             archive_path.filename = archive_path.filename[archive_path.filename.find("/") + 1:]
             if archive_path.filename:
-                z.extract(archive_path, to_path)
+                f.extract(archive_path, to_path)
                 target_path = to_path / archive_path.filename
                 attr = archive_path.external_attr >> 16
                 if attr != 0:
                     target_path.chmod(attr)
 
 
-def untar(file, to_path):
-    with tarfile.open(file) as z:
-        for archive_path in z.getmembers():
+def untar(
+        file: bytes,
+        to_path: Path
+):
+    """
+    Untar the specified file
+
+    @param file:    The file to untar
+    @param to_path: The location to extract to
+    """
+    with tarfile.open(file) as f:
+        for archive_path in f.getmembers():
             index = archive_path.name.find("/")
             if index < 0:
                 continue
             archive_path.name = archive_path.name[index + 1:]
             if archive_path.name:
-                z.extract(archive_path, to_path)
+                f.extract(archive_path, to_path)
 
 
 def main(dependencies_path: Path):
+    """
+    Download all dependencies
 
-    download(CMSIS,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis"))
-    download(CMSIS_DSP,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-dsp"))
-    download(CMSIS_NN,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-nn"))
-    download(CMSIS_ENSEMBLE_A,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble-a"))
-    download(CMSIS_ENSEMBLE,
-             lambda file: unzip(file.name, to_path=dependencies_path / "cmsis-ensemble"))
-    download(BOARDLIB,
-             lambda file: unzip(file.name, to_path=dependencies_path / "boardlib"))
-    download(ETHOS_U_CORE_DRIVER,
-             lambda file: untar(file.name, to_path=dependencies_path / "core-driver"))
-    download(ETHOS_U_CORE_PLATFORM,
-             lambda file: untar(file.name, to_path=dependencies_path / "core-platform"))
-    download(TF,
-             lambda file: unzip(file.name, to_path=dependencies_path / "tensorflow"))
-    download(LVGL,
-             lambda file: unzip(file.name, to_path=dependencies_path / "lvgl"))
-    download(ARM2D,
-             lambda file: unzip(file.name, to_path=dependencies_path / "Arm-2D"))
+    @param dependencies_path:   The path to which the dependencies will be downloaded
+    """
+    dependency_urls_path = (
+            Path(__file__).parent.resolve() / "scripts" / "py" / "dependency_urls.json")
+    with open(dependency_urls_path, encoding="utf8") as f:
+        dependency_urls = json.load(f)
+
+    for name, url in dependency_urls.items():
+        download(url, dependencies_path / name)
 
 
 if __name__ == '__main__':
@@ -113,6 +121,6 @@ if __name__ == '__main__':
     download_dir = Path(__file__).parent.resolve() / "dependencies"
 
     if download_dir.is_dir():
-        logging.info(f'{download_dir} exists. Skipping download.')
+        logging.info('%s exists. Skipping download.', download_dir)
     else:
         main(download_dir)

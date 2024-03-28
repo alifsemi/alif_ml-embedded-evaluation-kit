@@ -43,7 +43,6 @@
 #endif
 
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/micro/debug_log.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/schema/schema_utils.h"
@@ -75,5 +74,12 @@ namespace app {
  * @brief Prints the tensor flow version in use to stdout.
  */
 void PrintTensorFlowVersion();
+
+/**
+ * @brief   String logging functionality expected to be defined
+ *          by TensorFlow Lite Micro's error reporter.
+ * @param[in]   s   Pointer to the string.
+ */
+extern "C" void DebugLog(const char* s) __attribute__((__weak__));
 
 #endif /* TENSORFLOW_LITE_MICRO_LOCAL_HPP */
