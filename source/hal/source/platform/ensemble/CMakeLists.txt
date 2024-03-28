@@ -44,7 +44,12 @@ set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
 set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
 set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as they have ITM. so no user-visible option
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
+
+if (TARGET_REVISION STREQUAL "A")
+set(OSPI_FLASH_SUPPORT OFF CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
+else()
 set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
+endif()
 
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
