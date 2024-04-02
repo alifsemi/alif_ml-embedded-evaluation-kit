@@ -1,29 +1,12 @@
-/* Copyright (c) 2021 ALIF SEMICONDUCTOR
-
-   All rights reserved.
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-   - Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   - Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-   - Neither the name of ALIF SEMICONDUCTOR nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
+/* Copyright (C) 2024 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
-   ---------------------------------------------------------------------------*/
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 
 #ifndef UART_TRACELIB_H_
 #define UART_TRACELIB_H_
@@ -34,38 +17,11 @@
 extern "C" {
 #endif
 
-/* For Release build disable printf and semihosting */
-//#define DISABLE_PRINTF
+int uart_init(void);
 
-#ifdef DISABLE_PRINTF
-#define printf tracef
-#undef assert
-#define assert 0
-#endif
+int uart_send(const char* str, uint32_t len);
 
-/**
- * @brief Initializes the trace lib.
- *
- * @param prefix string prepended to every trace message
- *
- * @note Max length is currently 256 - length of the prefix
- */
-int tracelib_init(const char * prefix);
-
-/**
- * @brief write trace to UART
- */
-void tracef(const char * format, ...);
-
-/**
- * @brief Send string to UART, no prefix is prepended.
- *
- * @param str string to send over UART
- * @param len length of the string
- */
-int send_str(const char* str, uint32_t len);
-
-unsigned int GetLine(char *user_input, unsigned int size);
+char uart_getchar(void);
 
 #ifdef __cplusplus
 }

@@ -27,6 +27,10 @@
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "object_detection" "alif_ui")
 
+USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
+    OFF
+    BOOL)
+
 USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
     192
     STRING)

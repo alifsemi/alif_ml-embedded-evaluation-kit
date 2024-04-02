@@ -26,10 +26,12 @@ const tflite::MicroOpResolver& arm::app::Wav2LetterModel::GetOpResolver()
 
 bool arm::app::Wav2LetterModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddReshape();
     this->m_opResolver.AddLeakyRelu();
     this->m_opResolver.AddSoftmax();
+#endif
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

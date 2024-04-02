@@ -16,8 +16,15 @@
  */
 #include "TestModel.hpp"
 #include "log_macros.h"
+#include "MicroMutableAllOpsResolver.hpp"
 
-const tflite::MicroMutableOpResolver<kNumberOperators>& arm::app::TestModel::GetOpResolver()
+const tflite::MicroOpResolver& arm::app::TestModel::GetOpResolver()
 {
-    return this->m_opResolver;
+   return this->m_opResolver;
+}
+
+bool arm::app::TestModel::EnlistOperations()
+{
+   this->m_opResolver = CreateAllOpsResolver();
+   return true;
 }

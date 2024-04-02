@@ -94,7 +94,7 @@ if(POLICY CMP0123)
 endif()
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     23.08.0
+        VERSION     23.11.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 
@@ -234,6 +234,12 @@ foreach(use_case ${USE_CASES})
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
+    # Set model in external flash
+    if (${use_case}_MODEL_IN_EXT_FLASH)
+        target_compile_definitions(${UC_LIB_NAME} PUBLIC
+            MODEL_IN_EXT_FLASH=1)
+    endif()
+
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         log
         arm_math
@@ -251,6 +257,10 @@ foreach(use_case ${USE_CASES})
             add_subdirectory(
                 ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
                 ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
+            if (ETHOS_U_NPU_ASSUMED)
+                target_compile_definitions(${API_TO_USE}_api PRIVATE
+                    ETHOS_U_NPU_ASSUMED=1)
+            endif()
         endif()
 
         # Check if the target now exists
@@ -266,7 +276,8 @@ foreach(use_case ${USE_CASES})
 
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
 
-    platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
+    platform_custom_post_build(TARGET_NAME ${TARGET_NAME}
+                               MODEL_IN_EXT_FLASH ${${use_case}_MODEL_IN_EXT_FLASH})
 
 endforeach()
 

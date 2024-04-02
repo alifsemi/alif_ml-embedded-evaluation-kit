@@ -2125,7 +2125,7 @@
 // <o> UART0 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART0.
 // <i> Default: 0
-#define RTE_UART0_IRQ_PRI       0
+#define RTE_UART0_IRQ_PRI       10
 
 // <o> UART0 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2144,7 +2144,7 @@
 // <o> UART0 DMA IRQ priority <0-255>
 // <i> Defines UART0 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART0_DMA_IRQ_PRI  0
+#define RTE_UART0_DMA_IRQ_PRI  10
 
 #endif //UART0
 
@@ -2178,7 +2178,7 @@
 // <o> UART1 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART1.
 // <i> Default: 0
-#define RTE_UART1_IRQ_PRI       0
+#define RTE_UART1_IRQ_PRI       10
 
 // <o> UART1 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2197,7 +2197,7 @@
 // <o> UART1 DMA IRQ priority <0-255>
 // <i> Defines UART1 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART1_DMA_IRQ_PRI  0
+#define RTE_UART1_DMA_IRQ_PRI  10
 
 #endif //UART1
 
@@ -2231,7 +2231,7 @@
 // <o> UART2 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART2.
 // <i> Default: 0
-#define RTE_UART2_IRQ_PRI       0
+#define RTE_UART2_IRQ_PRI       10
 
 // <o> UART2 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2250,7 +2250,7 @@
 // <o> UART2 DMA IRQ priority <0-255>
 // <i> Defines UART2 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART2_DMA_IRQ_PRI  0
+#define RTE_UART2_DMA_IRQ_PRI  10
 
 #endif //UART2
 
@@ -2284,7 +2284,7 @@
 // <o> UART3 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART3.
 // <i> Default: 0
-#define RTE_UART3_IRQ_PRI       0
+#define RTE_UART3_IRQ_PRI       10
 
 // <o> UART3 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2303,7 +2303,7 @@
 // <o> UART3 DMA IRQ priority <0-255>
 // <i> Defines UART3 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART3_DMA_IRQ_PRI  0
+#define RTE_UART3_DMA_IRQ_PRI  10
 
 #endif //UART3
 
@@ -2337,7 +2337,7 @@
 // <o> UART4 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART4.
 // <i> Default: 0
-#define RTE_UART4_IRQ_PRI       0
+#define RTE_UART4_IRQ_PRI       10
 
 // <o> UART4 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2372,7 +2372,7 @@
 // <o> UART4 DMA IRQ priority <0-255>
 // <i> Defines UART4 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART4_DMA_IRQ_PRI  0
+#define RTE_UART4_DMA_IRQ_PRI  10
 
 #endif //UART4
 
@@ -2406,7 +2406,7 @@
 // <o> UART5 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART5.
 // <i> Default: 0
-#define RTE_UART5_IRQ_PRI       0
+#define RTE_UART5_IRQ_PRI       10
 
 // <o> UART5 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2441,7 +2441,7 @@
 // <o> UART5 DMA IRQ priority <0-255>
 // <i> Defines UART5 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART5_DMA_IRQ_PRI  0
+#define RTE_UART5_DMA_IRQ_PRI  10
 
 #endif //UART5
 
@@ -2475,7 +2475,7 @@
 // <o> UART6 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART6.
 // <i> Default: 0
-#define RTE_UART6_IRQ_PRI       0
+#define RTE_UART6_IRQ_PRI       10
 
 // <o> UART6 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2510,7 +2510,7 @@
 // <o> UART6 DMA IRQ priority <0-255>
 // <i> Defines UART6 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART6_DMA_IRQ_PRI  0
+#define RTE_UART6_DMA_IRQ_PRI  10
 
 #endif //UART6
 
@@ -2544,7 +2544,7 @@
 // <o> UART7 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART7.
 // <i> Default: 0
-#define RTE_UART7_IRQ_PRI       0
+#define RTE_UART7_IRQ_PRI       10
 
 // <o> UART7 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2579,7 +2579,7 @@
 // <o> UART7 DMA IRQ priority <0-255>
 // <i> Defines UART7 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART7_DMA_IRQ_PRI  0
+#define RTE_UART7_DMA_IRQ_PRI  10
 
 #endif //UART7
 
@@ -2615,7 +2615,7 @@
 // <o> LPUART IRQ priority <0-255>
 // <i> Defines Interrupt priority for LPUART.
 // <i> Default: 0
-#define RTE_LPUART_IRQ_PRI       0
+#define RTE_LPUART_IRQ_PRI       10
 
 // <o> LPUART DMA ENABLE
 //    <0=> DISABLE
@@ -2634,7 +2634,7 @@
 // <o> LPUART DMA IRQ priority <0-255>
 // <i> Defines LPUART DMA Interrupt priority
 // <i> Default: 0
-#define RTE_LPUART_DMA_IRQ_PRI   0
+#define RTE_LPUART_DMA_IRQ_PRI   10
 
 #endif //RTE_LPUART
 
@@ -8554,7 +8554,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for PDM
 // <i> Default: ENABLE
-#define RTE_PDM_DMA_ENABLE        1
+#define RTE_PDM_DMA_ENABLE        0
 
 // <o> PDM DMA IRQ priority <0-255>
 // <i> Defines PDM DMA Interrupt priority
@@ -8569,7 +8569,7 @@
 // <o> PDM Fifo watermark <0-7>
 // <i> Defines number of PCM samples in the internal FIFO
 // <i> Default: 5
-#define RTE_PDM_FIFO_WATERMARK   5
+#define RTE_PDM_FIFO_WATERMARK   4
 
 #endif
 // </e> PDM (Pulse density modulation) [Driver_PDM]

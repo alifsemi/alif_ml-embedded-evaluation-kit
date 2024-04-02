@@ -74,6 +74,8 @@ LR_SRAM0 __RO_BASE __RO_SIZE  {                       ; load region size_region
    *libensemble_services.a(+RO)
    *printf*.o (+RO)
    btod.o (+RO)
+   arm_*_s4.o(+RO)
+   arm_*_s16.o(+RO)
    .ANY(+RO-DATA)
 
       * (ifm)                                ; Baked-in inputs

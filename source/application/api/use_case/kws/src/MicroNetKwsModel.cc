@@ -24,12 +24,14 @@ const tflite::MicroOpResolver& arm::app::MicroNetKwsModel::GetOpResolver()
 
 bool arm::app::MicroNetKwsModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddReshape();
     this->m_opResolver.AddAveragePool2D();
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddDepthwiseConv2D();
     this->m_opResolver.AddFullyConnected();
     this->m_opResolver.AddRelu();
+#endif
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

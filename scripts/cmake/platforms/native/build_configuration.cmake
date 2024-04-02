@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,16 +21,15 @@ function(set_platform_global_defaults)
         set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
-
     set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/native" PARENT_SCOPE)
     set(TEST_TPIP ${DOWNLOAD_DEP_DIR}/test)
 
     file(MAKE_DIRECTORY ${TEST_TPIP})
     set(TEST_TPIP_INCLUDE ${TEST_TPIP}/include)
     file(MAKE_DIRECTORY ${TEST_TPIP_INCLUDE})
-    set(CATCH_HEADER_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
-    set(CATCH_HEADER_MD5 dc6bb8ce282ad134476b37275804c44c)
 
+    set(CATCH_HEADER_URL "https://github.com/catchorg/Catch2/releases/download/v2.13.5/catch.hpp")
+    set(CATCH_HEADER_MD5 b43c586fe617aefdee3e480e9fa8f370)
 
     include(FetchContent)
     FetchContent_Declare(catch2-header-download
@@ -116,6 +115,6 @@ function(platform_custom_post_build)
         target_compile_definitions(${TEST_TARGET_NAME} PRIVATE
                 "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}"
                 TESTS)
-        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME} -r junit -o ${TEST_TARGET_NAME}.xml)
+        add_test(NAME "${use_case}-tests" COMMAND ${TEST_TARGET_NAME})
     endif ()
 endfunction()

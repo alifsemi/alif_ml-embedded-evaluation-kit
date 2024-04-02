@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
 
-/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -41,7 +41,8 @@
 #include "RTE_Components.h"
 #include "Driver_HWSEM.h"
 #include "board.h"
-#include "uart_tracelib.h"
+#include "tracelib.h"
+#include "ospi_flash.h"
 #include "services_lib_api.h"
 #include "services_main.h"
 
@@ -106,14 +107,21 @@ int platform_init(void)
         printf("Failed to initialise system tick config\n");
     }
 
+#ifndef USE_SEMIHOSTING
     /* Forces retarget code to be included in build */
     extern void _clock_init(void);
     _clock_init();
+#endif
+
+    tracelib_init(NULL);
+    fault_dump_enable(true);
 
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
 
     HWSEMdrv->Initialize(NULL);
+
+    int err = 0;
     /* Only 1 core will do the pinmux */
 #if LP_PERIPHERAL_BASE == 0x70000000 // Old core, so old CMSIS pack
     if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
@@ -125,6 +133,15 @@ int platform_init(void)
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
+#if RTE_Drivers_OSPI /* OSPI flash support not added for revision A */
+#ifdef OSPI_FLASH_SUPPORT /* OSPI drivers compiled in, check if OSPI flash support is enabled */
+        err = ospi_flash_init();
+        if (err) {
+            printf_err("Failed initializing OSPI flash. err=%d\n", err);
+        }
+#endif
+#endif
+
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
         HWSEMdrv->Lock();
     } else {
@@ -134,13 +151,7 @@ int platform_init(void)
 
     HWSEMdrv->Uninitialize();
 
-    tracelib_init(NULL);
-
-    fault_dump_enable(true);
-
-    int err = 0;
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
-
     info("%s: complete\n", __FUNCTION__);
 
 #if defined(ARM_NPU)
@@ -151,6 +162,7 @@ int platform_init(void)
     if (0 != (state = arm_ethosu_npu_init())) {
         return state;
     }
+    NVIC_SetPriority((IRQn_Type)ETHOS_U_IRQN, 0x60);
 
 #endif /* ARM_NPU */
 
@@ -319,39 +331,46 @@ bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 
 void MPU_Load_Regions(void)
 {
+
+/* Define the memory attribute index with the below properties */
+#define MEMATTRIDX_NORMAL_WT_RA_TRANSIENT    0
+#define MEMATTRIDX_DEVICE_nGnRE              1
+#define MEMATTRIDX_NORMAL_WB_RA_WA           2
+#define MEMATTRIDX_NORMAL_NON_CACHEABLE      3
+#define MEMATTRIDX_DEVICE_nGnRnE             7
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.
      */
     static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
     { // ITCM (alias) at 01000000, SRAM0 at 02000000, SRAM1 at 08000000
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, 2)
+    .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
     },
 #if LP_PERIPHERAL_BASE != 0x70000000
     { // SSE-700 Host Peripheral Region (1A000000)
     .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, 0)
+    .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
 #endif
     { // DTCM (20000000)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, 2)
+    .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
     },
     { // Combined RAM (30000000) - firewall translation with some system packages
     .RBAR = ARM_MPU_RBAR(0x30000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XN
-    .RLAR = ARM_MPU_RLAR(0x3067FFFF, 2)
+    .RLAR = ARM_MPU_RLAR(0x3067FFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
     },
     { // General peripherals
     .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, 0)
+    .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
     { // Other core's DTCM
 #if defined(M55_HE)
     .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, 1)  // HP TCM (SRAM2 + SRAM3)
+    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HP TCM (SRAM2 + SRAM3)
 #elif defined(M55_HP)
     .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, 1)  // HE TCM (SRAM4 + SRAM5)
+    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HE TCM (SRAM4 + SRAM5)
 #else
   #error device not specified!
 #endif
@@ -359,32 +378,56 @@ void MPU_Load_Regions(void)
 #if LP_PERIPHERAL_BASE == 0x70000000
     { // LP- Peripheral & PINMUX Regions (70000000)
     .RBAR = ARM_MPU_RBAR(0x70000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x71FFFFFF, 0)
+    .RLAR = ARM_MPU_RLAR(0x71FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
 #endif
     { // MRAM (80000000)
     .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
-    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, 1)
+    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
     },
+#ifdef OSPI_FLASH_SUPPORT
+    {   /* OSPI Regs - 16MB : RO-0, NP-0, XN-1  */
+    .RBAR = ARM_MPU_RBAR(0x83000000, ARM_MPU_SH_NON, 0, 0, 1),
+    .RLAR = ARM_MPU_RLAR(0x83FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+    },
+    {   /* OSPI1 XIP(eg:flash) - 512MB */
+    .RBAR = ARM_MPU_RBAR(0xC0000000, ARM_MPU_SH_NON, 1, 1, 0),
+    .RLAR = ARM_MPU_RLAR(0xDFFFFFFF, MEMATTRIDX_NORMAL_NON_CACHEABLE)
+    },
+#endif
     { // System PPB
     .RBAR = ARM_MPU_RBAR(0xE0000000, ARM_MPU_SH_NON, 1, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0xE00FFFFF, 7)
+    .RLAR = ARM_MPU_RLAR(0xE00FFFFF, MEMATTRIDX_DEVICE_nGnRnE)
     },
     };
 
-    /* Define the possible Attribute regions */
-    ARM_MPU_SetMemAttr(0, ARM_MPU_ATTR(   /* Attr0, Device Memory */
-                          ARM_MPU_ATTR_DEVICE,
-                          ARM_MPU_ATTR_DEVICE_nGnRE));
-    ARM_MPU_SetMemAttr(1, ARM_MPU_ATTR(   /* Attr1, Normal Memory, Write-Back, Read-Write-Allocate */
-                          ARM_MPU_ATTR_MEMORY_(1,1,1,1),
-                          ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
-    ARM_MPU_SetMemAttr(2, ARM_MPU_ATTR(   /* Attr2, Normal Memory, Transient, Write Through, Read Allocate */
-                          ARM_MPU_ATTR_MEMORY_(0,0,1,0),
-                          ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
-    ARM_MPU_SetMemAttr(7, ARM_MPU_ATTR(   /* Attr7, Device Memory nGnRnE*/
-                          ARM_MPU_ATTR_DEVICE,
-                          ARM_MPU_ATTR_DEVICE_nGnRnE));
+    /* Mem Attribute for 0th index */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_NORMAL_WT_RA_TRANSIENT, ARM_MPU_ATTR(
+                                         /* NT=0, WB=0, RA=1, WA=0 */
+                                         ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                                         ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+
+    /* Mem Attribute for 1st index */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_DEVICE_nGnRE, ARM_MPU_ATTR(
+                                         /* Device Memory */
+                                         ARM_MPU_ATTR_DEVICE,
+                                         ARM_MPU_ATTR_DEVICE_nGnRE));
+
+    /* Mem Attribute for 2nd index */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_NORMAL_WB_RA_WA, ARM_MPU_ATTR(
+                                         /* NT=1, WB=1, RA=1, WA=1 */
+                                         ARM_MPU_ATTR_MEMORY_(1,1,1,1),
+                                         ARM_MPU_ATTR_MEMORY_(1,1,1,1)));
+
+    /* Mem Attribute for 3th index */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_NORMAL_NON_CACHEABLE, ARM_MPU_ATTR(
+                                         ARM_MPU_ATTR_NON_CACHEABLE,
+                                         ARM_MPU_ATTR_NON_CACHEABLE));
+
+
+    ARM_MPU_SetMemAttr(MEMATTRIDX_DEVICE_nGnRnE, ARM_MPU_ATTR(   /* Attr7, Device Memory nGnRnE*/
+                                         ARM_MPU_ATTR_DEVICE,
+                                         ARM_MPU_ATTR_DEVICE_nGnRnE));
 
     /* Load the regions from the table */
     ARM_MPU_Load(0, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));

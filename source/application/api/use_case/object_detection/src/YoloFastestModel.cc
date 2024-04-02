@@ -25,6 +25,7 @@ const tflite::MicroOpResolver& arm::app::YoloFastestModel::GetOpResolver()
 
 bool arm::app::YoloFastestModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddDepthwiseConv2D();
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddAdd();
@@ -33,6 +34,7 @@ bool arm::app::YoloFastestModel::EnlistOperations()
     this->m_opResolver.AddPad();
     this->m_opResolver.AddMaxPool2D();
     this->m_opResolver.AddConcatenation();
+#endif
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

@@ -28,10 +28,10 @@
 #----------------------------------------------------------------------------
 
 function(set_platform_global_defaults)
-    set(TARGET_BOARD "DevKit" CACHE STRING "Board type")
+    set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard" "AppKit_Alpha1" "AppKit_Alpha2")
 
-    set(TARGET_REVISION "A" CACHE STRING "Chip revision")
+    set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
 
     if (TARGET_REVISION STREQUAL "A")
@@ -84,7 +84,7 @@ function(set_platform_global_defaults)
 endfunction()
 
 function(platform_custom_post_build)
-    set(oneValueArgs TARGET_NAME)
+    set(oneValueArgs TARGET_NAME MODEL_IN_EXT_FLASH)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
@@ -108,11 +108,16 @@ function(platform_custom_post_build)
     set(LINKER_SECTION_TAGS     "*.at_mram")
     set(LINKER_OUTPUT_BIN_TAGS  "mram.bin")
 
+    # Create the ospi flash binaries if enabled
+    if(PARSED_MODEL_IN_EXT_FLASH)
+        list(APPEND LINKER_SECTION_TAGS "*.at_ext_flash")
+        list(APPEND LINKER_OUTPUT_BIN_TAGS "ext_flash.bin")
+    endif()
+
     add_bin_generation_command(
             TARGET_NAME ${PARSED_TARGET_NAME}
             OUTPUT_DIR  ${SECTORS_BIN_DIR}
             AXF_PATH    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf
             SECTION_PATTERNS    "${LINKER_SECTION_TAGS}"
             OUTPUT_BIN_NAMES    "${LINKER_OUTPUT_BIN_TAGS}")
-
 endfunction()

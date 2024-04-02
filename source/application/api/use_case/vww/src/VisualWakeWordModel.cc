@@ -24,12 +24,14 @@ const tflite::MicroOpResolver& arm::app::VisualWakeWordModel::GetOpResolver()
 
 bool arm::app::VisualWakeWordModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddDepthwiseConv2D();
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddAveragePool2D();
     this->m_opResolver.AddReshape();
-    this->m_opResolver.AddPad();
     this->m_opResolver.AddAdd();
+#endif
+    this->m_opResolver.AddPad();
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

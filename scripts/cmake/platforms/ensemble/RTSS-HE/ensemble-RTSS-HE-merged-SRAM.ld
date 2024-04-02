@@ -31,6 +31,8 @@ __STACK_SIZE = 0x00001000;
 __HEAP_SIZE  = 0x00006000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
+__OSPI_FLASH_BASE = 0xC0000000;
+__OSPI_FLASH_SIZE = 0x02000000;
 
 MEMORY
 {
@@ -38,6 +40,7 @@ MEMORY
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
   SRAM  (rwx) : ORIGIN = 0x30000000, LENGTH = 0x00680000 // Combined SRAM0+1 view from custom system package
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
 
 ENTRY(Reset_Handler)
@@ -69,6 +72,8 @@ SECTIONS
     *libalif_ui_api.a:*(.text* .rodata*)
     *libg.a:*printf*(.text* .rodata*)
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
@@ -226,4 +231,9 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > MRAM
+
+  .readonly.at_ext_flash : ALIGN(8)
+  {
+    *(nn_model_ext_flash)
+  } > OSPI_FLASH
 }

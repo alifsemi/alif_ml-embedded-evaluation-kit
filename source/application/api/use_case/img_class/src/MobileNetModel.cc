@@ -24,12 +24,14 @@ const tflite::MicroOpResolver& arm::app::MobileNetModel::GetOpResolver()
 
 bool arm::app::MobileNetModel::EnlistOperations()
 {
+#ifndef ETHOS_U_NPU_ASSUMED
     this->m_opResolver.AddDepthwiseConv2D();
     this->m_opResolver.AddConv2D();
     this->m_opResolver.AddAveragePool2D();
     this->m_opResolver.AddAdd();
     this->m_opResolver.AddReshape();
     this->m_opResolver.AddSoftmax();
+#endif
 
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
         info("Added %s support to op resolver\n",

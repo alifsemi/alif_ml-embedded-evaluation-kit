@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
 
-/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2023-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -155,7 +155,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         std::vector<kws::KwsResult> infResults;
         static bool audio_inited;
         if (!audio_inited) {
-            int err = hal_audio_init(audioRate, 32);
+            int err = hal_audio_init(audioRate);
             if (err) {
                 printf_err("hal_audio_init failed with error: %d\n", err);
                 return false;

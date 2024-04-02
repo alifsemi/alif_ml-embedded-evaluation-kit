@@ -71,6 +71,9 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *libalif_ui_api.a(+RO)
    *printf*.o (+RO)
    btod.o (+RO)
+   arm_*_s4.o(+RO)
+   arm_*_s16.o(+RO)
+
    .ANY(+RO-DATA)
   }
 

@@ -27,10 +27,12 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00001000;
+__STACK_SIZE = 0x00001800;
 __HEAP_SIZE  = 0x00006000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
+__OSPI_FLASH_BASE = 0xC0000000;
+__OSPI_FLASH_SIZE = 0x02000000;
 
 MEMORY
 {
@@ -39,6 +41,7 @@ MEMORY
   SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
   SRAM1 (rwx) : ORIGIN = 0x08000000, LENGTH = 0x00280000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
 
 ENTRY(Reset_Handler)
@@ -70,6 +73,8 @@ SECTIONS
     *libalif_ui_api.a:*(.text* .rodata*)
     *libg.a:*printf*(.text* .rodata*)
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
+    *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
@@ -110,7 +115,7 @@ SECTIONS
 
   .text.itcm.at_mram : ALIGN(8)
   {
-    /* ITCM has non-startup code, CMSIS-DSP tables, audio record buffer and RAM vectors */
+    /* ITCM has non-startup code, except for non-fast LVGL, and RAM vectors */
     *(.text*)
     *(fast_code)
   } > ITCM AT> MRAM
@@ -121,7 +126,6 @@ SECTIONS
     *(vtable)
     *(.data)
     *(.data*)
-    *arm_common_tables.c.obj(.data* .rodata*)
 
     KEEP(*(.jcr*))
 
@@ -226,11 +230,15 @@ SECTIONS
     *(.dtors)
 
     *(.rodata*)
-
     *(nn_model)
     *(labels)
     *(ifm)
 
     KEEP(*(.eh_frame*))
   } > MRAM
+
+  .readonly.at_ext_flash : ALIGN(8)
+  {
+    *(nn_model_ext_flash)
+  } > OSPI_FLASH
 }

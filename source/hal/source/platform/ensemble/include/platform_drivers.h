@@ -35,7 +35,7 @@
 /* Platform components */
 #include "RTE_Components.h" /* For CPU related defintiions */
 #include "timer_ensemble.h"     /* Timer functions. */
-#include "uart_tracelib.h"
+#include "tracelib.h"
 
 #ifdef __cplusplus
 extern "C" {
