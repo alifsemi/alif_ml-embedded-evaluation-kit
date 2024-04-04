@@ -2,7 +2,7 @@
 
 This repo contains different ML models that can be built to run on the Alif Beta AI/ML AppKit development board. It is based on the ARM ML embedded evaluation Kit.
 
-For instructions on setting up the build environment and creating loadable images, please refer to the PDF file in the root directory [AUGD0011 ML Embedded Evaluation Kit v3.0.pdf](https://github.com/alifsemi/ml-embedded-evaluation-kit_DEV/blob/alif_main/AUGD0011%20ML%20Embedded%20Evaluation%20Kit%20v3.0.pdf).
+For instructions on setting up the build environment and creating loadable images, please refer to the PDF file in the root directory [AUGD0011 ML Embedded Evaluation Kit v3.0.pdf](https://github.com/alifsemi/alif_ml-embedded-evaluation-kit/blob/main/AUGD0011%20ML%20Embedded%20Evaluation%20Kit%20v3.0.pdf).
 
 The instructions and build by default is for Generation 2 device AppKit. To build for Generation 1 devices please use the _gen1_ branch and make sure TARGET_REVISION=A.
 
