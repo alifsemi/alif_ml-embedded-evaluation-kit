@@ -175,13 +175,16 @@ The build parameters are:
 
 - `TARGET_PLATFORM`: The target platform to execute the application on:
   - `mps3` (default)
+  - `mps4`
   - `native`
   - `simple_platform`
 
-- `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target. For
-  both, the MPS3 FVP and the MPS3 FPGA, this must be left to the default value of SSE-300:
-  - `sse-300` (default - [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300))
-  - `sse-310` (The FVP is available via Arm Virtual Hardware (AVH) hosted on AWS)
+- `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target.
+  For `mps3` target these sub-systems are available:
+  - `sse-300`: this is the default, see [Arm® Corstone™-300](https://developer.arm.com/Processors/Corstone-300)
+  - `sse-310`: See [Arm® Corstone™-310](https://developer.arm.com/Processors/Corstone-310)
+  For `mps4` target:
+  - `sse-315`: See [Arm® Corstone™-315](https://developer.arm.com/Processors/Corstone-315)
 
 - `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the default toolchain file used for the
   build. All the valid toolchain files are located in the scripts directory. For example, see:

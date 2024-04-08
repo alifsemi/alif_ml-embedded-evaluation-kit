@@ -42,12 +42,15 @@ Before starting the setup process, please make sure that you have:
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
   - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package (`AN555`). See
-    <https://developer.arm.com/downloads/-/download-fpga-images>. You
+    [Download FPGA Images](https://developer.arm.com/downloads/-/download-fpga-images). You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
     application.
   - Both `Arm® Corstone™-300` and `Arm® Corstone™-310` based FVPs for MPS3 are available from:
-    <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>
-    and as Arm® Virtual Hardware: <https://www.arm.com/products/development-tools/simulation/virtual-hardware>
+    [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+    and as [Arm® Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware)
+- An Arm® MPS4 `Fixed Virtual Platform` binary to try the latest `Arm® Corstone™-315` reference platform. This can also
+  be downloaded from [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+  page.
 
 > **Note:**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
 > notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built

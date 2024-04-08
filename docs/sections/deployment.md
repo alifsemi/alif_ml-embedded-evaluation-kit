@@ -2,10 +2,10 @@
 
 - [Deployment](./deployment.md#deployment)
   - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
-    - [Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
-    - [Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3)
+    - [Installing an FVP](./deployment.md#installing-an-fvp)
+    - [Deploying on an FVP](./deployment.md#deploying-on-an-fvp)
     - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
-  - [MPS3 board](./deployment.md#mps3-board)
+  - [MPS3 FPGA board](./deployment.md#mps3-fpga-board)
     - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
     - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
 
@@ -27,22 +27,23 @@ Please ensure that you download the correct archive from the list under Arm® Co
 - Emulates MPS3 board and *not* for MPS2 FPGA board,
 - Contains support for Arm® Ethos™-U55 and Ethos™-U65 processors.
 
-### Setting up the MPS3 Arm Corstone-300 FVP
+### Installing an FVP
 
-To install the FVP:
+To install an FVP:
 
-- Unpack the archive.
+- Unpack the archive downloaded from [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-- Run the installation script in the extracted package:
-
-    `./FVP_Corstone_SSE-300.sh`
+- Run the installation script in the extracted package. For example, `Arm® Corstone™-300` package will have
+  `FVP_Corstone_SSE-300.sh`.
 
 - Follow the instructions to install the FVP to your required location.
 
-### Deploying on an FVP emulating MPS3
+> **Note**: The installation process is the same for other FVPs (Arm® Corstone™-310 and Corstone™-315) too.
+
+### Deploying on an FVP
 
 This section assumes that the FVP has been installed (see
-[Setting up the MPS3 Arm Corstone-300 FVP](./deployment.md#setting-up-the-mps3-arm-corstone-300-fvp))
+[Installing an FVP](./deployment.md#installing-an-fvp))
 to the home directory of the user: `~/FVP_Corstone_SSE-300`. The installation, typically, has the
 executable under `~/FVP_Corstone_SSE-300/model/<OS>_<compiler-version>/` directory. For the example
 below, we assume it is: `~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4`.
@@ -51,7 +52,7 @@ For Arm Virtual Hardware, the installation paths are different (see Arm Virtual 
 [Useful Links](./arm_virtual_hardware.md#useful-links) section).
 
 > **NOTE**: The commandline arguments for the FVP mentioned below are valid for FVPs (and AVH) for
-> both Arm® Corstone™-300 and Corstone™-310.
+> Arm® Corstone™-300, Corstone™-310 and Corstone™-315.
 
 To run a use-case on the FVP, from the [Build directory](../sections/building.md#create-a-build-directory):
 
@@ -100,13 +101,21 @@ The FVP supports many command-line parameters, such as:
 
     The number signifies the 8x8 MACs that are performed per cycle-count and that are available on
     the hardware.
-  - `cpu0.CFGITCMSZ`: The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB
-  - `cpu0.CFGDTCMSZ`: The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB
-  - `mps3_board.telnetterminal0.start_telnet`: Starts the telnet session if nothing connected.
-  - `mps3_board.uart0.out_file`: Sets the output file to hold the data written by the UART. Use `'-'` to send all output
-    to `stdout` and is empty by default).
-  - `mps3_board.uart0.shutdown_on_eot`: Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.
-  - `mps3_board.visualisation.disable-visualisation`: Enables, or disables, visualization and is disabled by default.
+  - For `MPS3` based FVPs:
+    - `cpu0.CFGITCMSZ`: The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB
+    - `cpu0.CFGDTCMSZ`: The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB
+    - `mps3_board.telnetterminal0.start_telnet`: Starts the telnet session if nothing connected.
+    - `mps3_board.uart0.out_file`: Sets the output file to hold the data written by the UART. Use `'-'` to send all output
+      to `stdout` and is empty by default).
+    - `mps3_board.uart0.shutdown_on_eot`: Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.
+    - `mps3_board.visualisation.disable-visualisation`: Enables, or disables, visualization and is disabled by default.
+  - For `MPS4` based FVPs, the equivalent parameters for the list above are:
+    - `mps4_board.subsystem.cpu0.CFGITCMSZ`
+    - `mps4_board.subsystem.cpu0.CFGDTCMSZ`
+    - `mps4_board.telnetterminal0.start_telnet`
+    - `mps4_board.uart0.out_file`
+    - `mps4_board.uart0.shutdown_on_eot`
+    - `mps4_board.visualisation.disable-visualisation` and `vis_hdlcd.disable_visualisation`.
 
   To start the model in `128` mode for *Ethos-U55*:
 
@@ -136,8 +145,8 @@ The FVP supports many command-line parameters, such as:
 
 ### Running the FVP without the UI
 
-If there is a need to run the FVP without the UI (e.g running the FVP inside of a docker container),
-it can be done as follows:
+If there is a need to run the FVP without the UI (e.g. running the FVP inside a Docker container),
+it can be done as follows.
 
 Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0`
 to the command line arguments when starting the FVP. For example:
@@ -148,15 +157,29 @@ FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
     -C mps3_board.telnetterminal0.start_telnet=0 \
     ./bin/mps3-sse-300/ethos-u-<use_case>.axf
    ```
+For an `MPS4` FVP, the arguments are similar. For example:
+```commandline
+FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
+    -C mps4_board.visualisation.disable-visualisation=1 \
+    -C vis_hdlcd.disable_visualisation=1 \
+    -C mps4_board.telnetterminal0.start_telnet=0 \
+    ./bin/mps4-sse-315/ethos-u-<use_case>.axf
+   ```
 
-Once the FVP reports waiting on telnet connections, connect to the first serverport from another terminal.
+Once the FVP reports waiting on telnet connections, connect to the first server port from another terminal.
 Assuming the FVP has the telnet server running at the default port 5000, connect to it by:
 
 ```commandline
 telnet localhost 5000
 ```
 
-## MPS3 board
+For applications that are configured with `USE_SINGLE_INPUT` CMake option, there is no interaction on telnet needed and
+the application output can be directed to standard output by using an FVP option:
+
+- `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
+- `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
+
+## MPS3 FPGA board
 
 > **Note:**  Before proceeding, make sure that you have the MPS3 board powered on, and a USB A to B cable connected
 > between your machine and the MPS3. The connector on the MPS3 is marked as "Debug USB".
