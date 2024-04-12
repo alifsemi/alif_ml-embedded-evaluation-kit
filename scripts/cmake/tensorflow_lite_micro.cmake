@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,8 +70,8 @@ else()
 
     if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
-        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR  "ethos_u")
-        set(ETHOS_U_NPU_ID "u55")  # Currently only u55 is supported by TFLite Micro.
+        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR      "ethos_u")
+        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH "u55")  # Currently only u55 is supported by TFLite Micro.
     endif()
 
     set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")
@@ -114,7 +115,7 @@ add_custom_target(tensorflow_build ALL
         CMSIS_PATH=${CMSIS_SRC_PATH}
         CMSIS_NN_PATH=${CMSIS_NN_SRC_PATH}
         # Conditional arguments
-        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${ETHOS_U_NPU_ID}>
+        $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_ARCH=${TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_PATH=${ETHOS_U_NPU_DRIVER_SRC_PATH}>
         $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:ETHOSU_DRIVER_LIBS=$<TARGET_FILE:ethosu_core_driver>>
 

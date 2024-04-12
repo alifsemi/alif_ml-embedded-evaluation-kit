@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,8 @@
 ##############################################################################
 # Helper function to provide user option and corresponding default value
 ##############################################################################
+include_guard()
+
 function(USER_OPTION name description default type)
 
     if (${type} STREQUAL PATH_OR_FILE)
@@ -180,7 +183,7 @@ function(add_platform_build_configuration)
     set(oneValueArgs TARGET_PLATFORM)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
     message(STATUS "Searching for ${PARSED_TARGET_PLATFORM} build configuration")
-    list(APPEND PLATFORM_BUILD_CONFIG_DIRS ${CMAKE_SCRIPTS_DIR}/platforms)
+    list(APPEND PLATFORM_BUILD_CONFIG_DIRS ${SCRIPTS_DIR}/cmake/platforms)
 
     FIND_PATH(PLATFORM_BUILD_CONFIG
             NAMES build_configuration.cmake

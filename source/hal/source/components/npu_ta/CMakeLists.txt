@@ -90,5 +90,5 @@ target_link_libraries(${ETHOS_U_NPU_TA_COMPONENT} PUBLIC
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${ETHOS_U_NPU_TA_COMPONENT})
+message(STATUS "Library                  : " ${ETHOS_U_NPU_TA_COMPONENT})
 message(STATUS "*******************************************************")

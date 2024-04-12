@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +38,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SCRIPTS_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
-set(CMAKE_SCRIPTS_DIR   ${SCRIPTS_DIR}/cmake)
-set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
+set(CMAKE_TOOLCHAIN_DIR ${SCRIPTS_DIR}/cmake/toolchains)
 set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
 set(DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
 set(CORE_PLATFORM_DIR   ${DEPENDENCY_ROOT_DIR}/core-platform)
@@ -46,8 +46,12 @@ set(CORE_PLATFORM_DIR   ${DEPENDENCY_ROOT_DIR}/core-platform)
 set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
                         CACHE PATH "Resources directory")
 set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/source/platform)
+list(APPEND CMAKE_MODULE_PATH
+    "${SCRIPTS_DIR}/cmake"
+    "${SCRIPTS_DIR}/cmake/configuration_options"
+    "${SCRIPTS_DIR}/cmake/timing_adapter")
 
-include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
+include(source_gen_utils)
 
 enable_testing()
 
@@ -58,7 +62,8 @@ else()
     message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
 endif()
 
-include(${CMAKE_SCRIPTS_DIR}/common_user_options.cmake)
+# Include common configuration options
+include(common_opts)
 
 # Check if the resources_downloaded needs update
 check_update_public_resources(${RESOURCES_DIR})
@@ -73,8 +78,6 @@ message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 assert_defined(LOG_LEVEL)
 assert_defined(TENSORFLOW_SRC_PATH)
 assert_defined(TARGET_PLATFORM)
-assert_defined(TARGET_SUBSYSTEM)
-assert_defined(ETHOS_U_NPU_ENABLED)
 assert_defined(USE_CASE_BUILD)
 assert_defined(CPU_PROFILE_ENABLED)
 assert_defined(CMAKE_TOOLCHAIN_FILE)
@@ -114,7 +117,7 @@ endif ()
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
 
 # Include the tensorflow build target
-include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
+include(tensorflow_lite_micro)
 
 # Add the common API library target (tensorflow-lite-micro target is needed)
 add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common)

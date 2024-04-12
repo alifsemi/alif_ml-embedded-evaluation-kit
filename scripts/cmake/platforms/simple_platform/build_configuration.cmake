@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,11 @@
 
 function(set_platform_global_defaults)
     message(STATUS "Platform: Simple platform with minimal peripherals")
+
+    # Include NPU and CMSIS configuration options
+    include(npu_opts)
+    include(cmsis_opts)
+
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
@@ -41,9 +47,9 @@ function(platform_custom_post_build)
 
     # Add link options for the linker script to be used:
     add_linker_script(
-        ${PARSED_TARGET_NAME}          # Target
-        ${CMAKE_SCRIPTS_DIR}/platforms/simple_platform    # Directory path
-        ${LINKER_SCRIPT_NAME})  # Name of the file without suffix
+        ${PARSED_TARGET_NAME}               # Target
+        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}  # Directory path
+        ${LINKER_SCRIPT_NAME})              # Name of the file without suffix
 
     add_target_map_file(
         ${PARSED_TARGET_NAME}

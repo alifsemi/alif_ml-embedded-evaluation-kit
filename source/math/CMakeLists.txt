@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,11 +35,11 @@ target_include_directories(arm_math PUBLIC include)
 target_link_libraries(arm_math PRIVATE log)
 
 if (${CMAKE_CROSSCOMPILING})
-    include(${CMAKE_SCRIPTS_DIR}/cmsis-dsp.cmake)
+    include(cmsis-dsp)
     target_link_libraries(arm_math PUBLIC cmsis-dsp)
 endif ()
 
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " arm_math)
-message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "Library                    : " arm_math)
+message(STATUS "CMAKE_SYSTEM_PROCESSOR     : " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "*******************************************************")

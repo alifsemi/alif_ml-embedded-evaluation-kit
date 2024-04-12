@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,21 @@
 
 function(set_platform_global_defaults)
     message(STATUS "Platform: MPS3 FPGA Prototyping Board or FVP")
+
+    # Set default subsystem for MPS3:
+    USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or sse-310"
+        sse-300
+        STRING)
+
+    # Default NPU for SSE-300 target:
+    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
+        "U55"
+        STRING)
+
+    # Include NPU, FVP tests and CMSIS configuration options
+    include(npu_opts)
+    include(fvp_test_opts)
+    include(cmsis_opts)
 
     if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
         if (TARGET_SUBSYSTEM STREQUAL sse-300)
@@ -61,13 +77,13 @@ function(platform_custom_post_build)
 
     # Add link options for the linker script to be used:
     add_linker_script(
-            ${PARSED_TARGET_NAME}          # Target
-            ${CMAKE_SCRIPTS_DIR}/platforms/mps3/${TARGET_SUBSYSTEM}    # Directory path
-            ${LINKER_SCRIPT_NAME})  # Name of the file without suffix
+        ${PARSED_TARGET_NAME}                                   # Target
+        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}  # Directory path
+        ${LINKER_SCRIPT_NAME})                                  # Name of the file without suffix
 
     add_target_map_file(
-            ${PARSED_TARGET_NAME}
-            ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.map)
+        ${PARSED_TARGET_NAME}
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.map)
 
     set(SECTORS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sectors)
     set(SECTORS_BIN_DIR ${SECTORS_DIR}/${use_case})

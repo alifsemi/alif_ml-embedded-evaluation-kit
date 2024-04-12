@@ -536,8 +536,8 @@ However, for clarity, here is the full list of available functions:
 
 ## Reading user input from console
 
-The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to 
-expose a function called `hal_get_user_input`. 
+The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to
+expose a function called `hal_get_user_input`.
 
 ```C++
 char ch_input[128];
@@ -774,9 +774,9 @@ function like this:
 
 ```cmake
     add_linker_script(
-            ${PARSED_TARGET_NAME}                  # Target
-            ${CMAKE_SCRIPTS_DIR}/platforms/mps3    # linker scripts directory path
-            ${LINKER_SCRIPT_NAME})                 # Name of the file without suffix
+            ${PARSED_TARGET_NAME}                                   # Target
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}  # Linker scripts directory path
+            ${LINKER_SCRIPT_NAME})                                  # Name of the file without suffix
 ```
 
 Please see existing platforms sources and build scripts for more details.
