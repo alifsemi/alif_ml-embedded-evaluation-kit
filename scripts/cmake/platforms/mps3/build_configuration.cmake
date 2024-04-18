@@ -17,7 +17,7 @@
 #----------------------------------------------------------------------------
 
 function(set_platform_global_defaults)
-    message(STATUS "Platform: MPS3 FPGA Prototyping Board or FVP")
+    message(STATUS "Platform: Arm MPS3 FPGA Prototyping Board or FVP")
 
     # Set default subsystem for MPS3:
     USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-300 or sse-310"

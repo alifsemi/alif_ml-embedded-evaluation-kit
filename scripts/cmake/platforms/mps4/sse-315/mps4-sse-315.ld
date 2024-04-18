@@ -22,9 +22,9 @@ __HEAP_SIZE  = 0x000C0000;
 MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x10000000, LENGTH = 0x00008000
-  DTCM  (rwx) : ORIGIN = 0x30000000, LENGTH = 0x00008000
   BOOT  (rx)  : ORIGIN = 0x11000000, LENGTH = 0x00010000
   BRAM  (rwx) : ORIGIN = 0x12000000, LENGTH = 0x00200000
+  DTCM  (rwx) : ORIGIN = 0x30000000, LENGTH = 0x00008000
   SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00400000
   DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
 
@@ -70,9 +70,13 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-  .text.at_bram :
+  .text.at_boot :
   {
     KEEP(*(.vectors))
+  } > BOOT AT > BOOT
+
+  .text.at_bram :
+  {
     *(.text*)
 
     KEEP(*(.init))

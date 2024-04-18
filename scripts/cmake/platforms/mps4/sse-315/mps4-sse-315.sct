@@ -25,30 +25,41 @@
 ;
 
 ;---------------------------------------------------------
-; First load region (FPGA SRAM) 2MiB region
-; NOTE: The default INITSVTOR is 0x11000000 and not the
-; ITCM (32K) which we do not use for any code, but
-; could potentially put some critical code in there
-; if we need to.
-; @TODO: The memory pointed to by the INITSVTOR is a 64
-;        kiB location for boot code which we should use.
+; First load region (SRAM) 64KiB boot region
 ;---------------------------------------------------------
-LOAD_REGION_0       0x12000000                  0x00200000
+LOAD_REGION_0       0x11000000                  0x00010000
 {
     ;-----------------------------------------------------
-    ; First 640K of FGPA SRAM.
+    ; 64K boot ROM. Our vector table also
+    ; resides here as the default INITSVTOR is 0x11000000.
+    ; We currently do not use the ITCM for any code, but
+    ; could potentially put some critical code in there
+    ; if we need to.
     ;-----------------------------------------------------
-    bram.bin        0x12000000                  0x000A0000
+    boot.bin        0x11000000                  0x00010000
     {
-        *.o (RESET, +First)
-        * (InRoot$$Sections)
+       *.o (RESET, +First)
+       *(InRoot$$Sections)
+    }
+}
 
-        ; Essentially only RO (code + data)
+;---------------------------------------------------------
+; Second load region (FPGA SRAM) 2MiB region
+;---------------------------------------------------------
+LOAD_REGION_1       0X12000000                  0x00200000
+{
+    ;-----------------------------------------------------
+    ; First 640K of SRAM/BRAM region for RO code,
+    ; 8 byte aligned.
+    ;-----------------------------------------------------
+    bram.bin        0x12000000 ALIGN 8          0x000A0000
+    {
+        ; Essentially only RO (code)
         .ANY (+RO)
     }
 
     ;-----------------------------------------------------
-    ; Next 384K of SRAM/BRAM region for RO, RW and ZI
+    ; Next 384K of SRAM/BRAM region for RW and ZI
     ; data, 8 byte aligned.
     ;-----------------------------------------------------
     data.bin        0x120A0000 ALIGN 8          0x00060000
@@ -91,9 +102,9 @@ LOAD_REGION_0       0x12000000                  0x00200000
 }
 
 ;---------------------------------------------------------
-; Second load region (DDR)
+; Third load region (DDR)
 ;---------------------------------------------------------
-LOAD_REGION_1       0x70000000                  0x02000000
+LOAD_REGION_2       0x70000000                  0x02000000
 {
     ;-----------------------------------------------------
     ; 32 MiB of DDR space for neural network model,

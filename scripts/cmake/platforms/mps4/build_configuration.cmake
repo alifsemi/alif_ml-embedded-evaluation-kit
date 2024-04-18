@@ -83,8 +83,8 @@ function(platform_custom_post_build)
     file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
 
     if (TARGET_SUBSYSTEM STREQUAL sse-315)
-        set(LINKER_SECTION_TAGS     "*.at_itcm" "*.at_ddr")
-        set(LINKER_OUTPUT_BIN_TAGS  "itcm.bin"  "ddr.bin")
+        set(LINKER_SECTION_TAGS     "*.at_boot" "*.at_bram" "*.at_ddr")
+        set(LINKER_OUTPUT_BIN_TAGS  "boot.bin" "bram.bin"  "ddr.bin")
     endif()
 
     add_bin_generation_command(
@@ -119,7 +119,6 @@ function(platform_custom_post_build)
                     -C mps4_board.uart0.shutdown_on_eot=1
                     -C mps4_board.visualisation.disable-visualisation=1
                     -C vis_hdlcd.disable_visualisation=1
-                    -C mps4_board.subsystem.iotss3_systemcontrol.INITSVTOR_RST=0x12000000
                     --stat)
         endif()
     endif ()
