@@ -92,7 +92,7 @@ python3
 
 #### Arm Clang Compiler (v6.19) setup – Option 1
 
-1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE?) and then extract it.
+1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE) and then extract it.
 
 ![alt text](docs/media/alif/armclang_download.png)
 2. Within the extracted folder is a shell script. Open a terminal window, navigate to the extracted folder, and run the shell script.
