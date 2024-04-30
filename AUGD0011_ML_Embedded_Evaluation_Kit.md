@@ -38,8 +38,8 @@ This cable serves two purposes, it provides power to the AppKit along with two m
 
 ## Required Software and Setup
 
-- Ubuntu 20.04 or Ubuntu 22.04
-- Oracle VirtualBox
+- Ubuntu 20.04 or Ubuntu 22.04 or macOS with Apple M Chip
+- Oracle VirtualBox (not required with macOS)
 - Alif Security Toolkit (SETOOLS) Version v1.0.0
 
 ### Virtual Machine Setup
@@ -78,7 +78,7 @@ At the time of writing, the following software versions were used:
 - Option-1: Arm clang compiler toolchain.
 - Option-2: Arm GNU GCC compiler toolchain.
 
-### Install Python3
+#### Install Python3
 
 You need python version 3.10 or higher for use with the latest vela compiler. You can download and install python3 using the following command:
 ```
@@ -90,9 +90,10 @@ Verify Python
 python3
 ```
 
-### Arm Clang Compiler (v6.19) setup – Option 1
+#### Arm Clang Compiler (v6.19) setup – Option 1
 
-1. Start with downloading the .tgz file for Arm Compiler for Embedded and then extract it.
+1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE) and then extract it.
+
 ![alt text](docs/media/alif/armclang_download.png)
 2. Within the extracted folder is a shell script. Open a terminal window, navigate to the extracted folder, and run the shell script.
 3. Download the tar.gz file for Arm Clang Compiler and use sudo to extract it to `/usr/local/bin/`
@@ -109,7 +110,7 @@ python3
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
-### Arm GNU GCC Compiler Setup – Option 2
+#### Arm GNU GCC Compiler Setup – Option 2
 
 1. Search on Google and download the GNU Arm Embedded Toolchain for the file shown.<br>
     https://developer.arm.com/downloads/-/gnu-rm <br>
@@ -128,6 +129,71 @@ python3
     ```
 5. Log out and then log in for the above environment changes to take effect.
 
+
+### Mac Setup
+
+#### Install brew.
+You can get it from https://brew.sh/ and paste the install script found in main page to macOS terminal. Optional brew install with the pkg-file: take the latest version of homebrew pgk-file from https://github.com/Homebrew/brew/releases.
+
+#### Install Python3
+From https://www.python.org/downloads/macos/, download `macOS 64-bit universal2 installer` -> `Python 3.10.11 - April 5, 2023` and install it. You can try newer version but this has been verified to work.<br>
+You also need to install pip, in terminal:
+```
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3 get-pip.py
+```
+
+#### Install the latest CMake
+From https://cmake.org/download/ choose the correct .dmg file and install it.
+
+#### Arm Clang Compiler (v6.19) setup – Option 1
+macOS is not supported at the moment.
+
+#### Arm GNU GCC Compiler Setup – Option 2
+Go to https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+
+Select `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal target (arm-none-eabi)` -> `arm-gnu-toolchain-13.2.rel1-darwin-arm64-arm-none-eabi.pkg`. Install the pkg-file. Note that this more newer version than Ubuntu setup. Reason is that this support the Apple M chip.
+
+#### Additional installs and modifications
+
+1. In terminal:
+    ```
+    brew install libsndfile
+    ```
+2. If you don't have .zprofile and .zshrc in your home folder, create them in terminal:
+    ```
+    touch .zprofile
+    touch .zshrc
+    ```
+3. Add following lines to your ~/.zprofile so that libsndfile is used from correct place:
+    ```
+    export CPATH=/opt/homebrew/include
+    export LIBRARY_PATH=/opt/homebrew/lib
+    ```
+4. In terminal:
+    ```
+    pip install pysndfile
+    ```
+5. Add following line to ~/.zshrc:
+    ```
+    export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+    ```
+6. Be sure to have the need version of make. In terminal:
+    ```
+    brew install make
+    ```
+7. Use the installed make, add following line to ~/.zshrc:
+    ```
+    PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+    ```
+8. Tensorflow uses wget, make sure you have it installed, in terminal
+    ```
+    brew install wget
+    ```
+9. GNU GCC path needs to be added to ~/.zshrc:
+    ```
+    export PATH=$PATH:/Applications/ArmGNUToolchain/13.2.Rel1/arm-none-eabi/bin
+    ```
 
 ## Building the use-case applications
 
@@ -326,6 +392,7 @@ Refer to the Alif Security Toolkit Quick Start Guide on how to download and inst
 The recommended <release-location> installation directories are:
 Windows: C:\app-release-exec
 Linux: /home/$USER/app-release-exec-linux
+Mac: /Users/$USER/app-release-exec-macos
 ```
 
 After building the applications above, these steps will prepare them to be stored in the Alif device and
@@ -407,7 +474,7 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
     ```
     app-gen-toc.exe -f build\config\kws_demo.json
     ```
-    Linux:
+    Linux/Mac:
     ```
     ./app-gen-toc -f build/config/kws_demo.json
     ```
@@ -416,7 +483,7 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
     ```
     app-write-mram.exe -p
     ```
-    Linux:
+    Linux/Mac:
     ```
     sudo ./app-write-mram -p
     ```
