@@ -90,7 +90,7 @@ Verify Python
 python3
 ```
 
-#### Arm Clang Compiler (v6.19) setup – Option 1
+#### Arm Clang Compiler (v6.19 or above) setup – Option 1
 
 1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE) and then extract it.<br>
 ![alt text](docs/media/alif/armclang_download.png)
@@ -109,7 +109,7 @@ python3
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
-#### Arm GNU GCC Compiler Setup – Option 2
+#### Arm GNU GCC Compiler (v10.2 or above) Setup – Option 2
 
 1. Search on Google and download the GNU Arm Embedded Toolchain for the file shown.<br>
     https://developer.arm.com/downloads/-/gnu-rm <br>
@@ -144,10 +144,10 @@ python3 get-pip.py
 #### Install the latest CMake
 From https://cmake.org/download/ choose the correct .dmg file and install it.
 
-#### Arm Clang Compiler (v6.19) setup – Option 1
+#### Arm Clang Compiler (v6.19 or above) setup – Option 1
 macOS is not supported at the moment.
 
-#### Arm GNU GCC Compiler Setup – Option 2
+#### Arm GNU GCC Compiler (v10.2 or above) Setup – Option 2
 Go to https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 
 Select `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal target (arm-none-eabi)` -> `arm-gnu-toolchain-13.2.rel1-darwin-arm64-arm-none-eabi.pkg`. Install the pkg-file. Note that this more newer version than Ubuntu setup. Reason is that this support the Apple M chip.
