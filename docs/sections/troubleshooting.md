@@ -51,7 +51,7 @@ For example, if the `accelerator-config` from the Vela command was `ethos-u55-12
 `ethos-u55-256`, the FVP must be executed with additional command line parameter to instruct it to emulate the
 256 MACs configuration instead.
 
-The [deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3) page provides guidance
+The [deploying on an FVP](./deployment.md#deploying-on-an-fvp) page provides guidance
 on how to instruct the FVP to change the number of MACs units.
 
 Note that when the FVP is launched and the application starts executing, various parameters about the system are

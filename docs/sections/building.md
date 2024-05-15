@@ -486,7 +486,7 @@ cmake .. \
 Default CMake configuration behaviour looks for input samples, for each use case, in the default directory. All these
 inputs are baked-in into the application. If the number of files baked in is greater than one, a user menu is displayed
 on the application output, where the user is expected to enter their chosen option. See more here:
-[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3).
+[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp).
 
 To configure the project to use single input for each use case, CMake option `USE_SINGLE_INPUT` can be set to `ON`.
 This will result in each use case automatically running with predefined input data, thus removing the need for the

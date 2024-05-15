@@ -329,9 +329,9 @@ For further information, please see:
 
 - [Deployment](./sections/deployment.md#deployment)
   - [Fixed Virtual Platform](./sections/deployment.md#fixed-virtual-platform)
-    - [Setting up the MPS3 Corstone-300 FVP](./sections/deployment.md#setting-up-the-mps3-arm-corstone_300-fvp)
-    - [Deploying on an FVP emulating MPS3](./sections/deployment.md#deploying-on-an-fvp-emulating-mps3)
-  - [MPS3 board](./sections/deployment.md#mps3-board)
+    - [Installing an FVP](./sections/deployment.md#installing-an-fvp)
+    - [Deploying on an FVP](./sections/deployment.md#deploying-on-an-fvp)
+  - [MPS3 FPGA board](./sections/deployment.md#mps3-fpga-board)
     - [Deployment on MPS3 board](./sections/deployment.md#deployment-on-mps3-board)
 
 ## Implementing custom ML application
