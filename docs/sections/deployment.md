@@ -179,6 +179,14 @@ the application output can be directed to standard output by using an FVP option
 - `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
 - `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
 
+> **NOTE**: Dockerfile, provided within the repository, contains useful environment variables pre-assigned with
+> above arguments. These can be used directly from command-line. For example, to run MPS4 Arm® Corstone™-315 based
+> application within the Docker container, the following command can be used to run the FVP in headless mode.
+>
+> ```commandline
+> ${FVP_315_U65} -a <path/to/ethos-u-<use_case>.axf> ${FVP_315_ARGS}
+> ```
+
 ## MPS3 FPGA board
 
 > **Note:**  Before proceeding, make sure that you have the MPS3 board powered on, and a USB A to B cable connected
