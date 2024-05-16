@@ -672,7 +672,7 @@ Platform build configuration script must have 2 functions:
 The function `set_platform_global_defaults` must set `PLATFORM_DRIVERS_DIR` variable
 
 ```cmake
-    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
+    set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
 ```
 
 location of the platform library sources.

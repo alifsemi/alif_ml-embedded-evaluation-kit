@@ -33,7 +33,7 @@ USER_OPTION(LOG_LEVEL "Log level for the application"
 
 ## TensorFlow options
 USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources"
-    "${DEPENDENCY_ROOT_DIR}/tensorflow"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/tensorflow"
     PATH)
 
 USER_OPTION(TENSORFLOW_LITE_MICRO_BUILD_TYPE "TensorFlow Lite Mirco build type (release/debug etc.)"

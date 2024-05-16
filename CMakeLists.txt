@@ -37,54 +37,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(SCRIPTS_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
-set(CMAKE_TOOLCHAIN_DIR ${SCRIPTS_DIR}/cmake/toolchains)
-set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
-set(DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
-set(CORE_PLATFORM_DIR   ${DEPENDENCY_ROOT_DIR}/core-platform)
-
-set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
-                        CACHE PATH "Resources directory")
-set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/source/platform)
-list(APPEND CMAKE_MODULE_PATH
-    "${SCRIPTS_DIR}/cmake"
-    "${SCRIPTS_DIR}/cmake/configuration_options"
-    "${SCRIPTS_DIR}/cmake/timing_adapter")
-
-include(source_gen_utils)
-
-enable_testing()
-
-if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-    message(FATAL_ERROR "Source and build are in the same directory")
-else()
-    message(STATUS "Source directory: ${CMAKE_SOURCE_DIR}")
-    message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
-endif()
-
-# Include common configuration options
-include(common_opts)
-
-# Check if the resources_downloaded needs update
-check_update_public_resources(${RESOURCES_DIR})
-
-add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
-
-set_platform_global_defaults()
-
-message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
-
-# Make sure the following options are defined before proceeding:
-assert_defined(LOG_LEVEL)
-assert_defined(TENSORFLOW_SRC_PATH)
-assert_defined(TARGET_PLATFORM)
-assert_defined(USE_CASE_BUILD)
-assert_defined(CPU_PROFILE_ENABLED)
-assert_defined(CMAKE_TOOLCHAIN_FILE)
-
-if(POLICY CMP0123)
-    cmake_policy(SET CMP0123 NEW)
-endif()
+# Initialise global settings
+include("${CMAKE_CURRENT_SOURCE_DIR}/MlekModule.cmake")
 
 project(arm_ml_embedded_evaluation_kit
         VERSION     24.02.0
@@ -173,7 +127,7 @@ foreach(use_case ${USE_CASES})
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 
-    set(DEFAULT_MODEL_DIR ${RESOURCES_DIR}/${use_case})
+    set(DEFAULT_MODEL_DIR ${MLEK_RESOURCES_DIR}/${use_case})
     set(DEFAULT_TEST_DATA_DIR ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)

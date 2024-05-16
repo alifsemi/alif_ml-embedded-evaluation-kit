@@ -43,7 +43,7 @@ function(set_platform_global_defaults)
     endif()
 
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
+        set(CMAKE_TOOLCHAIN_FILE ${MLEK_CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
 
@@ -56,7 +56,7 @@ function(set_platform_global_defaults)
     endif()
 
     set(LINKER_SCRIPT_NAME "mps3-${TARGET_SUBSYSTEM}" PARENT_SCOPE)
-    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
+    set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
 
 endfunction()
 

@@ -35,13 +35,13 @@ message(STATUS "Assessing NPU configuration options...")
 
 USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH
     "Path to Ethos-U NPU timing adapter sources"
-    "${DEPENDENCY_ROOT_DIR}/core-platform/drivers/timing_adapter"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/core-platform/drivers/timing_adapter"
     PATH
 )
 
 USER_OPTION(ETHOS_U_NPU_DRIVER_SRC_PATH
     "Path to Ethos-U NPU core driver sources"
-    "${DEPENDENCY_ROOT_DIR}/core-driver"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/core-driver"
     PATH
 )
 

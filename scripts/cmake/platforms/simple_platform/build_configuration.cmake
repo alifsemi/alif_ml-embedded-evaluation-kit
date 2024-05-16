@@ -24,12 +24,12 @@ function(set_platform_global_defaults)
     include(cmsis_opts)
 
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
+        set(CMAKE_TOOLCHAIN_FILE ${MLEK_CMAKE_TOOLCHAIN_DIR}/bare-metal-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
 
     set(LINKER_SCRIPT_NAME  "simple_platform" PARENT_SCOPE)
-    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/simple" PARENT_SCOPE)
+    set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/simple" PARENT_SCOPE)
 endfunction()
 
 function(platform_custom_post_build)

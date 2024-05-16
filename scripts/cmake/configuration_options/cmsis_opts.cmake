@@ -27,15 +27,15 @@ message(STATUS "Assessing CMSIS configuration options...")
 
 USER_OPTION(CMSIS_SRC_PATH
     "Path to CMSIS-5 sources"
-    "${DEPENDENCY_ROOT_DIR}/cmsis"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis"
     PATH)
 
 USER_OPTION(CMSIS_DSP_SRC_PATH
     "Path to CMSIS-5 DSP sources"
-    "${DEPENDENCY_ROOT_DIR}/cmsis-dsp"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-dsp"
     PATH)
 
 USER_OPTION(CMSIS_NN_SRC_PATH
     "Path to CMSIS-5 NN sources"
-    "${DEPENDENCY_ROOT_DIR}/cmsis-nn"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-nn"
     PATH)
