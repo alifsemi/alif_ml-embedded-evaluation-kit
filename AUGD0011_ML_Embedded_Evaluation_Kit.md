@@ -214,14 +214,21 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     The above python command will take some time, around a few minutes. Python command
     fetches and optimizes the needed Ethos models for all the use cases in the kit.
 
-    If you get errors right at the beginning, try doing the following and run the command again:
-    ```
-    sudo apt-get install python3-pip
-    sudo apt install python3-venv
-    ```
+    Troubleshooting:
 
-    Delete the folder “resources_downloaded”.
-    Rerun the commands from step 4.
+    - If you get errors about certificate: e.g.
+        ```
+        urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)>
+        ```
+        Go to Python installation directory `/Applications/Python <version>/` and run `./Install\ Certificates.command`
+
+    - If you get errors right at the beginning, try doing the following and run the command again:
+        ```
+        sudo apt-get install python3-pip
+        sudo apt install python3-venv
+        ```
+
+    In all these error cases, delete the folder “resources_downloaded” and rerun the commands from step 4.
 
 
 ### Building The Key Word Spotting (KWS) Use-Case For The M55-HE Core.
