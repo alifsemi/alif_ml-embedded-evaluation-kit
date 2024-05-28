@@ -109,20 +109,19 @@ python3
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
-#### Arm GNU GCC Compiler (v10.2 or above) Setup – Option 2
+#### Arm GNU GCC Compiler (v12.3 or above) Setup – Option 2
 
 1. Search on Google and download the GNU Arm Embedded Toolchain for the file shown.<br>
-    https://developer.arm.com/downloads/-/gnu-rm <br>
-    Select item #3.
-2. You may ignore the note on Arm’s webpage that the compiler is deprecated. Using the latest release may work but has not been tested.
+    https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads <br>
+2. Select the wanted version and download GCC for x86_64 Linux hosted cross toolchains / AArch32 bare-metal target (arm-none-eabi).
    ![alt text](docs/media/alif/gcc_download.png)
-3. Extract the downloaded tar.bz2 file and use sudo to extract it to /usr/local/bin
+3. Extract the downloaded file and use sudo to extract it to /usr/local/bin
     ```
-    sudo tar xf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /usr/local/bin
+    sudo tar xf arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz -C /usr/local/bin
     ```
 4. Add it to the path, as shown
     ```
-    sudo sh -c "echo export PATH=/usr/local/bin/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH >
+    sudo sh -c "echo export PATH=/usr/local/bin/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin:$PATH >
     /etc/profile.d/arm-compiler.sh"
     ```
 5. Log out and then log in for the above environment changes to take effect.
@@ -147,10 +146,10 @@ From https://cmake.org/download/ choose the correct .dmg file and install it.
 #### Arm Clang Compiler (v6.19 or above) setup – Option 1
 macOS is not supported at the moment.
 
-#### Arm GNU GCC Compiler (v10.2 or above) Setup – Option 2
+#### Arm GNU GCC Compiler (v12.3 or above) Setup – Option 2
 Go to https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 
-Select `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal target (arm-none-eabi)` -> `arm-gnu-toolchain-13.2.rel1-darwin-arm64-arm-none-eabi.pkg`. Install the pkg-file. Note that this more newer version than Ubuntu setup. Reason is that this support the Apple M chip.
+Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal target (arm-none-eabi)` -> `arm-gnu-toolchain-12.3.rel1-darwin-arm64-arm-none-eabi.pkg`. Install the pkg-file.
 
 #### Additional installs and modifications
 
@@ -190,7 +189,7 @@ Select `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal ta
     ```
 9. GNU GCC path needs to be added to ~/.zshrc:
     ```
-    export PATH=$PATH:/Applications/ArmGNUToolchain/13.2.Rel1/arm-none-eabi/bin
+    export PATH=$PATH:/Applications/ArmGNUToolchain/12.3.rel1/arm-none-eabi/bin
     ```
 
 ## Building the use-case applications
@@ -215,14 +214,21 @@ Select `macOS (Apple silicon) hosted cross toolchains` -> `AArch32 bare-metal ta
     The above python command will take some time, around a few minutes. Python command
     fetches and optimizes the needed Ethos models for all the use cases in the kit.
 
-    If you get errors right at the beginning, try doing the following and run the command again:
-    ```
-    sudo apt-get install python3-pip
-    sudo apt install python3-venv
-    ```
+    Troubleshooting:
 
-    Delete the folder “resources_downloaded”.
-    Rerun the commands from step 4.
+    - If you get errors about certificate: e.g.
+        ```
+        urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)>
+        ```
+        Go to Python installation directory `/Applications/Python <version>/` and run `./Install\ Certificates.command`
+
+    - If you get errors right at the beginning, try doing the following and run the command again:
+        ```
+        sudo apt-get install python3-pip
+        sudo apt install python3-venv
+        ```
+
+    In all these error cases, delete the folder “resources_downloaded” and rerun the commands from step 4.
 
 
 ### Building The Key Word Spotting (KWS) Use-Case For The M55-HE Core.
