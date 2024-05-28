@@ -41,7 +41,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include("${CMAKE_CURRENT_SOURCE_DIR}/MlekModule.cmake")
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     24.02.0
+        VERSION     24.05.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 

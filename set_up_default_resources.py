@@ -39,7 +39,7 @@ from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 
 # Supported version of Python and Vela
 
-VELA_VERSION = "3.10.0"
+VELA_VERSION = "3.12.0"
 py3_version_minimum = (3, 10)
 
 # Valid NPU configurations:
