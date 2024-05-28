@@ -8,7 +8,7 @@
 
   <license>LICENSE_APACHE_2.0.txt</license>
 
-  <url>https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/source/application/api/use_case/readme.md</url>
+  <url>https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/</url>
 
   <requirements>
     <packages>
@@ -67,7 +67,7 @@
     <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Log" Cversion="1.0.0">
       <description>Logging header-only utility</description>
       <files>
-        <file category="include" name="source/log/include/"/>
+        <file category="header" name="source/log/include/log_macros.h"/>
       </files>
     </component>
     <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Math" Cversion="1.0.0" condition="arm_math Condition">
