@@ -40,7 +40,14 @@ arm::app::QuantParams arm::app::GetTensorQuantParams(TfLiteTensor* tensor)
     return params;
 }
 
-extern "C" void DebugLog(const char* s)
+/**
+ * @brief   String logging functionality expected to be defined
+ *          by TensorFlow Lite Micro's error reporter.
+ * @param[in]   format   Pointer to the format.
+ * @param[in]   args     Argument list.
+ */
+extern "C" __attribute__((__weak__))
+void DebugLog(const char* format, va_list args)
 {
-    puts(s);
+    vprintf(format, args);
 }
