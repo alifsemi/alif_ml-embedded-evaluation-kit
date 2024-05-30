@@ -138,14 +138,14 @@
 // <o> select MT9M114 frame height
 // <i> defines select MT9M114 frame height.
 // <i> default: 480
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT                480
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_FRAME_HEIGHT            480
 
 // <o> select MT9M114 frame width
 // <i> defines select MT9M114 frame width.
 // <i> default: 640
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH                 640
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_FRAME_WIDTH             640
 
-// <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <o RTE_MT9M114_CAMERA_SENSOR_CPI_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
 // <i> Defines camera sensor MT9M114 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
@@ -153,7 +153,7 @@
 //     <3=>   I2C3
 //     <I3C=> I2C OVER I3C
 // <i> Default: 1
-#define RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE                1
+#define RTE_MT9M114_CAMERA_SENSOR_CPI_I2C_INSTANCE            1
 
 #endif
 // </e> MT9M114 [Driver_MT9M114]
@@ -259,14 +259,14 @@
 // <o> select MT9M114 frame height
 // <i> defines select MT9M114 frame height.
 // <i> default: 480
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT                480
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_FRAME_HEIGHT          480
 
 // <o> select MT9M114 frame width
 // <i> defines select MT9M114 frame width.
 // <i> default: 640
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH                 640
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_FRAME_WIDTH           640
 
-// <o RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <o RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
 // <i> Defines camera sensor MT9M114 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
@@ -274,7 +274,7 @@
 //     <3=>   I2C3
 //     <I3C=> I2C OVER I3C
 // <i> Default: 1
-#define RTE_MT9M114_CAMERA_SENSOR_I2C_INSTANCE                1
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE          1
 
 #endif
 // </e> MT9M114 [Driver_MT9M114]
@@ -446,10 +446,9 @@
 //     <1=> enable
 // <i> define if to enable or disable ARX3A0 camera sensor
 // <i> default: enable
-#define RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE             1
+#define RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE             ENSEMBLE_CAMERA_MODULE_ARX3A0
 
 #if (RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE)
-
 // <o> Select camera ARX3A0 frame per second
 //     <5=>   5 FPS
 //     <40=> 40 FPS
@@ -468,13 +467,6 @@
 // <i> defines select CSI2 Data type
 // <i> default: 43(RAW10)
 #define RTE_ARX3A0_CAMERA_SENSOR_CSI_DATA_TYPE               43
-
-// <o> select ARX3A0 clock mode
-//     <0=> CONTINUOUS CLOCK_MODE
-//     <1=> NON CONTINUOUS CLOCK MODE
-// <i> defines ARX3A0 clock mode for mipi csi2
-// <i> default: 1 (non continuous clock mode)
-#define RTE_ARX3A0_CAMERA_SENSOR_CLOCK_MODE                  1
 
 // <o> select ARX3A0 number of lanes in DPHY
 // <i> defines select ARX3A0 number of lanes in DPHY.
@@ -543,6 +535,320 @@
 
 #endif
 // </e> ARX3A0 [Driver_ARX3A0]
+
+// <e> AR0144 [Driver_AR0144]
+// <o> Enable/Disable AR0144 camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable AR0144 camera sensor
+// <i> default: enable
+#define RTE_AR0144_CAMERA_SENSOR_CPI_ENABLE                   0
+
+#if (RTE_AR0144_CAMERA_SENSOR_CPI_ENABLE)
+
+// <o> Select camera AR0144 frequency
+// <i> Defines camera AR0144 frequency
+// <i> Default: 225000000
+#define RTE_AR0144_CAMERA_SENSOR_CSI_FREQ                    225000000
+
+// <o> select AR0144 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default: 44(RAW12)
+#define RTE_AR0144_CAMERA_SENSOR_CSI_DATA_TYPE               44
+
+// <o> select AR0144 number of lanes in DPHY
+// <i> defines select AR0144 number of lanes in DPHY.
+// <i> default: 2 two lane
+#define RTE_AR0144_CAMERA_SENSOR_CSI_N_LANES                 2
+
+// <o> select AR0144 virtual channel ID
+// <i> defines select AR0144 virtual channel ID.
+// <i> default: 0
+#define RTE_AR0144_CAMERA_SENSOR_CSI_VC_ID                   0
+
+// <o> select AR0144 override CPI color mode
+// <i> defines select AR0144 override CPI color mode.
+// <i> default: 1 (Ensable)
+#define RTE_AR0144_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE     1
+
+// <o> select AR0144 CPI color mode
+// <i> defines select AR0144 CPI color mode.
+// <i> default: 2  (IPI-16 RAW 8)
+#define RTE_AR0144_CAMERA_SENSOR_CPI_COLOR_MODE              2
+
+// <o> select AR0144 frame height
+// <i> defines select AR0144 frame height.
+// <i> default: 560
+#define RTE_AR0144_CAMERA_SENSOR_FRAME_HEIGHT                800
+
+// <o> select AR0144 frame width
+// <i> defines select AR0144 frame width.
+// <i> default: 560
+#define RTE_AR0144_CAMERA_SENSOR_FRAME_WIDTH                 1280
+
+// <o> Select camera sensor AR0144 CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor AR0144 CSI clock source division
+// <i> Default: 20
+#define RTE_AR0144_CAMERA_SENSOR_CSI_CLK_SCR_DIV             20
+
+// <o> Select camera sensor AR0144 reset pin number
+// <i> Defines camera sensor AR0144 reset pin number
+// <i> Default: 5
+#define RTE_AR0144_CAMERA_SENSOR_RESET_PIN_NO                 1
+
+// <o> Select camera sensor AR0144 reset GPIO port
+// <i> Defines camera sensor AR0144 reset GPIO port
+// <i> Default: 4
+#define RTE_AR0144_CAMERA_SENSOR_RESET_GPIO_PORT              9
+
+// <o> Select camera sensor AR0144 power pin number
+// <i> Defines camera sensor AR0144 power pin number
+// <i> Default: 5
+#define RTE_AR0144_CAMERA_SENSOR_POWER_PIN_NO                 5
+
+// <o> Select camera sensor AR0144 power GPIO port
+// <i> Defines camera sensor AR0144 power GPIO port
+// <i> Default: 7
+#define RTE_AR0144_CAMERA_SENSOR_POWER_GPIO_PORT              7
+
+// <o RTE_AR0144_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor AR0144 i2c instance
+// <i> Defines camera sensor AR0144 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_AR0144_CAMERA_SENSOR_I2C_INSTANCE                 1
+
+#endif
+// </e> AR0114 [Driver_AR0114]
+
+// <e> MT9M114_MIPI [Driver_MT9M114_MIPI]
+// <o> Enable/Disable MT9M114 MIPI camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable MT9M114 MIPI camera sensor
+// <i> default: enable
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE                  ENSEMBLE_CAMERA_MODULE_MT9M114
+
+#if (RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE)
+// <o> Select camera MT9M114 MIPI frequency
+// <i> Defines camera MT9M114 MIPI frequency
+// <i> Default: 296000000
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_FREQ                    296000000
+
+// <o> select MT9M114 MIPI CSI2 Data type
+// <i> Define camera sensor DATA type
+//     <0x2B=>   RAW10
+//     <0x2A=>   RAW 8
+//     <0x22=>   RGB565
+// <i> defines select CSI2 Data type
+// <i> default: 0x2A(RAW8)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE               0x22
+
+// <o> select MT9M114 MIPI number of lanes in DPHY
+// <i> defines select MT9M114 MIPI number of lanes in DPHY.
+// <i> default: 1 one lane
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_N_LANES                 1
+
+// <o> select MT9M114 MIPI virtual channel ID
+// <i> defines select MT9M114 MIPI virtual channel ID.
+// <i> default: 0
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_VC_ID                   0
+
+// <o> select MT9M114 MIPI override CPI color mode
+// <i> defines select MT9M114 MIPI override CPI color mode.
+// <i> default: 0 (Disable)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_OVERRIDE_CPI_COLOR_MODE     0
+
+// <o> select MT9M114 MIPI CPI color mode
+// <i> defines select MT9M114 MIPI CPI color mode.
+// <i> default: 0
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CPI_COLOR_MODE              0
+
+#if(RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x2B)
+
+// <o> select MT9M114 MIPI frame height
+// <i> defines select MT9M114 MIPI frame height.
+// <i> default: 728
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT                728
+
+// <o> select MT9M114 MIPI frame width
+// <i> defines select MT9M114 MIPI frame width.
+// <i> default: 1288
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH                 1288
+
+#elif ((RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x2A) || \
+       (RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x22))
+
+// <o> select MT9M114 MIPI frame height
+// <i> defines select MT9M114 MIPI frame height.
+// <i> default: 720
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT                720
+
+// <o> select MT9M114 MIPI frame width
+// <i> defines select MT9M114 MIPI frame width.
+// <i> default: 1280
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH                 1280
+#endif
+
+// <o> Select camera sensor MT9M114 MIPI CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor MT9M114 MIPI CSI clock source division
+// <i> Default: 20
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_CLK_SCR_DIV             19
+
+// <o> Select camera sensor MT9M114 MIPI reset pin number
+// <i> Defines camera sensor MT9M114 MIPI reset pin number
+// <i> Default: 1
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_RESET_PIN_NO                 BOARD_CAMERA_RESET_PIN_NO
+
+// <o> Select camera sensor MT9M114 MIPI reset GPIO port
+// <i> Defines camera sensor MT9M114 MIPI reset GPIO port
+// <i> Default: 9
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_RESET_GPIO_PORT              BOARD_CAMERA_RESET_GPIO_PORT
+
+// <o> Select camera sensor MT9M114 MIPI power pin number
+// <i> Defines camera sensor MT9M114 MIPI power pin number
+// <i> Default: 5
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_POWER_PIN_NO                 BOARD_CAMERA_POWER_PIN_NO
+
+// <o> Select camera sensor MT9M114 MIPI power GPIO port
+// <i> Defines camera sensor MT9M114 MIPI power GPIO port
+// <i> Default: 7
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_POWER_GPIO_PORT              BOARD_CAMERA_POWER_GPIO_PORT
+
+// <o RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE> Select camera sensor MT9M114 MIPI i2c instance
+// <i> Defines camera sensor MT9M114 MIPI i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
+
+#endif
+// </e> MT9M114_MIPI [Driver_MT9M114_MIPI]
+
+// <e> HM0360_MIPI [Driver_HM0360_MIPI]
+// <o> Enable/Disable HM0360 MIPI camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable HM0360 MIPI camera sensor
+// <i> default: enable
+#define RTE_HM0360_CAMERA_SENSOR_ENABLE                  1
+
+#if (RTE_HM0360_CAMERA_SENSOR_ENABLE)
+
+// <o> Select camera HM0360 frequency
+// <i> Defines camera HM0360 frequency
+// <i> Default: 176000000
+#define RTE_HM0360_CAMERA_SENSOR_CSI_FREQ                   176000000
+
+// <o> Select camera HM0360 frame per second
+//     <30=> 30 FPS
+//     <60=> 60 FPS
+// <i> Defines camera HM0360 frame per second
+// <i> Default: 60 FPS
+#define RTE_HM0360_CAMERA_SENSOR_CSI_CFG_FPS                 60
+
+// <o> Select camera HM0360 context select
+//     <0=> CONTEXT_A
+//     <1=> CONTEXT_B
+// <i> Defines camera HM0360 context select
+// <i> Default: 0
+#define RTE_HM0360_CAMERA_SENSOR_CSI_CXT_SEL                 0
+
+// <o> select HM0360 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default: 42(RAW8)
+#define RTE_HM0360_CAMERA_SENSOR_CSI_DATA_TYPE               42
+
+// <o> select HM0360 number of lanes in DPHY
+// <i> defines select HM0360 number of lanes in DPHY.
+// <i> default: 1 one lane
+#define RTE_HM0360_CAMERA_SENSOR_CSI_N_LANES                 1
+
+// <o> select HM0360 virtual channel ID
+// <i> defines select HM0360 virtual channel ID.
+// <i> default: 0
+#define RTE_HM0360_CAMERA_SENSOR_CSI_VC_ID                   0
+
+// <o> select HM0360 override CPI color mode
+// <i> defines select HM0360 override CPI color mode.
+// <i> default: 0
+#define RTE_HM0360_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE     0
+
+// <o> select HM0360 CPI color mode
+// <i> defines select HM0360 CPI color mode.
+// <i> default: 0
+#define RTE_HM0360_CAMERA_SENSOR_CPI_COLOR_MODE              0
+
+#if (RTE_HM0360_CAMERA_SENSOR_CSI_CXT_SEL == 0)
+// <o> select HM0360 frame height
+// <i> defines select HM0360 frame height.
+// <i> default: 480
+#define RTE_HM0360_CAMERA_SENSOR_FRAME_HEIGHT                480
+
+// <o> select HM0360 frame width
+// <i> defines select HM0360 frame width.
+// <i> default: 640
+#define RTE_HM0360_CAMERA_SENSOR_FRAME_WIDTH                 640
+#else
+// <o> select HM0360 frame height
+// <i> defines select HM0360 frame height.
+// <i> default: 240
+#define RTE_HM0360_CAMERA_SENSOR_FRAME_HEIGHT                240
+
+// <o> select HM0360 frame width
+// <i> defines select HM0360 frame width.
+// <i> default: 320
+#define RTE_HM0360_CAMERA_SENSOR_FRAME_WIDTH                 320
+#endif
+
+// <o> Select camera sensor HM0360 reset pin number
+// <i> Defines camera sensor HM0360 reset pin number
+// <i> Default: 1
+#define RTE_HM0360_CAMERA_SENSOR_RESET_PIN_NO                1
+
+// <o> Select camera sensor HM0360 reset GPIO port
+// <i> Defines camera sensor HM0360 reset GPIO port
+// <i> Default: 9
+#define RTE_HM0360_CAMERA_SENSOR_RESET_GPIO_PORT             9
+
+// <o> Select camera sensor HM0360 power pin number
+// <i> Defines camera sensor HM0360 power pin number
+// <i> Default: 5
+#define RTE_HM0360_CAMERA_SENSOR_POWER_PIN_NO                5
+
+// <o> Select camera sensor HM0360 power GPIO port
+// <i> Defines camera sensor HM0360 power GPIO port
+// <i> Default: 7
+#define RTE_HM0360_CAMERA_SENSOR_POWER_GPIO_PORT             7
+
+// <o> Select camera sensor HM0360 xsleep pin number
+// <i> Defines camera sensor HM0360 xsleep pin number
+// <i> Default: 3
+#define RTE_HM0360_CAMERA_SENSOR_XSLEEP_PIN_NO               3
+
+// <o> Select camera sensor HM0360 xsleep GPIO port
+// <i> Defines camera sensor HM0360 xsleep GPIO port
+// <i> Default: 6
+#define RTE_HM0360_CAMERA_SENSOR_XSLEEP_GPIO_PORT            6
+
+// <o RTE_HM0360_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor HM0360 i2c instance
+// <i> Defines camera sensor HM0360 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_HM0360_CAMERA_SENSOR_I2C_INSTANCE                1
+
+#endif
+// </e> HM0360_MIPI [Driver_HM0360_MIPI]
 
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
@@ -624,13 +930,6 @@
 // <i> Defines Color mode for display panel
 // <i> Default: 24bit
 #define RTE_ILI9806E_PANEL_DSI_COLOR_MODE            5
-
-// <o> DPHY Clock Mode
-//     <0=> CONTINUOUS CLOCK_MODE
-//     <1=> NON CONTINUOUS CLOCK MODE
-// <i> Defines DPHY Clock Mode
-// <i> Default: NON CONTINUOUS CLOCK MODE
-#define RTE_ILI9806E_PANEL_DPHY_CLOCK_MODE           1
 
 // <o> Number of data lanes
 //     <1=> ONE
@@ -976,7 +1275,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for I3C
 // <i> Default: ENABLE
-#define RTE_I3C_DMA_ENABLE   1
+#define RTE_I3C_DMA_ENABLE   0
 
 // <o> I3C DMA Selection
 //    <0=> DMA2(M55-HE)
@@ -1042,6 +1341,13 @@
 // <i> Default: 0
 #define RTE_SPI0_RX_SAMPLE_DELAY                0
 
+// <o> SPI0 Slave Select Toggle Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SS state after each data frame for SPI0.
+// <i> Default: 1
+#define RTE_SPI0_SSTE_ENABLE                    1
+
 // <o> SPI0 Master SS SW
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1069,6 +1375,35 @@
 #define RTE_SPI0_SW_SPI_SS_POLARITY             0
 #endif //RTE_SPI0_USE_MASTER_SS_SW
 
+// <o> SPI0 Enable MicroWire FRF
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SPI0 MicroWire frame format.
+// <i> Default: 0
+#define RTE_SPI0_MICROWIRE_FRF_ENABLE           0
+
+#if RTE_SPI0_MICROWIRE_FRF_ENABLE
+
+// <o> SPI0 MW Transfer Mode
+//    <0=> NON-SEQUENTIAL MODE
+//    <1=> SEQUENTIAL MODE
+// <i> Defines SPI0 MicroWire transfer mode.
+// <i> Default: 0
+#define RTE_SPI0_MW_TRANSFER_MODE               0
+
+// <o> SPI0 MW Handshake Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SPI0 MicroWire handshake enable.
+// <i> Default: 0
+#define RTE_SPI0_MW_HANDSAHKE_ENABLE            0
+
+// <o> SPI0 MW Control Frame Size
+// <i> Defines MW Control Frame Size for SPI0.
+// <i> Default: 0
+#define RTE_SPI0_MW_CFS                         16
+#endif //RTE_SPI0_MICROWIRE_FRF_ENABLE
+
 // <o> SPI0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1080,6 +1415,13 @@
 // <i> Defines SPI0 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_SPI0_DMA_IRQ_PRI                    0
+
+// <o> SPI0 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for SPI0
+// <i> Default: DISABLE
+#define RTE_SPI0_BLOCKING_MODE_ENABLE           0
 #endif
 // </e> SPI0 (Serial Peripheral Interface 0) [Driver_SPI0]
 
@@ -1131,6 +1473,13 @@
 // <i> Default: 0
 #define RTE_SPI1_RX_SAMPLE_DELAY                0
 
+// <o> SPI1 Slave Select Toggle Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SS state after each data frame for SPI1.
+// <i> Default: 1
+#define RTE_SPI1_SSTE_ENABLE                    1
+
 // <o> SPI1 Master SS SW
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1158,6 +1507,35 @@
 #define RTE_SPI1_SW_SPI_SS_POLARITY             0
 #endif //RTE_SPI1_USE_MASTER_SS_SW
 
+// <o> SPI1 Enable MicroWire FRF
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SPI1 MicroWire frame format.
+// <i> Default: 0
+#define RTE_SPI1_MICROWIRE_FRF_ENABLE           0
+
+#if RTE_SPI1_MICROWIRE_FRF_ENABLE
+
+// <o> SPI1 MW Transfer Mode
+//    <0=> NON-SEQUENTIAL MODE
+//    <1=> SEQUENTIAL MODE
+// <i> Defines SPI1 MicroWire transfer mode.
+// <i> Default: 0
+#define RTE_SPI1_MW_TRANSFER_MODE               0
+
+// <o> SPI1 MW Handshake Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SPI1 MicroWire handshake enable.
+// <i> Default: 0
+#define RTE_SPI1_MW_HANDSAHKE_ENABLE            0
+
+// <o> SPI1 MW Control Frame Size
+// <i> Defines MW Control Frame Size for SPI1.
+// <i> Default: 0
+#define RTE_SPI1_MW_CFS                         16
+#endif //RTE_SPI1_MICROWIRE_FRF_ENABLE
+
 // <o> SPI1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1169,6 +1547,13 @@
 // <i> Defines SPI1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_SPI1_DMA_IRQ_PRI                    0
+
+// <o> SPI1 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for SPI1
+// <i> Default: DISABLE
+#define RTE_SPI1_BLOCKING_MODE_ENABLE           0
 #endif
 // </e> SPI1 (Serial Peripheral Interface 1) [Driver_SPI1]
 
@@ -1219,6 +1604,13 @@
 // <i> Default: 0
 #define RTE_SPI2_RX_SAMPLE_DELAY                0
 
+// <o> SPI2 Slave Select Toggle Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SS state after each data frame for SPI2.
+// <i> Default: 1
+#define RTE_SPI2_SSTE_ENABLE                    1
+
 // <o> SPI2 Master SS SW
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1246,6 +1638,35 @@
 #define RTE_SPI2_SW_SPI_SS_POLARITY             0
 #endif //RTE_SPI2_USE_MASTER_SS_SW
 
+// <o> SPI2 Enable MicroWire FRF
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SPI2 MicroWire frame format.
+// <i> Default: 0
+#define RTE_SPI2_MICROWIRE_FRF_ENABLE           0
+
+#if RTE_SPI2_MICROWIRE_FRF_ENABLE
+
+// <o> SPI2 MW Transfer Mode
+//    <0=> NON-SEQUENTIAL MODE
+//    <1=> SEQUENTIAL MODE
+// <i> Defines SPI2 MicroWire transfer mode.
+// <i> Default: 0
+#define RTE_SPI2_MW_TRANSFER_MODE               0
+
+// <o> SPI2 MW Handshake Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SPI2 MicroWire handshake enable.
+// <i> Default: 0
+#define RTE_SPI2_MW_HANDSAHKE_ENABLE            0
+
+// <o> SPI2 MW Control Frame Size
+// <i> Defines MW Control Frame Size for SPI2.
+// <i> Default: 0
+#define RTE_SPI2_MW_CFS                         0
+#endif //RTE_SPI2_MICROWIRE_FRF_ENABLE
+
 // <o> SPI2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1257,6 +1678,13 @@
 // <i> Defines SPI2 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_SPI2_DMA_IRQ_PRI                    0
+
+// <o> SPI2 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for SPI2
+// <i> Default: DISABLE
+#define RTE_SPI2_BLOCKING_MODE_ENABLE           0
 #endif
 // </e> SPI2 (Serial Peripheral Interface 2) [Driver_SPI2]
 
@@ -1308,6 +1736,13 @@
 // <i> Default: 0
 #define RTE_SPI3_RX_SAMPLE_DELAY                0
 
+// <o> SPI3 Slave Select Toggle Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SS state after each data frame for SPI3.
+// <i> Default: 1
+#define RTE_SPI3_SSTE_ENABLE                    1
+
 // <o> SPI3 Master SS SW
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1335,6 +1770,35 @@
 #define RTE_SPI3_SW_SPI_SS_POLARITY             0
 #endif //RTE_SPI3_USE_MASTER_SS_SW
 
+// <o> SPI3 Enable MicroWire FRF
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of SPI3 MicroWire frame format.
+// <i> Default: 0
+#define RTE_SPI3_MICROWIRE_FRF_ENABLE           0
+
+#if RTE_SPI3_MICROWIRE_FRF_ENABLE
+
+// <o> SPI3 MW Transfer Mode
+//    <0=> NON-SEQUENTIAL MODE
+//    <1=> SEQUENTIAL MODE
+// <i> Defines SPI3 MicroWire transfer mode.
+// <i> Default: 0
+#define RTE_SPI3_MW_TRANSFER_MODE               0
+
+// <o> SPI3 MW Handshake Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SPI3 MicroWire handshake enable.
+// <i> Default: 0
+#define RTE_SPI3_MW_HANDSAHKE_ENABLE            0
+
+// <o> SPI3 MW Control Frame Size
+// <i> Defines MW Control Frame Size for SPI3.
+// <i> Default: 0
+#define RTE_SPI3_MW_CFS                         0
+#endif //RTE_SPI3_MICROWIRE_FRF_ENABLE
+
 // <o> SPI3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1346,6 +1810,13 @@
 // <i> Defines SPI3 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_SPI3_DMA_IRQ_PRI                    0
+
+// <o> SPI3 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for SPI3
+// <i> Default: DISABLE
+#define RTE_SPI3_BLOCKING_MODE_ENABLE           0
 #endif
 // </e> SPI3 (Serial Peripheral Interface 3) [Driver_SPI3]
 
@@ -1393,6 +1864,13 @@
 // <i> Default: 0
 #define RTE_LPSPI_CHIP_SELECTION_PIN             0
 
+// <o> LPSPI Slave Select Toggle Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines SS state after each data frame for LPSPI.
+// <i> Default: 1
+#define RTE_LPSPI_SSTE_ENABLE                    1
+
 // <o> LPSPI Master SS SW
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -1419,6 +1897,35 @@
 // <i> Default: 0
 #define RTE_LPSPI_SW_SPI_SS_POLARITY             0
 #endif //RTE_LPSPI_USE_MASTER_SS_SW
+
+// <o> LPSPI Enable MicroWire FRF
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines use of LPSPI MicroWire frame format.
+// <i> Default: 0
+#define RTE_LPSPI_MICROWIRE_FRF_ENABLE           0
+
+#if RTE_LPSPI_MICROWIRE_FRF_ENABLE
+
+// <o> LPSPI MW Transfer Mode
+//    <0=> NON-SEQUENTIAL MODE
+//    <1=> SEQUENTIAL MODE
+// <i> Defines LPSPI MicroWire transfer mode.
+// <i> Default: 0
+#define RTE_LPSPI_MW_TRANSFER_MODE               0
+
+// <o> LPSPI MW Handshake Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines LPSPI MicroWire handshake enable.
+// <i> Default: 0
+#define RTE_LPSPI_MW_HANDSAHKE_ENABLE            0
+
+// <o> LPSPI MW Control Frame Size
+// <i> Defines MW Control Frame Size for LPSPI.
+// <i> Default: 0
+#define RTE_LPSPI_MW_CFS                         8
+#endif //RTE_LPSPI_MICROWIRE_FRF_ENABLE
 
 // <o> LPSPI DMA ENABLE
 //    <0=> DISABLE
@@ -1648,6 +2155,12 @@
 // <i> Defines the OSPI Bus speed
 // <i> Default: 100000000
 #define RTE_ISSI_FLASH_OSPI_BUS_SPEED           100000000
+
+// <o> ISSI FLASH Wait cycles
+// <i> Defines the number of wait (dummy) cycles needed for fast read operations
+// <i> Default: 16
+#define RTE_ISSI_FLASH_WAIT_CYCLES              10
+
 #endif
 // </e> FLASH (ISSI FLASH) [Driver_Flash]
 
@@ -1722,19 +2235,26 @@
 // <o> I2S0 IRQ priority <0-255>
 // <i> Defines I2S0 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S0_IRQ_PRI   10
+#define RTE_I2S0_IRQ_PRI   0
 
 // <o> I2S0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S0
 // <i> Default: ENABLE
-#define RTE_I2S0_DMA_ENABLE   1
+#define RTE_I2S0_DMA_ENABLE   0
 
 // <o> I2S0 DMA IRQ priority <0-255>
 // <i> Defines I2S0 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2S0_DMA_IRQ_PRI   0
+
+// <o> I2S0 Blocking Mode
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for I2S0
+// <i> Default: DISABLE
+#define RTE_I2S0_BLOCKING_MODE_ENABLE   0
 
 #endif
 // </e> I2S0 (Integrated Interchip Sound 0) [Driver_SAI0]
@@ -1809,19 +2329,27 @@
 // <o> I2S1 IRQ priority <0-255>
 // <i> Defines I2S1 Interrupt priority
 // <i> Default: 1
-#define RTE_I2S1_IRQ_PRI   10
+#define RTE_I2S1_IRQ_PRI   1
 
 // <o> I2S1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S1
 // <i> Default: ENABLE
-#define RTE_I2S1_DMA_ENABLE   1
+#define RTE_I2S1_DMA_ENABLE   0
 
 // <o> I2S1 DMA IRQ priority <0-255>
 // <i> Defines I2S1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2S1_DMA_IRQ_PRI   0
+
+// <o> I2S1 Blocking Mode
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for I2S1
+// <i> Default: DISABLE
+#define RTE_I2S1_BLOCKING_MODE_ENABLE   0
+
 #endif
 // </e> I2S1 (Integrated Interchip Sound 1) [Driver_SAI1]
 
@@ -1902,12 +2430,20 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S2
 // <i> Default: ENABLE
-#define RTE_I2S2_DMA_ENABLE   1
+#define RTE_I2S2_DMA_ENABLE   0
 
 // <o> I2S2 DMA IRQ priority <0-255>
 // <i> Defines I2S2 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2S2_DMA_IRQ_PRI   0
+
+// <o> I2S2 Blocking Mode
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for I2S2
+// <i> Default: DISABLE
+#define RTE_I2S2_BLOCKING_MODE_ENABLE   0
+
 #endif
 // </e> I2S2 (Integrated Interchip Sound 2) [Driver_SAI2]
 
@@ -1994,6 +2530,14 @@
 // <i> Defines I2S3 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2S3_DMA_IRQ_PRI  RTE_I2S3_IRQ_PRI
+
+// <o> I2S3 Blocking Mode
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for I2S3
+// <i> Default: DISABLE
+#define RTE_I2S3_BLOCKING_MODE_ENABLE   0
+
 #endif
 // </e> I2S3 (Integrated Interchip Sound 3) [Driver_SAI3]
 
@@ -2069,14 +2613,14 @@
 // <o> LPI2S IRQ priority <0-255>
 // <i> Defines LPI2S Interrupt priority
 // <i> Default: 1
-#define RTE_LPI2S_IRQ_PRI   0
+#define RTE_LPI2S_IRQ_PRI   1
 
 // <o> LPI2S DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPI2S
 // <i> Default: ENABLE
-#define RTE_LPI2S_DMA_ENABLE   1
+#define RTE_LPI2S_DMA_ENABLE   0
 #if RTE_LPI2S_DMA_ENABLE
 
 // <o> LPI2S DMA Selection
@@ -2091,6 +2635,14 @@
 // <i> Defines LPI2S DMA Interrupt priority
 // <i> Default: 0
 #define RTE_LPI2S_DMA_IRQ_PRI   0
+
+// <o> LPI2S Blocking Mode
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for LPI2S
+// <i> Default: DISABLE
+#define RTE_LPI2S_BLOCKING_MODE_ENABLE   0
+
 #endif //RTE_LPI2S
 #endif //defined(M55_HE)
 
@@ -2125,7 +2677,7 @@
 // <o> UART0 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART0.
 // <i> Default: 0
-#define RTE_UART0_IRQ_PRI       10
+#define RTE_UART0_IRQ_PRI       0
 
 // <o> UART0 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2138,13 +2690,20 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART0
-// <i> Default: ENABLE
-#define RTE_UART0_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART0_DMA_ENABLE   0
 
 // <o> UART0 DMA IRQ priority <0-255>
 // <i> Defines UART0 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART0_DMA_IRQ_PRI  10
+#define RTE_UART0_DMA_IRQ_PRI  0
+
+// <o> UART0 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART0
+// <i> Default: DISABLE
+#define RTE_UART0_BLOCKING_MODE_ENABLE       0
 
 #endif //UART0
 
@@ -2178,7 +2737,7 @@
 // <o> UART1 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART1.
 // <i> Default: 0
-#define RTE_UART1_IRQ_PRI       10
+#define RTE_UART1_IRQ_PRI       0
 
 // <o> UART1 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2191,13 +2750,20 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART1
-// <i> Default: ENABLE
-#define RTE_UART1_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART1_DMA_ENABLE   0
 
 // <o> UART1 DMA IRQ priority <0-255>
 // <i> Defines UART1 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART1_DMA_IRQ_PRI  10
+#define RTE_UART1_DMA_IRQ_PRI  0
+
+// <o> UART1 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART1
+// <i> Default: DISABLE
+#define RTE_UART1_BLOCKING_MODE_ENABLE       0
 
 #endif //UART1
 
@@ -2237,20 +2803,27 @@
 //    <0=> CLK_38.4MHz
 //    <1=> CLK_100MHz
 // <i> Defines UART2 clock source.
-// <i> Default: CLK_38.4MHz
+// <i> Default: CLK_100MHz
 #define RTE_UART2_CLK_SOURCE    1
 
 // <o> UART2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART2
-// <i> Default: ENABLE
+// <i> Default: DISABLE
 #define RTE_UART2_DMA_ENABLE   1
 
 // <o> UART2 DMA IRQ priority <0-255>
 // <i> Defines UART2 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_UART2_DMA_IRQ_PRI  10
+
+// <o> UART2 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART2
+// <i> Default: DISABLE
+#define RTE_UART2_BLOCKING_MODE_ENABLE       0
 
 #endif //UART2
 
@@ -2284,7 +2857,7 @@
 // <o> UART3 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART3.
 // <i> Default: 0
-#define RTE_UART3_IRQ_PRI       10
+#define RTE_UART3_IRQ_PRI       0
 
 // <o> UART3 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2297,13 +2870,20 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART3
-// <i> Default: ENABLE
-#define RTE_UART3_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART3_DMA_ENABLE   0
 
 // <o> UART3 DMA IRQ priority <0-255>
 // <i> Defines UART3 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART3_DMA_IRQ_PRI  10
+#define RTE_UART3_DMA_IRQ_PRI  0
+
+// <o> UART3 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART3
+// <i> Default: DISABLE
+#define RTE_UART3_BLOCKING_MODE_ENABLE       0
 
 #endif //UART3
 
@@ -2359,7 +2939,7 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART4
-// <i> Default: ENABLE
+// <i> Default: DISABLE
 #define RTE_UART4_DMA_ENABLE   1
 
 // <o> UART4 DMA Selection
@@ -2373,6 +2953,13 @@
 // <i> Defines UART4 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_UART4_DMA_IRQ_PRI  10
+
+// <o> UART4 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART4
+// <i> Default: DISABLE
+#define RTE_UART4_BLOCKING_MODE_ENABLE       0
 
 #endif //UART4
 
@@ -2406,7 +2993,7 @@
 // <o> UART5 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART5.
 // <i> Default: 0
-#define RTE_UART5_IRQ_PRI       10
+#define RTE_UART5_IRQ_PRI       0
 
 // <o> UART5 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2428,8 +3015,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART5
-// <i> Default: ENABLE
-#define RTE_UART5_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART5_DMA_ENABLE   0
 
 // <o> UART5 DMA Selection
 //    <0=> DMA1(M55-HP)
@@ -2441,7 +3028,14 @@
 // <o> UART5 DMA IRQ priority <0-255>
 // <i> Defines UART5 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART5_DMA_IRQ_PRI  10
+#define RTE_UART5_DMA_IRQ_PRI  0
+
+// <o> UART5 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART5
+// <i> Default: DISABLE
+#define RTE_UART5_BLOCKING_MODE_ENABLE       0
 
 #endif //UART5
 
@@ -2475,7 +3069,7 @@
 // <o> UART6 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART6.
 // <i> Default: 0
-#define RTE_UART6_IRQ_PRI       10
+#define RTE_UART6_IRQ_PRI       0
 
 // <o> UART6 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2497,8 +3091,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART6
-// <i> Default: ENABLE
-#define RTE_UART6_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART6_DMA_ENABLE   0
 
 // <o> UART6 DMA Selection
 //    <0=> DMA1(M55-HP)
@@ -2510,7 +3104,14 @@
 // <o> UART6 DMA IRQ priority <0-255>
 // <i> Defines UART6 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART6_DMA_IRQ_PRI  10
+#define RTE_UART6_DMA_IRQ_PRI  0
+
+// <o> UART6 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART6
+// <i> Default: DISABLE
+#define RTE_UART6_BLOCKING_MODE_ENABLE       0
 
 #endif //UART6
 
@@ -2544,7 +3145,7 @@
 // <o> UART7 IRQ priority <0-255>
 // <i> Defines Interrupt priority for UART7.
 // <i> Default: 0
-#define RTE_UART7_IRQ_PRI       10
+#define RTE_UART7_IRQ_PRI       0
 
 // <o> UART7 CLK SOURCE
 //    <0=> CLK_38.4MHz
@@ -2566,8 +3167,8 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART7
-// <i> Default: ENABLE
-#define RTE_UART7_DMA_ENABLE   1
+// <i> Default: DISABLE
+#define RTE_UART7_DMA_ENABLE   0
 
 // <o> UART7 DMA Selection
 //    <0=> DMA1(M55-HP)
@@ -2579,7 +3180,14 @@
 // <o> UART7 DMA IRQ priority <0-255>
 // <i> Defines UART7 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_UART7_DMA_IRQ_PRI  10
+#define RTE_UART7_DMA_IRQ_PRI  0
+
+// <o> UART7 blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for UART7
+// <i> Default: DISABLE
+#define RTE_UART7_BLOCKING_MODE_ENABLE       0
 
 #endif //UART7
 
@@ -2615,14 +3223,14 @@
 // <o> LPUART IRQ priority <0-255>
 // <i> Defines Interrupt priority for LPUART.
 // <i> Default: 0
-#define RTE_LPUART_IRQ_PRI       10
+#define RTE_LPUART_IRQ_PRI       0
 
 // <o> LPUART DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPUART
-// <i> Default: ENABLE
-#define RTE_LPUART_DMA_ENABLE    1
+// <i> Default: DISABLE
+#define RTE_LPUART_DMA_ENABLE    0
 
 // <o> LPUART DMA Selection
 //    <0=> DMA2
@@ -2634,7 +3242,14 @@
 // <o> LPUART DMA IRQ priority <0-255>
 // <i> Defines LPUART DMA Interrupt priority
 // <i> Default: 0
-#define RTE_LPUART_DMA_IRQ_PRI   10
+#define RTE_LPUART_DMA_IRQ_PRI   0
+
+// <o> LPUART blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for LPUART
+// <i> Default: DISABLE
+#define RTE_LPUART_BLOCKING_MODE_ENABLE       0
 
 #endif //RTE_LPUART
 
@@ -2669,7 +3284,6 @@
 //    <0=> CLK_32768Hz
 //    <1=> CLK_128KHz
 //    <2=> EXT_CLK
-//    <3=> CLK_CASCADE
 // <i> Defines clock source for channel0.
 // <i> Default: CLK_32768Hz
 #define RTE_LPTIMER_CHANNEL0_CLK_SRC        (0)
@@ -2721,7 +3335,6 @@
 //    <0=> CLK_32768Hz
 //    <1=> CLK_128KHz
 //    <2=> EXT_CLK
-//    <3=> CLK_CASCADE
 // <i> Defines clock source for channel2.
 // <i> Default: CLK_32768Hz
 #define RTE_LPTIMER_CHANNEL2_CLK_SRC        (0)
@@ -2825,7 +3438,7 @@
 //    <1=> ENABLED
 // <i> Defines Driver A state for UT channel 0.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL0_DRIVER_A                0
+#define RTE_UTIMER_CHANNEL0_DRIVER_A                1
 
 // <o> CHANNEL0 DRIVER B
 //    <0=> DISABLED
@@ -2917,14 +3530,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 0.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL0_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL0_BUFFERING_TYPE          0
 
 // <o> CHANNEL0 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 0.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL0_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL0_BUFFER_OPERATION        0
 
 // <o> CHANNEL0 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -4521,7 +5134,7 @@
 //    <1=> ENABLED
 // <i> Defines Driver A state for UT channel 8.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL8_DRIVER_A                0
+#define RTE_UTIMER_CHANNEL8_DRIVER_A                1
 
 // <o> CHANNEL8 DRIVER B
 //    <0=> DISABLED
@@ -4551,7 +5164,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at compare match for UT channel 8.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_MATCH_COUNT  0
+#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_MATCH_COUNT  1
 
 // <o> CHANNEL8 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
@@ -4560,7 +5173,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at cycle end for UT channel 8.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_CYCLE_END    0
+#define RTE_UTIMER_CHANNEL8_DRV_A_OP_AT_CYCLE_END    2
 
 // <o> CHANNEL8 DRIVER B START STATE
 //    <0=> LOW
@@ -4613,14 +5226,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 8.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL8_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL8_BUFFERING_TYPE          0
 
 // <o> CHANNEL8 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 8.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL8_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL8_BUFFER_OPERATION        0
 
 // <o> CHANNEL8 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -4740,7 +5353,7 @@
 //    <1=> ENABLED
 // <i> Defines Driver B state for UT channel 9.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL9_DRIVER_B                0
+#define RTE_UTIMER_CHANNEL9_DRIVER_B                1
 
 // <o> CHANNEL9 DRIVER A START STATE
 //    <0=> LOW
@@ -4795,7 +5408,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver B state at compare match for UT channel 9.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_MATCH_COUNT  0
+#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_MATCH_COUNT  1
 
 // <o> CHANNEL9 DRIVER B AT CYCLE END
 //    <0=> NO CHANGE
@@ -4804,7 +5417,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver B state at cycle end for UT channel 9.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_CYCLE_END    0
+#define RTE_UTIMER_CHANNEL9_DRV_B_OP_AT_CYCLE_END    2
 
 // <o> CHANNEL9 BUFFER TRANSFER AT CREST
 //    <0=> DISABLE
@@ -4825,14 +5438,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 9.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL9_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL9_BUFFERING_TYPE          0
 
 // <o> CHANNEL9 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 9.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL9_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL9_BUFFER_OPERATION        0
 
 // <o> CHANNEL9 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -4840,7 +5453,7 @@
 //    <2=> DOUBLE BUFFER
 // <i> Defines buffer operation for UT channel 9 capture mode.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL9_BUFFERING_TYPE_A        2
+#define RTE_UTIMER_CHANNEL9_BUFFERING_TYPE_A        0
 
 // <o> CHANNEL9 CAPTURE BUFFER OPERATION FOR DRIVER B
 //    <0=> NO BUFFER
@@ -4945,7 +5558,7 @@
 //    <1=> ENABLED
 // <i> Defines Driver A state for UT channel 10.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL10_DRIVER_A                0
+#define RTE_UTIMER_CHANNEL10_DRIVER_A                1
 
 // <o> CHANNEL10 DRIVER B
 //    <0=> DISABLED
@@ -4975,7 +5588,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at compare match for UT channel 10.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_MATCH_COUNT  0
+#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_MATCH_COUNT  1
 
 // <o> CHANNEL10 DRIVER A AT CYCLE END
 //    <0=> NO CHANGE
@@ -4984,7 +5597,7 @@
 //    <3=> TOGGLE
 // <i> Defines Driver A state at cycle end for UT channel 10.
 // <i> Default: NO CHANGE
-#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_CYCLE_END    0
+#define RTE_UTIMER_CHANNEL10_DRV_A_OP_AT_CYCLE_END    2
 
 // <o> CHANNEL10 DRIVER B START STATE
 //    <0=> LOW
@@ -5037,14 +5650,14 @@
 //    <1=> DOUBLE BUFFER
 // <i> Defines buffer type for UT channel 10.
 // <i> Default: DOUBLE BUFFER
-#define RTE_UTIMER_CHANNEL10_BUFFERING_TYPE          1
+#define RTE_UTIMER_CHANNEL10_BUFFERING_TYPE          0
 
 // <o> CHANNEL10 BUFFER OPERATION
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines buffer operation for UT channel 10.
 // <i> Default: ENABLE
-#define RTE_UTIMER_CHANNEL10_BUFFER_OPERATION        1
+#define RTE_UTIMER_CHANNEL10_BUFFER_OPERATION        0
 
 // <o> CHANNEL10 CAPTURE BUFFER OPERATION FOR DRIVER A
 //    <0=> NO BUFFER
@@ -6194,30 +6807,64 @@
 // <h> DAC (Digital to analog converter )
 // <e> DAC0 (Digital to analog converter ) [Driver_DAC0]
 // <i> Configuration settings for Driver_DAC0 in component ::Drivers:DAC
-#define RTE_DAC0                   1
+#define RTE_DAC0                    1
 #if RTE_DAC0
-#define RTE_DAC0_INPUT_BYP_MUX_EN  0
-#define RTE_DAC0_BYP_VAL           (0x1FF)
-#define RTE_DAC0_CAP_CONT          (0X07)
-#define RTE_DAC0_RES_CONT          (0X0C)
+
+// <o> DAC input through bypass mode
+//    <0=> DISABLE (DAC input data source through DAC_IN reg)
+//    <1=> ENABLE (DAC input data source through DAC_REG1 reg)
+// <i> Default: DISABLE
+#define RTE_DAC0_INPUT_BYP_MUX_EN   0
+
+// <o> DAC converts two's complement to unsigned binary data
+//    <0=> DISABLE(input will be positive)
+//    DAC_out = (DAC_Input / 2^12) * Vref
+//    DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
+//    2^12 represents DAC supports 12 bit resolution.
+
+//    <1=> ENABLE (Input can be positive or negative)
+//    if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
+//    DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
+//    if dac_input > 2047 then,
+//    DAC_out = ((dac_input - 2047) / 2^12) *vref
+//    if dac_input < 2047 then,
+//    DAC_out = ((dac_input + 2047) / 2^12) *vref
+
+// <i> Default: DISABLE
 #define RTE_DAC0_TWOSCOMP_EN        0
-#define RTE_DAC0_IBIAS             (0X0C)
 #endif
 // </e> DAC0 (Digital to analog converter) [Driver_DAC0]
 
 // <e> DAC1 (Digital to analog converter ) [Driver_DAC1]
 // <i> Configuration settings for Driver_DAC1 in component ::Drivers:DAC
-#define RTE_DAC1                   1
+#define RTE_DAC1                    1
 #if RTE_DAC1
-#define RTE_DAC1_INPUT_BYP_MUX_EN  0
-#define RTE_DAC1_BYP_VAL           (0x1FF)
-#define RTE_DAC1_CAP_CONT          (0X07)
-#define RTE_DAC1_RES_CONT          (0X0C)
+
+// <o> DAC input through bypass mode
+//    <0=> DISABLE (DAC input data source through DAC_IN reg)
+//    <1=> ENABLE (DAC input data source through DAC_REG1 reg)
+// <i> Default: DISABLE
+#define RTE_DAC1_INPUT_BYP_MUX_EN   0
+
+// <o> DAC converts two's complement to unsigned binary data
+//    <0=> DISABLE(input will be positive)
+//    DAC_out = (DAC_Input / 2^12) * Vref
+//    DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
+//    2^12 represents DAC supports 12 bit resolution.
+
+//    <1=> ENABLE (Input can be positive or negative)
+//    if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
+//    DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
+//    if dac_input > 2047 then,
+//    DAC_out = ((dac_input - 2047) / 2^12) *vref
+//    if dac_input < 2047 then,
+//    DAC_out = ((dac_input + 2047) / 2^12) *vref
+
+// <i> Default: DISABLE
 #define RTE_DAC1_TWOSCOMP_EN        0
-#define RTE_DAC1_IBIAS             (0X0C)
 #endif
 // </e> DAC1 (Digital to Analog converter) [Driver_DAC1]
-// </h>
+// </h> DAC(Digital to analog converter)
 
 // <h> ADC (Analog to Digital Converter)
 // <e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
@@ -6318,13 +6965,6 @@
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
 #define RTE_ADC120_COMPARATOR_BIAS          2
-
-// <o> Resistive divider enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
-// <i> Default: ENABLE
-#define RTE_ADC120_VCM_RDIV_EN              1
 
 #endif
 // </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
@@ -6427,13 +7067,6 @@
 // <i> Default: ENABLE
 #define RTE_ADC121_COMPARATOR_BIAS          2
 
-// <o> Resistive divider enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
-// <i> Default: ENABLE
-#define RTE_ADC121_VCM_RDIV_EN              1
-
 #endif
 // </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
 
@@ -6535,13 +7168,6 @@
 // <i> Default: ENABLE
 #define RTE_ADC122_COMPARATOR_BIAS          2
 
-// <o> Resistive divider enable
-//     <0=> DISABLE
-//     <1=> ENABLE
-// <i> Defines "0": the resistive divider is off, common mode is not well defined,    "1": the resistive divider is on, common mode is VDD/2
-// <i> Default: ENABLE
-#define RTE_ADC122_VCM_RDIV_EN              1
-
 #endif
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 
@@ -6630,9 +7256,8 @@
 // <o> Bias Control
 //     <0=> 5 uA
 //     <1=> 6.25 uA
-//     <2=> 12 dB
 //     <3=> 7.5 uA
-//     <4=> 8.75 uA
+//     <7=> 8.75 uA
 // <i> Defines Bias control
 // <i> Default: 3
 #define RTE_ADC24_BIAS                     (3)
@@ -7788,7 +8413,7 @@
 // <i> Defines Interrupt priority for GPIO5_PIN7.
 // <i> Default: 0
 #define RTE_GPIO5_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO5 */
+#endif 
 // </e> GPIO5
 
 // <e> GPIO6
@@ -7841,7 +8466,7 @@
 // <i> Defines Interrupt priority for GPIO6_PIN7.
 // <i> Default: 0
 #define RTE_GPIO6_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO6 */
+#endif
 // </e> GPIO6
 
 // <e> GPIO7
@@ -7950,7 +8575,7 @@
 // <i> Defines Enable Glitch Filter
 // <i> Default: DISABLE
 #define RTE_GPIO7_PIN7_DMA_GLITCH_FILTER_ENABLE  0
-#endif /* RTE_GPIO7 */
+#endif
 // </e> GPIO7
 
 // <e> GPIO8
@@ -8059,7 +8684,7 @@
 // <i> Defines Enable Glitch Filter
 // <i> Default: DISABLE
 #define RTE_GPIO8_PIN7_DMA_GLITCH_FILTER_ENABLE  0
-#endif /* RTE_GPIO8 */
+#endif
 // </e> GPIO8
 
 // <e> GPIO9
@@ -8168,7 +8793,7 @@
 // <i> Defines Enable Glitch Filter
 // <i> Default: DISABLE
 #define RTE_GPIO9_PIN7_DMA_GLITCH_FILTER_ENABLE  0
-#endif /* RTE_GPIO9 */
+#endif
 // </e> GPIO9
 
 // <e> GPIO10
@@ -8221,7 +8846,7 @@
 // <i> Defines Interrupt priority for GPIO10_PIN7.
 // <i> Default: 0
 #define RTE_GPIO10_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO10 */
+#endif
 // </e> GPIO10
 
 // <e> GPIO11
@@ -8274,7 +8899,7 @@
 // <i> Defines Interrupt priority for GPIO11_PIN7.
 // <i> Default: 0
 #define RTE_GPIO11_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO11 */
+#endif 
 // </e> GPIO11
 
 // <e> GPIO12
@@ -8327,7 +8952,7 @@
 // <i> Defines Interrupt priority for GPIO12_PIN7.
 // <i> Default: 0
 #define RTE_GPIO12_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO12 */
+#endif
 // </e> GPIO12
 
 // <e> GPIO13
@@ -8380,7 +9005,7 @@
 // <i> Defines Interrupt priority for GPIO13_PIN7.
 // <i> Default: 0
 #define RTE_GPIO13_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO13 */
+#endif
 // </e> GPIO13
 
 // <e> GPIO14
@@ -8433,7 +9058,7 @@
 // <i> Defines Interrupt priority for GPIO14_PIN7.
 // <i> Default: 0
 #define RTE_GPIO14_PIN7_IRQ_PRIORITY     0
-#endif /* RTE_GPIO14 */
+#endif
 // </e> GPIO14
 
 // <e> LPGPIO
@@ -8538,7 +9163,7 @@
 // <i> Default: DISABLE
 #define RTE_LPGPIO_PIN7_DMA_GLITCH_FILTER_ENABLE  0
 
-#endif /* RTE_LPGPIO */
+#endif
 // </e> LPGPIO
 
 // </h> GPIO (general purpose input and output)
@@ -8569,7 +9194,7 @@
 // <o> PDM Fifo watermark <0-7>
 // <i> Defines number of PCM samples in the internal FIFO
 // <i> Default: 5
-#define RTE_PDM_FIFO_WATERMARK   4
+#define RTE_PDM_FIFO_WATERMARK   5
 
 #endif
 // </e> PDM (Pulse density modulation) [Driver_PDM]
@@ -8599,7 +9224,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPPDM
 // <i> Default: ENABLE
-#define RTE_LPPDM_DMA_ENABLE    1
+#define RTE_LPPDM_DMA_ENABLE    0
 #if RTE_LPPDM_DMA_ENABLE
 
 // <o> LPPDM DMA Selection
@@ -8645,6 +9270,13 @@
 // <i> Default: 20MHz
 #define RTE_CANFD_CLK_SPEED                 20000000
 
+// <o> CANFD blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for CANFD
+// <i> Default: DISABLE
+#define RTE_CANFD_BLOCKING_MODE_ENABLE      0
+
 #endif
 // </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
 // </h> CANFD (Controller Area Network - Fast Mode)
@@ -8661,7 +9293,15 @@
 //    <1=> BUS_WIDTH_4BIT
 // <i> Defines SDC0 size of bus width
 // <i> Default: BUS_WIDTH_4BIT
-#define RTE_SDC_BUS_WIDTH 0
+#define RTE_SDC_BUS_WIDTH 1
+
+//    <o> SDC CLOCK SELECT
+//    <0=> SDC_12_5MHz
+//    <1=> SDC_25MHz
+//    <2=> SDC_50MHz
+// <i> Defines SDC0 Clock select
+// <i> Default: 25MHz
+#define RTE_SDC_CLOCK_SELECT 1
 
 //    <o> SDC DMA SELECT
 //    <0=> SDMA
@@ -8670,9 +9310,44 @@
 // <i> Default: ADMA2
 #define RTE_SDC_DMA_SELECT 1
 
+// <o> SDC IRQ priority <0-255>
+// <i> Defines SDC Interrupt priority
+// <i> Default: 0
+#define RTE_SDC_IRQ_PRI                    0
+
+// <o> SDC WAKEUP IRQ priority <0-255>
+// <i> Defines SDC Wakeup Interrupt priority
+// <i> Default: 0
+#define RTE_SDC_WAKEUP_IRQ_PRI                    0
+
 #endif
 // </e> SDC0 (Secure Digital Controller 0) [Driver_SDC0]
 // </h> SDC (Secure Digital Controller)
+
+// <h> ETH_MAC (Ethernet MAC)
+// <e> ETH_MAC (Ethernet MAC) [Driver_ETH_MAC0]
+// <i> Configuration settings for Driver_ETH_MAC0 in component ::Drivers:ETH_MAC
+#define RTE_ETH_MAC   1
+
+#if RTE_ETH_MAC
+
+// <o> ETH MAC IRQ priority <0-255>
+// <i> Defines ETH MAC Interrupt priority
+// <i> Default: 0
+#define RTE_ETH_MAC_IRQ_PRIORITY                    0
+
+#endif
+// </e> ETH (Ethernet MAC) [Driver_ETH_MAC0]
+// </h> ETH (Ethernet MAC)
+
+// <h> Power Management (PM)
+// <o> Handle Spurious Wakeup
+//     <0=> Disable
+//     <1=> Enable
+// <i> define Handle Spurious Wakeup
+// <i> default: Enable
+#define PM_HANDLE_SPURIOUS_WAKEUP                 1
+// </h> Power Management (PM)
 
 #endif  /* __RTE_DEVICE_H */
 

@@ -26,14 +26,16 @@
 
 /* Camera fills the raw_image buffer.
  * Bayer->RGB conversion transfers into the rgb_image buffer.
+ * With MT9M114 camera this can be a RGB565 to RGB conversion.
  * Following steps (crop, interpolate, colour correct) all occur in the rgb_image buffer in-place.
  */
-
 static struct {
 	tiff_header_t tiff_header;
-	uint8_t image_data[CIMAGE_X * CIMAGE_Y * RGB_BYTES]; // 560x560x3 = 940,800
+	uint8_t image_data[CIMAGE_RGB_WIDTH_MAX * CIMAGE_RGB_HEIGHT_MAX * RGB_BYTES];
 } rgb_image __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));
-static uint8_t raw_image[CIMAGE_X * CIMAGE_Y] __attribute__((aligned(32),section(".bss.camera_frame_buf")));   // 560x560 = 313,600
+
+static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CIMAGE_Y]
+    __attribute__((aligned(32),section(".bss.camera_frame_buf")));
 
 #define FAKE_CAMERA 0
 
@@ -87,6 +89,7 @@ static int32_t log_gain_to_api(float gain)
     return expf(gain) * 0x1p16f;
 }
 
+#if CIMAGE_SW_GAIN_CONTROL
 static void process_autogain(void)
 {
     /* Simple "auto-exposure" algorithm. We work a single "gain" value
@@ -182,11 +185,11 @@ static void process_autogain(void)
         }
     }
 }
+#endif
 
 const uint8_t *get_image_data(int ml_width, int ml_height)
 {
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
-
 #if !FAKE_CAMERA
     camera_start(CAMERA_MODE_SNAPSHOT);
     camera_wait(100);
@@ -225,6 +228,7 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     roll = (roll + 1) % CIMAGE_Y;
 #endif
 
+#if !CIMAGE_USE_RGB565
     /* TIFF image can be dumped in Arm Development Studio using the command
      *
      *     dump value camera.tiff rgb_image
@@ -236,21 +240,38 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     // RGB conversion and frame resize
     dc1394_bayer_Simple(raw_image, rgb_image.image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
     tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
+#endif
 
-#if !FAKE_CAMERA
+#if !FAKE_CAMERA && CIMAGE_SW_GAIN_CONTROL
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
 #endif
-    if ((size_t) ml_width * ml_height * RGB_BYTES > sizeof raw_image) {
+
+    // Cropping and scaling
+#if CIMAGE_USE_RGB565
+    if ((size_t) ml_width * ml_height * RGB_BYTES > sizeof rgb_image.image_data) {
+        printf_err("Requested image does not fit to RGB buffer.\n");
         return NULL;
     }
-    // Cropping and scaling
-    crop_and_interpolate(rgb_image.image_data, CIMAGE_X, CIMAGE_Y, ml_width, ml_height, RGB_BYTES * 8);
+    crop_and_interpolate(raw_image, CIMAGE_X, CIMAGE_Y,
+                         rgb_image.image_data, ml_width, ml_height,
+                         RGB565_BYTES * 8);
+#else
+    if (ml_width > CIMAGE_X || ml_height > CIMAGE_Y) {
+        printf_err("Requested image can't be processed in place\n");
+        return NULL;
+    }
+    crop_and_interpolate(rgb_image.image_data, CIMAGE_X, CIMAGE_Y,
+                         rgb_image.image_data, ml_width, ml_height, RGB_BYTES * 8);
+#endif
     // Rewrite the TIFF header for the new size
     write_tiff_header(&rgb_image.tiff_header, ml_width, ml_height);
+
+#if CIMAGE_COLOR_CORRECTION
     tprof4 = Get_SysTick_Cycle_Count32();
     // Color correction for white balance
     white_balance(ml_width, ml_height, rgb_image.image_data, rgb_image.image_data);
     tprof4 = Get_SysTick_Cycle_Count32() - tprof4;
+#endif
     return rgb_image.image_data;
 }

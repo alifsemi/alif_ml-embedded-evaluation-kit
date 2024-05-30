@@ -40,6 +40,9 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
+set(ENSEMBLE_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Ensemble kits")
+set_property(CACHE ENSEMBLE_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0")
+
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
 set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
 set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as they have ITM. so no user-visible option
