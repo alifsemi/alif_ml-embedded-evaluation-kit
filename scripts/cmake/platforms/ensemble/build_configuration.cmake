@@ -35,14 +35,22 @@ function(set_platform_global_defaults)
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
 
     if (TARGET_REVISION STREQUAL "A")
+        # Sanity check DevKit, AppKit_Alpha1 and AppKit_Alpha2
+        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit_Alpha1") OR (TARGET_BOARD STREQUAL "AppKit_Alpha2")))
+            message(FATAL_ERROR "'A' revision possible TARGET_BOARD values are: DevKit, AppKit_Alpha1 and AppKit_Alpha2 but given value was ${TARGET_BOARD}")
+        endif()
         set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble-a PARENT_SCOPE)
     else()
+        # Sanity check DevKit, AppKit and DevKit_Baseboard
+        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_Baseboard")))
+            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit and DevKit_Baseboard but given value was ${TARGET_BOARD}")
+        endif()
         set(ENSEMBLE_CMSIS_PATH ${DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
     endif()
     set(BOARDLIB_PATH ${DEPENDENCY_ROOT_DIR}/boardlib PARENT_SCOPE)
 
     message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
-    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION}")
+    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION})")
 
     set(CMAKE_SYSTEM_PROCESSOR  cortex-m55)
 
