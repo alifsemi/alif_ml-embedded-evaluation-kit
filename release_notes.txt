@@ -1,8 +1,10 @@
 Changes in 24.05
     * Support for 24.05 NPU components and dependencies (core-driver, core-platform, Vela 3.12.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
-    * CMSIS pack version from 23.02 added
+    * CMSIS pack refresh - version from 23.02 added
     * Support for Arm® Corstone™-315 targets
-    * Minor improvements to help easier integration especially for cases where this project is a dependency for others
+    * Minor improvements to ease integration for cases where this project is a dependency
+    * CMake user configuration options refactored
+    * Dockerfile updates including FVP versions downloaded
 
 Changes in 23.11
     * Support for 23.11 NPU components and dependencies (core-driver, core-platform, Vela 3.10.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
