@@ -27,8 +27,12 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O0")
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
-    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-Ofast")
-    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-Ofast")
+    # -Ofast is not an option as we set the floating-point conformance mode
+    # to 'full' in the TensorFlow Lite Micro Makefile. Although this is done
+    # only for Arm Compiler, we stick with the '-O3' optimisation level for
+    # all compilers.
+    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O3")
+    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O3")
 endif()
 
 assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
@@ -71,7 +75,7 @@ else()
     if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
         set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR      "ethos_u")
-        set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH "u55")  # Currently only u55 is supported by TFLite Micro.
+        string(TOLOWER ${ETHOS_U_NPU_ID} TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH)
     endif()
 
     set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")

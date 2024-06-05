@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,6 +68,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                         "optimisation level")
         target_compile_options(${CMSIS_DSP_TARGET} PUBLIC -O3)
     endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
+    # For Arm Compiler the floating-point standard conformance is set to'std'
+    # by default. As we need NaN's and infinity definitions, we set the mode
+    # to 'full'.
+    target_compile_options(${CMSIS_DSP_TARGET} PRIVATE -ffp-mode=full)
 endif ()
 
 # 5. General compile definitions
