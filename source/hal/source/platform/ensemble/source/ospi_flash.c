@@ -30,10 +30,9 @@
 
 /* NOTE: According to IS25WX256 flash device datasheet fast read wait cycles
          can be set to 9 at 100MHz bus clock.
-         As of Ensemble CMSIS pack 1.0.0 the default wait cycles is 16
-         and it is set in IS25WX256.c
-         Set both sides to 9 when doing performance testing. */
-#define FLASH_DEVICE_FAST_READ_WAIT_CYCLES (16U)
+         For IS25WX512 minimum wait cycles is 10 (@100MHz)
+         See RTE_Device.h */
+#define FLASH_DEVICE_FAST_READ_WAIT_CYCLES (RTE_ISSI_FLASH_WAIT_CYCLES)
 
 extern ARM_DRIVER_FLASH ARM_Driver_Flash_(1);
 static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(1);
