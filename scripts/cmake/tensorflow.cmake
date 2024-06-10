@@ -40,6 +40,10 @@ assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
     set(TENSORFLOW_LITE_MICRO_TOOLCHAIN "armclang")
+    # Alif workaround as this version of Tensorflow Makefile does not set -ffp-mode=full
+    # This fixed in ML development version, so should be removed when rebasing with new version
+    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL} -ffp-mode=full")
+    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL} -ffp-mode=full")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(TENSORFLOW_LITE_MICRO_TOOLCHAIN "gcc")
 else ()
