@@ -74,7 +74,7 @@ int frame_crop(const void *input_fb,
 	//updating the input frame column start
 	ip_fb = (uint8_t *)input_fb + (col_start * ip_row_size * (bpp / 8));
 
-    op_fb = output_fb;
+    op_fb = (uint8_t *)output_fb;
 
     for(uint32_t col_cnt = 0; col_cnt < op_col_size; ++col_cnt) {
 
@@ -195,6 +195,18 @@ int resize_image_A(
     return 0;
 } // resizeImage()
 
+#if __ARM_FEATURE_MVE & 1
+#if defined(__clang__)
+#define MVE_GOOD (1)
+#elif defined (__GNUC__)
+#define MVE_GOOD (__GNUC_PREREQ(12,2))
+#else
+#define MVE_GOOD (1)
+#endif
+#else
+#define MVE_GOOD (0)
+#endif //__ARM_FEATURE_MVE
+
 int resize_image_RGB565(
     const uint8_t *srcImage,
     int srcWidth,
@@ -224,6 +236,11 @@ int resize_image_RGB565(
     //dstWidth still needed as is
     //dstHeight shouldn't be scaled
 
+#if MVE_GOOD
+    const uint32_t corner_offset_vals[4] = { 0, RGB565_BYTES, srcWidth, srcWidth + RGB565_BYTES };
+    const uint32x4_t corner_offsets = vldrwq_u32((uint32_t*)corner_offset_vals);
+#endif
+
     const uint8_t *s;
     uint8_t *d;
 
@@ -239,15 +256,53 @@ int resize_image_RGB565(
         // start at 1/2 pixel in to account for integer downsampling which might miss pixels
         src_x_accum = FRAC_VAL / 2;
         for (x = 0; x < dstWidth; x++) {
-            uint32_t tx;
             // do indexing computations
-            tx = (src_x_accum >> FRAC_BITS) * RGB565_BYTES;
+            const uint32_t tx = (src_x_accum >> FRAC_BITS) * RGB565_BYTES;
             x_frac = src_x_accum & FRAC_MASK;
             nx_frac = FRAC_VAL - x_frac; // x fraction and 1.0 - x fraction
             src_x_accum += src_x_frac;
             __builtin_prefetch(&s[tx + 64]);
             __builtin_prefetch(&s[tx + srcWidth + 64]);
 
+#if MVE_GOOD
+            uint32x4_t corners = vldrhq_gather_offset_u32((const uint16_t *) (s + tx), corner_offsets);
+
+            // Reinterpret to uint8 and fill LSB bits
+            uint8x16_t blue = vreinterpretq_u8(corners);
+            blue = vshlq_n(blue, 3);
+            blue = vsriq(blue, blue, 5);
+
+            corners = vshrq_n_u32(corners, 3);
+            uint8x16_t green = vreinterpretq_u8(corners);
+            green = vsriq(green, green, 6);
+
+            corners = vshrq_n_u32(corners, 5);
+            uint8x16_t red = vreinterpretq_u8(corners);
+            red = vsriq(red, red, 5);
+
+            // We now have 4 corners packed in separate red, green blue registers
+            // Permute so we have red green blue packed in separate corner registers
+            uint8x16x4_t rgbx = { red, green, blue, vuninitializedq_u8() };
+            uint8_t swapbuf[64];
+            vst4q_u8(swapbuf, rgbx);
+            uint32x4_t p00 = vldrbq_u32(swapbuf + 0);
+            uint32x4_t p10 = vldrbq_u32(swapbuf + 16);
+            uint32x4_t p01 = vldrbq_u32(swapbuf + 32);
+            uint32x4_t p11 = vldrbq_u32(swapbuf + 48);
+
+            p00 = vmulq(p00, nx_frac);
+            p00 = vmlaq(p00, p10, x_frac);
+            p00 = vrshrq(p00, FRAC_BITS);
+            p01 = vmulq(p01, nx_frac);
+            p01 = vmlaq(p01, p11, x_frac);
+            p01 = vrshrq(p01, FRAC_BITS);
+            p00 = vmulq(p00, ny_frac);
+            p00 = vmlaq(p00, p01, y_frac);
+            p00 = vrshrq(p00, FRAC_BITS);
+            vstrbq_p_u32(d, p00, vctp32q(RGB_BYTES));
+
+            d += RGB_BYTES;
+#else
             //interpolate and write out
             uint16_t rgb565_p00 = *((uint16_t*)&s[tx]);
             uint16_t rgb565_p10 = *((uint16_t*)&s[tx + RGB565_BYTES]);
@@ -283,7 +338,6 @@ int resize_image_RGB565(
             rgb_p01[0] = (rgb565_p01 & 0xF8) | ((rgb565_p01 & 0xE0) >> 5);
             rgb_p11[0] = (rgb565_p11 & 0xF8) | ((rgb565_p11 & 0xE0) >> 5);
 
-            tx += RGB565_BYTES;
             for (int color = 0; color < RGB_BYTES; color++)
             {
                 uint32_t p00, p01, p10, p11;
@@ -297,6 +351,7 @@ int resize_image_RGB565(
                 p00 = ((p00 * ny_frac) + (p01 * y_frac) + FRAC_VAL / 2) >> FRAC_BITS; //top + bottom
                 *d++ = (uint8_t)p00; // store new pixel
             }
+#endif
         } // for x
     } // for y
     return 0;
