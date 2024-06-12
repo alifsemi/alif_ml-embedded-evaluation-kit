@@ -127,7 +127,7 @@ foreach(use_case ${USE_CASES})
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 
-    set(DEFAULT_MODEL_DIR ${MLEK_RESOURCES_DIR}/${use_case})
+    set(DEFAULT_MODEL_DIR ${RESOURCES_PATH}/${use_case})
     set(DEFAULT_TEST_DATA_DIR ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)

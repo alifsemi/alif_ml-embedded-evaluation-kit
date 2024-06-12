@@ -265,8 +265,8 @@ function(setup_source_generator)
     # If a virtual env has been created in the resources_downloaded directory,
     # use it for source generator. Else, fall back to creating a virtual env
     # in the current build directory.
-    if (EXISTS ${MLEK_RESOURCES_DIR}/env)
-        set(DEFAULT_VENV_DIR ${MLEK_RESOURCES_DIR}/env)
+    if (EXISTS ${RESOURCES_PATH}/env)
+        set(DEFAULT_VENV_DIR ${RESOURCES_PATH}/env)
     else()
         set(DEFAULT_VENV_DIR ${CMAKE_BINARY_DIR}/venv)
     endif()

@@ -32,7 +32,7 @@ USER_OPTION(LOG_LEVEL "Log level for the application"
     STRING)
 
 ## TensorFlow options
-USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources"
+USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources."
     "${MLEK_DEPENDENCY_ROOT_DIR}/tensorflow"
     PATH)
 
@@ -44,11 +44,11 @@ USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS "Select if TPIP downloads shou
     OFF
     BOOL)
 
-USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be added to a list of targets"
+USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be added to a list of targets."
     ON
     BOOL)
 
-USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, simple_platform and native"
+USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, simple_platform and native."
     mps3
     STRING)
 
@@ -60,6 +60,10 @@ USER_OPTION(CPU_PROFILE_ENABLED "Output CPU performance profiling information. S
     OFF
     BOOL)
 
-USER_OPTION(USE_SINGLE_INPUT "Select if a use case should execute using a default known input file"
+USER_OPTION(USE_SINGLE_INPUT "Select if a use case should execute using a default known input file."
     OFF
     BOOL)
+
+USER_OPTION(RESOURCES_PATH "Path to use case models that have been compiled with Vela."
+    "${MLEK_ROOT}/resources_downloaded"
+    PATH)

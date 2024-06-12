@@ -284,6 +284,11 @@ inference_runner use-case.
 - `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
 `BUILD_FVP_TESTS` option is switched `ON`.
 
+- `RESOURCES_PATH`: The path to the resources downloaded by the set_up_default_resources.py script
+  and compiled using Vela.  This can be set if this script was run using the `--downloads-dir` flag to
+  override the default location for these models.  Defaults to `./resources_downloaded` relative to the
+  root of this project.
+
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
 Also, when setting any of the CMake configuration parameters that expect a directory, or file, path, **use absolute

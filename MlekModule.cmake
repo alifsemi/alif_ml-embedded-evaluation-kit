@@ -21,10 +21,10 @@
 include_guard(GLOBAL)
 
 # Variables used by all other scripts
-set(MLEK_SCRIPTS_DIR         ${CMAKE_CURRENT_LIST_DIR}/scripts)
-set(MLEK_DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/dependencies)
-set(MLEK_RESOURCES_DIR       ${CMAKE_CURRENT_LIST_DIR}/resources_downloaded)
-set(MLEK_HAL_PLATFORM_DIR    ${CMAKE_CURRENT_LIST_DIR}/source/hal/source/platform)
+set(MLEK_ROOT                ${CMAKE_CURRENT_LIST_DIR})
+set(MLEK_SCRIPTS_DIR         ${MLEK_ROOT}/scripts)
+set(MLEK_DEPENDENCY_ROOT_DIR ${MLEK_ROOT}/dependencies)
+set(MLEK_HAL_PLATFORM_DIR    ${MLEK_ROOT}/source/hal/source/platform)
 set(MLEK_DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
 set(MLEK_CMAKE_TOOLCHAIN_DIR ${MLEK_SCRIPTS_DIR}/cmake/toolchains)
 set(MLEK_CORE_PLATFORM_DIR   ${MLEK_DEPENDENCY_ROOT_DIR}/core-platform)
@@ -59,7 +59,7 @@ endif()
 include(common_opts)
 
 # Check if the resources_downloaded needs update.
-check_update_public_resources(${MLEK_RESOURCES_DIR})
+check_update_public_resources(${RESOURCES_PATH})
 
 # Find the platform's build configuration and then add it.
 add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
