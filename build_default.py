@@ -31,12 +31,12 @@ from pathlib import Path
 from set_up_default_resources import PathsConfig
 from set_up_default_resources import SetupConfig
 from set_up_default_resources import default_downloads_path
-from set_up_default_resources import default_npu_config_names
+from set_up_default_resources import default_npu_configs
 from set_up_default_resources import default_requirements_path
 from set_up_default_resources import default_use_case_resources_path
 from set_up_default_resources import get_default_npu_config_from_name
 from set_up_default_resources import set_up_resources
-from set_up_default_resources import valid_npu_config_names
+from set_up_default_resources import valid_npu_configs
 
 
 @dataclass(frozen=True)
@@ -249,8 +249,8 @@ def run(build_config: BuildConfig):
         f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
         f" -DTARGET_SUBSYSTEM={target_subsystem}"
         f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
-        f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
-        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
+        f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
+        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
         " -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
     )
 
@@ -288,8 +288,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
-            {valid_npu_config_names}""",
-        default=default_npu_config_names[0],
+            {valid_npu_configs.names}""",
+        default=default_npu_configs.names[0],
     )
     parser.add_argument(
         "--make-jobs",

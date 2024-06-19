@@ -26,9 +26,9 @@ import re
 import shutil
 import subprocess
 import sys
+import textwrap
 import typing
 import urllib.request
-import textwrap
 import venv
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
@@ -37,47 +37,50 @@ from pathlib import Path
 from urllib.error import URLError
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
+from scripts.py.vela_configs import NpuConfigs, NpuConfig
 
 # Supported version of Python and Vela
-
 VELA_VERSION = "3.12.0"
 py3_version_minimum = (3, 10)
 
+# If true, install Vela from source using VELA_VERSION as a git branch/tag name
+# If false, install Vela package from PyPi using VELA_VERSION as the version
+INSTALL_VELA_FROM_SOURCE = False
+
 # Valid NPU configurations:
-valid_npu_config_names = [
-    "ethos-u55-32",
-    "ethos-u55-64",
-    "ethos-u55-128",
-    "ethos-u55-256",
-    "ethos-u65-256",
-    "ethos-u65-512",
-]
+valid_npu_configs = NpuConfigs.create(
+    *(
+        NpuConfig(
+            name_prefix="ethos-u55",
+            macs=macs,
+            processor_id="U55",
+            prefix_id="H",
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U55_High_End_Embedded",
+        ) for macs in (32, 64, 128, 256)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u65",
+            macs=macs,
+            processor_id="U65",
+            prefix_id="Y",
+            memory_mode="Dedicated_Sram",
+            system_config="Ethos_U65_High_End"
+        ) for macs in (256, 512)
+    )
+)
 
 # Default NPU configurations (these are always run when the models are optimised)
-default_npu_config_names = [valid_npu_config_names[2], valid_npu_config_names[4]]
-
-# The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
-# The internal SRAM size for Corstone-310 implementation on MPS3 specified by AN555
-# is 4MB, but we are content with the 2MB specified below.
-MPS3_MAX_SRAM_SZ = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
+default_npu_configs = NpuConfigs.create(
+    valid_npu_configs.get("ethos-u55", 128),
+    valid_npu_configs.get("ethos-u65", 256),
+)
 
 current_file_dir = Path(__file__).parent.resolve()
 default_use_case_resources_path = current_file_dir / 'scripts' / 'py' / 'use_case_resources.json'
 default_requirements_path = current_file_dir / 'scripts' / 'py' / 'requirements.txt'
 default_downloads_path = current_file_dir / 'resources_downloaded'
-
-
-@dataclass(frozen=True)
-class NpuConfig:
-    """
-    Represent an NPU configuration for Vela
-    """
-    config_name: str
-    memory_mode: str
-    system_config: str
-    ethos_u_npu_id: str
-    ethos_u_config_id: str
-    arena_cache_size: str
 
 
 @dataclass(frozen=True)
@@ -219,43 +222,19 @@ def get_default_npu_config_from_name(
 
     Returns:
     -------
-    NPUConfig: An NPU config named tuple populated with defaults for the given
-               config name
+    NpuConfig: An NpuConfig populated with defaults for the given config name
     """
-    if config_name not in valid_npu_config_names:
+    npu_config = valid_npu_configs.get_by_name(config_name)
+
+    if not npu_config:
         raise ValueError(
             f"""
             Invalid Ethos-U NPU configuration.
-            Select one from {valid_npu_config_names}.
+            Select one from {valid_npu_configs.names}.
             """
         )
 
-    strings_ids = ["ethos-u55-", "ethos-u65-"]
-    processor_ids = ["U55", "U65"]
-    prefix_ids = ["H", "Y"]
-    memory_modes = ["Shared_Sram", "Dedicated_Sram"]
-    system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
-    memory_modes_arena = {
-        # For shared SRAM memory mode, we use the MPS3 SRAM size by default.
-        "Shared_Sram": MPS3_MAX_SRAM_SZ if arena_cache_size <= 0 else arena_cache_size,
-        # For dedicated SRAM memory mode, we do not override the arena size. This is expected to
-        # be defined in the Vela configuration file instead.
-        "Dedicated_Sram": None if arena_cache_size <= 0 else arena_cache_size,
-    }
-
-    for i, string_id in enumerate(strings_ids):
-        if config_name.startswith(string_id):
-            npu_config_id = config_name.replace(string_id, prefix_ids[i])
-            return NpuConfig(
-                config_name=config_name,
-                memory_mode=memory_modes[i],
-                system_config=system_configs[i],
-                ethos_u_npu_id=processor_ids[i],
-                ethos_u_config_id=npu_config_id,
-                arena_cache_size=memory_modes_arena[memory_modes[i]],
-            )
-
-    return None
+    return npu_config.overwrite_arena_cache_size(arena_cache_size)
 
 
 def remove_tree_dir(dir_path: Path):
@@ -426,7 +405,7 @@ def run_vela(
 
     # We want the name to include the configuration suffix. For example: vela_H128,
     # vela_Y512 etc.
-    new_suffix = "_vela_" + config.ethos_u_config_id + ".tflite"
+    new_suffix = "_vela_" + config.config_id + ".tflite"
     new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
 
     skip_optimisation = new_vela_optimised_model_path.is_file()
@@ -595,7 +574,13 @@ def set_up_python_venv(
         call_command(command)
 
     # Make sure to have all the main requirements
-    requirements = [f"ethos-u-vela=={VELA_VERSION}"]
+    if INSTALL_VELA_FROM_SOURCE:
+        requirements = [
+            f"git+https://review.mlplatform.org/ml/ethos-u/ethos-u-vela.git@{VELA_VERSION}"
+        ]
+    else:
+        requirements = [f"ethos-u-vela=={VELA_VERSION}"]
+
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
     for req in requirements:
@@ -728,7 +713,7 @@ def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Pa
             env_activate,
             setup_config.arena_cache_size,
             npu_config_names=list(
-                set(default_npu_config_names + list(setup_config.additional_npu_config_names))
+                set(default_npu_configs.names + list(setup_config.additional_npu_config_names))
             )
         )
 
@@ -754,7 +739,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--additional-ethos-u-config-name",
         help=f"""Additional (non-default) configurations for Vela:
-                        {valid_npu_config_names}""",
+                        {valid_npu_configs.names}""",
         default=[],
         action="append",
     )
