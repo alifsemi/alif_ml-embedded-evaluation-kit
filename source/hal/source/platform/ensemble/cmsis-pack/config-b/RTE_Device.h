@@ -696,7 +696,7 @@
 // <o> Select camera sensor MT9M114 MIPI CSI clock source division [Divisor] <2-511>
 // <i> Defines camera sensor MT9M114 MIPI CSI clock source division
 // <i> Default: 20
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_CLK_SCR_DIV             19
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_CLK_SCR_DIV             20
 
 // <o> Select camera sensor MT9M114 MIPI reset pin number
 // <i> Defines camera sensor MT9M114 MIPI reset pin number
@@ -9300,8 +9300,8 @@
 //    <1=> SDC_25MHz
 //    <2=> SDC_50MHz
 // <i> Defines SDC0 Clock select
-// <i> Default: 25MHz
-#define RTE_SDC_CLOCK_SELECT 1
+// <i> Default: 50MHz
+#define RTE_SDC_CLOCK_SELECT 2
 
 //    <o> SDC DMA SELECT
 //    <0=> SDMA
@@ -9309,6 +9309,13 @@
 // <i> Defines SDC0 DMA select
 // <i> Default: ADMA2
 #define RTE_SDC_DMA_SELECT 1
+
+//    <o> SDC IRQ MODE SELECT
+//    <0=> Polling Mode
+//    <1=> IRQ Mode
+// <i> Defines SDC IRQ MODE select
+// <i> Default: IRQ MODE
+#define RTE_SDC_IRQ_MODE_SELECT 1
 
 // <o> SDC IRQ priority <0-255>
 // <i> Defines SDC Interrupt priority
