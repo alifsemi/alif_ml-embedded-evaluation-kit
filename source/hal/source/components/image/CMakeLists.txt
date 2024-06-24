@@ -62,6 +62,10 @@ target_sources(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     source/ensemble/src/camera.c
     )
 
+target_compile_definitions(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
+    PUBLIC
+    ENSEMBLE_CAMERA_MODULE_${ENSEMBLE_CAMERA_MODULE}=1)
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)

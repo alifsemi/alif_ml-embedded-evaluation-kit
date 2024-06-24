@@ -26,8 +26,12 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O0")
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
-    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-Ofast")
-    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-Ofast")
+    # -Ofast is not an option as we set the floating-point conformance mode
+    # to 'full' in the TensorFlow Lite Micro Makefile. Although this is done
+    # only for Arm Compiler, we stick with the '-O3' optimisation level for
+    # all compilers.
+    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O3")
+    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O3")
 endif()
 
 assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
@@ -36,6 +40,10 @@ assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
     set(TENSORFLOW_LITE_MICRO_TOOLCHAIN "armclang")
+    # Alif workaround as this version of Tensorflow Makefile does not set -ffp-mode=full
+    # This fixed in ML development version, so should be removed when rebasing with new version
+    set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL} -ffp-mode=full")
+    set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL} -ffp-mode=full")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(TENSORFLOW_LITE_MICRO_TOOLCHAIN "gcc")
 else ()

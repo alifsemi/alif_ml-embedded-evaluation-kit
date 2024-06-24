@@ -3,7 +3,7 @@
   "cmsis-dsp": "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip",
   "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/bfc54edb61e873039ec0857cacc40df36b1d644e.zip",
   "cmsis-ensemble-a": "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/5bfce4020fa27d91fcd950725d35ecee8ba364ad.zip",
-  "cmsis-ensemble": "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/2a2c7c7c88b3d7fa3501d9dd51c632b946baf426.zip",
+  "cmsis-ensemble": "https://github.com/alifsemi/alif_ensemble-cmsis-dfp/archive/633bbb1ee9cf07ea671f6b5f56132e43d53e0130.zip",
   "boardlib": "https://github.com/alifsemi/alif_boardlib/archive/ec601aa027932c65f9856a3a30a8bfc2914226ce.zip",
   "core-driver": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-23.11.tar.gz",
   "core-platform": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-23.11.tar.gz",
