@@ -75,7 +75,11 @@ else()
     if(ETHOS_U_NPU_ENABLED)
         # Arm Ethos-U55 NPU is the co-processor for ML workload:
         set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR      "ethos_u")
-        string(TOLOWER ${ETHOS_U_NPU_ID} TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH)
+        if(${ETHOS_U_NPU_ID} STREQUAL "U65")
+            set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH "u65")
+        else()
+            set(TENSORFLOW_LITE_MICRO_CO_PROCESSOR_ARCH "u55")
+        endif ()
     endif()
 
     set(TENSORFLOW_LITE_MICRO_OPTIMIZED_KERNEL  "cmsis_nn")
