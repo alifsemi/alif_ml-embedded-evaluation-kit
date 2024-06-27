@@ -1,9 +1,9 @@
 /* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -130,6 +130,17 @@ int32_t receive_voice_data(void *data, uint32_t data_len)
 #ifdef USE_PDM_MICS
 #include "Driver_PDM.h"
 
+/* channel number used for channel configuration and status register */
+#define CHANNEL_4  4
+#define CHANNEL_5  5
+
+/* PDM Channel configurations */
+#define PDM_PHASE             0x0000001F
+#define PDM_GAIN              0x00000800
+#define PDM_PEAK_DETECT_TH    0x00060002
+#define PDM_PEAK_DETECT_ITV   0x0004002D
+#define PDM_IIR_COEF          0x00000004
+
 static void PDM_fifo_callback(uint32_t event)
 {
     if(event & ARM_PDM_EVENT_ERROR )
@@ -214,7 +225,7 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
     }
 
     /* To select the PDM channel 4 and channel 5 */
-    ret = PDMdrv->Control(ARM_PDM_SELECT_CHANNEL, (ARM_PDM_MASK_CHANNEL_4 | ARM_PDM_MASK_CHANNEL_5));
+    ret = PDMdrv->Control(ARM_PDM_SELECT_CHANNEL, (ARM_PDM_MASK_CHANNEL_4 | ARM_PDM_MASK_CHANNEL_5), 0);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM channel select control failed\n");
         return -1;
@@ -228,7 +239,7 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
         return -1;
     }
 
-    ret = PDMdrv->Control(ARM_PDM_MODE, (uint32_t)mode);
+    ret = PDMdrv->Control(ARM_PDM_MODE, (uint32_t)mode, 0);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM mode control failed\n");
         return -1;
@@ -242,28 +253,52 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
         return -1;
     }
 
-    ret = PDMdrv->Control(ARM_PDM_SELECT_RESOLUTION, (uint32_t)pdm_resolution);
+    ret = PDMdrv->Control(ARM_PDM_SELECT_RESOLUTION, (uint32_t)pdm_resolution, 0);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM resolution control failed\n");
         return -1;
     }
 
     /* Select the DC blocking IIR filter */
-    ret = PDMdrv->Control(ARM_PDM_BYPASS_IIR_FILTER, 1);
+    ret = PDMdrv->Control(ARM_PDM_BYPASS_IIR_FILTER, 1, 0);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM DC blocking IIR control failed\n");
         return -1;
     }
 
+    /* Set Channel 4 Phase value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, CHANNEL_4, PDM_PHASE);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 4 Gain value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, CHANNEL_4, PDM_GAIN);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 4 Peak detect threshold value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, CHANNEL_4, PDM_PEAK_DETECT_TH);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 4 Peak detect ITV value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, CHANNEL_4, PDM_PEAK_DETECT_ITV);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
     /* Channel 4 configuration values */
     PDM_CH_CONFIG pdm_coef_reg;
-    pdm_coef_reg.ch_num              = 4;    /* Channel 4 */
+    pdm_coef_reg.ch_num              = CHANNEL_4;       /* Channel 4 */
     memcpy(pdm_coef_reg.ch_fir_coef, ch_fir, sizeof(pdm_coef_reg.ch_fir_coef)); /* Channel 4 fir coefficient */
-    pdm_coef_reg.ch_iir_coef         = 0x00000004;   /* Channel IIR Filter Coefficient */
-    pdm_coef_reg.ch_phase            = 0x0000001F;   /* Channel Phase Control */
-    pdm_coef_reg.ch_gain             = 0x00000800;   /* Channel gain control */
-    pdm_coef_reg.ch_peak_detect_th   = 0x00060002;   /* Channel Peak Detector Threshold */
-    pdm_coef_reg.ch_peak_detect_itv  = 0x0004002D;   /* Channel Peak Detector Interval */
+    pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
 
     ret = PDMdrv->Config(&pdm_coef_reg);
     if(ret != ARM_DRIVER_OK){
@@ -271,14 +306,38 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
         return -1;
     }
 
+    /* Set Channel 5 Phase value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, CHANNEL_5, PDM_PHASE);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 5 Gain value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, CHANNEL_5, PDM_GAIN);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 5 Peak detect threshold value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, CHANNEL_5, PDM_PEAK_DETECT_TH);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
+    /* Set Channel 5 Peak detect ITV value */
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, CHANNEL_5, PDM_PEAK_DETECT_ITV);
+    if(ret != ARM_DRIVER_OK){
+        printf("\r\n Error: PDM Channel_Config failed\n");
+        return -1;
+    }
+
     /* Channel 5 configuration values */
-    pdm_coef_reg.ch_num              = 5;    /* Channel 5 */
+    pdm_coef_reg.ch_num              = CHANNEL_5;       /* Channel 5 */
     memcpy(pdm_coef_reg.ch_fir_coef, ch_fir, sizeof(pdm_coef_reg.ch_fir_coef)); /* Channel 5 fir coefficient */
-    pdm_coef_reg.ch_iir_coef         = 0x00000004;   /* Channel IIR Filter Coefficient */
-    pdm_coef_reg.ch_phase            = 0x0000001F;   /* Channel Phase Control */
-    pdm_coef_reg.ch_gain             = 0x00000800;   /* Channel gain control */
-    pdm_coef_reg.ch_peak_detect_th   = 0x00060002;   /* Channel Peak Detector Threshold */
-    pdm_coef_reg.ch_peak_detect_itv  = 0x0004002D;   /* Channel Peak Detector Interval */
+    pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
 
     ret = PDMdrv->Config(&pdm_coef_reg);
     if(ret != ARM_DRIVER_OK){
