@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,9 +107,10 @@ TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdMode
 {
     REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_IFM_FILES);
     for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
-        auto input_goldenFV = GetIfmDataArray(i);
-        ;
-        auto output_goldenFV = GetOfmDataArray(i);
+        auto input_goldenFV = reinterpret_cast<const int8_t*>(
+                GetIfmDataArray(i));
+        auto output_goldenFV = reinterpret_cast<const int8_t*>(
+                GetOfmDataArray(i));
 
         DYNAMIC_SECTION("Executing inference with re-init")
         {

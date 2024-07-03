@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,9 +42,8 @@ bool RunInference(arm::app::Model& model, const int8_t* imageData)
 template <typename T>
 void TestInference(int imageIdx, arm::app::Model& model)
 {
-
-    auto image    = test::GetIfmDataArray(imageIdx);
-    auto goldenFV = test::GetOfmDataArray(imageIdx);
+    auto image    = reinterpret_cast<const int8_t *>(test::GetIfmDataArray(imageIdx));
+    auto goldenFV = reinterpret_cast<const int8_t *>(test::GetOfmDataArray(imageIdx));
 
     REQUIRE(RunInference(model, image));
 

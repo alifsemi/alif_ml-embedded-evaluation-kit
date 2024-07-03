@@ -1,4 +1,5 @@
-#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +83,14 @@ env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
+@dataclass
+class IofmParams:
+    """
+    Parameters representing a single tensor (feature map) configuration.
+    """
+    var_name: str
+    size: int
+    data_type: str
 
 # pylint: enable=duplicate-code
 @dataclass
@@ -91,20 +100,34 @@ class TestDataParams:
     """
     ifm_count: int
     ofm_count: int
-    ifm_var_names: typing.List[str]
-    ifm_var_sizes: typing.List[int]
-    ofm_var_names: typing.List[str]
-    ofm_var_sizes: typing.List[int]
-    data_type: str
+    ifm_params: typing.List[IofmParams]
+    ofm_params: typing.List[IofmParams]
 
 
-@dataclass
-class IofmParams:
+def get_data_type_str(filename: Path) -> str:
     """
-    Template params for iofmdata.cc
+    Gets the C data type string from a numpy array file path.
+    @param filename:    File path to the numpy file.
+    @return             String representing C data type.
     """
-    var_name: str
-    data_type: str
+
+    dtype = np.load(Path(parsed_args.data_folder_path) / filename).dtype
+
+    data_type = None
+    if dtype == np.int8:
+        data_type = 'int8_t'
+    elif dtype == np.uint8:
+        data_type = 'uint8_t'
+    elif dtype == np.int16:
+        data_type = 'int16_t'
+    elif dtype == np.int32:
+        data_type = 'int32_t'
+    elif dtype == np.float32:
+        data_type = 'float'
+    elif data_type is None:
+        raise ValueError(f'Numpy type {dtype} is not supported.')
+
+    return data_type
 
 
 def write_hpp_file(
@@ -130,11 +153,8 @@ def write_hpp_file(
         .stream(common_template_header=hdr,
                 ifm_count=template_params.ifm_count,
                 ofm_count=template_params.ofm_count,
-                ifm_var_names=template_params.ifm_var_names,
-                ifm_var_sizes=template_params.ifm_var_sizes,
-                ofm_var_names=template_params.ofm_var_names,
-                ofm_var_sizes=template_params.ofm_var_sizes,
-                data_type=template_params.data_type,
+                ifm_params=template_params.ifm_params,
+                ofm_params=template_params.ofm_params,
                 namespaces=parsed_args.namespaces) \
         .dump(str(header_file_path))
 
@@ -142,9 +162,8 @@ def write_hpp_file(
         .get_template('TestData.cc.template') \
         .stream(common_template_header=hdr,
                 include_h=header_filename,
-                ifm_var_names=template_params.ifm_var_names,
-                ofm_var_names=template_params.ofm_var_names,
-                data_type=template_params.data_type,
+                ifm_params=template_params.ifm_params,
+                ofm_params=template_params.ofm_params,
                 namespaces=parsed_args.namespaces) \
         .dump(str(cc_file_path))
 
@@ -169,8 +188,9 @@ def write_individual_cc_file(
     hdr = GenUtils.gen_header(env, header_template_file, filename)
 
     # Convert the image and write it to the cc file
-    fm_data = (np.load(Path(parsed_args.data_folder_path) / filename)).flatten()
-    type(fm_data.dtype)
+    npy_filepath = Path(parsed_args.data_folder_path) / filename
+    fm_data = (np.load(npy_filepath)).flatten()
+
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(fm_data, math.ceil(len(fm_data) / 20)))
 
@@ -197,19 +217,17 @@ def get_npy_vec_size(filename: str) -> int:
     return data.size * data.dtype.itemsize
 
 
-def write_cc_files(args, count, iofm_data_type, add_usecase_fname, prefix):
+def write_cc_files(args, count, add_usecase_fname, prefix) -> typing.List[IofmParams]:
     """
     Write all cc files
 
     @param args:                User-provided args
     @param count:               File count
-    @param iofm_data_type:      Data type
     @param add_usecase_fname:   Use case suffix
     @param prefix:              Prefix (ifm/ofm)
     @return:                    Names and sizes of generated C++ arrays
     """
-    array_names = []
-    sizes = []
+    fm_params_list = []
 
     header_filename = get_header_filename(add_usecase_fname)
 
@@ -223,19 +241,20 @@ def write_cc_files(args, count, iofm_data_type, add_usecase_fname, prefix):
         filename = base_name + ".npy"
         array_name = base_name + add_usecase_fname
         cc_filename = Path(args.source_folder_path) / (array_name + ".cc")
-        array_names.append(array_name)
 
         template_params = IofmParams(
             var_name=array_name,
-            data_type=iofm_data_type,
+            size=get_npy_vec_size(filename),
+            data_type=get_data_type_str(filename)
         )
 
         write_individual_cc_file(
             template_params, header_filename, filename, cc_filename, args.license_template
         )
-        sizes.append(get_npy_vec_size(filename))
 
-    return array_names, sizes
+        fm_params_list.append(template_params)
+
+    return fm_params_list
 
 
 def get_header_filename(use_case_filename):
@@ -272,18 +291,12 @@ def main(args):
     ifms_count = int(len(list(Path(args.data_folder_path).glob('ifm*.npy'))))
     ofms_count = int(len(list(Path(args.data_folder_path).glob('ofm*.npy'))))
 
-    iofm_data_type = "int8_t"
-    if ifms_count > 0:
-        iofm_data_type = "int8_t" \
-            if (np.load(str(Path(args.data_folder_path) / "ifm0.npy")).dtype == np.int8) \
-            else "uint8_t"
-
-    ifm_array_names, ifm_sizes = write_cc_files(
-        args, ifms_count, iofm_data_type, add_usecase_fname, prefix="ifm"
+    ifm_params = write_cc_files(
+        args, ifms_count, add_usecase_fname, prefix="ifm"
     )
 
-    ofm_array_names, ofm_sizes = write_cc_files(
-        args, ofms_count, iofm_data_type, add_usecase_fname, prefix="ofm"
+    ofm_params = write_cc_files(
+        args, ofms_count, add_usecase_fname, prefix="ofm"
     )
 
     common_cc_filepath = Path(args.source_folder_path) / common_cc_filename
@@ -291,11 +304,8 @@ def main(args):
     template_params = TestDataParams(
         ifm_count=ifms_count,
         ofm_count=ofms_count,
-        ifm_var_names=ifm_array_names,
-        ifm_var_sizes=ifm_sizes,
-        ofm_var_names=ofm_array_names,
-        ofm_var_sizes=ofm_sizes,
-        data_type=iofm_data_type,
+        ifm_params=ifm_params,
+        ofm_params=ofm_params
     )
 
     write_hpp_file(

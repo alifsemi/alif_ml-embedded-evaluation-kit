@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,11 +99,10 @@ void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::
 
 TEST_CASE("Running inference with Tflu and Wav2LetterModel Int8", "[Wav2Letter]")
 {
-    REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_IFM_FILES);
+    REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
     for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
-        auto input_goldenFV = GetIfmDataArray(i);
-        ;
-        auto output_goldenFV = GetOfmDataArray(i);
+        auto input_goldenFV = reinterpret_cast<const int8_t *>(GetIfmDataArray(i));
+        auto output_goldenFV = reinterpret_cast<const int8_t *>(GetOfmDataArray(i));
 
         DYNAMIC_SECTION("Executing inference with re-init")
         {
