@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2023-2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,7 +86,8 @@ SECTIONS
                    *Profiler*.obj
                    *lcd*.obj
                    *timing_adapter.c.obj
-                   *s4*.o)
+                   *s4*.o
+                   *cp-demangle.o)
     .text*)
 
     KEEP(*(.init))
@@ -210,6 +212,8 @@ SECTIONS
     *Profiler*.obj (*.text*)
     . = ALIGN(4);
     *s4*.o (*.text*)  /* Temporary solution to move s4 operations to DDR. */
+    . = ALIGN(4);
+    *cp-demangle.o (*.text*) /* from stdc++ lib */
     . = ALIGN(4);
   } > DDR AT > DDR
 

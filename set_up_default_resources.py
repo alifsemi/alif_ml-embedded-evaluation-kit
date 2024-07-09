@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,48 +26,61 @@ import re
 import shutil
 import subprocess
 import sys
+import textwrap
 import typing
 import urllib.request
 import venv
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import URLError
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
+from scripts.py.vela_configs import NpuConfigs, NpuConfig
 
 # Supported version of Python and Vela
-
-VELA_VERSION = "3.10.0"
+VELA_VERSION = "3.12.0"
 py3_version_minimum = (3, 10)
 
+# If true, install Vela from source using VELA_VERSION as a git branch/tag name
+# If false, install Vela package from PyPi using VELA_VERSION as the version
+INSTALL_VELA_FROM_SOURCE = False
+
 # Valid NPU configurations:
-valid_npu_config_names = [
-    "ethos-u55-32",
-    "ethos-u55-64",
-    "ethos-u55-128",
-    "ethos-u55-256",
-    "ethos-u65-256",
-    "ethos-u65-512",
-]
+valid_npu_configs = NpuConfigs.create(
+    *(
+        NpuConfig(
+            name_prefix="ethos-u55",
+            macs=macs,
+            processor_id="U55",
+            prefix_id="H",
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U55_High_End_Embedded",
+        ) for macs in (32, 64, 128, 256)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u65",
+            macs=macs,
+            processor_id="U65",
+            prefix_id="Y",
+            memory_mode="Dedicated_Sram",
+            system_config="Ethos_U65_High_End"
+        ) for macs in (256, 512)
+    )
+)
 
 # Default NPU configurations (these are always run when the models are optimised)
-default_npu_config_names = [valid_npu_config_names[2], valid_npu_config_names[4]]
-
-# NPU config named tuple
-NPUConfig = namedtuple(
-    "NPUConfig",
-    [
-        "config_name",
-        "memory_mode",
-        "system_config",
-        "ethos_u_npu_id",
-        "ethos_u_config_id",
-        "arena_cache_size",
-    ],
+default_npu_configs = NpuConfigs.create(
+    valid_npu_configs.get("ethos-u55", 128),
+    valid_npu_configs.get("ethos-u65", 256),
 )
+
+current_file_dir = Path(__file__).parent.resolve()
+default_use_case_resources_path = current_file_dir / 'scripts' / 'py' / 'use_case_resources.json'
+default_requirements_path = current_file_dir / 'scripts' / 'py' / 'requirements.txt'
+default_downloads_path = current_file_dir / 'resources_downloaded'
 
 
 @dataclass(frozen=True)
@@ -90,36 +103,82 @@ class UseCase:
     resources: typing.List[UseCaseResource]
 
 
-# The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
-# The internal SRAM size for Corstone-310 implementation on MPS3 specified by AN555
-# is 4MB, but we are content with the 2MB specified below.
-MPS3_MAX_SRAM_SZ = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
+@dataclass(frozen=True)
+class SetupConfig:
+    """
+    Configuration for setup behaviour.
+
+    Attributes:
+        run_vela_on_models (bool)           :   Whether to run Vela on the downloaded models
+        additional_npu_config_names (list)  :   List of strings of Ethos-U NPU configs.
+        use_case_names (list)               :   List of names of use cases to set up resources for
+                                                (default is all).
+        arena_cache_size (int)              :   Specifies arena cache size in bytes. If a value
+                                                greater than 0 is provided, this will be taken
+                                                as the cache size. If 0, the default values, as per
+                                                the NPU config requirements, are used.
+        check_clean_folder (bool)           :   Indicates whether the resources folder needs to
+                                                be checked for updates and cleaned.
+    """
+    run_vela_on_models: bool = False
+    additional_npu_config_names: typing.List[str] = ()
+    use_case_names: typing.List[str] = ()
+    arena_cache_size: int = 0
+    check_clean_folder: bool = False
 
 
-def load_use_case_resources(current_file_dir: Path) -> typing.List[UseCase]:
+@dataclass(frozen=True)
+class PathsConfig:
+    """
+    Configuration of paths to resources used by the setup process.
+
+    Attributes:
+        additional_requirements_file (str)  :   Path to a requirements.txt file if
+                                                additional packages need to be
+                                                installed.
+        use_case_resources_file (Path)      :   Path to a JSON file containing the use case
+                                                metadata resources.
+
+        downloads_dir (Path)                :  Path to store model resources files.
+    """
+    additional_requirements_file: Path = ""
+    use_case_resources_file: Path = ""
+    downloads_dir: Path = ""
+
+
+def load_use_case_resources(
+        use_case_resources_file: Path,
+        use_case_names: typing.List[str] = ()
+) -> typing.List[UseCase]:
     """
     Load use case metadata resources
 
     Parameters
     ----------
-    current_file_dir:   Directory of the current script
-
+    use_case_resources_file :   Path to a JSON file containing the use case
+                                metadata resources.
+    use_case_names          :   List of named use cases to restrict
+                                resource loading to.
     Returns
     -------
     The use cases resources object parsed to a dict
     """
 
-    resources_path = current_file_dir / "scripts" / "py" / "use_case_resources.json"
-    with open(resources_path, encoding="utf8") as f:
-        use_cases = json.load(f)
-        return [
+    with open(use_case_resources_file, encoding="utf8") as f:
+        parsed_use_cases = json.load(f)
+        use_cases = (
             UseCase(
                 name=u["name"],
                 url_prefix=u["url_prefix"],
                 resources=[UseCaseResource(**r) for r in u["resources"]],
             )
-            for u in use_cases
-        ]
+            for u in parsed_use_cases
+        )
+
+        if len(use_case_names) == 0:
+            return list(use_cases)
+
+        return [uc for uc in use_cases if uc.name in use_case_names]
 
 
 def call_command(command: str, verbose: bool = True) -> str:
@@ -147,7 +206,7 @@ def call_command(command: str, verbose: bool = True) -> str:
 
 def get_default_npu_config_from_name(
         config_name: str, arena_cache_size: int = 0
-) -> typing.Optional[NPUConfig]:
+) -> typing.Optional[NpuConfig]:
     """
     Gets the file suffix for the TFLite file from the
     `accelerator_config` string.
@@ -163,43 +222,19 @@ def get_default_npu_config_from_name(
 
     Returns:
     -------
-    NPUConfig: An NPU config named tuple populated with defaults for the given
-               config name
+    NpuConfig: An NpuConfig populated with defaults for the given config name
     """
-    if config_name not in valid_npu_config_names:
+    npu_config = valid_npu_configs.get_by_name(config_name)
+
+    if not npu_config:
         raise ValueError(
             f"""
             Invalid Ethos-U NPU configuration.
-            Select one from {valid_npu_config_names}.
+            Select one from {valid_npu_configs.names}.
             """
         )
 
-    strings_ids = ["ethos-u55-", "ethos-u65-"]
-    processor_ids = ["U55", "U65"]
-    prefix_ids = ["H", "Y"]
-    memory_modes = ["Shared_Sram", "Dedicated_Sram"]
-    system_configs = ["Ethos_U55_High_End_Embedded", "Ethos_U65_High_End"]
-    memory_modes_arena = {
-        # For shared SRAM memory mode, we use the MPS3 SRAM size by default.
-        "Shared_Sram": MPS3_MAX_SRAM_SZ if arena_cache_size <= 0 else arena_cache_size,
-        # For dedicated SRAM memory mode, we do not override the arena size. This is expected to
-        # be defined in the Vela configuration file instead.
-        "Dedicated_Sram": None if arena_cache_size <= 0 else arena_cache_size,
-    }
-
-    for i, string_id in enumerate(strings_ids):
-        if config_name.startswith(string_id):
-            npu_config_id = config_name.replace(string_id, prefix_ids[i])
-            return NPUConfig(
-                config_name=config_name,
-                memory_mode=memory_modes[i],
-                system_config=system_configs[i],
-                ethos_u_npu_id=processor_ids[i],
-                ethos_u_config_id=npu_config_id,
-                arena_cache_size=memory_modes_arena[memory_modes[i]],
-            )
-
-    return None
+    return npu_config.overwrite_arena_cache_size(arena_cache_size)
 
 
 def remove_tree_dir(dir_path: Path):
@@ -332,7 +367,7 @@ def download_resources(
 
 
 def run_vela(
-        config: NPUConfig,
+        config: NpuConfig,
         env_activate_cmd: str,
         model: Path,
         config_file: Path,
@@ -370,7 +405,7 @@ def run_vela(
 
     # We want the name to include the configuration suffix. For example: vela_H128,
     # vela_Y512 etc.
-    new_suffix = "_vela_" + config.ethos_u_config_id + ".tflite"
+    new_suffix = "_vela_" + config.config_id + ".tflite"
     new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
 
     skip_optimisation = new_vela_optimised_model_path.is_file()
@@ -395,7 +430,6 @@ def run_vela(
 
 
 def run_vela_on_all_models(
-        current_file_dir: Path,
         download_dir: Path,
         env_activate_cmd: str,
         arena_cache_size: int,
@@ -404,7 +438,6 @@ def run_vela_on_all_models(
     """
     Run vela on downloaded models for the specified NPU configurations
 
-    @param current_file_dir:    Path to the current directory
     @param download_dir:        Path to the downloaded resources directory
     @param env_activate_cmd:    Command used to activate Python venv
     @param npu_config_names:    Names of NPU configurations for which to run Vela
@@ -535,13 +568,19 @@ def set_up_python_venv(
     if not env_activate.is_file():
         venv_builder.install_scripts(venv_context, venv_context.bin_path)
 
-    # 1.3 Install additional requirements first, if a valid file has been provided
+    # Install additional requirements first, if a valid file has been provided
     if additional_requirements_file and os.path.isfile(additional_requirements_file):
         command = f"{env_python} -m pip install -r {additional_requirements_file}"
         call_command(command)
 
-    # 1.4 Make sure to have all the main requirements
-    requirements = [f"ethos-u-vela=={VELA_VERSION}"]
+    # Make sure to have all the main requirements
+    if INSTALL_VELA_FROM_SOURCE:
+        requirements = [
+            f"git+https://review.mlplatform.org/ml/ethos-u/ethos-u-vela.git@{VELA_VERSION}"
+        ]
+    else:
+        requirements = [f"ethos-u-vela=={VELA_VERSION}"]
+
     command = f"{env_python} -m pip freeze"
     packages = call_command(command)
     for req in requirements:
@@ -555,61 +594,72 @@ def set_up_python_venv(
 def update_metadata(
         metadata_dict: typing.Dict,
         setup_script_hash: str,
-        json_uc_res: typing.List[UseCase],
+        use_case_resources: typing.List[UseCase],
         metadata_file_path: Path
 ):
     """
     Update the metadata file
 
-    @param metadata_dict:       The metadata dictionary to update
-    @param setup_script_hash:   The setup script hash
-    @param json_uc_res:         The use case resources metadata
-    @param metadata_file_path   The metadata file path
+    @param metadata_dict        :   The metadata dictionary to update
+    @param setup_script_hash    :   The setup script hash
+    @param use_case_resources   :   The use case resources metadata
+    @param metadata_file_path   :   The metadata file path
     """
     metadata_dict["ethosu_vela_version"] = VELA_VERSION
     metadata_dict["set_up_script_md5sum"] = setup_script_hash.strip("\n")
-    metadata_dict["resources_info"] = [dataclasses.asdict(uc) for uc in json_uc_res]
+    metadata_dict["resources_info"] = [dataclasses.asdict(uc) for uc in use_case_resources]
 
     with open(metadata_file_path, "w", encoding="utf8") as metadata_file:
         json.dump(metadata_dict, metadata_file, indent=4)
 
 
-def set_up_resources(
-        run_vela_on_models: bool = False,
-        additional_npu_config_names: tuple = (),
-        arena_cache_size: int = 0,
-        check_clean_folder: bool = False,
-        additional_requirements_file: Path = ""
-) -> Path:
+def get_default_use_cases_names() -> typing.List[str]:
+    """
+    Get the names of the default use cases
+
+    :return :   List of use case names as strings
+    """
+    use_case_resources = load_use_case_resources(default_use_case_resources_path)
+    return [uc.name for uc in use_case_resources]
+
+
+def check_paths_config(paths_config: PathsConfig):
+    """
+    Runs pre-setup checks on the paths config
+
+    :param paths_config:    PathsConfig used for setup
+    """
+    if paths_config.downloads_dir != default_downloads_path:
+        message = f"""
+        You have specified a non-default path for downloading use case resources.
+        To configure the CMake project, you will need to supply the following argument:
+
+            cmake \\
+                -DRESOURCES_PATH={paths_config.downloads_dir.absolute()} \\
+                ...
+        """.strip("\n")
+        logging.warning(textwrap.dedent(message))
+
+
+def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Path:
     """
     Helpers function that retrieve the output from a command.
 
     Parameters:
     ----------
-    run_vela_on_models (bool):  Specifies if run vela on downloaded models.
-    additional_npu_config_names(list):  list of strings of Ethos-U NPU configs.
-    arena_cache_size (int): Specifies arena cache size in bytes. If a value
-                            greater than 0 is provided, this will be taken
-                            as the cache size. If 0, the default values, as per
-                            the NPU config requirements, are used.
-    check_clean_folder (bool): Indicates whether the resources folder needs to
-                               be checked for updates and cleaned.
-    additional_requirements_file (str): Path to a requirements.txt file if
-                                        additional packages need to be
-                                        installed.
+    args (SetupArgs)        :   Arguments used to set up the project.
 
     Returns
     -------
 
-    Tuple of pair of Paths: (download_directory_path,  virtual_env_path)
+    Tuple of pairs of Paths: (download_directory_path,  virtual_env_path)
 
-    download_directory_path: Root of the directory where the resources have been downloaded to.
-    virtual_env_path: Path to the root of virtual environment.
+    download_directory_path :   Root of the directory where the resources have been downloaded to.
+    virtual_env_path        :   Path to the root of virtual environment.
     """
     # Paths.
-    current_file_dir = Path(__file__).parent.resolve()
-    download_dir = current_file_dir / "resources_downloaded"
-    metadata_file_path = download_dir / "resources_downloaded_metadata.json"
+    check_paths_config(paths_config)
+    metadata_file_path = paths_config.downloads_dir / "resources_downloaded_metadata.json"
 
     # Is Python minimum requirement matched?
     if sys.version_info < py3_version_minimum:
@@ -619,33 +669,36 @@ def set_up_resources(
         )
     logging.info("Using Python version: %s", sys.version_info)
 
-    json_uc_res = load_use_case_resources(current_file_dir)
+    use_case_resources = load_use_case_resources(
+        paths_config.use_case_resources_file,
+        setup_config.use_case_names
+    )
     setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
 
     metadata_dict, setup_script_hash_verified = initialize_resources_directory(
-        download_dir,
-        check_clean_folder,
+        paths_config.downloads_dir,
+        setup_config.check_clean_folder,
         metadata_file_path,
         setup_script_hash
     )
 
     env_path, env_activate = set_up_python_venv(
-        download_dir,
-        additional_requirements_file
+        paths_config.downloads_dir,
+        paths_config.additional_requirements_file
     )
 
-    # 2. Download models
+    # Download models
     logging.info("Downloading resources.")
-    for use_case in json_uc_res:
+    for use_case in use_case_resources:
         download_resources(
             use_case,
             metadata_dict,
-            download_dir,
-            check_clean_folder,
+            paths_config.downloads_dir,
+            setup_config.check_clean_folder,
             setup_script_hash_verified
         )
 
-    # 3. Run vela on models in resources_downloaded
+    # Run vela on models in resources_downloaded
     # New models will have same name with '_vela' appended.
     # For example:
     # original model:    kws_micronet_m.tflite
@@ -653,22 +706,23 @@ def set_up_resources(
     #
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.
-    if run_vela_on_models is True:
+    if setup_config.run_vela_on_models is True:
         # Consolidate all config names while discarding duplicates:
         run_vela_on_all_models(
-            current_file_dir,
-            download_dir,
+            paths_config.downloads_dir,
             env_activate,
-            arena_cache_size,
-            npu_config_names=list(set(default_npu_config_names + list(additional_npu_config_names)))
+            setup_config.arena_cache_size,
+            npu_config_names=list(
+                set(default_npu_configs.names + list(setup_config.additional_npu_config_names))
+            )
         )
 
-    # 4. Collect and write metadata
+    # Collect and write metadata
     logging.info("Collecting and write metadata.")
     update_metadata(
         metadata_dict,
         setup_script_hash.strip("\n"),
-        json_uc_res,
+        use_case_resources,
         metadata_file_path
     )
 
@@ -685,7 +739,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--additional-ethos-u-config-name",
         help=f"""Additional (non-default) configurations for Vela:
-                        {valid_npu_config_names}""",
+                        {valid_npu_configs.names}""",
+        default=[],
+        action="append",
+    )
+    parser.add_argument(
+        "--use-case",
+        help=f"""Only set up resources for the specified use case (can specify multiple times).
+        Valid values are: {get_default_use_cases_names()}
+        """,
         default=[],
         action="append",
     )
@@ -703,25 +765,45 @@ if __name__ == "__main__":
     parser.add_argument(
         "--requirements-file",
         help="Path to requirements.txt file to install additional packages",
-        type=str,
-        default=Path(__file__).parent.resolve() / 'scripts' / 'py' / 'requirements.txt'
+        type=Path,
+        default=default_requirements_path
+    )
+    parser.add_argument(
+        "--use-case-resources-file",
+        help="Path to the use case resources file",
+        type=Path,
+        default=default_use_case_resources_path
+    )
+    parser.add_argument(
+        "--downloads-dir",
+        help="Path to downloaded model resources",
+        type=Path,
+        default=default_downloads_path
     )
 
-    args = parser.parse_args()
+    parsed_args = parser.parse_args()
 
-    if args.arena_cache_size < 0:
+    if parsed_args.arena_cache_size < 0:
         raise ArgumentTypeError("Arena cache size cannot not be less than 0")
 
-    if not Path(args.requirements_file).is_file():
-        raise ArgumentTypeError(f"Invalid requirements file: {args.requirements_file}")
+    if not Path(parsed_args.requirements_file).is_file():
+        raise ArgumentTypeError(f"Invalid requirements file: {parsed_args.requirements_file}")
 
     logging.basicConfig(filename="log_build_default.log", level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    set_up_resources(
-        not args.skip_vela,
-        args.additional_ethos_u_config_name,
-        args.arena_cache_size,
-        args.clean,
-        args.requirements_file,
+    setup = SetupConfig(
+        run_vela_on_models=not parsed_args.skip_vela,
+        additional_npu_config_names=parsed_args.additional_ethos_u_config_name,
+        use_case_names=parsed_args.use_case,
+        arena_cache_size=parsed_args.arena_cache_size,
+        check_clean_folder=parsed_args.clean,
     )
+
+    paths = PathsConfig(
+        use_case_resources_file=parsed_args.use_case_resources_file,
+        downloads_dir=parsed_args.downloads_dir,
+        additional_requirements_file=parsed_args.requirements_file,
+    )
+
+    set_up_resources(setup, paths)

@@ -46,8 +46,8 @@ if (STDOUT_RETARGET)
 
     # Check prerequisites
     ## Core platform directory is required to add the UART library project.
-    if (NOT DEFINED CORE_PLATFORM_DIR)
-        message(FATAL_ERROR "CORE_PLATFORM_DIR undefined")
+    if (NOT DEFINED MLEK_CORE_PLATFORM_DIR)
+        message(FATAL_ERROR "MLEK_CORE_PLATFORM_DIR undefined")
     endif()
 
     ## UART0_BASE is the base address for UART configuration. The platform
@@ -57,7 +57,7 @@ if (STDOUT_RETARGET)
     endif()
 
     ## Platform component: UART
-    add_subdirectory(${CORE_PLATFORM_DIR}/drivers/uart ${CMAKE_BINARY_DIR}/uart)
+    add_subdirectory(${MLEK_CORE_PLATFORM_DIR}/drivers/uart ${CMAKE_BINARY_DIR}/uart)
 
     ## Component sources - public
     target_sources(${STDOUT_COMPONENT_CMSDK}

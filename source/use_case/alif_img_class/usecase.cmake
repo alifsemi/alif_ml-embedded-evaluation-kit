@@ -68,9 +68,9 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${RESOURCES_DIR}/img_class/mobilenet_v2_1.0_224_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
 else()
-    set(DEFAULT_MODEL_PATH      ${RESOURCES_DIR}/img_class/mobilenet_v2_1.0_224_INT8.tflite)
+    set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8.tflite)
 endif()
 
 USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."

@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 - 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021 - 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +41,6 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(CPU_ID                      M55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
-    set(FLOAT_ABI                   hard)
     set(ARM_MATH_DSP                1)
     set(ARM_MATH_LOOPUNROLL         1)
     set(CPU_HEADER_FILE             "${ARM_CPU}.h")
@@ -90,16 +90,18 @@ add_compile_options(
 
 # General purpose compile options:
 add_compile_options(
+    -funsigned-char
     -fdata-sections
     -fno-function-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
 # Arch compile options:
 add_compile_options(
-    -mfloat-abi=${FLOAT_ABI}
+    -mthumb
     --target=arm-arm-none-eabi
     -MD
-    ${CPU_COMPILE_OPTION})
+    ${CPU_COMPILE_OPTION}
+    ${FLOAT_ABI_COMPILE_OPTION})
 
 # Compile definitions:
 add_compile_definitions(

@@ -8,7 +8,7 @@
     "configurePresets": [
         {
             "name": "mps3-300-platform",
-            "description": "Target mps3 board, SSE-300 subsystem.",
+            "description": "Target MPS3 board, SSE-300 subsystem.",
             "hidden": true,
             "cacheVariables": {
                 "TARGET_PLATFORM": {
@@ -23,7 +23,7 @@
         },
         {
             "name": "mps3-310-platform",
-            "description": "Target mps3 board, SSE-310 subsystem.",
+            "description": "Target MPS3 board, SSE-310 subsystem.",
             "hidden": true,
             "cacheVariables": {
                 "TARGET_PLATFORM": {
@@ -33,6 +33,21 @@
                 "TARGET_SUBSYSTEM": {
                     "type": "STRING",
                     "value": "sse-310"
+                }
+            }
+        },
+        {
+            "name": "mps4-315-platform",
+            "description": "Target MPS4 board, SSE-315 subsystem.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "mps4"
+                },
+                "TARGET_SUBSYSTEM": {
+                    "type": "STRING",
+                    "value": "sse-315"
                 }
             }
         },
