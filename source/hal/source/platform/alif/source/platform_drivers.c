@@ -58,9 +58,9 @@
 #include "ethosu_npu_init.h"
 
 #if defined(ETHOS_U_BASE_ADDR)
-    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
+    #if (ETHOS_U_BASE_ADDR != ETHOS_U55_NPU_BASE && ETHOS_U_BASE_ADDR != ETHOS_U85_NPU_BASE)
         #error "NPU component configured with incorrect NPU base address."
-    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) */
+    #endif /* (ETHOS_U_BASE_ADDR != ETHOS_U55_NPU_BASE && ETHOS_U_BASE_ADDR != ETHOS_U85_NPU_BASE) */
 #else
     #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
 #endif /* defined(ETHOS_U_BASE_ADDR) */

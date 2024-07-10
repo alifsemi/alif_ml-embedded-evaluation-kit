@@ -63,35 +63,32 @@ function(set_platform_global_defaults)
         add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
     endif()
 
-    if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-        set(RTSS_NPU_CONFIG_ID  "H256")
-        set(ALIF_CORE           "RTSS_HP" CACHE STRING "Alif core") # Used by alif-cmsis
-    else()
-        set(RTSS_NPU_CONFIG_ID  "H128")
-        set(ALIF_CORE           "RTSS_HE" CACHE STRING "Alif core") # Used by alif-cmsis
-    endif()
-
-
-    set(IS_BALLETTO_DEVICE OFF CACHE BOOL "Is device a Balletto device.")
-
     if (ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") # Add other SKUs which are Balletto devices
         set(ALIF_BOARDLIB_PATH_END "devkit_e1c" CACHE STRING "" FORCE)
-        set(IS_BALLETTO_DEVICE ON CACHE BOOL "" FORCE)
+        set(IS_BALLETTO_DEVICE ON)
         add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
-        set(RTSS_NPU_CONFIG_ID  "H128")
-        set(ALIF_CORE           "RTSS_HE" CACHE STRING "Alif core" FORCE) # Used by alif-cmsis
         USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead. Disabled by default on E1C."
             OFF
             BOOL)
     else()
+        set(IS_BALLETTO_DEVICE OFF)
         USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead. Enabled by default."
             ON
             BOOL)
     endif()
 
-    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
+    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U85)"
         "U55"
         STRING)
+    set_property(CACHE ETHOS_U_NPU_ID PROPERTY STRINGS "U55" "U85")
+
+    if (ETHOS_U_NPU_ID STREQUAL U85)
+        set(RTSS_NPU_CONFIG_ID "Z256")
+    elseif (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
+        set(RTSS_NPU_CONFIG_ID "H256")
+    else()
+        set(RTSS_NPU_CONFIG_ID "H128")
+    endif()
 
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
         "${RTSS_NPU_CONFIG_ID}"
@@ -124,6 +121,11 @@ function(set_platform_global_defaults)
     set(LINKER_SCRIPT_NAME "${TARGET_SUBSYSTEM}" CACHE STRING "Linker script name")
     set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/alif" PARENT_SCOPE)
 
+    if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
+        set(ALIF_CORE "RTSS_HP")
+    else()
+        set(ALIF_CORE "RTSS_HE")
+    endif()
     set(ALIF_CORE "${ALIF_CORE}" PARENT_SCOPE)
     set(ALIF_DEVICE_SKU "${ALIF_DEVICE_SKU}" PARENT_SCOPE)
     set(ALIF_BOARDLIB_PATH_END "${ALIF_BOARDLIB_PATH_END}" PARENT_SCOPE)
@@ -133,8 +135,13 @@ function(set_platform_global_defaults)
         ${ALIF_CORE}
         )
 
-    set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
-    set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
+    if (ETHOS_U_NPU_ID STREQUAL "U55")
+        set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
+    else()
+        set(ETHOS_U_BASE_ADDR    "0x49042000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_IRQN         "366"          CACHE STRING "Ethos-U85 Interrupt")
+    endif()
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
