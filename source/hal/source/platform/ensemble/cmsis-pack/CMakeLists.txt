@@ -69,10 +69,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/clk.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tcm_partition.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cdc.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/cpi.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/csi.c
@@ -87,30 +84,46 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/uart.c
     ${ENSEMBLE_CMSIS_PATH}/drivers/source/ospi.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/driver_phy.c
-    ${ENSEMBLE_CMSIS_PATH}/components/Source/IS25WX256.c
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},MT9M114>:${ENSEMBLE_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},ARX3A0>:${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
     )
-endif()
 
+# Ensemble DFP RTE_Components does not support yet building the module if it is disabled
+if (NOT TARGET_BOARD STREQUAL "DevKit_E1C")
+    target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
+    ${ENSEMBLE_CMSIS_PATH}/components/Source/IS25WX256.c
+    )
+endif() # not DevKit_E1C
+endif() # TARGET_REVISION
 
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
+    ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
+    )
+
+# Ensemble DFP RTE_Components does not support yet building the module if it is disabled
+if (NOT TARGET_BOARD STREQUAL "DevKit_E1C")
+    target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
-    ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
     )
+endif()
 
 ## Board sources
 target_sources(${CMSIS_DEVICE_TARGET}
@@ -118,6 +131,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${BOARDLIB_PATH}/appkit_gen2/board_init.c
     ${BOARDLIB_PATH}/devkit_gen2/board_init.c
     ${BOARDLIB_PATH}/devkit_b0_cob/board_init.c
+    ${BOARDLIB_PATH}/devkit_e1c/board_init.c
     )
 
 

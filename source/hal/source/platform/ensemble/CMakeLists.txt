@@ -79,6 +79,10 @@ if (TARGET_SUBSYSTEM STREQUAL RTSS-HE)
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
 endif()
 
+if (TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
+    set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
+endif()
+
 set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
 set(DYNAMIC_MODEL_SIZE   "0x02000000"   CACHE STRING "Size of the space reserved for the model")
 

@@ -13,6 +13,8 @@
 #include "RTE_Device.h"
 #include "global_map.h"
 
+#if defined(RTE_Drivers_CPI)
+
 /* Project Includes */
 #include "camera.h"
 #include "Driver_GPIO.h"
@@ -128,3 +130,5 @@ int32_t camera_wait(uint32_t timeout_ms)
     };
     return ARM_DRIVER_OK;
 }
+
+#endif // RTE_Drivers_CPI

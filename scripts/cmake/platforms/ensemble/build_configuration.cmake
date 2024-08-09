@@ -43,10 +43,16 @@ function(set_platform_global_defaults)
 
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
         set(RTSS_NPU_CONFIG_ID "H256")
-        set(ENSEMBLE_CORE         "M55_HP")
+        set(ENSEMBLE_CORE      "M55_HP")
+    elseif(TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
+        set(RTSS_NPU_CONFIG_ID "H128")
+        set(ENSEMBLE_CORE      "M55_HE_E1C")
+        add_compile_definitions("M55_HE") # We need to also define M55_HE
+        add_compile_definitions("SOC_VARIANT_E1C")
+        add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB
     else()
         set(RTSS_NPU_CONFIG_ID "H128")
-        set(ENSEMBLE_CORE         "M55_HE")
+        set(ENSEMBLE_CORE      "M55_HE")
     endif()
 
     USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
@@ -70,8 +76,8 @@ function(set_platform_global_defaults)
 
     if (TARGET_REVISION STREQUAL "B")
         # Sanity check DevKit, AppKit and DevKit_Baseboard
-        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_Baseboard")))
-            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit and DevKit_Baseboard but given value was ${TARGET_BOARD}")
+        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_Baseboard") OR (TARGET_BOARD STREQUAL "DevKit_E1C")))
+            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit, DevKit_Baseboard, DevKit_E1C but given value was ${TARGET_BOARD}")
         endif()
         set(ENSEMBLE_CMSIS_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
     endif()

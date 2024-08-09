@@ -242,16 +242,17 @@ int platform_init(void)
     SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
 
     se_err = (int)set_power_profiles();
-#endif // SE_SERVICES_SUPPORT
 
+#if !defined(SOC_VARIANT_E1C)
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
 
     HWSEMdrv->Initialize(NULL);
 
-    int err = 0;
     /* Only 1 core will do the pinmux */
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
+#endif // SOC_VARIANT_E1C
+
         /* We're first to acquire the lock - we do it */
         BOARD_Power_Init();
         BOARD_Clock_Init();
@@ -264,6 +265,7 @@ int platform_init(void)
         }
 #endif
 
+#if !defined(SOC_VARIANT_E1C)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
         HWSEMdrv->Lock();
     } else {
@@ -272,6 +274,7 @@ int platform_init(void)
     }
 
     HWSEMdrv->Uninitialize();
+#endif // SOC_VARIANT_E1C
 
     // tracelib init here after pinmux is done.
     tracelib_init(NULL);
@@ -478,6 +481,51 @@ void MPU_Load_Regions(void)
 #define MEMATTRIDX_NORMAL_WB_RA_WA           2
 #define MEMATTRIDX_NORMAL_NON_CACHEABLE      3
 #define MEMATTRIDX_DEVICE_nGnRnE             7
+
+#if defined(SOC_VARIANT_E1C)
+
+    /* This is a complete map - the startup code enables PRIVDEFENA that falls back
+     * to the system default, but we will turn it off later.
+     */
+    static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
+    { // ITCM (alias) at 01000000, SRAM0 at 02000000, SRAM1 at 08000000
+    .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
+    },
+    { // SSE-700 Host Peripheral Region (1A000000)
+    .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+    },
+    { // DTCM (20000000)
+    .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
+    .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
+    },
+    { // General peripherals
+    .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+    },
+    { // MRAM (80000000)
+    .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
+    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
+    },
+#ifdef OSPI_FLASH_SUPPORT
+    {   /* OSPI Regs - 16MB : RO-0, NP-1, XN-1  */
+        .RBAR = ARM_MPU_RBAR(0x83000000, ARM_MPU_SH_NON, 0, 1, 1),
+        .RLAR = ARM_MPU_RLAR(0x83FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+    },
+    {   /* OSPI0 XIP(eg:hyperram) - 512MB : RO-0, NP-1, XN-0  */
+        .RBAR = ARM_MPU_RBAR(0xA0000000, ARM_MPU_SH_NON, 0, 1, 0),
+        .RLAR = ARM_MPU_RLAR(0xBFFFFFFF, MEMATTRIDX_NORMAL_WB_RA_WA)
+    },
+#endif
+    { // System PPB
+    .RBAR = ARM_MPU_RBAR(0xE0000000, ARM_MPU_SH_NON, 1, 0, 1),  // RW, P, XN
+    .RLAR = ARM_MPU_RLAR(0xE00FFFFF, MEMATTRIDX_DEVICE_nGnRnE)
+    },
+    };
+
+#else
+
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.
      */
@@ -532,6 +580,8 @@ void MPU_Load_Regions(void)
     .RLAR = ARM_MPU_RLAR(0xE00FFFFF, MEMATTRIDX_DEVICE_nGnRnE)
     },
     };
+
+#endif
 
     /* Mem Attribute for 0th index */
     ARM_MPU_SetMemAttr(MEMATTRIDX_NORMAL_WT_RA_TRANSIENT, ARM_MPU_ATTR(

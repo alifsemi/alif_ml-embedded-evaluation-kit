@@ -20,6 +20,7 @@
 #define BOARD_DevKit            1
 #define BOARD_DevKit_Baseboard  2
 #define BOARD_AppKit            3
+#define BOARD_DevKit_E1C        4
 
 #if (TARGET_BOARD == BOARD_DevKit)
 #define BOARD_IS_ALIF_DEVKIT_B0_VARIANT
@@ -30,6 +31,9 @@
 #elif (TARGET_BOARD == BOARD_AppKit)
 #define BOARD_IS_ALIF_APPKIT_B1_VARIANT
 #include "appkit_gen2/board_defs.h"
+#elif (TARGET_BOARD == BOARD_DevKit_E1C)
+#define BOARD_IS_ALIF_DEVKIT_E1C_VARIANT
+#include "devkit_e1c/board_defs.h"
 #endif
 
 // <o> ILI9806E LCD panel variant

@@ -37,6 +37,10 @@ static struct {
 static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CIMAGE_Y]
     __attribute__((aligned(32),section(".bss.camera_frame_buf")));
 
+#if !defined(RTE_Drivers_CPI)
+#define USE_FAKE_CAMERA 1
+#endif
+
 #define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
 
 int image_init()
