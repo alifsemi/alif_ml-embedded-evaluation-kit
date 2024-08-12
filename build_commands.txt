@@ -1,9 +1,8 @@
 NOTE! Update submodules before building:
-git submodule init
-git submodule update
+git submodule update --init
 
 NOTE! Generate micronet/mobilenet models 1st with:
-python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
 
 NOTE! All should normally build as Release for full-speed operation. In particular,
 this enables auto-vectorization for ARMCLANG. Images can still be debugged with
@@ -24,7 +23,7 @@ this is done below for the HE keyword-spotting to leave the display for the othe
 
 The main SRAM is normally used for camera, display and NPU buffers. This allows the
 larger models to be run. There is an alternative linker script for the HE core that
-does not use the main SRAM. It also runs from a smaller region at the end of MRAM. 
+does not use the main SRAM. It also runs from a smaller region at the end of MRAM.
 
 This allows the smallest models to be run faster from the DTCM, but no display is
 possible. This is selected below for the secondary core, where it's necessary to
@@ -42,17 +41,18 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_REVISION=B -DTARGET_BOARD=AppKit ..
 
 ; ------------ Image classification on CM55-HP with GCC --------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HP \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_REVISION=B -DTARGET_BOARD=AppKit ..
 
 make ethos-u-alif_img_class -j
-
 
 
 
@@ -61,13 +61,23 @@ cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_REVISION=B -DTARGET_BOARD=AppKit ..
 
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
 cmake -DTARGET_PLATFORM=ensemble \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_REVISION=B -DTARGET_BOARD=AppKit ..
 
-make ethos-u-alif_kws -j20
+; ------------Keyword spotting on CM55-HE GCC (DevKit_E1C)----------------
+cmake -DTARGET_PLATFORM=ensemble \
+-DTARGET_SUBSYSTEM=RTSS-HE-E1C \
+-DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-E1C-TCM \
+-DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_REVISION=B -DTARGET_BOARD=DevKit_E1C ..
+
+make ethos-u-alif_kws -j
