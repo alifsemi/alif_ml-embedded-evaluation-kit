@@ -290,6 +290,6 @@ used by a Vela optimized neural network model, then the Arm® *Ethos™-U* NPU w
 A bigger region of memory for storing the neural network model is placed in the DDR, or flash, region under
 `LOAD_REGION_1`. The two load regions are necessary as the motherboard configuration controller of the MPS3 limits the
 load size at address `0x00000000` to 1MiB. This has implications on how the application **is deployed** on MPS3, as
-explained under the following section: [Deployment on MPS3](./deployment.md#mps3-board).
+explained under the following section: [Deployment on MPS3](./deployment.md#mps3-fpga-board).
 
 The next section of the documentation covers: [Troubleshooting](troubleshooting.md).

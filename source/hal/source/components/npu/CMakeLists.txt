@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +34,8 @@ endif()
 # For the driver, we need to provide the CMSIS_PATH variable
 set(CMSIS_PATH ${CMSIS_SRC_PATH} CACHE PATH "Path to CMSIS directory")
 
-# Definitions that will be set.
+# Definitions that should be overridden by the platform wrapping this project.
+# Otherwise, these defaults will be used.
 set(ETHOS_U_BASE_ADDR    "0x58102000"    CACHE STRING "Ethos-U NPU base address")
 set(ETHOS_U_IRQN         "56"            CACHE STRING "Ethos-U NPU Interrupt")
 set(ETHOS_U_SEC_ENABLED  "1"             CACHE STRING "Ethos-U NPU Security enable")

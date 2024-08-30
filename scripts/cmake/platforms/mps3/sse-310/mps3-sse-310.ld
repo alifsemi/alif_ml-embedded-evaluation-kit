@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2023-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ __HEAP_SIZE  = 0x000C0000;
 MEMORY
 {
   ITCM  (rx)  : ORIGIN = 0x10000000, LENGTH = 0x00008000
-  DTCM  (rwx) : ORIGIN = 0x30000000, LENGTH = 0x00008000
   BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00200000
+  DTCM  (rwx) : ORIGIN = 0x30000000, LENGTH = 0x00008000
   SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00400000
   DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
 

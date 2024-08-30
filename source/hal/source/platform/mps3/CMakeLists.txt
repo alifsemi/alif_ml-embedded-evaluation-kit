@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,15 +37,23 @@ if (TARGET_SUBSYSTEM STREQUAL sse-300)
     set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
     set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-    set(ETHOS_U_BASE_ADDR    "0x58102000"   CACHE STRING "Ethos-U NPU base address")
     set(ETHOS_U_IRQN         "56"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
-    if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-        set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-        set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
-    endif()
+    if (ETHOS_U_SEC_ENABLED)
+        set(ETHOS_U_BASE_ADDR    "0x58102000"   CACHE STRING "Ethos-U NPU base address")
+        if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+            set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
+            set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+        endif()
+    else ()
+        set(ETHOS_U_BASE_ADDR    "0x48102000"   CACHE STRING "Ethos-U NPU base address")
+        if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+            set(TA0_BASE         "0x48103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
+            set(TA1_BASE         "0x48103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+        endif()
+    endif ()
 endif()
 
 # Define target specific base addresses here (before adding the components)
@@ -53,10 +62,16 @@ if (TARGET_SUBSYSTEM STREQUAL sse-310)
     set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
     set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
     set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
-    set(ETHOS_U_BASE_ADDR    "0x50004000"   CACHE STRING "Ethos-U NPU base address")
+
     set(ETHOS_U_IRQN         "16"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
+
+    if (ETHOS_U_SEC_ENABLED)
+        set(ETHOS_U_BASE_ADDR    "0x50004000"   CACHE STRING "Ethos-U NPU base address")
+    else ()
+        set(ETHOS_U_BASE_ADDR    "0x40004000"   CACHE STRING "Ethos-U NPU base address")
+    endif ()
 
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
         message(FATAL_ERROR "Timing adapter support should be disabled for ${TARGET_SUBSYSTEM}")

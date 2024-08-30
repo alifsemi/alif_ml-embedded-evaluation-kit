@@ -9,7 +9,8 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,55 +47,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(SCRIPTS_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
-set(CMAKE_SCRIPTS_DIR   ${SCRIPTS_DIR}/cmake)
-set(CMAKE_TOOLCHAIN_DIR ${CMAKE_SCRIPTS_DIR}/toolchains)
-set(DOWNLOAD_DEP_DIR    ${CMAKE_BINARY_DIR}/dependencies)
-set(DEPENDENCY_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
-set(CORE_PLATFORM_DIR   ${DEPENDENCY_ROOT_DIR}/core-platform)
-
-set(RESOURCES_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/resources_downloaded
-                        CACHE PATH "Resources directory")
-set(HAL_PLATFORM_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/source/hal/source/platform)
-
-include(${CMAKE_SCRIPTS_DIR}/source_gen_utils.cmake)
-
-enable_testing()
-
-if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-    message(FATAL_ERROR "Source and build are in the same directory")
-else()
-    message(STATUS "Source directory: ${CMAKE_SOURCE_DIR}")
-    message(STATUS "Binary directory: ${CMAKE_BINARY_DIR}")
-endif()
-
-include(${CMAKE_SCRIPTS_DIR}/common_user_options.cmake)
-
-# Check if the resources_downloaded needs update
-check_update_public_resources(${RESOURCES_DIR})
-
-add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
-
-set_platform_global_defaults()
-
-message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
-
-# Make sure the following options are defined before proceeding:
-assert_defined(LOG_LEVEL)
-assert_defined(TENSORFLOW_SRC_PATH)
-assert_defined(TARGET_PLATFORM)
-assert_defined(TARGET_SUBSYSTEM)
-assert_defined(ETHOS_U_NPU_ENABLED)
-assert_defined(USE_CASE_BUILD)
-assert_defined(CPU_PROFILE_ENABLED)
-assert_defined(CMAKE_TOOLCHAIN_FILE)
-
-if(POLICY CMP0123)
-    cmake_policy(SET CMP0123 NEW)
-endif()
+# Initialise global settings
+include("${CMAKE_CURRENT_SOURCE_DIR}/MlekModule.cmake")
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     23.11.0
+        VERSION     24.05.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 
@@ -124,7 +81,7 @@ endif ()
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler EXCLUDE_FROM_ALL)
 
 # Include the tensorflow build target
-include(${CMAKE_SCRIPTS_DIR}/tensorflow.cmake)
+include(tensorflow_lite_micro)
 
 # Add the common API library target (tensorflow-lite-micro target is needed)
 add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common EXCLUDE_FROM_ALL)
@@ -180,7 +137,7 @@ foreach(use_case ${USE_CASES})
     # Executable application:
     set(TARGET_NAME "ethos-u-${use_case}")
 
-    set(DEFAULT_MODEL_DIR ${RESOURCES_DIR}/${use_case})
+    set(DEFAULT_MODEL_DIR ${RESOURCES_PATH}/${use_case})
     set(DEFAULT_TEST_DATA_DIR ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)

@@ -18,11 +18,11 @@
 function(set_platform_global_defaults)
     message(STATUS "Platform: Native (Linux based x86_64/aarch64 system)")
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake
+        set(CMAKE_TOOLCHAIN_FILE ${MLEK_CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
-    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/native" PARENT_SCOPE)
-    set(TEST_TPIP ${DOWNLOAD_DEP_DIR}/test)
+    set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/native" PARENT_SCOPE)
+    set(TEST_TPIP ${MLEK_DOWNLOAD_DEP_DIR}/test)
 
     file(MAKE_DIRECTORY ${TEST_TPIP})
     set(TEST_TPIP_INCLUDE ${TEST_TPIP}/include)

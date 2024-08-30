@@ -21,11 +21,11 @@ set(LV_THEME_DEFAULT_DARK "1" CACHE STRING "0: Light mode; 1: Dark mode")
 set_property(CACHE LV_THEME_DEFAULT_DARK PROPERTY STRINGS "0" "1")
 
 ## LVGL and Arm-2D libraries
-include(${CMAKE_SCRIPTS_DIR}/Arm-2D.cmake)
+include(Arm-2D)
 target_include_directories(${ARM_2D_TARGET} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-include(${CMAKE_SCRIPTS_DIR}/lvgl.cmake)
+include(lvgl)
 target_include_directories(${LVGL_TARGET} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
