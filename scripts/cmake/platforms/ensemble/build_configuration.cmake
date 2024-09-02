@@ -31,6 +31,11 @@
 function(set_platform_global_defaults)
     message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
     message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION})")
+    message(STATUS "Alif SoC part number: ${ALIF_SOC_PART_NUMBER}")
+
+    USER_OPTION(ALIF_SOC_PART_NUMBER "Specify Alif SoC part number"
+        AE722F80F55D5XX
+        STRING)
 
     USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: RTSS-HP, RTSS-HE or none"
         RTSS-HE
@@ -89,7 +94,10 @@ function(set_platform_global_defaults)
     set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/ensemble" PARENT_SCOPE)
 
     set(ENSEMBLE_CORE "${ENSEMBLE_CORE}" PARENT_SCOPE)
-    add_compile_definitions(${ENSEMBLE_CORE})
+    add_compile_definitions(
+        ${ENSEMBLE_CORE}
+        ${ALIF_SOC_PART_NUMBER}
+        )
 
     set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
     set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")

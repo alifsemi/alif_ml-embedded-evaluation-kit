@@ -21,11 +21,17 @@
 
 // Camera dimensions
 #if RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE
-#define CIMAGE_X                (RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH)
-#define CIMAGE_Y                (RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT)
+
+#if RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 2
+    #define CIMAGE_X            (1280)
+    #define CIMAGE_Y            (720)
+    #define CIMAGE_USE_RGB565   (1)
+#else
+    #error "Unsupported MT9M114 configuration"
+#endif
+
 #define CIMAGE_COLOR_CORRECTION (0)
 #define CIMAGE_SW_GAIN_CONTROL  (0)
-#define CIMAGE_USE_RGB565       (RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x22)
 #if CIMAGE_USE_RGB565
 #define CIMAGE_RGB_WIDTH_MAX    (320)
 #define CIMAGE_RGB_HEIGHT_MAX   (320)

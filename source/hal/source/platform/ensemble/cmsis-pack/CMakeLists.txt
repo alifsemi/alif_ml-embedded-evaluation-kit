@@ -82,6 +82,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_init.c
     )
 else()
 target_sources(${CMSIS_DEVICE_TARGET}
@@ -93,6 +94,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/clk.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tcm_partition.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
@@ -114,6 +116,9 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/components/Source/IS25WX256.c
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},MT9M114>:${ENSEMBLE_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},ARX3A0>:${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
     )
 endif()
 
@@ -128,7 +133,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_init.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c

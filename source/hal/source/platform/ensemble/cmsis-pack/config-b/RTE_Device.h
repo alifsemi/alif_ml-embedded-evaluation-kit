@@ -145,13 +145,13 @@
 // <i> default: 640
 #define RTE_MT9M114_CAMERA_SENSOR_CPI_FRAME_WIDTH             640
 
-// <o RTE_MT9M114_CAMERA_SENSOR_CPI_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <o> RTE_MT9M114_CAMERA_SENSOR_CPI_I2C_INSTANCE
 // <i> Defines camera sensor MT9M114 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_CPI_I2C_INSTANCE            1
 
@@ -266,13 +266,13 @@
 // <i> default: 640
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_FRAME_WIDTH           640
 
-// <o RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
+// <o> RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE
 // <i> Defines camera sensor MT9M114 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE          1
 
@@ -449,6 +449,7 @@
 #define RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE             ENSEMBLE_CAMERA_MODULE_ARX3A0
 
 #if (RTE_ARX3A0_CAMERA_SENSOR_CSI_ENABLE)
+
 // <o> Select camera ARX3A0 frame per second
 //     <5=>   5 FPS
 //     <40=> 40 FPS
@@ -523,13 +524,13 @@
 // <i> Default: 7
 #define RTE_ARX3A0_CAMERA_SENSOR_POWER_GPIO_PORT             BOARD_CAMERA_POWER_GPIO_PORT
 
-// <o RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor ARX3A0 i2c instance
+// <o> RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE
 // <i> Defines camera sensor ARX3A0 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_ARX3A0_CAMERA_SENSOR_I2C_INSTANCE                BOARD_CAMERA_I2C_INSTANCE
 
@@ -611,18 +612,105 @@
 // <i> Default: 7
 #define RTE_AR0144_CAMERA_SENSOR_POWER_GPIO_PORT              7
 
-// <o RTE_AR0144_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor AR0144 i2c instance
+// <o> RTE_AR0144_CAMERA_SENSOR_I2C_INSTANCE
 // <i> Defines camera sensor AR0144 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_AR0144_CAMERA_SENSOR_I2C_INSTANCE                 1
 
 #endif
 // </e> AR0114 [Driver_AR0114]
+
+// <e> AR0145 [Driver_AR0145]
+// <o> Enable/Disable AR0145 camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable AR0145 camera sensor
+// <i> default: enable
+#define RTE_AR0145_CAMERA_SENSOR_CPI_ENABLE     1
+
+#if (RTE_AR0145_CAMERA_SENSOR_CPI_ENABLE)
+
+// <o> Select camera AR0145 frequency
+// <i> Defines camera AR0145 frequency
+// <i> Default: 400000000
+#define RTE_AR0145_CAMERA_SENSOR_CSI_FREQ                    400000000
+
+// <o> select AR0145 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default: 0x2A(RAW8)
+#define RTE_AR0145_CAMERA_SENSOR_CSI_DATA_TYPE               0x2A
+
+// <o> select AR0145 number of lanes in DPHY
+// <i> defines select AR0145 number of lanes in DPHY.
+// <i> default: 2 two lane
+#define RTE_AR0145_CAMERA_SENSOR_CSI_N_LANES                 2
+
+// <o> select AR0145 virtual channel ID
+// <i> defines select AR0145 virtual channel ID.
+// <i> default: 0
+#define RTE_AR0145_CAMERA_SENSOR_CSI_VC_ID                   0
+
+// <o> select AR0145 override CPI color mode
+// <i> defines select AR0145 override CPI color mode.
+// <i> default: 0
+#define RTE_AR0145_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE     0
+
+// <o> select AR0145 CPI color mode
+// <i> defines select AR0145 CPI color mode.
+// <i> default: 0
+#define RTE_AR0145_CAMERA_SENSOR_CPI_COLOR_MODE              0
+
+// <o> select AR0145 Image configuration
+// <i> Defines camera sensor AR0145 Image configuration
+//     <0=>   1280x800_Full_1M
+//     <1=>   640x400_YSum2_XBin2
+//     <2=>   640x400_YSkip2_XSkip2
+//     <3=>   320x200_YSkip2_XSkip2
+// <i> Default: 0
+#define RTE_AR0145_CAMERA_SENSOR_IMAGE_CONFIG                0
+
+// <o> Select camera sensor AR0145 CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor AR0145 CSI clock source division
+// <i> Default: 16
+#define RTE_AR0145_CAMERA_SENSOR_CSI_CLK_SCR_DIV             16
+
+// <o> Select camera sensor AR0145 reset pin number
+// <i> Defines camera sensor AR0145 reset pin number
+// <i> Default: 1
+#define RTE_AR0145_CAMERA_SENSOR_RESET_PIN_NO                 1
+
+// <o> Select camera sensor AR0145 reset GPIO port
+// <i> Defines camera sensor AR0145 reset GPIO port
+// <i> Default: 9
+#define RTE_AR0145_CAMERA_SENSOR_RESET_GPIO_PORT              9
+
+// <o> Select camera sensor AR0145 power pin number
+// <i> Defines camera sensor AR0145 power pin number
+// <i> Default: 5
+#define RTE_AR0145_CAMERA_SENSOR_POWER_PIN_NO                 5
+
+// <o> Select camera sensor AR0145 power GPIO port
+// <i> Defines camera sensor AR0145 power GPIO port
+// <i> Default: 7
+#define RTE_AR0145_CAMERA_SENSOR_POWER_GPIO_PORT              7
+
+// <o> RTE_AR0145_CAMERA_SENSOR_I2C_INSTANCE
+// <i> Defines camera sensor AR0145 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <4=>   I2C OVER I3C
+// <i> Default: 1
+#define RTE_AR0145_CAMERA_SENSOR_I2C_INSTANCE                 1
+
+#endif
+// </e> AR0145 [Driver_AR0145]
 
 // <e> MT9M114_MIPI [Driver_MT9M114_MIPI]
 // <o> Enable/Disable MT9M114 MIPI camera sensor
@@ -633,19 +721,22 @@
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE                  ENSEMBLE_CAMERA_MODULE_MT9M114
 
 #if (RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE)
+
 // <o> Select camera MT9M114 MIPI frequency
 // <i> Defines camera MT9M114 MIPI frequency
 // <i> Default: 296000000
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_FREQ                    296000000
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_FREQ                    320000000
 
-// <o> select MT9M114 MIPI CSI2 Data type
-// <i> Define camera sensor DATA type
-//     <0x2B=>   RAW10
-//     <0x2A=>   RAW 8
-//     <0x22=>   RGB565
-// <i> defines select CSI2 Data type
-// <i> default: 0x2A(RAW8)
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE               0x22
+// <o> select MT9M114 Image configuration
+// <i> Defines camera sensor MT9M114 Image configuration
+//     <0=>   1288x728_RAW10
+//     <1=>   1280x720_RAW8
+//     <2=>   1280x720_RGB565
+//     <3=>   640x480_RGB565
+//     <4=>   320x240_RGB565
+//     <5=>   320x320_RGB565
+// <i> Default: 0
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG                2
 
 // <o> select MT9M114 MIPI number of lanes in DPHY
 // <i> defines select MT9M114 MIPI number of lanes in DPHY.
@@ -666,32 +757,6 @@
 // <i> defines select MT9M114 MIPI CPI color mode.
 // <i> default: 0
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_CPI_COLOR_MODE              0
-
-#if(RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x2B)
-
-// <o> select MT9M114 MIPI frame height
-// <i> defines select MT9M114 MIPI frame height.
-// <i> default: 728
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT                728
-
-// <o> select MT9M114 MIPI frame width
-// <i> defines select MT9M114 MIPI frame width.
-// <i> default: 1288
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH                 1288
-
-#elif ((RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x2A) || \
-       (RTE_MT9M114_CAMERA_SENSOR_MIPI_CSI_DATA_TYPE == 0x22))
-
-// <o> select MT9M114 MIPI frame height
-// <i> defines select MT9M114 MIPI frame height.
-// <i> default: 720
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT                720
-
-// <o> select MT9M114 MIPI frame width
-// <i> defines select MT9M114 MIPI frame width.
-// <i> default: 1280
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH                 1280
-#endif
 
 // <o> Select camera sensor MT9M114 MIPI CSI clock source division [Divisor] <2-511>
 // <i> Defines camera sensor MT9M114 MIPI CSI clock source division
@@ -718,13 +783,13 @@
 // <i> Default: 7
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_POWER_GPIO_PORT              BOARD_CAMERA_POWER_GPIO_PORT
 
-// <o RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE> Select camera sensor MT9M114 MIPI i2c instance
+// <o> RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE
 // <i> Defines camera sensor MT9M114 MIPI i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
 
@@ -837,13 +902,13 @@
 // <i> Default: 6
 #define RTE_HM0360_CAMERA_SENSOR_XSLEEP_GPIO_PORT            6
 
-// <o RTE_HM0360_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor HM0360 i2c instance
+// <o> RTE_HM0360_CAMERA_SENSOR_I2C_INSTANCE
 // <i> Defines camera sensor HM0360 i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_HM0360_CAMERA_SENSOR_I2C_INSTANCE                1
 
@@ -1052,6 +1117,96 @@
 #endif
 // </e> MIPI_DSI (ILI9806E_PANEL_E50RA_MW550) [Driver_ILI9806E_PANEL]
 
+// <e> MIPI_DSI (ILI9488_PANEL) [Driver_ILI9488_PANEL]
+// <o> DSI ILI9488 LCD PANEL
+//     <0=> DISABLE
+//     <1=> ENABLE
+// <i> Defines DSI ILI9488 LCD PANEL
+// <i> Default: ENABLE
+#define RTE_MIPI_DSI_ILI9488_PANEL  1
+
+#if RTE_MIPI_DSI_ILI9488_PANEL
+
+// <o> ILI9806 LCD panel maximum bitrate in mbps
+// <i> Defines ILI9806 LCD panel maximum bitrate in mbps.
+// <i> Default: 500
+#define RTE_ILI9488_PANEL_MAX_BITRATE_MBPS          500
+
+// <o> DSI color mode
+//     <1=> 16bit
+//     <4=> 18bit
+// <i> Defines Color mode for display panel
+// <i> Default: 16bit
+#define RTE_ILI9488_PANEL_DSI_COLOR_MODE            1
+
+// <o> Virtual channel ID
+// <i> Defines Virtual Channel ID
+// <i> Default: 0
+#define RTE_ILI9488_PANEL_DSI_VC_ID                 0
+
+// <o> ILI9488 LCD panel reset pin number
+// <i> Defines ILI9488 LCD panel reset pin number.
+// <i> Default: 5
+#define RTE_ILI9488_PANEL_RESET_PIN_NO              5
+
+// <o> ILI9488 LCD panel reset pin GPIO port number
+// <i> Defines ILI9488 LCD panel reset pin GPIO port number.
+// <i> Default: 15
+#define RTE_ILI9488_PANEL_RESET_GPIO_PORT           15
+
+// <o> ILI9488 LCD panel back light pin number
+// <i> Defines ILI9488 LCD panel back light pin number.
+// <i> Default: 1
+#define RTE_ILI9488_PANEL_BL_LED_PIN_NO             1
+
+// <o> ILI9488 LCD panel back light pin GPIO port number
+// <i> Defines ILI9488 LCD panel back light pin GPIO port number.
+// <i> Default: 6
+#define RTE_ILI9488_PANEL_BL_LED_GPIO_PORT          6
+
+// <o> Panel hsync time in pixels
+// <i> Defines ILI9488 LCD panel hsync time in pixels.
+// <i> Default: 10
+#define RTE_ILI9488_PANEL_HSYNC_TIME                10
+
+// <o> Panel ILI9488 hbp time in pixels
+// <i> Defines ILI9488 LCD panel hbp time in pixels.
+// <i> Default: 10
+#define RTE_ILI9488_PANEL_HBP_TIME                  10
+
+// <o> Panel ILI9488 hfp time in pixels
+// <i> Defines ILI9488 LCD panel hfp time in pixels.
+// <i> Default: 40
+#define RTE_ILI9488_PANEL_HFP_TIME                  40
+
+// <o> Panel ILI9488 hactive pixels
+// <i> Defines ILI9488 LCD panel hactive pixels.
+// <i> Default: 320
+#define RTE_ILI9488_PANEL_HACTIVE_TIME              320
+
+// <o> Panel ILI9488 vsync time in lines
+// <i> Defines ILI9488 LCD panel vsync time in lines.
+// <i> Default: 2
+#define RTE_ILI9488_PANEL_VSYNC_LINE                2
+
+// <o> Panel ILI9488 vbp time in lines
+// <i> Defines ILI9488 LCD panel vbp time in lines.
+// <i> Default: 16
+#define RTE_ILI9488_PANEL_VBP_LINE                  16
+
+// <o> Panel ILI9488 vfp time in lines
+// <i> Defines ILI9488 LCD panel vfp time in lines.
+// <i> Default: 10
+#define RTE_ILI9488_PANEL_VFP_LINE                  10
+
+// <o> Panel ILI9488 vactive lines
+// <i> Defines ILI9488 LCD panel vactive lines.
+// <i> Default: 480
+#define RTE_ILI9488_PANEL_VACTIVE_LINE              480
+
+#endif
+// </e> MIPI_DSI (ILI9488_PANEL) [Driver_ILI9488_PANEL]
+
 #endif
 // </e> MIPI_DSI (ILI9806E_PANEL) [Driver_ILI9806E_PANEL]
 
@@ -1103,15 +1258,22 @@
 // <i> Default: 4
 #define RTE_GT911_TOUCH_INT_PIN_NO        BOARD_TOUCH_INT_PIN_NO
 
-// <o RTE_GT911_TOUCH_I2C_INSTANCE> Select GT911 Touchscreen i2c instance
+// <o> RTE_GT911_TOUCH_I2C_INSTANCE
 // <i> Defines GT911 Touchscreen i2c instance
 //     <0=>   I2C0
 //     <1=>   I2C1
 //     <2=>   I2C2
 //     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
+//     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_GT911_TOUCH_I2C_INSTANCE     BOARD_TOUCH_I2C_INSTANCE
+
+// <o> RTE_GT911_TOUCH_I2C_SLAVE_ADDRESS_SEL
+// <i> Defines GT911 Touchscreen i2c slave address selection
+//     <0x14=>   I2C_SLAVE_ADDRESS_HEX_14
+//     <0x5D=>   I2C_SLAVE_ADDRESS_HEX_5D
+// <i> Default: 0x14
+#define RTE_GT911_TOUCH_I2C_SLAVE_ADDRESS_SEL     0x14
 #endif
 
 #endif
@@ -1274,7 +1436,7 @@
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I3C
-// <i> Default: ENABLE
+// <i> Default: DISABLE
 #define RTE_I3C_DMA_ENABLE   0
 
 // <o> I3C DMA Selection
@@ -1288,6 +1450,21 @@
 // <i> Defines I3C DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I3C_DMA_IRQ_PRI  0
+
+// <o> I3C blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for I3C
+// <i> Default: DISABLE
+#define RTE_I3C_BLOCKING_MODE_ENABLE    0
+
+// <o> I3C Slave I2C/I3C Adaptive mode Enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines whether I3C Slave starts with I2C mode or not.
+// <i> It is for for enabling some features for I2C/I3C mode
+// <i> Default: DISABLE
+#define RTE_I3C_SLAVE_ADAPTIVE_MODE_ENABLE  0
 
 #endif
 // </e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
@@ -1857,9 +2034,6 @@
 
 // <o> LPSPI slave selection
 //    <0=> SS_0
-//    <1=> SS_1
-//    <2=> SS_2
-//    <3=> SS_3
 // <i> Defines slave selection for LPSPI.
 // <i> Default: 0
 #define RTE_LPSPI_CHIP_SELECTION_PIN             0
@@ -4635,7 +4809,7 @@
 // <i> Default: 0
 #define RTE_UTIMER_CHANNEL5_CAPTURE_D_IRQ_PRIORITY  0
 
-// <o> CHANNEL5 CAPTURE E IRQ priority <0-255 >
+// <o> CHANNEL5 CAPTURE E IRQ priority <0-255>
 // <i> Defines Interrupt priority for channel 5 capture E.
 // <i> Default: 0
 #define RTE_UTIMER_CHANNEL5_CAPTURE_E_IRQ_PRIORITY  0
@@ -9245,40 +9419,34 @@
 // </h> LPPDM (Low Power Pulse density modulation)
 
 // <h> CANFD (Controller Area Network - Fast Mode)
-// <e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
-// <i> Configuration settings for Driver_CANFD in component ::Drivers:CANFD
-#define RTE_CANFD 1
-
-#ifdef RTE_CANFD
-
-// <o> CANFD IRQ priority <0-255>
-// <i> Defines Interrupt priority for CANFD.
+// <e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
+// <i> Configuration settings for Driver_CANFD0 in component ::Drivers:CANFD
+#define RTE_CANFD0                           1
+#ifdef RTE_CANFD0
+// <o> CANFD0 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CANFD0.
 // <i> Default: 0
-#define RTE_CANFD_IRQ_PRIORITY              0
-
-// <o> CANFD Clock Source
+#define RTE_CANFD0_IRQ_PRIORITY              0
+// <o> CANFD0 Clock Source
 //    <0=> 38.4 MHz Clock
 //    <1=> 160 MHz Clock
-// <i> Defines Clock Source for CANFD.
+// <i> Defines Clock Source for CANFD0.
 // <i> Default: 160 MHz
-#define RTE_CANFD_CLK_SOURCE                1
-
-// <o> CANFD Clock Speed (Hz) <160000-80000000>
-// <i> Defines Clock Speed for CANFD.
+#define RTE_CANFD0_CLK_SOURCE                1
+// <o> CANFD0 Clock Speed (Hz) <160000-80000000>
+// <i> Defines Clock Speed for CANFD0.
 // <i> Maximum Clock speed is 80MHz
 // <i> Recommended speeds with 160MHz clock source: 20MHz, 40MHz, 80MHz
 // <i> Default: 20MHz
-#define RTE_CANFD_CLK_SPEED                 20000000
-
-// <o> CANFD blocking mode enable
+#define RTE_CANFD0_CLK_SPEED                 20000000
+// <o> CANFD0 blocking mode enable
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines Blocking mode support for CANFD
+// <i> Defines Blocking mode support for CANFD0
 // <i> Default: DISABLE
-#define RTE_CANFD_BLOCKING_MODE_ENABLE      0
-
+#define RTE_CANFD0_BLOCKING_MODE_ENABLE      0
 #endif
-// </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
+// </e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
 // </h> CANFD (Controller Area Network - Fast Mode)
 
 // <h> SDC (Secure Digital Controller)
@@ -9300,8 +9468,8 @@
 //    <1=> SDC_25MHz
 //    <2=> SDC_50MHz
 // <i> Defines SDC0 Clock select
-// <i> Default: 50MHz
-#define RTE_SDC_CLOCK_SELECT 2
+// <i> Default: 25MHz
+#define RTE_SDC_CLOCK_SELECT 1
 
 //    <o> SDC DMA SELECT
 //    <0=> SDMA
