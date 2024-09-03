@@ -97,6 +97,10 @@ function(set_platform_global_defaults)
     if ((ALIF_DEVICE_SKU STREQUAL "AE722F80F55D5") AND (TARGET_BOARD STREQUAL "DevKit"))
         set(ALIF_BOARDLIB_PATH_END "devkit_gen2" CACHE STRING "" FORCE)
     endif()
+    
+    USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
+        "Shared_Sram"
+        STRING)
 
     # Include NPU, CMSIS and LVGL configuration options
     include(npu_opts)
