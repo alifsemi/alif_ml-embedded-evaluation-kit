@@ -135,11 +135,14 @@ target_link_options(
     INTERFACE
     --entry Reset_Handler)
 
+message(STATUS "ensemble cmsis-pack: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
+
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${CPU_HEADER_TARGET}
-    ensemble_services)
+    $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
+)
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)

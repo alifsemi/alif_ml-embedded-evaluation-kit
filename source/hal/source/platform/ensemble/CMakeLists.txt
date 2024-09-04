@@ -57,6 +57,11 @@ set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turne
 
 set(COPY_VECTORS ON CACHE BOOL "Copy vectors - can be turned off if not booting from MRAM")
 
+set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Needed for power examples and KWS MHU communication.")
+
+set(USE_FAKE_CAMERA OFF CACHE BOOL "If enabled, does not use real camera.")
+
+
 # 1. We should be cross-compiling (Ensemble target only runs Cortex-M/A targets)
 if (NOT ${CMAKE_CROSSCOMPILING})
     message(FATAL_ERROR "No ${PLATFORM_DRIVERS_TARGET} support for this target.")
@@ -110,12 +115,16 @@ INTERFACE
 include
 )
 
+message(STATUS "platform ensemble: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
+
 target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     CONSOLE_UART=${CONSOLE_UART}
     $<$<NOT:$<STREQUAL:${CONSOLE_UART},None>>:USE_UART>
     $<$<BOOL:${CONSOLE_STM}>:USE_STM>
     $<$<BOOL:${CONSOLE_ITM}>:USE_ITM>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:OSPI_FLASH_SUPPORT>
+    $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
+    $<$<BOOL:${USE_FAKE_CAMERA}>:USE_FAKE_CAMERA>
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
 )
 
@@ -143,8 +152,10 @@ if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
 endif()
 
-# Ensemble services lib to have IPC communication
-add_subdirectory(services_lib ${CMAKE_BINARY_DIR}/services_lib)
+if (SE_SERVICES_SUPPORT)
+    # Ensemble services lib to have IPC communication
+    add_subdirectory(services_lib ${CMAKE_BINARY_DIR}/services_lib)
+endif()
 
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
@@ -189,7 +200,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     image_ensemble
     $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
     audio_ensemble
-    ensemble_services
+    $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
 )
 
 add_compile_options(-Werror-implicit-function-declaration)

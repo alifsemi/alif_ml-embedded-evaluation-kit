@@ -52,6 +52,11 @@ typedef struct ethosu_pmu_counters_ {
 void ethosu_pmu_init(void);
 
 /**
+ * @brief  Finalise the Arm Ethos-U NPU performance monitoring unit.
+ */
+void ethosu_pmu_final(void);
+
+/**
  * @brief  Resets the Arm Ethos-U NPU PMU counters.
  */
 void ethosu_pmu_reset_counters(void);

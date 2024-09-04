@@ -77,22 +77,19 @@ void LCD_enable_tear_interrupt(void (*handler)(void), uint8_t prio)
 
 int Display_initialization(uint8_t *buffer)
 {
-#if !RTE_SILICON_REV_A
-    // enable peripheral clocks
-    enable_cgu_clk38p4m();
-    enable_cgu_clk160m();
-    enable_cgu_clk100m();
-    enable_cgu_clk20m();
+    int32_t ret = (int32_t)enable_peripheral_clocks();
+    if(ret != ARM_DRIVER_OK)
+    {
+        printf("Display_initialization enable_peripheral_clocks failed: %" PRIi32 "\n", ret);
+        return 1;
+    }
 
-    /* Enable MIPI power */
-    enable_mipi_dphy_power();
-    disable_mipi_dphy_isolation();
-#endif
+    enable_mipi_power();
 
 	////////////////////////////////////////////////////////////////////////////
 	// MIPI DPI Controller Setup (CDC200)
 	////////////////////////////////////////////////////////////////////////////
-	int32_t ret = Driver_CDC200.Initialize(cdc_event_handler);
+	ret = Driver_CDC200.Initialize(cdc_event_handler);
 	if(ret != ARM_DRIVER_OK)
 	{
 		printf("Driver_CDC200.Initialize: %" PRIi32 "\n", ret);

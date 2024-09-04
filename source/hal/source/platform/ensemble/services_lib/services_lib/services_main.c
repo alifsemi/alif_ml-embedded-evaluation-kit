@@ -35,6 +35,8 @@ uint32_t hp_comms_handle = 0xff;
 uint32_t a32_0_comms_handle = 0xff;
 uint32_t a32_1_comms_handle = 0xff;
 
+static bool initialized = false;
+
 #ifdef A32
 #define MHU1_OFFSET            0x00020000
 #define NUM_MHU                3
@@ -345,6 +347,10 @@ int services_init (mhu_receive_callback_t cb)
 {
     mhu_receive_callback = cb;
 
+    if (initialized) {
+      return 0;
+    }
+
     /**
      * Initialise the MHU and SERVICES Library
      */
@@ -362,5 +368,8 @@ int services_init (mhu_receive_callback_t cb)
     a32_0_comms_handle = SERVICES_register_channel(MHU_CPU_A32_0_MHU, 0);
     a32_1_comms_handle = SERVICES_register_channel(MHU_CPU_A32_1_MHU, 0);
 #endif
+
+    initialized = true;
+
     return 0;
 }

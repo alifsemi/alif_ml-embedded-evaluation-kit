@@ -1,9 +1,9 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -37,8 +37,6 @@ static struct {
 static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CIMAGE_Y]
     __attribute__((aligned(32),section(".bss.camera_frame_buf")));
 
-#define FAKE_CAMERA 0
-
 #if RTE_SILICON_REV_A
 #define BAYER_FORMAT DC1394_COLOR_FILTER_BGGR
 #else
@@ -47,7 +45,7 @@ static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CI
 
 int image_init()
 {
-#if FAKE_CAMERA
+#ifdef USE_FAKE_CAMERA
     return 0;
 #else
     DEBUG_PRINTF("image_init(IN)\n");
@@ -190,7 +188,7 @@ static void process_autogain(void)
 const uint8_t *get_image_data(int ml_width, int ml_height)
 {
     extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
-#if !FAKE_CAMERA
+#ifndef USE_FAKE_CAMERA
     camera_start(CAMERA_MODE_SNAPSHOT);
     camera_wait(100);
     // It's a big buffer (313,600 bytes) - actually doing it by address can take 0.175ms, while
@@ -242,9 +240,11 @@ const uint8_t *get_image_data(int ml_width, int ml_height)
     tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
 #endif
 
-#if !FAKE_CAMERA && CIMAGE_SW_GAIN_CONTROL
+#ifndef USE_FAKE_CAMERA
+#if CIMAGE_SW_GAIN_CONTROL
     // Use pixel analysis from bayer_to_RGB to adjust gain
     process_autogain();
+#endif
 #endif
 
     // Cropping and scaling

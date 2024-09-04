@@ -45,7 +45,7 @@ USER_OPTION(${use_case}_USE_APP_MENU "Show application menu"
 
 set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Needed for power examples and KWS MHU communication.")
 
-message(STATUS "alif_kws: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
+message(STATUS "alif_kws_with_power: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
 
 set(${use_case}_COMPILE_DEFS
     USE_APP_MENU=$<BOOL:${${use_case}_USE_APP_MENU}>
