@@ -3,10 +3,17 @@
  *
  * @brief Services library Error handling
  * @par
- * COPYRIGHT NOTICE: (c) 2021 Alif Group. All rights reserved.
+ *
+ * Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
  *  @ingroup host_services
  */
-
 
 /******************************************************************************
  *  I N C L U D E   F I L E S
@@ -16,7 +23,6 @@
 #include <string.h>
 #include <stdint.h>
 #include "services_lib_api.h"
-#include "services_lib_public.h"
 #include "services_lib_protocol.h"
 
 #define MAX_ERROR_STRING_LENGTH     38
@@ -41,35 +47,19 @@
  */
 char *SERVICES_error_to_string(uint32_t error_code)
 {
-  static char err_string[MAX_ERROR_STRING_LENGTH];
+  static char err_string[MAX_ERROR_STRING_LENGTH] = { 0 };
   char *p_str = NULL;
-
-  memset(err_string, ' ',sizeof(err_string));
 
   switch (error_code)
    {
        case SERVICES_REQ_SUCCESS:
-         p_str = "SERVICES_REQ_SUCCESS        "; break;
+         p_str = "SERVICES_REQ_SUCCESS          "; break;
        case SERVICES_REQ_NOT_ACKNOWLEDGE:
-         p_str = "SERVICES_REQ_NOT_ACKNOWLEDGE"; break;
-       case SERVICES_REQ_ACKNOWLEDGE:
-         p_str = "SERVICES_REQ_ACKNOWLEDGE    "; break;
+         p_str = "SERVICES_REQ_NOT_ACKNOWLEDGE  "; break;
        case SERVICES_REQ_TIMEOUT:
-         p_str = "SERVICES_REQ_TIMEOUT        "; break;
+         p_str = "SERVICES_REQ_TIMEOUT          "; break;
        case SERVICES_RESP_UNKNOWN_COMMAND:
-         p_str = "SERVICES_RESP_UNKNOWN_COMMAND"; break;
-       case SERVICES_REQ_BAD_PACKET_SIZE:
-         p_str = "SERVICES_REQ_BAD_PACKET_SIZE"; break;
-       case SERVICES_REQ_CANNOT_EXECUTE_SERVICE:
-         p_str = "SERVICES_REQ_CANNOT_EXECUTE_SERVICE"; break;
-       case SERVICES_REQ_BAD_PAYLOAD:
-         p_str = "SERVICES_REQ_BAD_PAYLOAD"; break;
-       case SERVICES_REQ_BAD_PAYLOAD_LENGTH:
-         p_str = "SERVICES_REQ_BAD_PAYLOAD_LENGTH"; break;
-       case SERVICES_REQ_PAYLOAD_OK:
-         p_str = "SERVICES_REQ_PAYLOAD_OK"; break;
-       case SERVICES_REQ_PIN_LOCKED:
-         p_str = "SERVICES_REQ_PIN_LOCKED"; break;
+         p_str = "SERVICES_RESP_UNKNOWN_COMMAND "; break;
        default:
          p_str = ">>  Error UNKNOWN  <<"; break;
   }
@@ -77,3 +67,14 @@ char *SERVICES_error_to_string(uint32_t error_code)
 
   return (char *)&err_string[0];
 }
+
+/**
+ * @fn    const char *SERVICES_version(void)
+ * @brief SERVICES version
+ * @return version string
+ */
+const char *SERVICES_version(void)
+{
+  return SE_SERVICES_VERSION_STRING;
+}
+

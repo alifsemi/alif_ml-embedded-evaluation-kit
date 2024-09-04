@@ -1,7 +1,16 @@
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /**
  * @file mhu_receiver.c
  * @brief MHU receiver driver
- * COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
  */
 
 /******************************************************************************
@@ -79,7 +88,7 @@ static mhu_channel_combined_group_t sender_receiver_combined_ch_group(
 }
 
 /**
- * @fn        void receive_message_irq_handler(uint32_t receiver_id)
+ * @fn        void MHU_receive_message_irq_handler(uint32_t receiver_id)
  * @brief     This functions handles received messages
  * @param[in] receiver_id    Receiver frame id
  * @return    none
@@ -90,9 +99,12 @@ void MHU_receive_message_irq_handler(uint32_t receiver_id)
   {
     return;
   }
-  MHU_receiver_frame_register_t * receiver_reg_base = get_receiver_frame_base_address(receiver_id);
 
-  for (mhu_channel_number_t channel_number = 0; channel_number < MHU_CHANNELS; channel_number++)
+  MHU_receiver_frame_register_t * receiver_reg_base =
+                      get_receiver_frame_base_address(receiver_id);
+
+  for (mhu_channel_number_t channel_number = 0;
+       channel_number < MHU_CHANNELS; channel_number++)
   {
     mhu_channel_combined_group_t channel_group =
         sender_receiver_combined_ch_group(channel_number);
@@ -112,7 +124,7 @@ void MHU_receive_message_irq_handler(uint32_t receiver_id)
                   receiver_id, channel_irq_status, channel_number, message_data);
 
       // Clear channel data
-      SET_REGISTER_BITS_U32(&receiver_reg_base->CHANNEL[channel_number].CH_CLR, 0xFFFFFFFF);
+      WRITE_REGISTER_U32(&receiver_reg_base->CHANNEL[channel_number].CH_CLR, 0xFFFFFFFF);
     }
   }
 }
@@ -125,7 +137,9 @@ void MHU_receive_message_irq_handler(uint32_t receiver_id)
  * @return    None
  */
 static void MHU_receiver_set_irq_enable(
-    MHU_receiver_frame_register_t * receiver_reg_base, uint32_t mask, bool enable)
+             MHU_receiver_frame_register_t * receiver_reg_base,
+             uint32_t mask,
+             bool enable)
 {
   if (enable)
   {
@@ -137,6 +151,7 @@ static void MHU_receiver_set_irq_enable(
   }
 }
 
+#if 0
 /**
  * @brief     Function clears the irq status
  * @param[in] mhu_frame_id    MHU frame ID
@@ -146,8 +161,9 @@ static void MHU_receiver_set_irq_enable(
 static void MHU_receiver_clear_irq(
     MHU_receiver_frame_register_t * receiver_reg_base, uint32_t mask)
 {
-  SET_REGISTER_BITS_U32(&receiver_reg_base->INT_CLR, mask);
+  WRITE_REGISTER_U32(&receiver_reg_base->INT_CLR, mask);
 }
+#endif
 
 /**
  * @brief     Initialize function for MHU receiver interrupts
@@ -156,16 +172,22 @@ static void MHU_receiver_clear_irq(
  */
 static void MHU_receiver_interrupt_initialize(uint32_t receiver_frame_count)
 {
-  for (uint32_t receiver_id = 0; receiver_id < receiver_frame_count; receiver_id++)
+  for (uint32_t receiver_id = 0;
+       receiver_id < receiver_frame_count; receiver_id++)
   {
     MHU_receiver_frame_register_t * receiver_reg_base =
         get_receiver_frame_base_address(receiver_id);
-    MHU_receiver_set_irq_enable(receiver_reg_base, MHU_CHCOMB, false);
-    MHU_receiver_clear_irq(receiver_reg_base, MHU_CHCOMB);
+
     MHU_receiver_set_irq_enable(receiver_reg_base, MHU_CHCOMB, true);
   }
 }
 
+/**
+ *
+ * @param receiver_frame_base_address_list
+ * @param receiver_frame_count
+ * @param callback
+ */
 void MHU_receiver_initialize(
     uint32_t receiver_frame_base_address_list[],
     uint32_t receiver_frame_count,

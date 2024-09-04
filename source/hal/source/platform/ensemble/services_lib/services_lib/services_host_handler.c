@@ -1,52 +1,92 @@
 /**
  * @file services_host_handler.c
  * @brief Services handler file
- * COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
+ *
+ * Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
  * @ingroup host_services
  */
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "services_lib_api.h"
-#include "services_lib_public.h"
+#include <string.h>
+#include "services_lib_bare_metal.h"
 #include "services_lib_protocol.h"
-#include "RTE_Components.h"
+#if defined(A32)
+#include "a32_device.h"
+#else
+#include "system_utils.h"
+#endif
 
-#define SEND_MSG_ACK_TIMEOUT    100000ul
+#define SERVICES_REQ_TIMEOUT_MS  0x20
+#define SEND_MSG_ACK_TIMEOUT     1000000ul
+#define UNUSED(x) (void)(x)
 
 static services_lib_t s_services_host = {0};
 
-static uint32_t s_pkt_buffer_address = 0x0;
+static uint32_t s_pkt_buffer_address_global = 0x0;
 static volatile bool s_service_req_ack_received = false;
 static volatile bool s_new_msg_received = false;
-static SERVICES_sender_callback s_callback;
 
 /**
- * Function to initialize the services library
+ * @brief Function to initialize the services library
  * @param init_params Initialization parameters
  */
 void SERVICES_initialize(services_lib_t * init_params)
 {
-  s_services_host.global_offset = init_params->global_offset;
+  s_services_host.packet_buffer_address = init_params->packet_buffer_address;
+  s_pkt_buffer_address_global =
+      LocalToGlobal((void *)s_services_host.packet_buffer_address);
   s_services_host.fn_send_mhu_message = init_params->fn_send_mhu_message;
   s_services_host.fn_wait_ms = init_params->fn_wait_ms;
   s_services_host.wait_timeout = init_params->wait_timeout,
   s_services_host.fn_print_msg = init_params->fn_print_msg;
 }
 
-uint32_t SERVICES_local_to_global_addr(uint32_t local_addr)
+/**
+ * @brief  Function to synchronize with SE
+ * @param  services_handle Services library handle
+ * @return total number of retries
+ *          if nonnegative, success
+ *          if negative, failure
+ */
+int SERVICES_synchronize_with_se(uint32_t services_handle)
 {
-  // uint32_t global_addr = local_addr + s_services_host.global_offset;
-  // return global_addr;
-    return LocalToGlobal((void *) local_addr);
+  const int MAX_RETRY = 100;
+  uint32_t error_code = SERVICES_REQ_SUCCESS;
+  int retry_count = 0;
+
+  while (1)
+  {
+    retry_count ++;
+    error_code = SERVICES_heartbeat(services_handle);
+    if (error_code == SERVICES_REQ_SUCCESS)
+    {
+      break;
+    }
+    if (retry_count > MAX_RETRY)
+    {
+      return -retry_count;
+    }
+  }
+
+  return retry_count;
 }
 
-uint32_t SERVICES_global_to_local_addr(uint32_t global_addr)
+/**
+ * @brief prepare the packet buffer ()
+ * @return
+ */
+uintptr_t SERVICES_prepare_packet_buffer(uint32_t size)
 {
-  // uint32_t local_addr = global_addr - s_services_host.global_offset;
-  // return local_addr;
-    return (uint32_t) GlobalToLocal(global_addr);
+  memset((void *)s_services_host.packet_buffer_address, 0x0, size);
+  return s_services_host.packet_buffer_address;
 }
 
 /**
@@ -57,7 +97,7 @@ uint32_t SERVICES_global_to_local_addr(uint32_t global_addr)
  * @param   channel_number
  * @return  Handle to be used in subsequent service calls
  */
-uint32_t SERVICES_register_channel(uint32_t mhu_id,
+uint32_t SERVICES_register_channel(uint32_t mhu_id, 
                                    uint32_t channel_number)
 {
   return mhu_id * MHU_NUMBER_OF_CHANNELS_MAX + channel_number;
@@ -84,16 +124,6 @@ static uint32_t services_get_channel_number(uint32_t services_handle)
 }
 
 /**
- * @fn    const char *SERVICES_version(void)
- * @brief SERVICES version
- * @return version string
- */
-const char *SERVICES_version(void)
-{
-  return SE_SERVICES_VERSION_STRING;
-}
-
-/**
  * @brief Callback function for sent msg ACK
  * @fn    void SERVICES_send_msg_acked_callback(uint32_t sender_id,
  *                                              uint32_t channel_number)
@@ -102,6 +132,8 @@ void SERVICES_send_msg_acked_callback(uint32_t sender_id,
                                       uint32_t channel_number)
 {
   s_service_req_ack_received = true;
+  UNUSED(sender_id);
+  UNUSED(channel_number);
 }
 
 /**
@@ -113,22 +145,18 @@ void SERVICES_send_msg_acked_callback(uint32_t sender_id,
  * @param channel_number
  * @param service_data
  */
-void SERVICES_rx_msg_callback(uint32_t receiver_id,
-                              uint32_t channel_number,
+void SERVICES_rx_msg_callback(uint32_t receiver_id, 
+                              uint32_t channel_number, 
                               uint32_t service_data)
 {
-  uint32_t local_address = SERVICES_global_to_local_addr(service_data);
+  UNUSED(receiver_id);
+  UNUSED(channel_number);
+
   // Validate response by checking the message
-  if (s_pkt_buffer_address == local_address)
+  if (s_pkt_buffer_address_global == service_data)
   {
     s_services_host.fn_print_msg("[SERVICESLIB] rx_msg=0x%x \n", service_data);
     s_new_msg_received = true;
-
-    if (s_callback)
-    {
-      s_callback(receiver_id, service_data);
-      s_callback = NULL;
-    }
   }
   else
   {
@@ -138,16 +166,21 @@ void SERVICES_rx_msg_callback(uint32_t receiver_id,
   }
 }
 
-uint32_t SERVICES_send_msg(uint32_t services_handle,
-                           void* service_data)
+/**
+ * @fn    uint32_t SERVICES_send_msg(uint32_t services_handle, uint32_t service_data)
+ * @brief Send the MHU message pointed by 'service_data'
+ */
+uint32_t SERVICES_send_msg(uint32_t services_handle, uint32_t services_data)
 {
-    // Send a message to the SE
-    uint32_t global_address = SERVICES_local_to_global_addr((uint32_t)service_data);
+    s_service_req_ack_received = false;
+
+    // Send a MHU message
+    uint32_t global_address = services_data;
     s_services_host.fn_send_mhu_message(services_get_mhu_id(services_handle),
                                         services_get_channel_number(services_handle),
                                         global_address);
 
-    // Wait for ACK from SE
+    // Wait for a MHU 'send' ACK
     uint32_t timeout = SEND_MSG_ACK_TIMEOUT;
     while (!s_service_req_ack_received)
     {
@@ -160,58 +193,62 @@ uint32_t SERVICES_send_msg(uint32_t services_handle,
     }
     return SERVICES_REQ_SUCCESS;
 }
-
 /**
- *
+ * @brief Send services request to MHU
  * @param services_handle
  * @param service_id
- * @param service_data
- * @param callback
+ * @param service_timeout
  * @return
  */
 uint32_t SERVICES_send_request(uint32_t services_handle,
                                uint16_t service_id,
-                               void *service_data,
-                               SERVICES_sender_callback callback)
+                               uint32_t service_timeout)
 {
   s_services_host.fn_print_msg("[SERVICESLIB] Send service request 0x%x\n",
                                service_id);
 
-  s_pkt_buffer_address = (uint32_t)service_data;
   s_new_msg_received = false;
-  s_service_req_ack_received = false;
-  s_callback = callback;
 
-  // Initialize the service request common header
-  service_header_t * p_header = (service_header_t *)s_pkt_buffer_address;
-  p_header->send_service_id = service_id;
-  p_header->send_flags = 0;
+  /**
+   * Initialize the service request common header
+   */
+  service_header_t * p_header = (service_header_t *)s_services_host.packet_buffer_address;
+  p_header->hdr_service_id = service_id;
+  p_header->hdr_flags = 0;
+  
+  /**
+   * Send a message to the SE
+   */
 
-  // Send a message to the SE
-  uint32_t ret = SERVICES_send_msg(services_handle, service_data);
+  RTSS_CleanDCache_by_Addr((uint32_t *)s_services_host.packet_buffer_address,
+                          SERVICES_MAX_PACKET_BUFFER_SIZE);
+
+  uint32_t ret = SERVICES_send_msg(services_handle, s_pkt_buffer_address_global);
   if (ret != SERVICES_REQ_SUCCESS)
-      return ret;
-
-  if (callback) // asynchronous invokation, don't wait for the service response
   {
-    return 0;
+      return ret;
   }
 
   // Wait for response from SE
-  uint32_t timeout = s_services_host.wait_timeout;
+  uint32_t timeout = service_timeout != DEFAULT_TIMEOUT
+                     ? service_timeout :
+                     s_services_host.wait_timeout;
   while (!s_new_msg_received)
   {
-    timeout--;
+    timeout--;  
     if (0 == timeout) // No response from SE
     {
       return SERVICES_REQ_TIMEOUT;
     }
-
-    if (0 != s_services_host.fn_wait_ms(SERVICES_REQ_TIMEOUT_MS))
-    {
-      break;
-    }
+	
+    //if (0 != s_services_host.fn_wait_ms(SERVICES_REQ_TIMEOUT_MS))
+    //{
+    //  break;
+    //}
   }
 
-  return p_header->resp_error_code;
+  RTSS_InvalidateDCache_by_Addr((uint32_t*)s_services_host.packet_buffer_address,
+                                SERVICES_MAX_PACKET_BUFFER_SIZE);
+
+  return p_header->hdr_error_code;
 }

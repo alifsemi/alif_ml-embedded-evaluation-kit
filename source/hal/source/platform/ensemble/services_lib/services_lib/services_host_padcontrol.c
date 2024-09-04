@@ -4,7 +4,14 @@
  * @brief Pad control service source file
  * @ingroup host_services
  * @par
- * COPYRIGHT NOTICE: (c) 2021 Alif Group. All rights reserved.
+ *
+ * Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
  */
 
 /******************************************************************************
@@ -15,8 +22,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "services_lib_api.h"
-#include "services_lib_public.h"
 #include "services_lib_protocol.h"
+#include "services_lib_ids.h"
 
 /**
  * @ingroup services
@@ -46,24 +53,26 @@
  * @param port_number
  * @param pin_number
  * @param config_data
+ * @param error_code
  * @return
  */
-uint32_t SERVICES_padcontrol(uint32_t services_handle, 
-                             uint8_t port_number, 
-                             uint8_t pin_number, 
+uint32_t SERVICES_padcontrol(uint32_t services_handle,
+                             uint8_t port_number,
+                             uint8_t pin_number,
                              uint8_t config_data,
                              uint32_t * error_code)
 
 {
-  pad_control_svc_t svc;
-  memset(&svc, 0x0, sizeof(pad_control_svc_t));
+  pad_control_svc_t * p_svc = (pad_control_svc_t *)
+      SERVICES_prepare_packet_buffer(sizeof(pad_control_svc_t));
 
-  svc.send_port_num = port_number;
-  svc.send_pin_num = pin_number;
-  svc.send_config_data = config_data;
+  p_svc->send_port_num = port_number;
+  p_svc->send_pin_num = pin_number;
+  p_svc->send_config_data = config_data;
 
   uint32_t ret =  SERVICES_send_request(services_handle,
-                               SERVICE_APPLICATION_PAD_CONTROL_ID, &svc, NULL);
-  *error_code = svc.resp_error_code;
+                                        SERVICE_APPLICATION_PAD_CONTROL_ID,
+                                        DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code;
   return ret;
 }

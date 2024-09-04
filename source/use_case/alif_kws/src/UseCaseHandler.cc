@@ -43,7 +43,12 @@
 
 #include <vector>
 
-extern uint32_t m55_comms_handle;
+#if defined(M55_HE)
+// Use hp_comms_handle for sending MHU message to HP core
+extern uint32_t hp_comms_handle;
+#else
+extern uint32_t he_comms_handle;
+#endif
 m55_data_payload_t mhu_data;
 
 using arm::app::KwsClassifier;
@@ -96,7 +101,11 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             info("******************* send_msg_if_needed, FOUND \"%s\", copy data end send! ******************\n", classification.m_label.c_str());
             strcpy(mhu_data.msg, classification.m_label.c_str());
             __DMB();
-            SERVICES_send_msg(m55_comms_handle, &mhu_data);
+#if defined(M55_HE)
+            SERVICES_send_msg(hp_comms_handle, LocalToGlobal(&mhu_data));
+#else
+            SERVICES_send_msg(he_comms_handle, LocalToGlobal(&mhu_data));
+#endif
         }
         last_label = classification.m_label;
     }
