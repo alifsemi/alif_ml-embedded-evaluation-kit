@@ -293,7 +293,7 @@ applications from sources and includes illustrating the build options and the pr
 The following graph of source modules aims to explain better intra-project code and build execution dependencies.
 ![intra-project dependencies](./media/build_graph.png)
 
-The project can be built for MPS3 FPGA and FVP emulating MPS3. Using default values for configuration parameters builds
+The project can be built for MPS3 FPGA, FVP emulating MPS3 and FVP emulating MPS4. Using default values for configuration parameters builds
 executable models that support the *Ethos-U* NPU.
 
 For further information, please see:
@@ -311,6 +311,8 @@ For further information, please see:
       - [Using Arm Compiler](./sections/building.md#using-arm-compiler)
       - [Generating project for Arm Development Studio](./sections/building.md#generating-project-for-arm-development-studio)
       - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
+    - [Configuring the build for MPS3 SSE-310](./sections/building.md#configuring-the-build-for-mps3-sse_310)
+    - [Configuring the build for MPS4 SSE-315](./sections/building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
