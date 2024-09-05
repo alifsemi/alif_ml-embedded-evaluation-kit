@@ -76,12 +76,12 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
 
 ###### Arm compiler
 ````commandline
-python3.9 ./build_default.py --toolchain arm
+python3.10 ./build_default.py --toolchain arm
 ````
 
 ###### GNU Arm Embedded toolchain
 ```commandline
-python3.9 ./build_default.py
+python3.10 ./build_default.py
 ```
 
 5. Change directory to the generated cmake build folder which contains the `.axf` file output in the `bin`
