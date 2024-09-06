@@ -645,12 +645,11 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_REVISION=<A|B>`<br>
-Specifies which revision (generation) of Ensemble device is being targeted – A is generation 1, B is generation 2. (Default is B)
+`-DTARGET_REVISION=<B>`<br>
+Specifies which revision (generation) of Ensemble device is being targeted – B is generation 2. (Default is B)
 
-`-DTARGET_BOARD=<DevKit|AppKit|DevKit_Baseboard|AppKit_Alpha1|AppKit_Alpha2>`<br>
+`-DTARGET_BOARD=<DevKit|AppKit|DevKit_Baseboard|>`<br>
 Specifies the target board. (Default is AppKit)<br>
--DTARGET_REVISION=A supports the following boards: DevKit, AppKit_Alpha1 and AppKit_Alpha2<br>
 -DTARGET_REVISION=B supports the following boards: DevKit, AppKit and DevKit_Baseboard
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>

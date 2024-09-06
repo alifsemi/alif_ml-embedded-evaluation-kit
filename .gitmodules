@@ -22,9 +22,6 @@
 [submodule "dependencies/Arm-2D"]
 	path = dependencies/Arm-2D
 	url = https://github.com/ARM-software/Arm-2D.git
-[submodule "dependencies/cmsis-ensemble"]
-	path = dependencies/cmsis-ensemble-a
-	url = https://github.com/alifsemi/alif_ensemble-cmsis-dfp.git
 [submodule "dependencies/cmsis-ensemble-b"]
 	path = dependencies/cmsis-ensemble
 	url = git@github.com:alifsemi/b0-cmsis-dfp_DEV.git

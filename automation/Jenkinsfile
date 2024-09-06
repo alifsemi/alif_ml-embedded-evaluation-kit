@@ -41,13 +41,6 @@ pipeline {
         // Remaining builds can be parallel
         stage('More builds') {
             parallel {
-                stage('Build HP GCC Release (rev. A)') {
-                    steps {
-                        script {
-                            common_funcs.build_hp("Release", "gcc", "A");
-                        }
-                    }
-                }
                 stage('Build HP GCC Debug') {
                     steps {
                         script {
