@@ -1,15 +1,23 @@
+
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /**
  * @file mhu_driver.h
- *
  * @brief Header file for MHU driver module
- *
  * @par
- * COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
+ * @defgroup host_services Host Services
  */
 
 #ifndef __MHU_DRIVER_H__
 #define __MHU_DRIVER_H__
-
 
 /******************************************************************************
  *  I N C L U D E   F I L E S

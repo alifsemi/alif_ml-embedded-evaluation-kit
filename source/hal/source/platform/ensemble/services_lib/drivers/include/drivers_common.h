@@ -1,14 +1,21 @@
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
 /** @file drivers_common.h
 *
 * @brief Header file for common macros used by shared drivers
 *
 * @par
-* COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
 */
 
 #ifndef DRIVERS_COMMON_H
 #define DRIVERS_COMMON_H
-
 
 /*******************************************************************************
  *  M A C R O   D E F I N E S

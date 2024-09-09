@@ -1,11 +1,11 @@
-/**
- * @file  services_lib_interface.c
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * @brief Public interface for Services library
- * @note  Unique for each platform
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
- * @par
- * COPYRIGHT NOTICE: (c) 2021 Alif Group. All rights reserved.
  */
 
 /******************************************************************************
@@ -19,15 +19,15 @@
 #include "services_lib_protocol.h"
 #include "mhu.h"
 
+#include "RTE_Components.h"
+#include CMSIS_device_header
+
 /*******************************************************************************
  *  M A C R O   D E F I N E S
  ******************************************************************************/
 
-#define SERVICES_PRINT_ENABLE       0
-
-#define MAXIMUM_TIMEOUT             0x10000
-
-#if DEVICE_REVISION == REV_B0
+#if ((DEVICE_TYPE == FUSION && DEVICE_REVISION == REV_B0) \
+    || (DEVICE_TYPE == SPARK))
 #define HE_DTCM_GLOBAL_ADDRESS      0x58800000ul
 #else
 #define HE_DTCM_GLOBAL_ADDRESS      0x60800000ul
@@ -35,6 +35,9 @@
 #define HP_DTCM_GLOBAL_ADDRESS      0x50800000ul
 #define M55_DTCM_LOCAL_OFFSET       0x20000000ul
 
+/**
+ * @note
+ */
 #if   CPU == M55_HE || defined(M55_HE)
 #define DTCM_GLOBAL_ADDRESS         HE_DTCM_GLOBAL_ADDRESS
 #elif CPU == M55_HP || defined(M55_HP)
@@ -43,6 +46,8 @@
 #error Target CPU is not defined
 #endif
 
+#define SERVICES_PRINT_BUFFER_SIZE (256)
+
 /*******************************************************************************
  *  T Y P E D E F S
  ******************************************************************************/
@@ -50,7 +55,10 @@
 /*******************************************************************************
  *  G L O B A L   V A R I A B L E S
  ******************************************************************************/
+static uint8_t
+  s_packet_buffer[SERVICES_MAX_PACKET_BUFFER_SIZE] __attribute__ ((aligned (4)));
 
+debug_print_function_t drv_debug_print_fn;
 
 /*******************************************************************************
  *  C O D E
@@ -63,14 +71,14 @@
  * @note  User must supply this implementation for their platform. This is a
  *        bare metal use case
  */
-int SERVICES_wait_ms(uint32_t wait_time_ms)
+int32_t SERVICES_wait_ms(uint32_t wait_time_ms)
 {
   /*
    * To be filled in by the user
    */
-  for (int i = 0; i < wait_time_ms; i++)
+  for (volatile uint32_t i = 0; i < wait_time_ms; i++)
   {
-     /* Do nothing */
+    sys_busy_loop_us(1000);
   }
 
   return 0;
@@ -85,13 +93,13 @@ int SERVICES_print(const char * fmt, ...)
 {
 #if SERVICES_PRINT_ENABLE != 0
   va_list args;
-  char buffer[256];
+  char buffer[SERVICES_PRINT_BUFFER_SIZE];
 
   /*
    * @todo Handle long strings bigger than buffer size
    */
   va_start(args,fmt);
-  vsprintf(buffer, fmt, args);
+  vsnprintf(buffer, SERVICES_PRINT_BUFFER_SIZE, fmt, args);
   va_end(args);
 
   printf("%s", buffer);
@@ -102,24 +110,25 @@ int SERVICES_print(const char * fmt, ...)
   return 0;
 }
 
-debug_print_function_t drv_debug_print_fn;
-
 /**
  * @fn    SERVICES_Setup(MHU_send_message_t send_message)
  * @brief Public interface to initialize the SERVICES library
+ *
+ * @param send_message
+ * @param timeout
  */
-void SERVICES_Setup(MHU_send_message_t send_message)
+void SERVICES_Setup(MHU_send_message_t send_message, uint32_t timeout)
 {
   /**
    *  @brief  Service library initialization parameters
    */
   services_lib_t  services_init_params =
   {
-    .global_offset        = DTCM_GLOBAL_ADDRESS - M55_DTCM_LOCAL_OFFSET,
-    .fn_send_mhu_message  = send_message,
-    .fn_wait_ms           = &SERVICES_wait_ms,
-    .wait_timeout         = 400000,
-    .fn_print_msg         = &SERVICES_print,
+    .packet_buffer_address = (uint32_t)s_packet_buffer,
+    .fn_send_mhu_message   = send_message,
+    .fn_wait_ms            = &SERVICES_wait_ms,
+    .wait_timeout          = timeout,
+    .fn_print_msg          = &SERVICES_print,
   };
   drv_debug_print_fn = &SERVICES_print;
 

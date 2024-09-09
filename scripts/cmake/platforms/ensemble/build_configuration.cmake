@@ -63,18 +63,12 @@ function(set_platform_global_defaults)
     include(lvgl_opts)
 
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard" "AppKit_Alpha1" "AppKit_Alpha2")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard")
 
     set(TARGET_REVISION "B" CACHE STRING "Chip revision")
-    set_property(CACHE TARGET_REVISION PROPERTY STRINGS "A" "B")
+    set_property(CACHE TARGET_REVISION PROPERTY STRINGS "B")
 
-    if (TARGET_REVISION STREQUAL "A")
-        # Sanity check DevKit, AppKit_Alpha1 and AppKit_Alpha2
-        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit_Alpha1") OR (TARGET_BOARD STREQUAL "AppKit_Alpha2")))
-            message(FATAL_ERROR "'A' revision possible TARGET_BOARD values are: DevKit, AppKit_Alpha1 and AppKit_Alpha2 but given value was ${TARGET_BOARD}")
-        endif()
-        set(ENSEMBLE_CMSIS_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-ensemble-a PARENT_SCOPE)
-    else()
+    if (TARGET_REVISION STREQUAL "B")
         # Sanity check DevKit, AppKit and DevKit_Baseboard
         if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_Baseboard")))
             message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit and DevKit_Baseboard but given value was ${TARGET_BOARD}")
@@ -111,8 +105,6 @@ function(set_platform_global_defaults)
     # If not using MRAM or OSPI for the model data, then the user can set this back to two.
     if (TARGET_REVISION STREQUAL "B")
         set(ETHOS_U_NPU_PORTS "1"          CACHE STRING "Ethos-U AXI ports")
-    else()
-        set(ETHOS_U_NPU_PORTS "2"          CACHE STRING "Ethos-U AXI ports")
     endif()
 
 endfunction()
