@@ -63,8 +63,8 @@ namespace app {
         void LogInterpreterInfo();
 
         /** @brief      Initialise the model class object.
-         *  @param[in]  tensorArenaAddress  Pointer to the tensor arena buffer.
-         *  @param[in]  tensorArenaAddress  Size of the tensor arena buffer in bytes.
+         *  @param[in]  tensorArenaAddr     Pointer to the tensor arena buffer.
+         *  @param[in]  tensorArenaSize     Size of the tensor arena buffer in bytes.
          *  @param[in]  nnModelAddr         Pointer to the model.
          *  @param[in]  nnModelSize         Size of the model in bytes, if known.
          *  @param[in]  allocator   Optional: a pre-initialised micro allocator pointer,
