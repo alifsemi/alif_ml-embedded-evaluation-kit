@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,15 +72,9 @@ namespace app {
 } /* namespace arm */
 
 /**
- * @brief Prints the tensor flow version in use to stdout.
+ * @brief Enables TensorFlow Lite Micro's error reporter to log to standard
+ *        output stream.
  */
-void PrintTensorFlowVersion();
-
-/**
- * @brief   String logging functionality expected to be defined
- *          by TensorFlow Lite Micro's error reporter.
- * @param[in]   s   Pointer to the string.
- */
-extern "C" void DebugLog(const char* s) __attribute__((__weak__));
+void EnableTFLMLog();
 
 #endif /* TENSORFLOW_LITE_MICRO_LOCAL_HPP */

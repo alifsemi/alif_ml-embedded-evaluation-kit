@@ -46,8 +46,8 @@ int main ()
         /* Application information, UART should have been initialised. */
         print_application_intro();
 
-        /* Check the version of TensorFlow Lite Micro. */
-        PrintTensorFlowVersion();
+        /* Enable TensorFlow Lite Micro logging. */
+        EnableTFLMLog();
 
         /* Run the application. */
         main_loop();
