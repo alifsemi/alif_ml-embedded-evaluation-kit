@@ -251,23 +251,17 @@ int platform_init(void)
 
     int err = 0;
     /* Only 1 core will do the pinmux */
-#if LP_PERIPHERAL_BASE == 0x70000000 // Old core, so old CMSIS pack
-    if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
-#else
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
-#endif
         /* We're first to acquire the lock - we do it */
         BOARD_Power_Init();
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
-#if RTE_Drivers_OSPI /* OSPI flash support not added for revision A */
 #ifdef OSPI_FLASH_SUPPORT /* OSPI drivers compiled in, check if OSPI flash support is enabled */
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
-#endif
 #endif
 
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
@@ -492,12 +486,10 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
     },
-#if LP_PERIPHERAL_BASE != 0x70000000
     { // SSE-700 Host Peripheral Region (1A000000)
     .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
     .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
-#endif
     { // DTCM (20000000)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
@@ -521,12 +513,6 @@ void MPU_Load_Regions(void)
   #error device not specified!
 #endif
     },
-#if LP_PERIPHERAL_BASE == 0x70000000
-    { // LP- Peripheral & PINMUX Regions (70000000)
-    .RBAR = ARM_MPU_RBAR(0x70000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x71FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
-    },
-#endif
     { // MRAM (80000000)
     .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)

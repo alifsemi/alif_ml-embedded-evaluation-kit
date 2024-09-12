@@ -37,11 +37,7 @@ static struct {
 static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CIMAGE_Y]
     __attribute__((aligned(32),section(".bss.camera_frame_buf")));
 
-#if RTE_SILICON_REV_A
-#define BAYER_FORMAT DC1394_COLOR_FILTER_BGGR
-#else
 #define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
-#endif
 
 int image_init()
 {
