@@ -543,9 +543,9 @@
 //     <1=> enable
 // <i> define if to enable or disable AR0144 camera sensor
 // <i> default: enable
-#define RTE_AR0144_CAMERA_SENSOR_CPI_ENABLE                   0
+#define RTE_AR0144_CAMERA_SENSOR_CSI_ENABLE                   1
 
-#if (RTE_AR0144_CAMERA_SENSOR_CPI_ENABLE)
+#if (RTE_AR0144_CAMERA_SENSOR_CSI_ENABLE)
 
 // <o> Select camera AR0144 frequency
 // <i> Defines camera AR0144 frequency
@@ -631,9 +631,9 @@
 //     <1=> enable
 // <i> define if to enable or disable AR0145 camera sensor
 // <i> default: enable
-#define RTE_AR0145_CAMERA_SENSOR_CPI_ENABLE     1
+#define RTE_AR0145_CAMERA_SENSOR_CSI_ENABLE     1
 
-#if (RTE_AR0145_CAMERA_SENSOR_CPI_ENABLE)
+#if (RTE_AR0145_CAMERA_SENSOR_CSI_ENABLE)
 
 // <o> Select camera AR0145 frequency
 // <i> Defines camera AR0145 frequency
@@ -914,6 +914,79 @@
 
 #endif
 // </e> HM0360_MIPI [Driver_HM0360_MIPI]
+
+// <e> OV5647_MIPI [Driver_OV5647_MIPI]
+// <o> Enable/Disable OV5647 MIPI camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable OV5647 MIPI camera sensor
+// <i> default: enable
+#define RTE_OV5647_CAMERA_SENSOR_ENABLE                  1
+
+#if (RTE_OV5647_CAMERA_SENSOR_ENABLE)
+
+// <o> Select camera OV5647 frequency
+// <i> Defines camera OV5647 frequency
+// <i> Default: 158000000
+#define RTE_OV5647_CAMERA_SENSOR_CSI_FREQ                   158000000
+
+// <o> select OV5647 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default:  0x2B (RAW10)
+#define RTE_OV5647_CAMERA_SENSOR_CSI_DATA_TYPE              0x2B
+
+// <o> select OV5647 number of lanes in DPHY
+// <i> defines select OV5647 number of lanes in DPHY.
+// <i> default: 2 one lane
+#define RTE_OV5647_CAMERA_SENSOR_CSI_N_LANES                2
+
+// <o> select OV5647 virtual channel ID
+// <i> defines select OV5647 virtual channel ID.
+// <i> default: 0
+#define RTE_OV5647_CAMERA_SENSOR_CSI_VC_ID                  0
+
+// <o> select OV5647 override CPI color mode
+// <i> defines select OV5647 override CPI color mode.
+// <i> default: 1
+#define RTE_OV5647_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE    1
+
+// <o> select OV5647 CPI color mode
+// <i> defines select OV5647 CPI color mode.
+// <i> default: 2  (IPI-16 RAW 8)
+#define RTE_OV5647_CAMERA_SENSOR_CPI_COLOR_MODE             2
+
+// <o> select OV5647 frame height
+// <i> defines select OV5647 frame height.
+// <i> default: 480
+#define RTE_OV5647_CAMERA_SENSOR_FRAME_HEIGHT               480
+
+// <o> select OV5647 frame width
+// <i> defines select OV5647 frame width.
+// <i> default: 640
+#define RTE_OV5647_CAMERA_SENSOR_FRAME_WIDTH                640
+
+// <o> Select camera sensor OV5647 reset pin number
+// <i> Defines camera sensor OV5647 reset pin number
+// <i> Default: 1
+#define RTE_OV5647_CAMERA_SENSOR_RESET_PIN_NO               1
+
+// <o> Select camera sensor OV5647 reset GPIO port
+// <i> Defines camera sensor OV5647 reset GPIO port
+// <i> Default: 9
+#define RTE_OV5647_CAMERA_SENSOR_RESET_GPIO_PORT            9
+
+// <o RTE_OV5647_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor OV5647 i2c instance
+// <i> Defines camera sensor OV5647 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_OV5647_CAMERA_SENSOR_I2C_INSTANCE               1
+
+#endif
+// </e> OV5647_MIPI [Driver_OV5647_MIPI]
 
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
@@ -9419,34 +9492,40 @@
 // </h> LPPDM (Low Power Pulse density modulation)
 
 // <h> CANFD (Controller Area Network - Fast Mode)
-// <e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
-// <i> Configuration settings for Driver_CANFD0 in component ::Drivers:CANFD
-#define RTE_CANFD0                           1
-#ifdef RTE_CANFD0
-// <o> CANFD0 IRQ priority <0-255>
-// <i> Defines Interrupt priority for CANFD0.
+// <e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
+// <i> Configuration settings for Driver_CANFD in component ::Drivers:CANFD
+#define RTE_CANFD 1
+
+#ifdef RTE_CANFD
+
+// <o> CANFD IRQ priority <0-255>
+// <i> Defines Interrupt priority for CANFD.
 // <i> Default: 0
-#define RTE_CANFD0_IRQ_PRIORITY              0
-// <o> CANFD0 Clock Source
+#define RTE_CANFD_IRQ_PRIORITY              0
+
+// <o> CANFD Clock Source
 //    <0=> 38.4 MHz Clock
 //    <1=> 160 MHz Clock
-// <i> Defines Clock Source for CANFD0.
+// <i> Defines Clock Source for CANFD.
 // <i> Default: 160 MHz
-#define RTE_CANFD0_CLK_SOURCE                1
-// <o> CANFD0 Clock Speed (Hz) <160000-80000000>
-// <i> Defines Clock Speed for CANFD0.
+#define RTE_CANFD_CLK_SOURCE                1
+
+// <o> CANFD Clock Speed (Hz) <160000-80000000>
+// <i> Defines Clock Speed for CANFD.
 // <i> Maximum Clock speed is 80MHz
 // <i> Recommended speeds with 160MHz clock source: 20MHz, 40MHz, 80MHz
 // <i> Default: 20MHz
-#define RTE_CANFD0_CLK_SPEED                 20000000
-// <o> CANFD0 blocking mode enable
+#define RTE_CANFD_CLK_SPEED                 20000000
+
+// <o> CANFD blocking mode enable
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines Blocking mode support for CANFD0
+// <i> Defines Blocking mode support for CANFD
 // <i> Default: DISABLE
-#define RTE_CANFD0_BLOCKING_MODE_ENABLE      0
+#define RTE_CANFD_BLOCKING_MODE_ENABLE      0
+
 #endif
-// </e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
+// </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
 // </h> CANFD (Controller Area Network - Fast Mode)
 
 // <h> SDC (Secure Digital Controller)
