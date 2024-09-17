@@ -65,6 +65,12 @@ set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
+# Add user case definition so it can be used to #ifdef in code
+if (NOT "${USE_CASE_BUILD}" STREQUAL "all")
+string(TOUPPER "${USE_CASE_BUILD}" use_case_upper)
+add_compile_definitions(${use_case_upper})
+endif()
+
 # We include log target
 add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log EXCLUDE_FROM_ALL)
 

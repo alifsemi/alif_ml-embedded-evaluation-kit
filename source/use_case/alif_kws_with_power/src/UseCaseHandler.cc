@@ -41,18 +41,7 @@
 
 #include <vector>
 
-#ifdef SE_SERVICES_SUPPORT
-#include "services_lib_api.h"
-#include "services_main.h"
-
-#if defined(M55_HE)
-// Use hp_comms_handle for sending MHU message to HP core
-extern uint32_t hp_comms_handle;
-#else
-extern uint32_t he_comms_handle;
-#endif
-m55_data_payload_t mhu_data;
-#endif // SE_SERVICES_SUPPORT
+extern volatile bool kws_button_pressed;
 
 using arm::app::KwsClassifier;
 using arm::app::Profiler;
@@ -87,34 +76,8 @@ using namespace arm::app::kws;
  **/
 static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results);
 
-#ifdef SE_SERVICES_SUPPORT
 static std::string last_label;
 
-static void send_msg_if_needed(arm::app::kws::KwsResult &result)
-{
-    mhu_data.id = 2; // id for M55_HE
-    if (result.m_resultVec.empty()) {
-        last_label.clear();
-        return;
-    }
-
-    arm::app::ClassificationResult classification = result.m_resultVec[0];
-
-    if (classification.m_label != last_label) {
-        if (classification.m_label == "go" || classification.m_label == "stop") {
-            info("******************* send_msg_if_needed, FOUND \"%s\", copy data end send! ******************\n", classification.m_label.c_str());
-            strcpy(mhu_data.msg, classification.m_label.c_str());
-            __DMB();
-#if defined(M55_HE)
-            SERVICES_send_msg(hp_comms_handle, LocalToGlobal(&mhu_data));
-#else
-            SERVICES_send_msg(he_comms_handle, LocalToGlobal(&mhu_data));
-#endif
-        }
-        last_label = classification.m_label;
-    }
-}
-#endif
 
     /* KWS inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, bool oneshot)
@@ -180,6 +143,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
         do {
+
             // Wait until stride buffer is full - initiated above or by previous interation of loop
             int err = hal_wait_for_audio();
             if (err) {
@@ -187,6 +151,10 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 return false;
             }
 
+            if (kws_button_pressed) {
+                hal_audio_uninit();
+                return true;
+            }
             // move buffer down by one stride, clearing space at the end for the next stride
             std::copy(audio_inf + AUDIO_STRIDE, audio_inf + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
 
@@ -226,9 +194,6 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             infResults.emplace_back(kws::KwsResult(singleInfResult,
                     index * secondsPerSample * preProcess.m_audioDataStride,
                     index, scoreThreshold));
-#ifdef SE_SERVICES_SUPPORT
-            send_msg_if_needed(infResults.back());
-#endif
 
 #if VERIFY_TEST_OUTPUT
             DumpTensor(outputTensor);
@@ -254,8 +219,8 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
 
         hal_lcd_set_text_color(COLOR_GREEN);
-        info("Final results:\n");
-        info("Total number of inferences: %zu\n", results.size());
+        // info("Final results:\n");
+        // info("Total number of inferences: %zu\n", results.size());
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;

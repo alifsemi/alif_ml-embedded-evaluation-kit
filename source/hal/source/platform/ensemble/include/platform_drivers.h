@@ -36,6 +36,10 @@
 #include "RTE_Components.h" /* For CPU related defintiions */
 #include "timer_ensemble.h"     /* Timer functions. */
 #include "tracelib.h"
+#ifdef SE_SERVICES_SUPPORT
+#include "services_lib_bare_metal.h"
+#include "services_main.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +61,14 @@ void platform_release(void);
  * @return  Pointer to the name
  */
 const char* platform_name(void);
+
+
+#ifdef SE_SERVICES_SUPPORT
+extern uint32_t set_power_off_profile(off_profile_t offprof);
+extern uint32_t set_power_run_profile(run_profile_t runprof);
+#endif
+extern uint32_t enable_peripheral_clocks(void);
+extern void enable_mipi_power(void);
 
 extern bool run_requested(void);
 extern void init_trigger_rx(void);

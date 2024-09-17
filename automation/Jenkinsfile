@@ -9,7 +9,7 @@ pipeline {
         stage('Init') {
             steps {
                 script {
-                    common_funcs = evaluate readTrusted("automation/test_common.groovy");
+                    common_funcs = load ("automation/test_common.groovy");
                 }
             }
         }
@@ -72,7 +72,7 @@ pipeline {
             }
         }
         stage('Test KWS HE Release') {
-            agent { label 'tester_B' }
+            agent { label 'E7' }
             steps {
                 unstash name: "test_build_gnu_kws_he_release"
                 script {

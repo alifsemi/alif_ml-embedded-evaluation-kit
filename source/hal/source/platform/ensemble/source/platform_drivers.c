@@ -43,8 +43,7 @@
 #include "board.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
-#include "services_lib_api.h"
-#include "services_main.h"
+#include "power.h"
 
 #include CMSIS_device_header
 
@@ -66,6 +65,12 @@ uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
 
+#ifdef SE_SERVICES_SUPPORT
+extern uint32_t services_handle;
+
+run_profile_t default_runprof;
+off_profile_t default_offprof;
+
 static void MHU_msg_received(void* data);
 
 // IPC callback
@@ -76,6 +81,7 @@ static void ipc_rx_callback(void *data)
     uint16_t id = payload->id;
     printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
+#endif
 
 #ifdef COPY_VECTORS
 
@@ -93,6 +99,116 @@ static void copy_vtor_table_to_ram()
     __DSB();
 }
 #endif
+
+#ifdef SE_SERVICES_SUPPORT
+
+uint32_t set_power_off_profile(off_profile_t offprof)
+{
+    uint32_t service_error_code;
+    uint32_t err = SERVICES_set_off_cfg(services_handle, &offprof, &service_error_code);
+    return (err + service_error_code);
+}
+
+uint32_t set_power_run_profile(run_profile_t runprof)
+{
+    uint32_t service_error_code;
+    uint32_t err = SERVICES_set_run_cfg(services_handle, &runprof, &service_error_code);
+    return (err + service_error_code);
+}
+
+static uint32_t set_power_profiles()
+{
+    uint32_t service_error_code;
+    uint32_t err;
+
+    // By default all the needed memories, power domains and gatings are enabled.
+    // Use case can easily change these for more suitable settings extern default_runprof/default_offprof and change only
+    // the needed values and call set_power_run_profile/set_power_off_profile
+    default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK | PD_DBSS_MASK;
+    default_runprof.dcdc_mode       = DCDC_MODE_PWM;
+    default_runprof.dcdc_voltage    = DCDC_VOUT_0825;
+    default_runprof.aon_clk_src     = CLK_SRC_LFXO;
+    default_runprof.run_clk_src     = CLK_SRC_PLL;
+    default_runprof.scaled_clk_freq = SCALED_FREQ_XO_HIGH_DIV_38_4_MHZ;
+    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
+    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
+#ifdef OSPI_FLASH_SUPPORT
+    default_runprof.ip_clock_gating |= OSPI_1_MASK;
+#endif
+#ifdef M55_HE
+    default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_160MHZ;
+#elif M55_HP
+    default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_400MHZ;
+#endif
+    default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+    err = SERVICES_set_run_cfg(services_handle, &default_runprof, &service_error_code);
+
+    if ((err + service_error_code) == 0) {
+        // No power domains on off profile -> device can go to chip STOP mode which is the most least power consumption state
+        default_offprof.power_domains   = 0;
+        default_offprof.dcdc_voltage    = DCDC_VOUT_0825;
+        default_offprof.dcdc_mode       = DCDC_MODE_PWM;
+        default_offprof.aon_clk_src     = CLK_SRC_LFXO;
+        default_offprof.stby_clk_src    = CLK_SRC_HFRC;
+        default_offprof.stby_clk_freq   = SCALED_FREQ_RC_STDBY_38_4_MHZ;
+        // default_offprof.sysref_clk_src = /* SoC Reference Clock shared with all subsystems */
+        default_offprof.memory_blocks   = SERAM_MASK;
+        default_offprof.ip_clock_gating = 0;
+        default_offprof.phy_pwr_gating  = 0;
+        default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+        default_offprof.wakeup_events   = WE_LPGPIO;
+        default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
+#ifdef M55_HE
+        default_offprof.vtor_address    = 0x80480000;
+        default_offprof.vtor_address_ns = 0x80480000;
+#elif M55_HP
+        default_offprof.vtor_address    = 0x80008000;
+        default_offprof.vtor_address_ns = 0x80008000;
+#else
+#error "Only M55_HE or M55_HP core is supported!"
+#endif
+        err = SERVICES_set_off_cfg(services_handle, &default_offprof, &service_error_code);
+    }
+
+    return (err + service_error_code);
+}
+#endif
+
+void enable_mipi_power(void)
+{
+    // if SE_SERVICES_SUPPORT is defined, then in run profile dphy is already enabled.
+#ifndef SE_SERVICES_SUPPORT
+    /* Enable MIPI power */
+    enable_mipi_dphy_power();
+    disable_mipi_dphy_isolation();
+#endif
+}
+
+uint32_t enable_peripheral_clocks(void)
+{
+    uint32_t err = 0;
+    uint32_t service_error_code = 0;
+#if SE_SERVICES_SUPPORT
+    // Enable peripheral clocks, dphy_tx_clk
+    err = SERVICES_clocks_enable_clock(services_handle,
+                                    CLKEN_HFOSC,
+                                    true,
+                                    &service_error_code);
+    if ((err + service_error_code) == 0) {
+        // CSI, DSI...
+        err = SERVICES_clocks_enable_clock(services_handle,
+                                        CLKEN_CLK_100M,
+                                        true,
+                                        &service_error_code);
+    }
+#else // SE_SERVICES_SUPPORT
+    enable_cgu_clk38p4m();
+    enable_cgu_clk100m();
+#endif // SE_SERVICES_SUPPORT
+
+    return (err + service_error_code);
+}
 
 int platform_init(void)
 {
@@ -113,8 +229,20 @@ int platform_init(void)
     _clock_init();
 #endif
 
-    tracelib_init(NULL);
-    fault_dump_enable(true);
+#ifdef SE_SERVICES_SUPPORT
+
+    uint32_t se_err;
+    // Init SE. Use case MainLoop.cc will do the re-init if needed but only updates the callback function
+    services_init(ipc_rx_callback);
+
+    SERVICES_synchronize_with_se(services_handle);
+
+    uint32_t service_error_code;
+
+    SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
+
+    se_err = (int)set_power_profiles();
+#endif // SE_SERVICES_SUPPORT
 
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
@@ -123,23 +251,17 @@ int platform_init(void)
 
     int err = 0;
     /* Only 1 core will do the pinmux */
-#if LP_PERIPHERAL_BASE == 0x70000000 // Old core, so old CMSIS pack
-    if (HWSEMdrv->Lock() == ARM_DRIVER_OK) {
-#else
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
-#endif
         /* We're first to acquire the lock - we do it */
         BOARD_Power_Init();
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
-#if RTE_Drivers_OSPI /* OSPI flash support not added for revision A */
 #ifdef OSPI_FLASH_SUPPORT /* OSPI drivers compiled in, check if OSPI flash support is enabled */
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
-#endif
 #endif
 
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
@@ -151,8 +273,20 @@ int platform_init(void)
 
     HWSEMdrv->Uninitialize();
 
+    // tracelib init here after pinmux is done.
+    tracelib_init(NULL);
+    fault_dump_enable(true);
+
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
     info("%s: complete\n", __FUNCTION__);
+
+#ifdef SE_SERVICES_SUPPORT
+    if (se_err) {
+        printf_err("Failed to set power profiles!\n");
+        // return here as if power profiles did not succeed, NPU init will fail.
+        return se_err;
+    }
+#endif
 
 #if defined(ARM_NPU)
 
@@ -183,7 +317,9 @@ const char* platform_name(void)
 
 void init_trigger_rx(void)
 {
+#ifdef SE_SERVICES_SUPPORT
     services_init(MHU_msg_received);
+#endif
 
     BOARD_BUTTON1_Init(NULL);
     BOARD_BUTTON2_Init(NULL);
@@ -191,7 +327,9 @@ void init_trigger_rx(void)
 
 void init_trigger_tx(void)
 {
+#ifdef SE_SERVICES_SUPPORT
     services_init(ipc_rx_callback);
+#endif
 }
 
 #if BOARD_BUTTON_COUNT < 2
@@ -202,6 +340,7 @@ static bool last_btn1 = false;
 static bool last_btn2 = false;
 #endif
 
+#ifdef SE_SERVICES_SUPPORT
 static void MHU_msg_received(void* data)
 {
     m55_data_payload_t* payload = data;
@@ -226,6 +365,7 @@ static void MHU_msg_received(void* data)
             break;
     }
 }
+#endif
 
 bool run_requested(void)
 {
@@ -346,12 +486,10 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
     },
-#if LP_PERIPHERAL_BASE != 0x70000000
     { // SSE-700 Host Peripheral Region (1A000000)
     .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
     .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
-#endif
     { // DTCM (20000000)
     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
@@ -375,12 +513,6 @@ void MPU_Load_Regions(void)
   #error device not specified!
 #endif
     },
-#if LP_PERIPHERAL_BASE == 0x70000000
-    { // LP- Peripheral & PINMUX Regions (70000000)
-    .RBAR = ARM_MPU_RBAR(0x70000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
-    .RLAR = ARM_MPU_RLAR(0x71FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
-    },
-#endif
     { // MRAM (80000000)
     .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
