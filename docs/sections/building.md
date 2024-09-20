@@ -397,6 +397,14 @@ Additional command line arguments supported by this script are:
   - the default value specified in the Vela configuration file [default_vela.ini](../../scripts/vela/default_vela.ini),
   when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
+- `--use-case-resources-file`: Path to a JSON file pointing to resources to be downloaded. See the default
+  [use_case_resources.json](../../scripts/py/use_case_resources.json) as an example.
+
+- `--downloads-dir`: Root directory where the resources are downloaded.
+
+> **NOTE**: If you provide a different location by providing `downloads-dir` option, ensure `RESOURCES_PATH` is set
+> correctly for the associated CMake configuration. See [build options](building.md#build-options) for details.
+
 ### Building for default configuration
 
 A helper script `build_default.py` is provided to configure and build all the applications. It configures the project
