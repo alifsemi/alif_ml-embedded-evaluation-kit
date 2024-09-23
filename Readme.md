@@ -145,7 +145,7 @@ python3.10 ./build_default.py
 
 *  The [Ethos-U NPU driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver) is integrated TensorFlow Lite for Microcontrollers
    *  ML operators are delegated to the NPU with CPU fall-back for unsupported operators
-   * [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise CPU workload execution with int8 data type
+   * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
    * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
 
 * The provided set of common ML use-case functions will assist in implementing your application logic

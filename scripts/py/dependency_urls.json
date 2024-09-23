@@ -1,5 +1,7 @@
 {
-  "cmsis": "https://github.com/ARM-software/CMSIS_5/archive/4a819a09ccadacc3bad2def1d5121f137fc330fb.zip",
+  "cmsis-5": "https://github.com/ARM-software/CMSIS_5/archive/4a819a09ccadacc3bad2def1d5121f137fc330fb.zip",
+  "cmsis-6": "https://github.com/ARM-software/CMSIS_6/archive/cd2b418c90465a5e6863518130c2f867f1f4c70d.zip",
+  "cortex-dfp": "https://github.com/ARM-software/Cortex_DFP/archive/c2c70a97a20fb355815e2ead3d4a40e35a4a3cdf.zip",
   "cmsis-dsp": "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip",
   "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/95f293df19c9a38806868fe12a64a4f9b457f9c1.zip",
   "core-driver": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-24.08.tar.gz",

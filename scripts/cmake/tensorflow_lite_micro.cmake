@@ -16,13 +16,6 @@
 #  limitations under the License.
 #----------------------------------------------------------------------------
 
-if (DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL})
-    set(PARALLEL_JOBS $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
-else()
-    include(ProcessorCount)
-    ProcessorCount(PARALLEL_JOBS)
-endif()
-
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     set(TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL "-O0")
     set(TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL "-O0")
@@ -36,6 +29,66 @@ elseif (CMAKE_BUILD_TYPE STREQUAL Release)
 endif()
 
 assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
+
+if (NOT TARGET_PLATFORM STREQUAL native)
+    assert_defined(CMSIS_VER)
+endif()
+
+# When using CMSIS version 6, we can't use the TensorFlow Lite Micro build framework as the Makefile build
+# system relies on CMSIS-5. Here, we use the CMake wrapper provided by ethos-u-core-software instead. We could,
+# in theory, use the same flow even when we are using CMSIS-5 but it is worth keeping the older path alive
+# because it exercises the canonical TensorFlow Lite Micro build flow and it doesn't download the third party
+# dependencies every time the project is configured.
+if (CMSIS_VER STREQUAL 6)
+    include(FetchContent)
+    set(CORE_SOFTWARE_REPO_URL "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-software.git")
+    set(CORE_SOFTWARE_GIT_TAG  "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
+    set(TFLM_CMAKE_URL "${CORE_SOFTWARE_REPO_URL}/plain/tflite_micro.cmake?h=${CORE_SOFTWARE_GIT_TAG}")
+    set(TFLM_CMAKE_MD5 "b830f62c2e6e5a0a87438fcf1f4b8eee")
+
+    FetchContent_Declare(TensorFlow_Lite_Micro_CMake_Wrapper
+        URL                 ${TFLM_CMAKE_URL}
+        URL_HASH            MD5=${TFLM_CMAKE_MD5}
+        DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}
+        DOWNLOAD_NAME       "tflite_micro.cmake"
+        DOWNLOAD_NO_EXTRACT ON)
+
+    FetchContent_MakeAvailable(TensorFlow_Lite_Micro_CMake_Wrapper)
+
+    set(CMSIS_NN_PATH           ${CMSIS_NN_SRC_PATH})
+    set(TENSORFLOW_PATH         ${TENSORFLOW_SRC_PATH})
+    set(TFLM_OPTIMIZATION_LEVEL ${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}
+                                CACHE STRING "Optimization level")
+    set(TFLM_BUILD_TYPE         ${TENSORFLOW_LITE_MICRO_BUILD_TYPE}
+                                CACHE STRING "Build type")
+
+    include(${CMAKE_BINARY_DIR}/tflite_micro.cmake)
+
+    # Additional option to enable "full" floating point standard conformance
+    # (needed for NaNs and infinity).
+    target_compile_options(tflu PRIVATE "-ffp-mode=full")
+
+    # If CPU_HEADER_FILE is defined, add this to compile definitions.
+    if (DEFINED CPU_HEADER_FILE)
+        target_compile_definitions(tflu PRIVATE
+            "-DCMSIS_DEVICE_ARM_CORTEX_M_XX_HEADER_FILE=\"${CPU_HEADER_FILE}\"")
+    endif()
+
+    # Create an alias to use in other parts of the project.
+    add_library(tensorflow-lite-micro ALIAS tflu)
+
+    # Return from here, rest of the section is for CMSIS-5 and building with
+    # default Makefile.
+    return()
+endif()
+
+if (DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+    set(PARALLEL_JOBS $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+else()
+    include(ProcessorCount)
+    ProcessorCount(PARALLEL_JOBS)
+endif()
+
 assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS)
 assert_defined(TENSORFLOW_LITE_MICRO_CLEAN_BUILD)
 
