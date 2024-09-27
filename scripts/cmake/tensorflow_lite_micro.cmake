@@ -64,9 +64,11 @@ if (CMSIS_VER STREQUAL 6)
 
     include(${CMAKE_BINARY_DIR}/tflite_micro.cmake)
 
-    # Additional option to enable "full" floating point standard conformance
-    # (needed for NaNs and infinity).
-    target_compile_options(tflu PRIVATE "-ffp-mode=full")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
+        # Additional option to enable "full" floating point standard conformance
+        # (needed for NaNs and infinity).
+        target_compile_options(tflu PRIVATE "-ffp-mode=full")
+    endif()
 
     # If CPU_HEADER_FILE is defined, add this to compile definitions.
     if (DEFINED CPU_HEADER_FILE)
