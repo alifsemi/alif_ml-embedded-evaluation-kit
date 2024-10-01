@@ -20,13 +20,22 @@ function(set_platform_global_defaults)
     message(STATUS "Platform: Arm MPS4 FPGA Prototyping Board or FVP")
 
     # Default sub-system for MPS4
-    USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-315"
+    USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: sse-315 or sse-320"
         sse-315
         STRING)
 
+    # NPU respective to target subsystem
+    if(TARGET_SUBSYSTEM STREQUAL sse-315)
+        set(DEFAULT_ETHOS_U_NPU_ID  "U65")
+    elseif(TARGET_SUBSYSTEM STREQUAL sse-320)
+        set(DEFAULT_ETHOS_U_NPU_ID  "U85")
+    else()
+        message(FATAL_ERROR "${TARGET_SUBSYSTEM} unsupported by ${TARGET_PLATFORM}")
+    endif()
+
     # Default NPU for SSE-315 target:
-    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
-        "U65"
+    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U65 or U85)"
+        "${DEFAULT_ETHOS_U_NPU_ID}"
         STRING)
 
     # Include NPU, FVP tests and CMSIS configuration options
@@ -35,11 +44,7 @@ function(set_platform_global_defaults)
     include(cmsis_opts)
 
     if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
-        if(TARGET_SUBSYSTEM STREQUAL sse-315)
-            set(CMAKE_SYSTEM_PROCESSOR cortex-m85 CACHE STRING "Cortex-M CPU to use")
-        else()
-            message(FATAL_ERROR "${TARGET_SUBSYSTEM} unsupported by ${TARGET_PLATFORM}")
-        endif()
+        set(CMAKE_SYSTEM_PROCESSOR cortex-m85 CACHE STRING "Cortex-M CPU to use")
     endif()
 
     if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -47,7 +52,7 @@ function(set_platform_global_defaults)
                 CACHE FILEPATH "Toolchain file")
     endif()
 
-    # Arm Corstone-315's timing adapter behaviour is very different to Arm Corstone-300 and cannot
+    # Arm Corstone-315's timing adapter behaviour is very different to Arm Corstone-320 and cannot
     # be used for bandwidth/latency related performance sweeps for the Arm Ethos-U NPU. Read
     # docs/sections/timing_adapters.md for more details.
     if ((TARGET_SUBSYSTEM STREQUAL "sse-315") AND (DEFINED ETHOS_U_NPU_TIMING_ADAPTER_ENABLED))
@@ -82,7 +87,7 @@ function(platform_custom_post_build)
     file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
     file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
 
-    if (TARGET_SUBSYSTEM STREQUAL sse-315)
+    if (TARGET_SUBSYSTEM STREQUAL sse-315 OR TARGET_SUBSYSTEM STREQUAL sse-320)
         set(LINKER_SECTION_TAGS     "*.at_boot" "*.at_bram" "*.at_ddr")
         set(LINKER_OUTPUT_BIN_TAGS  "boot.bin" "bram.bin"  "ddr.bin")
     endif()

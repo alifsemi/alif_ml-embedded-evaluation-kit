@@ -49,21 +49,24 @@ USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
     "U55"
     STRING)
 
-if ((ETHOS_U_NPU_ID STREQUAL U55) OR (ETHOS_U_NPU_ID STREQUAL U65))
-    if (ETHOS_U_NPU_ID STREQUAL U55)
-        set(DEFAULT_NPU_MEM_MODE    "Shared_Sram")
-        set(DEFAULT_NPU_CONFIG_ID   "H128")
-    elseif(ETHOS_U_NPU_ID STREQUAL U65)
-        set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
-        set(DEFAULT_NPU_CONFIG_ID   "Y256")
-        set(DEFAULT_NPU_CACHE_SIZE  "393216")
+if (ETHOS_U_NPU_ID STREQUAL U55)
+    set(DEFAULT_NPU_MEM_MODE    "Shared_Sram")
+    set(DEFAULT_NPU_CONFIG_ID   "H128")
+elseif (ETHOS_U_NPU_ID STREQUAL U65)
+    set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
+    set(DEFAULT_NPU_CONFIG_ID   "Y256")
+elseif (ETHOS_U_NPU_ID STREQUAL U85)
+    set(DEFAULT_NPU_MEM_MODE    "Dedicated_Sram")
+    set(DEFAULT_NPU_CONFIG_ID   "Z256")
+else()
+    message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID}")
+endif()
 
-        USER_OPTION(ETHOS_U_NPU_CACHE_SIZE "Arm Ethos-U65 NPU Cache Size"
+if(DEFAULT_NPU_MEM_MODE STREQUAL "Dedicated_Sram")
+    set(DEFAULT_NPU_CACHE_SIZE  "393216")
+    USER_OPTION(ETHOS_U_NPU_CACHE_SIZE "Arm Ethos-U NPU Cache Size"
             "${DEFAULT_NPU_CACHE_SIZE}"
             STRING)
-    endif()
-else ()
-    message(FATAL_ERROR "Non compatible Ethos-U NPU processor ${ETHOS_U_NPU_ID}")
 endif ()
 
 USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
@@ -74,17 +77,29 @@ USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
     "${DEFAULT_NPU_CONFIG_ID}"
     STRING)
 
-if (ETHOS_U_NPU_ID STREQUAL U55)
-    set(DEFAULT_TA_CONFIG_FILE "ta_config_u55_high_end")
-else ()
-    set(DEFAULT_TA_CONFIG_FILE "ta_config_u65_high_end")
-endif ()
-
 USER_OPTION(ETHOS_U_NPU_TIMING_ADAPTER_ENABLED "Specifies if the Ethos-U timing adapter is enabled"
     ON
     BOOL)
 
 if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
+    if (${ETHOS_U_NPU_ID} STREQUAL "U55")
+        set(DEFAULT_TA_CONFIG_FILE  "ta_config_u55_high_end")
+    elseif (${ETHOS_U_NPU_ID} STREQUAL "U65")
+        set(DEFAULT_TA_CONFIG_FILE  "ta_config_u65_high_end")
+    elseif (${ETHOS_U_NPU_ID} STREQUAL "U85")
+        set(U85_TA_LOW  "Z128" "Z256")
+        set(U85_TA_MID  "Z512" "Z1024")
+        set(U85_TA_HIGH "Z2048")
+
+        if(${ETHOS_U_NPU_CONFIG_ID} IN_LIST U85_TA_LOW)
+            set(DEFAULT_TA_CONFIG_FILE  "ta_config_u85_sys_dram_low")
+        elseif (${ETHOS_U_NPU_CONFIG_ID} IN_LIST U85_TA_MID)
+            set(DEFAULT_TA_CONFIG_FILE  "ta_config_u85_sys_dram_mid")
+        elseif (${ETHOS_U_NPU_CONFIG_ID} IN_LIST U85_TA_HIGH)
+            set(DEFAULT_TA_CONFIG_FILE  "ta_config_u85_sys_dram_high")
+        endif ()
+    endif ()
+
     USER_OPTION(TA_CONFIG_FILE "Path to the timing adapter configuration file"
         ${DEFAULT_TA_CONFIG_FILE}
         STRING)

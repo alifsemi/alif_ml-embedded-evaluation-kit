@@ -156,6 +156,14 @@ mv resources_downloaded/kws/kws_micronet_m.tflite resources_downloaded/kws/kws_m
     --output-dir=resources_downloaded/kws
 mv resources_downloaded/kws/kws_micronet_vela.tflite resources_downloaded/kws/kws_micronet_m_vela_Y256.tflite
 
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws/kws_micronet_m.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/kws
+mv resources_downloaded/kws/kws_micronet_vela.tflite resources_downloaded/kws/kws_micronet_m_vela_Z256.tflite
+
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
@@ -172,6 +180,14 @@ mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/kws_asr
 mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded/kws_asr/wav2letter_int8_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/wav2letter_int8.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/kws_asr
+mv resources_downloaded/kws_asr/wav2letter_int8_vela.tflite resources_downloaded/kws_asr/wav2letter_int8_vela_Z256.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/kws_micronet_m.tflite \
     --accelerator-config=ethos-u55-128 \
@@ -190,6 +206,14 @@ mv resources_downloaded/kws_asr/kws_micronet_m.tflite_vela.tflite resources_down
     --output-dir=resources_downloaded/kws_asr
 mv resources_downloaded/kws_asr/kws_micronet_m.tflite_vela.tflite resources_downloaded/kws_asr/kws_micronet_m.tflite_vela_Y256.tflite
 
+. resources_downloaded/env/bin/activate && vela resources_downloaded/kws_asr/kws_micronet_m.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/kws_asr
+mv resources_downloaded/kws_asr/kws_micronet_m.tflite_vela.tflite resources_downloaded/kws_asr/kws_micronet_m.tflite_vela_Z256.tflite
+
 . resources_downloaded/env/bin/activate && vela resources_downloaded/inference_runner/dnn_s_quantized.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
@@ -206,6 +230,14 @@ mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_d
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/inference_runner
 mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_downloaded/inference_runner/dnn_s_quantized_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/inference_runner/dnn_s_quantized.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/inference_runner
+mv resources_downloaded/inference_runner/dnn_s_quantized_vela.tflite resources_downloaded/inference_runner/dnn_s_quantized_vela_Z256.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite \
     --accelerator-config=ethos-u55-128 \
@@ -224,6 +256,14 @@ mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resource
     --output-dir=resources_downloaded/img_class
 mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_Y256.tflite
 
+. resources_downloaded/env/bin/activate && vela resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8.tflite \
+    --accelerator-config=ethos-u65-512 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_High_End \
+    --output-dir=resources_downloaded/img_class
+mv resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela.tflite resources_downloaded/img_class/mobilenet_v2_1.0_224_INT8_vela_Z256.tflite
+
 . resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
@@ -240,6 +280,14 @@ mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/asr
 mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr/wav2letter_int8_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/asr/wav2letter_int8.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/asr
+mv resources_downloaded/asr/wav2letter_int8_vela.tflite resources_downloaded/asr/wav2letter_int8_vela_Z256.tflite
 
 . resources_downloaded/env/bin/activate && vela resources_downloaded/ad/ad_medium_int8.tflite \
     --accelerator-config=ethos-u55-128 \
@@ -258,6 +306,14 @@ mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad
     --output-dir=resources_downloaded/ad
 mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad_medium_int8_vela_Y256.tflite
 
+. resources_downloaded/env/bin/activate && vela resources_downloaded/ad/ad_medium_int8.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/ad/ad_medium_int8_vela.tflite resources_downloaded/ad/ad_medium_int8_vela_Z256.tflite
+
 . resources_downloaded/env/bin/activate && vela resources_downloaded/vww/vww4_128_128_INT8.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
@@ -275,6 +331,14 @@ mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/v
     --output-dir=resources_downloaded/ad
 mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/vww/vww4_128_128_INT8_vela_Y256.tflite
 
+. resources_downloaded/env/bin/activate && vela resources_downloaded/vww/vww4_128_128_INT8.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/vww/vww4_128_128_INT8_vela.tflite resources_downloaded/vww/vww4_128_128_INT8_vela_Z256.tflite
+
 . resources_downloaded/env/bin/activate && vela resources_downloaded/noise_reduction/rnnoise_INT8.tflite \
     --accelerator-config=ethos-u55-128 \
     --optimise Performance --config scripts/vela/default_vela.ini \
@@ -291,6 +355,14 @@ mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downl
     --system-config=Ethos_U65_High_End \
     --output-dir=resources_downloaded/ad
 mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downloaded/noise_reduction/rnnoise_INT8_vela_Y256.tflite
+
+. resources_downloaded/env/bin/activate && vela resources_downloaded/noise_reduction/rnnoise_INT8.tflite \
+    --accelerator-config=ethos-u85-256 \
+    --optimise Performance --config scripts/vela/default_vela.ini \
+    --memory-mode=Dedicated_Sram \
+    --system-config=Ethos_U85_SYS_DRAM_Low \
+    --output-dir=resources_downloaded/ad
+mv resources_downloaded/noise_reduction/rnnoise_INT8_vela.tflite resources_downloaded/noise_reduction/rnnoise_INT8_vela_Z256.tflite
 
 mkdir cmake-build-mps3-sse-300-gnu-release and cd cmake-build-mps3-sse-300-gnu-release
 

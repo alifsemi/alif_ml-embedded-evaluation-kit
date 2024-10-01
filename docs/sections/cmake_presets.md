@@ -76,6 +76,8 @@ mps3-310-gcc
 mps3-310-clang
 mps4-315-gcc
 mps4-315-clang
+mps4-320-gcc
+mps4-320-clang
 simple-gcc
 simple-clang
 ```

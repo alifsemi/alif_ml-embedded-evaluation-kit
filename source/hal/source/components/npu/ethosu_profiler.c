@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,6 +79,7 @@ void ethosu_pmu_init(void)
     /* Total counters = event counters + derived counters + total cycle count */
     counters->num_total_counters = ETHOSU_PROFILER_NUM_COUNTERS;
 
+#if defined(ETHOSU55) || defined(ETHOSU65)
 #if ETHOSU_PMU_NCOUNTERS >= 4
     counters->npu_evt_counters[0].event_type = ETHOSU_PMU_NPU_ACTIVE;
     counters->npu_evt_counters[0].event_mask = ETHOSU_PMU_CNT1_Msk;
@@ -102,6 +103,34 @@ void ethosu_pmu_init(void)
 #else /* ETHOSU_PMU_NCOUNTERS >= 4 */
 #error "NPU PMU expects a minimum of 4 available event triggered counters!"
 #endif /* ETHOSU_PMU_NCOUNTERS >= 4 */
+#elif defined(ETHOSU85)
+#if ETHOSU_PMU_NCOUNTERS >= 8
+    counters->npu_evt_counters[0].event_type = ETHOSU_PMU_NPU_ACTIVE;
+    counters->npu_evt_counters[0].event_mask = ETHOSU_PMU_CNT1_Msk;
+    counters->npu_evt_counters[0].name       = "NPU ACTIVE";
+    counters->npu_evt_counters[0].unit       = unit_cycles;
+
+    counters->npu_evt_counters[1].event_type = ETHOSU_PMU_SRAM_RD_DATA_BEAT_RECEIVED;
+    counters->npu_evt_counters[1].event_mask = ETHOSU_PMU_CNT2_Msk;
+    counters->npu_evt_counters[1].name       = "NPU ETHOSU_PMU_SRAM_RD_DATA_BEAT_RECEIVED";
+    counters->npu_evt_counters[1].unit       = unit_beats;
+
+    counters->npu_evt_counters[2].event_type = ETHOSU_PMU_SRAM_WR_DATA_BEAT_WRITTEN;
+    counters->npu_evt_counters[2].event_mask = ETHOSU_PMU_CNT3_Msk;
+    counters->npu_evt_counters[2].name       = "NPU ETHOSU_PMU_SRAM_WR_DATA_BEAT_WRITTEN";
+    counters->npu_evt_counters[2].unit       = unit_beats;
+
+    counters->npu_evt_counters[3].event_type = ETHOSU_PMU_EXT_RD_DATA_BEAT_RECEIVED;
+    counters->npu_evt_counters[3].event_mask = ETHOSU_PMU_CNT4_Msk;
+    counters->npu_evt_counters[3].name       = "NPU ETHOSU_PMU_EXT_RD_DATA_BEAT_RECEIVED";
+    counters->npu_evt_counters[3].unit       = unit_beats;
+
+    counters->npu_evt_counters[4].event_type = ETHOSU_PMU_EXT_WR_DATA_BEAT_WRITTEN;
+    counters->npu_evt_counters[4].event_mask = ETHOSU_PMU_CNT5_Msk;
+    counters->npu_evt_counters[4].name       = "NPU ETHOSU_PMU_EXT_WR_DATA_BEAT_WRITTEN";
+    counters->npu_evt_counters[4].unit       = unit_beats;
+#endif /* ETHOSU_PMU_NCOUNTERS >= 8 */
+#endif /* defined(ETHOSU55) || defined(ETHOSU65) */
 
 #if ETHOSU_DERIVED_NCOUNTERS >= 1
     counters->npu_derived_counters[0].name = "NPU IDLE";

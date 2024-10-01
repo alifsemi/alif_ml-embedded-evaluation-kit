@@ -11,6 +11,7 @@
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
   - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
   - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
+  - [Missing libpython3.9.so.1.0](./troubleshooting.md#missing-libpython3_9_so_1_0)
 
 ## Inference results are incorrect for my custom files
 
@@ -165,7 +166,24 @@ b
    sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
    ```
 
-    If the above fails, try installing from the deadsnakes PPA:
+    If the packages aren't available, Python 3.10 can be installed from source:
+
+    ```commandline
+    sudo apt-get update
+    sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+      libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xzutils \
+      tk-dev liblzma-dev tk-dev
+    wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
+    tar xzf Python-3.10.15.tgz
+    cd Python-3.10.15.tgz
+    ./configure --enable-optimizations --prefix=/opt/python/3.10.15/
+    make -j "$(nproc)"
+    sudo make altinstall
+    ```
+
+    Alternatively, it is possible to install the packages from the deadsnakes PPA:
+
+    > Note: Arm® is not affiliated with deadsnakes - use at your own risk
 
     ```commandline
     sudo apt update
@@ -296,3 +314,12 @@ To resolve this issue, remove any paths with spaces. Alternatively, if these
 paths are required, escape them using `\` or enclose them with quotes.
 
 Another example of a similar issue: [Discourse issue 171: Build error in makefile](https://discuss.mlplatform.org/t/build-error-in-makefile/171).
+
+## Missing libpython3.9.so.1.0
+
+When running an FVP, you may encounter the following error:
+
+```commandline
+FVP_Corstone_SSE-320: error while loading shared libraries: libpython3.9.so.1.0: cannot open shared object file: No such file or directory
+```
+This occurs when the `libpython3.9-dev` is missing on your system.  To resolve the issue, install the library as per the instructions [here](./deployment.md#arm_corstone_320-fvp).

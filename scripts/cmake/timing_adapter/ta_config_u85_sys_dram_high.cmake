@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -17,21 +17,21 @@
 #----------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------
-# CMake description file for the Arm Ethos-U65 Timing Adapter settings (single
-# NPU core with two AXIs).
+# CMake description file for the Arm Ethos-U85 Timing Adapter settings (single
+# NPU core with three, four or six AXIs).
 #----------------------------------------------------------------------------
 
 # The platform CMake infra should set the base register values for
-# TA component to work. For Ethos-U65, we need two base addresses.
+# TA component to work. For Ethos-U85, we need at least three base addresses.
 if (NOT DEFINED TA_SRAM_BASE OR NOT DEFINED TA_EXT_BASE)
     message(FATAL_ERROR "TA_SRAM_BASE and TA_EXT_BASE need to be defined.")
 endif ()
 
 message(STATUS "using TA_SRAM_BASE @ ${TA_SRAM_BASE}; TA_EXT_BASE @ ${TA_EXT_BASE}.")
 
-# Timing adapter settings for AXI0
-set(SRAM_MAXR       "16"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(SRAM_MAXW       "16"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+# Timing adapter settings for SRAM
+set(SRAM_MAXR       "8"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+set(SRAM_MAXW       "8"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
 set(SRAM_MAXRW      "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
 set(SRAM_RLATENCY   "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
 set(SRAM_WLATENCY   "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
@@ -48,15 +48,15 @@ set(SRAM_MODE       "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to
 set(SRAM_HISTBIN    "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
 set(SRAM_HISTCNT    "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
 
-# Timing adapter settings for AXI1
-set(EXT_MAXR        "24"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(EXT_MAXW        "12"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+# Timing adapter settings for EXT
+set(EXT_MAXR        "64"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+set(EXT_MAXW        "32"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
 set(EXT_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
 set(EXT_RLATENCY    "500"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
 set(EXT_WLATENCY    "250"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
 set(EXT_PULSE_ON    "4000"     CACHE STRING "No. of cycles addresses let through (0-65535).")
 set(EXT_PULSE_OFF   "1000"     CACHE STRING "No. of cycles addresses blocked (0-65535).")
-set(EXT_BWCAP       "1172"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+set(EXT_BWCAP       "3750"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
 set(EXT_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
 set(EXT_PERFCNT     "0"        CACHE STRING "32-bit event counter")
 set(EXT_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;

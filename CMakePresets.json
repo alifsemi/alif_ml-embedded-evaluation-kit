@@ -68,7 +68,7 @@
         },
         {
             "name": "mps4-315-gcc",
-            "displayName": "mps3-315-gcc",
+            "displayName": "mps4-315-gcc",
             "description": "Target MPS4 board, SSE-315 subsystem with bare-metal gcc toolchain.",
             "inherits": [
                 "mps4-315-platform",
@@ -81,6 +81,24 @@
             "description": "Target MPS4 board, SSE-315 subsystem with bare-metal armclang toolchain.",
             "inherits": [
                 "mps4-315-platform",
+                "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-320-gcc",
+            "displayName": "mps4-320-gcc",
+            "description": "Target MPS4 board, SSE-320 subsystem with bare-metal gcc toolchain.",
+            "inherits": [
+                "mps4-320-platform",
+                "gcc-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-320-clang",
+            "displayName": "mps4-320-armclang",
+            "description": "Target MPS4 board, SSE-320 subsystem with bare-metal armclang toolchain.",
+            "inherits": [
+                "mps4-320-platform",
                 "armclang-toolchain"
             ]
         },

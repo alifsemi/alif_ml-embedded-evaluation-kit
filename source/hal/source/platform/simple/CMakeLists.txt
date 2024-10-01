@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +40,8 @@ set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enabl
 set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
 if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-    set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+    set(TA_SRAM_BASE    "0x58103000"   CACHE STRING "Ethos-U NPU SRAM timing adapter")
+    set(TA_EXT_BASE     "0x58103200"   CACHE STRING "Ethos-U NPU EXT timing adapter")
 endif()
 
 # 2. Create static library

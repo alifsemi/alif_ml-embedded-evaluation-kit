@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define NUM_PMU_COUNTERS     (10)     /**< Maximum number of available counters. */
+#define NUM_PMU_COUNTERS     (12)     /**< Maximum number of available counters. */
 
 /**
  * @brief   Container for a single unit for a PMU counter.

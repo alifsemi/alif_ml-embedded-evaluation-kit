@@ -28,7 +28,10 @@ ENV EVAL_KIT_DIR="/home/ml-embedded-evaluation-kit" \
     FVP_310_SHA="616ecc0e82067fe0684790cf99638b3496f9ead11051a58d766e8258e766c556" \
     FVP_315="FVP_Corstone_SSE-315" \
     FVP_VER_315="11.24_22" \
-    FVP_315_SHA="e105569b159e42a5557baf15cc980a62427b2de3bf17aaaa72de6d218bb3a2eb"
+    FVP_315_SHA="e105569b159e42a5557baf15cc980a62427b2de3bf17aaaa72de6d218bb3a2eb" \
+    FVP_320="FVP_Corstone_SSE-320" \
+    FVP_VER_320="11.27_25" \
+    FVP_320_SHA="6986af8805de54fa8dcbc54ea2cd63b305ebf5f1c07d3cba09641e2f8cc4e2f5"
 
 RUN apt-get update && \
     apt-get install -y \
@@ -80,6 +83,14 @@ RUN wget "${FVP_BASE_URL}/FVP/Corstone-315/${FVP_315}_${FVP_VER_315}_Linux64.tgz
     bash /home/${FVP_315}/${FVP_315}.sh --no-interactive --i-agree-to-the-contained-eula -d /home/${FVP_315} && \
     rm "${FVP_315}_${FVP_VER_315}_Linux64.tgz"
 
+# Download and install Arm Corstone-320 FVP
+RUN wget "${FVP_BASE_URL}/FVP/Corstone-320/${FVP_320}_${FVP_VER_320}_Linux64.tgz" 2>/dev/null && \
+    echo "${FVP_320_SHA} ${FVP_320}_${FVP_VER_320}_Linux64.tgz" | sha256sum -c && \
+    mkdir -p /home/${FVP_320}/ && \
+    tar -xf ${FVP_320}_${FVP_VER_320}_Linux64.tgz -C /home/${FVP_320}/ && \
+    bash /home/${FVP_320}/${FVP_320}.sh --no-interactive --i-agree-to-the-contained-eula -d /home/${FVP_320} && \
+    rm "${FVP_320}_${FVP_VER_320}_Linux64.tgz"
+
 # Clone the ml-embedded-evaluation-kit repository
 RUN git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit" ${EVAL_KIT_DIR}
 
@@ -100,6 +111,8 @@ ENV PATH="${EVAL_KIT_DIR}/resources_downloaded/env/bin:/opt/gcc-arm-none-eabi/bi
     FVP_310_U55="/home/${FVP_310}/models/Linux64_GCC-9.3/${FVP_310}" \
     FVP_310_U65="/home/${FVP_310}/models/Linux64_GCC-9.3/${FVP_310}_Ethos-U65" \
     FVP_315_U65="/home/${FVP_315}/models/Linux64_GCC-9.3/${FVP_315}" \
+    FVP_320_U85="/home/${FVP_320}/models/Linux64_GCC-9.3/${FVP_320}" \
     FVP_300_ARGS="-C mps3_board.telnetterminal0.start_telnet=0 -C mps3_board.uart0.out_file='-' -C mps3_board.uart0.shutdown_on_eot=1 -C mps3_board.visualisation.disable-visualisation=1" \
     FVP_310_ARGS="-C mps3_board.telnetterminal0.start_telnet=0 -C mps3_board.uart0.out_file='-' -C mps3_board.uart0.shutdown_on_eot=1 -C mps3_board.visualisation.disable-visualisation=1" \
-    FVP_315_ARGS="-C mps4_board.telnetterminal0.start_telnet=0 -C mps4_board.uart0.out_file='-' -C mps4_board.uart0.shutdown_on_eot=1 -C mps4_board.visualisation.disable-visualisation=1 -C vis_hdlcd.disable_visualisation=1"
+    FVP_315_ARGS="-C mps4_board.telnetterminal0.start_telnet=0 -C mps4_board.uart0.out_file='-' -C mps4_board.uart0.shutdown_on_eot=1 -C mps4_board.visualisation.disable-visualisation=1 -C vis_hdlcd.disable_visualisation=1" \
+    FVP_320_ARGS="-C mps4_board.telnetterminal0.start_telnet=0 -C mps4_board.uart0.out_file='-' -C mps4_board.uart0.shutdown_on_eot=1 -C mps4_board.visualisation.disable-visualisation=1 -C vis_hdlcd.disable_visualisation=1"

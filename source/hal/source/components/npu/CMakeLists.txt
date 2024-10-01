@@ -17,7 +17,7 @@
 #----------------------------------------------------------------------------
 
 #########################################################
-#         Ethos-U NPU initialization library            #
+#         Arm Ethos-U NPU initialization library        #
 #########################################################
 
 cmake_minimum_required(VERSION 3.21.0)
@@ -73,11 +73,20 @@ elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
     # Shared Sram can be used for Ethos-U55 and Ethos-U65
     set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-    # Dedicated Sram is used only for Ethos-U65
-    if (ETHOS_U_NPU_ID STREQUAL U65)
-        list(APPEND ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM" "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}")
+    # Dedicated Sram is used only for Ethos-U65 and Ethos-U85
+    if (ETHOS_U_NPU_ID STREQUAL U65 OR ETHOS_U_NPU_ID STREQUAL U85)
+        list(
+                APPEND
+                ETHOS_U_NPU_MEMORY_MODE_FLAG
+                "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM"
+                "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}"
+        )
     else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `dedicated_sram` can be used only for Ethos-U65.")
+        message(
+                FATAL_ERROR
+                "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. "
+                "`dedicated_sram` can be used only for Ethos-U65 or Ethos-U85."
+        )
     endif ()
 else ()
     message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
@@ -128,15 +137,20 @@ else()
         NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
 endif()
 
-# Ethos-U55 supports a maximum burst length of 64 bytes while Ethos-U65 supports up to 128 bytes.
+# Ethos-U55 supports a maximum burst length of 64 bytes, Ethos-U65 supports up to 128 bytes,
+# and Ethos-U85 supports up to 256 bytes.
 # Although, this is system implementation dependent the platforms we build for should support the
-# maximum burst length for both NPU configurations.
+# maximum burst length for all NPU configurations.
 if (ETHOS_U_NPU_ID STREQUAL U65)
     target_compile_definitions(ethosu_core_driver PRIVATE
             AXI_LIMIT0_MAX_BEATS_BYTES=1
             AXI_LIMIT1_MAX_BEATS_BYTES=1
             AXI_LIMIT2_MAX_BEATS_BYTES=1
             AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
+elseif (ETHOS_U_NPU_ID STREQUAL U85)
+    target_compile_definitions(ethosu_core_driver PRIVATE
+            AXI_LIMIT_SRAM_MAX_BEATS=2
+            AXI_LIMIT_EXT_MAX_BEATS=2) # 0 = 64 byte burst, 1 = 128 byte burst, 2 = 256 byte burst
 endif()
 
 # Create static library
