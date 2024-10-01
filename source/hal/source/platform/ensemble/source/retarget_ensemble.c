@@ -27,6 +27,7 @@
  * limitations under the License.
  */
 
+#include <errno.h>
 #if !defined(USE_SEMIHOSTING)
 
 #include <stdio.h>
@@ -370,3 +371,36 @@ int _kill(int pid, int sig)
 #endif // !defined __ARMCC_VERSION
 
 #endif // USE_SEMIHOSTING
+
+/* Retarget functions built regardless of USE_SEMIHOSTING */
+#ifdef __ARMCC_VERSION
+/* ARMCC */
+#elif __ICCARM__
+/* IAR */
+#else
+/* GCC (newlib) */
+
+// The default _sbrk implementation of newlib does not do heap limit checking
+static char* heap_end = 0;
+void* _sbrk(int incr)
+{
+    extern char heap_start __asm ("end");
+    extern char __HeapLimit;
+
+    char* prev_heap_end;
+
+    if (heap_end == 0) {
+        heap_end = &heap_start;
+    }
+
+    prev_heap_end = heap_end;
+
+    if (heap_end + incr > (&__HeapLimit)) {
+        errno = ENOMEM;
+        return (void*)-1;
+    }
+
+    heap_end += incr;
+    return prev_heap_end;
+}
+#endif // GCC
