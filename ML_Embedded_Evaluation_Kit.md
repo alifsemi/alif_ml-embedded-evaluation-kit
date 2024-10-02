@@ -248,7 +248,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     -DTARGET_BOARD=AppKit \
     -DTARGET_REVISION=B \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
-    -DGLCD_UI=NO \
+    -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
     -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
