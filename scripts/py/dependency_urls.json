@@ -4,7 +4,7 @@
   "cortex-dfp": "https://github.com/ARM-software/Cortex_DFP/archive/c2c70a97a20fb355815e2ead3d4a40e35a4a3cdf.zip",
   "cmsis-dsp": "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.15.0.zip",
   "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/95f293df19c9a38806868fe12a64a4f9b457f9c1.zip",
-  "core-driver": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-24.08.tar.gz",
+  "core-driver": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-driver.git/snapshot/ethos-u-core-driver-78df0006c5fa667150d3ee35db7bde1d3f6f58c7.tar.gz",
   "core-platform": "https://git.mlplatform.org/ml/ethos-u/ethos-u-core-platform.git/snapshot/ethos-u-core-platform-24.08.tar.gz",
   "tensorflow": "https://github.com/tensorflow/tflite-micro/archive/c01ca97f52ca451bfba714d7eb8ae0349d85f537.zip"
 }

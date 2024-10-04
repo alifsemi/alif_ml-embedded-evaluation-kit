@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +20,22 @@
 
 #include "pmu_ethosu.h"
 
-#define ETHOSU_DERIVED_NCOUNTERS     1      /**< Number of counters derived from event counters */
-#define ETHOSU_PROFILER_NUM_COUNTERS ( \
-            ETHOSU_DERIVED_NCOUNTERS + \
-            ETHOSU_PMU_NCOUNTERS +     \
-            1 /* total CCNT */)
+#if defined(ETHOSU55) || defined(ETHOSU65)
+    #define ETHOSU_USED_PMU_NCOUNTERS   (4U)    /**< Number of actual PMU counters we want to display */
+#elif defined(ETHOSU85)
+    #define ETHOSU_USED_PMU_NCOUNTERS   (5U)    /**< Number of actual PMU counters we want to display */
+#endif /* defined(ETHOSU85) */
+
+#define ETHOSU_DERIVED_NCOUNTERS    (1U)    /**< Number of counters derived from event counters */
+
+#if ETHOSU_PMU_NCOUNTERS < ETHOSU_USED_PMU_NCOUNTERS
+    #error "NPU PMU expects a minimum of 4 available event triggered counters!"
+#endif /* ETHOSU_PMU_COUNTERS < ETHOSU_USED_PMU_NCOUNTERS */
+
+#define ETHOSU_PROFILER_NUM_COUNTERS (      \
+            ETHOSU_DERIVED_NCOUNTERS +      \
+            ETHOSU_USED_PMU_NCOUNTERS +     \
+            1 /* total CCNT */              )
 
 typedef struct npu_event_counter_ {
     enum ethosu_pmu_event_type event_type;
@@ -41,7 +53,7 @@ typedef struct npu_derived_counter_ {
 
 typedef struct ethosu_pmu_counters_ {
     uint64_t                npu_total_ccnt;     /**< Total NPU cycles */
-    npu_evt_counter         npu_evt_counters[ETHOSU_PMU_NCOUNTERS];
+    npu_evt_counter         npu_evt_counters[ETHOSU_USED_PMU_NCOUNTERS];
     npu_derived_counter     npu_derived_counters[ETHOSU_DERIVED_NCOUNTERS];
     uint32_t                num_total_counters; /**< Total number of counters */
 } ethosu_pmu_counters;
