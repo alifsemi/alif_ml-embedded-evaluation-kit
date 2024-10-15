@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +25,13 @@
 
 static int show_title(void)
 {
-    const char title[] = "Arm ML embedded code samples";
+    int ret = 0;
+#if defined(LCD_TITLE_STRING)
+    const char *title = LCD_TITLE_STRING;
     lcd_set_text_color(White);
-    return lcd_display_text(title, strlen(title), 10, 0, false);
+    ret = lcd_display_text(title, strlen(title), 10, 0, false);
+#endif /* LCD_TITLE_STRING */
+    return ret;
 }
 
 int lcd_init(void)
@@ -124,6 +129,7 @@ int lcd_display_box(const uint32_t pos_x, const uint32_t pos_y,
 int lcd_clear(const uint16_t color)
 {
     GLCD_Clear(color);
+    GLCD_SetBackColor(color);
     GLCD_SetTextColor(White);
     return show_title();
 }
