@@ -1,17 +1,19 @@
 # Troubleshooting
 
-- [Troubleshooting](./troubleshooting.md#troubleshooting)
-  - [Inference results are incorrect for my custom files](./troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
-  - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
-  - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
-  - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
-  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==4.0.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
-  - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
-  - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
-  - [Missing libpython3.9.so.1.0](./troubleshooting.md#missing-libpython3_9_so_1_0)
+<!-- TOC -->
+* [Troubleshooting](#troubleshooting)
+  * [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
+  * [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
+  * [NPU configuration mismatch error when running inference](#npu-configuration-mismatch-error-when-running-inference)
+  * [Errors when cloning the repository](#errors-when-cloning-the-repository)
+  * [Problem installing Vela](#problem-installing-vela)
+  * [No matching distribution found for Vela](#no-matching-distribution-found-for-vela)
+    * [How to update Python3 package to newer version](#how-to-update-python3-package-to-newer-version)
+  * [Error trying to build on Arm Virtual Hardware](#error-trying-to-build-on-arm-virtual-hardware)
+  * [Internal Compiler Error](#internal-compiler-error)
+  * [Build issues with WSL2](#build-issues-with-wsl2)
+  * [Missing libpython when running FVP](#missing-libpython-when-running-fvp)
+<!-- TOC -->
 
 ## Inference results are incorrect for my custom files
 
@@ -128,7 +130,7 @@ install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-ex
 
 To solve this issue install libpython3 on the system.
 
-## No matching distribution found for ethos-u-vela
+## No matching distribution found for Vela
 
 Vela 3.9.0 increases Python requirement to at least version 3.9, if not installed on your system the following error will occur:
 
@@ -315,7 +317,7 @@ paths are required, escape them using `\` or enclose them with quotes.
 
 Another example of a similar issue: [Discourse issue 171: Build error in makefile](https://discuss.mlplatform.org/t/build-error-in-makefile/171).
 
-## Missing libpython3.9.so.1.0
+## Missing libpython when running FVP
 
 When running an FVP, you may encounter the following error:
 
