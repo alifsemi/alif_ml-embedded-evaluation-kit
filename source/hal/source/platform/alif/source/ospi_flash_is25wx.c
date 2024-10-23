@@ -24,7 +24,10 @@
 #include "ospi.h"
 #include "ospi_private.h"
 
+#include "ospi_flash.h"
 #include "log_macros.h"
+
+#ifdef BOARD_HAS_IS25WX_FLASH
 
 #define OSPI_RESET_PORT     LP
 
@@ -145,6 +148,32 @@ int32_t ospi_flash_init()
         return ret;
     }
 
+    ret = ptrDrvFlash->EraseSector(0);
+    if (ret != ARM_DRIVER_OK) {
+        printf_err("Ext flash program failed\n");
+        return ret;
+    }
+
+    uint16_t wdata[512];
+    uint8_t * const data = (uint8_t *) wdata;
+    for (size_t i = 0; i < sizeof wdata; i++) {
+        data[i] = (i << (i / 256)) | (i >> (8-i/256));
+    }
+
+    ret = ptrDrvFlash->ProgramData(0, wdata, sizeof wdata / 2);
+    if (ret != sizeof wdata / 2) {
+        printf_err("Ext flash program failed\n");
+        //return ARM_DRIVER_ERROR;
+    }
+    ARM_FLASH_STATUS flash_status = ptrDrvFlash->GetStatus();
+    if (flash_status.error) {
+        printf("Flash error status (expected)\n");
+    }
+
+    printf("IS25WX flash apparently okay\n");
+
     ospi_flash_enable_xip();
     return ret;
 }
+
+#endif // BOARD_HAS_IS25WX_FLASH
