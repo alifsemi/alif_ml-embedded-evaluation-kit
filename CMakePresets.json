@@ -6,7 +6,7 @@
         "patch": 0
     },
     "include": [
-        "scripts/cmake/options-preset.json",
+        "scripts/cmake/configuration_options/options-preset.json",
         "scripts/cmake/platforms/platforms-preset.json",
         "scripts/cmake/toolchains/toolchain-preset.json",
         "source/use_case/usecase-preset.json"
@@ -33,7 +33,7 @@
         {
             "name": "mps3-300-gcc",
             "displayName": "mps3-300-gcc",
-            "description": "Target mps3 board, SSE-300 subsystem with bare-metal gcc toolchain.",
+            "description": "Target MPS3 board, SSE-300 subsystem with bare-metal gcc toolchain.",
             "inherits": [
                 "mps3-300-platform",
                 "gcc-toolchain"
@@ -42,7 +42,7 @@
         {
             "name": "mps3-300-clang",
             "displayName": "mps3-300-armclang",
-            "description": "Target mps3 board, SSE-300 subsystem with bare-metal armclang toolchain.",
+            "description": "Target MPS3 board, SSE-300 subsystem with bare-metal armclang toolchain.",
             "inherits": [
                 "mps3-300-platform",
                 "armclang-toolchain"
@@ -51,7 +51,7 @@
         {
             "name": "mps3-310-gcc",
             "displayName": "mps3-310-gcc",
-            "description": "Target mps3 board, SSE-310 subsystem with bare-metal gcc toolchain.",
+            "description": "Target MPS3 board, SSE-310 subsystem with bare-metal gcc toolchain.",
             "inherits": [
                 "mps3-310-platform",
                 "gcc-toolchain"
@@ -60,9 +60,27 @@
         {
             "name": "mps3-310-clang",
             "displayName": "mps3-310-armclang",
-            "description": "Target mps3 board, SSE-310 subsystem with bare-metal armclang toolchain.",
+            "description": "Target MPS3 board, SSE-310 subsystem with bare-metal armclang toolchain.",
             "inherits": [
                 "mps3-310-platform",
+                "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-315-gcc",
+            "displayName": "mps3-315-gcc",
+            "description": "Target MPS4 board, SSE-315 subsystem with bare-metal gcc toolchain.",
+            "inherits": [
+                "mps4-315-platform",
+                "gcc-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-315-clang",
+            "displayName": "mps4-315-armclang",
+            "description": "Target MPS4 board, SSE-315 subsystem with bare-metal armclang toolchain.",
+            "inherits": [
+                "mps4-315-platform",
                 "armclang-toolchain"
             ]
         },

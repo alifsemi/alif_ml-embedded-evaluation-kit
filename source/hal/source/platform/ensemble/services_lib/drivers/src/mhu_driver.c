@@ -1,14 +1,29 @@
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /**
  * @file mhu_driver.c
  * @brief MHU driver
- * @ingroup SERVICES
+ * @ingroup services
  * @par
- * COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
  */
-
 #include "mhu_driver.h"
 
-void MHU_driver_initialize(mhu_driver_in_t * data_in, mhu_driver_out_t * data_out)
+/**
+ * @fn void MHU_driver_initialize(mhu_driver_in_t * data_in,
+ *                                mhu_driver_out_t * data_out)
+ * @param data_in
+ * @param data_out
+ */
+void MHU_driver_initialize(mhu_driver_in_t * data_in,
+                           mhu_driver_out_t * data_out)
 {
   MHU_sender_initialize(data_in->sender_base_address_list, 
                         data_in->mhu_count, 

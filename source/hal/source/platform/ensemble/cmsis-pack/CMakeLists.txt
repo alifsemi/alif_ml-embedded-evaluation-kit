@@ -26,15 +26,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     ${BOARDLIB_PATH}
     )
 
-if (TARGET_REVISION STREQUAL "A")
-target_include_directories(${CPU_HEADER_TARGET}
-    INTERFACE
-    config
-    config/${ENSEMBLE_CORE}
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Include
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Config
-    )
-else()
+if (TARGET_REVISION STREQUAL "B")
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     config-b
@@ -66,24 +58,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     )
 
 ## Platform sources
-if (TARGET_REVISION STREQUAL "A")
-target_sources(${CMSIS_DEVICE_TARGET}
-    PRIVATE
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/mpu_${ENSEMBLE_CORE}.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/startup_${ENSEMBLE_CORE}.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_${ENSEMBLE_CORE}.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/system_utils.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/${ENSEMBLE_CORE}/Source/tgu_${ENSEMBLE_CORE}.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DMA_Opcode.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_Camera_Controller.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PINMUX_AND_PINPAD.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/GPIO_ll_drv.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/drv_i2c_bitbang.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/LPTIMER_ll_drv.c
-    ${ENSEMBLE_CMSIS_PATH}/components/Source/PHY_Generic.c
-    ${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c
-    )
-else()
+if (TARGET_REVISION STREQUAL "B")
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_${ENSEMBLE_CORE}.c
@@ -93,6 +68,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/clk.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tcm_partition.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
@@ -114,6 +90,9 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/components/Source/IS25WX256.c
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},MT9M114>:${ENSEMBLE_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},ARX3A0>:${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
     )
 endif()
 
@@ -128,7 +107,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_init.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
@@ -137,10 +115,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
 ## Board sources
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    ${BOARDLIB_PATH}/appkit_alpha1/board_init.c
-    ${BOARDLIB_PATH}/appkit_alpha2/board_init.c
     ${BOARDLIB_PATH}/appkit_gen2/board_init.c
-    ${BOARDLIB_PATH}/devkit_gen1/board_init.c
     ${BOARDLIB_PATH}/devkit_gen2/board_init.c
     ${BOARDLIB_PATH}/devkit_b0_cob/board_init.c
     )
@@ -160,11 +135,14 @@ target_link_options(
     INTERFACE
     --entry Reset_Handler)
 
+message(STATUS "ensemble cmsis-pack: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
+
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${CPU_HEADER_TARGET}
-    ensemble_services)
+    $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
+)
 
 # Check if semihosting configuration is available
 if (COMMAND configure_semihosting)

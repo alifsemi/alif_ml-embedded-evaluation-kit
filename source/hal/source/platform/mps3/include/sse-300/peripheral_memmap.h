@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 #define FMC_CMDSK_GPIO_BASE2        (0x41106000)       /* FMC_CMDSK_GPIO_BASE 2 Base Address (4KB)*/
 #define FMC_USER_AHB_BASE           (0x41107000)          /* FMC_USER_AHB_BASE     Base Address (4KB)*/
 
-#define DMA0_BASE                (0x41200000)       /* DMA0 (4KB) */
+/* Note: DMA0_BASE does not exist for Corstone-300 */
 #define DMA1_BASE                (0x41201000)       /* DMA1 (4KB) */
 #define DMA2_BASE                (0x41202000)       /* DMA2 (4KB) */
 #define DMA3_BASE                (0x41203000)       /* DMA3 (4KB) */
@@ -64,10 +64,6 @@
 #define CMSDK_UART1_BASE         (0x49304000)       /* UART 1 Base Address */
 #define CMSDK_UART2_BASE         (0x49305000)       /* UART 2 Base Address */
 #define CMSDK_UART3_BASE         (0x49306000)       /* UART 3 Base Address Shield 0*/
-
-#define ETHOS_U_NPU_BASE           (0x48102000)    /* Ethos-U NPU base address*/
-#define ETHOS_U_NPU_TA0_BASE       (0x48103000)    /* Ethos-U NPU's timing adapter 0 base address */
-#define ETHOS_U_NPU_TA1_BASE       (0x48103200)    /* Ethos-U NPU's timing adapter 1 base address */
 
 #define CMSDK_UART4_BASE         (0x49307000)       /* UART 4 Base Address Shield 1*/
 #define CMSDK_UART5_BASE         (0x49308000)       /* UART 5 Base Address */
@@ -101,7 +97,6 @@
 #define SEC_AHB_USER2_BASE       (0x51106000)       /* AHB USER 2 Base Address (4KB)*/
 #define SEC_AHB_USER3_BASE       (0x51107000)       /* AHB USER 3 Base Address (4KB)*/
 
-#define SEC_DMA0_BASE            (0x51200000)       /* DMA0 (4KB) */
 #define SEC_DMA1_BASE            (0x51201000)       /* DMA1 (4KB) */
 #define SEC_DMA2_BASE            (0x51202000)       /* DMA2 (4KB) */
 #define SEC_DMA3_BASE            (0x51203000)       /* DMA3 (4KB) */
@@ -137,10 +132,6 @@
 #define SEC_RTC_BASE             (0x5930B000)       /* RTC Base address */
 #define SEC_SMSC9220_BASE        (0x51400000)       /* Ethernet SMSC9220 Base Address */
 #define SEC_USB_BASE             (0x51500000)       /* USB Base Address */
-
-#define SEC_ETHOS_U_NPU_BASE       (0x58102000)   /* Ethos-U NPU base address*/
-#define SEC_ETHOS_U_NPU_TA0_BASE   (0x58103000)   /* Ethos-U NPU's timing adapter 0 base address */
-#define SEC_ETHOS_U_NPU_TA1_BASE   (0x58103200)   /* Ethos-U NPU's timing adapter 1 base address */
 
 /* #undef SEC_USER_BASE */
 

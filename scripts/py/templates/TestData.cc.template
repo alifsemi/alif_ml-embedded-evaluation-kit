@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,15 +23,19 @@
 namespace {{namespace}} {
 {% endfor %}
 
-static const {{data_type}} *ifmArrays[] = {
-    {{ ifm_var_names|join(',\n    ') }}
+static const void *ifmArrays[] = {
+{% for param in ifm_params %}
+    reinterpret_cast<const void*>({{ param.var_name }}),
+{% endfor %}
 };
 
-static const {{data_type}} *ofmArrays[] = {
-    {{ ofm_var_names|join(',\n    ') }}
+static const void *ofmArrays[] = {
+{% for param in ofm_params %}
+    reinterpret_cast<const void*>({{ param.var_name }}),
+{% endfor %}
 };
 
-const {{data_type}}* GetIfmDataArray(const uint32_t idx)
+const void* GetIfmDataArray(const uint32_t idx)
 {
     if (idx < NUMBER_OF_IFM_FILES) {
         return ifmArrays[idx];
@@ -38,7 +43,7 @@ const {{data_type}}* GetIfmDataArray(const uint32_t idx)
     return nullptr;
 }
 
-const {{data_type}}* GetOfmDataArray(const uint32_t idx)
+const void* GetOfmDataArray(const uint32_t idx)
 {
     if (idx < NUMBER_OF_OFM_FILES) {
         return ofmArrays[idx];

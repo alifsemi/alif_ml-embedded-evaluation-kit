@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+include_guard()
+
 set(SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
 
 ##############################################################################
@@ -29,7 +32,7 @@ function(generate_images_code input_dir src_out hdr_out img_size)
 
     message(STATUS "Generating image files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_rgb_cpp.py
+        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_rgb_cpp.py
         --image_path ${input_dir_abs}
         --source_folder_path ${src_out_abs}
         --header_folder_path ${hdr_out_abs}
@@ -57,7 +60,7 @@ function(generate_audio_code input_dir src_out hdr_out s_rate_opt mono_opt off_o
 
     message(STATUS "Generating audio files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_audio_cpp.py
+        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_audio_cpp.py
         --audio_path ${input_dir_abs}
         --source_folder_path ${src_out_abs}
         --header_folder_path ${hdr_out_abs}
@@ -86,7 +89,7 @@ function(generate_default_input_code hdr_out)
 
     message(STATUS "Generating default input files")
     execute_process(
-            COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_default_input_cpp.py
+            COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_default_input_cpp.py
             --header_folder_path ${hdr_out_abs}
             RESULT_VARIABLE return_code
     )
@@ -130,7 +133,7 @@ function(generate_tflite_code)
     endforeach()
 
     execute_process(
-        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_model_cpp.py
+        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_model_cpp.py
         --tflite_path ${ABS_MODEL_PATH}
         --output_dir ${ABS_DESTINATION} ${py_arg_exp}
         RESULT_VARIABLE return_code
@@ -173,7 +176,7 @@ function(generate_labels_code)
 
     message(STATUS "writing to ${hdr_out_abs}/${PARSED_OUTPUT_FILENAME}.hpp and ${src_out_abs}/${PARSED_OUTPUT_FILENAME}.cc")
     execute_process(
-        COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_labels_cpp.py
+        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_labels_cpp.py
         --labels_file ${input_abs}
         --source_folder_path ${src_out_abs}
         --header_folder_path ${hdr_out_abs}
@@ -238,7 +241,7 @@ function(generate_test_data_code)
 
         message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
         execute_process(
-            COMMAND ${PYTHON} ${SCRIPTS_DIR}/py/gen_test_data_cpp.py
+            COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_test_data_cpp.py
             --data_folder_path ${input_dir_abs}
             --source_folder_path ${src_out_abs}
             --header_folder_path ${hdr_out_abs}
@@ -262,8 +265,8 @@ function(setup_source_generator)
     # If a virtual env has been created in the resources_downloaded directory,
     # use it for source generator. Else, fall back to creating a virtual env
     # in the current build directory.
-    if (EXISTS ${RESOURCES_DIR}/env)
-        set(DEFAULT_VENV_DIR ${RESOURCES_DIR}/env)
+    if (EXISTS ${RESOURCES_PATH}/env)
+        set(DEFAULT_VENV_DIR ${RESOURCES_PATH}/env)
     else()
         set(DEFAULT_VENV_DIR ${CMAKE_BINARY_DIR}/venv)
     endif()
@@ -323,7 +326,7 @@ function(setup_source_generator)
     endif ()
 
     execute_process(
-        COMMAND ${PYTHON} -m pip install -r ${SCRIPTS_DIR}/py/requirements.txt
+        COMMAND ${PYTHON} -m pip install -r ${MLEK_SCRIPTS_DIR}/py/requirements.txt
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")

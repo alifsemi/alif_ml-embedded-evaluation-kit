@@ -19,7 +19,12 @@
 
 void hal_pmu_init(void)
 {
-    platform_reset_counters();
+    platform_init_counters();
+}
+
+void hal_pmu_final(void)
+{
+    platform_final_counters();
 }
 
 void hal_pmu_reset(void)

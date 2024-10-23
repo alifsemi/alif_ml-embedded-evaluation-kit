@@ -27,6 +27,16 @@
 #endif /* defined (ARM_NPU) */
 
 /**
+ * @brief   Initialises the counters.
+ */
+void platform_init_counters(void);
+
+/**
+ * @brief   Finalises the counters.
+ */
+void platform_final_counters(void);
+
+/**
  * @brief   Resets the counters.
  */
 void platform_reset_counters(void);

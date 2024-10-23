@@ -38,13 +38,21 @@
 #include "KwsResult.hpp"
 #include "log_macros.h"
 #include "KwsProcessing.hpp"
-#include "services_lib_api.h"
-#include "services_main.h"
 
 #include <vector>
 
-extern uint32_t m55_comms_handle;
+#ifdef SE_SERVICES_SUPPORT
+#include "services_lib_api.h"
+#include "services_main.h"
+
+#if defined(M55_HE)
+// Use hp_comms_handle for sending MHU message to HP core
+extern uint32_t hp_comms_handle;
+#else
+extern uint32_t he_comms_handle;
+#endif
 m55_data_payload_t mhu_data;
+#endif // SE_SERVICES_SUPPORT
 
 using arm::app::KwsClassifier;
 using arm::app::Profiler;
@@ -79,6 +87,7 @@ using namespace arm::app::kws;
  **/
 static bool PresentInferenceResult(const std::vector<arm::app::kws::KwsResult>& results);
 
+#ifdef SE_SERVICES_SUPPORT
 static std::string last_label;
 
 static void send_msg_if_needed(arm::app::kws::KwsResult &result)
@@ -96,12 +105,16 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             info("******************* send_msg_if_needed, FOUND \"%s\", copy data end send! ******************\n", classification.m_label.c_str());
             strcpy(mhu_data.msg, classification.m_label.c_str());
             __DMB();
-            SERVICES_send_msg(m55_comms_handle, &mhu_data);
+#if defined(M55_HE)
+            SERVICES_send_msg(hp_comms_handle, LocalToGlobal(&mhu_data));
+#else
+            SERVICES_send_msg(he_comms_handle, LocalToGlobal(&mhu_data));
+#endif
         }
         last_label = classification.m_label;
     }
 }
-
+#endif
 
     /* KWS inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx, bool oneshot)
@@ -213,8 +226,9 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             infResults.emplace_back(kws::KwsResult(singleInfResult,
                     index * secondsPerSample * preProcess.m_audioDataStride,
                     index, scoreThreshold));
-
+#ifdef SE_SERVICES_SUPPORT
             send_msg_if_needed(infResults.back());
+#endif
 
 #if VERIFY_TEST_OUTPUT
             DumpTensor(outputTensor);

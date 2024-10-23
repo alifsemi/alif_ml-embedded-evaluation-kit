@@ -119,6 +119,19 @@ uint64_t Get_SysTick_Cycle_Count(void)
     return ticks1 * (reload + 1) + (reload - systick_val);
 }
 
+void platform_init_counters(void)
+{
+#if defined (ARM_NPU)
+    ethosu_pmu_init();
+#endif /* defined (ARM_NPU) */
+}
+
+void platform_final_counters(void)
+{
+#if defined (ARM_NPU)
+    ethosu_pmu_final();
+#endif /* defined (ARM_NPU) */
+}
 
 void platform_reset_counters(void)
 {

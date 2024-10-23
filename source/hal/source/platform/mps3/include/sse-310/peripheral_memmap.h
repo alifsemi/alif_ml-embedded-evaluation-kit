@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,6 @@
 #define CMSDK_UART1_BASE         (0x49304000)       /* UART 1 Base Address */
 #define CMSDK_UART2_BASE         (0x49305000)       /* UART 2 Base Address */
 #define CMSDK_UART3_BASE         (0x49306000)       /* UART 3 Base Address Shield 0*/
-
-#define ETHOS_U_NPU_BASE           (0x40004000)    /* Ethos-U NPU base address*/
-#define ETHOS_U_NPU_TA0_BASE       (0x48103000)    /* Ethos-U NPU's timing adapter 0 base address */
-#define ETHOS_U_NPU_TA1_BASE       (0x48103200)    /* Ethos-U NPU's timing adapter 1 base address */
 
 #define CMSDK_UART4_BASE         (0x49307000)       /* UART 4 Base Address Shield 1*/
 #define CMSDK_UART5_BASE         (0x49308000)       /* UART 5 Base Address */
@@ -136,15 +132,8 @@
 #define SEC_CLCD_CONFIG_BASE     (0x5930A000)       /* CLCD CONFIG Base Address */
 #define SEC_RTC_BASE             (0x5930B000)       /* RTC Base address */
 
-
-
-
 #define SEC_SMSC9220_BASE        (0x51400000)       /* Ethernet SMSC91C111 Base Address */
 #define SEC_USB_BASE             (0x51500000)       /* USB Base Address */
-
-#define SEC_ETHOS_U_NPU_BASE       (0x50004000)   /* Ethos-U NPU base address*/
-#define SEC_ETHOS_U_NPU_TA0_BASE   (0x58103000)   /* Ethos-U NPU's timing adapter 0 base address */
-#define SEC_ETHOS_U_NPU_TA1_BASE   (0x58103200)   /* Ethos-U NPU's timing adapter 1 base address */
 
 /* #undef SEC_USER_BASE */
 

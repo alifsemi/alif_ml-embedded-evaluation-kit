@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +17,15 @@
 #----------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------
-# CMake description file for the Ethos-U55 Timing Adapter settings (single
+# CMake description file for the Arm Ethos-U55 Timing Adapter settings (single
 # NPU core with two AXIs).
 #----------------------------------------------------------------------------
 
-set(TA0_BASE "${SEC_ETHOS_U_NPU_TA0_BASE}"   CACHE STRING "Timing adapter 0: base-address")
-set(TA1_BASE "${SEC_ETHOS_U_NPU_TA1_BASE}"   CACHE STRING "Timing adapter 1: base-address")
+# The platform CMake infra should set the base register values for
+# TA component to work. For Ethos-U55, we need two base addresses.
+if (NOT DEFINED TA0_BASE OR NOT DEFINED TA1_BASE)
+    message(FATAL_ERROR "TA0_BASE and TA1_BASE need to be defined.")
+endif ()
 
 message(STATUS "using TA0_BASE @ ${TA0_BASE}; TA1_BASE @ ${TA1_BASE}.")
 

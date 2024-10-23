@@ -36,7 +36,7 @@ namespace app {
         }
 
         if (!this->m_started) {
-            hal_pmu_reset();
+            hal_pmu_init();
             this->m_tstampSt.initialised = false;
             hal_pmu_get_counters(&this->m_tstampSt);
             if (this->m_tstampSt.initialised) {
@@ -59,6 +59,7 @@ namespace app {
         if (this->m_started) {
             this->m_tstampEnd.initialised = false;
             hal_pmu_get_counters(&this->m_tstampEnd);
+            hal_pmu_final();
             this->m_started = false;
             if (this->m_tstampEnd.initialised) {
                 this->UpdateRunningStats(

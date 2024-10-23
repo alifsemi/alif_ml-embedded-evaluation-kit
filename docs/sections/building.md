@@ -175,13 +175,16 @@ The build parameters are:
 
 - `TARGET_PLATFORM`: The target platform to execute the application on:
   - `mps3` (default)
+  - `mps4`
   - `native`
   - `simple_platform`
 
-- `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target. For
-  both, the MPS3 FVP and the MPS3 FPGA, this must be left to the default value of SSE-300:
-  - `sse-300` (default - [Arm® Corstone™-300](https://developer.arm.com/ip-products/subsystem/corstone/corstone-300))
-  - `sse-310` (The FVP is available via Arm Virtual Hardware (AVH) hosted on AWS)
+- `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target.
+  For `mps3` target these sub-systems are available:
+  - `sse-300`: this is the default, see [Arm® Corstone™-300](https://developer.arm.com/Processors/Corstone-300)
+  - `sse-310`: See [Arm® Corstone™-310](https://developer.arm.com/Processors/Corstone-310)
+  For `mps4` target:
+  - `sse-315`: See [Arm® Corstone™-315](https://developer.arm.com/Processors/Corstone-315)
 
 - `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the default toolchain file used for the
   build. All the valid toolchain files are located in the scripts directory. For example, see:
@@ -280,6 +283,11 @@ inference_runner use-case.
 
 - `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
 `BUILD_FVP_TESTS` option is switched `ON`.
+
+- `RESOURCES_PATH`: The path to the resources downloaded by the set_up_default_resources.py script
+  and compiled using Vela.  This can be set if this script was run using the `--downloads-dir` flag to
+  override the default location for these models.  Defaults to `./resources_downloaded` relative to the
+  root of this project.
 
 For details on the specific use-case build options, follow the instructions in the use-case specific documentation.
 
@@ -483,7 +491,7 @@ cmake .. \
 Default CMake configuration behaviour looks for input samples, for each use case, in the default directory. All these
 inputs are baked-in into the application. If the number of files baked in is greater than one, a user menu is displayed
 on the application output, where the user is expected to enter their chosen option. See more here:
-[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp-emulating-mps3).
+[Deploying on an FVP emulating MPS3](./deployment.md#deploying-on-an-fvp).
 
 To configure the project to use single input for each use case, CMake option `USE_SINGLE_INPUT` can be set to `ON`.
 This will result in each use case automatically running with predefined input data, thus removing the need for the

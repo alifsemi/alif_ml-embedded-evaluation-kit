@@ -248,7 +248,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     -DTARGET_BOARD=AppKit \
     -DTARGET_REVISION=B \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
-    -DGLCD_UI=NO \
+    -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
     -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
@@ -599,7 +599,9 @@ Of the original ARM use cases the following are known to work:
 - object_detection
 - vww
 - inference_runner
-- noise_rejection
+- noise_reduction
+
+**NOTE:** You may need to adapt the memory configuration (linker file choice) and/or activation area size. [See Alif-specific build options](#Alif-specific-build-options)
 
 New use cases have been added:
 - alif_kws (equivalent of kws with live microphone input)
@@ -643,12 +645,11 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_REVISION=<A|B>`<br>
-Specifies which revision (generation) of Ensemble device is being targeted – A is generation 1, B is generation 2. (Default is B)
+`-DTARGET_REVISION=<B>`<br>
+Specifies which revision (generation) of Ensemble device is being targeted – B is generation 2. (Default is B)
 
-`-DTARGET_BOARD=<DevKit|AppKit|DevKit_Baseboard|AppKit_Alpha1|AppKit_Alpha2>`<br>
+`-DTARGET_BOARD=<DevKit|AppKit|DevKit_Baseboard|>`<br>
 Specifies the target board. (Default is AppKit)<br>
--DTARGET_REVISION=A supports the following boards: DevKit, AppKit_Alpha1 and AppKit_Alpha2<br>
 -DTARGET_REVISION=B supports the following boards: DevKit, AppKit and DevKit_Baseboard
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
@@ -666,3 +667,4 @@ Specifies a linker script/scatter file to use. The default is `ensemble-RTSS-<HE
 both TCM and SRAM0/SRAM1.<br>
 If running on two cores, the M55-HE core must use the alternative ensemble-RTSS-HE-TCM layout which uses only TCM. This will only fit the smallest use-cases such as kws or alif_kws, and GLCD_UI must be disabled.<br>
 To fit in TCM the kws use case must have its activation area reduced using `-Dkws_ACTIVATION_BUF_SZ=0x20000`. (This is already the default for alif_kws).
+Also noise_reduction use-case needs activation area reduced using `-Dnoise_reduction_ACTIVATION_BUF_SZ=0x20000` for TCM build.

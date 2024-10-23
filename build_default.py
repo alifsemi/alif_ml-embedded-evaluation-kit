@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,25 +25,40 @@ import sys
 import threading
 from argparse import ArgumentDefaultsHelpFormatter
 from argparse import ArgumentParser
-from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import Path
 
-from set_up_default_resources import default_npu_config_names
+from set_up_default_resources import PathsConfig
+from set_up_default_resources import SetupConfig
+from set_up_default_resources import default_downloads_path
+from set_up_default_resources import default_npu_configs
+from set_up_default_resources import default_requirements_path
+from set_up_default_resources import default_use_case_resources_path
 from set_up_default_resources import get_default_npu_config_from_name
 from set_up_default_resources import set_up_resources
-from set_up_default_resources import valid_npu_config_names
+from set_up_default_resources import valid_npu_configs
 
-BuildArgs = namedtuple(
-    "BuildArgs",
-    [
-        "toolchain",
-        "download_resources",
-        "run_vela_on_models",
-        "npu_config_name",
-        "make_jobs",
-        "make_verbose",
-    ],
-)
+
+@dataclass(frozen=True)
+class BuildConfig:
+    """
+    Args used to build the project.
+
+    Attributes:
+        toolchain (str)            : Specifies if 'gnu' or 'arm' toolchain needs to be used.
+        download_resources (bool)  : Specifies if 'Download resources' step is performed.
+        run_vela_on_models (bool)  : Only if `download_resources` is True, specifies whether to
+                                     run Vela on downloaded models.
+        npu_config_name (str)      : Ethos-U NPU configuration name. See "valid_npu_config_names"
+        make_jobs (int)            : The number of make jobs to use (`-j` flag).
+        make_verbose (bool)        : Runs make with VERBOSE=1.
+    """
+    toolchain: str
+    download_resources: bool
+    run_vela_on_models: bool
+    npu_config_name: str
+    make_jobs: int
+    make_verbose: bool
 
 
 class PipeLogging(threading.Thread):
@@ -176,37 +191,35 @@ def run_command(
         sys.exit(err.returncode)
 
 
-def run(args: BuildArgs):
+def run(build_config: BuildConfig):
     """
     Run the helpers scripts.
 
     Parameters:
     ----------
-    args (BuildArgs)    :   Parsed set of build args expecting:
-                            - toolchain
-                            - download_resources
-                            - run_vela_on_models
-                            - np_config_name
-    toolchain (str)             :   Specifies if 'gnu' or 'arm' toolchain needs to be used.
-    download_resources (bool)   :   Specifies if 'Download resources' step is performed.
-    run_vela_on_models (bool)   :   Only if `download_resources` is True, specifies if
-                                    run vela on downloaded models.
-    npu_config_name(str)        :   Ethos-U NPU configuration name. See "valid_npu_config_names"
+    args (BuildArgs)    : Arguments used to build the project
     """
 
     current_file_dir = Path(__file__).parent.resolve()
 
     # 1. Make sure the toolchain is supported, and set the right one here
-    toolchain_file_name = get_toolchain_file_name(args.toolchain)
+    toolchain_file_name = get_toolchain_file_name(build_config.toolchain)
 
     # 2. Download models if specified
-    if args.download_resources is True:
+    if build_config.download_resources is True:
         logging.info("Downloading resources.")
-        env_path = set_up_resources(
-            run_vela_on_models=args.run_vela_on_models,
-            additional_npu_config_names=(args.npu_config_name,),
-            additional_requirements_file=current_file_dir / "scripts" / "py" / "requirements.txt"
+        setup_config = SetupConfig(
+            run_vela_on_models=build_config.run_vela_on_models,
+            additional_npu_config_names=[build_config.npu_config_name],
         )
+        paths_config = PathsConfig(
+            additional_requirements_file=default_requirements_path,
+            use_case_resources_file=default_use_case_resources_path,
+            downloads_dir=default_downloads_path
+        )
+        env_path = set_up_resources(setup_config, paths_config)
+    else:
+        env_path = default_downloads_path / "env"
 
     # 3. Build default configuration
     logging.info("Building default configuration.")
@@ -217,8 +230,8 @@ def run(args: BuildArgs):
         current_file_dir,
         target_platform,
         target_subsystem,
-        args.npu_config_name,
-        args.toolchain
+        build_config.npu_config_name,
+        build_config.toolchain
     )
 
     logpipe = PipeLogging(logging.INFO)
@@ -230,21 +243,21 @@ def run(args: BuildArgs):
             "toolchains" /
             toolchain_file_name
     )
-    ethos_u_cfg = get_default_npu_config_from_name(args.npu_config_name)
+    ethos_u_cfg = get_default_npu_config_from_name(build_config.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
     cmake_command = (
         f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
         f" -DTARGET_SUBSYSTEM={target_subsystem}"
         f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
-        f" -DETHOS_U_NPU_ID={ethos_u_cfg.ethos_u_npu_id}"
-        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.ethos_u_config_id}"
+        f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
+        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
         " -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
     )
 
     run_command(cmake_command, logpipe, fail_message="Failed to configure the project.")
 
-    make_command = f"{cmake_path} --build {build_dir} -j{args.make_jobs}"
-    if args.make_verbose:
+    make_command = f"{cmake_path} --build {build_dir} -j{build_config.make_jobs}"
+    if build_config.make_verbose:
         make_command += " --verbose"
 
     run_command(make_command, logpipe, fail_message="Failed to build project.")
@@ -275,8 +288,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
-            {valid_npu_config_names}""",
-        default=default_npu_config_names[0],
+            {valid_npu_configs.names}""",
+        default=default_npu_configs.names[0],
     )
     parser.add_argument(
         "--make-jobs",
@@ -293,7 +306,7 @@ if __name__ == "__main__":
     )
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    build_args = BuildArgs(
+    build = BuildConfig(
         toolchain=parsed_args.toolchain.lower(),
         download_resources=not parsed_args.skip_download,
         run_vela_on_models=not parsed_args.skip_vela,
@@ -302,4 +315,4 @@ if __name__ == "__main__":
         make_verbose=parsed_args.make_verbose
     )
 
-    run(build_args)
+    run(build)

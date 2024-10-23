@@ -1,10 +1,17 @@
+/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
+ * Use, distribution and modification of this code is permitted under the
+ * terms stated in the Alif Semiconductor Software License Agreement
+ *
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
+ * contact@alifsemi.com, or visit: https://alifsemi.com/license
+ *
+ */
+
 /**
  * @file mhu.h
- *
  * @brief Header file for MHU module
- *
  * @par
- * COPYRIGHT NOTICE: (c) 2022 Alif Group. All rights reserved.
  */
 #ifndef __MHU_H__
 #define __MHU_H__
@@ -60,6 +67,7 @@ typedef mhu_send_status_t (*MHU_send_message_t)(uint32_t mhu_id,
 typedef void (*MHU_irq_handler_t)(uint32_t mhu_id);
 
 /**
+ * @struct mhu_driver_out_t
  * Functions implemented by the MHU driver and called by the client and
  * the Services library
  */

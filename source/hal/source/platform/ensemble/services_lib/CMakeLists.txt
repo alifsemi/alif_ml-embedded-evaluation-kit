@@ -55,6 +55,7 @@ target_sources(${ENSEMBLE_SERVICES_TARGET}
     drivers/src/mhu_sender.c
     services_lib/services_host_application.c
     services_lib/services_host_boot.c
+    services_lib/services_host_clocks.c
     services_lib/services_host_cryptocell.c
     services_lib/services_host_error.c
     services_lib/services_host_handler.c

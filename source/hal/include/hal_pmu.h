@@ -25,6 +25,11 @@
 void hal_pmu_init(void);
 
 /**
+ * @brief   Finalise the PMU available for the platform.
+ **/
+void hal_pmu_final(void);
+
+/**
  * @brief   Resets the counters.
  */
 void hal_pmu_reset(void);

@@ -28,7 +28,7 @@
  */
 
 __STACK_SIZE = 0x00001000;
-__HEAP_SIZE  = 0x00006000;
+__HEAP_SIZE  = 0x00007000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
 __OSPI_FLASH_BASE = 0xC0000000;
@@ -61,6 +61,7 @@ SECTIONS
     *mpu_M55*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
+    *tcm_partition.c.obj(.text* .rodata*)
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
@@ -134,7 +135,7 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     __exidx_end = .;
 
-  } > DTCM AT> MRAM 
+  } > DTCM AT> MRAM
 
   /* Place non-zero code/data here if required in SRAM0 */
   .data.sram.at_mram : ALIGN(8)
@@ -185,7 +186,7 @@ SECTIONS
 
   .readonly.at_mram : ALIGN(8)
   {
-    /* Use wildcards to mop up any read-only not directed to TCM */ 
+    /* Use wildcards to mop up any read-only not directed to TCM */
     KEEP(*(.init))
     KEEP(*(.fini))
 

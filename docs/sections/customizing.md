@@ -536,8 +536,8 @@ However, for clarity, here is the full list of available functions:
 
 ## Reading user input from console
 
-The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to 
-expose a function called `hal_get_user_input`. 
+The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to
+expose a function called `hal_get_user_input`.
 
 ```C++
 char ch_input[128];
@@ -672,7 +672,7 @@ Platform build configuration script must have 2 functions:
 The function `set_platform_global_defaults` must set `PLATFORM_DRIVERS_DIR` variable
 
 ```cmake
-    set(PLATFORM_DRIVERS_DIR "${HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
+    set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/mps3" PARENT_SCOPE)
 ```
 
 location of the platform library sources.
@@ -774,9 +774,9 @@ function like this:
 
 ```cmake
     add_linker_script(
-            ${PARSED_TARGET_NAME}                  # Target
-            ${CMAKE_SCRIPTS_DIR}/platforms/mps3    # linker scripts directory path
-            ${LINKER_SCRIPT_NAME})                 # Name of the file without suffix
+            ${PARSED_TARGET_NAME}                                   # Target
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}  # Linker scripts directory path
+            ${LINKER_SCRIPT_NAME})                                  # Name of the file without suffix
 ```
 
 Please see existing platforms sources and build scripts for more details.

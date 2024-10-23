@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,8 @@
 ##############################################################################
 # Helper function to provide user option and corresponding default value
 ##############################################################################
+include_guard()
+
 function(USER_OPTION name description default type)
 
     if (${type} STREQUAL PATH_OR_FILE)
@@ -180,12 +183,11 @@ function(add_platform_build_configuration)
     set(oneValueArgs TARGET_PLATFORM)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
     message(STATUS "Searching for ${PARSED_TARGET_PLATFORM} build configuration")
-    list(APPEND PLATFORM_BUILD_CONFIG_DIRS ${CMAKE_SCRIPTS_DIR}/platforms)
 
     FIND_PATH(PLATFORM_BUILD_CONFIG
             NAMES build_configuration.cmake
             PATH_SUFFIXES ${PARSED_TARGET_PLATFORM}
-            PATHS ${PLATFORM_BUILD_CONFIG_DIRS}
+            PATHS ${MLEK_PLATFORM_BUILD_CONFIG_DIRS}
             )
 
     message(STATUS "Found build configuration: ${PLATFORM_BUILD_CONFIG}")
@@ -196,9 +198,9 @@ function(check_update_public_resources resource_downloaded_dir)
 
     string(JOIN "/" FILE_URL ${resource_downloaded_dir})
     execute_process(
-            COMMAND python3 ${SCRIPTS_DIR}/py/check_update_resources_downloaded.py
+            COMMAND python3 ${MLEK_SCRIPTS_DIR}/py/check_update_resources_downloaded.py
             --resource_downloaded_dir ${resource_downloaded_dir}
-            --setup_script_path ${SCRIPTS_DIR}/../set_up_default_resources.py
+            --setup_script_path ${MLEK_SCRIPTS_DIR}/../set_up_default_resources.py
             RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")

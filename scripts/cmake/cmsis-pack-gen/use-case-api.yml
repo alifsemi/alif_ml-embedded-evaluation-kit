@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@
 # packgen and packchk must be installed. See https://github.com/Open-CMSIS-Pack/devtools
 # on how to build these tools.
 #
-# yaml-language-server: $schema=https://github.com/Open-CMSIS-Pack/devtools/blob/tools/toolbox/1.0.0/tools/packgen/schema/manifest.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/tools/projmgr/2.4.0/tools/packgen/schema/manifest.schema.json
 #
 build:
   - name: "build-dir"
@@ -44,22 +44,20 @@ packs:
     description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/source/application/api/use_case/readme.md"
+    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/"
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.22.8"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.23.2"}
         - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.14.4"}
+        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.15.0"}
         - attributes: {vendor: "ARM", name: "CMSIS-NN", version: "4.0.0"}
 
     releases:
       - version: "23.2.0"
-        date: "2023-03-23"
+        date: "2024-05-21"
         description: "23.02.0 release package"
-      - version: "22.11.0"
-        date: "2022-11-09"
-        description: "22.11.0 release package"
+        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.23.2.0.pack?h=refs/heads/main"
       - version: "22.8.0-Beta"
         date: "2022-09-29"
         description: "Beta release package"
@@ -75,8 +73,8 @@ packs:
         attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Log", Cversion: "1.0.0" }
         description: "Logging header-only utility"
         files:
-          - name: "source/log/include/"
-            attributes: {category: include}
+          - name: "source/log/include/log_macros.h"
+            attributes: {category: header}
 
       - name: arm_math
         target: arm_math

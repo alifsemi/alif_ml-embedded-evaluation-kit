@@ -59,6 +59,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    mpu_M55*.o (+RO)
    Main.o (+RO)
    platform_drivers.o (+RO)
+   *tcm_partition.o (+RO)
    *(InRoot$$Sections)
    *(.init_array)
    *liblvgl.a(+RO)

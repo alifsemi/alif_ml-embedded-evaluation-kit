@@ -161,4 +161,7 @@ not support the feature. Additionally - base addresses of timer adapters blocks 
 | 3         | User memory               | 0x4170_3000/0x5170_3000          | 4KB  |
 
 This is why the evaluation kit is configured with timing adapters disabled altogether (parameter
-`ETHOS_U_NPU_TIMING_ADAPTER_ENABLED` set to `OFF`) for Corstone-310 target platform. 
+`ETHOS_U_NPU_TIMING_ADAPTER_ENABLED` set to `OFF`) for Corstone-310 target platform.
+
+> **NOTE**: Arm® Corstone™-315 reference platforms do not use timing adapters. Therefore, like for
+Arm® Corstone™-310, they are force-disabled in the CMake configuration.
