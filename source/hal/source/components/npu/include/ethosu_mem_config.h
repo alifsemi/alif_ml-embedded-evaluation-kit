@@ -49,7 +49,7 @@
     #define ACTIVATION_BUF_SECTION      section(".bss.NoInit.activation_buf_sram")
     #define ACTIVATION_BUF_SECTION_NAME ("SRAM")
 #elif (ETHOS_U_NPU_MEMORY_MODE==ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM)
-    #define ACTIVATION_BUF_SECTION      section("activation_buf_dram")
+    #define ACTIVATION_BUF_SECTION      section(".bss.NoInit.activation_buf_dram")
     #define CACHE_BUF_SECTION           section(".bss.NoInit.ethos_u_cache")
     #define ACTIVATION_BUF_SECTION_NAME ("DDR/DRAM")
     #define CACHE_BUF_ATTRIBUTE         __attribute__((aligned(ETHOS_U_MEM_BYTE_ALIGNMENT), CACHE_BUF_SECTION))

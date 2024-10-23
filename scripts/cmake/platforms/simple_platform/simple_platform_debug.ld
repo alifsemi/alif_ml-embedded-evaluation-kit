@@ -197,7 +197,7 @@ SECTIONS
     *Labels*.obj (*.rodata*)
     . = ALIGN (16);
     /* activation buffers a.k.a tensor arena when memory mode dedicated sram */
-    *(activation_buf_dram)
+    *(.bss.NoInit.activation_buf_dram)
     . = ALIGN (16);
   } > DDR AT > DDR
 
