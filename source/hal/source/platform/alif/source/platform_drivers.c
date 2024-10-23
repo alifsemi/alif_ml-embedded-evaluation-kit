@@ -43,6 +43,7 @@
 #include "board.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
+#include "ospi_ram.h"
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
@@ -337,12 +338,20 @@ int platform_init(void)
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
-#ifdef OSPI_FLASH_SUPPORT /* OSPI drivers compiled in, check if OSPI flash support is enabled */
+#ifdef OSPI_FLASH_SUPPORT
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
 #endif
+
+#ifdef OSPI_RAM_SUPPORT
+        err = ospi_ram_init();
+        if (err) {
+            printf_err("Failed initializing OSPI RAM. err=%d\n", err);
+        }
+#endif
+
 #if !defined(BALLETTO_DEVICE)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
         HWSEMdrv->Lock();

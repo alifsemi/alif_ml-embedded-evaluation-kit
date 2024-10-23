@@ -109,6 +109,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/drivers/source/pinconf.c
     ${ALIF_CMSIS_PATH}/drivers/source/uart.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi.c
+    ${ALIF_CMSIS_PATH}/drivers/source/ospi_hyperram_xip.c
     ${ALIF_CMSIS_PATH}/components/Source/driver_phy.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c

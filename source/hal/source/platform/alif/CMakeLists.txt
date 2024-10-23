@@ -51,6 +51,8 @@ set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
 set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
 
+set(OSPI_RAM_SUPPORT ON CACHE BOOL "Enables OSPI RAM driver initialization")
+
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
 set(GLCD_UI ON CACHE BOOL "Provide GLCD UI as used by Arm's demos - can be turned off if only using LVGL to save RAM")
@@ -119,6 +121,7 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     $<$<BOOL:${CONSOLE_STM}>:USE_STM>
     $<$<BOOL:${CONSOLE_ITM}>:USE_ITM>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:OSPI_FLASH_SUPPORT>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:OSPI_RAM_SUPPORT>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
     $<$<BOOL:${USE_FAKE_CAMERA}>:USE_FAKE_CAMERA>
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
@@ -143,6 +146,8 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/MX66UM2G.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66um2g.c>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66.c>
     )
 
 ## Directory for additional components required by MPS3:
