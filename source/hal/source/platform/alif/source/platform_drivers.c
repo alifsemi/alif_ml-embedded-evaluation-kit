@@ -593,9 +593,20 @@ bool ethosu_area_needs_invalidate_dcache(const void *p, size_t bytes)
 
 bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 {
+#ifdef OSPI_RAM_SUPPORT
+    if (!p) {
+        return true;
+    }
+    uintptr_t area_start = (uintptr_t) p;
+    uintptr_t area_end = area_start + bytes;
+    if (area_end > BOARD_OSPI_RAM_BASE && area_start < BOARD_OSPI_RAM_BASE + BOARD_OSPI_RAM_SIZE) {
+        return true;
+    }
+#else
     /* We're not using writeback for any Ethos areas */
     UNUSED(p);
     UNUSED(bytes);
+#endif
     return false;
 }
 
