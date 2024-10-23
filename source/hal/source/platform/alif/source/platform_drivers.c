@@ -572,6 +572,15 @@ static bool check_need_to_invalidate(const void *p, size_t bytes)
     return true;
 }
 
+#ifndef BOARD_OSPI_RAM_BASE
+#define BOARD_OSPI_RAM_BASE     0xA0000000
+#define BOARD_OSPI_RAM_SIZE     0x20000000
+#endif
+#ifndef BOARD_OSPI_FLASH_BASE
+#define BOARD_OSPI_FLASH_BASE   0xC0000000
+#define BOARD_OSPI_FLASH_SIZE   0x20000000
+#endif
+
 bool ethosu_area_needs_invalidate_dcache(const void *p, size_t bytes)
 {
     /* API says null pointer can be passed */
@@ -683,14 +692,22 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(SOC_FEAT_MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(SOC_FEAT_MRAM_BASE + SOC_FEAT_MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
     },
-#ifdef OSPI_FLASH_SUPPORT
+#if defined OSPI_FLASH_SUPPORT || defined OSPI_RAM_SUPPORT
     {   /* OSPI Regs - 16MB : RO-0, NP-0, XN-1  */
     .RBAR = ARM_MPU_RBAR(0x83000000, ARM_MPU_SH_NON, 0, 0, 1),
     .RLAR = ARM_MPU_RLAR(0x83FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
-    {   /* OSPI1 XIP(eg:flash) - 512MB */
-    .RBAR = ARM_MPU_RBAR(0xC0000000, ARM_MPU_SH_NON, 1, 1, 0),
-    .RLAR = ARM_MPU_RLAR(0xDFFFFFFF, MEMATTRIDX_NORMAL_NON_CACHEABLE)
+#endif
+#ifdef OSPI_RAM_SUPPORT
+    {   /* OSPI0 XIP(eg:PSRAM) */
+    .RBAR = ARM_MPU_RBAR(BOARD_OSPI_RAM_BASE, ARM_MPU_SH_NON, 0, 1, 0),
+    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_RAM_BASE + BOARD_OSPI_RAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
+    },
+#endif
+#ifdef OSPI_FLASH_SUPPORT
+    {   /* OSPI1 XIP(eg:flash) */
+    .RBAR = ARM_MPU_RBAR(BOARD_OSPI_FLASH_BASE, ARM_MPU_SH_NON, 1, 1, 0),
+    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - 1, MEMATTRIDX_NORMAL_NON_CACHEABLE)
     },
 #endif
     { // System PPB
