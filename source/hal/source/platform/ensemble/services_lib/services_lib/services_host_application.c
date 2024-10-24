@@ -114,6 +114,7 @@ uint32_t SERVICES_get_se_revision(uint32_t services_handle,
 
 /**
  * @brief Write an OSPI decryption key
+ * @param services_handle
  * @param command
  * @param key
  * @param error_code
@@ -121,8 +122,8 @@ uint32_t SERVICES_get_se_revision(uint32_t services_handle,
  */
 uint32_t SERVICES_application_ospi_write_key(uint32_t services_handle,
                                              uint32_t command,
-                                             uint8_t * key,
-                                             uint32_t * error_code)
+                                             uint8_t *key,
+                                             uint32_t *error_code)
 {
   ospi_write_key_svc_t * p_svc = (ospi_write_key_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(ospi_write_key_svc_t));

@@ -2,7 +2,7 @@
  * @file services_lib_api.h
  *
  * @brief Services library public API header file
- * @defgroup host_services Host Services
+ * @defgroup host-services Host Services
  * @par
  *
  * Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
@@ -217,24 +217,24 @@ typedef int (*print_msg_t)(const char *fmt, ...);
  *  @enum SERVICES_cpuid_t
  */
 typedef enum {
-	HOST_CPU_0   = 0,                /**< A32_0 CPU               *//**< HOST_CPU_0 */
-	HOST_CPU_1   = 1,                /**< A32_1 CPU               *//**< HOST_CPU_1 */
-	EXTSYS_0     = 2,                /**< M55 HP CPU or other CPU *//**< EXTSYS_0 */
-	EXTSYS_1     = 3,                /**< M55 HE CPU              *//**< EXTSYS_1 */
+	HOST_CPU_0   = 0,                /*!< A32_0 CPU               HOST_CPU_0 */
+	HOST_CPU_1   = 1,                /*!< A32_1 CPU               HOST_CPU_1 */
+	EXTSYS_0     = 2,                /*!< M55 HP CPU or other CPU EXTSYS_0   */
+	EXTSYS_1     = 3,                /*!< M55 HE CPU              EXTSYS_1   */
 } SERVICES_cpuid_t;
 
 /**
  *  @struct SERVICES_toc_info_t
  */
 typedef struct {
-	uint8_t   image_identifier[TOC_NAME_LENGTH]; /**< TOC name      */
-	uint32_t  version;                  /**< TOC Version      */
-	uint32_t  cpu;                      /**< TOC Cpu ID       */
-	uint32_t  store_address;            /**< TOC MRAM address */
-	uint32_t  load_address;             /**< TOC load         */
-	uint32_t  boot_address;             /**< TOC boot address */
-	uint32_t  image_size;               /**< TOC image size   */
-	uint32_t  flags;                    /**< TOC flag state   */
+	uint8_t   image_identifier[TOC_NAME_LENGTH]; /*!< TOC name      */
+	uint32_t  version;                  /*!< TOC Version      */
+	uint32_t  cpu;                      /*!< TOC Cpu ID       */
+	uint32_t  store_address;            /*!< TOC MRAM address */
+	uint32_t  load_address;             /*!< TOC load         */
+	uint32_t  boot_address;             /*!< TOC boot address */
+	uint32_t  image_size;               /*!< TOC image size   */
+	uint32_t  flags;                    /*!< TOC flag state   */
 } SERVICES_toc_info_t;
 
 /**
@@ -242,34 +242,34 @@ typedef struct {
  * @brief  user facing device details, including internal OTP
  */
 typedef struct {
-	uint32_t revision_id; /**< SoC revision          */
-	uint8_t version[4];   /**< @todo deprecate       */
-	uint8_t ALIF_PN[16];  /**< SoC part number       */
-	uint8_t HBK0[16];     /**< ALIF Key              */
-	uint8_t HBK1[16];     /**< ALIF Key              */
-	uint8_t HBK_FW[20];   /**< ALIF Firmware version */
-	uint8_t config[4];    /**< Wounding data         */
-	uint8_t DCU[16];      /**< DCU settings          */
-	uint8_t MfgData[32];  /**< Manufacturing data    */
-	uint8_t SerialN[8];   /**< SoC Serial number     */
-	uint8_t LCS;          /**< SoC lifecycle state   */
+	uint32_t revision_id; /*!< SoC revision          */
+	uint8_t version[4];   /*!< @todo deprecate       */
+	uint8_t ALIF_PN[16];  /*!< SoC part number       */
+	uint8_t HBK0[16];     /*!< ALIF Key              */
+	uint8_t HBK1[16];     /*!< ALIF Key              */
+	uint8_t HBK_FW[20];   /*!< ALIF Firmware version */
+	uint8_t config[4];    /*!< Wounding data         */
+	uint8_t DCU[16];      /*!< DCU settings          */
+	uint8_t MfgData[32];  /*!< Manufacturing data    */
+	uint8_t SerialN[8];   /*!< SoC Serial number     */
+	uint8_t LCS;          /*!< SoC lifecycle state   */
 } SERVICES_version_data_t;
 
 /**
  * @struct SERVICES_toc_data_t
  */
 typedef struct {
-	uint32_t number_of_toc_entries;     /**< Number of real TOC objects */
+	uint32_t number_of_toc_entries;     /*!< Number of real TOC objects */
 	SERVICES_toc_info_t toc_entry[SERVICES_NUMBER_OF_TOC_ENTRIES]; /* TOC details */
 } SERVICES_toc_data_t;
 
 /**
- * @struct services_power_profile_t
+ * @enum services_power_profile_t
  */
 typedef enum {
-	OFF_PROFILE = 0,               /**< OFF_PROFILE           */
-	RUN_PROFILE,                   /**< HIGH_PERFORMANCE_POWER_PROFILE */
-	NUMBER_OF_POWER_PROFILES       /**< NUMBER_OF_POWER_PROFILES       */
+	OFF_PROFILE = 0,               /*!< OFF_PROFILE                    */
+	RUN_PROFILE,                   /*!< HIGH_PERFORMANCE_POWER_PROFILE */
+	NUMBER_OF_POWER_PROFILES       /*!< NUMBER_OF_POWER_PROFILES       */
 } services_power_profile_t;
 
 /**
@@ -351,6 +351,16 @@ typedef enum {
 	POWER_SETTING_BOR_EN,
 	POWER_SETTING_SCALED_CLK_FREQ
 } power_setting_t;
+
+typedef enum {
+    CLOCK_SETTING_HFOSC_FREQ,
+    CLOCK_SETTING_EXTSYS0_FREQ,
+    CLOCK_SETTING_EXTSYS1_FREQ,
+    CLOCK_SETTING_AXI_FREQ,
+    CLOCK_SETTING_AHB_FREQ,
+    CLOCK_SETTING_APB_FREQ,
+    CLOCK_SETTING_SYSREF_FREQ,
+} clock_setting_t;
 
 /*******************************************************************************
  *  G L O B A L   D E F I N E S
@@ -569,8 +579,11 @@ uint32_t SERVICES_power_wakeup_config(uint32_t services_handle,
 				      uint32_t vbat_wakeup_source,
 				      services_power_profile_t power_profile);
 uint32_t SERVICES_power_memory_req(uint32_t services_handle,
-				   uint32_t memory_request,
-				   uint32_t *error_code);
+                                   uint32_t memory_request,
+                                   uint32_t *error_code);
+uint32_t SERVICES_power_se_sleep_req(uint32_t services_handle,
+                                     uint32_t se_param,
+                                     uint32_t *error_code);
 uint32_t
 SERVICES_power_mem_retention_config(uint32_t services_handle,
 				    uint32_t mem_retention,
@@ -621,8 +634,10 @@ uint32_t SERVICES_clocks_set_ES1_frequency(uint32_t services_handle, clock_frequ
 uint32_t SERVICES_clocks_select_a32_source(uint32_t services_handle, a32_source_t source, uint32_t *error_code);
 uint32_t SERVICES_clocks_select_aclk_source(uint32_t services_handle, aclk_source_t source, uint32_t *error_code);
 uint32_t SERVICES_clocks_set_divider(uint32_t services_handle, clock_divider_t divider, uint32_t value, uint32_t *error_code);
-uint32_t SERVICES_clocks_get_apb_frequency(uint32_t services_handle, uint32_t *frequency, uint32_t *error_code);
-uint32_t SERVICES_clocks_get_refclk_frequency(uint32_t services_handle, uint32_t *frequency, uint32_t *error_code);
+uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,
+                                     clock_setting_t setting_type,
+                                     uint32_t *value,
+                                     uint32_t *error_code);
 
 // PLL services
 uint32_t SERVICES_pll_initialize(uint32_t services_handle, uint32_t *error_code);

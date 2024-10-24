@@ -402,6 +402,32 @@ SERVICES_corstone_standby_mode(uint32_t services_handle,
 }
 
 /**
+ * @brief SE to deep sleep
+ *
+ * @param services_handle
+ * @param se_param
+ * @param error_code
+ * @return
+ */
+uint32_t SERVICES_power_se_sleep_req(uint32_t services_handle,
+                                     uint32_t se_param,
+                                     uint32_t *error_code)
+{
+  uint32_t srv_error_code = 0; /* Service function call return */
+  se_sleep_svc_t *p_svc =
+      (se_sleep_svc_t *)SERVICES_prepare_packet_buffer(sizeof(se_sleep_svc_t));
+
+  p_svc->send_param = se_param;
+
+  srv_error_code = SERVICES_send_request(services_handle,
+                                         SERVICE_POWER_SE_SLEEP_REQ_ID,
+                                         DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code; /* return actual call error */
+
+  return srv_error_code;  /* Return SERVICES error code */
+}
+
+/**
  * @brief Function for DCDC voltage control
  * @param services_handle
  * @param dcdc_vout_sel
