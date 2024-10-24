@@ -46,11 +46,12 @@
  * @brief Services Boot process TOC entry
  * @param services_handle
  * @param image_id
+ * @param error_code
  * @return
  */
 uint32_t SERVICES_boot_process_toc_entry(uint32_t services_handle, 
                                          const uint8_t * image_id,
-                                         uint32_t * error_code)
+                                         uint32_t *error_code)
 {
   process_toc_entry_svc_t * p_svc = (process_toc_entry_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(process_toc_entry_svc_t));
@@ -70,6 +71,7 @@ uint32_t SERVICES_boot_process_toc_entry(uint32_t services_handle,
  * @param services_handle
  * @param cpu_id
  * @param address
+ * @param error_code
  * @return
  */
 uint32_t SERVICES_boot_cpu(uint32_t services_handle, 
@@ -96,12 +98,13 @@ uint32_t SERVICES_boot_cpu(uint32_t services_handle,
  * @param services_handle
  * @param cpu_id
  * @param address   VTOR value
+ * @param error_code
  * @return
  */
 uint32_t SERVICES_boot_set_vtor(uint32_t services_handle,
                                 uint32_t cpu_id,
                                 uint32_t address,
-                                uint32_t * error_code)
+                                uint32_t *error_code)
 {
   boot_cpu_svc_t * p_svc = (boot_cpu_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(boot_cpu_svc_t));
@@ -119,11 +122,12 @@ uint32_t SERVICES_boot_set_vtor(uint32_t services_handle,
  * @brief Services Reset a CPU core
  * @param services_handle
  * @param cpu_id
+ * @param error_code
  * @return
  */
 uint32_t SERVICES_boot_reset_cpu(uint32_t services_handle,
                                  uint32_t cpu_id,
-                                 uint32_t * error_code)
+                                 uint32_t *error_code)
 {
   control_cpu_svc_t * p_svc = (control_cpu_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(control_cpu_svc_t));
@@ -140,11 +144,12 @@ uint32_t SERVICES_boot_reset_cpu(uint32_t services_handle,
  * @brief Services Release a CPU core
  * @param services_handle
  * @param cpu_id
+ * @param error_code
  * @return
  */
 uint32_t SERVICES_boot_release_cpu(uint32_t services_handle,
                                    uint32_t cpu_id,
-                                   uint32_t * error_code)
+                                   uint32_t *error_code)
 {
   control_cpu_svc_t * p_svc = (control_cpu_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(control_cpu_svc_t));

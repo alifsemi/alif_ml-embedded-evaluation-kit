@@ -115,7 +115,7 @@ static bool sender_is_access_ready(uint32_t sender_id)
 
 /**
  * @brief     Interrupt handler for send message
- * @param[in] sender_id    MHU frame ID
+ * @param     sender_id    MHU frame ID
  * @return    None
  */
 void MHU_send_message_irq_handler(uint32_t sender_id)
@@ -195,9 +195,7 @@ mhu_send_status_t MHU_send_message(uint32_t sender_id,
  * @param     sender_id
  * @param     channel_number
  * @param     message_data
- * @return    MHU_SEND_OK              Message was sent successfully
- *            MHU_SEND_RECEIVER_BUSY   Receiver is busy
- *            MHU_SEND_FAILED          Message send failed
+ * @return
  */
 mhu_send_status_t MHU_send_message(uint32_t sender_id,
                                    uint32_t channel_number,

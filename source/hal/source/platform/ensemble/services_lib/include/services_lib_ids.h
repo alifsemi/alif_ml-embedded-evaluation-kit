@@ -91,6 +91,7 @@ enum SERVICE_ID_t {
 	SERVICE_POWER_SET_OFF_REQ_ID,                                       /**< SERVICE_POWER_SET_OFF_REQ_ID               */
 	SERVICE_POWER_SETTING_CONFIG_REQ_ID,                                /**< SERVICE_POWER_SETTING_CONFIG_REQ_ID        */
 	SERVICE_POWER_SETTING_GET_REQ_ID,                                   /**< SERVICE_POWER_SETTING_GET_REQ_ID           */
+	SERVICE_POWER_SE_SLEEP_REQ_ID,                                      /**< SERVICE_POWER_SE_SLEEP_REQ_ID              */
 	SERVICE_POWER_END          = 399,                                   /**< SERVICE_POWER_END                          */
 
   /**
@@ -159,6 +160,7 @@ enum SERVICE_ID_t {
 	SERVICE_PLL_CLKPLL_STOP,
 	SERVICE_PLL_CLKPLL_IS_LOCKED,
 	SERVICE_CLOCK_GET_CLOCKS,
+	SERVICE_CLOCK_SETTING_GET_REQ_ID,
 	SERVICE_CLOCK_END = 799,                                             /**< SERVICE_CLOCK_END                       */
 
   /**

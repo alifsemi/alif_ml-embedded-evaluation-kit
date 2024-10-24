@@ -26,65 +26,6 @@
 #include "services_lib_protocol.h"
 #include "services_lib_ids.h"
 
-/*******************************************************************************
- *  M A C R O   D E F I N E S
- ******************************************************************************/
-
-#define BIT0        0x01
-#define BIT1        0x02
-#define BIT2        0x04
-#define BIT3        0x08
-#define BIT4        0x10
-#define BIT5        0x20
-#define BIT6        0x40
-#define BIT7        0x80
-#define BIT8        0x0100
-#define BIT9        0x0200
-#define BIT10       0x0400
-#define BIT11       0x0800
-#define BIT12       0x1000
-#define BIT13       0x2000
-#define BIT14       0x4000
-#define BIT15       0x8000
-#define BIT16       0x00010000UL
-#define BIT17       0x00020000UL
-#define BIT18       0x00040000UL
-#define BIT19       0x00080000UL
-#define BIT20       0x00100000UL
-#define BIT21       0x00200000UL
-#define BIT22       0x00400000UL
-#define BIT23       0x00800000UL
-#define BIT24       0x01000000UL
-#define BIT25       0x02000000UL
-#define BIT26       0x04000000UL
-#define BIT27       0x08000000UL
-#define BIT28       0x10000000UL
-#define BIT29       0x20000000UL
-#define BIT30       0x40000000UL
-#define BIT31       0x80000000UL
-
-#define FREQ_38_4_MHz  38400000
-#define FREQ_76_8_MHz  76800000
-#define FREQ_100_MHz   100000000
-#define FREQ_400_MHz   400000000
-/*******************************************************************************
- *  T Y P E D E F S
- ******************************************************************************/
-
-/*******************************************************************************
- *  G L O B A L   V A R I A B L E S
- ******************************************************************************/
-
-static uint32_t s_se_scaled_frequency[SCALED_FREQ_NONE] =
-    {76800000, 38400000, 19200000, 9600000, 4800000, 2400000, 1200000, 600000,  // 1/X
-     76800000, 38400000, 19200000, 4800000, 1200000, 600000, 300000, 75000,     // 1/Y
-     38400000, 19200000, 9600000, 4800000, 2400000, 1200000, 600000, 300000,    // 1/Z low
-     38400000, 19200000, 9600000, 2400000, 600000, 300000, 150000, 37500};      // 1/Z high
-
-/*******************************************************************************
- *  C O D E
- ******************************************************************************/
-
 /**
  * @fn   uint32_t SERVICES_clocks_select_osc_source(uint32_t services_handle,
  *                                                  oscillator_source_t source,
@@ -515,151 +456,33 @@ uint32_t SERVICES_pll_clkpll_is_locked(uint32_t services_handle,
 }
 
 /**
- * @fn  uint32_t SERVICES_clocks_get_clocks(uint32_t services_handle,
- *                                          clk_get_clocks_svc_t ** pp_svc,
- *                                          uint32_t * error_code)
- * @brief Get the values of the clocks registers
- * @param services_handle
- * @param pp_svc            Service struct definition
- * @param scaled_clk_freq   Scaled clock frequency
+ * @fn  uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,
+ *                                           clock_setting_t setting_type,
+ *                                           uint32_t *value,
+ *                                           uint32_t * error_code)
+ * @brief                   Get a clock setting from the 'clock_setting_t' enumeration
  * @param error_code        Service error code
  * @return                  Transport layer error code
  */
-uint32_t SERVICES_clocks_get_clocks(uint32_t services_handle,
-                                    clk_get_clocks_svc_t ** pp_svc,
-                                    scaled_clk_freq_t * scaled_clk_freq,
-                                    uint32_t * error_code)
+uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,
+                                     clock_setting_t setting_type,
+                                     uint32_t *value,
+                                     uint32_t *error_code)
 {
-  *pp_svc = (clk_get_clocks_svc_t *)
-      SERVICES_prepare_packet_buffer(sizeof(clk_get_clocks_svc_t));
+  clock_setting_svc_t * p_svc =
+      (clock_setting_svc_t *)
+      SERVICES_prepare_packet_buffer(sizeof(clock_setting_svc_t));
+
+  p_svc->send_setting_type = setting_type;
 
   uint32_t ret = SERVICES_send_request(services_handle,
-      SERVICE_CLOCK_GET_CLOCKS, DEFAULT_TIMEOUT);
+      SERVICE_CLOCK_SETTING_GET_REQ_ID, DEFAULT_TIMEOUT);
 
-  *error_code = (*pp_svc)->resp_error_code;
-  if (ret != SERVICES_REQ_SUCCESS)
+  if (SERVICES_REQ_SUCCESS == ret)
   {
-    return ret;
+    *value = p_svc->value;
   }
 
-  // Get the scaled clock frequency
-  power_setting_svc_t * p_svc =
-      (power_setting_svc_t *)
-      SERVICES_prepare_packet_buffer(sizeof(power_setting_svc_t));
-
-  p_svc->send_setting_type = POWER_SETTING_SCALED_CLK_FREQ;
-  SERVICES_send_request(services_handle,
-      SERVICE_POWER_SETTING_GET_REQ_ID, DEFAULT_TIMEOUT);
-  *scaled_clk_freq = p_svc->value;
-
-  return SERVICES_REQ_SUCCESS;
-}
-
-/**
- * @fn  uint32_t SERVICES_clocks_get_apb_frequency(uint32_t services_handle,
- *                                                 uint32_t * frequency,
- *                                                 uint32_t * error_code)
- * @brief Get the APB clock frequency
- * @param services_handle
- * @param frequency         calculated APB frequency in Hz
- * @param error_code        Service error code
- * @return                  Transport layer error code
- */
-uint32_t SERVICES_clocks_get_apb_frequency(uint32_t services_handle,
-                                           uint32_t * frequency,
-                                           uint32_t * error_code)
-{
-  clk_get_clocks_svc_t * p_clocks;
-  scaled_clk_freq_t scaled_freq;
-  uint32_t ret =
-      SERVICES_clocks_get_clocks(services_handle, &p_clocks, &scaled_freq, error_code);
-
-  if (ret != SERVICES_REQ_SUCCESS)
-  {
-    return ret;
-  }
-
-  *frequency = 0;
-
-  uint32_t osc_freq = (p_clocks->cgu_osc_ctrl & BIT0) > 0 ?
-      FREQ_38_4_MHz : FREQ_76_8_MHz;
-  if (scaled_freq < SCALED_FREQ_NONE)
-  {
-    osc_freq = s_se_scaled_frequency[scaled_freq];
-  }
-
-  uint32_t calc_freq = 0;
-  a32_source_t aclk = p_clocks->aclk_ctrl & (BIT1 | BIT0);
-  if (A32_SYSPLL == aclk)
-  {
-    bool syspll_clk_is_pll = (p_clocks->cgu_pll_sel & BIT4) > 0;
-    calc_freq = syspll_clk_is_pll ? FREQ_400_MHz : osc_freq;
-    uint32_t syspll_clk_divider =
-        p_clocks->hostcpuclk_div1 & (BIT4 | BIT3 | BIT2 | BIT1 | BIT0);
-    syspll_clk_divider += 1;
-    calc_freq /= syspll_clk_divider;
-  }
-  else if (A32_REFCLK == aclk)
-  {
-    uint32_t refclk_freq = (p_clocks->cgu_pll_sel & BIT0) > 0 ?
-        FREQ_100_MHz : osc_freq;
-
-    calc_freq = refclk_freq;
-  }
-
-  uint32_t apb_divider = p_clocks->systop_clk_div & (BIT1 | BIT0);
-  if (0x0 == apb_divider)
-  {
-    apb_divider = 1;
-  }
-  else if (0x1 == apb_divider)
-  {
-    apb_divider = 2;
-  }
-  else  // 0x2, 0x3
-  {
-    apb_divider = 4;
-  }
-  calc_freq /= apb_divider;
-
-  *frequency = calc_freq;
-  return SERVICES_REQ_SUCCESS;
-}
-
-/**
- * @fn  uint32_t SERVICES_clocks_get_refclk_frequency(uint32_t services_handle,
- *                                                    uint32_t * frequency,
- *                                                    uint32_t * error_code)
- * @brief Get the REFCLK frequency
- * @param services_handle
- * @param frequency         calculated REFCLK frequency in Hz
- * @param error_code        Service error code
- * @return                  Transport layer error code
- */
-uint32_t SERVICES_clocks_get_refclk_frequency(uint32_t services_handle,
-                                              uint32_t * frequency,
-                                              uint32_t * error_code)
-{
-  clk_get_clocks_svc_t * p_clocks;
-  scaled_clk_freq_t scaled_freq;
-  uint32_t ret =
-      SERVICES_clocks_get_clocks(services_handle, &p_clocks, &scaled_freq, error_code);
-
-  if (ret != SERVICES_REQ_SUCCESS)
-  {
-    return ret;
-  }
-
-  uint32_t osc_freq = (p_clocks->cgu_osc_ctrl & BIT0) > 0 ?
-      FREQ_38_4_MHz : FREQ_76_8_MHz;
-  if (scaled_freq < SCALED_FREQ_NONE)
-  {
-    osc_freq = s_se_scaled_frequency[scaled_freq];
-  }
-
-  uint32_t refclk_freq = (p_clocks->cgu_pll_sel & BIT0) > 0 ?
-      FREQ_100_MHz : osc_freq;
-
-  *frequency = refclk_freq;
-  return SERVICES_REQ_SUCCESS;
+  *error_code = p_svc->resp_error_code;
+  return ret;
 }

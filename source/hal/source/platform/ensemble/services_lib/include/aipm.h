@@ -143,6 +143,54 @@ typedef enum {
 	SCALED_FREQ_NONE
 } scaled_clk_freq_t;
 
+#ifdef BALLETTO_DEVICE
+/* Memory Blocks */
+typedef enum {
+  MB_SRAM2,
+  MB_SRAM3,
+  MB_SRAM4_1, // M55-HE ITCM RET1 itcm 64kb;
+  MB_SRAM4_2, // M55-HE ITCM RET2 itcm 64kb;
+  MB_SRAM4_3, // M55-HE ITCM RET3 itcm 128kb;
+  MB_SRAM4_4, // M55-HE ITCM RET4 itcm 256kb;
+  MB_SRAM5_1, // M55-HE DTCM RET1 dtcm 64kb
+  MB_SRAM5_2, // M55-HE DTCM RET2 dtcm 64kb
+  MB_SRAM5_3, // M55-HE DTCM RET3 dtcm 128kb
+  MB_SRAM5_4, // M55-HE DTCM RET4 dtcm 256kb
+  MB_SRAM5_5, // M55-HE DTCM RET5 dtcm 1024kb
+  MB_MRAM,
+  MB_OSPI0,
+  MB_OSPI1,
+  MB_SERAM_1,
+  MB_SERAM_2,
+  MB_SERAM_3,
+  MB_SERAM_4,
+  MB_FWRAM,
+  MB_BACKUP4K
+} memory_block_t;
+
+/* Memory block bit mask */
+#define SRAM2_MASK      (1 << MB_SRAM2)          // bit0
+#define SRAM3_MASK      (1 << MB_SRAM3)          // bit1
+#define SRAM4_1_MASK    (1 << MB_SRAM4_1)        // bit2
+#define SRAM4_2_MASK    (1 << MB_SRAM4_2)        // bit3
+#define SRAM4_3_MASK    (1 << MB_SRAM4_2)        // bit4
+#define SRAM4_4_MASK    (1 << MB_SRAM4_2)        // bit5
+#define SRAM5_1_MASK    (1 << MB_SRAM5_1)        // bit6
+#define SRAM5_2_MASK    (1 << MB_SRAM5_2)        // bit7
+#define SRAM5_3_MASK    (1 << MB_SRAM5_1)        // bit8
+#define SRAM5_4_MASK    (1 << MB_SRAM5_2)        // bit9
+#define SRAM5_5_MASK    (1 << MB_SRAM5_1)        // bit10
+#define MRAM_MASK       (1 << MB_MRAM)           // bit11
+#define OSPI0_MASK      (1 << MB_OSPI0)          // bit12
+#define OSPI1_MASK      (1 << MB_OSPI1)          // bit13
+#define SERAM_1_MASK    (1 << MB_SERAM_1)        // bit14
+#define SERAM_2_MASK    (1 << MB_SERAM_2)        // bit15
+#define SERAM_3_MASK    (1 << MB_SERAM_3)        // bit16
+#define SERAM_4_MASK    (1 << MB_SERAM_4)        // bit17
+#define FWRAM_MASK      (1 << MB_FWRAM)          // bit18
+#define BACKUP4K_MASK   (1 << MB_BACKUP4K)       // bit19
+
+#else
 /* Memory Blocks */
 typedef enum {
 	MB_SRAM0 = 0,
@@ -190,6 +238,7 @@ typedef enum {
 #define SERAM_MASK      (1 << MB_SERAM)          // bit18
 #define FWRAM_MASK      (1 << MB_FWRAM)          // bit19
 #define BACKUP4K_MASK   (1 << MB_BACKUP4K)       // bit20
+#endif // #ifdef BALLETTO_DEVICE
 
 /* PD0 Wakeup events */
 #define WE_SERTC    (1 << 4)     // bit4
@@ -213,6 +262,22 @@ typedef enum {
 #define WE_LPGPIO   0XFF0000  // bit23:16
 
 // EWIC
+#ifdef BALLETTO_DEVICE
+#define EWIC_RTC_SE                  (1)         // bit0
+#define EWIC_ES0_WAKEUP              (1 << 1)    // bit1
+#define EWIC_ES0_OSC_EN              (1 << 2)    // bit2
+#define EWIC_ES0_RADIO_EN            (1 << 3)    // bit3
+#define EWIC_RTC_A                   (1 << 4)    // bit4
+#define EWIC_VBAT_TIMER              (0x001E0)   // bit8:5
+#define EWIC_VBAT_GPIO               (0x1FE00)   // bit16:9
+#define EWIC_VBAT_LP_CMP_IRQ         (1 << 17)   // bit17
+#define EWIC_ES1_LP_I2C_IRQ          (1 << 18)   // bit18
+#define EWIC_ES1_LP_UART_IRQ         (1 << 19)   // bit19
+#define EWIC_BROWN_OUT               (1 << 20)   // bit20
+#define EWIC_RTC_B                   (1 << 21)   // bit21
+
+#else
+
 #define EWIC_RTC_SE                  0x1         // bit0
 #define EWIC_RTC_A                   0x40        // bit6
 #define EWIC_VBAT_TIMER              0x780       // bit10:7
@@ -221,6 +286,7 @@ typedef enum {
 #define EWIC_ES1_LP_I2C_IRQ          0x00100000UL// bit20
 #define EWIC_ES1_LP_UART_IRQ         0x00200000UL// bit21
 #define EWIC_BROWN_OUT               0x00400000UL// bit22
+#endif // #ifdef BALLETTO_DEVICE
 
 typedef enum {
   DCDC_VOUT_0800 = 1,
