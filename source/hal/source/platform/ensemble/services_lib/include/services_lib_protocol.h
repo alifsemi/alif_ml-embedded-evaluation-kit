@@ -5,7 +5,7 @@
  *
  * @par
  * @ingroup services
- * Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+ * Copyright (C) 2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -29,76 +29,77 @@ extern "C" {
  *  M A C R O   D E F I N E S
  ******************************************************************************/
 /**
- * Version   JIRA         Description
- * 0.49.0                 Deprecating SERVICES_system_get_toc_via_name
- * 0.49.1                 Updated examples for ALIF Update Package support.
- * 0.48.0                 Switch to external CMSIS source builds
- * 0.0.47                 Add Power setting Get/Configure API
- * 0.0.46                 Adding UPDATE STOC Service and test
- * 0.0.45                 Adding STOP, STANDBY Cycle tests
- *                        Adding SES update Service
- * 0.0.44                 Example test changes
- * 0.0.43                 CMSIS V1.0.0
- * 0.0.42   SE-2176       Reduce the size of the packet buffer in the services
- *                        examples
+ * Version  Description
+ * 0.51.0   Updated contributed power examples
+ * 0.50.0   API for getting HFOSC and EXTSYS0/1 frequency
+ * 0.49.0   Deprecating SERVICES_system_get_toc_via_name
+ * 0.49.1   Updated examples for ALIF Update Package support.
+ * 0.48.0   Switch to external CMSIS source builds
+ * 0.0.47   Add Power setting Get/Configure API
+ * 0.0.46   Adding UPDATE STOC Service and test
+ * 0.0.45   Adding STOP, STANDBY Cycle tests
+ *          Adding SES update Service
+ * 0.0.44   Example test changes
+ * 0.0.43   CMSIS V1.0.0
+ * 0.0.42   Reduce the size of the packet buffer in the services examples
  * 0.0.41
- * 0.0.40   SE-2111       [aiPM] Define the parameter VDD_IOFLEX_3V3 as an enum
- * 0.0.39   SE-2077       SERVICES switch to CMSIS V0.9.4
- * 0.0.38   SE-2047       SERVICES switch to CMSIS V0.9.3
- * 0.0.37   SE-1951       Scalable HFRC and HXTAL frequencies
- * 0.0.36   SE-1961       SERVICES switch to CMSIS V0.9.1
- *          SE-1960       arm clang startup issues
- * 0.0.35   SE-1924       SERVICES build switch to CMake
- *          SE-1923       addition of aiPM Service API - RUN
- * 0.0.34   SE-1887       addition of amPM Service API - OFF
- *          SE-1900       retrieve full revision info
- * 0.0.33                 edits for simulation testing
- * 0.0.32   SE-1822       Add a new service call SERVICES_boot_set_vtor
- *          SE-1857       Use defines to support different power test variations
- * 0.0.31   SE-1813       Warnings fixes
- * 0.0.30   SE-1782       Fix services-he-hp-a32-xip.json HP address
- * 0.0.29   SE-1731       Consistent Error handling
- *          SE-1696       Memory Power On Off
- *          SE-1737       Add boot services and clock tests
- * 0.0.28   SE-1709       Add new warnings and do cleanup
- * 0.0.27   SE-1709       Add new warnings and do cleanup
- * 0.0.26   SE-1608       Retention fine grained control
- *          SE-1676       CMSIS update build options
- *          SE-1616       Add SERVICES_INVALID_ADDRESS error code
- * 0.0.25   SE-777        Clocks apis
- *          SE-1628       Retention APIs
- *          SE-1497       TEST Services initialize polling
- * 0.0.24   SE-1645       GCC build for m55_power
- *          SE-1612       Query TOC by cpu id returns N entries
- * 0.0.23   SE-1585       CMSIS integration
- * 0.0.22   SE-1562       Simplify error code usage at the services transport layer
- * 0.0.21   SE-1548       Added build support for SPARK
- * 0.0.20   SE-1512       Updated ALIF License
- * 0.0.19   SE-1440       Adding CMake build
- * 0.0.18   SE-1463       Stop mode power profile
- * 0.0.17   SE-1443       Fixed unimplemented function warnings in GCC build
- * 0.0.16   SE-<>         Update to RTSS V0.4.1
- * 0.0.15   SE-1423       Added examples installation, fixed build flags
- * 0.0.14   SE-1370       Addition of XIP examples
- * 0.0.13   SE-1272       Examples common directory
- * 0.0.12   SE-1290       get otp data (for real!)
- * 0.0.11   SE-1265       get all toc info
- *          SE-859        get otp data
- * 0.0.10   SE-1246       standardized variables for send/resp
- * 0.0.9    SE-1214       bounds checks for UART prints
- * 0.0.8    SE-1099       Added firmware version id
- * 0.0.7    SE-1165       mbed TLS accelerators
- * 0.0.6    SE-1173       Added enable / disable debug status
- * 0.0.5    SE-1144       Service API error code added
- * 0.0.4    SE-700        Service BOOT reset added
- * 0.0.3    SE-827        RPC Parameter changes
- * 0.0.2    SE-708        First re-factoring
- * 0.0.1                  First implementation
+ * 0.0.40   [aiPM] Define the parameter VDD_IOFLEX_3V3 as an enum
+ * 0.0.39   SERVICES switch to CMSIS V0.9.4
+ * 0.0.38   SERVICES switch to CMSIS V0.9.3
+ * 0.0.37   Scalable HFRC and HXTAL frequencies
+ * 0.0.36   SERVICES switch to CMSIS V0.9.1
+ *          arm clang startup issues
+ * 0.0.35   SERVICES build switch to CMake
+ *          addition of aiPM Service API - RUN
+ * 0.0.34   Addition of amPM Service API - OFF
+ *          retrieve full revision info
+ * 0.0.33   edits for simulation testing
+ * 0.0.32   Add a new service call SERVICES_boot_set_vtor
+ *          Use defines to support different power test variations
+ * 0.0.31   Warnings fixes
+ * 0.0.30   Fix services-he-hp-a32-xip.json HP address
+ * 0.0.29   Consistent Error handling
+ *          Memory Power On Off
+ *          Add boot services and clock tests
+ * 0.0.28   Add new warnings and do cleanup
+ * 0.0.27   Add new warnings and do cleanup
+ * 0.0.26   Retention fine grained control
+ *          CMSIS update build options
+ *          Add SERVICES_INVALID_ADDRESS error code
+ * 0.0.25   Clocks apis
+ *          Retention APIs
+ *          TEST Services initialize polling
+ * 0.0.24   GCC build for m55_power
+ *          Query TOC by cpu id returns N entries
+ * 0.0.23   CMSIS integration
+ * 0.0.22   Simplify error code usage at the services transport layer
+ * 0.0.21   Added build support for SPARK
+ * 0.0.20   Updated ALIF License
+ * 0.0.19   Adding CMake build
+ * 0.0.18   Stop mode power profile
+ * 0.0.17   Fixed unimplemented function warnings in GCC build
+ * 0.0.16   Update to RTSS V0.4.1
+ * 0.0.15   Added examples installation, fixed build flags
+ * 0.0.14   Addition of XIP examples
+ * 0.0.13   Examples common directory
+ * 0.0.12   get otp data (for real!)
+ * 0.0.11   get all toc info
+ *          get otp data
+ * 0.0.10   standardized variables for send/resp
+ * 0.0.9    bounds checks for UART prints
+ * 0.0.8    Added firmware version id
+ * 0.0.7    mbed TLS accelerators
+ * 0.0.6    Added enable / disable debug status
+ * 0.0.5    Service API error code added
+ * 0.0.4    Service BOOT reset added
+ * 0.0.3    RPC Parameter changes
+ * 0.0.2    First re-factoring
+ * 0.0.1    Concept + realization - First implementation
  */
-#define SE_SERVICES_VERSION_STRING                 "0.49.0"
+#define SE_SERVICES_VERSION_STRING                 "0.50.1"
 #define SE_SERVICES_VERSION_MAJOR                  0
-#define SE_SERVICES_VERSION_MINOR                  49
-#define SE_SERVICES_VERSION_PATCH                  0
+#define SE_SERVICES_VERSION_MINOR                  50
+#define SE_SERVICES_VERSION_PATCH                  1
 
 #define IMAGE_NAME_LENGTH                          8
 #define VERSION_RESPONSE_LENGTH                    80
@@ -138,6 +139,14 @@ typedef struct {
 	service_header_t header;
 	volatile int     resp_error_code;
 } generic_svc_t;
+
+// SE Deep Sleeper
+typedef struct
+{
+  service_header_t header;
+  volatile uint32_t  send_param;
+  volatile uint32_t  resp_error_code;
+} se_sleep_svc_t;
 
 // AI PM APIs
 typedef struct {
@@ -833,6 +842,14 @@ typedef struct {
 	volatile uint32_t value;
 	volatile uint32_t resp_error_code;
 } power_setting_svc_t;
+
+// Clock Setting Get API
+typedef struct {
+    service_header_t header;
+    volatile uint32_t send_setting_type;
+    volatile uint32_t value;
+    volatile uint32_t resp_error_code;
+} clock_setting_svc_t;
 
 /*******************************************************************************
  *  G L O B A L   D E F I N E S
