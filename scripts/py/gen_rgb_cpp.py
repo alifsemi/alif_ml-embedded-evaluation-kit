@@ -1,4 +1,5 @@
-#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2024 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,7 @@ from the cpp files.
 """
 import glob
 import math
+import os
 import typing
 from argparse import ArgumentParser
 from dataclasses import dataclass
@@ -41,15 +43,9 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--source_folder_path",
+    "--package_gen_dir",
     type=str,
-    help="path to source folder to be generated."
-)
-
-parser.add_argument(
-    "--header_folder_path",
-    type=str,
-    help="path to header folder to be generated."
+    help="path to directory to be generated."
 )
 
 parser.add_argument(
@@ -102,23 +98,26 @@ def write_hpp_file(
     print(f"++ Generating {header_file_path}")
     hdr = GenUtils.gen_header(env, header_template_file)
 
-    image_size = str(images_params.image_size[0] * images_params.image_size[1] * 3)
+    img_w, img_h = images_params.image_size
+    image_size = str(img_w * img_h * 3)
 
     env \
-        .get_template('Images.hpp.template') \
+        .get_template('sample-data/images/images.h.template') \
         .stream(common_template_header=hdr,
                 imgs_count=images_params.num_images,
                 img_size=image_size,
-                var_names=images_params.image_array_names) \
+                var_names=images_params.image_array_names,
+                img_width=img_w,
+                img_height=img_h) \
         .dump(str(header_file_path))
 
     env \
-        .get_template('Images.cc.template') \
+        .get_template('sample-data/images/images.c.template') \
         .stream(common_template_header=hdr,
                 var_names=images_params.image_array_names,
-                img_names=images_params.image_filenames) \
+                img_names=images_params.image_filenames,
+                header_filename=os.path.basename(header_file_path)) \
         .dump(str(cc_file_path))
-
 
 def resize_crop_image(
         original_image: Image.Image,
@@ -179,7 +178,7 @@ def write_individual_img_cc_file(
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(rgb_data, math.ceil(len(rgb_data) / 20)))
     env \
-        .get_template('image.cc.template') \
+        .get_template('sample-data/images/image.c.template') \
         .stream(common_template_header=hdr,
                 var_name=array_name,
                 img_data=hex_line_generator) \
@@ -214,22 +213,26 @@ def main(args):
 
         image_filenames.append(filename)
 
-        # Save the cc file
-        cc_filename = (Path(args.source_folder_path) /
-                       (Path(filename).stem.replace(" ", "_") + ".cc"))
+        # Save the C file
+        os.makedirs(args.package_gen_dir, exist_ok=True)
+
+        cc_filename = (Path(args.package_gen_dir) /
+                       (Path(filename).stem.replace(" ", "_") + ".c"))
         array_name = "im" + str(image_idx)
         image_array_names.append(array_name)
 
         rgb_data = resize_crop_image(original_image, args.image_size)
-        write_individual_img_cc_file(
-            rgb_data, filename, cc_filename, args.license_template, array_name
-        )
+        write_individual_img_cc_file(rgb_data,
+                                     filename,
+                                     cc_filename,
+                                     args.license_template,
+                                     array_name)
 
         # Increment image index
         image_idx = image_idx + 1
 
-    header_filepath = Path(args.header_folder_path) / "InputFiles.hpp"
-    common_cc_filepath = Path(args.source_folder_path) / "InputFiles.cc"
+    header_filepath = Path(args.package_gen_dir) / "sample_files.h"
+    common_cc_filepath = Path(args.package_gen_dir) / "sample_files.c"
 
     images_params = ImagesParams(image_idx, args.image_size, image_array_names, image_filenames)
 

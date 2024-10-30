@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,13 +62,21 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
     log
     platform_pmu
     stdout
-    lcd_stubs)
+    lcd_stubs
+    hal_camera_static_images
+    hal_audio_static_streams)
 
 # Display status:
 message(STATUS "*******************************************************")

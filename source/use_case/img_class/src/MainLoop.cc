@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 - 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,6 @@
  */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "Classifier.hpp"           /* Classifier. */
-#include "InputFiles.hpp"           /* For input images. */
 #include "Labels.hpp"               /* For label strings. */
 #include "MobileNetModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
@@ -35,7 +35,7 @@ namespace app {
 
 using ImgClassClassifier = arm::app::Classifier;
 
-void main_loop()
+void MainLoop()
 {
     arm::app::MobileNetModel model;  /* Model wrapper object. */
 
@@ -54,7 +54,6 @@ void main_loop()
     arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
 
     ImgClassClassifier classifier;  /* Classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
@@ -64,41 +63,7 @@ void main_loop()
     caseContext.Set<const std::vector <std::string>&>("labels", labels);
 
     /* Loop. */
-    bool executionSuccessful = true;
-    constexpr bool bUseMenu = NUMBER_OF_FILES > 1 ? true : false;
-
-    /* Loop. */
-    do {
-        int menuOption = common::MENU_OPT_RUN_INF_NEXT;
-        if (bUseMenu) {
-            DisplayCommonMenu();
-            menuOption = arm::app::ReadUserInputAsInt();
-            printf("\n");
-        }
-        switch (menuOption) {
-            case common::MENU_OPT_RUN_INF_NEXT:
-                executionSuccessful = ClassifyImageHandler(caseContext, caseContext.Get<uint32_t>("imgIndex"), false);
-                break;
-            case common::MENU_OPT_RUN_INF_CHOSEN: {
-                printf("    Enter the image index [0, %d]: ", NUMBER_OF_FILES-1);
-                fflush(stdout);
-                auto imgIndex = static_cast<uint32_t>(arm::app::ReadUserInputAsInt());
-                executionSuccessful = ClassifyImageHandler(caseContext, imgIndex, false);
-                break;
-            }
-            case common::MENU_OPT_RUN_INF_ALL:
-                executionSuccessful = ClassifyImageHandler(caseContext, caseContext.Get<uint32_t>("imgIndex"), true);
-                break;
-            case common::MENU_OPT_SHOW_MODEL_INFO:
-                executionSuccessful = model.ShowModelInfoHandler();
-                break;
-            case common::MENU_OPT_LIST_IFM:
-                executionSuccessful = ListFilesHandler(caseContext);
-                break;
-            default:
-                printf("Incorrect choice, try again.");
-                break;
-        }
-    } while (executionSuccessful && bUseMenu);
-    info("Main loop terminated.\n");
+    bool executionSuccessful = ClassifyImageHandler(caseContext);
+    info("Main loop terminated %s.\n",
+        executionSuccessful ? "successfully" : "with failure");
 }

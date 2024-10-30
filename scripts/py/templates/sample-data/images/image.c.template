@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,18 +17,9 @@
 #}
 {{common_template_header}}
 
-#ifndef DEFAULT_GENERATED_INPUT_H
-#define DEFAULT_GENERATED_INPUT_H
+#include "BufAttributes.hpp"
+#include <stdint.h>
 
-#include <cstdint>
-
-#define NUMBER_OF_FILES (0U)
-
-/**
- * @brief       Gets the filename for the baked-in input array
- * @param[in]   idx     Index of the input.
- * @return      const C string pointer to the name.
- **/
-const char* GetFilename(const uint32_t idx);
-
-#endif /* DEFAULT_GENERATED_INPUT_H */
+const uint8_t {{var_name}}[] IFM_BUF_ATTRIBUTE = {
+    {{img_data|join(',\n\t')}}
+};

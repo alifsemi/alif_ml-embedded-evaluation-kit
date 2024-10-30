@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +21,6 @@
 #include "AsrResult.hpp"
 #include "AudioUtils.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "OutputDecode.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "Wav2LetterModel.hpp"
@@ -40,7 +40,7 @@ namespace app {
     static bool PresentInferenceResult(const std::vector<asr::AsrResult>& results);
 
     /* ASR inference handler. */
-    bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
+    bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
         auto& model          = ctx.Get<Model&>("model");
         auto& profiler       = ctx.Get<Profiler&>("profiler");
@@ -48,13 +48,6 @@ namespace app {
         auto mfccFrameStride = ctx.Get<uint32_t>("frameStride");
         auto scoreThreshold  = ctx.Get<float>("scoreThreshold");
         auto inputCtxLen     = ctx.Get<uint32_t>("ctxLen");
-        /* If the request has a valid size, set the audio index. */
-        if (clipIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, clipIndex, "clipIndex")) {
-                return false;
-            }
-        }
-        auto initialClipIdx                    = ctx.Get<uint32_t>("clipIndex");
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
@@ -97,20 +90,24 @@ namespace app {
                                                     Wav2LetterModel::ms_blankTokenIdx,
                                                     Wav2LetterModel::ms_outputRowsIdx);
 
+        hal_audio_init();
+        if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
+                                 HAL_AUDIO_FORMAT_16KHZ_MONO_16BIT)) {
+            printf_err("Failed to configure audio\n");
+            return false;
+        }
+
         /* Loop to process audio clips. */
-        do {
+        while (true) {
             hal_lcd_clear(COLOR_BLACK);
 
-            /* Get current audio clip index. */
-            auto currentIndex = ctx.Get<uint32_t>("clipIndex");
-
             /* Get the current audio buffer and respective size. */
-            const int16_t* audioArr     = GetAudioArray(currentIndex);
-            const uint32_t audioArrSize = GetAudioArraySize(currentIndex);
-
-            if (!audioArr) {
-                printf_err("Invalid audio array pointer.\n");
-                return false;
+            uint32_t audioArrSize = 0;
+            hal_audio_start();
+            auto audioArr = hal_audio_get_captured_frame(&audioArrSize);
+            if (!audioArrSize || !audioArr) {
+                debug("End of stream\n");
+                break;
             }
 
             /* Audio clip needs enough samples to produce at least 1 MFCC feature. */
@@ -131,10 +128,6 @@ namespace app {
             std::string str_inf{"Running inference... "};
             hal_lcd_display_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-
-            info("Running inference on audio clip %" PRIu32 " => %s\n",
-                 currentIndex,
-                 GetFilename(currentIndex));
 
             size_t inferenceWindowLen = audioDataWindowLen;
 
@@ -196,10 +189,7 @@ namespace app {
             }
 
             profiler.PrintProfilingResult();
-
-            IncrementAppCtxIfmIdx(ctx, "clipIndex");
-
-        } while (runAll && ctx.Get<uint32_t>("clipIndex") != initialClipIdx);
+        }
 
         return true;
     }

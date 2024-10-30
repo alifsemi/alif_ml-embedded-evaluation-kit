@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +140,7 @@ generate_labels_code(
 )
 
 # Generate audio .cc files:
-generate_audio_code(${${use_case}_FILE_PATH} ${SRC_GEN_DIR} ${INC_GEN_DIR}
+generate_audio_code(${${use_case}_FILE_PATH} ${SAMPLES_GEN_DIR}
         ${${use_case}_AUDIO_RATE}
         ${${use_case}_AUDIO_MONO}
         ${${use_case}_AUDIO_OFFSET}

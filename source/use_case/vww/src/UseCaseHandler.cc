@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022  Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,6 @@
 #include "UseCaseHandler.hpp"
 #include "Classifier.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "VisualWakeWordModel.hpp"
 #include "VisualWakeWordProcessing.hpp"
@@ -28,17 +28,10 @@ namespace arm {
 namespace app {
 
     /* Visual Wake Word inference handler. */
-    bool ClassifyImageHandler(ApplicationContext& ctx, uint32_t imgIndex, bool runAll)
+    bool ClassifyImageHandler(ApplicationContext& ctx)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
         auto& model    = ctx.Get<Model&>("model");
-        /* If the request has a valid size, set the image index. */
-        if (imgIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, imgIndex, "imgIndex")) {
-                return false;
-            }
-        }
-        auto initialImgIdx = ctx.Get<uint32_t>("imgIndex");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
         constexpr uint32_t dataPsnImgStartX          = 10;
@@ -84,19 +77,26 @@ namespace app {
                                       ctx.Get<Classifier&>("classifier"),
                                       ctx.Get<std::vector<std::string>&>("labels"),
                                       results);
+        hal_camera_init();
+        auto bCamera = hal_camera_configure(nCols,
+            nRows,
+            HAL_CAMERA_MODE_SINGLE_FRAME,
+            HAL_CAMERA_COLOUR_FORMAT_RGB888);
+        if (!bCamera) {
+            printf_err("Failed to configure camera.\n");
+            return false;
+        }
 
-        do {
+        while (true) {
             hal_lcd_clear(COLOR_BLACK);
+            hal_camera_start();
 
             /* Strings for presentation/logging. */
             std::string str_inf{"Running inference... "};
-
-            const uint8_t* imgSrc = GetImgArray(ctx.Get<uint32_t>("imgIndex"));
-            if (nullptr == imgSrc) {
-                printf_err("Failed to get image index %" PRIu32 " (max: %u)\n",
-                           ctx.Get<uint32_t>("imgIndex"),
-                           NUMBER_OF_FILES - 1);
-                return false;
+            uint32_t capturedFrameSize = 0;
+            const uint8_t* imgSrc = hal_camera_get_captured_frame(&capturedFrameSize);
+            if (!imgSrc || !capturedFrameSize) {
+                break;
             }
 
             /* Display this image on the LCD. */
@@ -112,13 +112,8 @@ namespace app {
             hal_lcd_display_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
-            /* Run inference over this image. */
-            info("Running inference on image %" PRIu32 " => %s\n",
-                 ctx.Get<uint32_t>("imgIndex"),
-                 GetFilename(ctx.Get<uint32_t>("imgIndex")));
-
             const size_t imgSz =
-                inputTensor->bytes < IMAGE_DATA_SIZE ? inputTensor->bytes : IMAGE_DATA_SIZE;
+                inputTensor->bytes < capturedFrameSize ? inputTensor->bytes : capturedFrameSize;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
@@ -151,13 +146,9 @@ namespace app {
             if (!PresentInferenceResult(results)) {
                 return false;
             }
-
             profiler.PrintProfilingResult();
 
-            IncrementAppCtxIfmIdx(ctx, "imgIndex");
-
-        } while (runAll && ctx.Get<uint32_t>("imgIndex") != initialImgIdx);
-
+        }
         return true;
     }
 

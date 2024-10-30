@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +26,9 @@ namespace app {
     /**
      * @brief       Handles the inference event.
      * @param[in]   ctx        Pointer to the application context.
-     * @param[in]   imgIndex   Index to the image to run object detection.
-     * @param[in]   runAll     Flag to request classification of all the available images.
      * @return      true or false based on execution success.
      **/
-    bool ObjectDetectionHandler(ApplicationContext& ctx, uint32_t imgIndex, bool runAll);
+    bool ObjectDetectionHandler(ApplicationContext& ctx);
 
 } /* namespace app */
 } /* namespace arm */

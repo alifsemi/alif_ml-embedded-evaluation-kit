@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,18 +17,26 @@
 #}
 {{common_template_header}}
 
-#include "{{include_h}}"
-#include "BufAttributes.hpp"
-#include <cstdint>
+#ifndef {{filename}}_HPP
+#define {{filename}}_HPP
+
+#include <string>
+#include <vector>
 
 {% for namespace in namespaces %}
 namespace {{namespace}} {
 {% endfor %}
 
-const {{data_type}} {{var_name}} [{{size}}] IFM_BUF_ATTRIBUTE = {
-    {{fm_data|join(',\n\t')}}
-};
+/**
+ * @brief       Gets the label vector corresponding to the model
+ * @param[out]  labels   Vector of strings.
+ * @return      true if successful, false otherwise.
+ */
+extern bool GetLabelsVector(std::vector<std::string>& labels);
+
 
 {% for namespace in namespaces %}
 } /* namespace {{namespace}} */
 {% endfor %}
+
+#endif /* {{filename}}_HPP */

@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,26 +17,39 @@
 #}
 {{common_template_header}}
 
-#ifndef {{filename}}_HPP
-#define {{filename}}_HPP
+#include "BufAttributes.hpp"
 
-#include <string>
 #include <vector>
+#include <string>
 
 {% for namespace in namespaces %}
 namespace {{namespace}} {
 {% endfor %}
 
-/**
- * @brief       Gets the label vector corresponding to the model
- * @param[out]  labels   Vector of strings.
- * @return      true if successful, false otherwise.
- */
-extern bool GetLabelsVector(std::vector<std::string>& labels);
+static const char * labelsVec[] LABELS_ATTRIBUTE = {
+{% for label in labels %}
+    "{{label}}",
+{% endfor %}
+};
 
+bool GetLabelsVector(std::vector<std::string>& labels)
+{
+    constexpr size_t labelsSz = {{labelsSize}};
+    labels.clear();
+
+    if (!labelsSz) {
+        return false;
+    }
+
+    labels.reserve(labelsSz);
+
+    for (size_t i = 0; i < labelsSz; ++i) {
+        labels.emplace_back(labelsVec[i]);
+    }
+
+    return true;
+}
 
 {% for namespace in namespaces %}
-} /* namespace {{namespace}} */
+} /* namespace {{name_space}} */
 {% endfor %}
-
-#endif /* {{filename}}_HPP */

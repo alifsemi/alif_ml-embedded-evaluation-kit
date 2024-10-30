@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022  Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,103 +17,53 @@
  */
 #include "UseCaseCommonUtils.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "log_macros.h"
 
 #include <cinttypes>
 
-void DisplayCommonMenu()
-{
-    printf("\n\n");
-    printf("User input required\n");
-    printf("Enter option number from:\n\n");
-    printf("  %u. Classify next ifm\n", common::MENU_OPT_RUN_INF_NEXT);
-    printf("  %u. Classify ifm at chosen index\n", common::MENU_OPT_RUN_INF_CHOSEN);
-    printf("  %u. Run classification on all ifm\n", common::MENU_OPT_RUN_INF_ALL);
-    printf("  %u. Show NN model info\n", common::MENU_OPT_SHOW_MODEL_INFO);
-    printf("  %u. List ifm\n\n", common::MENU_OPT_LIST_IFM);
-    printf("  Choice: ");
-    fflush(stdout);
-}
-
-bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results)
-{
-    constexpr uint32_t dataPsnTxtStartX1 = 150;
-    constexpr uint32_t dataPsnTxtStartY1 = 30;
-
-    constexpr uint32_t dataPsnTxtStartX2 = 10;
-    constexpr uint32_t dataPsnTxtStartY2 = 150;
-
-    constexpr uint32_t dataPsnTxtYIncr = 16; /* Row index increment. */
-
-    hal_lcd_set_text_color(COLOR_GREEN);
-
-    /* Display each result. */
-    uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
-    uint32_t rowIdx2 = dataPsnTxtStartY2;
-
-    info("Final results:\n");
-    info("Total number of inferences: 1\n");
-
-    for (uint32_t i = 0; i < results.size(); ++i) {
-        std::string resultStr = std::to_string(i + 1) + ") " +
-                                std::to_string(results[i].m_labelIdx) + " (" +
-                                std::to_string(results[i].m_normalisedVal) + ")";
-
-        hal_lcd_display_text(
-            resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
-        rowIdx1 += dataPsnTxtYIncr;
-
-        resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
-        hal_lcd_display_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
-        rowIdx2 += dataPsnTxtYIncr;
-
-        info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n",
-             i,
-             results[i].m_labelIdx,
-             results[i].m_normalisedVal,
-             results[i].m_label.c_str());
-    }
-
-    return true;
-}
-
-void IncrementAppCtxIfmIdx(arm::app::ApplicationContext& ctx, const std::string& useCase)
-{
-#if NUMBER_OF_FILES > 0
-    auto curImIdx = ctx.Get<uint32_t>(useCase);
-
-    if (curImIdx + 1 >= NUMBER_OF_FILES) {
-        ctx.Set<uint32_t>(useCase, 0);
-        return;
-    }
-    ++curImIdx;
-    ctx.Set<uint32_t>(useCase, curImIdx);
-#else  /* NUMBER_OF_FILES > 0 */
-    UNUSED(ctx);
-    UNUSED(useCase);
-#endif /* NUMBER_OF_FILES > 0 */
-}
-
-bool SetAppCtxIfmIdx(arm::app::ApplicationContext& ctx, uint32_t idx, const std::string& ctxIfmName)
-{
-#if NUMBER_OF_FILES > 0
-    if (idx >= NUMBER_OF_FILES) {
-        printf_err("Invalid idx %" PRIu32 " (expected less than %u)\n", idx, NUMBER_OF_FILES);
-        return false;
-    }
-    ctx.Set<uint32_t>(ctxIfmName, idx);
-    return true;
-#else  /* NUMBER_OF_FILES > 0 */
-    UNUSED(ctx);
-    UNUSED(idx);
-    UNUSED(ctxIfmName);
-    return false;
-#endif /* NUMBER_OF_FILES > 0 */
-}
-
 namespace arm {
 namespace app {
+    bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results)
+    {
+        constexpr uint32_t dataPsnTxtStartX1 = 150;
+        constexpr uint32_t dataPsnTxtStartY1 = 30;
+
+        constexpr uint32_t dataPsnTxtStartX2 = 10;
+        constexpr uint32_t dataPsnTxtStartY2 = 150;
+
+        constexpr uint32_t dataPsnTxtYIncr = 16; /* Row index increment. */
+
+        hal_lcd_set_text_color(COLOR_GREEN);
+
+        /* Display each result. */
+        uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
+        uint32_t rowIdx2 = dataPsnTxtStartY2;
+
+        info("Final results:\n");
+        info("Total number of inferences: 1\n");
+
+        for (uint32_t i = 0; i < results.size(); ++i) {
+            std::string resultStr = std::to_string(i + 1) + ") " +
+                                    std::to_string(results[i].m_labelIdx) + " (" +
+                                    std::to_string(results[i].m_normalisedVal) + ")";
+
+            hal_lcd_display_text(
+                resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
+            rowIdx1 += dataPsnTxtYIncr;
+
+            resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
+            hal_lcd_display_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
+            rowIdx2 += dataPsnTxtYIncr;
+
+            info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n",
+                 i,
+                 results[i].m_labelIdx,
+                 results[i].m_normalisedVal,
+                 results[i].m_label.c_str());
+        }
+
+        return true;
+    }
 
     bool RunInference(arm::app::Model& model, Profiler& profiler)
     {
@@ -163,44 +114,5 @@ namespace app {
 
         DumpTensorData(tensorData, tensorSz, lineBreakForNumElements);
     }
-
-    bool ListFilesHandler(ApplicationContext& ctx)
-    {
-        auto& model = ctx.Get<Model&>("model");
-
-        constexpr uint32_t dataPsnTxtStartX = 20;
-        constexpr uint32_t dataPsnTxtStartY = 40;
-
-        if (!model.IsInited()) {
-            printf_err("Model is not initialised! Terminating processing.\n");
-            return false;
-        }
-
-        /* Clear the LCD */
-        hal_lcd_clear(COLOR_BLACK);
-
-        /* Show the total number of embedded files. */
-        std::string strNumFiles =
-            std::string{"Total Number of Files: "} + std::to_string(NUMBER_OF_FILES);
-        hal_lcd_display_text(
-            strNumFiles.c_str(), strNumFiles.size(), dataPsnTxtStartX, dataPsnTxtStartY, false);
-
-#if NUMBER_OF_FILES > 0
-        constexpr uint32_t dataPsnTxtYIncr = 16;
-        info("List of Files:\n");
-        uint32_t yVal = dataPsnTxtStartY + dataPsnTxtYIncr;
-        for (uint32_t i = 0; i < NUMBER_OF_FILES; ++i, yVal += dataPsnTxtYIncr) {
-
-            std::string currentFilename{GetFilename(i)};
-            hal_lcd_display_text(
-                currentFilename.c_str(), currentFilename.size(), dataPsnTxtStartX, yVal, false);
-
-            info("\t%" PRIu32 " => %s\n", i, currentFilename.c_str());
-        }
-#endif /* NUMBER_OF_FILES > 0 */
-
-        return true;
-    }
-
 } /* namespace app */
 } /* namespace arm */

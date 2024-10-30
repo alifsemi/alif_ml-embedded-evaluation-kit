@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,10 +27,9 @@ namespace app {
     /**
      * @brief       Handles the inference event for noise reduction.
      * @param[in]   ctx         pointer to the application context
-     * @param[in]   runAll      flag to request classification of all the available audio clips
      * @return      True or false based on execution success
      **/
-    bool NoiseReductionHandler(ApplicationContext& ctx, bool runAll);
+    bool NoiseReductionHandler(ApplicationContext& ctx);
 
     /**
      * @brief           Dumps the output tensors to a memory address.

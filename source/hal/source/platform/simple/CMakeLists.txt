@@ -77,6 +77,12 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)
@@ -91,6 +97,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         log
         platform_pmu
         lcd_stubs
+        hal_camera_static_images
+        hal_audio_static_streams
         $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)
 
 # Set the CPU profiling definition

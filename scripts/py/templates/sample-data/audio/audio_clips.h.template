@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,16 @@
 #ifndef GENERATED_AUDIOCLIPS_H
 #define GENERATED_AUDIOCLIPS_H
 
-#include <cstdint>
+#if defined(__cplusplus)
+extern "C" {
+#endif /* defined(__cplusplus) */
+
+#include <stdint.h>
 #include <stddef.h>
 
-#define NUMBER_OF_FILES ({{clips_count}}U)
+#define NUMBER_OF_FILES     ({{clips_count}}U)  /**< Total number of files data is available for */
+#define AUDIO_NUM_CHANNELS  ({{n_channels}}U)   /**< Mono or stereo audio - applies to all files */
+#define AUDIO_SAMPLING_RATE ({{sampling_rate}}U)/**< Sampling frequency */
 
 {% for var_name, size in varname_size %}
 extern const int16_t {{var_name}}[{{size}}];
@@ -33,20 +40,43 @@ extern const int16_t {{var_name}}[{{size}}];
  * @param[in]   idx     Index of the input.
  * @return      const C string pointer to the name.
  **/
-const char* GetFilename(const uint32_t idx);
+const char* get_sample_data_filename(const uint32_t idx);
 
 /**
  * @brief       Gets the pointer to audio data.
  * @param[in]   idx     Index of the input.
  * @return      Pointer to 16-bit signed integer data.
  **/
-const int16_t* GetAudioArray(const uint32_t idx);
+const int16_t* get_sample_data_ptr(const uint32_t idx);
 
 /**
  * @brief       Gets the size of the input array.
  * @param[in]   idx     Index of the input.
  * @return      Size of the input array in bytes.
  **/
-uint32_t GetAudioArraySize(const uint32_t idx);
+uint32_t get_sample_data_size(const uint32_t idx);
+
+/**
+ * @brief       Gets the total number of samples available.
+ * @return      Number of samples.
+ **/
+uint32_t get_sample_n_elements(void);
+
+/**
+ * @brief       Gets the audio sampling frequency used to generate
+ *              all the files.
+ * @return      Sampling frequency as an integer.
+ */
+uint32_t get_sample_sampling_frequency(void);
+
+/**
+ * @brief       Gets the number of audio channels for every file.
+ * @return      Number of channels as an integer.
+ */
+uint32_t get_sample_audio_num_channels(void);
+
+#if defined(__cplusplus)
+}
+#endif /* defined(__cplusplus) */
 
 #endif /* GENERATED_AUDIOCLIPS_H */
