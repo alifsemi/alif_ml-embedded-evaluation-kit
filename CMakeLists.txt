@@ -25,8 +25,8 @@ endif()
 message(STATUS "Build type is set to ${CMAKE_BUILD_TYPE}")
 
 # Set language standards.
-set(CMAKE_C_STANDARD   99)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD   11)
+set(CMAKE_CXX_STANDARD 17)
 
 # Make the standard a requirement => prevent fallback to previous
 # supported standard
