@@ -400,7 +400,7 @@ For further information, please see:
   - [NPU configuration mismatch error when running inference](./sections/troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./sections/troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==4.0.0](./sections/troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+  - [No matching distribution found for Vela](./sections/troubleshooting.md#no-matching-distribution-found-for-vela)
     - [How to update Python3 package to 3.10 version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./sections/troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
   - [Internal Compiler Error](./sections/troubleshooting.md#internal-compiler-error)
