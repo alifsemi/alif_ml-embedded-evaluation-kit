@@ -6,27 +6,22 @@
       - [Arm® Corstone™-320 FVP](./deployment.md#arm_corstone_320-fvp)
     - [Deploying on an FVP](./deployment.md#deploying-on-an-fvp)
     - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
+    - [Virtual Streaming Interface](./deployment.md#virtual-streaming-interface)
+      - [VSI requirements](./deployment.md#vsi-requirements)
+      - [Deployment with VSI](./deployment.md#deployment-with-virtual-streaming-interface)
   - [MPS3 FPGA board](./deployment.md#mps3-fpga-board)
     - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
     - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
 
-The sample application for Arm® Ethos™-U55 can be deployed on two target platforms:
+The sample applications can be deployed on two primary target platforms:
 
 - A physical Arm MPS3 FPGA prototyping board
-- An MPS3 FVP
-
-Both implement the Arm® Corstone™-300 design. For further information, please refer to:
-[Arm Corstone-300](https://www.arm.com/products/iot/soc/corstone-300)
+- An MPS3 or MPS4 based FVP
 
 ## Fixed Virtual Platform
 
 The FVP is available publicly from the following page:
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
-
-Please ensure that you download the correct archive from the list under Arm® Corstone™-300. You need the one which:
-
-- Emulates MPS3 board and *not* for MPS2 FPGA board,
-- Contains support for Arm® Ethos™-U55 and Ethos™-U65 processors.
 
 ### Installing an FVP
 
@@ -237,6 +232,57 @@ telnet localhost 5000
 > ```commandline
 > ${FVP_315_U65} -a <path/to/ethos-u-<use_case>.axf> ${FVP_315_ARGS}
 > ```
+
+### Virtual Streaming Interface
+
+[Virtual Streaming Interface](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi.html) is available
+on certain FVPs and allows streaming data from the host machine into the application running on the FVP.
+
+#### VSI Requirements
+
+For details and up-to-date requirements, see
+[Python environment setup](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi__pyenv.html)
+which mentions:
+
+> The following packages are required on Linux systems (Ubuntu 20.04 and later):
+>   - libatomic1
+>   - python3.9
+>   - python3-pip
+
+In addition to the above, the VSI Python scripts depend on `opencv-python` package. We recommend using
+a virtual environment and installing this with pip.
+
+```shell
+$ pip install opencv-python "numpy<2.0.0"
+```
+
+**NOTE**: The requirement for Python version is driven by the FVP executable. Versions <= 11.26 require
+Python3.9 but this may change for future releases.
+
+
+#### Deployment with Virtual Streaming Interface
+
+If the applications have been configured with `-DFVP_VSI_ENABLED=ON`, FVP deployment needs an additional
+parameter to point to the Python scripts it should use.
+
+To run the VSI enabled application, append the command line with the `v_path` argument. For example:
+
+- Arm® MPS3 based FVPs (Arm® Corstone™-300 and Arm® Corstone™-310):
+
+```shell
+  $ FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
+    <other-arguments> \
+    -C mps3_board.v_path=dependencies/avh/interface/video/python
+  ```
+
+- Arm® MPS4 based FVPs (Arm® Corstone™-315 and Arm® Corstone™-320):
+
+```shell
+  $ <path_to_installed_FVP> \
+    FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
+    <other-arguments>
+    -C mps4_board.v_path=dependencies/avh/interface/video/python
+```
 
 ## MPS3 FPGA board
 

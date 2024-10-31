@@ -75,8 +75,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     platform_pmu
     stdout
     lcd_stubs
-    hal_camera_static_images
-    hal_audio_static_streams)
+    hal_audio_static_streams
+    hal_camera_static_images)
 
 # Display status:
 message(STATUS "*******************************************************")

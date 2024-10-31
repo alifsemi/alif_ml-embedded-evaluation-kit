@@ -97,9 +97,9 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         log
         platform_pmu
         lcd_stubs
-        hal_camera_static_images
         hal_audio_static_streams
-        $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)
+        hal_camera_static_images
+        $<IF:$<BOOL:${STDOUT_RETARGET}>,stdout_retarget_pl011,stdout>)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)

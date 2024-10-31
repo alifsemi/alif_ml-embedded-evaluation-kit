@@ -287,11 +287,20 @@ The build parameters are:
 - `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input sample file. This is useful for
    quicker functional testing especially for CI tests. Disabled by default.
 
-- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications on the Corstone-300 FVP. Tests will
+- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications targeted to run on the FVP. Tests will
   be generated for all use-cases. It is recommended to set `USE_SINGLE_INPUT` to `ON` when using this option.
 
 - `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
 `BUILD_FVP_TESTS` option is switched `ON`.
+
+- `FVP_VSI_ENABLED`: Configures the build for applications to use
+  [Virtual Streaming Interface](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi.html) (VSI)
+  available for FVP targets. Read more about VSI requirements [here](./deployment.md#vsi-requirements) and about
+  deployment [here](./deployment.md#deployment-with-virtual-streaming-interface). Note that enabling this option will
+  conflict with `BUILD_FVP_TESTS`.
+
+- `FVP_VSI_SRC_PATH`: If `FVP_VSI_ENABLED` is `ON`, this cache variable defaults to the git submodule for AVH
+   repository. This directory is expected to provide the VSI driver sources and Python scripts.
 
 - `RESOURCES_PATH`: The path to the resources downloaded by the set_up_default_resources.py script
   and compiled using Vela.  This can be set if this script was run using the `--downloads-dir` flag to

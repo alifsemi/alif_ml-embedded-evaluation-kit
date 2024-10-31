@@ -22,3 +22,6 @@
 [submodule "dependencies/cortex-dfp"]
 	path = dependencies/cortex-dfp
 	url = https://github.com/ARM-software/Cortex_DFP.git
+[submodule "dependencies/avh"]
+	path = dependencies/avh
+	url = https://github.com/ARM-software/AVH/

@@ -69,6 +69,11 @@ bool hal_camera_configure(const uint32_t width,
         return false;
     }
 
+    if (HAL_CAMERA_MODE_CONTINUOUS == mode) {
+        printf_err("Only single shot mode is supported\n");
+        return false;
+    }
+
     dev.frame_width = width;
     dev.frame_height = height;
     dev.mode = mode;
@@ -117,12 +122,11 @@ const uint8_t* hal_camera_get_captured_frame(uint32_t* size)
     static uint32_t idx = 0;
     const uint8_t* buffer = NULL;
     *size = 0;
-    if (dev.status == HAL_CAMERA_STATUS_RUNNING) {
+    if (hal_camera_get_status() == HAL_CAMERA_STATUS_STOPPED) {
         if (idx >= get_sample_n_elements()) {
 #if defined(HAL_CAMERA_LOOP)
             idx = 0;
 #else
-            dev.status = HAL_CAMERA_STATUS_STOPPED;
             return buffer;
 #endif /* HAL_CAMERA_LOOP */
         }
@@ -130,9 +134,6 @@ const uint8_t* hal_camera_get_captured_frame(uint32_t* size)
         info("Using sample image: %s\n", get_sample_data_filename(idx));
         buffer = get_sample_data_ptr(idx);
         *size = dev.bytes_per_frame;
-        if (dev.mode == HAL_CAMERA_MODE_SINGLE_FRAME) {
-            dev.status = HAL_CAMERA_STATUS_STOPPED;
-        }
         ++idx;
     }
     return buffer;
@@ -148,6 +149,11 @@ bool hal_camera_stop(void)
 
 hal_cam_status hal_camera_get_status(void)
 {
+    /* Reading the status simulates a device finishing
+     * frame capture. */
+    if (dev.status == HAL_CAMERA_STATUS_RUNNING) {
+        hal_camera_stop();
+    }
     return dev.status;
 }
 

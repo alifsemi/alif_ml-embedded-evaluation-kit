@@ -33,7 +33,7 @@ static uint32_t init_ta(uintptr_t base_addr,
     }
 
     ta_set_all(&ta, ta_s);
-    info("Configured TA_%s\t@0x%" PRIx32 "\n", name, base_addr);
+    info("Configured TA_%s\t@0x%" PRIx32 "\n", name, (uint32_t)base_addr);
     return 0;
 }
 
