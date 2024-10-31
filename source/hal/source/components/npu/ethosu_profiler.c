@@ -201,9 +201,13 @@ ethosu_pmu_counters ethosu_get_pmu_counters(void)
     return *counters;
 }
 
+extern void platform_ethosu_inference_begin(void);
+extern void platform_ethosu_inference_end(void);
+
 void ethosu_inference_begin(struct ethosu_driver* drv, void* userArg)
 {
     UNUSED(userArg);
+    platform_ethosu_inference_begin();
     ETHOSU_PMU_CNTR_Disable(drv, get_event_mask());
     ETHOSU_PMU_CNTR_Enable(drv, get_event_mask());
 }
@@ -212,4 +216,5 @@ void ethosu_inference_end(struct ethosu_driver* drv, void* userArg)
 {
     UNUSED(userArg);
     ETHOSU_PMU_CNTR_Disable(drv, get_event_mask());
+    platform_ethosu_inference_end();
 }

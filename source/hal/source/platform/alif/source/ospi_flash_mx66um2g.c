@@ -60,11 +60,33 @@ static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(2);
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
+extern int32_t MX66UM2G_set_linear(void);
+extern int32_t MX66UM2G_set_wrap32(void);
+
+int32_t ospi_flash_set_linear(void)
+{
+    int32_t status = MX66UM2G_set_linear();
+    if (status != ARM_DRIVER_OK) {
+        printf("Error setting flash linear\n");
+    }
+    return status;
+}
+
+int32_t ospi_flash_set_wrap32(void)
+{
+    int32_t status = MX66UM2G_set_wrap32();
+    if (status != ARM_DRIVER_OK) {
+        printf("Error setting flash wrap32\n");
+    }
+    return status;
+}
+
 static void ospi_flash_enable_xip(void)
 {
     // so far this is for the OSPI0 only.
     OSPI_Type *ospi = (OSPI_Type *) OSPI0_BASE;
     AES_Type *aes = (AES_Type *)AES0_BASE;
+    ospi_flash_set_wrap32();
     ospi_disable(ospi);
 
     uint32_t val = (1 << SPI_CTRLR0_SSI_IS_MST)

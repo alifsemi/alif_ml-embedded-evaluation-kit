@@ -49,6 +49,17 @@ static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(1);
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
+int32_t ospi_flash_set_linear(void)
+{
+    return ARM_DRIVER_OK;
+}
+
+int32_t ospi_flash_set_wrap32(void)
+{
+    // TO DO - flash device does support this
+    return ARM_DRIVER_ERROR_UNSUPPORTED;
+}
+
 static void ospi_flash_enable_xip()
 {
 #ifdef BALLETTO_DEVICE

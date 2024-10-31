@@ -90,6 +90,9 @@ off_profile_t default_offprof;
 
 static void MHU_msg_received(void* data);
 
+static void set_flash_to_linear_and_disable_caching(void);
+static void set_flash_to_wrap_and_enable_caching(void);
+
 // IPC callback
 static void ipc_rx_callback(void *data)
 {
@@ -367,6 +370,8 @@ int platform_init(void)
     tracelib_init(NULL);
     fault_dump_enable(true);
 
+    set_flash_to_wrap_and_enable_caching();
+
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
     info("%s: complete\n", __FUNCTION__);
 
@@ -618,6 +623,7 @@ void MPU_Load_Regions(void)
 #define MEMATTRIDX_DEVICE_nGnRE              1
 #define MEMATTRIDX_NORMAL_WB_RA_WA           2
 #define MEMATTRIDX_NORMAL_NON_CACHEABLE      3
+#define MEMATTRIDX_FLASH_SWITCHABLE          4
 #define MEMATTRIDX_DEVICE_nGnRnE             7
 
 #if defined(BALLETTO_DEVICE)
@@ -718,7 +724,7 @@ void MPU_Load_Regions(void)
 #ifdef OSPI_FLASH_SUPPORT
     {   /* OSPI1 XIP(eg:flash) */
     .RBAR = ARM_MPU_RBAR(BOARD_OSPI_FLASH_BASE, ARM_MPU_SH_NON, 1, 1, 0),
-    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - 1, MEMATTRIDX_NORMAL_NON_CACHEABLE)
+    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - 1, MEMATTRIDX_FLASH_SWITCHABLE)
     },
 #endif
     { // System PPB
@@ -752,10 +758,60 @@ void MPU_Load_Regions(void)
                                          ARM_MPU_ATTR_NON_CACHEABLE));
 
 
+#ifdef OSPI_FLASH_SUPPORT
+    /* Mem Attribute for 4th index - flash initially non cacheable (assuming traditional linear burst setup) */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                         ARM_MPU_ATTR_NON_CACHEABLE,
+                                         ARM_MPU_ATTR_NON_CACHEABLE));
+#endif
+
     ARM_MPU_SetMemAttr(MEMATTRIDX_DEVICE_nGnRnE, ARM_MPU_ATTR(   /* Attr7, Device Memory nGnRnE*/
                                          ARM_MPU_ATTR_DEVICE,
                                          ARM_MPU_ATTR_DEVICE_nGnRnE));
 
     /* Load the regions from the table */
     ARM_MPU_Load(0, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
+}
+
+static void set_flash_to_linear_and_disable_caching(void)
+{
+#ifdef OSPI_FLASH_SUPPORT
+    /* We assume flash can't mix wrap and linear accesses - true for IS25 and MX66 */
+    /* Flash is set up initially for 32-byte wrap to suit the M55 cache fills; switch to linear for Ethos now */
+    /* While set like this, M55 musn't generate cache fills, so mark non-cacheable */
+    /* No need for any cache maintenance - can retain any already loaded flash in the cache */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                         ARM_MPU_ATTR_NON_CACHEABLE,
+                                         ARM_MPU_ATTR_NON_CACHEABLE));
+    __DSB();
+    __ISB();
+
+    ospi_flash_set_linear();
+#endif
+}
+
+static void set_flash_to_wrap_and_enable_caching(void)
+{
+#ifdef OSPI_FLASH_SUPPORT
+    /* Ethos has finished, so we can set flash back to wrap mode, and then re-enable cache loading- if flash supports this switching */
+    if (ospi_flash_set_wrap32() == ARM_DRIVER_OK) {
+
+        ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                             /* NT=0, WB=0, RA=1, WA=0 */
+                                             ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                                             ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+        __DSB();
+        __ISB();
+    }
+#endif
+}
+
+void platform_ethosu_inference_begin(void)
+{
+    set_flash_to_linear_and_disable_caching();
+}
+
+void platform_ethosu_inference_end(void)
+{
+    set_flash_to_wrap_and_enable_caching();
 }

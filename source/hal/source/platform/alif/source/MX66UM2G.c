@@ -82,6 +82,7 @@
 #define CMD_WRCR2                                               (0x728DU) // write configuration register 2
 #define CMD_RDID                                                (0x9F60U) // read identification
 #define CMD_RDSCUR                                              (0x2BD4U) // read security register
+#define CMD_SBL                                                 (0xC03FU) // set burst length
 
 #define IO_MODE_ADDRESS                                         0x00000000U
 #define IO_MODE_STR_OPI                                         (0x01U)
@@ -96,6 +97,11 @@
 #define DUMMY_CYCLE_8                                           (0x06U)
 #define DUMMY_CYCLE_6                                           (0x07U)
 #define DUMMY_CYCLE(N)                                          ((20-(N))/2)
+
+#define BURST_LINEAR                                            0x10
+#define BURST_WRAP16                                            0x01
+#define BURST_WRAP32                                            0x02
+#define BURST_WRAP64                                            0x03
 
 #define DEFAULT_WAIT_CYCLES                                     6
 
@@ -300,6 +306,34 @@ static int32_t ReadStatusReg(uint8_t *value)
 static int32_t ReadSecurityReg(uint8_t *value)
 {
     return ReadReg(CMD_RDSCUR, 0, value);
+}
+
+static int32_t set_burst_length(uint8_t sbl)
+{
+    uint32_t cmd[3];
+    int32_t status;
+
+    /* Prepare buffer with command and address to set burst length */
+    cmd[0] = CMD_SBL;
+    cmd[1] = 0;
+    cmd[2] = (sbl << 8) | sbl;
+
+    status = ptrOSPI->Control(ARM_OSPI_SET_ADDR_LENGTH_WAIT_CYCLE | control_flags, (ARM_OSPI_ADDR_LENGTH_32_BITS << ARM_OSPI_ADDR_LENGTH_POS) | (0 << ARM_OSPI_WAIT_CYCLE_POS));
+    if (status != ARM_DRIVER_OK)
+    {
+        return ARM_DRIVER_ERROR;
+    }
+
+    status = ptrOSPI->Send(cmd, 3);
+
+    if (status != ARM_DRIVER_OK)
+    {
+        return ARM_DRIVER_ERROR;
+    }
+
+    status = wait_for_completion();
+
+    return status;
 }
 
 static int32_t AwaitResult(ARM_FLASH_STATUS *flash_status, uint8_t err_flags)
@@ -1205,3 +1239,13 @@ ARM_DRIVER_FLASH ARM_Driver_Flash_(DRIVER_FLASH_NUM) = {
     GetStatus,
     GetInfo
 };
+
+int32_t MX66UM2G_set_linear(void)
+{
+    return set_burst_length(BURST_LINEAR);
+}
+
+int32_t MX66UM2G_set_wrap32(void)
+{
+    return set_burst_length(BURST_WRAP32);
+}
