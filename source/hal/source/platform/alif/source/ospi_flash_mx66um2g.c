@@ -154,7 +154,7 @@ static int32_t ospi_flash_toggle_reset(void)
     return ret;
 }
 
-#define FLASH_BUF_SIZE (32*1024)
+#define FLASH_BUF_SIZE (128*1024)
 static int32_t program_from_semihosting(const char *filename)
 {
     int32_t ret;
