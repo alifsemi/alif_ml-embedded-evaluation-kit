@@ -116,7 +116,7 @@ uint64_t Get_SysTick_Cycle_Count(void)
     uint32_t reload = SysTick->LOAD;
 
     /* Each completed tick is LOAD cycles, and add the cycles from the countdown */
-    return ticks1 * (reload + 1) + (reload - systick_val);
+    return (uint64_t) ticks1 * (reload + 1) + (reload - systick_val);
 }
 
 void platform_init_counters(void)
