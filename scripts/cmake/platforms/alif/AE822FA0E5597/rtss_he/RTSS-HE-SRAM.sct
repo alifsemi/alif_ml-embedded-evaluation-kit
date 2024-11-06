@@ -81,7 +81,7 @@ LR_SRAM0 __RO_BASE __RO_SIZE  {                       ; load region size_region
 
   RW_SRAM1 SRAM1_BASE SRAM1_SIZE  {  ; 2.5MB ----------------------------
 
-      ; activation buffers a.k.a tensor arena when memory mode dedicated sram
+      ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
   }
 
