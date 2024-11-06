@@ -60,6 +60,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *sau_tcm_ns_setup*.o (+RO)
    Main.o (+RO)
    platform_drivers.o (+RO)
+   fault_handler.o (+RO)
    *(InRoot$$Sections)
    *(.init_array)
    *liblvgl.a(+RO)

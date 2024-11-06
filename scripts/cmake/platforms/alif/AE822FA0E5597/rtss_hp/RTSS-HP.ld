@@ -65,6 +65,7 @@ SECTIONS
     *sau_tcm_ns_setup*(.text* .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
+    *fault_handler.c.obj(.text* .rodata*)
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
