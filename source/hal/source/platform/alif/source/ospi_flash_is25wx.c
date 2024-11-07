@@ -29,13 +29,12 @@
 
 #ifdef BOARD_HAS_IS25WX_FLASH
 
-#define OSPI_RESET_PORT     LP
-
-#ifdef BALLETTO_DEVICE
-#define OSPI_RESET_PIN      1
-#else
-#define OSPI_RESET_PIN      7
+#ifndef BOARD_OSPI_FLASH_RESET_GPIO_PORT
+#error X
 #endif
+
+#define OSPI_RESET_PORT     BOARD_OSPI_FLASH_RESET_GPIO_PORT
+#define OSPI_RESET_PIN      BOARD_OSPI_FLASH_RESET_PIN_NO
 
 /* NOTE: According to IS25WX256 flash device datasheet fast read wait cycles
          can be set to 9 at 100MHz bus clock.
