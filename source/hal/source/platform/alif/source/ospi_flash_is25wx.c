@@ -12,6 +12,7 @@
  *        from flash device. Defaults to E7 devkit gen2 pinconfig and flash device
  ******************************************************************************/
 
+#include <string.h>
 #include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
@@ -28,6 +29,10 @@
 #include "log_macros.h"
 
 #ifdef BOARD_HAS_IS25WX_FLASH
+
+#define IMMEDIATE_XIP
+//#define SEMIHOSTING_WRITE "ER_OSPI_FLASH"
+//#define DO_FLASH_WRITE
 
 #ifndef BOARD_OSPI_FLASH_RESET_GPIO_PORT
 #error X
@@ -61,7 +66,7 @@ int32_t ospi_flash_set_wrap32(void)
 
 static void ospi_flash_enable_xip()
 {
-#ifdef BALLETTO_DEVICE
+#if BOARD_FLASH_OSPI_INSTANCE == 0
     OSPI_Type *ospi = (OSPI_Type *) OSPI0_BASE;
     AES_Type *aes = (AES_Type *)AES0_BASE;
 #else
@@ -71,12 +76,12 @@ static void ospi_flash_enable_xip()
     ospi_disable(ospi);
 
     uint32_t val = (1 << 31)
-        |(SPI_FRAME_FORMAT_OCTAL << 22)
-        |(0 << 9)
-        |(0 << SPI_CTRLR0_INST_L_OFFSET)
-        |(0 << 14)
-        |(SPI_TMOD_RX << 10)
-        |(SPI_CTRLR0_DFS_16bit << SPI_CTRLR0_TRANS_TYPE_OFFSET);
+        |(SPI_FRAME_FORMAT_OCTAL << SPI_CTRLR0_SPI_FRF)
+        | SPI_CTRLR0_SCPOL_LOW
+        | SPI_CTRLR0_SCPH_LOW
+        |(0 << SPI_CTRLR0_SSTE)
+        |(SPI_TMOD_RX << SPI_CTRLR0_TMOD)
+        |(SPI_CTRLR0_DFS_16bit << SPI_CTRLR0_DFS);
 
     ospi->OSPI_CTRLR0 = val;
 
@@ -106,7 +111,7 @@ static void ospi_flash_enable_xip()
     ospi->OSPI_XIP_INCR_INST = 0xFD;
     ospi->OSPI_XIP_WRAP_INST = 0xFD;
 #if SOC_FEAT_OSPI_HAS_XIP_SER // OSPI_XIP_SER not available on Spark and Eagle
-    ospi->OSPI_XIP_SER = 1;
+    ospi->OSPI_XIP_SER = 1 << BOARD_FLASH_OSPI_SS;
 #endif
     ospi->OSPI_XIP_CNT_TIME_OUT = 255;
 
@@ -158,32 +163,74 @@ int32_t ospi_flash_init()
         return ret;
     }
 
-    ret = ptrDrvFlash->EraseSector(0);
-    if (ret != ARM_DRIVER_OK) {
-        printf_err("Ext flash program failed\n");
-        return ret;
-    }
+#ifdef IMMEDIATE_XIP
+    ospi_flash_enable_xip();
+#endif
+    return ret;
+}
 
-    uint16_t wdata[512];
-    uint8_t * const data = (uint8_t *) wdata;
-    for (size_t i = 0; i < sizeof wdata; i++) {
-        data[i] = (i << (i / 256)) | (i >> (8-i/256));
-    }
+const uint8_t *do_flash_write(const uint8_t *ptr, size_t len)
+{
+#ifdef DO_FLASH_WRITE
+    ARM_FLASH_INFO *info = ptrDrvFlash->GetInfo();
+    int32_t ret;
 
-    ret = ptrDrvFlash->ProgramData(0, wdata, sizeof wdata / 2);
-    if (ret != sizeof wdata / 2) {
-        printf_err("Ext flash program failed\n");
-        //return ARM_DRIVER_ERROR;
+    SCB_InvalidateDCache_by_Addr((volatile void *) BOARD_OSPI_FLASH_BASE, len);
+    for (uint32_t offset = 0x00000000; offset < 0x00000000 + len; offset += info->sector_size) {
+        printf("\rErasing %" PRIX32, BOARD_OSPI_FLASH_BASE + offset);
+        fflush(stdout); // GCC/newlib seems to be fully buffered...
+        ret = ptrDrvFlash->EraseSector(offset);
+        if (ret != ARM_DRIVER_OK) {
+            printf_err("Ext flash erase failed\n");
+            return ptr;
+        }
     }
+    putchar('\n');
     ARM_FLASH_STATUS flash_status = ptrDrvFlash->GetStatus();
     if (flash_status.error) {
-        printf("Flash error status (expected)\n");
+        printf_err("Flash error status\n");
+        return ptr;
     }
 
-    printf("IS25WX flash apparently okay\n");
+    printf("Programming\n");
+    ret = ptrDrvFlash->ProgramData(0, ptr, (len + 1) / 2);
+    if (ret != (len + 1) / 2) {
+         printf_err("Ext flash program failed\n");
+         ospi_flash_enable_xip();
+         return ptr;
+    }
 
+    flash_status = ptrDrvFlash->GetStatus();
+    if (flash_status.error) {
+        printf_err("Flash error status\n");
+        ospi_flash_enable_xip();
+        return ptr;
+    }
+#endif
+
+#ifndef IMMEDIATE_XIP
+    printf("Going for XIP\n");
     ospi_flash_enable_xip();
-    return ret;
+#endif
+    printf("Verifying flash\n");
+    SCB_InvalidateDCache_by_Addr((volatile void *) BOARD_OSPI_FLASH_BASE, len);
+    const uint8_t *flash_ptr = (const uint8_t *) BOARD_OSPI_FLASH_BASE;
+//#ifndef DO_FLASH_WRITE
+    if (memcmp(flash_ptr, ptr, len)) {
+        printf_err("Verify fail\n");
+        for (size_t i = 0; i < len; i += 2) {
+            if (flash_ptr[i] != ptr[i+1] || flash_ptr[i+1] != ptr[i]) {
+                printf("Swap verify fail at %d\n", i);
+                return ptr;
+            }
+        }
+        //return ptr;
+    } else {
+        printf("Flash model verified\n");
+    }
+//#endif
+    return flash_ptr;
+   // return ptr;
 }
 
 #endif // BOARD_HAS_IS25WX_FLASH
