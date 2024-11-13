@@ -584,6 +584,30 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 ```
 
 
+## Running a use-case with ML model data in external flash
+
+- For example use-cases asr and kws_asr have model which does not fit to Ensemble device MRAM. On Ensemble DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
+- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for kws and kws_asr
+  - You can enable it also for alif_object_detection use-case by setting `-Dalif_object_detection_MODEL_IN_EXT_FLASH=ON`
+  - For other use-case examples you need to add the following to `usecase.cmake`
+  ```
+  USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
+      OFF
+      BOOL)
+  ```
+  - When the flag is enabled the definition MODEL_SECTION is changed from nn_model to nn_model_ext_flash and the model data is then linked to OSPI flash start address (0xC0000000)
+  - After building, in addition to normal ELF file, you will find a separate binary for MRAM and external flash
+  ```
+  ls -lh bin/sectors/asr/
+   14M marras 12 10:10 ext_flash.bin
+  1,1M marras 12 10:10 mram.bin
+  ```
+  - In principle, a JTAG debugger can load both the MRAM and external flash using the ELF (For example Segger J-Link with Ozone), but developer may want to update the model separately and use SE Toolkit for programming the MRAM part.
+  - There are multiple ways for programming the external flash alone from the ext_flash.bin
+    - [J-Link with J-Flash](docs/programming_flash_jlink.md)
+    - [Using SD card approach with DevKit](https://github.com/alifsemi/alif_sd-to-ospi-flasher)
+    - [Using USB serial connection and XMODEM](https://github.com/alifsemi/alif_usb-to-ospi-flasher)
+
 ## Further information
 
 Beyond the demo build described above, many other use cases and options of the upstream Arm ML Embedded Evaluation kit should work on Alif hardware.<br>
