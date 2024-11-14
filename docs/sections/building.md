@@ -222,8 +222,9 @@ The build parameters are:
   - `Dedicated_Sram` (default for *Ethos-U65* and *Ethos-U85* NPU)
   - `Sram_Only`
 
-  > **Note:** The `Shared_Sram` memory mode is available on *Ethos-U55*, *Ethos-U65* and *Ethos-U85* NPU,
-  > `Dedicated_Sram` only for *Ethos-U65* and *Ethos-U85* NPU and `Sram_Only` only for *Ethos-U55* NPU.
+  > **Note:** The `Sram_Only` and `Shared_Sram` memory modes are available on
+  > *Ethos-U55*, *Ethos-U65* and *Ethos-U85* NPU,
+  > and `Dedicated_Sram` only for *Ethos-U65* and *Ethos-U85* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
   For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model

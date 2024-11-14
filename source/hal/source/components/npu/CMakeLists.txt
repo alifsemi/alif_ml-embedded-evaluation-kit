@@ -64,11 +64,7 @@ if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
 endif()
 
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-    if (ETHOS_U_NPU_ID STREQUAL U55)
-        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
-    endif ()
+    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
     # Shared Sram can be used for Ethos-U55 and Ethos-U65
     set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
