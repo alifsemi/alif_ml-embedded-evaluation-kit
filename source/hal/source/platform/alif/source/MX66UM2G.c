@@ -975,7 +975,14 @@ static int32_t ARM_Flash_ProgramData (uint32_t addr, const void *data, uint32_t 
         {
             if (!error_reported) {
                 printf("verify error at %" PRIX32 "\n", addr);
-                error_reported = true;
+                char * p = (char *) (cmd + 2), *q = (char *) (data_ptr + iter - data_cnt);
+                for (int i = 0; i < data_cnt * 2; i++) {
+                    if (p[i] != q[i]) {
+                        printf("to be precise, at %" PRIX32 "\n", addr + i);
+                        break;
+                    }
+                }
+                //error_reported = true;
             }
             FlashStatus.error = 1U;
             break;
