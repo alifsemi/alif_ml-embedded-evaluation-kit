@@ -608,6 +608,14 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
     - [Using SD card approach with DevKit](https://github.com/alifsemi/alif_sd-to-ospi-flasher)
     - [Using USB serial connection and XMODEM](https://github.com/alifsemi/alif_usb-to-ospi-flasher)
 
+
+## Deploying a model outside of ML Embedded Evaluation Kit
+
+The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
+The inference_runner use-case can be used for basic benchmarks.
+- [Deploying your own model](docs/deploying_model.md)
+
+
 ## Further information
 
 Beyond the demo build described above, many other use cases and options of the upstream Arm ML Embedded Evaluation kit should work on Alif hardware.<br>
