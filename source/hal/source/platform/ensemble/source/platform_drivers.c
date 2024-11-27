@@ -125,14 +125,22 @@ static uint32_t set_power_profiles()
     // Use case can easily change these for more suitable settings extern default_runprof/default_offprof and change only
     // the needed values and call set_power_run_profile/set_power_off_profile
     default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK | PD_DBSS_MASK;
-    default_runprof.dcdc_mode       = DCDC_MODE_PWM;
+#ifdef BALLETTO_DEVICE // Balletto support only PFM: https://alifsemi.atlassian.net/browse/SE-2708
+        default_runprof.dcdc_mode     = DCDC_MODE_PFM_FORCED;
+        // No following memories on E1C/B1: SRAM0_MASK | SRAM1_MASK | SRAM6A_MASK | SRAM6B_MASK | SRAM7_1_MASK | SRAM7_2_MASK | SRAM7_3_MASK | SRAM8_MASK | SRAM9_MASK
+        default_runprof.memory_blocks = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+        default_runprof.phy_pwr_gating  = LDO_PHY_MASK;
+        default_runprof.ip_clock_gating = LP_PERIPH_MASK | NPU_HE_MASK;
+#else
+        default_runprof.dcdc_mode     = DCDC_MODE_PWM;
+        default_runprof.memory_blocks = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+        default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
+        default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
+#endif
     default_runprof.dcdc_voltage    = DCDC_VOUT_0825;
     default_runprof.aon_clk_src     = CLK_SRC_LFXO;
     default_runprof.run_clk_src     = CLK_SRC_PLL;
     default_runprof.scaled_clk_freq = SCALED_FREQ_XO_HIGH_DIV_38_4_MHZ;
-    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
-    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
-    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
 #ifdef OSPI_FLASH_SUPPORT
     default_runprof.ip_clock_gating |= OSPI_1_MASK;
 #endif
@@ -148,20 +156,29 @@ static uint32_t set_power_profiles()
         // No power domains on off profile -> device can go to chip STOP mode which is the most least power consumption state
         default_offprof.power_domains   = 0;
         default_offprof.dcdc_voltage    = DCDC_VOUT_0825;
+#ifdef BALLETTO_DEVICE // Balletto support only PFM: https://alifsemi.atlassian.net/browse/SE-2708
+        default_offprof.dcdc_mode       = DCDC_MODE_PFM_FORCED;
+        default_offprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK;
+#else
         default_offprof.dcdc_mode       = DCDC_MODE_PWM;
+        default_offprof.memory_blocks   = SERAM_MASK;
+#endif
         default_offprof.aon_clk_src     = CLK_SRC_LFXO;
         default_offprof.stby_clk_src    = CLK_SRC_HFRC;
         default_offprof.stby_clk_freq   = SCALED_FREQ_RC_STDBY_38_4_MHZ;
-        // default_offprof.sysref_clk_src = /* SoC Reference Clock shared with all subsystems */
-        default_offprof.memory_blocks   = SERAM_MASK;
         default_offprof.ip_clock_gating = 0;
         default_offprof.phy_pwr_gating  = 0;
         default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
         default_offprof.wakeup_events   = WE_LPGPIO;
         default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
 #ifdef M55_HE
+#ifdef BALLETTO_DEVICE
+        default_offprof.vtor_address    = 0x80000000;
+        default_offprof.vtor_address_ns = 0x80000000;
+#else
         default_offprof.vtor_address    = 0x80480000;
         default_offprof.vtor_address_ns = 0x80480000;
+#endif // BALLETTO_DEVICE
 #elif M55_HP
         default_offprof.vtor_address    = 0x80008000;
         default_offprof.vtor_address_ns = 0x80008000;
@@ -212,6 +229,8 @@ uint32_t enable_peripheral_clocks(void)
 
 int platform_init(void)
 {
+    int err = 0;
+
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
@@ -242,6 +261,7 @@ int platform_init(void)
     SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
 
     se_err = (int)set_power_profiles();
+#endif // SE_SERVICES_SUPPORT
 
 #if !defined(SOC_VARIANT_E1C)
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);

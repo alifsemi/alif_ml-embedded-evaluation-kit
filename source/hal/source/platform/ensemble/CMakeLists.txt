@@ -81,6 +81,7 @@ endif()
 
 if (TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
     set(SYSTEM_CORE_CLOCK    "160000000"     CACHE STRING "System peripheral clock (Hz)")
+    set(OSPI_FLASH_SUPPORT OFF CACHE BOOL "" FORCE)
 endif()
 
 set(DYNAMIC_MODEL_BASE   "0x90000000"   CACHE STRING "Region to be used for dynamic load of model into memory")
@@ -148,7 +149,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/tracelib.c
     source/retarget_ensemble.c
     source/delay.c
-    source/ospi_flash.c
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash.c>
     )
 
 ## Directory for additional components required by MPS3:

@@ -2,7 +2,7 @@
     "HE_alif_kws": {
         "binary": "ethos-u-alif_kws.bin",
         "version" : "1.0.0",
-        "mramAddress": "0x80480000",
+        "mramAddress": "0x80000000",
         "cpu_id": "M55_HE",
         "flags": ["boot"],
         "signed": false

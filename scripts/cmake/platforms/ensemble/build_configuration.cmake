@@ -31,11 +31,16 @@
 function(set_platform_global_defaults)
     message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
     message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION})")
-    message(STATUS "Alif SoC part number: ${ALIF_SOC_PART_NUMBER}")
 
-    USER_OPTION(ALIF_SOC_PART_NUMBER "Specify Alif SoC part number"
-        AE722F80F55D5XX
-        STRING)
+    if(TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
+        USER_OPTION(ALIF_SOC_PART_NUMBER "Specify Alif SoC part number"
+            AE1C1F4051920PH
+            STRING)
+    else()
+        USER_OPTION(ALIF_SOC_PART_NUMBER "Specify Alif SoC part number"
+            AE722F80F55D5XX
+            STRING)
+    endif()
 
     USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: RTSS-HP, RTSS-HE or none"
         RTSS-HE
@@ -69,7 +74,7 @@ function(set_platform_global_defaults)
     include(lvgl_opts)
 
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard" "DevKit_E1C")
 
     set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "B")

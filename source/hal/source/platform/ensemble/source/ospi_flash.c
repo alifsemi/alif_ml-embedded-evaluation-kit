@@ -25,8 +25,15 @@
 
 #include "log_macros.h"
 
+#ifndef M55_HE_E1C
+#define FLASH_INSTANCE 1
 #define OSPI_RESET_PORT     LP
 #define OSPI_RESET_PIN      7
+#else
+#define FLASH_INSTANCE 1
+#define OSPI_RESET_PORT     15
+#define OSPI_RESET_PIN      1
+#endif
 
 /* NOTE: According to IS25WX256 flash device datasheet fast read wait cycles
          can be set to 9 at 100MHz bus clock.
@@ -34,8 +41,8 @@
          See RTE_Device.h */
 #define FLASH_DEVICE_FAST_READ_WAIT_CYCLES (RTE_ISSI_FLASH_WAIT_CYCLES)
 
-extern ARM_DRIVER_FLASH ARM_Driver_Flash_(1);
-static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(1);
+extern ARM_DRIVER_FLASH ARM_Driver_Flash_(FLASH_INSTANCE);
+static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(FLASH_INSTANCE);
 
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
@@ -43,8 +50,8 @@ static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static void ospi_flash_enable_xip()
 {
     // so far this is for the OSPI1 only.
-    OSPI_Type *ospi = (OSPI_Type *) OSPI1_BASE;
-    AES_Type *aes = (AES_Type *)AES1_BASE;
+    OSPI_Type *ospi = (OSPI_Type *) OSPI0_BASE;
+    AES_Type *aes = (AES_Type *)AES0_BASE;
     ospi_disable(ospi);
 
     uint32_t val = (1 << 31)
@@ -90,7 +97,6 @@ static void ospi_flash_enable_xip()
 
     aes->AES_CONTROL |= AES_CONTROL_XIP_EN;
 }
-
 
 static int32_t ospi_flash_toggle_reset(void)
 {

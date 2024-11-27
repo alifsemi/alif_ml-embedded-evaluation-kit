@@ -61,7 +61,6 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
 if (TARGET_REVISION STREQUAL "B")
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_${ENSEMBLE_CORE}.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/mpu_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_M55.c
     ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
@@ -89,6 +88,12 @@ target_sources(${CMSIS_DEVICE_TARGET}
     $<$<STREQUAL:${ENSEMBLE_CAMERA_MODULE},ARX3A0>:${ENSEMBLE_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
     )
 
+if ("${ENSEMBLE_CORE}" STREQUAL "M55_HE" OR "${ENSEMBLE_CORE}" STREQUAL "M55_HP")
+    target_sources(${CMSIS_DEVICE_TARGET} PRIVATE ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_${ENSEMBLE_CORE}.c)
+elseif("${ENSEMBLE_CORE}" STREQUAL "M55_HE_E1C")
+    target_sources(${CMSIS_DEVICE_TARGET} PRIVATE ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_M55_HE.c)
+endif()
+
 # Ensemble DFP RTE_Components does not support yet building the module if it is disabled
 if (NOT TARGET_BOARD STREQUAL "DevKit_E1C")
     target_sources(${CMSIS_DEVICE_TARGET}
@@ -104,11 +109,8 @@ target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
-    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
     )
 
@@ -119,9 +121,12 @@ if (NOT TARGET_BOARD STREQUAL "DevKit_E1C")
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
     )
 endif()
 

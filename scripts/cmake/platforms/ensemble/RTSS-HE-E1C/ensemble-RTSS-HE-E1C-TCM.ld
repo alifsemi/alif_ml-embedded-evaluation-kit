@@ -28,7 +28,7 @@
  */
 
 __STACK_SIZE = 0x00001000;
-__HEAP_SIZE  = 0x00006000;
+__HEAP_SIZE  = 0x00007000;
 __ROM_BASE = 0x80000000;
 __ROM_SIZE = 0x00180000;
 
@@ -57,6 +57,7 @@ SECTIONS
     *mpu_M55*.c.obj(.text .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
+    *tcm_partition.c.obj(.text* .rodata*)
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
