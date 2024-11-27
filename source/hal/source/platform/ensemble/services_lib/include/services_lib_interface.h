@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
@@ -8,6 +9,11 @@
  *
  */
 
+/**
+ * @file services_lib_interface.h
+ * @brief Services library interface header file
+ * @par
+ */
 #ifndef __SERVICES_LIB_INTERFACE_H__
 #define __SERVICES_LIB_INTERFACE_H__
 
@@ -32,11 +38,9 @@
  *  T Y P E D E F S
  ******************************************************************************/
 
-
 /*******************************************************************************
  *  G L O B A L   D E F I N E S
  ******************************************************************************/
-
 
 /*******************************************************************************
  *  F U N C T I O N   P R O T O T Y P E S

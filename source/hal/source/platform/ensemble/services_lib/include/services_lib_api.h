@@ -43,6 +43,7 @@ extern "C" {
  */
 #define SERVICE_SUCCESS                            0x0
 #define SERVICE_FAIL                               0x200
+#define SERVICE_INVALID_PARAMETER                  0x201
 
 /**
  * Pin muxing/pad control error codes
@@ -77,12 +78,43 @@ extern "C" {
 #define PLL_ERROR_XTAL_ALREADY_RUNNING             0x204
 
 /**
- * Boot services error codes (returned by SERVICES_boot_process_toc_entry())
+ * Boot services error codes
  */
-#define BOOT_OK                                    0x00 // BL_STATUS_OK
-#define BOOT_ERROR_INVALID_TOC                     0x12 // BL_ERROR_INVALID_TOC
-#define BOOT_ERROR_INVALID_TOC_ENTRY_ID            0x15 // BL_ERROR_INVALID_TOC_ENTRY_ID
-#define BOOT_ERROR_INVALID_TOC_CPU_ID              0x16 // BL_ERROR_INVALID_TOC_CPU_ID
+#define BL_STATUS_OK                                  0x00
+#define BL_ERROR_APP_INVALID_TOC_ADDRESS              0x01
+#define BL_ERROR_APP_INVALID_TOC_OFFSET               0x02
+#define BL_ERROR_UNALIGNED_ADDRESS                    0x03
+#define BL_ERROR_INVALID_TOC_ADDRESS_RANGE            0x04
+#define BL_ERROR_INVALID_TOC_FLAGS                    0x05
+#define BL_ERROR_INVALID_ADDRESS                      0x06
+#define BL_ERROR_CERTIFICATE_NO_VERIFY_IN_MEMORY      0x07
+#define BL_ERROR_CERTIFICATE_NO_VERIFY_IN_FLASH       0x08
+#define BL_ERROR_CERTIFICATE_INVALID_LOAD_ADDRESS     0x09
+#define BL_ERROR_CERTIFICATE_INVALID_CHAIN            0x0A
+#define BL_ERROR_CERTIFICATE_STORAGE_ADDRESS_INVALID  0x0B
+#define BL_ERROR_DEVICE_ADDRESS_INVALID               0x0C
+#define BL_ERROR_UNCOMPRESS_FAILED                    0x0D
+#define BL_ERROR_SIGNATURE_VERIFY_FAILED              0x0E
+#define BL_ERROR_APP_ACCESSING_PROTECTED_AREA         0x0F
+#define BL_ERROR_ICV_ACCESSING_PROTECTED_AREA         0x10
+#define BL_ERROR_FAILED_TOC_CRC32                     0x11
+#define BL_ERROR_INVALID_TOC                          0x12
+#define BL_ERROR_EXCEED_MAXIMUM_TOC_ENTRIES           0x13
+#define BL_ERROR_NOT_IMAGE_NOT_DEVICE_CFG             0x14
+#define BL_ERROR_INVALID_TOC_ENTRY_ID                 0x15
+#define BL_ERROR_INVALID_CPU_ID                       0x16
+#define BL_ERROR_ENTRY_NOT_SIGNED                     0x17
+#define BL_ERROR_LOAD_TO_MRAM_NOT_ALLOWED             0x18
+#define BL_ERROR_NO_FREE_SLOTS                        0x19
+#define BL_ERROR_INVALID_M55_BOOT_ADDRESS             0x1A
+#define BL_TOC_OBJECT_NOT_FOUND                       0x1B
+#define BL_TOC_OBJECT_FOR_CPU_NOT_FOUND               0x1C
+#define BL_TOC_IMAGE_NOT_BOOTABLE                     0x1D
+#define BL_TOC_IMAGE_NOT_FOUND                        0x1E
+#define BL_ERROR_COMPRESSION_NOT_SUPPORTED            0x1F
+#define BL_TOC_IMAGE_DEVICE_MISMATCH                  0x20
+#define BL_ERROR_UPD_SIGNATURE_INCORRECT              0x21
+#define BL_ERROR_UPD_IMG_IN_MRAM_NOT_SUPPORTED        0x22
 
 /**
  * OTP Offsets
@@ -114,10 +146,16 @@ extern "C" {
 #define MBEDTLS_OP_DECRYPT                         0
 #define MBEDTLS_OP_ENCRYPT                         1
 
+#define MBEDTLS_AES_BLOCK_SIZE                     16
+
 #define MBEDTLS_AES_CRYPT_ECB                      0
 #define MBEDTLS_AES_CRYPT_CBC                      1
 #define MBEDTLS_AES_CRYPT_CTR                      2
 #define MBEDTLS_AES_CRYPT_OFB                      3
+
+#define MBEDTLS_AES_KEY_128                        128
+#define MBEDTLS_AES_KEY_192                        192
+#define MBEDTLS_AES_KEY_256                        256
 
 #define MBEDTLS_HASH_SHA1                          0
 #define MBEDTLS_HASH_SHA224                        1
@@ -214,27 +252,31 @@ typedef int32_t (*wait_ms_t)(uint32_t wait_time_ms);
 typedef int (*print_msg_t)(const char *fmt, ...);
 
 /**
- *  @enum SERVICES_cpuid_t
+ * @enum SERVICES_cpuid_t
+ * @brief
  */
 typedef enum {
-	HOST_CPU_0   = 0,                /*!< A32_0 CPU               HOST_CPU_0 */
-	HOST_CPU_1   = 1,                /*!< A32_1 CPU               HOST_CPU_1 */
-	EXTSYS_0     = 2,                /*!< M55 HP CPU or other CPU EXTSYS_0   */
-	EXTSYS_1     = 3,                /*!< M55 HE CPU              EXTSYS_1   */
+	HOST_CPU_0   = 0,                /*!< A32_0 CPU               HOST_CPU_0 *//**< HOST_CPU_0 */
+	HOST_CPU_1   = 1,                /*!< A32_1 CPU               HOST_CPU_1 *//**< HOST_CPU_1 */
+	EXTSYS_0     = 2,                /*!< M55 HP CPU or other CPU EXTSYS_0   *//**< EXTSYS_0 */
+	EXTSYS_1     = 3,                /*!< M55 HE CPU              EXTSYS_1   *//**< EXTSYS_1 */
 } SERVICES_cpuid_t;
 
 /**
- *  @struct SERVICES_toc_info_t
+ * @struct SERVICES_toc_info_t
+ * @brief user facing TOC information
  */
 typedef struct {
-	uint8_t   image_identifier[TOC_NAME_LENGTH]; /*!< TOC name      */
-	uint32_t  version;                  /*!< TOC Version      */
-	uint32_t  cpu;                      /*!< TOC Cpu ID       */
-	uint32_t  store_address;            /*!< TOC MRAM address */
-	uint32_t  load_address;             /*!< TOC load         */
-	uint32_t  boot_address;             /*!< TOC boot address */
-	uint32_t  image_size;               /*!< TOC image size   */
-	uint32_t  flags;                    /*!< TOC flag state   */
+	uint8_t   image_identifier[TOC_NAME_LENGTH]; /*!< TOC name         */
+	uint32_t  version;                           /*!< TOC Version      */
+	uint32_t  cpu;                               /*!< TOC Cpu ID       */
+	uint32_t  store_address;                     /*!< TOC MRAM address */
+	uint32_t  load_address;                      /*!< TOC load         */
+	uint32_t  boot_address;                      /*!< TOC boot address */
+	uint32_t  image_size;                        /*!< TOC image size   */
+	uint32_t  processing_time;                   /*!< TOC process time */
+	uint32_t  flags;                             /*!< TOC flag state   */
+	uint8_t   flags_string[FLAG_STRING_SIZE];    /*!< TOC flag string  */
 } SERVICES_toc_info_t;
 
 /**
@@ -294,6 +336,21 @@ typedef enum {
 	PLL_SOURCE_OSC   // use the OCS clocks (can be RC or XTAL)
 } pll_source_t;
 
+// ES0 CPU clock frequencies
+#define ES0_CLOCK_16MHZ   0
+#define ES0_CLOCK_24MHZ   4
+#define ES0_CLOCK_48MHZ   0xC
+
+// ExtSys0 Boot arguments
+typedef struct {
+	uint32_t nvds_src_addr;
+	uint32_t nvds_dst_addr;
+	uint32_t nvds_copy_len;
+	uint32_t trng_dst_addr;
+	uint32_t trng_len;
+	uint32_t es0_clock_select;
+} net_proc_boot_args_t;
+
 typedef enum {
 	PLL_TARGET_SYSREFCLK,
 	PLL_TARGET_SYSCLK,
@@ -338,14 +395,6 @@ typedef enum {
 	DIVIDER_HCLK,
 	DIVIDER_PCLK
 } clock_divider_t;
-
-typedef struct {
-	uint32_t nvds_src_addr;
-	uint32_t nvds_dst_addr;
-	uint32_t nvds_copy_len;
-	uint32_t trng_dst_addr;
-	uint32_t trng_len;
-} net_proc_boot_args_t;
 
 typedef enum {
 	POWER_SETTING_BOR_EN,
@@ -425,6 +474,17 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
 					       uint32_t iv,
 					       uint32_t input,
 					       uint32_t output);
+uint32_t SERVICES_cryptocell_mbedtls_aes(uint32_t services_handle,
+                           uint32_t *error_code,
+                           uint32_t key,
+                           uint32_t keybits,
+                           uint32_t direction,
+                           uint32_t crypt_type,
+                           uint32_t iv,
+                           uint32_t length,
+                           uint32_t input,
+                           uint32_t output);
+
 uint32_t SERVICES_cryptocell_mbedtls_sha_starts(uint32_t services_handle,
 						uint32_t *error_code,
 						uint32_t ctx,
@@ -445,6 +505,12 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle,
 						uint32_t ctx,
 						uint32_t sha_type,
 						uint32_t data);
+uint32_t SERVICES_cryptocell_mbedtls_sha(uint32_t services_handle,
+                        uint32_t *error_code,
+                        uint32_t sha_type,
+                        uint32_t data,
+                        uint32_t data_length,
+                        uint32_t sha_sum);
 
 uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm_set_key(uint32_t services_handle,
 	uint32_t *error_code,
@@ -466,6 +532,21 @@ uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm_crypt(uint32_t services_handle,
 	uint32_t output_addr,
 	uint32_t tag_addr,
 	uint32_t tag_length);
+uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t crypt_type,
+    uint32_t key_addr,
+    uint32_t key_bits,
+    uint32_t length,
+    uint32_t iv_addr,
+    uint32_t iv_length,
+    uint32_t add_addr,
+    uint32_t add_length,
+    uint32_t input_addr,
+    uint32_t output_addr,
+    uint32_t tag_addr,
+    uint32_t tag_length);
+
 uint32_t SERVICES_cryptocell_mbedtls_chacha20_crypt(uint32_t services_handle,
 	uint32_t *error_code,
 	uint32_t key_addr,
@@ -493,21 +574,28 @@ uint32_t SERVICES_cryptocell_mbedtls_poly1305_crypt(uint32_t services_handle,
 	uint32_t mac_addr);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_init_setkey(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t key_addr,
-	uint32_t key_bits);
+	uint32_t ctx,
+	uint32_t keyaddr,
+	uint32_t keybits);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_update(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t input_addr,
-	uint32_t input_length);
+	uint32_t ctx,
+	uint32_t input,
+	uint32_t length);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_finish(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t output_addr);
+	uint32_t ctx,
+	uint32_t output);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_reset(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr);
+	uint32_t ctx);
+uint32_t SERVICES_cryptocell_mbedtls_cmac(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t key,
+    uint32_t keybits,
+    uint32_t input,
+    uint32_t length,
+    uint32_t output);
 
 uint32_t SERVICES_system_get_toc_version(uint32_t services_handle,
 	uint32_t *toc_version,

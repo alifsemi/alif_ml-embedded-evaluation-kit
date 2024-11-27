@@ -456,12 +456,13 @@ uint32_t SERVICES_pll_clkpll_is_locked(uint32_t services_handle,
 }
 
 /**
- * @fn  uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,
- *                                           clock_setting_t setting_type,
- *                                           uint32_t *value,
- *                                           uint32_t * error_code)
+ * @fn uint32_t SERVICES_clocks_setting_get(uint32_t, clock_setting_t, uint32_t*, uint32_t*)
  * @brief                   Get a clock setting from the 'clock_setting_t' enumeration
- * @param error_code        Service error code
+ * @brief
+ * @param services_handle
+ * @param setting_type
+ * @param value
+ * @param error_code
  * @return                  Transport layer error code
  */
 uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,

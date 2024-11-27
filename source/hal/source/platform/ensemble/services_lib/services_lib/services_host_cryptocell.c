@@ -229,6 +229,51 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
 }
 
 /**
+ * @brief Single-part AES encryption/decryption
+ *
+ * @param services_handle
+ * @param error_code
+ * @param key         key address
+ * @param keybits     MBEDTLS_AES_KEY_128, MBEDTLS_AES_KEY_192, MBEDTLS_AES_KEY_256
+ * @param direction   MBEDTLS_OP_DECRYPT, MBEDTLS_OP_ENCRYPT
+ * @param crypt_type  MBEDTLS_AES_CRYPT_ECB/CBC/CTR/OFB
+ * @param iv          IV address - n/a for ECB
+ * @param length      data length - n/a for ECB
+ * @param input       input address
+ * @param output      output address
+ * @return
+ */
+uint32_t SERVICES_cryptocell_mbedtls_aes(uint32_t services_handle,
+                           uint32_t *error_code,
+                           uint32_t key,
+                           uint32_t keybits,
+                           uint32_t direction,
+                           uint32_t crypt_type,
+                           uint32_t iv,
+                           uint32_t length,
+                           uint32_t input,
+                           uint32_t output)
+{
+  mbedtls_aes_svc_t * p_svc = (mbedtls_aes_svc_t *)
+    SERVICES_prepare_packet_buffer(sizeof(mbedtls_aes_svc_t));
+
+  p_svc->send_key_addr = LocalToGlobal((void *)key);
+  p_svc->send_key_bits = keybits;
+  p_svc->send_direction = direction;
+  p_svc->send_crypt_type = crypt_type;
+  p_svc->send_iv_addr = LocalToGlobal((void *)iv);
+  p_svc->send_length = length;
+  p_svc->send_input_addr = LocalToGlobal((void *)input);
+  p_svc->send_output_addr = LocalToGlobal((void *)output);
+
+  uint32_t err = SERVICES_send_request(services_handle,
+                                       SERVICE_CRYPTOCELL_MBEDTLS_AES,
+                                       DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code;
+  return err;
+}
+
+/**
  * @brief
  *
  * @param services_handle
@@ -349,6 +394,39 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle,
 }
 
 /**
+ * @brief Single-part SHA calculation
+ *
+ * @param services_handle
+ * @param error_code
+ * @param sha_type        MBEDTLS_HASH_SHA1/224/256
+ * @param data            data address
+ * @param data_length     data length
+ * @param sha_sum         calculated SHA
+ * @return
+ */
+uint32_t SERVICES_cryptocell_mbedtls_sha(uint32_t services_handle,
+                                         uint32_t *error_code,
+                                         uint32_t sha_type,
+                                         uint32_t data,
+                                         uint32_t data_length,
+                                         uint32_t sha_sum)
+{
+  mbedtls_sha_single_svc_t * p_svc = (mbedtls_sha_single_svc_t *)
+    SERVICES_prepare_packet_buffer(sizeof(mbedtls_sha_single_svc_t));
+
+  p_svc->send_sha_type = sha_type;
+  p_svc->send_data_addr = LocalToGlobal((void *)data);
+  p_svc->send_data_length = data_length;
+  p_svc->send_shasum_addr = LocalToGlobal((void *)sha_sum);
+
+  uint32_t err = SERVICES_send_request(services_handle,
+                                       SERVICE_CRYPTOCELL_MBEDTLS_SHA,
+                                       DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code;
+  return err;
+}
+
+/**
  * @brief
  *
  * @param services_handle
@@ -434,6 +512,64 @@ uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm_crypt(uint32_t services_handle,
   uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_CCM_GCM_CRYPT,
                                        DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code;
+  return err;
+}
+
+/**
+ * @brief Single-part CCM/CGM crypto
+ *
+ * @param services_handle
+ * @param error_code
+ * @param crypt_type   MBEDTLS_CCM_xxx or MBEDTLS_GCM_xxx in services_lib_api.h
+ * @param key_addr     key address
+ * @param key_bits     MBEDTLS_AES_KEY_128, MBEDTLS_AES_KEY_192, MBEDTLS_AES_KEY_256
+ * @param length       data length
+ * @param iv_addr      IV address
+ * @param iv_length    IV length
+ * @param add_addr     additional data address
+ * @param add_length   additional data length
+ * @param input_addr   input address
+ * @param output_addr  output address
+ * @param tag_addr     tag address
+ * @param tag_length   tag length
+ * @return
+ */
+uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t crypt_type,
+    uint32_t key_addr,
+    uint32_t key_bits,
+    uint32_t length,
+    uint32_t iv_addr,
+    uint32_t iv_length,
+    uint32_t add_addr,
+    uint32_t add_length,
+    uint32_t input_addr,
+    uint32_t output_addr,
+    uint32_t tag_addr,
+    uint32_t tag_length)
+{
+  mbedtls_ccm_gcm_svc_t * p_svc = (mbedtls_ccm_gcm_svc_t *)
+    SERVICES_prepare_packet_buffer(sizeof(mbedtls_ccm_gcm_svc_t));
+
+  p_svc->send_crypt_type = crypt_type;
+  p_svc->send_key_addr = LocalToGlobal((void *)key_addr);
+  p_svc->send_key_bits = key_bits;
+  p_svc->send_length = length;
+  p_svc->send_iv_addr = LocalToGlobal((void *)iv_addr);
+  p_svc->send_iv_length = iv_length;
+  p_svc->send_add_addr = LocalToGlobal((void *)add_addr);
+  p_svc->send_add_length = add_length;
+  p_svc->send_input_addr = LocalToGlobal((void *)input_addr);
+  p_svc->send_output_addr = LocalToGlobal((void *)output_addr);
+  p_svc->send_tag_addr = LocalToGlobal((void *)tag_addr);
+  p_svc->send_tag_length = tag_length;
+
+  uint32_t err = SERVICES_send_request(services_handle,
+                                       SERVICE_CRYPTOCELL_MBEDTLS_CCM_GCM,
+                                       DEFAULT_TIMEOUT);
+
   *error_code = p_svc->resp_error_code;
   return err;
 }
@@ -570,16 +706,16 @@ uint32_t SERVICES_cryptocell_mbedtls_poly1305_crypt(uint32_t services_handle,
  */
 uint32_t SERVICES_cryptocell_mbedtls_cmac_init_setkey(uint32_t services_handle,
     uint32_t *error_code,
-    uint32_t context_addr,
-    uint32_t key_addr,
-    uint32_t key_bits)
+    uint32_t ctx,
+    uint32_t key,
+    uint32_t keybits)
 {
   mbedtls_cmac_init_setkey_svc_t * p_svc = (mbedtls_cmac_init_setkey_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_cmac_init_setkey_svc_t));
 
-  p_svc->send_context_addr = LocalToGlobal((void *)context_addr);
-  p_svc->send_key_addr = LocalToGlobal((void *)key_addr);
-  p_svc->send_key_bits = key_bits;
+  p_svc->send_context_addr = LocalToGlobal((void *)ctx);
+  p_svc->send_key_addr = LocalToGlobal((void *)key);
+  p_svc->send_key_bits = keybits;
 
   uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_CMAC_INIT_SETKEY,
@@ -600,16 +736,16 @@ uint32_t SERVICES_cryptocell_mbedtls_cmac_init_setkey(uint32_t services_handle,
  */
 uint32_t SERVICES_cryptocell_mbedtls_cmac_update(uint32_t services_handle,
     uint32_t *error_code,
-    uint32_t context_addr,
-    uint32_t input_addr,
-    uint32_t input_length)
+    uint32_t ctx,
+    uint32_t input,
+    uint32_t length)
 {
   mbedtls_cmac_update_svc_t * p_svc = (mbedtls_cmac_update_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_cmac_update_svc_t));
 
-  p_svc->send_context_addr = LocalToGlobal((void *)context_addr);
-  p_svc->send_input_addr = LocalToGlobal((void *)input_addr);
-  p_svc->send_input_length = input_length;
+  p_svc->send_context_addr = LocalToGlobal((void *)ctx);
+  p_svc->send_input_addr = LocalToGlobal((void *)input);
+  p_svc->send_input_length = length;
 
   uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_CMAC_UPDATE,
@@ -629,14 +765,14 @@ uint32_t SERVICES_cryptocell_mbedtls_cmac_update(uint32_t services_handle,
  */
 uint32_t SERVICES_cryptocell_mbedtls_cmac_finish(uint32_t services_handle,
     uint32_t *error_code,
-    uint32_t context_addr,
-    uint32_t output_addr)
+    uint32_t ctx,
+    uint32_t output)
 {
   mbedtls_cmac_finish_svc_t * p_svc = (mbedtls_cmac_finish_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_cmac_finish_svc_t));
 
-  p_svc->send_context_addr = LocalToGlobal((void *)context_addr);
-  p_svc->send_output_addr = LocalToGlobal((void *)output_addr);
+  p_svc->send_context_addr = LocalToGlobal((void *)ctx);
+  p_svc->send_output_addr = LocalToGlobal((void *)output);
 
   uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_CMAC_FINISH,
@@ -655,15 +791,51 @@ uint32_t SERVICES_cryptocell_mbedtls_cmac_finish(uint32_t services_handle,
  */
 uint32_t SERVICES_cryptocell_mbedtls_cmac_reset(uint32_t services_handle,
     uint32_t *error_code,
-    uint32_t context_addr)
+    uint32_t ctx)
 {
   mbedtls_cmac_reset_svc_t * p_svc = (mbedtls_cmac_reset_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_cmac_reset_svc_t));
 
-  p_svc->send_context_addr = LocalToGlobal((void *)context_addr);
+  p_svc->send_context_addr = LocalToGlobal((void *)ctx);
 
   uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_CMAC_RESET,
+                                       DEFAULT_TIMEOUT);
+  *error_code = p_svc->resp_error_code;
+  return err;
+}
+
+/**
+ * @brief Single-part CMAC calculation
+ *
+ * @param services_handle
+ * @param error_code
+ * @param key         key address
+ * @param keybits     MBEDTLS_AES_KEY_128, MBEDTLS_AES_KEY_192, MBEDTLS_AES_KEY_256
+ * @param input       input address
+ * @param length      input length
+ * @param output      output address
+ * @return
+ */
+uint32_t SERVICES_cryptocell_mbedtls_cmac(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t key, uint32_t keybits,
+    uint32_t input, uint32_t length,
+    uint32_t output)
+{
+  mbedtls_cmac_svc_t * p_svc = (mbedtls_cmac_svc_t *)
+    SERVICES_prepare_packet_buffer(sizeof(mbedtls_cmac_svc_t));
+
+  p_svc->send_key_addr = LocalToGlobal((void *)key);
+  p_svc->send_key_bits = keybits;
+
+  p_svc->send_input_addr = LocalToGlobal((void *)input);
+  p_svc->send_input_length = length;
+
+  p_svc->send_output_addr = LocalToGlobal((void *)output);
+
+  uint32_t err = SERVICES_send_request(services_handle,
+                                       SERVICE_CRYPTOCELL_MBEDTLS_CMAC,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
   return err;

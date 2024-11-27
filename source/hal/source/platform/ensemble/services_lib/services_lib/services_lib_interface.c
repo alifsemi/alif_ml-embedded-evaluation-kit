@@ -7,6 +7,12 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
+/**
+ * @file  services_lib_interface.c
+ * @brief Public interface for Services library
+ * @note  Unique for each platform
+ * @par
+ */
 
 /******************************************************************************
  *  I N C L U D E   F I L E S
@@ -21,30 +27,9 @@
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
-
 /*******************************************************************************
  *  M A C R O   D E F I N E S
  ******************************************************************************/
-
-#if ((DEVICE_TYPE == FUSION && DEVICE_REVISION == REV_B0) \
-    || (DEVICE_TYPE == SPARK))
-#define HE_DTCM_GLOBAL_ADDRESS      0x58800000ul
-#else
-#define HE_DTCM_GLOBAL_ADDRESS      0x60800000ul
-#endif
-#define HP_DTCM_GLOBAL_ADDRESS      0x50800000ul
-#define M55_DTCM_LOCAL_OFFSET       0x20000000ul
-
-/**
- * @note
- */
-#if   CPU == M55_HE || defined(M55_HE)
-#define DTCM_GLOBAL_ADDRESS         HE_DTCM_GLOBAL_ADDRESS
-#elif CPU == M55_HP || defined(M55_HP)
-#define DTCM_GLOBAL_ADDRESS         HP_DTCM_GLOBAL_ADDRESS
-#else
-#error Target CPU is not defined
-#endif
 
 #define SERVICES_PRINT_BUFFER_SIZE (256)
 
@@ -119,9 +104,6 @@ int SERVICES_print(const char * fmt, ...)
  */
 void SERVICES_Setup(MHU_send_message_t send_message, uint32_t timeout)
 {
-  /**
-   *  @brief  Service library initialization parameters
-   */
   services_lib_t  services_init_params =
   {
     .packet_buffer_address = (uint32_t)s_packet_buffer,

@@ -47,27 +47,27 @@
 
 /**
  * @fn      uint32_t SERVICES_system_get_toc_version(uint32_t * toc_version)
- * @brief   get the TOC
- * @param services_handle
- * @param toc_version
- * @param error_code
- * @return
+ * @brief   Retrieves the SES SW Version number
+ * @param   services_handle
+ * @param   toc_version
+ * @param   error_code
+ * @return  SES SW version (Semantc versioning format).
  */
 uint32_t SERVICES_system_get_toc_version(uint32_t services_handle, 
                                          uint32_t *toc_version,
                                          uint32_t *error_code)
 {
-  get_toc_version_svc_t * p_svc = (get_toc_version_svc_t *)
-      SERVICES_prepare_packet_buffer(sizeof(get_toc_version_svc_t));
+  get_toc_version_svc_t *p_svc = (get_toc_version_svc_t *)
+      SERVICES_prepare_packet_buffer(sizeof(get_toc_version_svc_t)); /* create packet */
 
-  uint32_t ret = SERVICES_send_request(services_handle, 
-                                       SERVICE_SYSTEM_MGMT_GET_TOC_VERSION, 
-                                       DEFAULT_TIMEOUT);
+  uint32_t return_code = SERVICES_send_request(services_handle,
+                                               SERVICE_SYSTEM_MGMT_GET_TOC_VERSION,
+                                               DEFAULT_TIMEOUT);
 
   *toc_version = p_svc->resp_version;
   *error_code = p_svc->resp_error_code;
 
-  return ret;
+  return return_code;
 }
 
 /**
@@ -84,13 +84,14 @@ uint32_t SERVICES_system_get_toc_number(uint32_t services_handle,
   get_toc_number_svc_t * p_svc = (get_toc_number_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(get_toc_number_svc_t));
 	
-  uint32_t ret = SERVICES_send_request(services_handle, 
-                                       SERVICE_SYSTEM_MGMT_GET_TOC_NUMBER, 
-                                       DEFAULT_TIMEOUT);
+  uint32_t return_code = SERVICES_send_request(services_handle,
+                                              SERVICE_SYSTEM_MGMT_GET_TOC_NUMBER,
+                                              DEFAULT_TIMEOUT);
 
   *toc_number = p_svc->resp_number_of_toc;
   *error_code = p_svc->resp_error_code;
-  return ret;
+
+  return return_code;
 }
 
 /**
@@ -126,10 +127,18 @@ uint32_t SERVICES_system_get_toc_via_cpuid(uint32_t services_handle,
                                            SERVICES_toc_data_t *toc_info,
                                            uint32_t *error_code)
 {
-  uint32_t toc_number = 0;
-  uint32_t return_code = SERVICES_system_get_toc_number(services_handle,
-                                                        &toc_number,
-                                                        error_code);
+  uint32_t toc_number = 0; /* Number of TOCs from SE */
+  uint32_t return_code = SERVICE_SUCCESS; /* Service error code */
+
+  /* defend against the application */
+  if (toc_info == NULL)
+  {
+	  return SERVICE_INVALID_PARAMETER;
+  }
+
+  return_code = SERVICES_system_get_toc_number(services_handle,
+                                               &toc_number,
+                                               error_code);
   if (SERVICE_SUCCESS != return_code)
   {
     return return_code;
@@ -149,7 +158,7 @@ uint32_t SERVICES_system_get_toc_via_cpuid(uint32_t services_handle,
                                               SERVICE_SYSTEM_MGMT_GET_TOC_INFO,
                                               DEFAULT_TIMEOUT))
     {
-      if (cpuid == p_svc->resp_toc_entry.cpu)
+      if (cpuid == p_svc->resp_toc_entry.resp_cpu)
       {
         memcpy(&toc_info->toc_entry[toc_info->number_of_toc_entries],
                &p_svc->resp_toc_entry,
@@ -158,6 +167,8 @@ uint32_t SERVICES_system_get_toc_via_cpuid(uint32_t services_handle,
       }
     }
   }
+
+  *error_code = p_svc->resp_error_code;
 
   return return_code;
 }
@@ -173,12 +184,22 @@ uint32_t SERVICES_system_get_toc_data (uint32_t services_handle,
                                        SERVICES_toc_data_t *toc_info,
                                        uint32_t *error_code)
 {
-  uint32_t toc_number = 0;
-  uint32_t return_code = SERVICES_system_get_toc_number(services_handle,
-                                                        &toc_number,
-                                                        error_code);
-  if (SERVICE_SUCCESS != return_code)
+  uint32_t toc_number = 0;   /* retrieve number of TOCs from SE */
+  uint32_t return_code = SERVICE_SUCCESS; /* Service error code */
+
+  /* defend against the application */
+  if (toc_info == NULL)
   {
+     *error_code = 0;
+     return SERVICE_INVALID_PARAMETER;
+  }
+
+  return_code = SERVICES_system_get_toc_number(services_handle,
+                                               &toc_number,
+                                               error_code);
+  if (SERVICES_REQ_SUCCESS != return_code)
+  {
+     *error_code = 0;
     return return_code;
   }
 
@@ -202,6 +223,8 @@ uint32_t SERVICES_system_get_toc_data (uint32_t services_handle,
     }
   }
 
+  *error_code = p_svc->resp_error_code;
+
   return return_code;
 }
 
@@ -217,16 +240,17 @@ uint32_t SERVICES_system_get_device_part_number(uint32_t services_handle,
                                                 uint32_t *device_part_number,
                                                 uint32_t *error_code)
 {
-  get_device_part_svc_t * p_svc = (get_device_part_svc_t *)
+  get_device_part_svc_t *p_svc = (get_device_part_svc_t *)
       SERVICES_prepare_packet_buffer(sizeof(get_device_part_svc_t));
 
-  uint32_t ret = SERVICES_send_request(services_handle, 
+  uint32_t return_code = SERVICES_send_request(services_handle,
                                        SERVICE_SYSTEM_MGMT_GET_DEVICE_PART_NUMBER, 
                                        DEFAULT_TIMEOUT);
 
   *device_part_number = p_svc->resp_device_string;
   *error_code = p_svc->resp_error_code;
-  return ret;
+
+  return return_code;
 }
 
 /**
@@ -241,19 +265,21 @@ uint32_t SERVICES_system_set_services_debug (uint32_t services_handle,
                                              bool debug_enable,
                                              uint32_t *error_code)
 {
-  set_services_capabilities_t * p_svc = (set_services_capabilities_t *)
+  set_services_capabilities_t *p_svc = (set_services_capabilities_t *)
       SERVICES_prepare_packet_buffer(sizeof(set_services_capabilities_t));
 
   p_svc->send_services_debug = debug_enable;
 
-  uint32_t ret = SERVICES_send_request(services_handle,
-                                       SERVICE_SYSTEM_MGMT_SET_CAPABILITIES_DEBUG,
-                                       DEFAULT_TIMEOUT);
+  uint32_t return_code = SERVICES_send_request(services_handle,
+                                               SERVICE_SYSTEM_MGMT_SET_CAPABILITIES_DEBUG,
+                                               DEFAULT_TIMEOUT);
 
   *error_code = p_svc->resp_error_code;
-  return ret;
+
+  return return_code;
 }
 
+#if 0
 /**
  * @brief obtain the OTP data
  * @param services_handle
@@ -261,7 +287,6 @@ uint32_t SERVICES_system_set_services_debug (uint32_t services_handle,
  * @param error_code
  * @return
  */
-#if 0
 uint32_t SERVICES_system_get_otp_data (uint32_t services_handle,
                                        SERVICES_otp_data_t *device_info,
                                        uint32_t *error_code)
@@ -285,8 +310,8 @@ uint32_t SERVICES_system_get_otp_data (uint32_t services_handle,
 #endif
 
 /**
- * @brief  Get device_data
- *
+ * @fn uint32_t SERVICES_system_get_device_data(uint32_t, SERVICES_version_data_t*, uint32_t*)
+ * @brief  Get device data information
  * @param services_handle
  * @param device_info
  * @param error_code
@@ -303,6 +328,10 @@ uint32_t SERVICES_system_get_device_data(uint32_t services_handle,
   return_code = SERVICES_send_request(services_handle,
                                       SERVICE_SYSTEM_MGMT_GET_DEVICE_REVISION_DATA,
                                       DEFAULT_TIMEOUT);
+  if (SERVICES_REQ_SUCCESS != return_code)
+  {
+    return return_code;
+  }
 
   /* unpack and return */
   device_info->revision_id = p_svc->revision_id;
@@ -403,7 +432,7 @@ typedef struct
   uint8_t lot_no : 8;
 } mfg_data_t;
 
-#else // REV_B3, maybe SPARK as well
+#else // REV_B3
 typedef struct
 {
   uint8_t x_loc  : 7;
@@ -446,7 +475,7 @@ void init_test_mgf_data(uint8_t * p_data_in)
  */
 static void get_eui64_extension(uint8_t *p_data_in, uint8_t *p_data_out)
 {
-  mfg_data_t * p_mfg_data = (mfg_data_t *)p_data_in;
+  mfg_data_t *p_mfg_data = (mfg_data_t *)p_data_in;
 
   uint8_t seven_bits_1 = p_mfg_data->x_loc;
   uint8_t seven_bits_2 = p_mfg_data->y_loc;
@@ -479,7 +508,7 @@ static void get_eui64_extension(uint8_t *p_data_in, uint8_t *p_data_out)
  */
 static void get_eui48_extension(uint8_t * p_data_in, uint8_t * p_data_out)
 {
-  mfg_data_t * p_mfg_data = (mfg_data_t *)p_data_in;
+  mfg_data_t *p_mfg_data = (mfg_data_t *)p_data_in;
 
   uint8_t six_bits_1 = p_mfg_data->x_loc & 0x3F;
   uint8_t six_bits_2 = p_mfg_data->y_loc & 0x3F;
@@ -516,13 +545,22 @@ uint32_t SERVICES_system_get_eui_extension(uint32_t services_handle,
                                            uint8_t *eui_extension,
                                            uint32_t *error_code)
 {
-  SERVICES_version_data_t device_data;
-  uint32_t ret = SERVICES_system_get_device_data(services_handle,
+  SERVICES_version_data_t device_data; /* SoC Device information */
+  uint32_t return_code = SERVICES_REQ_SUCCESS; /* Service error code  */
+
+  /* defend against the application */
+  if (eui_extension == NULL)
+  {
+    *error_code = 0;
+    return SERVICE_INVALID_PARAMETER;
+  }
+
+  return_code = SERVICES_system_get_device_data(services_handle,
                                                &device_data,
                                                error_code);
-  if (ret != SERVICES_REQ_SUCCESS)
+  if (return_code != SERVICES_REQ_SUCCESS)
   {
-    return ret;
+    return return_code;
   }
 
   //init_test_mgf_data(device_data.MfgData);

@@ -14,6 +14,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 typedef void (*mhu_receive_callback_t)(void* data);
 
 typedef struct

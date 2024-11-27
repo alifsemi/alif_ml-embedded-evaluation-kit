@@ -117,6 +117,10 @@ enum SERVICE_ID_t {
 	SERVICE_CRYPTOCELL_MBEDTLS_CMAC_UPDATE,                             /**< SERVICE_CRYPTOCELL_MBEDTLS_CMAC_UPDATE     */
 	SERVICE_CRYPTOCELL_MBEDTLS_CMAC_FINISH,                             /**< SERVICE_CRYPTOCELL_MBEDTLS_CMAC_FINISH     */
 	SERVICE_CRYPTOCELL_MBEDTLS_CMAC_RESET,                              /**< SERVICE_CRYPTOCELL_MBEDTLS_CMAC_RESET      */
+	SERVICE_CRYPTOCELL_MBEDTLS_AES,                                     /**< SERVICE_CRYPTOCELL_MBEDTLS_AES             */
+	SERVICE_CRYPTOCELL_MBEDTLS_SHA,                                     /**< SERVICE_CRYPTOCELL_MBEDTLS_SHA             */
+	SERVICE_CRYPTOCELL_MBEDTLS_CMAC,                                    /**< SERVICE_CRYPTOCELL_MBEDTLS_CMAC            */
+	SERVICE_CRYPTOCELL_MBEDTLS_CCM_GCM,                                 /**< SERVICE_CRYPTOCELL_MBEDTLS_CCM_GCM         */
 	SERVICE_CRYPTOCELL_END     = 499,                                   /**< SERVICE_CRYPTOCELL_END                     */
 
   /**

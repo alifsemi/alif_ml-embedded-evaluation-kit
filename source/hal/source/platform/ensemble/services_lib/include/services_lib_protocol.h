@@ -28,81 +28,26 @@ extern "C" {
 /*******************************************************************************
  *  M A C R O   D E F I N E S
  ******************************************************************************/
-/**
- * Version  Description
- * 0.51.0   Updated contributed power examples
- * 0.50.0   API for getting HFOSC and EXTSYS0/1 frequency
- * 0.49.0   Deprecating SERVICES_system_get_toc_via_name
- * 0.49.1   Updated examples for ALIF Update Package support.
- * 0.48.0   Switch to external CMSIS source builds
- * 0.0.47   Add Power setting Get/Configure API
- * 0.0.46   Adding UPDATE STOC Service and test
- * 0.0.45   Adding STOP, STANDBY Cycle tests
- *          Adding SES update Service
- * 0.0.44   Example test changes
- * 0.0.43   CMSIS V1.0.0
- * 0.0.42   Reduce the size of the packet buffer in the services examples
- * 0.0.41
- * 0.0.40   [aiPM] Define the parameter VDD_IOFLEX_3V3 as an enum
- * 0.0.39   SERVICES switch to CMSIS V0.9.4
- * 0.0.38   SERVICES switch to CMSIS V0.9.3
- * 0.0.37   Scalable HFRC and HXTAL frequencies
- * 0.0.36   SERVICES switch to CMSIS V0.9.1
- *          arm clang startup issues
- * 0.0.35   SERVICES build switch to CMake
- *          addition of aiPM Service API - RUN
- * 0.0.34   Addition of amPM Service API - OFF
- *          retrieve full revision info
- * 0.0.33   edits for simulation testing
- * 0.0.32   Add a new service call SERVICES_boot_set_vtor
- *          Use defines to support different power test variations
- * 0.0.31   Warnings fixes
- * 0.0.30   Fix services-he-hp-a32-xip.json HP address
- * 0.0.29   Consistent Error handling
- *          Memory Power On Off
- *          Add boot services and clock tests
- * 0.0.28   Add new warnings and do cleanup
- * 0.0.27   Add new warnings and do cleanup
- * 0.0.26   Retention fine grained control
- *          CMSIS update build options
- *          Add SERVICES_INVALID_ADDRESS error code
- * 0.0.25   Clocks apis
- *          Retention APIs
- *          TEST Services initialize polling
- * 0.0.24   GCC build for m55_power
- *          Query TOC by cpu id returns N entries
- * 0.0.23   CMSIS integration
- * 0.0.22   Simplify error code usage at the services transport layer
- * 0.0.21   Added build support for SPARK
- * 0.0.20   Updated ALIF License
- * 0.0.19   Adding CMake build
- * 0.0.18   Stop mode power profile
- * 0.0.17   Fixed unimplemented function warnings in GCC build
- * 0.0.16   Update to RTSS V0.4.1
- * 0.0.15   Added examples installation, fixed build flags
- * 0.0.14   Addition of XIP examples
- * 0.0.13   Examples common directory
- * 0.0.12   get otp data (for real!)
- * 0.0.11   get all toc info
- *          get otp data
- * 0.0.10   standardized variables for send/resp
- * 0.0.9    bounds checks for UART prints
- * 0.0.8    Added firmware version id
- * 0.0.7    mbed TLS accelerators
- * 0.0.6    Added enable / disable debug status
- * 0.0.5    Service API error code added
- * 0.0.4    Service BOOT reset added
- * 0.0.3    RPC Parameter changes
- * 0.0.2    First re-factoring
- * 0.0.1    Concept + realization - First implementation
- */
-#define SE_SERVICES_VERSION_STRING                 "0.50.1"
+/* See SERVICES documentation for change log */
+#define SE_SERVICES_VERSION_STRING                 "0.50.2"
 #define SE_SERVICES_VERSION_MAJOR                  0
 #define SE_SERVICES_VERSION_MINOR                  50
-#define SE_SERVICES_VERSION_PATCH                  1
+#define SE_SERVICES_VERSION_PATCH                  2
 
 #define IMAGE_NAME_LENGTH                          8
 #define VERSION_RESPONSE_LENGTH                    80
+
+/**
+ * @brief Flag positions with the SERVICES_toc_data_t flag string
+ */
+#define FLAG_STRING_COMPRESSED                     0
+#define FLAG_STRING_LOAD_IMAGE                     1
+#define FLAG_STRING_VERIFY                         2
+#define FLAG_STRING_CPU_BOOTED                     3
+#define FLAG_STRING_ENCRYPTED                      4
+#define FLAG_STRING_DEFERRED                       5
+#define FLAG_STRING_END                            6
+#define FLAG_STRING_SIZE                           8
 
 /**
  * Transport layer error codes
@@ -141,8 +86,7 @@ typedef struct {
 } generic_svc_t;
 
 // SE Deep Sleeper
-typedef struct
-{
+typedef struct {
   service_header_t header;
   volatile uint32_t  send_param;
   volatile uint32_t  resp_error_code;
@@ -227,6 +171,7 @@ typedef struct {
 	volatile uint32_t send_nvds_copy_len;
 	volatile uint32_t send_trng_dst_addr;
 	volatile uint32_t send_trng_len;
+	volatile uint32_t send_internal_clock_select;
 	volatile int      resp_error_code;
 } net_proc_boot_svc_t;
 
@@ -291,7 +236,7 @@ typedef struct {
 typedef struct {
 	service_header_t header;
 	volatile uint32_t send_context_addr;
-	volatile uint32_t send_crypt_type; // ECB, CBC, CTR_OFB
+	volatile uint32_t send_crypt_type; // ECB, CBC, CTR, OFB
 	volatile uint32_t send_mode;       // Encrypt, Decrypt
 	volatile uint32_t send_length;
 	volatile uint32_t send_iv_addr;
@@ -299,6 +244,20 @@ typedef struct {
 	volatile uint32_t send_output_addr;
 	volatile uint32_t resp_error_code;
 } mbedtls_aes_crypt_svc_t;
+
+// MBEDTLS AES
+typedef struct {
+    service_header_t header;
+    volatile uint32_t send_key_addr;
+    volatile uint32_t send_key_bits;
+    volatile uint32_t send_direction;  // Encrypt, Decrypt
+    volatile uint32_t send_crypt_type; // ECB, CBC, CTR, OFB
+    volatile uint32_t send_iv_addr;
+    volatile uint32_t send_length;
+    volatile uint32_t send_input_addr;
+    volatile uint32_t send_output_addr;
+    volatile uint32_t resp_error_code;
+} mbedtls_aes_svc_t;
 
 // MBEDTLS SHA
 typedef struct {
@@ -310,11 +269,20 @@ typedef struct {
 	volatile uint32_t resp_error_code;
 } mbedtls_sha_svc_t;
 
+typedef struct {
+    service_header_t header;
+    volatile uint32_t send_sha_type;  // SHA1, SHA224, SHA256
+    volatile uint32_t send_data_addr;
+    volatile uint32_t send_data_length;
+    volatile uint32_t send_shasum_addr;
+    volatile uint32_t resp_error_code;
+} mbedtls_sha_single_svc_t;
+
 // MBEDTLS CCM/GCM SET KEY
 typedef struct {
 	service_header_t header;
 	volatile uint32_t send_context_addr;
-	volatile uint32_t send_key_type;
+	volatile uint32_t send_key_type;     // CCM or GCM
 	volatile uint32_t send_cipher;
 	volatile uint32_t send_key_addr;
 	volatile uint32_t send_key_bits;
@@ -337,6 +305,24 @@ typedef struct {
 	volatile uint32_t send_tag_length;
 	volatile uint32_t resp_error_code;
 } mbedtls_ccm_gcm_crypt_svc_t;
+
+// MBEDTLS CCM/GCM
+typedef struct {
+    service_header_t header;
+    volatile uint32_t send_crypt_type;
+    volatile uint32_t send_key_addr;
+    volatile uint32_t send_key_bits;
+    volatile uint32_t send_length;
+    volatile uint32_t send_iv_addr;
+    volatile uint32_t send_iv_length;
+    volatile uint32_t send_add_addr;
+    volatile uint32_t send_add_length;
+    volatile uint32_t send_input_addr;
+    volatile uint32_t send_output_addr;
+    volatile uint32_t send_tag_addr;
+    volatile uint32_t send_tag_length;
+    volatile uint32_t resp_error_code;
+} mbedtls_ccm_gcm_svc_t;
 
 // MBEDTLS CHACHA20 CRYPT
 typedef struct {
@@ -408,6 +394,16 @@ typedef struct {
 	volatile uint32_t resp_error_code;
 } mbedtls_cmac_reset_svc_t;
 
+// MBEDTLS CMAC
+typedef struct {
+    service_header_t header;
+    volatile uint32_t send_key_addr;
+    volatile uint32_t send_key_bits;
+    volatile uint32_t send_input_addr;
+    volatile uint32_t send_input_length;
+    volatile uint32_t send_output_addr;
+    volatile uint32_t resp_error_code;
+} mbedtls_cmac_svc_t;
 
 // Boot Services
 
@@ -535,17 +531,19 @@ typedef struct {
 
 /**
  * @struct get_toc_entry_t
- * @brief  one toc record
+ * @brief  TOC record used to convey details of each TOC entry known by SES.
  */
 typedef struct {
-	volatile  uint8_t  image_identifier[IMAGE_NAME_LENGTH];
-	volatile uint32_t  version;
-	volatile uint32_t  cpu;
-	volatile uint32_t  store_address;
-	volatile uint32_t  load_address;
-	volatile uint32_t  boot_address;
-	volatile uint32_t  image_size;
-	volatile uint32_t  flags;
+	volatile uint8_t   resp_image_identifier[IMAGE_NAME_LENGTH];
+	volatile uint32_t  resp_version;
+	volatile uint32_t  resp_cpu;
+	volatile uint32_t  resp_store_address;
+	volatile uint32_t  resp_load_address;
+	volatile uint32_t  resp_boot_address;
+	volatile uint32_t  resp_image_size;
+	volatile uint32_t  resp_processing_time;
+	volatile uint32_t  resp_flags;
+	volatile uint8_t   resp_flags_string[FLAG_STRING_SIZE];
 } get_toc_entry_t;
 
 /**

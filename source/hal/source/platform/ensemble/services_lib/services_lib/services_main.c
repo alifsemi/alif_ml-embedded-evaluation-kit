@@ -27,7 +27,9 @@
 #include "services_lib_interface.h"
 #include "services_main.h"
 
-#define MAXIMUM_TIMEOUT        0x01000000
+#include "uart_tracelib.h"
+
+#define MAXIMUM_TIMEOUT        0x05000000
 
 uint32_t services_handle = 0xff;
 uint32_t he_comms_handle = 0xff;
@@ -86,9 +88,28 @@ uint32_t receiver_base_address_list_1[NUM_MHU] =
 };
 
 #else
-#define NUM_MHU                5
+
 #define SE_MHU0_SEND_BASE      MHU_SESS_S_TX_BASE
 #define SE_MHU0_RECV_BASE      MHU_SESS_S_RX_BASE
+#define MHU0_SE_SENDER_IRQn    MHU_SESS_S_TX_IRQ_IRQn
+#define MHU0_SE_RECVER_IRQn    MHU_SESS_S_RX_IRQ_IRQn
+
+#ifdef M55_HE_E1C
+#define NUM_MHU                1
+#define MHU_CPU_SE_MHU         0
+uint32_t sender_base_address_list[NUM_MHU] =
+{
+  SE_MHU0_SEND_BASE,
+};
+
+uint32_t receiver_base_address_list[NUM_MHU] =
+{
+  SE_MHU0_RECV_BASE,
+};
+
+#else
+#define NUM_MHU                5
+
 #define M55_MHU0_SEND_BASE     MHU_RTSS_S_TX_BASE
 #define M55_MHU0_RECV_BASE     MHU_RTSS_S_RX_BASE
 #define A32_MHU0_SEND_BASE     MHU_APSS_S_TX_BASE
@@ -96,9 +117,6 @@ uint32_t receiver_base_address_list_1[NUM_MHU] =
 #define A32_MHU1_SEND_BASE     MHU_APSS_NS_TX_BASE
 #define A32_MHU1_RECV_BASE     MHU_APSS_NS_RX_BASE
 
-
-#define MHU0_SE_SENDER_IRQn    MHU_SESS_S_TX_IRQ_IRQn
-#define MHU0_SE_RECVER_IRQn    MHU_SESS_S_RX_IRQ_IRQn
 
 #define MHU0_HE_SENDER_IRQn    MHU_RTSS_S_TX_IRQ_IRQn
 #define MHU0_HE_RECVER_IRQn    MHU_RTSS_S_RX_IRQ_IRQn
@@ -135,7 +153,7 @@ uint32_t receiver_base_address_list[NUM_MHU] =
   A32_MHU0_RECV_BASE,
   A32_MHU1_RECV_BASE,
 };
-
+#endif
 #endif
 
 static mhu_driver_in_t s_mhu_driver_in;
@@ -153,6 +171,7 @@ void MHU_SESS_S_RX_IRQHandler()
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_SE_MHU);
 }
 
+#ifndef M55_HE_E1C
 void MHU_RTSS_S_TX_IRQHandler()
 {
 #ifdef M55_HE
@@ -180,6 +199,7 @@ void MHU_HP_S_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_HP_MHU);
 }
+#endif // M55_HE_E1C
 
 #ifdef A32
 void MHU_SESS_NS_TX_IRQHandler()
@@ -213,6 +233,7 @@ void MHU_HP_NS_RX_IRQHandler()
 }
 
 #else // A32
+#ifndef M55_HE_E1C
 void MHU_APSS_S_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_CPU_A32_0_MHU);
@@ -233,8 +254,8 @@ void MHU_APSS_NS_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_A32_1_MHU);
 }
+#endif // M55_HE_E1C
 #endif
-
 static void setup_irq(int irq_num)
 {
   NVIC_DisableIRQ(irq_num);
@@ -259,7 +280,7 @@ void rx_msg_callback(uint32_t receiver_id,
         case MHU_CPU_SE_MHU:
             SERVICES_rx_msg_callback(receiver_id, channel_number, service_data);
             break;
-
+#ifndef M55_HE_E1C
         case MHU_CPU_HE_MHU:
         case MHU_CPU_HP_MHU:
 #ifndef A32
@@ -268,7 +289,7 @@ void rx_msg_callback(uint32_t receiver_id,
 #endif
             handle_my_msg(service_data);
             break;
-
+#endif // M55_HE_E1C
         default:
             printf("rx_msg_callback: Invalid channel_number = %ld\n", channel_number);
     }
@@ -310,11 +331,12 @@ static void mhu_initialize(void)
   setup_irq(MHU0_SE_SENDER_IRQn);
   setup_irq(MHU0_SE_RECVER_IRQn);
 
-#ifndef M55_HE
+#if !defined(M55_HE) && !defined(M55_HE_E1C)
   setup_irq(MHU0_HE_SENDER_IRQn);
   setup_irq(MHU0_HE_RECVER_IRQn);
 #endif
 
+#ifndef M55_HE_E1C
 #ifndef M55_HP
   setup_irq(MHU0_HP_SENDER_IRQn);
   setup_irq(MHU0_HP_RECVER_IRQn);
@@ -324,6 +346,7 @@ static void mhu_initialize(void)
   setup_irq(MHU0_A32_RECVER_IRQn);
   setup_irq(MHU1_A32_SENDER_IRQn);
   setup_irq(MHU1_A32_RECVER_IRQn);
+#endif // M55_HE_E1C
 #endif
 
   MHU_driver_initialize(&s_mhu_driver_in, &s_mhu_driver_out);
@@ -333,14 +356,25 @@ static void mhu_initialize(void)
 
 void disable_se_debug()
 {
-    uint32_t service_error_code;
+    uint32_t service_error_code = SERVICES_REQ_SUCCESS;
+    uint32_t err = SERVICES_REQ_SUCCESS;
 
-    /* Disable tracing output for services */
-    uint32_t err = SERVICES_system_set_services_debug(services_handle,
-                                                      false,
-                                                      &service_error_code);
-    //printf("SE debug disabled: err = %ld, service_error = %ld\n", err, service_error_code);
-    (void)err;
+    // TODO: Workaround for SE-2509: Loop until SE request completes successfully
+    int retrycnt = 100;
+
+    while (retrycnt--) {
+      /* Disable tracing output for services */
+      err = SERVICES_system_set_services_debug(services_handle,
+                                               false,
+                                               &service_error_code);
+      if (service_error_code == SERVICES_REQ_SUCCESS && err == SERVICES_REQ_SUCCESS) {
+        return;
+      }
+    }
+
+    if (service_error_code != SERVICES_REQ_SUCCESS || err != SERVICES_REQ_SUCCESS) {
+        while (1);
+    }
 }
 
 int services_init (mhu_receive_callback_t cb)
@@ -358,18 +392,20 @@ int services_init (mhu_receive_callback_t cb)
     SERVICES_Setup(s_mhu_driver_out.send_message, MAXIMUM_TIMEOUT);
     SERVICES_wait_ms(2);
     services_handle = SERVICES_register_channel(MHU_CPU_SE_MHU, 0);
-#ifndef M55_HE
+#if !defined(M55_HE) && !defined(M55_HE_E1C)
     he_comms_handle = SERVICES_register_channel(MHU_CPU_HE_MHU, 0);
 #endif
 #ifndef M55_HP
+#ifndef M55_HE_E1C
     hp_comms_handle = SERVICES_register_channel(MHU_CPU_HP_MHU, 0);
 #endif
+#endif
 #ifndef A32
+#ifndef M55_HE_E1C
     a32_0_comms_handle = SERVICES_register_channel(MHU_CPU_A32_0_MHU, 0);
     a32_1_comms_handle = SERVICES_register_channel(MHU_CPU_A32_1_MHU, 0);
 #endif
-
+#endif
     initialized = true;
-
     return 0;
 }
