@@ -199,15 +199,11 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_VER`: A string parameter to indicate which version of CMSIS to use. Supported values are "5" and "6"; default
-   is "5". Note that both version of CMSIS repositories are available as git submodules and this parameter is used
-   to set the default value for `CMSIS_SRC_PATH` parameter.
-
 - `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow
    Lite Micro library. These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted
    configurations.  The default values point to the git submodules. Repositories are hosted here:
-   [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git), [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git),
-   [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
+   [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git), [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP)
+   and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -342,7 +338,7 @@ repository to link against.
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [Ethos-U NPU core platform repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
-4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) or [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
+4. [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
 5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
 6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 7. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)

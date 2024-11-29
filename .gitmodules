@@ -1,9 +1,6 @@
 [submodule "dependencies/tensorflow"]
 	path = dependencies/tensorflow
 	url = https://github.com/tensorflow/tflite-micro.git
-[submodule "dependencies/cmsis"]
-	path = dependencies/cmsis-5
-	url = https://github.com/ARM-software/CMSIS_5.git
 [submodule "dependencies/core_driver"]
 	path = dependencies/core-driver
 	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-driver
@@ -18,7 +15,7 @@
 	url = https://github.com/ARM-software/CMSIS-NN.git
 [submodule "dependencies/cmsis-6"]
 	path = dependencies/cmsis-6
-	url = https://github.com/ARM-software/CMSIS_6
+	url = https://github.com/ARM-software/CMSIS_6.git
 [submodule "dependencies/cortex-dfp"]
 	path = dependencies/cortex-dfp
 	url = https://github.com/ARM-software/Cortex_DFP.git
