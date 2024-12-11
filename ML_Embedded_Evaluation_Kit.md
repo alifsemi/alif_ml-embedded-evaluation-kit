@@ -270,6 +270,18 @@ UART select jumpers set for UART2:
 
 5. Replace `bare-metal-armclang.cmake` to `bare-metal-gcc.cmake` in step 2 above.
 
+**Building for E1C devkit (supports only GCC)**
+
+6. Use the following CMake command instead of one in step 2 above:
+    ```
+    cmake -DTARGET_PLATFORM=ensemble \
+    -DTARGET_SUBSYSTEM=RTSS-HE-E1C \
+    -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-E1C-TCM \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DTARGET_REVISION=B -DTARGET_BOARD=DevKit_E1C ..
+    ```
+
 ### Building The Image Classification (IC) Use-Case For The M55-HP Core.
 
 1. Create a build directory for M55-HP core-based applications.
