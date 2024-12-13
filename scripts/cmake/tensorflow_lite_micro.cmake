@@ -55,9 +55,31 @@ function(build_tflite_micro_cmake)
     if(TARGET_PLATFORM STREQUAL native)
         set(TFLM_BUILD_CORTEX_M_GENERIC FALSE
                                         CACHE BOOL "Build for Arm Cortex-M")
+        set(DEFAULT_ACCELERATOR         "CPU")
+    else()
+        set(CMSIS_OPTIMIZATION_LEVEL    ${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL})
+        if (ETHOS_U_NPU_ENABLED)
+            set(DEFAULT_ACCELERATOR     "NPU")
+        else()
+            set(DEFAULT_ACCELERATOR     "CMSIS-NN")
+        endif()
     endif()
+    set(CORE_SOFTWARE_ACCELERATOR       ${DEFAULT_ACCELERATOR}
+                                        CACHE STRING "Default accelerator backend")
 
     include(${CMAKE_BINARY_DIR}/tflite_micro.cmake)
+
+    # For CMSIS-NN, define ARM_MATH_AUTOVECTORIZE if optimization level is 0.
+    # From CMSIS-NN Readme:
+    # > With only optimization level -O0, ARM_MATH_AUTOVECTORIZE needs to be defined
+    # > for processors with Helium Technology.
+    if (CMSIS_OPTIMIZATION_LEVEL STREQUAL "-O0")
+        if (CMAKE_SYSTEM_PROCESSOR MATCHES "cortex-m55" OR
+            CMAKE_SYSTEM_PROCESSOR MATCHES "cortex-m85" OR
+            CMAKE_SYSTEM_PROCESSOR MATCHES "armv8\..-m\.main")
+            target_compile_definitions(cmsis-nn PRIVATE ARM_MATH_AUTOVECTORIZE)
+        endif()
+    endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
         # Additional option to enable "full" floating point standard conformance
