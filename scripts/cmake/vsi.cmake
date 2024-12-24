@@ -32,28 +32,17 @@ target_include_directories(${FVP_VSI_TARGET} PUBLIC
     ${FVP_VSI_SRC_PATH}/interface/include
     ${FVP_VSI_SRC_PATH}/interface/video/include)
 
-target_compile_definitions(${FVP_VSI_TARGET} PRIVATE
-    CMSIS_device_header=\"${CPU_HEADER_FILE}\")
-
-# We need IRQ definitions for VSI for each target. This is expected to be in the
-# device headers we are configuring the build for. NOTE: this is a cyclic dependency
-# as VSI module is expected to be part of platform drivers but we rely on some headers
-# from platform driver source tree. But we only need definitions, no functionality.
-set(MLEK_TARGET_HDR_ROOT ${MLEK_HAL_PLATFORM_DIR}/${TARGET_PLATFORM}/include/${TARGET_SUBSYSTEM})
-
-if (NOT EXISTS ${MLEK_TARGET_HDR_ROOT})
-    message(FATAL_ERROR "Path ${MLEK_TARGET_HDR_ROOT} required for VSI IRQ definitions")
-endif()
+target_link_libraries(${FVP_VSI_TARGET} PUBLIC
+    cmsis_device)
 
 target_compile_options(${FVP_VSI_TARGET}
     PRIVATE
     "SHELL: -include ${FVP_VSI_SRC_PATH}/interface/include/arm_vsi.h"
 
+    # arm_vsi.h needs access to platform's interrupt numbers. These come via
+    # cmsis_device target
     PUBLIC
-    "SHELL: -include ${MLEK_TARGET_HDR_ROOT}/peripheral_irqs.h")
-
-target_link_libraries(${FVP_VSI_TARGET} PUBLIC
-    rte_components)
+    "SHELL: -include peripheral_irqs.h")
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")

@@ -109,6 +109,11 @@ add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
 ## Platform component: Audio interface
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
+# Add the platform headers to the CMSIS device target (provide access to platform's
+# memory map and interrupt numbers.
+target_include_directories(cmsis_device PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)

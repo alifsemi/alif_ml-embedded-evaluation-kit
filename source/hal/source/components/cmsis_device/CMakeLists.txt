@@ -44,6 +44,9 @@ endif()
 # 3.1 Create an interface library for CPU header only
 add_library(${CPU_HEADER_TARGET} INTERFACE)
 
+target_compile_definitions(${CPU_HEADER_TARGET} INTERFACE
+    CMSIS_device_header=\"${CPU_HEADER_FILE}\")
+
 ## Interface include directories:
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
@@ -57,8 +60,8 @@ add_library(${CMSIS_DEVICE_TARGET} STATIC)
 
 ## Sources - public
 target_sources(${CMSIS_DEVICE_TARGET}
-        PUBLIC
-        source/handlers.c)
+    PUBLIC
+    source/handlers.c)
 
 ## Sources - private
 target_sources(${CMSIS_DEVICE_TARGET}

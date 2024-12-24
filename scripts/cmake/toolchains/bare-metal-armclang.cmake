@@ -95,7 +95,6 @@ add_compile_options(
 
 # Compile definitions:
 add_compile_definitions(
-    CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
     $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>)
 
 # Link options:
