@@ -28,6 +28,7 @@
 
 #include "timer_alif.h"
 #include "ospi_ram.h"
+#include "ram_test.h"
 #include "log_macros.h"
 
 #ifdef BOARD_HAS_IS66_RAM
@@ -308,6 +309,12 @@ int32_t ospi_ram_init(void)
     (void)*(volatile uint32_t *) 0xA0000000;
     printf("XIP test RAM OK\n");
 #endif
+
+    printf("Linear test HyperRAM\n");
+    ram_linear_test((uint8_t *) 0xA0000000);
+
+    printf("Random test HyperRAM\n");
+    ram_random_test((uint8_t *) 0xA0800000);
 
     return ARM_DRIVER_OK;
 }
