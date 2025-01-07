@@ -148,6 +148,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66um2g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66.c>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66_o8.c>
     source/ram_test.c
     )
 
