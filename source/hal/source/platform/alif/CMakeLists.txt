@@ -150,6 +150,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66_o8.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66_o16.c>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_hyper16.c>
     source/ram_test.c
     )
 
