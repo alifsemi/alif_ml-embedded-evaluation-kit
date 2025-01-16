@@ -77,7 +77,7 @@ Other than the obvious link between the linker script and the target profile des
 CMake files, there are other parameters linked to what the reserved space for activation
 buffers is. These are:
 
-- The file [set_up_default_resources.py](../../set_up_default_resources.py) contains a
+- The file [vela_configs.py](../../scripts/py/vela_configs.py) contains a
   parameter called `mps3_max_sram_sz`:
 
   ```python

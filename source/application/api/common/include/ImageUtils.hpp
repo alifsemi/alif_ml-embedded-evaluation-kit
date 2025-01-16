@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +29,14 @@
                                      ((B8>>3) & 0x1F))
 
 constexpr uint16_t COLOR_BLACK  = 0;
-constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0, 255,  0); // 2016;
-constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255, 255,  0); // 65504;
-
+constexpr uint16_t COLOR_GREEN  = RGB888_TO_RGB565(  0, 255,   0);
+constexpr uint16_t COLOR_YELLOW = RGB888_TO_RGB565(255, 255,   0);
+constexpr uint16_t COLOR_WHITE  = RGB888_TO_RGB565(255, 255, 255);
+constexpr uint16_t COLOR_PURPLE = RGB888_TO_RGB565(128,   0, 128);
+constexpr uint16_t COLOR_BLUE   = RGB888_TO_RGB565(  0,   0, 255);
+constexpr uint16_t COLOR_MAROON = RGB888_TO_RGB565(128,   0,   0);
+constexpr uint16_t COLOR_DGREEN = RGB888_TO_RGB565(  0, 128,   0);
+constexpr uint16_t COLOR_DBLUE  = RGB888_TO_RGB565(  0,   0, 128);
 
 namespace arm {
 namespace app {

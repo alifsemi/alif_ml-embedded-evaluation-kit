@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,45 +20,45 @@
 #ifndef TIMING_ADAPTER_SETTINGS_H
 #define TIMING_ADAPTER_SETTINGS_H
 
-#cmakedefine TA0_BASE       (@TA0_BASE@)
-#cmakedefine TA1_BASE       (@TA1_BASE@)
+#cmakedefine TA_SRAM_BASE   (@TA_SRAM_BASE@)
+#cmakedefine TA_EXT_BASE    (@TA_EXT_BASE@)
 
-/* Timing adapter settings for AXI0 */
-#if defined(TA0_BASE)
+/* Timing adapter settings for SRAM */
+#if defined(TA_SRAM_BASE)
 
-#define TA0_MAXR           (@TA0_MAXR@)
-#define TA0_MAXW           (@TA0_MAXW@)
-#define TA0_MAXRW          (@TA0_MAXRW@)
-#define TA0_RLATENCY       (@TA0_RLATENCY@)
-#define TA0_WLATENCY       (@TA0_WLATENCY@)
-#define TA0_PULSE_ON       (@TA0_PULSE_ON@)
-#define TA0_PULSE_OFF      (@TA0_PULSE_OFF@)
-#define TA0_BWCAP          (@TA0_BWCAP@)
-#define TA0_PERFCTRL       (@TA0_PERFCTRL@)
-#define TA0_PERFCNT        (@TA0_PERFCNT@)
-#define TA0_MODE           (@TA0_MODE@)
-#define TA0_HISTBIN        (@TA0_HISTBIN@)
-#define TA0_HISTCNT        (@TA0_HISTCNT@)
+#define SRAM_MAXR           (@SRAM_MAXR@)
+#define SRAM_MAXW           (@SRAM_MAXW@)
+#define SRAM_MAXRW          (@SRAM_MAXRW@)
+#define SRAM_RLATENCY       (@SRAM_RLATENCY@)
+#define SRAM_WLATENCY       (@SRAM_WLATENCY@)
+#define SRAM_PULSE_ON       (@SRAM_PULSE_ON@)
+#define SRAM_PULSE_OFF      (@SRAM_PULSE_OFF@)
+#define SRAM_BWCAP          (@SRAM_BWCAP@)
+#define SRAM_PERFCTRL       (@SRAM_PERFCTRL@)
+#define SRAM_PERFCNT        (@SRAM_PERFCNT@)
+#define SRAM_MODE           (@SRAM_MODE@)
+#define SRAM_HISTBIN        (@SRAM_HISTBIN@)
+#define SRAM_HISTCNT        (@SRAM_HISTCNT@)
 
-#endif /* defined(TA0_BASE) */
+#endif /* defined(TA_SRAM_BASE) */
 
-/* Timing adapter settings for AXI1 */
-#if defined(TA1_BASE)
+/* Timing adapter settings for EXT */
+#if defined(TA_EXT_BASE)
 
-#define TA1_MAXR           (@TA1_MAXR@)
-#define TA1_MAXW           (@TA1_MAXW@)
-#define TA1_MAXRW          (@TA1_MAXRW@)
-#define TA1_RLATENCY       (@TA1_RLATENCY@)
-#define TA1_WLATENCY       (@TA1_WLATENCY@)
-#define TA1_PULSE_ON       (@TA1_PULSE_ON@)
-#define TA1_PULSE_OFF      (@TA1_PULSE_OFF@)
-#define TA1_BWCAP          (@TA1_BWCAP@)
-#define TA1_PERFCTRL       (@TA1_PERFCTRL@)
-#define TA1_PERFCNT        (@TA1_PERFCNT@)
-#define TA1_MODE           (@TA1_MODE@)
-#define TA1_HISTBIN        (@TA1_HISTBIN@)
-#define TA1_HISTCNT        (@TA1_HISTCNT@)
+#define EXT_MAXR           (@EXT_MAXR@)
+#define EXT_MAXW           (@EXT_MAXW@)
+#define EXT_MAXRW          (@EXT_MAXRW@)
+#define EXT_RLATENCY       (@EXT_RLATENCY@)
+#define EXT_WLATENCY       (@EXT_WLATENCY@)
+#define EXT_PULSE_ON       (@EXT_PULSE_ON@)
+#define EXT_PULSE_OFF      (@EXT_PULSE_OFF@)
+#define EXT_BWCAP          (@EXT_BWCAP@)
+#define EXT_PERFCTRL       (@EXT_PERFCTRL@)
+#define EXT_PERFCNT        (@EXT_PERFCNT@)
+#define EXT_MODE           (@EXT_MODE@)
+#define EXT_HISTBIN        (@EXT_HISTBIN@)
+#define EXT_HISTCNT        (@EXT_HISTCNT@)
 
-#endif /* defined(TA1_BASE) */
+#endif /* defined(TA_EXT_BASE) */
 
 #endif /* TIMING_ADAPTER_SETTINGS_H */

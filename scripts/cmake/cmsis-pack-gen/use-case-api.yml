@@ -48,12 +48,16 @@ packs:
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.23.2"}
-        - attributes: {vendor: "ARM", name: "CMSIS", version: "5.9.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.15.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS-NN", version: "4.0.0"}
+        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.24.8"}
+        - attributes: {vendor: "ARM", name: "CMSIS", version: "6.0.0"}
+        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.16.0"}
+        - attributes: {vendor: "ARM", name: "CMSIS-NN", version: "6.0.0"}
 
     releases:
+      - version: "24.8.0"
+        date: "2024-09-24"
+        description: "24.08.0 release package"
+        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack?h=refs/heads/main"
       - version: "23.2.0"
         date: "2024-05-21"
         description: "23.02.0 release package"

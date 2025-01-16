@@ -18,6 +18,7 @@
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring the build for MPS4 SSE-315](./building.md#configuring-the-build-for-mps4-sse_315)
+    - [Configuring the build for MPS4 SSE-320](./building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building with CMake Presets](./building.md#building-with-cmake-presets)
@@ -168,7 +169,7 @@ along with the network inputs.
 It also builds TensorFlow Lite for Microcontrollers library, Arm® *Ethos™-U* NPU driver library, and the CMSIS-DSP library
 from sources.
 
-The build script is parameterized to support different options (see [common_user_options.cmake](../../scripts/cmake/common_user_options.cmake)).
+The build script is parameterized to support different options (see [common_opts.cmake](../../scripts/configuration_options/common_opts.cmake)).
 Default values for these parameters configure the build for all use-cases to be executed on an MPS3 FPGA or the Fixed Virtual
 Platform (FVP) implementation of the Arm® *Corstone™-300* design.
 
@@ -198,11 +199,15 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow Lite Micro library.
-  These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted configurations.  The default values
-  points to the `dependencies/cmsis`, `dependencies/cmsis-dsp` and `dependencies/cmsis-nn` git submodules.
-  Repositories are hosted here: [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git),
-  [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
+- `CMSIS_VER`: A string parameter to indicate which version of CMSIS to use. Supported values are "5" and "6"; default
+   is "5". Note that both version of CMSIS repositories are available as git submodules and this parameter is used
+   to set the default value for `CMSIS_SRC_PATH` parameter.
+
+- `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow
+   Lite Micro library. These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted
+   configurations.  The default values point to the git submodules. Repositories are hosted here:
+   [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git), [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git),
+   [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -210,19 +215,21 @@ The build parameters are:
 - `ETHOS_U_NPU_ID`: The *Ethos-U* NPU processor:
   - `U55` (default)
   - `U65`
+  - `U85`
 
 - `ETHOS_U_NPU_MEMORY_MODE`:  The *Ethos-U* NPU memory mode:
   - `Shared_Sram` (default for *Ethos-U55* NPU)
-  - `Dedicated_Sram` (default for *Ethos-U65* NPU)
+  - `Dedicated_Sram` (default for *Ethos-U65* and *Ethos-U85* NPU)
   - `Sram_Only`
 
-  > **Note:** The `Shared_Sram` memory mode is available on both *Ethos-U55* and *Ethos-U65* NPU, `Dedicated_Sram` only
-  > for *Ethos-U65* NPU and `Sram_Only` only for *Ethos-U55* NPU.
+  > **Note:** The `Shared_Sram` memory mode is available on *Ethos-U55*, *Ethos-U65* and *Ethos-U85* NPU,
+  > `Dedicated_Sram` only for *Ethos-U65* and *Ethos-U85* NPU and `Sram_Only` only for *Ethos-U55* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
   For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
-  should be used. For Ethos-U65, it defaults to `Y256` instead. However, the user can override these
-  defaults to a configuration ID from `H32`, `H64`, `H256` and `Y512`.
+  should be used. For Ethos-U65, it defaults to `Y256` and for Ethos-U85 it defaults to `Z256`.
+  However, the user can override these defaults to a configuration ID from `H32`, `H64`, `H256`, `Y512`,
+  `Z128`, `Z512`, `Z1024` and `Z2048`.
 
   > **Note:** This ID is only used to choose which tflite file path is to be used by the CMake
   > configuration for all the use cases. If the user has overridden use-case specific model path
@@ -232,7 +239,8 @@ The build parameters are:
   > chosen configuration.
 
 - `ETHOS_U_NPU_CACHE_SIZE`: The *Ethos-U* NPU cache size used if the *Ethos-U* NPU processor selected with the option
-  `ETHOS_U_NPU_ID` is `U65`. Default value is 393216 (see [default_vela.ini](../../scripts/vela/default_vela.ini) ).
+  `ETHOS_U_NPU_ID` is `U65` or `U85`.
+  Default value is 393216 (see [default_vela.ini](../../scripts/vela/default_vela.ini) ).
 
 - `CPU_PROFILE_ENABLED`: Sets whether profiling information for the CPU core should be displayed. By default, this is
   set to false, but can be turned on for FPGA targets. The FVP and the CPU core cycle counts are **not** meaningful and
@@ -267,7 +275,8 @@ The build parameters are:
 - `TA_CONFIG_FILE`: The path to the CMake configuration file that contains the timing adapter parameters. Used only if
   the timing adapter build is enabled. Default for Ethos-U55 NPU is
   [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake),
-  for Ethos-U65 NPU is [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake).
+  for Ethos-U65 NPU is [ta_config_u55_high_end.cmake](../../scripts/timing_adapter/ta_config_u55_high_end.cmake) and
+  for Ethos-U85 NPU is [ta_config_u85_high_end.cmake](../../scripts/timing_adapter/ta_config_u85_high_end.cmake).
 
 - `TENSORFLOW_LITE_MICRO_CLEAN_BUILD`: Optional parameter to enable, or disable, "cleaning" prior to building for the
   TensorFlow Lite Micro library. Enabled by default.
@@ -324,9 +333,10 @@ repository to link against.
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [Ethos-U NPU core platform repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
-4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git)
+4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) or [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
 5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
 6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
+7. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -337,21 +347,24 @@ To pull the submodules:
 git submodule update --init
 ```
 
-This downloads all of the required components and places them in a tree, like so:
+This downloads all required components and places them in a tree under `dependencies` directory.
 
 ```tree
 dependencies
-    ├── cmsis
-    ├── cmsis-dsp
-    ├── cmsis-nn
-    ├── core-driver
-    ├── core-platform
-    └── tensorflow
+  ├── cmsis-5
+  ├── cmsis-6
+  ├── cmsis-dsp
+  ├── cmsis-nn
+  ├── core-driver
+  ├── core-platform
+  ├── cortex-dfp
+  └── tensorflow
 ```
 
-> **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all of the
+> **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all the
 > relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U_NPU_DRIVER_SRC_PATH`,
-> `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`and `CMSIS_NN_SRC_PATH`.
+> `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH` and `CORTEX_DFP_SRC_PATH`. When using `CMSIS_SRC_PATH`
+> configuration argument, ensure that `CMSIS_VER` also reflects the CMSIS version correctly. 
 
 #### Fetching resource files
 
@@ -363,8 +376,8 @@ python3 ./set_up_default_resources.py
 ```
 
 This fetches every model into the `resources_downloaded` directory. It also optimizes the models using the Vela compiler
-for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU and for the default 256 MACs configuration of the
-Arm® *Ethos™-U65* NPU.
+for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU, the default 256 MACs configuration of the
+Arm® *Ethos™-U65* NPU and the 256 MACs configuration of the Arm® *Ethos™-U85* NPU.
 
 > **Note:** This script requires Python version 3.10 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
 > are satisfied. If your environment points to system installed Python3 that is an older version than 3.10, choose the
@@ -387,15 +400,16 @@ Additional command line arguments supported by this script are:
     --additional-ethos-u-config-name ethos-u65-512
   ```
 
-  > **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones: `ethos-u55-128`
-  > and `ethosu-u65-256`.
+  > **Note:** As the argument name suggests, the configuration names are **in addition to** the default ones:
+  > `ethos-u55-128`, `ethosu-u65-256` and `ethosu-u85-256`.
 
 - `--arena-cache-size`: the size of the arena cache memory area, in bytes.
   The default value is:
   - the internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552,
   when optimizing for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU.
   - the default value specified in the Vela configuration file [default_vela.ini](../../scripts/vela/default_vela.ini),
-  when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
+  when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU
+  or the default 256 MACs configuration of the Arm® *Ethos™-U85* NPU.
 
 - `--use-case-resources-file`: Path to a JSON file pointing to resources to be downloaded. See the default
   [use_case_resources.json](../../scripts/py/use_case_resources.json) as an example.
@@ -435,7 +449,11 @@ Additional command line arguments supported by this script are:
   - `ethos-u55-128`
   - `ethos-u55-256`
   - `ethos-u65-256`
-  - `ethos-u65-512`
+  - `ethos-u65-128`
+  - `ethos-u85-256`
+  - `ethos-u85-512`
+  - `ethos-u85-1024`
+  - `ethos-u85-2048`
 - `--make-jobs`: Specifies the number of concurrent jobs to use for compilation.
   The default value is equal to the number of cores in the system.
   Lowering this value can be useful in case of limited resources.
@@ -584,7 +602,7 @@ cmake .. \
 
 ### Configuring the build for MPS4 SSE-315
 
-On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-315`,
+On Linux, execute the following command to build the application for target platform `mps4` and subsystem `sse-315`,
 using the default toolchain file for the target as `bare-metal-gcc`.
 This is equivalent to running:
 
@@ -596,6 +614,19 @@ cmake .. \
 ```
 
 > **Note:** Timing adapters are not supported for this subsystem.
+
+### Configuring the build for MPS4 SSE-320
+
+On Linux, execute the following command to build the application for target platform `mps4` and subsystem `sse-320`,
+using the default toolchain file for the target as `bare-metal-gcc`.
+This is equivalent to running:
+
+```commandline
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DTARGET_PLATFORM=mps4 \
+    -DTARGET_SUBSYSTEM=sse-320
+```
 
 ### Configuring native unit-test build
 
@@ -771,7 +802,8 @@ vela \
 The Vela command contains the following:
 
 - `--accelerator-config`: Specifies the accelerator configuration to use between `ethos-u55-256`, `ethos-u55-128`,
-  `ethos-u55-64`, `ethos-u55-32`, `ethos-u65-256`, and `ethos-u65-512`.
+  `ethos-u55-64`, `ethos-u55-32`, `ethos-u65-256`, `ethos-u65-512`, `ethos-u85-128`, `ethos-u85-256`, `ethos-u85-512`,
+  `ethos-u85-1024` and `ethos-u85-2048`.
 - `--optimise`: Sets the optimisation strategy to Performance or Size. The Size strategy results in a model minimising
   the SRAM usage whereas the Performance strategy optimises the neural network for maximal performance.
   Note that if using the Performance strategy, you can also pass the `--arena-cache-size` option to Vela.
@@ -779,7 +811,11 @@ The Vela command contains the following:
     file. An example can be found in the `dependencies` folder [default_vela.ini](../../scripts/vela/default_vela.ini).
 - `--memory-mode`: Selects the memory mode to use as specified in the Vela configuration file.
 - `--system-config`: Selects the system configuration to use as specified in the Vela configuration file:
-  `Ethos_U55_High_End_Embedded`for *Ethos-U55* and `Ethos_U65_High_End` for *Ethos-U65*.
+  `Ethos_U55_High_End_Embedded`for *Ethos-U55*, `Ethos_U65_High_End` for *Ethos-U65*,
+  `Ethos_U85_SYS_DRAM_Low` for *Ethos-U85* with 128 or 256 MACs configurations,
+  `Ethos_U85_SYS_DRAM_Mid_512` for *Ethos-U85* with 512 MACs configuration,
+  `Ethos_U85_SYS_DRAM_Mid_1024` for *Ethos-U85* with 1024 MACs configuration and
+  `Ethos_U85_SYS_DRAM_Mid_2048` for *Ethos-U85* with 2048 MACs configuration.
 
 Vela compiler accepts `.tflite` file as input and saves optimized network model as a `.tflite` file.
 
@@ -803,7 +839,7 @@ using the *Ethos-U55* High End timing adapter system configuration.
 To build for a different *Ethos-U* NPU variant:
 
 - Optimize the model with Vela compiler with the correct parameters. See [Optimize custom model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler).
-- Use the correct `ETHOS_U_NPU_ID`: `U55` for *Ethos-U55* NPU, `U65` for *Ethos-U65* NPU.
+- Use the correct `ETHOS_U_NPU_ID`: `U55` for *Ethos-U55* NPU, `U65` for *Ethos-U65* NPU or `U85` for *Ethos-U85*.
 - Use the Vela model as custom model in the building command. See [Add custom model](./building.md#add-custom-model)
 - Use the correct timing adapter settings configuration. See [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
 
