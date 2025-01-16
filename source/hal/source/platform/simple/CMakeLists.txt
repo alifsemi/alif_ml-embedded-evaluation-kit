@@ -63,7 +63,6 @@ if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
 endif()
 
-
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(${COMPONENTS_DIR}/cmsis_device ${CMAKE_BINARY_DIR}/cmsis_device)
 
@@ -88,6 +87,11 @@ add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
 
 ## Platform component: Audio interface
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
+# Add the platform headers to the CMSIS device target (provide access to platform's
+# memory map and interrupt numbers.
+target_include_directories(cmsis_device PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
 
 ## Logging utilities:
 if (NOT TARGET log)
