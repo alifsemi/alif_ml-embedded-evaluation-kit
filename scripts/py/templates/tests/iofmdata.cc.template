@@ -1,5 +1,6 @@
 {#
- SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ affiliates <open-source-office@arm.com>
  SPDX-License-Identifier: Apache-2.0
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,18 @@
 #}
 {{common_template_header}}
 
-#include "InputFiles.hpp"
+#include "{{include_h}}"
 #include "BufAttributes.hpp"
 #include <cstdint>
 
-const uint8_t {{var_name}}[] IFM_BUF_ATTRIBUTE = {
-    {{img_data|join(',\n\t')}}
+{% for namespace in namespaces %}
+namespace {{namespace}} {
+{% endfor %}
+
+const {{data_type}} {{var_name}} [{{size}}] IFM_BUF_ATTRIBUTE = {
+    {{fm_data|join(',\n\t')}}
 };
+
+{% for namespace in namespaces %}
+} /* namespace {{namespace}} */
+{% endfor %}

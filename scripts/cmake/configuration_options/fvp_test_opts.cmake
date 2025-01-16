@@ -29,6 +29,13 @@ USER_OPTION(BUILD_FVP_TESTS "Build tests for CTest driven FVP runs for built app
     OFF
     BOOL)
 
+# Assuming USE_SINGLE_INPUT (from common options) is included before these options
+# warn the developer that FVP tests may run using multiple sample files (depending on
+# the use case)
+if (${BUILD_FVP_TESTS} AND NOT ${USE_SINGLE_INPUT})
+    message(WARNING "FVP tests enabled but USE_SINGLE_INPUT is set to OFF")
+endif()
+
 if (BUILD_FVP_TESTS)
     USER_OPTION(FVP_PATH "Path to FVP for verifying execution"
     ""

@@ -245,7 +245,7 @@ cmake .. \
     -DUSE_CASE_BUILD=asr
 ```
 
-The audio flies found in the `asr_FILE_PATH` folder are picked up and automatically converted to C++ files during the
+The audio flies found in the `asr_FILE_PATH` folder are picked up and automatically converted to C files during the
 CMake configuration stage. They are then compiled into the application during the build phase for performing inference
 with.
 
@@ -255,10 +255,8 @@ The log from the configuration stage tells you what audio directory path has bee
 -- User option asr_FILE_PATH is set to /tmp/custom_wavs
 -- Generating audio files from /tmp/custom_wavs
 ++ Converting my_clip.wav to my_clip.cc
-++ Generating build/generated/asr/include/InputFiles.hpp
-++ Generating build/generated/asr/src/InputFiles.cc
--- Defined build user options:
--- asr_FILE_PATH=/tmp/custom_wavs
+++ Generating build/generated/asr/samples/sample_files.h
+++ Generating build/generated/asr/samples/sample_files.c
 ```
 
 After compiling, your custom inputs have now replaced the default ones in the application.

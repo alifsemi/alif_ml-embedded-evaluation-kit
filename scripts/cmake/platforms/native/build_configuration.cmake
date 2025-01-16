@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,6 +108,7 @@ function(platform_custom_post_build)
         message(STATUS "Adding ${TEST_SOURCES_GEN} to test sources")
         list(APPEND TEST_SOURCES ${TEST_SOURCES_GEN})
         list(APPEND TEST_RESOURCES_INCLUDE ${TEST_INC_GEN_DIR})
+        list(APPEND TEST_SOURCES ${SRC_SAMPLES})
 
         set(TEST_TARGET_NAME "${use_case}_tests")
         add_executable(${TEST_TARGET_NAME} ${TEST_SOURCES})

@@ -1,6 +1,6 @@
 #!env/bin/python3
 
-#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -100,13 +100,13 @@ def main(args):
     hdr = GenUtils.gen_header(env, args.license_template, Path(args.labels_file).name)
 
     hpp_filename = Path(args.header_folder_path) / (args.output_file_name + ".hpp")
-    env.get_template('Labels.hpp.template').stream(common_template_header=hdr,
+    env.get_template('labels/Labels.hpp.template').stream(common_template_header=hdr,
                                                    filename=args.output_file_name.upper(),
                                                    namespaces=args.namespaces) \
         .dump(str(hpp_filename))
 
     cc_filename = Path(args.source_folder_path) / (args.output_file_name + ".cc")
-    env.get_template('Labels.cc.template').stream(common_template_header=hdr,
+    env.get_template('labels/Labels.cc.template').stream(common_template_header=hdr,
                                                   labels=labels,
                                                   labelsSize=len(labels),
                                                   namespaces=args.namespaces) \

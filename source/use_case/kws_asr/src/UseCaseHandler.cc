@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,6 @@
 #include "AudioUtils.hpp"
 #include "Classifier.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "KwsProcessing.hpp"
 #include "KwsResult.hpp"
 #include "MicroNetKwsMfcc.hpp"
@@ -74,8 +74,6 @@ namespace app {
         const auto kwsMfccFrameStride = ctx.Get<int>("kwsFrameStride");
         const auto kwsScoreThreshold  = ctx.Get<float>("kwsScoreThreshold");
 
-        auto currentIndex = ctx.Get<uint32_t>("clipIndex");
-
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
@@ -123,9 +121,17 @@ namespace app {
                                                     ctx.Get<std::vector<std::string>&>("kwsLabels"),
                                                     singleInfResult);
 
+        uint32_t nElements = 0;
+        hal_audio_start();
+        auto audioData = hal_audio_get_captured_frame(&nElements);
+        if (!nElements || !audioData) {
+            debug("End of stream\n");
+            return output;
+        }
+
         /* Creating a sliding window through the whole audio clip. */
-        auto audioDataSlider = audio::SlidingWindow<const int16_t>(GetAudioArray(currentIndex),
-                                                                   GetAudioArraySize(currentIndex),
+        auto audioDataSlider = audio::SlidingWindow<const int16_t>(audioData,
+                                                                   nElements,
                                                                    preProcess.m_audioDataWindowSize,
                                                                    preProcess.m_audioDataStride);
 
@@ -136,10 +142,6 @@ namespace app {
         std::string str_inf{"Running KWS inference... "};
         hal_lcd_display_text(
             str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
-
-        info("Running KWS inference on audio clip %" PRIu32 " => %s\n",
-             currentIndex,
-             GetFilename(currentIndex));
 
         /* Start sliding through audio clip. */
         while (audioDataSlider.HasNext()) {
@@ -178,7 +180,7 @@ namespace app {
                 singleInfResult[0].m_normalisedVal > kwsScoreThreshold) {
                 output.asrAudioStart = inferenceWindow + preProcess.m_audioDataWindowSize;
                 output.asrAudioSamples =
-                    GetAudioArraySize(currentIndex) -
+                    nElements -
                     (audioDataSlider.NextWindowStartIndex() - preProcess.m_audioDataStride +
                      preProcess.m_audioDataWindowSize);
                 break;
@@ -372,20 +374,17 @@ namespace app {
     }
 
     /* KWS and ASR inference handler. */
-    bool ClassifyAudioHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
+    bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
         hal_lcd_clear(COLOR_BLACK);
-
-        /* If the request has a valid size, set the audio index. */
-        if (clipIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, clipIndex, "kws_asr")) {
-                return false;
-            }
+        hal_audio_init();
+        if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
+                                 HAL_AUDIO_FORMAT_16KHZ_MONO_16BIT)) {
+            printf_err("Failed to configure audio\n");
+            return false;
         }
 
-        auto startClipIdx = ctx.Get<uint32_t>("clipIndex");
-
-        do {
+        while (true) {
             KWSOutput kwsOutput = doKws(ctx);
             if (!kwsOutput.executionSuccess) {
                 printf_err("KWS failed\n");
@@ -399,11 +398,7 @@ namespace app {
                     return false;
                 }
             }
-
-            IncrementAppCtxIfmIdx(ctx, "kws_asr");
-
-        } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
-
+        } /* while */
         return true;
     }
 

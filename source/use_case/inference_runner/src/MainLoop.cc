@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,13 +52,7 @@ extern size_t GetModelLen();
 } /* namespace app */
 } /* namespace arm */
 
-enum opcodes
-{
-    MENU_OPT_RUN_INF_NEXT = 1,       /* Run on next vector. */
-    MENU_OPT_SHOW_MODEL_INFO,        /* Show model info. */
-};
-
-void main_loop()
+void MainLoop()
 {
     arm::app::TestModel model;  /* Model wrapper object. */
 
@@ -76,7 +71,6 @@ void main_loop()
     arm::app::Profiler profiler{"inference_runner"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
 
     /* Loop. */
     if (RunInferenceHandler(caseContext)) {

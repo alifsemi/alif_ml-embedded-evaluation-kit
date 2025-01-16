@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,82 +55,6 @@ TEST_CASE("Model info")
     REQUIRE(model.ShowModelInfoHandler());
 }
 
-
-TEST_CASE("Inference by index")
-{
-    /* Initialise the HAL and platform. */
-    hal_platform_init();
-
-    /* Model wrapper object. */
-    arm::app::MicroNetKwsModel model;
-
-    /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen()));
-
-    /* Instantiate application context. */
-    arm::app::ApplicationContext caseContext;
-
-    arm::app::Profiler profiler{"kws"};
-    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);  /* 640 sample length for MicroNetKws. */
-    caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);  /* 320 sample stride for MicroNetKws. */
-    caseContext.Set<float>("scoreThreshold", 0.5);       /* Normalised score threshold. */
-
-    arm::app::Classifier classifier;                     /* classifier wrapper object. */
-    caseContext.Set<arm::app::Classifier&>("classifier", classifier);
-
-    auto checker = [&](uint32_t audioIndex, std::vector<uint32_t> labelIndex)
-    {
-        caseContext.Set<uint32_t>("clipIndex", audioIndex);
-
-        std::vector<std::string> labels;
-        GetLabelsVector(labels);
-        caseContext.Set<const std::vector<std::string> &>("labels", labels);
-
-        REQUIRE(arm::app::ClassifyAudioHandler(caseContext, audioIndex, false));
-        REQUIRE(caseContext.Has("results"));
-
-        auto results = caseContext.Get<std::vector<arm::app::kws::KwsResult>>("results");
-
-        REQUIRE(results.size() == labelIndex.size());
-
-        for (size_t i = 0; i < results.size(); i++ ) {
-            REQUIRE(results[i].m_resultVec.size());
-            REQUIRE(results[i].m_resultVec[0].m_labelIdx == labelIndex[i]);
-        }
-
-    };
-
-    SECTION("Index = 0, short clip down")
-    {
-        /* Result: down. */
-        checker(0, {0});
-    }
-
-    SECTION("Index = 1, long clip right->left->up")
-    {
-        /* Result: right->right->left->up->up. */
-        checker(1, {6, 6, 2, 8, 8});
-    }
-
-    SECTION("Index = 2, short clip yes")
-    {
-        /* Result: yes. */
-        checker(2, {9});
-    }
-
-    SECTION("Index = 3, long clip yes->no->go->stop")
-    {
-        /* Result: yes->no->no->go->go->stop->stop. */
-        checker(3, {9, 3, 3, 1, 1, 7, 7});
-    }
-}
-
-
 TEST_CASE("Inference run all clips")
 {
     /* Initialise the HAL and platform. */
@@ -150,7 +75,6 @@ TEST_CASE("Inference run all clips")
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("clipIndex", 0);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);  /* 640 sample length for MicroNet. */
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);  /* 320 sample stride for MicroNet. */
     caseContext.Set<float>("scoreThreshold", 0.7);       /* Normalised score threshold. */
@@ -160,28 +84,5 @@ TEST_CASE("Inference run all clips")
     std::vector <std::string> labels;
     GetLabelsVector(labels);
     caseContext.Set<const std::vector <std::string>&>("labels", labels);
-    REQUIRE(arm::app::ClassifyAudioHandler(caseContext, 0, true));
-}
-
-
-TEST_CASE("List all audio clips")
-{
-   /* Initialise the HAL and platform. */
-    hal_platform_init();
-
-    /* Model wrapper object. */
-    arm::app::MicroNetKwsModel model;
-
-    /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen()));
-
-    /* Instantiate application context. */
-    arm::app::ApplicationContext caseContext;
-
-    caseContext.Set<arm::app::Model&>("model", model);
-
-    REQUIRE(arm::app::ListFilesHandler(caseContext));
+    REQUIRE(arm::app::ClassifyAudioHandler(caseContext));
 }

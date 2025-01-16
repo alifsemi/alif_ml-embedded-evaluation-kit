@@ -78,7 +78,8 @@ Software components written in C/C++ may use the language features allowed and i
 
   ```copyright
   /*
-  * SPDX-FileCopyrightText: Copyright <years additions were made to project> <your name>, Arm Limited and/or its affiliates <open-source-office@arm.com>
+  * SPDX-FileCopyrightText: Copyright <years additions were made to project> <your name>, Arm Limited and/or its
+  * affiliates <open-source-office@arm.com>
   * SPDX-License-Identifier: Apache-2.0
   *
   * Licensed under the Apache License, Version 2.0 (the "License");

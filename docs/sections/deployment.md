@@ -216,18 +216,19 @@ FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
     ./bin/mps4-sse-315/ethos-u-<use_case>.axf
    ```
 
-Once the FVP reports waiting on telnet connections, connect to the first server port from another terminal.
+By default, there is no interaction on telnet needed and the application output can be directed to standard output by
+using an FVP option:
+
+- `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
+- `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
+
+Otherwise, once the FVP reports waiting on telnet connections, connect to the first server port from another terminal.
 Assuming the FVP has the telnet server running at the default port 5000, connect to it by:
 
 ```commandline
 telnet localhost 5000
 ```
 
-For applications that are configured with `USE_SINGLE_INPUT` CMake option, there is no interaction on telnet needed and
-the application output can be directed to standard output by using an FVP option:
-
-- `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
-- `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
 
 > **NOTE**: Dockerfile, provided within the repository, contains useful environment variables pre-assigned with
 > above arguments. These can be used directly from command-line. For example, to run MPS4 Arm® Corstone™-315 based

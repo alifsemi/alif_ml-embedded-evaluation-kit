@@ -99,7 +99,7 @@ int arm_ethosu_npu_init(void)
 
     /* Initialise Ethos-U device */
     void* const ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
-    info("Initialising Ethos-U device@0x%" PRIx32 "\n", ETHOS_U_BASE_ADDR);
+    info("Initialising Ethos-U device@0x%" PRIx32 "\n", (uint32_t)(ETHOS_U_BASE_ADDR));
 
     if (0 != (err = ethosu_init(&ethosu_drv,         /* Ethos-U driver device pointer */
                                 ethosu_base_address, /* Ethos-U NPU's base address. */

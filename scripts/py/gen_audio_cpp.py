@@ -1,4 +1,5 @@
-#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023-2024 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +23,14 @@ import datetime
 import glob
 import math
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from pathlib import Path
+import typing
 
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
 
-from gen_utils import GenUtils, AudioSample
+from gen_utils import GenUtils
 
 # pylint: disable=duplicate-code
 parser = ArgumentParser()
@@ -39,15 +42,9 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--source_folder_path",
+    "--package_gen_dir",
     type=str,
-    help="path to source folder to be generated."
-)
-
-parser.add_argument(
-    "--header_folder_path",
-    type=str,
-    help="path to header folder to be generated."
+    help="path to directory to be generated."
 )
 
 parser.add_argument(
@@ -111,98 +108,67 @@ env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
                   trim_blocks=True,
                   lstrip_blocks=True)
 
-
 # pylint: enable=duplicate-code
+@dataclass
+class AudioParams:
+    """
+    Parameters for audio data
+    """
+    num_audio_files: int
+    audio_names_sizes: typing.List[tuple]
+    audio_filenames: typing.List[str]
+    sampling_rate: int
+    num_channels: int
+
 def write_hpp_file(
-        header_filepath,
-        header,
-        num_audios,
-        audio_array_namesizes
+        header_filepath: Path,
+        header: str,
+        audio_params: AudioParams
 ):
     """
     Write audio hpp file
 
     @param header_filepath:         .hpp filepath
     @param header:                  Rendered header
-    @param num_audios:              Audio file index
-    @param audio_array_namesizes:   Audio array name sizes
+    @param audio_params:            Audio parameters
     """
     print(f"++ Generating {header_filepath}")
 
     env \
-        .get_template('AudioClips.hpp.template') \
+        .get_template('sample-data/audio/audio_clips.h.template') \
         .stream(common_template_header=header,
-                clips_count=num_audios,
-                varname_size=audio_array_namesizes) \
+                clips_count=audio_params.num_audio_files,
+                varname_size=audio_params.audio_names_sizes,
+                sampling_rate=audio_params.sampling_rate,
+                n_channels=audio_params.num_channels) \
         .dump(str(header_filepath))
 
 
 def write_cc_file(
-        cc_filepath,
-        header,
-        num_audios,
-        audio_filenames,
-        audio_array_namesizes
+        cc_filepath: Path,
+        header: str,
+        audio_params: AudioParams,
+        header_filename: str
 ):
     """
     Write cc file
 
     @param cc_filepath:             .cc filepath
     @param header:                  Rendered header
-    @param num_audios:              Audio file index
-    @param audio_filenames:         Audio filenames
-    @param audio_array_namesizes:   Audio array name sizes
+    @param audio_params:            Audio parameters
+    @param header_filename:         Name of the common header file to be included
     """
     print(f"++ Generating {cc_filepath}")
 
     env \
-        .get_template('AudioClips.cc.template') \
+        .get_template('sample-data/audio/audio_clips.c.template') \
         .stream(common_template_header=header,
-                clips_count=num_audios,
-                var_names=(name for name, _ in audio_array_namesizes),
-                clip_sizes=(size for _, size in audio_array_namesizes),
-                clip_names=audio_filenames) \
+                clips_count=audio_params.num_audio_files,
+                var_names=(name for name, _ in audio_params.audio_names_sizes),
+                clip_sizes=(size for _, size in audio_params.audio_names_sizes),
+                clip_names=audio_params.audio_filenames,
+                header_filename=header_filename) \
         .dump(str(cc_filepath))
-
-
-def write_individual_audio_cc_file(
-        resampled_audio: AudioSample,
-        clip_filename,
-        cc_filename,
-        header_template_file,
-        array_name
-):
-    """
-    Writes the provided audio sample to a .cc file
-
-    @param resampled_audio:         Audio sample to write
-    @param clip_filename:           File name of the clip
-    @param cc_filename:             File name of the .cc file
-    @param header_template_file:    Header template
-    @param array_name:              Name of the array to write
-    @return:                        Array length of the audio data written
-    """
-    print(f"++ Converting {clip_filename} to {Path(cc_filename).name}")
-
-    # Change from [-1, 1] fp32 range to int16 range.
-    clip_data = np.clip((resampled_audio.data * (1 << 15)),
-                        np.iinfo(np.int16).min,
-                        np.iinfo(np.int16).max).flatten().astype(np.int16)
-
-    hdr = GenUtils.gen_header(env, header_template_file, clip_filename)
-
-    hex_line_generator = (', '.join(map(hex, sub_arr))
-                          for sub_arr in np.array_split(clip_data, math.ceil(len(clip_data) / 20)))
-
-    env \
-        .get_template('audio.cc.template') \
-        .stream(common_template_header=hdr,
-                size=len(clip_data),
-                var_name=array_name,
-                audio_data=hex_line_generator) \
-        .dump(str(cc_filename))
-
-    return len(clip_data)
 
 
 def create_audio_cc_file(args, filename, array_name, clip_dirpath):
@@ -215,16 +181,34 @@ def create_audio_cc_file(args, filename, array_name, clip_dirpath):
     @param clip_dirpath:    Audio file directory path
     @return:                Array length of the audio data written
     """
-    cc_filename = (Path(args.source_folder_path) /
-                   (Path(filename).stem.replace(" ", "_") + ".cc"))
+    cc_filename = (Path(args.package_gen_dir) /
+                   (Path(filename).stem.replace(" ", "_") + ".c"))
     audio_filepath = Path(clip_dirpath) / filename
     audio_sample = GenUtils.read_audio_file(audio_filepath, args.offset, args.duration)
     resampled_audio = GenUtils.resample_audio_clip(
         audio_sample, args.sampling_rate, args.mono, args.res_type, args.min_samples
     )
-    return write_individual_audio_cc_file(
-        resampled_audio, filename, cc_filename, args.license_template, array_name,
-    )
+
+    print(f"++ Converting {filename} to {Path(cc_filename).name}")
+
+    # Change from [-1, 1] fp32 range to int16 range.
+    clip_data = np.clip((resampled_audio.data * (1 << 15)),
+                        np.iinfo(np.int16).min,
+                        np.iinfo(np.int16).max).flatten().astype(np.int16)
+
+    hdr = GenUtils.gen_header(env, args.license_template, filename)
+    hex_line_generator = (', '.join(map(hex, sub_arr))
+                          for sub_arr in np.array_split(clip_data, math.ceil(len(clip_data) / 20)))
+
+    env \
+        .get_template('sample-data/audio/audio.c.template') \
+        .stream(common_template_header=hdr,
+                size=len(clip_data),
+                var_name=array_name,
+                audio_data=hex_line_generator) \
+        .dump(str(cc_filename))
+
+    return len(clip_data)
 
 
 def main(args):
@@ -236,10 +220,9 @@ def main(args):
     audioclip_idx = 0
     audioclip_filenames = []
     audioclip_array_names = []
-    header_filename = "InputFiles.hpp"
-    common_cc_filename = "InputFiles.cc"
-    header_filepath = Path(args.header_folder_path) / header_filename
-    common_cc_filepath = Path(args.source_folder_path) / common_cc_filename
+    header_filename = "sample_files.h"
+    header_filepath = Path(args.package_gen_dir) / header_filename
+    common_cc_filepath = Path(args.package_gen_dir) / "sample_files.c"
 
     if Path(args.audio_path).is_dir():
         filepaths = sorted(glob.glob(str(Path(args.audio_path) / '**/*.wav'), recursive=True))
@@ -256,7 +239,10 @@ def main(args):
 
             # Save the cc file
             array_name = "audio" + str(audioclip_idx)
-            array_size = create_audio_cc_file(args, filename, array_name, clip_dirpath)
+            array_size = create_audio_cc_file(args,
+                                              filename,
+                                              array_name,
+                                              clip_dirpath)
 
             audioclip_array_names.append((array_name, array_size))
             # Increment audio index
@@ -271,20 +257,23 @@ def main(args):
             .render(script_name=Path(__file__).name,
                     gen_time=datetime.datetime.now(),
                     year=datetime.datetime.now().year)
+        audio_params = AudioParams(num_audio_files=len(audioclip_filenames),
+                                   audio_names_sizes=audioclip_array_names,
+                                   audio_filenames=audioclip_filenames,
+                                   sampling_rate=args.sampling_rate,
+                                   num_channels=1 if args.mono else 2)
 
         write_hpp_file(
             header_filepath,
             header,
-            audioclip_idx,
-            audioclip_array_names
+            audio_params
         )
 
         write_cc_file(
             common_cc_filepath,
             header,
-            audioclip_idx,
-            audioclip_filenames,
-            audioclip_array_names
+            audio_params,
+            header_filename
         )
 
     else:

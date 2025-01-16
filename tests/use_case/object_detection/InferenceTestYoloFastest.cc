@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +18,9 @@
 #include "BufAttributes.hpp"
 #include "DetectorPostProcessing.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "TensorFlowLiteMicro.hpp"
 #include "YoloFastestModel.hpp"
+#include "hal.h"
 #include "log_macros.h"
 
 namespace arm {
@@ -66,8 +67,7 @@ bool RunInference(arm::app::Model& model, const uint8_t imageData[])
     TfLiteTensor* inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz =
-        inputTensor->bytes < IMAGE_DATA_SIZE ? inputTensor->bytes : IMAGE_DATA_SIZE;
+    const size_t copySz = inputTensor->bytes;
 
     arm::app::image::RgbToGrayscale(imageData, inputTensor->data.uint8, copySz);
 
@@ -79,11 +79,15 @@ bool RunInference(arm::app::Model& model, const uint8_t imageData[])
 }
 
 template <typename T>
-void TestInferenceDetectionResults(int imageIdx, arm::app::Model& model, T tolerance)
+bool TestInferenceDetectionResults(size_t imageIdx, arm::app::Model& model, T tolerance)
 {
-
     std::vector<arm::app::object_detection::DetectionResult> results;
-    auto image = GetImgArray(imageIdx);
+    uint32_t capturedFrameSize = 0;
+    hal_camera_start();
+    const uint8_t* image = hal_camera_get_captured_frame(&capturedFrameSize);
+    if (!image || !capturedFrameSize) {
+        return false;
+    }
 
     TfLiteIntArray* inputShape = model.GetInputShape(0);
     auto nCols                 = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
@@ -125,6 +129,8 @@ void TestInferenceDetectionResults(int imageIdx, arm::app::Model& model, T toler
         REQUIRE(static_cast<int>(results[i].m_h) ==
                 Approx(static_cast<int>((T)expected_results[imageIdx][i].m_h)).epsilon(tolerance));
     }
+
+    return true;
 }
 
 TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[YoloFastest]")
@@ -140,24 +146,24 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
                            arm::app::object_detection::GetModelLen()));
         REQUIRE(model.IsInited());
 
-        for (uint32_t i = 0; i < NUMBER_OF_FILES; ++i) {
-            TestInferenceDetectionResults<uint8_t>(i, model, 1);
-        }
-    }
+        TfLiteIntArray* inputShape = model.GetInputShape(0);
 
-    for (uint32_t i = 0; i < NUMBER_OF_FILES; ++i) {
-        DYNAMIC_SECTION("Executing inference with re-init")
-        {
-            arm::app::YoloFastestModel model{};
+        const int inputImgCols = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
+        const int inputImgRows = inputShape->data[arm::app::YoloFastestModel::ms_inputRowsIdx];
 
-            REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init(arm::app::tensorArena,
-                               sizeof(arm::app::tensorArena),
-                               arm::app::object_detection::GetModelPointer(),
-                               arm::app::object_detection::GetModelLen()));
-            REQUIRE(model.IsInited());
+        hal_camera_init();
+        auto bCamera = hal_camera_configure(inputImgCols,
+            inputImgRows,
+            HAL_CAMERA_MODE_SINGLE_FRAME,
+            HAL_CAMERA_COLOUR_FORMAT_RGB888);
 
-            TestInferenceDetectionResults<uint8_t>(i, model, 1);
+        REQUIRE(bCamera);
+
+        size_t imageIdx = 0;
+        while (true) {
+            if (!TestInferenceDetectionResults<uint8_t>(imageIdx++, model, 1)) {
+                break;
+            }
         }
     }
 }

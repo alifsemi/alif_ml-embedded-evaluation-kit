@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,6 @@
 #include "UseCaseHandler.hpp"
 #include "AudioUtils.hpp"
 #include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "RNNoiseFeatureProcessor.hpp"
 #include "RNNoiseModel.hpp"
 #include "RNNoiseProcessing.hpp"
@@ -28,14 +28,8 @@
 namespace arm {
 namespace app {
 
-    /**
-     * @brief            Helper function to increment current audio clip features index.
-     * @param[in,out]    ctx   Pointer to the application context object.
-     **/
-    static void IncrementAppCtxClipIdx(ApplicationContext& ctx);
-
     /* Noise reduction inference handler. */
-    bool NoiseReductionHandler(ApplicationContext& ctx, bool runAll)
+    bool NoiseReductionHandler(ApplicationContext& ctx)
     {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
@@ -75,44 +69,43 @@ namespace app {
             return false;
         }
 
+        if (memDumpMaxLen > 0 && !memDumpBaseAddr) {
+            return false;
+        }
+
         TfLiteTensor* outputTensor = model.GetOutputTensor(model.m_indexForModelOutput);
 
-        /* Initial choice of index for WAV file. */
-        auto startClipIdx = ctx.Get<uint32_t>("clipIndex");
+        hal_audio_init();
+        if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
+                                 HAL_AUDIO_FORMAT_48KHZ_MONO_16BIT)) {
+            printf_err("Failed to configure audio\n");
+            return false;
+        }
 
-        std::function<const int16_t*(const uint32_t)> audioAccessorFunc = GetAudioArray;
-        if (ctx.Has("features")) {
-            audioAccessorFunc = ctx.Get<std::function<const int16_t*(const uint32_t)>>("features");
-        }
-        std::function<uint32_t(const uint32_t)> audioSizeAccessorFunc = GetAudioArraySize;
-        if (ctx.Has("featureSizes")) {
-            audioSizeAccessorFunc =
-                ctx.Get<std::function<uint32_t(const uint32_t)>>("featureSizes");
-        }
-        std::function<const char*(const uint32_t)> audioFileAccessorFunc = GetFilename;
-        if (ctx.Has("featureFileNames")) {
-            audioFileAccessorFunc =
-                ctx.Get<std::function<const char*(const uint32_t)>>("featureFileNames");
-        }
-        do {
+        uint32_t loopCount = 0;
+
+        while (true) {
+            uint32_t nElements = 0;
+            hal_audio_start();
+            auto audioData = hal_audio_get_captured_frame(&nElements);
+            if (!nElements || !audioData) {
+                debug("End of stream\n");
+                break;
+            }
+
             hal_lcd_clear(COLOR_BLACK);
 
             auto startDumpAddress = memDumpBaseAddr + memDumpBytesWritten;
-            auto currentIndex     = ctx.Get<uint32_t>("clipIndex");
 
             /* Creating a sliding window through the audio. */
             auto audioDataSlider =
-                audio::SlidingWindow<const int16_t>(audioAccessorFunc(currentIndex),
-                                                    audioSizeAccessorFunc(currentIndex),
+                audio::SlidingWindow<const int16_t>(audioData,
+                                                    nElements,
                                                     audioFrameLen,
                                                     audioFrameStride);
-
-            info("Running inference on input feature map %" PRIu32 " => %s\n",
-                 currentIndex,
-                 audioFileAccessorFunc(currentIndex));
-
+            std::string audioFileName = "loop" + std::to_string(loopCount++);
             memDumpBytesWritten +=
-                DumpDenoisedAudioHeader(audioFileAccessorFunc(currentIndex),
+                DumpDenoisedAudioHeader(audioFileName.c_str(),
                                         (audioDataSlider.TotalStrides() + 1) * audioFrameLen,
                                         memDumpBaseAddr + memDumpBytesWritten,
                                         memDumpMaxLen - memDumpBytesWritten);
@@ -208,7 +201,6 @@ namespace app {
 
             info("All inferences for audio clip complete.\n");
             profiler.PrintProfilingResult();
-            IncrementAppCtxClipIdx(ctx);
 
             std::string clearString{' '};
             hal_lcd_display_text(clearString.c_str(),
@@ -226,7 +218,7 @@ namespace app {
                                  dataPsnTxtInfStartY,
                                  false);
 
-        } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
+        }
 
         return true;
     }
@@ -355,17 +347,5 @@ namespace app {
 
         return numBytesWritten;
     }
-
-    static void IncrementAppCtxClipIdx(ApplicationContext& ctx)
-    {
-        auto curClipIdx = ctx.Get<uint32_t>("clipIndex");
-        if (curClipIdx + 1 >= NUMBER_OF_FILES) {
-            ctx.Set<uint32_t>("clipIndex", 0);
-            return;
-        }
-        ++curClipIdx;
-        ctx.Set<uint32_t>("clipIndex", curClipIdx);
-    }
-
 } /* namespace app */
 } /* namespace arm */

@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +18,10 @@
 #include "UseCaseHandler.hpp"
 
 #include "AdMelSpectrogram.hpp"
-#include "AdModel.hpp"
 #include "AdProcessing.hpp"
 #include "AudioUtils.hpp"
-#include "Classifier.hpp"
-#include "ImageUtils.hpp"
-#include "InputFiles.hpp"
 #include "UseCaseCommonUtils.hpp"
+#include "ImageUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
 
@@ -39,28 +37,13 @@ namespace app {
      **/
     static bool PresentInferenceResult(float result, float threshold);
 
-    /** @brief      Given a wav file name return AD model output index.
-     *  @param[in]  wavFileName Audio WAV filename.
-     *                          File name should be in format anything_goes_XX_here.wav
-     *                          where XX is the machine ID e.g. 00, 02, 04 or 06
-     *  @return     AD model output index as 8 bit integer.
-     **/
-    static int8_t OutputIndexFromFileName(std::string wavFileName);
-
     /* Anomaly Detection inference handler */
-    bool ClassifyVibrationHandler(ApplicationContext& ctx, uint32_t clipIndex, bool runAll)
+    bool ClassifyVibrationHandler(ApplicationContext& ctx)
     {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
         auto& model = ctx.Get<Model&>("model");
-
-        /* If the request has a valid size, set the audio index */
-        if (clipIndex < NUMBER_OF_FILES) {
-            if (!SetAppCtxIfmIdx(ctx, clipIndex, "clipIndex")) {
-                return false;
-            }
-        }
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -71,7 +54,6 @@ namespace app {
         const auto melSpecFrameStride = ctx.Get<uint32_t>("frameStride");
         const auto scoreThreshold     = ctx.Get<float>("scoreThreshold");
         const auto trainingMean       = ctx.Get<float>("trainingMean");
-        auto startClipIdx             = ctx.Get<uint32_t>("clipIndex");
 
         TfLiteTensor* outputTensor = model.GetOutputTensor(0);
         TfLiteTensor* inputTensor  = model.GetInputTensor(0);
@@ -82,24 +64,30 @@ namespace app {
         }
 
         AdPreProcess preProcess{inputTensor, melSpecFrameLength, melSpecFrameStride, trainingMean};
-
         AdPostProcess postProcess{outputTensor};
+        uint32_t machineOutputIndex = 0; /* default sample */
 
-        do {
+        hal_audio_init();
+        if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
+                                 HAL_AUDIO_FORMAT_16KHZ_MONO_16BIT)) {
+            printf_err("Failed to configure audio\n");
+            return false;
+        }
+
+        while (true) {
             hal_lcd_clear(COLOR_BLACK);
-
-            auto currentIndex = ctx.Get<uint32_t>("clipIndex");
-
-            /* Get the output index to look at based on id in the filename. */
-            int8_t machineOutputIndex = OutputIndexFromFileName(GetFilename(currentIndex));
-            if (machineOutputIndex == -1) {
-                return false;
+            uint32_t nElements = 0;
+            hal_audio_start();
+            auto audioData = hal_audio_get_captured_frame(&nElements);
+            if (!nElements || !audioData) {
+                debug("End of stream\n");
+                break;
             }
 
             /* Creating a sliding window through the whole audio clip. */
             auto audioDataSlider =
-                audio::SlidingWindow<const int16_t>(GetAudioArray(currentIndex),
-                                                    GetAudioArraySize(currentIndex),
+                audio::SlidingWindow<const int16_t>(audioData,
+                                                    nElements,
                                                     preProcess.GetAudioWindowSize(),
                                                     preProcess.GetAudioDataStride());
 
@@ -110,10 +98,6 @@ namespace app {
             std::string str_inf{"Running inference... "};
             hal_lcd_display_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
-
-            info("Running inference on audio clip %" PRIu32 " => %s\n",
-                 currentIndex,
-                 GetFilename(currentIndex));
 
             /* Start sliding through audio clip. */
             while (audioDataSlider.HasNext()) {
@@ -153,10 +137,7 @@ namespace app {
             }
 
             profiler.PrintProfilingResult();
-
-            IncrementAppCtxIfmIdx(ctx, "clipIndex");
-
-        } while (runAll && ctx.Get<uint32_t>("clipIndex") != startClipIdx);
+        }
 
         return true;
     }
@@ -193,51 +174,5 @@ namespace app {
 
         return true;
     }
-
-    static int8_t OutputIndexFromFileName(std::string wavFileName)
-    {
-        /* Filename is assumed in the form machine_id_00.wav */
-        std::string delimiter = "_"; /* First character used to split the file name up. */
-        size_t delimiterStart;
-        std::string subString;
-        size_t machineIdxInString =
-            3; /* Which part of the file name the machine id should be at. */
-
-        for (size_t i = 0; i < machineIdxInString; ++i) {
-            delimiterStart = wavFileName.find(delimiter);
-            subString      = wavFileName.substr(0, delimiterStart);
-            wavFileName.erase(0, delimiterStart + delimiter.length());
-        }
-
-        /* At this point substring should be 00.wav */
-        delimiter      = "."; /* Second character used to split the file name up. */
-        delimiterStart = subString.find(delimiter);
-        subString =
-            (delimiterStart != std::string::npos) ? subString.substr(0, delimiterStart) : subString;
-
-        auto is_number = [](const std::string& str) -> bool {
-            std::string::const_iterator it = str.begin();
-            while (it != str.end() && std::isdigit(*it))
-                ++it;
-            return !str.empty() && it == str.end();
-        };
-
-        const int8_t machineIdx = is_number(subString) ? std::stoi(subString) : -1;
-
-        /* Return corresponding index in the output vector. */
-        if (machineIdx == 0) {
-            return 0;
-        } else if (machineIdx == 2) {
-            return 1;
-        } else if (machineIdx == 4) {
-            return 2;
-        } else if (machineIdx == 6) {
-            return 3;
-        } else {
-            printf_err("%d is an invalid machine index \n", machineIdx);
-            return -1;
-        }
-    }
-
 } /* namespace app */
 } /* namespace arm */
