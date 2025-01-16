@@ -289,7 +289,7 @@ function(setup_source_generator)
 
     # If environment is not found, find the required Python version
     # and create it.
-    find_package(Python3 3.9
+    find_package(Python3 3.10
             COMPONENTS Interpreter
             REQUIRED)
 

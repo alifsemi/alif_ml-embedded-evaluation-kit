@@ -40,7 +40,7 @@ from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 from scripts.py.vela_configs import NpuConfigs, NpuConfig
 
 # Supported version of Python and Vela
-VELA_VERSION = "3.12.0"
+VELA_VERSION = "4.0.0"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
