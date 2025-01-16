@@ -80,9 +80,9 @@ void ethosu_pmu_init(void)
     counters->num_total_counters = ETHOSU_PROFILER_NUM_COUNTERS;
 
 #if defined(ETHOSU55) || defined(ETHOSU65)
-    counters->npu_evt_counters[0].event_type = ETHOSU_PMU_NPU_IDLE;
+    counters->npu_evt_counters[0].event_type = ETHOSU_PMU_NPU_ACTIVE;
     counters->npu_evt_counters[0].event_mask = ETHOSU_PMU_CNT1_Msk;
-    counters->npu_evt_counters[0].name       = "NPU IDLE";
+    counters->npu_evt_counters[0].name       = "NPU ACTIVE";
     counters->npu_evt_counters[0].unit       = unit_cycles;
 
     counters->npu_evt_counters[1].event_type = ETHOSU_PMU_AXI0_RD_DATA_BEAT_RECEIVED;
@@ -127,7 +127,7 @@ void ethosu_pmu_init(void)
 #endif /* defined(ETHOSU55) || defined(ETHOSU65) */
 
 #if ETHOSU_DERIVED_NCOUNTERS >= 1
-    counters->npu_derived_counters[0].name = "NPU ACTIVE";
+    counters->npu_derived_counters[0].name = "NPU IDLE";
     counters->npu_derived_counters[0].unit = unit_cycles;
 #endif /* ETHOSU_DERIVED_NCOUNTERS >= 1 */
 
@@ -190,9 +190,9 @@ ethosu_pmu_counters ethosu_get_pmu_counters(void)
 
     /* Derived counters */
 #if ETHOSU_DERIVED_NCOUNTERS >= 1
-    if (counters->npu_evt_counters[0].event_type == ETHOSU_PMU_NPU_IDLE) {
+    if (counters->npu_evt_counters[0].event_type == ETHOSU_PMU_NPU_ACTIVE) {
 
-        /* Compute the active count */
+        /* Compute the idle count */
         counters->npu_derived_counters[0].counter_value =
             counters->npu_total_ccnt - counters->npu_evt_counters[0].counter_value;
     }
