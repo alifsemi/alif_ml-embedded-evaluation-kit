@@ -12,6 +12,7 @@
   - [Testing and benchmarking](./documentation.md#testing-and-benchmarking)
   - [Memory Considerations](./documentation.md#memory-considerations)
   - [Troubleshooting](./documentation.md#troubleshooting)
+  - [Using MLEK as a dependency](./documentation.md#using-mlek-as-a-dependency)
   - [Appendix](./documentation.md#appendix)
   - [Contributing](./documentation.md#contributing)
   - [FAQ](./documentation.md#faq)
@@ -393,6 +394,10 @@ For further information, please see:
   - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
   - [No matching distribution found for ethos-u-vela==3.3.0](./sections/troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
     - [How to update Python3 package to newer version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
+
+## Using MLEK as a dependency
+
+Please see [MLEK as a dependency](./sections/mlek_as_a_dependency.md)
 
 ## Appendix
 
