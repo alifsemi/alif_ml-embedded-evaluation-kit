@@ -118,9 +118,9 @@ python3.10 ./build_default.py
 >
 > | *Ethos™-U* NPU | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
 > |----------------|-----------------|-------------------------|---------------------|------------------------------|
-> | *Ethos™-U55*   | 128             | 32, 64, 256             |     Shared_Sram     |          Sram_Only           |
-> | *Ethos™-U65*   | 256             | 512                     |    Dedicated_Sram   |         Shared_Sram          |
-> | *Ethos™-U85*   | 256             | 128, 512, 1024, 2048    |    Dedicated_Sram   |         Shared_Sram          |
+> | *Ethos™-U55*   | 128             | 32, 64, 256             | Shared_Sram         | Sram_Only                    |
+> | *Ethos™-U65*   | 256             | 512                     | Dedicated_Sram      | Sram_Only, Shared_Sram       |
+> | *Ethos™-U85*   | 256             | 128, 512, 1024, 2048    | Dedicated_Sram      | Sram_Only, Shared_Sram       |
 >
 > For more information see [Building](./docs/documentation.md#building).
 

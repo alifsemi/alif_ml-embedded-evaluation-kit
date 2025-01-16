@@ -199,15 +199,11 @@ The build parameters are:
   `dependencies/core-driver` git submodule. Repository is hosted here:
   [ethos-u-core-driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver).
 
-- `CMSIS_VER`: A string parameter to indicate which version of CMSIS to use. Supported values are "5" and "6"; default
-   is "5". Note that both version of CMSIS repositories are available as git submodules and this parameter is used
-   to set the default value for `CMSIS_SRC_PATH` parameter.
-
 - `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH`: Paths to the CMSIS sources to be used to build TensorFlow
    Lite Micro library. These parameters are optional and are only valid for Arm® *Cortex®-M* CPU targeted
    configurations.  The default values point to the git submodules. Repositories are hosted here:
-   [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git), [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git),
-   [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP) and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
+   [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git), [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP)
+   and [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git).
 
 - `ETHOS_U_NPU_ENABLED`: Sets whether the use of *Ethos-U* NPU is available for the deployment target. By default, this
   is set and therefore application is built with *Ethos-U* NPU supported.
@@ -222,8 +218,9 @@ The build parameters are:
   - `Dedicated_Sram` (default for *Ethos-U65* and *Ethos-U85* NPU)
   - `Sram_Only`
 
-  > **Note:** The `Shared_Sram` memory mode is available on *Ethos-U55*, *Ethos-U65* and *Ethos-U85* NPU,
-  > `Dedicated_Sram` only for *Ethos-U65* and *Ethos-U85* NPU and `Sram_Only` only for *Ethos-U55* NPU.
+  > **Note:** The `Sram_Only` and `Shared_Sram` memory modes are available on
+  > *Ethos-U55*, *Ethos-U65* and *Ethos-U85* NPU,
+  > and `Dedicated_Sram` only for *Ethos-U65* and *Ethos-U85* NPU.
 
 - `ETHOS_U_NPU_CONFIG_ID`: This parameter is set by default based on the value of `ETHOS_U_NPU_ID`.
   For Ethos-U55, it defaults to the `H128` indicating that the Ethos-U55 128 MAC optimised model
@@ -287,11 +284,20 @@ The build parameters are:
 - `USE_SINGLE_INPUT`: Sets whether each use case will use a single default input sample file. This is useful for
    quicker functional testing especially for CI tests. Disabled by default.
 
-- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications on the Corstone-300 FVP. Tests will
+- `BUILD_FVP_TESTS`: Specifies whether to generate tests for built applications targeted to run on the FVP. Tests will
   be generated for all use-cases. It is recommended to set `USE_SINGLE_INPUT` to `ON` when using this option.
 
 - `FVP_PATH`: The path to the FVP to be used for testing built applications. This option is available only if
 `BUILD_FVP_TESTS` option is switched `ON`.
+
+- `FVP_VSI_ENABLED`: Configures the build for applications to use
+  [Virtual Streaming Interface](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi.html) (VSI)
+  available for FVP targets. Read more about VSI requirements [here](./deployment.md#vsi-requirements) and about
+  deployment [here](./deployment.md#deployment-with-virtual-streaming-interface). Note that enabling this option will
+  conflict with `BUILD_FVP_TESTS`.
+
+- `FVP_VSI_SRC_PATH`: If `FVP_VSI_ENABLED` is `ON`, this cache variable defaults to the git submodule for AVH
+   repository. This directory is expected to provide the VSI driver sources and Python scripts.
 
 - `RESOURCES_PATH`: The path to the resources downloaded by the set_up_default_resources.py script
   and compiled using Vela.  This can be set if this script was run using the `--downloads-dir` flag to
@@ -332,7 +338,7 @@ repository to link against.
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
 2. [Ethos-U NPU core driver repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-driver)
 3. [Ethos-U NPU core platform repository](https://review.mlplatform.org/admin/repos/ml/ethos-u/ethos-u-core-platform)
-4. [CMSIS-5](https://github.com/ARM-software/CMSIS_5.git) or [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
+4. [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
 5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
 6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 7. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)

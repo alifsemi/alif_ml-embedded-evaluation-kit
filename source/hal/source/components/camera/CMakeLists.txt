@@ -29,7 +29,7 @@ add_library(hal_camera_interface INTERFACE)
 target_include_directories(hal_camera_interface INTERFACE include)
 
 option(HAL_CAMERA_LOOP "Loop static data infinitely" OFF)
-add_library(hal_camera_static_images STATIC)
+add_library(hal_camera_static_images STATIC EXCLUDE_FROM_ALL)
 target_sources(hal_camera_static_images PRIVATE
     source/hal_camera_static.c
     source/hal_camera_static_external.c)
@@ -37,6 +37,31 @@ target_include_directories(hal_camera_static_images PRIVATE source)
 target_link_libraries(hal_camera_static_images PUBLIC hal_camera_interface log)
 target_compile_definitions(hal_camera_static_images PRIVATE
         $<$<BOOL:${HAL_CAMERA_LOOP}>:HAL_CAMERA_LOOP>)
+
+if (${FVP_VSI_ENABLED})
+    if (NOT DEFINED DYNAMIC_IFM_BASE OR NOT DEFINED DYNAMIC_IFM_SIZE)
+        message(FATAL_ERROR "DYNAMIC_IFM_BASE and DYNAMIC_IFM_SIZE should be defined for VSI")
+    endif()
+
+    # Include VSI helper to bring in virtual_streaming_interface target.
+    include(vsi)
+
+    # Create HAL camera VSI library
+    add_library(hal_camera_vsi STATIC EXCLUDE_FROM_ALL source/hal_camera_vsi.c)
+    target_link_libraries(hal_camera_vsi PUBLIC
+        hal_camera_interface
+        log
+        virtual_streaming_interface)
+    target_compile_definitions(hal_camera_vsi PRIVATE
+        DYNAMIC_IFM_BASE=${DYNAMIC_IFM_BASE}
+        DYNAMIC_IFM_SIZE=${DYNAMIC_IFM_SIZE})
+
+    # Supress unused section linker warning for Arm Compiler
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
+        target_link_options(hal_camera_vsi INTERFACE
+            --diag_suppress=L6329W)
+    endif()
+endif()
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

@@ -103,8 +103,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         log
         platform_pmu
         lcd_stubs
-        hal_camera_static_images
         hal_audio_static_streams
+        hal_camera_static_images
         audio_stubs
         image_stubs
         $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)

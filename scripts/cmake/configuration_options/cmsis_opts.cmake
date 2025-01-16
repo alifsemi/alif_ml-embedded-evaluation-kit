@@ -25,15 +25,9 @@ include(util_functions)
 
 message(STATUS "Assessing CMSIS configuration options...")
 
-USER_OPTION(CMSIS_VER
-    "CMSIS version to use (5 or 6)"
-    "5"
-    STRING)
-set_property(CACHE CMSIS_VER PROPERTY STRINGS "5" "6")
-
 USER_OPTION(CMSIS_SRC_PATH
     "Path to CMSIS sources"
-    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-${CMSIS_VER}"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-6"
     PATH)
 
 USER_OPTION(CMSIS_DSP_SRC_PATH

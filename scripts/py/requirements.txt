@@ -7,7 +7,7 @@ llvmlite==0.43.0
 lxml==5.3.0
 MarkupSafe==3.0.2
 numba==0.60.0
-numpy==2.0.2
+numpy==1.26.4
 pillow==11.0.0
 pycparser==2.22
 resampy==0.4.3

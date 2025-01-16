@@ -31,7 +31,7 @@ function(set_platform_global_defaults)
 
     # Include NPU, FVP tests and CMSIS configuration options
     include(npu_opts)
-    include(fvp_test_opts)
+    include(fvp_opts)
     include(cmsis_opts)
 
     if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)

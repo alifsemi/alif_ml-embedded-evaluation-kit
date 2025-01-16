@@ -28,7 +28,7 @@ conventions.
 
 The following sign indicates the important conventions to apply:
 
-> **Convention:** The code is developed using `C++14` and `C99` standards.
+> **Convention:** The code is developed using `C++17` and `C11` standards.
 
 ## Software project description
 

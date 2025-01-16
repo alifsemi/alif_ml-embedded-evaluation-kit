@@ -63,10 +63,12 @@ namespace app {
     /**
      * @brief           Performs the KWS pipeline.
      * @param[in,out]   ctx   pointer to the application context object
+     * @param[in]       audioBuffer Pointer to audio data buffer
+     * @param[in]       nElements   Number of elements in the audio buffer
      * @return          struct containing pointer to audio data where ASR should begin
      *                  and how much data to process.
      **/
-    static KWSOutput doKws(ApplicationContext& ctx)
+    static KWSOutput doKws(ApplicationContext& ctx, const int16_t* audioBuffer, uint32_t nElements)
     {
         auto& profiler                = ctx.Get<Profiler&>("profiler");
         auto& kwsModel                = ctx.Get<Model&>("kwsModel");
@@ -121,16 +123,8 @@ namespace app {
                                                     ctx.Get<std::vector<std::string>&>("kwsLabels"),
                                                     singleInfResult);
 
-        uint32_t nElements = 0;
-        hal_audio_start();
-        auto audioData = hal_audio_get_captured_frame(&nElements);
-        if (!nElements || !audioData) {
-            debug("End of stream\n");
-            return output;
-        }
-
         /* Creating a sliding window through the whole audio clip. */
-        auto audioDataSlider = audio::SlidingWindow<const int16_t>(audioData,
+        auto audioDataSlider = audio::SlidingWindow<const int16_t>(audioBuffer,
                                                                    nElements,
                                                                    preProcess.m_audioDataWindowSize,
                                                                    preProcess.m_audioDataStride);
@@ -383,9 +377,18 @@ namespace app {
             printf_err("Failed to configure audio\n");
             return false;
         }
+        hal_audio_start();
 
         while (true) {
-            KWSOutput kwsOutput = doKws(ctx);
+            uint32_t nElements = 0;
+            auto audioData = hal_audio_get_captured_frame(&nElements);
+
+            if (!nElements || !audioData) {
+                debug("End of stream\n");
+                break;
+            }
+
+            KWSOutput kwsOutput = doKws(ctx, audioData, nElements);
             if (!kwsOutput.executionSuccess) {
                 printf_err("KWS failed\n");
                 return false;

@@ -49,20 +49,41 @@ set(SRAM_HISTBIN    "0"        CACHE STRING "Controls which histogram bin (0-15)
 set(SRAM_HISTCNT    "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
 
 # Timing adapter settings for EXT
-set(EXT_MAXR        "64"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(EXT_MAXW        "32"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
-set(EXT_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
-set(EXT_RLATENCY    "500"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
-set(EXT_WLATENCY    "250"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
-set(EXT_PULSE_ON    "4000"     CACHE STRING "No. of cycles addresses let through (0-65535).")
-set(EXT_PULSE_OFF   "1000"     CACHE STRING "No. of cycles addresses blocked (0-65535).")
-set(EXT_BWCAP       "3750"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
-set(EXT_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
-set(EXT_PERFCNT     "0"        CACHE STRING "32-bit event counter")
-set(EXT_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
-                                            Bit 1: 1=enable random AR reordering (0=default);
-                                            Bit 2: 1=enable random R reordering (0=default);
-                                            Bit 3: 1=enable random B reordering (0=default);
-                                            Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
-set(EXT_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
-set(EXT_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+# If Memory mode is Sram_Only Timing adapter settings for EXT need to match the same as SRAM
+if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
+    set(EXT_MAXR        ${SRAM_MAXR}         CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(EXT_MAXW        ${SRAM_MAXW}         CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(EXT_MAXRW       ${SRAM_MAXRW}        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(EXT_RLATENCY    ${SRAM_RLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(EXT_WLATENCY    ${SRAM_WLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(EXT_PULSE_ON    ${SRAM_PULSE_ON}     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(EXT_PULSE_OFF   ${SRAM_PULSE_OFF}    CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(EXT_BWCAP       ${SRAM_BWCAP}        CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(EXT_PERFCTRL    ${SRAM_PERFCTRL}     CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(EXT_PERFCNT     ${SRAM_PERFCNT}      CACHE STRING "32-bit event counter")
+    set(EXT_MODE        ${SRAM_MODE}         CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                          Bit 1: 1=enable random AR reordering (0=default);
+                                                          Bit 2: 1=enable random R reordering (0=default);
+                                                          Bit 3: 1=enable random B reordering (0=default);
+                                                          Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(EXT_HISTBIN     ${SRAM_HISTBIN}      CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(EXT_HISTCNT     ${SRAM_HISTCNT}      CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+else ()
+    set(EXT_MAXR        "64"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(EXT_MAXW        "32"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(EXT_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(EXT_RLATENCY    "500"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(EXT_WLATENCY    "250"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(EXT_PULSE_ON    "4000"     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(EXT_PULSE_OFF   "1000"     CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(EXT_BWCAP       "3750"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(EXT_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(EXT_PERFCNT     "0"        CACHE STRING "32-bit event counter")
+    set(EXT_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                Bit 1: 1=enable random AR reordering (0=default);
+                                                Bit 2: 1=enable random R reordering (0=default);
+                                                Bit 3: 1=enable random B reordering (0=default);
+                                                Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(EXT_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(EXT_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+endif ()

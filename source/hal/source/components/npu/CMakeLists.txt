@@ -68,29 +68,21 @@ if (NOT DEFINED ETHOS_U_NPU_PORTS)
 endif()
 
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-    if (ETHOS_U_NPU_ID STREQUAL U55)
-        set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
-    else ()
-        message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. `sram_only` can be used only for Ethos-U55.")
-    endif ()
+    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
     # Shared Sram can be used for Ethos-U55 and Ethos-U65
     set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
     # Dedicated Sram is used only for Ethos-U65 and Ethos-U85
     if (ETHOS_U_NPU_ID STREQUAL U65 OR ETHOS_U_NPU_ID STREQUAL U85)
-        list(
-                APPEND
-                ETHOS_U_NPU_MEMORY_MODE_FLAG
-                "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM"
-                "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}"
-        )
+        list(APPEND ETHOS_U_NPU_MEMORY_MODE_FLAG
+            "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_DEDICATED_SRAM"
+            "-DETHOS_U_NPU_CACHE_SIZE=${ETHOS_U_NPU_CACHE_SIZE}")
     else ()
-        message(
-                FATAL_ERROR
-                "Non compatible Ethos-U NPU memory mode and processor ${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. "
-                "`dedicated_sram` can be used only for Ethos-U65 or Ethos-U85."
-        )
+        message(FATAL_ERROR
+            "Non compatible Ethos-U NPU memory mode and processor "
+            "${ETHOS_U_NPU_MEMORY_MODE} - ${ETHOS_U_NPU_ID}. "
+            "`dedicated_sram` can be used only for Ethos-U65 or Ethos-U85.")
     endif ()
 else ()
     message(FATAL_ERROR "Non compatible Ethos-U NPU memory mode ${ETHOS_U_NPU_MEMORY_MODE}")
@@ -120,26 +112,33 @@ endif()
 #
 if (ETHOS_U_NPU_PORTS EQUAL 2)
 # Common definitions:
-# For Ethos-U55/U65, Region configs are set as:
-#   0 or 1 = AXI0
-#   2 or 3 = AXI1
+# For Ethos-U55/U65/U85, region configs are set as:
+#   0 or 1 = AXI0 set
+#   2 or 3 = AXI1 set
 target_compile_definitions(ethosu_core_driver PRIVATE
-    NPU_QCONFIG=3       # AXI1=M1 for U55/U65
-    NPU_REGIONCFG_0=3   # AXI1=M1 for U55/U65
-    NPU_REGIONCFG_2=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_3=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_4=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_5=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_6=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_7=1)  # AXI0=M0 for U55/U65
+    NPU_REGIONCFG_2=1   # AXI0=M0
+    NPU_REGIONCFG_3=1   # AXI0=M0
+    NPU_REGIONCFG_4=1   # AXI0=M0
+    NPU_REGIONCFG_5=1   # AXI0=M0
+    NPU_REGIONCFG_6=1   # AXI0=M0
+    NPU_REGIONCFG_7=1)  # AXI0=M0
 
 # Definitions relevant for all NPUs but depend on memory mode
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
     target_compile_definitions(ethosu_core_driver PRIVATE
-        NPU_REGIONCFG_1=3)   # AXI1=M1 for U55/U65
+        NPU_QCONFIG=3       # AXI1=M1
+        NPU_REGIONCFG_0=3   # AXI1=M1
+        NPU_REGIONCFG_1=3)  # AXI1=M1
+elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
+    target_compile_definitions(ethosu_core_driver PRIVATE
+        NPU_QCONFIG=3       # AXI1=M1
+        NPU_REGIONCFG_0=3   # AXI1=M1
+        NPU_REGIONCFG_1=0)  # AXI0=M0
 else()
     target_compile_definitions(ethosu_core_driver PRIVATE
-        NPU_REGIONCFG_1=0)   # AXI0=M0 for U55/U65
+        NPU_QCONFIG=0       # AXI0=M0
+        NPU_REGIONCFG_0=0   # AXI0=M0
+        NPU_REGIONCFG_1=0)  # AXI0=M0
 endif()
 else()
 target_compile_definitions(ethosu_core_driver PRIVATE
@@ -160,26 +159,26 @@ endif()
 # maximum burst length for all NPU configurations.
 if (ETHOS_U_NPU_ID STREQUAL U55 OR ETHOS_U_NPU_ID STREQUAL U65)
     target_compile_definitions(ethosu_core_driver PRIVATE
-            AXI_LIMIT0_MAX_BEATS_BYTES=1
-            AXI_LIMIT1_MAX_BEATS_BYTES=1
-            AXI_LIMIT2_MAX_BEATS_BYTES=1
-            AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
+        AXI_LIMIT0_MAX_BEATS_BYTES=1
+        AXI_LIMIT1_MAX_BEATS_BYTES=1
+        AXI_LIMIT2_MAX_BEATS_BYTES=1
+        AXI_LIMIT3_MAX_BEATS_BYTES=1) # 0 = 64 byte burst & 1 = 128 byte burst
     # Use "normal" (modifiable) transactions, improving interconnect transit
     target_compile_definitions(ethosu_core_driver PRIVATE
-            AXI_LIMIT0_MEM_TYPE=2
-            AXI_LIMIT1_MEM_TYPE=2
-            AXI_LIMIT2_MEM_TYPE=2
-            AXI_LIMIT3_MEM_TYPE=2) # 2 = Normal Non-cacheable Non-bufferable
+        AXI_LIMIT0_MEM_TYPE=2
+        AXI_LIMIT1_MEM_TYPE=2
+        AXI_LIMIT2_MEM_TYPE=2
+        AXI_LIMIT3_MEM_TYPE=2) # 2 = Normal Non-cacheable Non-bufferable
 elseif (ETHOS_U_NPU_ID STREQUAL U85)
     target_compile_definitions(ethosu_core_driver PRIVATE
-            AXI_LIMIT_SRAM_MAX_BEATS=2
-            AXI_LIMIT_EXT_MAX_BEATS=2) # 0 = 64 byte burst, 1 = 128 byte burst, 2 = 256 byte burst
+        AXI_LIMIT_SRAM_MAX_BEATS=2
+        AXI_LIMIT_EXT_MAX_BEATS=2) # 0 = 64 byte burst, 1 = 128 byte burst, 2 = 256 byte burst
     # Use "normal" (modifiable) transactions, improving interconnect transit
     target_compile_definitions(ethosu_core_driver PRIVATE
-            NPU_MEM_ATTR_0=0x20  # Normal Non-cacheable Non-bufferable, SRAM ports
-            NPU_MEM_ATTR_1=0x20  # Normal Non-cacheable Non-bufferable, SRAM ports
-            NPU_MEM_ATTR_2=0x24  # Normal Non-cacheable Non-bufferable, EXT ports
-            NPU_MEM_ATTR_3=0x24) # Normal Non-cacheable Non-bufferable, EXT ports
+        NPU_MEM_ATTR_0=0x20  # Normal Non-cacheable Non-bufferable, SRAM ports
+        NPU_MEM_ATTR_1=0x20  # Normal Non-cacheable Non-bufferable, SRAM ports
+        NPU_MEM_ATTR_2=0x24  # Normal Non-cacheable Non-bufferable, EXT ports
+        NPU_MEM_ATTR_3=0x24) # Normal Non-cacheable Non-bufferable, EXT ports
 endif()
 
 # Use "normal" (modifiable) transactions, improving interconnect transit
@@ -223,9 +222,9 @@ if (TARGET rte_components)
         rte_components)
 else()
     message(WARNING
-            "rte_components target not defined."
-            "${ETHOS_U_NPU_COMPONENT} will need to be provided access to"
-            "RTE_Compnents.h header to include CPU specific definitions.")
+        "rte_components target not defined."
+        "${ETHOS_U_NPU_COMPONENT} will need to be provided access to"
+        "RTE_Compnents.h header to include CPU specific definitions.")
 endif()
 
 target_compile_definitions(${ETHOS_U_NPU_COMPONENT}
@@ -240,5 +239,5 @@ target_compile_definitions(${ETHOS_U_NPU_COMPONENT}
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${ETHOS_U_NPU_COMPONENT})
+message(STATUS "Library                 : " ${ETHOS_U_NPU_COMPONENT})
 message(STATUS "*******************************************************")

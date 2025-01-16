@@ -151,8 +151,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     cmsis_device
     platform_pmu
     lcd_mps3
-    hal_camera_static_images
     hal_audio_static_streams
+    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,hal_camera_static_images>
     audio_stubs
     image_stubs
     $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_cmsdk,stdout>)
