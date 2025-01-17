@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -315,7 +315,6 @@ bool arm::app::Model::ShowModelInfoHandler()
         return false;
     }
 
-    PrintTensorFlowVersion();
     info("Model address: 0x%p", this->ModelPointer());
     info("Model size:      %" PRIu32 " bytes.", this->ModelSize());
     info("Model info:\n");

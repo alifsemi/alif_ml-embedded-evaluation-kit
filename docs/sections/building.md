@@ -17,6 +17,7 @@
       - [Generating project for Arm Development Studio](./building.md#generating-project-for-arm-development-studio)
       - [Configuring with custom TPIP dependencies](./building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring the build for MPS3 SSE-310](./building.md#configuring-the-build-for-mps3-sse_310)
+    - [Configuring the build for MPS4 SSE-315](./building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building with CMake Presets](./building.md#building-with-cmake-presets)
@@ -180,11 +181,11 @@ The build parameters are:
   - `simple_platform`
 
 - `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target.
-  For `mps3` target these sub-systems are available:
-  - `sse-300`: this is the default, see [Arm® Corstone™-300](https://developer.arm.com/Processors/Corstone-300)
-  - `sse-310`: See [Arm® Corstone™-310](https://developer.arm.com/Processors/Corstone-310)
-  For `mps4` target:
-  - `sse-315`: See [Arm® Corstone™-315](https://developer.arm.com/Processors/Corstone-315)
+  - For `mps3` target these sub-systems are available:
+    - `sse-300`: this is the default, see [Arm® Corstone™-300](https://developer.arm.com/Processors/Corstone-300)
+    - `sse-310`: See [Arm® Corstone™-310](https://developer.arm.com/Processors/Corstone-310)
+  - For `mps4` target:
+    - `sse-315`: See [Arm® Corstone™-315](https://developer.arm.com/Processors/Corstone-315)
 
 - `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the default toolchain file used for the
   build. All the valid toolchain files are located in the scripts directory. For example, see:
@@ -396,6 +397,14 @@ Additional command line arguments supported by this script are:
   - the default value specified in the Vela configuration file [default_vela.ini](../../scripts/vela/default_vela.ini),
   when optimizing for the default 256 MACs configuration of the Arm® *Ethos™-U65* NPU.
 
+- `--use-case-resources-file`: Path to a JSON file pointing to resources to be downloaded. See the default
+  [use_case_resources.json](../../scripts/py/use_case_resources.json) as an example.
+
+- `--downloads-dir`: Root directory where the resources are downloaded.
+
+> **NOTE**: If you provide a different location by providing `downloads-dir` option, ensure `RESOURCES_PATH` is set
+> correctly for the associated CMake configuration. See [build options](building.md#build-options) for details.
+
 ### Building for default configuration
 
 A helper script `build_default.py` is provided to configure and build all the applications. It configures the project
@@ -561,19 +570,32 @@ cmake .. \
 ### Configuring the build for MPS3 SSE-310
 
 On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-310`,
-using the default toolchain file for the target as `bare-metal-gcc` and the default *Ethos-U55* timing adapter settings.
+using the default toolchain file for the target as `bare-metal-gcc`.
 This is equivalent to running:
 
 ```commandline
 cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
     -DTARGET_PLATFORM=mps3 \
-    -DTARGET_SUBSYSTEM=sse-310 \
-    -DTA_CONFIG_FILE=scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake
+    -DTARGET_SUBSYSTEM=sse-310
 ```
 
-> **Note:** Only *Ethos-U55* timing adapter settings can be used.
-> *Ethos-U65* is not supported for this subsystem.
+> **Note:** Timing adapters are not supported for this subsystem.
+
+### Configuring the build for MPS4 SSE-315
+
+On Linux, execute the following command to build the application for target platform `mps3` and subsystem `sse-315`,
+using the default toolchain file for the target as `bare-metal-gcc`.
+This is equivalent to running:
+
+```commandline
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DTARGET_PLATFORM=mps4 \
+    -DTARGET_SUBSYSTEM=sse-315
+```
+
+> **Note:** Timing adapters are not supported for this subsystem.
 
 ### Configuring native unit-test build
 

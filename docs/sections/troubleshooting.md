@@ -6,8 +6,8 @@
   - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.9.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [No matching distribution found for ethos-u-vela==4.0.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
+    - [How to update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
   - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
   - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
   - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
@@ -137,8 +137,8 @@ ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.9
 ERROR: No matching distribution found for ethos-u-vela==3.9.0
 ```
 
-Ensure that the minimum Python 3.9 requirement is installed, and it's the default version.
-Check your current installed version of Python by running:
+We recommend using Python 3.10 at minimum.  Ensure that Python 3.10 is installed,
+and it's the default version. Check your current installed version of Python by running:
 
 ```commandline
 python3 --version
@@ -153,21 +153,32 @@ python3 --version
    ```
 
    For example:
-
+b
    ```log
-   Python 3.6.9
+   Python 3.8.0
    ```
 
-2. Install the Python 3.9 packages necessary on the system:
+2. Install the Python 3.10 packages necessary on the system:
 
    ```commandline
-   sudo apt-get install python3.9 python3.9-venv libpython3.9 libpython3.9-dev
+   sudo apt update
+   sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
    ```
+
+    If the above fails, try installing from the deadsnakes PPA:
+
+    ```commandline
+    sudo apt update
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo apt update
+    sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
+    ```
 
 3. Explicitly specify this Python when executing the set-up Python scripts. For example:
 
     ```commandline
-    python3.9 ./set_up_default_resources.py
+    python3.10 ./set_up_default_resources.py
     ```
 > **Note:**: We do not recommend updating the Python version system-wide as it might break
 > various desktop utilities for your OS distribution. However, if you are using a container
@@ -176,8 +187,8 @@ python3 --version
 > * Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
 >
 >   ```commandline
->   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
->   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2
 >   ```
 >
 > * At the prompt, update the configuration by selecting Python3.9 as the chosen default alternative:
@@ -185,14 +196,14 @@ python3 --version
 >   ```commandline
 >   sudo update-alternatives --config python3
 >   ```
-> * Python3.9 is now set as default, you can check it by running:
+> * Python3.10 is now set as default, you can check it by running:
 >
 >   ```commandline
 >   python3 --version
 >   ```
 >
 >   ```log
->   Python 3.9.0
+>   Python 3.10.0
 >   ```
 
 Next section of the documentation: [Appendix](appendix.md).
@@ -206,7 +217,7 @@ The virtual environment was not created successfully because ensurepip is not
 available.  On Debian/Ubuntu systems, you need to install the python3-venv
 package using the following command.
 
-    apt install python3.9-venv
+    apt install python3.10-venv
 
 You may need to use sudo with that command.  After installing the python3-venv
 package, recreate your virtual environment.
@@ -234,7 +245,7 @@ You can fix this error by installing Python virtual environment and removing the
 rm -r resources_downloaded
 ```
 
-Follow the instructions to [update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+Follow the instructions to [update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
 before attempting a rebuild with:
 
 ```commandline

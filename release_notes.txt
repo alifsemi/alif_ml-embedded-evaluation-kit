@@ -1,3 +1,9 @@
+Changes in 24.08
+    * Support for 24.08 NPU components and dependencies (core-driver, core-platform, Vela 4.0.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
+    * Added BatchMatMul to all-ops resolver
+    * Test file generation supports types other than int8
+    * Setup script now allows download location to be specified
+
 Changes in 24.05
     * Support for 24.05 NPU components and dependencies (core-driver, core-platform, Vela 3.12.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
     * CMSIS pack refresh - version from 23.02 added

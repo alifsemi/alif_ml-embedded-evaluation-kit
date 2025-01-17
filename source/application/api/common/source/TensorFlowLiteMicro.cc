@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +17,28 @@
  */
 #include "TensorFlowLiteMicro.hpp"
 
-void PrintTensorFlowVersion()
-{}
+/* If target is arm-none-eabi and arch profile is 'M', wire the logging for
+ * TensorFlow Lite Micro */
+#if defined(__arm__) && (__ARM_ARCH_PROFILE == 77)
+#include "tensorflow/lite/micro/cortex_m_generic/debug_log_callback.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+static void TFLMLog(const char *s) {
+    printf("TFLM - %s\n", s);
+}
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
+
+void EnableTFLMLog()
+{
+    RegisterDebugLogCallback(TFLMLog);
+}
+#else /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) */
+void EnableTFLMLog() {}
+#endif /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) */
 
 arm::app::QuantParams arm::app::GetTensorQuantParams(TfLiteTensor* tensor)
 {
@@ -38,16 +59,4 @@ arm::app::QuantParams arm::app::GetTensorQuantParams(TfLiteTensor* tensor)
         }
     }
     return params;
-}
-
-/**
- * @brief   String logging functionality expected to be defined
- *          by TensorFlow Lite Micro's error reporter.
- * @param[in]   format   Pointer to the format.
- * @param[in]   args     Argument list.
- */
-extern "C" __attribute__((__weak__))
-void DebugLog(const char* format, va_list args)
-{
-    vprintf(format, args);
 }
