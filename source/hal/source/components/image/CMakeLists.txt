@@ -78,7 +78,7 @@ endif()
 target_link_libraries(${IMAGE_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${IMAGE_IFACE_TARGET}
     log
-    cmsis_ensemble
+    cmsis_device
     platform_drivers_core
     rte_components)
 

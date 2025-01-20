@@ -191,7 +191,7 @@ endif()
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
     log
     platform_pmu
-    cmsis_ensemble
+    cmsis_device
     rte_components
 )
 

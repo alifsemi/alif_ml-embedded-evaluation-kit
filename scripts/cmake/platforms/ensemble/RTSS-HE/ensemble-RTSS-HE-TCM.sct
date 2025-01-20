@@ -64,7 +64,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    *(.init_array)
    *liblvgl.a(+RO)
    *libArm-2D.a(+RO)
-   *libcmsis_ensemble.a(+RO)
+   *libcmsis_device.a(+RO)
    *libensemble_services.a(+RO)
    *liblcd_*.a(+RO)
    *libimage_*.a(+RO)

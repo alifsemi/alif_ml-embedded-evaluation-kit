@@ -61,7 +61,7 @@ SECTIONS
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
-    *libcmsis_ensemble.a:*(.text* .rodata*)
+    *libcmsis_device.a:*(.text* .rodata*)
     *libensemble_services.a:*(.text* .rodata*)
     *liblcd_*.a:*(.text* .rodata*)
     *libimage_*.a:*(.text* .rodata*)

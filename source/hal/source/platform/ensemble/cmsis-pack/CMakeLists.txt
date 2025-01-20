@@ -1,4 +1,4 @@
-set(CMSIS_DEVICE_TARGET cmsis_ensemble)
+set(CMSIS_DEVICE_TARGET cmsis_device)
 set(CPU_HEADER_TARGET rte_components)
 
 project(${CMSIS_DEVICE_TARGET}

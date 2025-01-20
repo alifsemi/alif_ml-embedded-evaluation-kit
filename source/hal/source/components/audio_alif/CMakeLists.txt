@@ -74,7 +74,7 @@ endif()
 target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
     log
-    cmsis_ensemble
+    cmsis_device
     rte_components)
 
 target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PRIVATE
