@@ -170,7 +170,7 @@ void GLCD_SetTextColor(unsigned short color)
     text_dsc.sel_color.full = color;
 }
 
-void GLCD_SetBGColor(unsigned short color)
+void GLCD_SetBackColor(unsigned short color)
 {
     text_dsc.sel_bg_color.full = color;
 }
