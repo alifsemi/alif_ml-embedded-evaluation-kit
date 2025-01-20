@@ -51,6 +51,12 @@ target_include_directories(${ARM_2D_TARGET} PUBLIC
 
 target_compile_options(${ARM_2D_TARGET} PRIVATE -ffunction-sections)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
+    # Additional option to enable "full" floating point standard conformance
+    # (needed for NaNs and infinity).
+    target_compile_options(${ARM_2D_TARGET} PRIVATE -ffp-mode=full)
+endif()
+
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # GCC produces a lot of warnings - silence them
     # (This is public, so will silence all warnings in any Arm-2D user, but
