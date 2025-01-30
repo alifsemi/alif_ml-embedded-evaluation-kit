@@ -179,6 +179,12 @@ add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)
