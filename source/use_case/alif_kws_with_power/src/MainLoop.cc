@@ -58,7 +58,7 @@ void button2_cb(unsigned int event)
     kws_button_pressed = true;
 }
 
-void main_loop()
+void MainLoop()
 {
 #ifdef SE_SERVICES_SUPPORT
     init_trigger_tx();

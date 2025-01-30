@@ -1,1 +1,0 @@
-#define NUMBER_OF_FILES 0

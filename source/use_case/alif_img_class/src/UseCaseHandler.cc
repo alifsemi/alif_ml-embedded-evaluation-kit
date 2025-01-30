@@ -29,7 +29,6 @@
 #include "UseCaseHandler.hpp"
 
 #include "Classifier.hpp"
-#include "InputFiles.hpp"
 #include "MobileNetModel.hpp"
 #include "ImageUtils.hpp"
 #include "ScreenLayout.hpp"

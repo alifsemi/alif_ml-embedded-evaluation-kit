@@ -29,7 +29,6 @@
 #include "UseCaseHandler.hpp"
 #include "VisualWakeWordModel.hpp"
 #include "Classifier.hpp"
-#include "InputFiles.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"

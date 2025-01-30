@@ -17,7 +17,6 @@
 #include "UseCaseHandler.hpp"
 
 #include "AdModel.hpp"
-#include "InputFiles.hpp"
 #include "Classifier.hpp"
 #include "hal.h"
 #include "AdMelSpectrogram.hpp"

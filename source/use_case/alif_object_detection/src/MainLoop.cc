@@ -27,7 +27,6 @@
  * limitations under the License.
  */
 #include "hal.h"                      /* Brings in platform definitions. */
-#include "InputFiles.hpp"             /* For input images. */
 #include "YoloFastestModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
@@ -44,7 +43,7 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-void main_loop()
+void MainLoop()
 {
     init_trigger_rx();
 
