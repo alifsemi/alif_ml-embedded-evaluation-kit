@@ -131,6 +131,9 @@ void ethosu_pmu_init(void)
     counters->npu_derived_counters[0].unit = unit_cycles;
 #endif /* ETHOSU_DERIVED_NCOUNTERS >= 1 */
 
+    /* Enable PMU. */
+    ETHOSU_PMU_Enable(&ethosu_drv);
+
     for (i = 0; i < ETHOSU_USED_PMU_NCOUNTERS; ++i) {
         ETHOSU_PMU_Set_EVTYPER(&ethosu_drv, i, counters->npu_evt_counters[i].event_type);
         evt_mask |= counters->npu_evt_counters[i].event_mask;
@@ -140,9 +143,6 @@ void ethosu_pmu_init(void)
 
     /* Reset overflow status. */
     ETHOSU_PMU_Set_CNTR_OVS(&ethosu_drv, get_event_mask());
-
-    /* Enable PMU. */
-    ETHOSU_PMU_Enable(&ethosu_drv);
 
     /* Enable counters for cycle and event counters. */
     ETHOSU_PMU_CNTR_Disable(&ethosu_drv, get_event_mask());

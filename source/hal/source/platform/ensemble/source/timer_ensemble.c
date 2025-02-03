@@ -124,6 +124,9 @@ void platform_init_counters(void)
 #if defined (ARM_NPU)
     ethosu_pmu_init();
 #endif /* defined (ARM_NPU) */
+#if defined(CPU_PROFILE_ENABLED)
+    perf_cycle_count_start = Get_SysTick_Cycle_Count();
+#endif
 }
 
 void platform_final_counters(void)
@@ -136,7 +139,7 @@ void platform_final_counters(void)
 void platform_reset_counters(void)
 {
 #if defined (ARM_NPU)
-    ethosu_pmu_init();
+    ethosu_pmu_reset_counters();
 #endif /* defined (ARM_NPU) */
 #if defined(CPU_PROFILE_ENABLED)
     perf_cycle_count_start = Get_SysTick_Cycle_Count();
