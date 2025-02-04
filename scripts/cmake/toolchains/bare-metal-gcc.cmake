@@ -143,6 +143,7 @@ function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-T ${LINKER_SCRIPT_PATH}")
+    set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT_PATH})
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf
