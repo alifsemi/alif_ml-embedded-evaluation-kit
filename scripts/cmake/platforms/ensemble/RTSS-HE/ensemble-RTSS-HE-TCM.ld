@@ -27,8 +27,8 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00001000;
-__HEAP_SIZE  = 0x00007000;
+__STACK_SIZE = 0x00001800;
+__HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80480000;
 __ROM_SIZE = 0x000FF000;
 
