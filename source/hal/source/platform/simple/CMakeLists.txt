@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +40,8 @@ set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enabl
 set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
 if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-    set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-    set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+    set(TA_SRAM_BASE    "0x58103000"   CACHE STRING "Ethos-U NPU SRAM timing adapter")
+    set(TA_EXT_BASE     "0x58103200"   CACHE STRING "Ethos-U NPU EXT timing adapter")
 endif()
 
 # 2. Create static library
@@ -63,7 +63,6 @@ if (NOT DEFINED COMPONENTS_DIR)
     set(COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
 endif()
 
-
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(${COMPONENTS_DIR}/cmsis_device ${CMAKE_BINARY_DIR}/cmsis_device)
 
@@ -75,13 +74,24 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
 ## Platform component: audio
-add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
 ## Platform component: image
 add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
+# Add the platform headers to the CMSIS device target (provide access to platform's
+# memory map and interrupt numbers.
+target_include_directories(cmsis_device PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -97,6 +107,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         log
         platform_pmu
         lcd_stubs
+        hal_audio_static_streams
+        hal_camera_static_images
         audio_stubs
         image_stubs
         $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)

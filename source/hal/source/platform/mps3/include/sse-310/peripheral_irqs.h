@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,5 +131,15 @@
 #define UARTTX5_IRQn               (126)  /* UART 5 TX Interrupt                   */
 #define UART5_IRQn                 (127)  /* UART 5 combined Interrupt             */
 /* #undef HDCLCD_IRQn */
+
+/** Virtual streaming interface related definitions */
+#define ARM_VSI0_IRQn              (224) /* VSI 0 Interrupt */
+#define ARM_VSI1_IRQn              (225) /* VSI 1 Interrupt */
+#define ARM_VSI2_IRQn              (226) /* VSI 2 Interrupt */
+#define ARM_VSI3_IRQn              (227) /* VSI 3 Interrupt */
+#define ARM_VSI4_IRQn              (228) /* VSI 4 Interrupt */
+#define ARM_VSI5_IRQn              (229) /* VSI 5 Interrupt */
+#define ARM_VSI6_IRQn              (230) /* VSI 6 Interrupt */
+#define ARM_VSI7_IRQn              (231) /* VSI 7 Interrupt */
 
 #endif /* PERIPHERAL_IRQS_H */

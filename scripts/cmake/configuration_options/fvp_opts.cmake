@@ -17,7 +17,7 @@
 #----------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------
-# FVP test configuration options
+# FVP configuration options
 #----------------------------------------------------------------------------
 include_guard()
 
@@ -31,6 +31,34 @@ USER_OPTION(BUILD_FVP_TESTS "Build tests for CTest driven FVP runs for built app
 
 if (BUILD_FVP_TESTS)
     USER_OPTION(FVP_PATH "Path to FVP for verifying execution"
-    ""
-    FILEPATH)
+            ""
+            FILEPATH)
+else()
+    USER_OPTION(FVP_VSI_ENABLED "Indicates if Virtual Streaming Interface is enabled"
+        OFF
+        BOOL)
+
+    if (${FVP_VSI_ENABLED})
+        USER_OPTION(FVP_VSI_SRC_PATH "Root directory for VSI sources"
+            "${MLEK_DEPENDENCY_ROOT_DIR}/avh"
+            PATH)
+    endif()
+endif()
+
+# Assuming USE_SINGLE_INPUT (from common options) is included before these options
+# warn the developer that FVP tests may run using multiple sample files (depending on
+# the use case)
+if (BUILD_FVP_TESTS AND (NOT USE_SINGLE_INPUT))
+    message(WARNING "FVP tests enabled but USE_SINGLE_INPUT is set to OFF")
+endif()
+
+# Warn if path to sources are set but VSI is not enabled.
+if (FVP_VSI_SRC_PATH AND (NOT FVP_VSI_ENABLED))
+    message(WARNING "FVP_VSI_SRC_PATH provided but FVP_VSI_ENABLED is not set.")
+endif()
+
+# Fail if FVP tests and VSI are enabled - the tests won't ever finish executing
+# gracefully.
+if (BUILD_FVP_TESTS AND FVP_VSI_ENABLED)
+    message(FATAL_ERROR "FVP tests cannot be enabled with VSI enabled too.")
 endif()

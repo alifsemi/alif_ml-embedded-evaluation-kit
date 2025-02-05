@@ -72,11 +72,11 @@ SECTIONS
      * section for details.
      */
     *(EXCLUDE_FILE(*hal.c.obj
-                   *_allocator.o
-                   *flatbuffer*.o
+                   *_allocator*.o*
+                   *flatbuffer*.o*
                    *lcd*.obj
                    *timing_adapter.c.obj
-                   *s4*.o)
+                   *s4*.o*)
     .text*)
 
     KEEP(*(.init))
@@ -230,15 +230,15 @@ SECTIONS
 
     *hal.c.obj (*.text*)
     . = ALIGN(4);
-    *_allocator.o (*.text*)
+    *_allocator*.o* (*.text*)
     . = ALIGN(4);
-    *flatbuffer*.o (*.text*)
+    *flatbuffer*.o* (*.text*)
     . = ALIGN(4);
     *lcd*.obj (*.text*)
     . = ALIGN(4);
     *timing_adapter.* (*.text*)
     . = ALIGN(4);
-    *s4*.o (*.text*)  /* Temporary solution to move s4 operations to DDR. */
+    *s4*.o* (*.text*)  /* Temporary solution to move s4 operations to DDR. */
     . = ALIGN(4);
 
     __data_end__ = .;

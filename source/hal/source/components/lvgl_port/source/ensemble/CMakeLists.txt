@@ -53,5 +53,5 @@ target_compile_definitions(${LVGL_TARGET}
     LV_THEME_DEFAULT_DARK=${LV_THEME_DEFAULT_DARK})
 
 target_link_libraries(${LVGL_TARGET} PRIVATE
-    cmsis_ensemble
+    cmsis_device
     platform_drivers_core)

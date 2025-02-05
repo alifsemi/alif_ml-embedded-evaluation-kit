@@ -37,30 +37,37 @@ if (NOT DEFINED CMSIS_SRC_PATH)
     message(FATAL_ERROR "CMSIS_SRC_PATH path should be defined for ${CMSIS_DEVICE_TARGET}.")
 endif()
 
+if (NOT DEFINED CORTEX_DFP_SRC_PATH)
+    message(FATAL_ERROR "CORTEX_DFP_SRC_PATH path should be defined for ${CMSIS_DEVICE_TARGET}.")
+endif()
+
 # 3.1 Create an interface library for CPU header only
 add_library(${CPU_HEADER_TARGET} INTERFACE)
+
+target_compile_definitions(${CPU_HEADER_TARGET} INTERFACE
+    CMSIS_device_header=\"${CPU_HEADER_FILE}\")
 
 ## Interface include directories:
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     include
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include/Template)
+    ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Include
+    ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Config)
 
 # 3.2 Create static library
 add_library(${CMSIS_DEVICE_TARGET} STATIC)
 
 ## Sources - public
 target_sources(${CMSIS_DEVICE_TARGET}
-        PUBLIC
-        source/handlers.c)
+    PUBLIC
+    source/handlers.c)
 
 ## Sources - private
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/system_${ARM_CPU}.c
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Source/startup_${ARM_CPU}.c)
+    ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Source/system_${ARM_CPU}.c
+    ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Source/startup_${ARM_CPU}.c)
 
 # Device definition needs to be set, is checked in source files to include correct header
 target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})

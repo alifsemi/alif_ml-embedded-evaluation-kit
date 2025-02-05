@@ -16,7 +16,6 @@
  */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "Classifier.hpp"           /* Classifier. */
-#include "InputFiles.hpp"           /* For input images. */
 #include "Labels.hpp"               /* For label strings. */
 #include "VisualWakeWordModel.hpp" /* Model class for running inference. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
@@ -36,7 +35,7 @@ namespace app {
 
 using ViusalWakeWordClassifier = arm::app::Classifier;
 
-void main_loop()
+void MainLoop()
 {
     arm::app::VisualWakeWordModel model;  /* Model wrapper object. */
 

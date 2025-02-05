@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,38 +54,6 @@ TEST_CASE("Model info")
     REQUIRE(model.ShowModelInfoHandler());
 }
 
-TEST_CASE("Inference by index")
-{
-    hal_platform_init();
-
-    arm::app::VisualWakeWordModel model;    /* model wrapper object */
-
-    /* Load the model */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::vww::GetModelPointer(),
-                       arm::app::vww::GetModelLen()));
-
-    /* Instantiate application context */
-    arm::app::ApplicationContext caseContext;
-    arm::app::Profiler profiler{"pd"};
-    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
-    arm::app::Classifier classifier;    /* classifier wrapper object */
-    caseContext.Set<arm::app::Classifier&>("classifier", classifier);
-
-    std::vector <std::string> labels;
-    GetLabelsVector(labels);
-    caseContext.Set<const std::vector <std::string>&>("labels", labels);
-
-    REQUIRE(arm::app::ClassifyImageHandler(caseContext, 0, false));
-
-    auto results = caseContext.Get<std::vector<arm::app::ClassificationResult>>("results");
-
-    REQUIRE(results[0].m_labelIdx == 1);
-}
-
 TEST_CASE("Inference run all images")
 {
     /* Initialise the HAL and platform */
@@ -103,7 +72,6 @@ TEST_CASE("Inference run all images")
     arm::app::Profiler profiler{"pd"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
     arm::app::Classifier classifier;    /* classifier wrapper object */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
 
@@ -111,26 +79,5 @@ TEST_CASE("Inference run all images")
     GetLabelsVector(labels);
     caseContext.Set<const std::vector <std::string>&>("labels", labels);
 
-    REQUIRE(arm::app::ClassifyImageHandler(caseContext, 0, true));
-}
-
-TEST_CASE("List all images")
-{
-    /* Initialise the HAL and platform */
-    hal_platform_init();
-
-    arm::app::VisualWakeWordModel model;    /* model wrapper object */
-
-    /* Load the model */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::vww::GetModelPointer(),
-                       arm::app::vww::GetModelLen()));
-
-    /* Instantiate application context */
-    arm::app::ApplicationContext caseContext;
-
-    caseContext.Set<arm::app::Model&>("model", model);
-
-    REQUIRE(arm::app::ListFilesHandler(caseContext));
+    REQUIRE(arm::app::ClassifyImageHandler(caseContext));
 }

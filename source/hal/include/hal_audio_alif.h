@@ -25,9 +25,9 @@
  * @brief init audio
  *
  */
-#define hal_audio_init(rate)          audio_init(rate)
+#define hal_audio_alif_init(rate)          audio_init(rate)
 
-#define hal_audio_uninit()            audio_uninit()
+#define hal_audio_alif_uninit()            audio_uninit()
 
 #define hal_set_audio_callback(cb)          audio_set_callback(cb)
 /**
@@ -42,7 +42,7 @@
 
 #define hal_get_audio_samples_received() get_audio_samples_received()
 
-#define hal_audio_preprocessing(data, len) audio_preprocessing(data, len)
+#define hal_audio_alif_preprocessing(data, len) audio_preprocessing(data, len)
 
 #define hal_set_audio_gain(gain_db) set_audio_gain(gain_db)
 

@@ -64,9 +64,10 @@ isram.bin       0x31000000  UNINIT ALIGN 16 0x00200000
 When not using the Arm Ethos-U NPU at all or using only Arm Ethos-U55 in `Shared_Sram` or `Sram_Only` modes, the limit
 in the linker script (and the platform memory definition header file) is applicable.
 
-However, for `Dedicated_Sram` memory mode (applies only for Arm Ethos-U65), the tensor arena will not sit in this
-SRAM space and therefore, the use case can be allowed to have larger `${use_case}_ACTIVATION_BUF_SZ`. See next section
-for more details on this.
+However, for `Dedicated_Sram` memory mode (applies only for Arm Ethos-U65 and Arm Ethos-U85),
+the tensor arena will not sit in this SRAM space and therefore,
+the use case can be allowed to have larger `${use_case}_ACTIVATION_BUF_SZ`.
+See next section for more details on this.
 
 For custom requirements (like always placing the tensor arena in DDR), the user can change the `BufAttributes.hpp` file
 along with the linker scripts.
@@ -77,7 +78,7 @@ Other than the obvious link between the linker script and the target profile des
 CMake files, there are other parameters linked to what the reserved space for activation
 buffers is. These are:
 
-- The file [set_up_default_resources.py](../../set_up_default_resources.py) contains a
+- The file [vela_configs.py](../../scripts/py/vela_configs.py) contains a
   parameter called `mps3_max_sram_sz`:
 
   ```python
@@ -144,10 +145,11 @@ The preceding example outlines a typical configuration for *Ethos-U55* NPU, and 
 Vela memory mode setting.
 Evaluation kit supports all the *Ethos-U* NPU memory modes:
 
-|  *Ethos™-U* NPU  |   Default Memory Mode  |  Other Memory Modes supported  |
-|------------------|------------------------|--------------------------------|
-|   *Ethos™-U55*   |     `Shared_Sram`      |          `Sram_Only`           |
-|   *Ethos™-U65*   |    `Dedicated_Sram`    |         `Shared_Sram`          |
+| *Ethos™-U* NPU | Default Memory Mode | Other Memory Modes supported |
+|----------------|---------------------|------------------------------|
+| *Ethos™-U55*   | `Shared_Sram`       | `Sram_Only`                  |
+| *Ethos™-U65*   | `Dedicated_Sram`    | `Sram_Only`, `Shared_Sram`   |
+| *Ethos™-U85*   | `Dedicated_Sram`    | `Sram_Only`, `Shared_Sram`   |
 
 For further information on the default settings, please refer to: [default_vela.ini](../../scripts/vela/default_vela.ini).
 To use the other supported memory modes refer to [vela.ini](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/refs/tags/3.2.0/vela.ini).
@@ -177,8 +179,7 @@ For script snippets, please refer to: [Memory constraints](./memory_consideratio
 > **Note:**
 >
 > 1. The `Shared_Sram` memory mode represents the default configuration.
-> 2. The `Dedicated_Sram` memory mode is only applicable for the Arm® *Ethos™-U65*.
-> 3. The `Sram_only` memory mode is only applicable for the Arm® *Ethos™-U55*.
+> 2. The `Dedicated_Sram` memory mode is only applicable for the Arm® *Ethos™-U65* and Arm® *Ethos™-U85*.
 
 ## Tensor arena and neural network model memory placement
 
@@ -186,8 +187,8 @@ The evaluation kit uses the name `activation buffer` for the `tensor arena` in t
 Every use-case application has a corresponding `<use_case_name>_ACTIVATION_BUF_SZ` parameter that governs the maximum
 available size of the `activation buffer` for that particular use-case.
 
-The linker script is set up to place this memory region in SRAM for *Ethos-U55* or in flash for *Ethos-U65* (following
-the default memory modes of `Shared_Sram` and `Dedicated_Sram` respectively).
+The linker script is set up to place this memory region in SRAM for *Ethos-U55* or in flash for *Ethos-U65* and *Ethos-U85*
+(following the default memory modes of `Shared_Sram` and `Dedicated_Sram` respectively).
 
 The neural network model is always placed in the flash region (even in case of `Sram_Only` memory mode as mentioned earlier).
 

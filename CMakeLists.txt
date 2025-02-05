@@ -35,8 +35,8 @@ endif()
 message(STATUS "Build type is set to ${CMAKE_BUILD_TYPE}")
 
 # Set language standards.
-set(CMAKE_C_STANDARD   99)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD   11)
+set(CMAKE_CXX_STANDARD 17)
 
 # Make the standard a requirement => prevent fallback to previous
 # supported standard
@@ -51,7 +51,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include("${CMAKE_CURRENT_SOURCE_DIR}/MlekModule.cmake")
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     24.08.0
+        VERSION     24.11.0
         DESCRIPTION "ARM ML Embedded Evaluation Kit"
         LANGUAGES   C CXX ASM)
 
@@ -147,10 +147,11 @@ foreach(use_case ${USE_CASES})
     set(DEFAULT_TEST_DATA_DIR ${DEFAULT_MODEL_DIR})
     set(SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/src)
     set(INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/include)
+    set(SAMPLES_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/samples)
 
     # Remove old files and recreate dirs
-    file(REMOVE_RECURSE ${SRC_GEN_DIR} ${INC_GEN_DIR})
-    file(MAKE_DIRECTORY ${SRC_GEN_DIR} ${INC_GEN_DIR})
+    file(REMOVE_RECURSE ${SRC_GEN_DIR} ${INC_GEN_DIR} ${SAMPLES_GEN_DIR})
+    file(MAKE_DIRECTORY ${SRC_GEN_DIR} ${INC_GEN_DIR} ${SAMPLES_GEN_DIR})
 
     file(GLOB UC_CMAKE_FILE
         "${SRC_USE_CASE}/${use_case}/*.cmake")
@@ -235,7 +236,12 @@ foreach(use_case ${USE_CASES})
         endif()
     endforeach()
 
-    add_executable(${TARGET_NAME} ${SRC_MAIN})
+    file(GLOB_RECURSE SRC_SAMPLES
+            "${SAMPLES_GEN_DIR}/*.cc"
+            "${SAMPLES_GEN_DIR}/*.cpp"
+            "${SAMPLES_GEN_DIR}/*.c")
+
+    add_executable(${TARGET_NAME} ${SRC_MAIN} ${SRC_SAMPLES})
 
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
 

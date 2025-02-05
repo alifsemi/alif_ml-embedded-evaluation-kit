@@ -12,14 +12,15 @@
 
   <requirements>
     <packages>
-      <package name="tensorflow-lite-micro" vendor="tensorflow" version="1.23.2"/>
-      <package name="CMSIS" vendor="ARM" version="5.9.0"/>
-      <package name="CMSIS-DSP" vendor="ARM" version="1.15.0"/>
-      <package name="CMSIS-NN" vendor="ARM" version="4.0.0"/>
+      <package name="tensorflow-lite-micro" vendor="tensorflow" version="1.24.8"/>
+      <package name="CMSIS" vendor="ARM" version="6.0.0"/>
+      <package name="CMSIS-DSP" vendor="ARM" version="1.16.0"/>
+      <package name="CMSIS-NN" vendor="ARM" version="6.0.0"/>
     </packages>
   </requirements>
 
   <releases>
+    <release date="2024-09-24" url="https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack?h=refs/heads/main" version="24.8.0">24.08.0 release package</release>
     <release date="2024-05-21" url="https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.23.2.0.pack?h=refs/heads/main" version="23.2.0">23.02.0 release package</release>
     <release date="2022-09-29" url="https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack?h=refs/heads/main" version="22.8.0-Beta">Beta release package</release>
   </releases>
@@ -122,6 +123,7 @@
     <component Cclass="ML Eval Kit" Cgroup="Generic" Csub="Inference runner" Cversion="1.0.0" condition="inference_runner_api Condition">
       <description>Generic inference runner use case API.</description>
       <files>
+        <file category="source" name="source/application/api/use_case/inference_runner/src/MicroMutableAllOpsResolver.cc"/>
         <file category="source" name="source/application/api/use_case/inference_runner/src/TestModel.cc"/>
         <file category="include" name="source/application/api/use_case/inference_runner/include/"/>
       </files>

@@ -1,3 +1,11 @@
+Changes in 24.11
+    * Support for 24.11 NPU components and dependencies (core-driver, core-platform, Vela 4.1.0, CMSIS-6, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro).
+    * Added support for Arm® Corstone™-320 FVP, which includes Arm® Ethos™-U85 NPU
+    * Added HAL APIs for obtaining camera and audio data to provide to use case apps
+    * Added support for Arm Virtual Streaming Interface (VSI) FVP feature as camera and audio data source
+    * Dropped CMSIS-5 support; now using CMSIS-6 exclusively
+    * Moved to C11 and C++17 standards
+
 Changes in 24.08
     * Support for 24.08 NPU components and dependencies (core-driver, core-platform, Vela 4.0.0, CMSIS, CMSIS-NN and TensorFlow Lite Micro).
     * Added BatchMatMul to all-ops resolver

@@ -171,13 +171,19 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
 
 ## Platform component: audio
-add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
 ## Platform component: image
 add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -191,7 +197,7 @@ endif()
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
     log
     platform_pmu
-    cmsis_ensemble
+    cmsis_device
     rte_components
 )
 
@@ -200,6 +206,8 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     image_ensemble
     $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
     audio_ensemble
+    hal_audio_static_streams
+    hal_camera_static_images
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
 )
 

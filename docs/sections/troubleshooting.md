@@ -1,16 +1,19 @@
 # Troubleshooting
 
-- [Troubleshooting](./troubleshooting.md#troubleshooting)
-  - [Inference results are incorrect for my custom files](./troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
-  - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
-  - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
-  - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
-  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==4.0.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
-  - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
-  - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
+<!-- TOC -->
+* [Troubleshooting](#troubleshooting)
+  * [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
+  * [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
+  * [NPU configuration mismatch error when running inference](#npu-configuration-mismatch-error-when-running-inference)
+  * [Errors when cloning the repository](#errors-when-cloning-the-repository)
+  * [Problem installing Vela](#problem-installing-vela)
+  * [No matching distribution found for Vela](#no-matching-distribution-found-for-vela)
+    * [How to update Python3 package to newer version](#how-to-update-python3-package-to-newer-version)
+  * [Error trying to build on Arm Virtual Hardware](#error-trying-to-build-on-arm-virtual-hardware)
+  * [Internal Compiler Error](#internal-compiler-error)
+  * [Build issues with WSL2](#build-issues-with-wsl2)
+  * [Missing libpython when running FVP](#missing-libpython-when-running-fvp)
+<!-- TOC -->
 
 ## Inference results are incorrect for my custom files
 
@@ -127,7 +130,7 @@ install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-ex
 
 To solve this issue install libpython3 on the system.
 
-## No matching distribution found for ethos-u-vela
+## No matching distribution found for Vela
 
 Vela 3.9.0 increases Python requirement to at least version 3.9, if not installed on your system the following error will occur:
 
@@ -165,7 +168,24 @@ b
    sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
    ```
 
-    If the above fails, try installing from the deadsnakes PPA:
+    If the packages aren't available, Python 3.10 can be installed from source:
+
+    ```commandline
+    sudo apt-get update
+    sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+      libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xzutils \
+      tk-dev liblzma-dev tk-dev
+    wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
+    tar xzf Python-3.10.15.tgz
+    cd Python-3.10.15.tgz
+    ./configure --enable-optimizations --prefix=/opt/python/3.10.15/
+    make -j "$(nproc)"
+    sudo make altinstall
+    ```
+
+    Alternatively, it is possible to install the packages from the deadsnakes PPA:
+
+    > Note: Arm® is not affiliated with deadsnakes - use at your own risk
 
     ```commandline
     sudo apt update
@@ -296,3 +316,12 @@ To resolve this issue, remove any paths with spaces. Alternatively, if these
 paths are required, escape them using `\` or enclose them with quotes.
 
 Another example of a similar issue: [Discourse issue 171: Build error in makefile](https://discuss.mlplatform.org/t/build-error-in-makefile/171).
+
+## Missing libpython when running FVP
+
+When running an FVP, you may encounter the following error:
+
+```commandline
+FVP_Corstone_SSE-320: error while loading shared libraries: libpython3.9.so.1.0: cannot open shared object file: No such file or directory
+```
+This occurs when the `libpython3.9-dev` is missing on your system.  To resolve the issue, install the library as per the instructions [here](./deployment.md#arm_corstone_320-fvp).

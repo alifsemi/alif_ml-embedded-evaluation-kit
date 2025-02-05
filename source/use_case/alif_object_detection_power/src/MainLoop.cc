@@ -27,7 +27,6 @@
  * limitations under the License.
  */
 #include "hal.h"                      /* Brings in platform definitions. */
-#include "InputFiles.hpp"             /* For input images. */
 #include "YoloFastestModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
@@ -58,7 +57,7 @@ void button2_cb(unsigned int event)
     obj_button_pressed = true;
 }
 
-void main_loop()
+void MainLoop()
 {
 #ifdef SE_SERVICES_SUPPORT
     run_profile_t runprof   = default_runprof;

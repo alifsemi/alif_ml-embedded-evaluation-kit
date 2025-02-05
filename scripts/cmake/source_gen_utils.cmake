@@ -23,19 +23,17 @@ set(SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
 # This function generates C++ files for images located in the directory it is
 # pointed at. NOTE: uses python
 ##############################################################################
-function(generate_images_code input_dir src_out hdr_out img_size)
+function(generate_images_code input_dir gen_dir img_size)
 
     # Absolute paths for passing into python script
     get_filename_component(input_dir_abs ${input_dir} ABSOLUTE)
-    get_filename_component(src_out_abs ${src_out} ABSOLUTE)
-    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
+    get_filename_component(gen_out_abs ${gen_dir} ABSOLUTE)
 
     message(STATUS "Generating image files from ${input_dir_abs}")
     execute_process(
         COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_rgb_cpp.py
         --image_path ${input_dir_abs}
-        --source_folder_path ${src_out_abs}
-        --header_folder_path ${hdr_out_abs}
+        --package_gen_dir ${gen_out_abs}
         --image_size ${img_size} ${img_size}
         RESULT_VARIABLE return_code
     )
@@ -49,12 +47,11 @@ endfunction()
 # This function generates C++ files for audio files located in the directory it is
 # pointed at. NOTE: uses python
 ##############################################################################
-function(generate_audio_code input_dir src_out hdr_out s_rate_opt mono_opt off_opt duration_opt res_type_opt min_sample_opt)
+function(generate_audio_code input_dir gen_dir s_rate_opt mono_opt off_opt duration_opt res_type_opt min_sample_opt)
 
     # Absolute paths for passing into python script
     get_filename_component(input_dir_abs ${input_dir} ABSOLUTE)
-    get_filename_component(src_out_abs ${src_out} ABSOLUTE)
-    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
+    get_filename_component(gen_dir_abs ${gen_dir} ABSOLUTE)
 
     to_py_bool(mono_opt mono_opt_py)
 
@@ -62,8 +59,7 @@ function(generate_audio_code input_dir src_out hdr_out s_rate_opt mono_opt off_o
     execute_process(
         COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_audio_cpp.py
         --audio_path ${input_dir_abs}
-        --source_folder_path ${src_out_abs}
-        --header_folder_path ${hdr_out_abs}
+        --package_gen_dir ${gen_dir_abs}
         --sampling_rate ${s_rate_opt}
         --mono ${mono_opt_py}
         --offset ${off_opt}
@@ -78,26 +74,6 @@ function(generate_audio_code input_dir src_out hdr_out s_rate_opt mono_opt off_o
 
 endfunction()
 
-##############################################################################
-# This function generates default empty input C++ files for applications with no
-# external input. Main use is for the inference runner. NOTE: uses python
-##############################################################################
-function(generate_default_input_code hdr_out)
-
-    # Absolute paths for passing into python script
-    get_filename_component(hdr_out_abs ${hdr_out} ABSOLUTE)
-
-    message(STATUS "Generating default input files")
-    execute_process(
-            COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_default_input_cpp.py
-            --header_folder_path ${hdr_out_abs}
-            RESULT_VARIABLE return_code
-    )
-    if (NOT return_code EQUAL "0")
-        message(FATAL_ERROR "Failed to generate default input .")
-    endif ()
-
-endfunction()
 ##############################################################################
 # This function generates C++ files for tflite NN model files.
 # @param[in]    MODEL_PATH      path to a tflite file

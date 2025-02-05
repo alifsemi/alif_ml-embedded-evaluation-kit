@@ -49,7 +49,7 @@ Before starting the setup process, please make sure that you have:
   - Both `Arm® Corstone™-300` and `Arm® Corstone™-310` based FVPs for MPS3 are available from:
     [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
     and as [Arm® Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware)
-- An Arm® MPS4 `Fixed Virtual Platform` binary to try the latest `Arm® Corstone™-315` reference platform. This can also
+- An Arm® MPS4 `Fixed Virtual Platform` binary to try the latest `Arm® Corstone™-315` and `Arm® Corstone™-320` reference platforms. These can also
   be downloaded from [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
   page.
 
@@ -75,6 +75,9 @@ for additional information:
 
 - ML processor, also referred to as a Neural Processing Unit (NPU) - Arm® `Ethos™-U65`:
     <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65>
+
+- ML processor, also referred to as a Neural Processing Unit (NPU) - Arm® `Ethos™-U85`:
+    <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u85>
 
 - Arm® MPS3 FPGA Prototyping Board:
     <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>
@@ -104,6 +107,7 @@ The repository has the following structure:
 │     ├── cmake
 │     │    ├── platforms
 │     │    │      ├── mps3
+│     │    │      ├── mps4
 │     │    │      ├── native
 │     │    │      └── simple_platform
 │     │    └── ...
@@ -204,21 +208,26 @@ The HAL has the following structure:
 hal
 ├── CMakeLists.txt
 ├── include
-│     ├── hal.h
-│     ├── hal_lcd.h
-│     └── hal_pmu.h
+│   ├── hal.h
+│   ├── hal_lcd.h
+│   └── hal_pmu.h
+├── readme.md
 └── source
     ├── components
-    │     ├── cmsis_device
-    │     ├── lcd
-    │     ├── npu
-    │     ├── npu_ta
-    │     ├── platform_pmu
-    │     └── stdout
+    │   ├── audio
+    │   ├── camera
+    │   ├── cmsis_device
+    │   ├── lcd
+    │   ├── npu
+    │   ├── npu_ta
+    │   ├── platform_pmu
+    │   ├── readme.md
+    │   └── stdout
     ├── hal.c
     ├── hal_pmu.c
     └── platform
         ├── mps3
+        ├── mps4
         ├── native
         └── simple
 ```
@@ -227,10 +236,10 @@ HAL is built as a separate project into a static library `libhal.a`. It is linke
 
 What these folders contain:
 
-- The folders `include` and `source/hal.c` contain the HAL top-level platform API and data acquisition, data presentation, and
-  timer interfaces.
-    > **Note:** the files here and lower in the hierarchy have been written in C and this layer is a clean C/ + boundary
-    > in the sources.
+- The folders `include` and `source/hal.c` contain the HAL top-level platform API with PMU interfaces.
+
+> **Note:** the files here and lower in the hierarchy have been written in C and this layer is a clean C/C++ boundary
+> in the sources.
 
 - `source/components` directory contains API and implementations for different modules that can be reused for different
   platforms. These contain common functions for Arm Ethos-U NPU initialization, timing adapter block helpers and others.
@@ -241,17 +250,14 @@ What these folders contain:
   other which can drive the LCD on an Arm MPS3 target. If you want to run default ML use-cases on a custom platform, you
   could re-use existing code from this directory provided it is compatible with your platform.
 
-- `source/components/cmsis_device` has a common startup code for Cortex-M based systems. The package defines interrupt vector table and
-    handlers. Reset handler - starting point of our application - is also defined here. This entry point is responsible
-    for the set-up before calling the user defined "main" function in the higher-level `application` logic.
-    It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS repo
-    through `CMSIS_SRC_PATH` variable.
-    The static library is used by platform code.
+- `source/components/cmsis_device` has a common startup code for Cortex-M based systems. The package defines interrupt
+   vector table and handlers. Reset handler - starting point of our application - is also defined here. This entry
+   point is responsible for the set-up before calling the user defined "main" function in the higher-level `application`
+   logic. It is a separate CMake project that is built into a static library `libcmsis_device.a`. It depends on a CMSIS
+   repo through `CMSIS_SRC_PATH` variable. The static library is used by platform code.
 
-- `source/platform/mps3`\
-  `source/platform/simple`:
-  These folders contain platform specific declaration and defines, such as, platform initialisation code, peripheral
-  memory map, system registers, system specific timer implementation and other.
+- `source/platform/*`: These folders contain platform specific declaration and defines, such as platform initialisation
+  code, peripheral memory map, system registers, system specific timer implementation and other.
   Platform is built from selected components and configured cmsis device. It is a separate CMake project, and is
   built into a static library `libplatform-drivers.a`. It is linked into HAL library.
 
@@ -314,6 +320,7 @@ For further information, please see:
       - [Configuring with custom TPIP dependencies](./sections/building.md#configuring-with-custom-tpip-dependencies)
     - [Configuring the build for MPS3 SSE-310](./sections/building.md#configuring-the-build-for-mps3-sse_310)
     - [Configuring the build for MPS4 SSE-315](./sections/building.md#configuring-the-build-for-mps4-sse_315)
+    - [Configuring the build for MPS4 SSE-320](./sections/building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
     - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
@@ -333,6 +340,7 @@ For further information, please see:
 - [Deployment](./sections/deployment.md#deployment)
   - [Fixed Virtual Platform](./sections/deployment.md#fixed-virtual-platform)
     - [Installing an FVP](./sections/deployment.md#installing-an-fvp)
+      - [Arm® Corstone™-320 FVP](./sections/deployment.md#arm_corstone_320-fvp)
     - [Deploying on an FVP](./sections/deployment.md#deploying-on-an-fvp)
   - [MPS3 FPGA board](./sections/deployment.md#mps3-fpga-board)
     - [Deployment on MPS3 board](./sections/deployment.md#deployment-on-mps3-board)
@@ -392,8 +400,11 @@ For further information, please see:
   - [NPU configuration mismatch error when running inference](./sections/troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
   - [Errors when cloning the repository](./sections/troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.3.0](./sections/troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to newer version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [No matching distribution found for Vela](./sections/troubleshooting.md#no-matching-distribution-found-for-vela)
+    - [How to update Python3 package to 3.10 version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
+  - [Error trying to build on Arm Virtual Hardware](./sections/troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
+  - [Internal Compiler Error](./sections/troubleshooting.md#internal-compiler-error)
+  - [Build issues with WSL2](./sections/troubleshooting.md#build-issues-with-wsl2)
 
 ## Using MLEK as a dependency
 
@@ -404,7 +415,10 @@ Please see [MLEK as a dependency](./sections/mlek_as_a_dependency.md)
 Please refer to:
 
 - [Appendix](./sections/appendix.md#appendix)
-  - [Cortex-M55 Memory map overview](./sections/appendix.md#arm_cortex_m55-memory-map-overview-for-corstone_300-reference-design)
+  - [Arm® Cortex®-M55 Memory map overview for Corstone™-300 reference design](./sections/appendix.md#arm-cortex-m55-memory-map-overview-for-corstone-300-reference-design)
+  - [Arm® Cortex®-M55 Memory map overview for Corstone™-310 reference design](./sections/appendix.md#arm-cortex-m55-memory-map-overview-for-corstone-310-reference-design)
+  - [Arm® Cortex®-M85 Memory map overview for Corstone™-315 reference design](./sections/appendix.md#arm-cortex-m85-memory-map-overview-for-corstone-315-reference-design)
+  - [Arm® Cortex®-M85 Memory map overview for Corstone™-320 reference design](./sections/appendix.md#arm-cortex-m85-memory-map-overview-for-corstone-320-reference-design)
 
 ## Contributing
 

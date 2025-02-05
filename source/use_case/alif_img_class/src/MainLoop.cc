@@ -46,7 +46,7 @@ namespace app {
 
 using ImgClassClassifier = arm::app::Classifier;
 
-void main_loop()
+void MainLoop()
 {
     init_trigger_rx();
 

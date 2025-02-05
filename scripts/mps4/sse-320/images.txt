@@ -1,0 +1,19 @@
+TITLE: Arm MPS4 FPGA prototyping board Images Configuration File
+
+[IMAGES]
+TOTALIMAGES: 3                          ;Number of Images (Max: 32)
+
+IMAGE0PORT: 1
+IMAGE0ADDRESS: 0x00_1100_0000           ; Address to load into
+IMAGE0UPDATE: RAM                       ; Image Update:NONE/AUTO/FORCE
+IMAGE0FILE: \SOFTWARE\boot.bin          ; Image/data to be loaded
+
+IMAGE1PORT: 1
+IMAGE1ADDRESS: 0x00_1200_0000           ; Address to load into
+IMAGE1UPDATE: RAM                       ; Image Update:NONE/AUTO/FORCE
+IMAGE1FILE: \SOFTWARE\bram.bin          ; Image/data to be loaded
+
+IMAGE2PORT: 1
+IMAGE2ADDRESS: 0x00_7000_0000           ; Address to load into
+IMAGE2UPDATE: RAM                       ; Image Update:NONE/AUTO/FORCE
+IMAGE2FILE: \SOFTWARE\ddr.bin           ; Image/data to be loaded

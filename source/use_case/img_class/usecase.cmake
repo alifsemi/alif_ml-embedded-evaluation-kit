@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +30,7 @@ USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model"
 
 # Generate input files
 generate_images_code("${${use_case}_FILE_PATH}"
-                     ${SRC_GEN_DIR}
-                     ${INC_GEN_DIR}
+                     ${SAMPLES_GEN_DIR}
                      "${${use_case}_IMAGE_SIZE}")
 
 # Generate labels file

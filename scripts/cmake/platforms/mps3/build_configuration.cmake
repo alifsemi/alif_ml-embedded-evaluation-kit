@@ -31,7 +31,7 @@ function(set_platform_global_defaults)
 
     # Include NPU, FVP tests and CMSIS configuration options
     include(npu_opts)
-    include(fvp_test_opts)
+    include(fvp_opts)
     include(cmsis_opts)
 
     if (NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
@@ -114,24 +114,19 @@ function(platform_custom_post_build)
 
     # Add tests for application on FVP if FVP path specified
     if (BUILD_FVP_TESTS)
+        set(AXF_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf")
+        set(TEST_TARGET_NAME "${use_case}_fvp_test")
 
-        # Build for all use cases if USE_SINGLE_INPUT as no telnet interaction required
-        # otherwise only build for inference runner
-        if ((USE_SINGLE_INPUT) OR (${use_case} STREQUAL "inference_runner"))
-            set(AXF_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf")
-            set(TEST_TARGET_NAME "${use_case}_fvp_test")
+        message(STATUS "Adding FVP test for ${use_case}")
 
-            message(STATUS "Adding FVP test for ${use_case}")
-
-            add_test(
-                NAME "${TEST_TARGET_NAME}"
-                COMMAND ${FVP_PATH} -a ${AXF_PATH}
-                    -C mps3_board.telnetterminal0.start_telnet=0
-                    -C mps3_board.uart0.out_file='-'
-                    -C mps3_board.uart0.shutdown_on_eot=1
-                    -C mps3_board.visualisation.disable-visualisation=1
-                    --stat)
-        endif()
+        add_test(
+            NAME "${TEST_TARGET_NAME}"
+            COMMAND ${FVP_PATH} -a ${AXF_PATH}
+                -C mps3_board.telnetterminal0.start_telnet=0
+                -C mps3_board.uart0.out_file='-'
+                -C mps3_board.uart0.shutdown_on_eot=1
+                -C mps3_board.visualisation.disable-visualisation=1
+                --stat)
     endif ()
 
 endfunction()

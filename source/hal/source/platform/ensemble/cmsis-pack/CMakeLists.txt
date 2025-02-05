@@ -1,4 +1,4 @@
-set(CMSIS_DEVICE_TARGET cmsis_ensemble)
+set(CMSIS_DEVICE_TARGET cmsis_device)
 set(CPU_HEADER_TARGET rte_components)
 
 project(${CMSIS_DEVICE_TARGET}
@@ -15,6 +15,10 @@ if (NOT DEFINED CMSIS_SRC_PATH)
     message(FATAL_ERROR "CMSIS_SRC_PATH path should be defined for ${CMSIS_DEVICE_TARGET}.")
 endif()
 
+if (NOT DEFINED CORTEX_DFP_SRC_PATH)
+    message(FATAL_ERROR "CORTEX_DFP_SRC_PATH path should be defined for ${CMSIS_DEVICE_TARGET}.")
+endif()
+
 # 3.1 Create an interface library for CPU header only
 add_library(${CPU_HEADER_TARGET} INTERFACE)
 
@@ -22,7 +26,7 @@ add_library(${CPU_HEADER_TARGET} INTERFACE)
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
-    ${CMSIS_SRC_PATH}/Device/ARM/${ARM_CPU}/Include
+    ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Include
     ${BOARDLIB_PATH}
     )
 

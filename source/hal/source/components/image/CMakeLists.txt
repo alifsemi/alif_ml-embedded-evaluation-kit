@@ -66,6 +66,12 @@ target_compile_definitions(${IMAGE_ENSEMBLE_COMPONENT_TARGET}
     PUBLIC
     ENSEMBLE_CAMERA_MODULE_${ENSEMBLE_CAMERA_MODULE}=1)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
+    # Additional option to enable "full" floating point standard conformance
+    # (needed for NaNs and infinity).
+    target_compile_options(${IMAGE_ENSEMBLE_COMPONENT_TARGET} PRIVATE -ffp-mode=full)
+endif()
+
 ## Logging utilities:
 if (NOT TARGET log)
     if (NOT DEFINED LOG_PROJECT_DIR)
@@ -78,7 +84,7 @@ endif()
 target_link_libraries(${IMAGE_ENSEMBLE_COMPONENT_TARGET} PUBLIC
     ${IMAGE_IFACE_TARGET}
     log
-    cmsis_ensemble
+    cmsis_device
     platform_drivers_core
     rte_components)
 

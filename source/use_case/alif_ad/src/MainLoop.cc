@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "InputFiles.hpp"           /* For input data */
 #include "AdModel.hpp"              /* Model class for running inference */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options */
@@ -32,7 +31,7 @@ namespace app {
 } /* namespace arm */
 
 
-void main_loop()
+void MainLoop()
 {
 
     arm::app::AdModel model;  /* Model wrapper object. */

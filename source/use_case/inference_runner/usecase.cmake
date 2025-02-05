@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +21,6 @@ list(APPEND ${use_case}_API_LIST "inference_runner")
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
     0x00200000
     STRING)
-
-generate_default_input_code(${INC_GEN_DIR})
 
 if (ETHOS_U_NPU_ENABLED)
     set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/dnn_s_quantized_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)

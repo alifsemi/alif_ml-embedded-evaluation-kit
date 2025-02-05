@@ -23,46 +23,67 @@
 
 # The platform CMake infra should set the base register values for
 # TA component to work. For Ethos-U65, we need two base addresses.
-if (NOT DEFINED TA0_BASE OR NOT DEFINED TA1_BASE)
-    message(FATAL_ERROR "TA0_BASE and TA1_BASE need to be defined.")
+if (NOT DEFINED TA_SRAM_BASE OR NOT DEFINED TA_EXT_BASE)
+    message(FATAL_ERROR "TA_SRAM_BASE and TA_EXT_BASE need to be defined.")
 endif ()
 
-message(STATUS "using TA0_BASE @ ${TA0_BASE}; TA1_BASE @ ${TA1_BASE}.")
+message(STATUS "using TA_SRAM_BASE @ ${TA_SRAM_BASE}; TA_EXT_BASE @ ${TA_EXT_BASE}.")
 
-# Timing adapter settings for AXI0
-set(TA0_MAXR        "16"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(TA0_MAXW        "16"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
-set(TA0_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
-set(TA0_RLATENCY    "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
-set(TA0_WLATENCY    "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
-set(TA0_PULSE_ON    "3999"     CACHE STRING "No. of cycles addresses let through (0-65535).")
-set(TA0_PULSE_OFF   "1"        CACHE STRING "No. of cycles addresses blocked (0-65535).")
-set(TA0_BWCAP       "4000"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
-set(TA0_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
-set(TA0_PERFCNT     "0"        CACHE STRING "32-bit event counter")
-set(TA0_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+# Timing adapter settings for SRAM
+set(SRAM_MAXR       "16"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+set(SRAM_MAXW       "16"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+set(SRAM_MAXRW      "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+set(SRAM_RLATENCY   "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+set(SRAM_WLATENCY   "32"       CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+set(SRAM_PULSE_ON   "3999"     CACHE STRING "No. of cycles addresses let through (0-65535).")
+set(SRAM_PULSE_OFF  "1"        CACHE STRING "No. of cycles addresses blocked (0-65535).")
+set(SRAM_BWCAP      "4000"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+set(SRAM_PERFCTRL   "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
+set(SRAM_PERFCNT    "0"        CACHE STRING "32-bit event counter")
+set(SRAM_MODE       "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
                                              Bit 1: 1=enable random AR reordering (0=default);
                                              Bit 2: 1=enable random R reordering (0=default);
                                              Bit 3: 1=enable random B reordering (0=default);
                                              Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
-set(TA0_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
-set(TA0_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+set(SRAM_HISTBIN    "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+set(SRAM_HISTCNT    "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
 
-# Timing adapter settings for AXI1
-set(TA1_MAXR        "24"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
-set(TA1_MAXW        "12"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
-set(TA1_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
-set(TA1_RLATENCY    "500"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
-set(TA1_WLATENCY    "250"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
-set(TA1_PULSE_ON    "4000"     CACHE STRING "No. of cycles addresses let through (0-65535).")
-set(TA1_PULSE_OFF   "1000"     CACHE STRING "No. of cycles addresses blocked (0-65535).")
-set(TA1_BWCAP       "1172"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
-set(TA1_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
-set(TA1_PERFCNT     "0"        CACHE STRING "32-bit event counter")
-set(TA1_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
-                                            Bit 1: 1=enable random AR reordering (0=default);
-                                            Bit 2: 1=enable random R reordering (0=default);
-                                            Bit 3: 1=enable random B reordering (0=default);
-                                            Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
-set(TA1_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
-set(TA1_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+# Timing adapter settings for EXT
+# If Memory mode is Sram_Only Timing adapter settings for EXT need to match the same as SRAM
+if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
+    set(EXT_MAXR        ${SRAM_MAXR}         CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(EXT_MAXW        ${SRAM_MAXW}         CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(EXT_MAXRW       ${SRAM_MAXRW}        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(EXT_RLATENCY    ${SRAM_RLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(EXT_WLATENCY    ${SRAM_WLATENCY}     CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(EXT_PULSE_ON    ${SRAM_PULSE_ON}     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(EXT_PULSE_OFF   ${SRAM_PULSE_OFF}    CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(EXT_BWCAP       ${SRAM_BWCAP}        CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(EXT_PERFCTRL    ${SRAM_PERFCTRL}     CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(EXT_PERFCNT     ${SRAM_PERFCNT}      CACHE STRING "32-bit event counter")
+    set(EXT_MODE        ${SRAM_MODE}         CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                          Bit 1: 1=enable random AR reordering (0=default);
+                                                          Bit 2: 1=enable random R reordering (0=default);
+                                                          Bit 3: 1=enable random B reordering (0=default);
+                                                          Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(EXT_HISTBIN     ${SRAM_HISTBIN}      CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(EXT_HISTCNT     ${SRAM_HISTCNT}      CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+else ()
+    set(EXT_MAXR        "24"       CACHE STRING "6-bit field. Max no. of pending reads. 0=infinite")
+    set(EXT_MAXW        "12"       CACHE STRING "6-bit field. Max no. of pending writes. 0=infinite")
+    set(EXT_MAXRW       "0"        CACHE STRING "6-bit field. Max no. of pending reads+writes. 0=infinite")
+    set(EXT_RLATENCY    "500"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from AVALID to RVALID.")
+    set(EXT_WLATENCY    "250"      CACHE STRING "12-bit field. Minimum latency (clock cycles) from WVALID&WLAST to BVALID.")
+    set(EXT_PULSE_ON    "4000"     CACHE STRING "No. of cycles addresses let through (0-65535).")
+    set(EXT_PULSE_OFF   "1000"     CACHE STRING "No. of cycles addresses blocked (0-65535).")
+    set(EXT_BWCAP       "1172"     CACHE STRING "16-bit field. Max no. of 64-bit words transfered per pulse cycle 0=infinite")
+    set(EXT_PERFCTRL    "0"        CACHE STRING "6-bit field selecting an event for event counter 0=default")
+    set(EXT_PERFCNT     "0"        CACHE STRING "32-bit event counter")
+    set(EXT_MODE        "1"        CACHE STRING "Bit 0: 1=enable dynamic clocking to avoid underrun;
+                                                Bit 1: 1=enable random AR reordering (0=default);
+                                                Bit 2: 1=enable random R reordering (0=default);
+                                                Bit 3: 1=enable random B reordering (0=default);
+                                                Bit 11-4: Frequency scale 0=full speed, 255=(1/256) speed")
+    set(EXT_HISTBIN     "0"        CACHE STRING "Controls which histogram bin (0-15) that should be accessed by HISTCNT.")
+    set(EXT_HISTCNT     "0"        CACHE STRING "32-bit field. Read/write the selected histogram bin.")
+endif ()

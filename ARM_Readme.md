@@ -13,19 +13,19 @@ to accelerate ML computation in constrained embedded and IoT devices.*
 
 Experiment with the included end-to-end software use cases and create your own ML applications for Cortex-M CPU and Ethos-U NPU.
 
-|   ML application                     |  Description | Neural Network Model |
-| :----------------------------------: | :-----------------------------------------------------: | :----: |
-|  [Image classification](./docs/use_cases/img_class.md)        | Recognize the presence of objects in a given image | [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)   |
-|  [Keyword spotting(KWS)](./docs/use_cases/kws.md)             | Recognize the presence of a key word in a recording | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8) |
-|  [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md) | Transcribe words in a recording | [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8) |
-|  [KWS and ASR](./docs/use_cases/kws_asr.md) | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8) |
-|  [Anomaly Detection](./docs/use_cases/ad.md)                 | Detecting abnormal behavior based on a sound recording of a machine | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/)|
-|  [Visual Wake Word](./docs/use_cases/visual_wake_word.md)                 | Recognize if person is present in a given image | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)|
-|  [Noise Reduction](./docs/use_cases/noise_reduction.md)        | Remove noise from audio while keeping speech intact | [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8)   |
-|  [Object detection](./docs/use_cases/object_detection.md)      | Detects and draws face bounding box in a given image | [Yolo Fastest](https://github.com/emza-vs/ModelZoo/blob/master/object_detection/yolo-fastest_192_face_v4.tflite)
-|  [Generic inference runner](./docs/use_cases/inference_runner.md) | Code block allowing you to develop your own use case for Ethos-U NPU | Your custom model |
+|                          ML application                          |                                         Description                                         |                                                                                                                                           Neural Network Model                                                                                                                                            |
+|:----------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|      [Image classification](./docs/use_cases/img_class.md)       |                     Recognize the presence of objects in a given image                      |                                                                     [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)                                                                     |
+|         [Keyword spotting(KWS)](./docs/use_cases/kws.md)         |                     Recognize the presence of a key word in a recording                     |                                                                           [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)                                                                            |
+|   [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md)   |                               Transcribe words in a recording                               |                                                                            [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8)                                                                            |
+|            [KWS and ASR](./docs/use_cases/kws_asr.md)            | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8) |
+|           [Anomaly Detection](./docs/use_cases/ad.md)            |             Detecting abnormal behavior based on a sound recording of a machine             |                                                                          [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/)                                                                           |
+|     [Visual Wake Word](./docs/use_cases/visual_wake_word.md)     |                       Recognize if person is present in a given image                       |                                                               [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)                                                                |
+|      [Noise Reduction](./docs/use_cases/noise_reduction.md)      |                     Remove noise from audio while keeping speech intact                     |                                                                                [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8)                                                                                |
+|     [Object detection](./docs/use_cases/object_detection.md)     |                    Detects and draws face bounding box in a given image                     |                                                                                             [Yolo Fastest](https://github.com/emza-vs/ModelZoo/blob/master/object_detection/yolo-fastest_192_face_v4.tflite)                                                                                              
+| [Generic inference runner](./docs/use_cases/inference_runner.md) |            Code block allowing you to develop your own use case for Ethos-U NPU             |                                                                                                                                             Your custom model                                                                                                                                             |
 
-## Recommended build targets 
+## Recommended build targets
 
 This repository is for building and deploying Machine Learning (ML) applications targeted for Arm® Cortex®-M and Arm®
 Ethos™-U NPU.
@@ -40,22 +40,31 @@ To run evaluations using this software, we suggest using:
       the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85) and the
       [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55).
 
-- [Arm® Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
-  offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
+- [Arm® Corstone™ Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+  - [Arm® Corstone™-300 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination with
-  the new [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55)
+  the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55)
+  - [Arm® Corstone™-310 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
+  or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination with
+  the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55)
+  - [Arm® Corstone™-315 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers the [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination with
+  the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85)
+  - [Arm® Corstone™-320 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers the [Arm® Ethos™-U85 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u85) software fast model in combination with
+  the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85)
   - You can also take advantage of
     [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) (AVH) and [run the Fixed Virtual Platform
     in the cloud](./docs/sections/arm_virtual_hardware.md).
 
 >Arm® Corstone™-300 and Corstone™-310 design implementations are publicly available on [Download FPGA Images](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images) page,
 or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
+>
+> Arm® Corstone™-315 and Corstone™-320 design implementations are publicly available as a [Fixed Virtual Platform of the MPS4 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
 ### Quick Start
 
 To run ML applications on the Cortex-M and Ethos-U NPU:
 
-1. First, verify that you have installed all of [the required prerequisites](sections/building.md#build-prerequisites).
+1. First, verify that you have installed all of [the required prerequisites](docs/sections/building.md#build-prerequisites).
    > **NOTE**: `Dockerfile` is also available if you would like to build a Docker image.
 
 2. Clone the *Ethos-U* evaluation kit repository:
@@ -107,10 +116,11 @@ python3.10 ./build_default.py
 >
 > Ml embedded evaluation kit supports:
 >
-> |  *Ethos™-U* NPU  | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
-> |------------------|-----------------|-------------------------|---------------------|------------------------------|
-> |   *Ethos™-U55*   |       128       |      32, 64, 256        |     Shared_Sram     |          Sram_Only           |
-> |   *Ethos™-U65*   |       256       |          512            |    Dedicated_Sram   |         Shared_Sram          |
+> | *Ethos™-U* NPU | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
+> |----------------|-----------------|-------------------------|---------------------|------------------------------|
+> | *Ethos™-U55*   | 128             | 32, 64, 256             | Shared_Sram         | Sram_Only                    |
+> | *Ethos™-U65*   | 256             | 512                     | Dedicated_Sram      | Sram_Only, Shared_Sram       |
+> | *Ethos™-U85*   | 256             | 128, 512, 1024, 2048    | Dedicated_Sram      | Sram_Only, Shared_Sram       |
 >
 > For more information see [Building](./docs/documentation.md#building).
 
@@ -145,7 +155,7 @@ python3.10 ./build_default.py
 
 *  The [Ethos-U NPU driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver) is integrated TensorFlow Lite for Microcontrollers
    *  ML operators are delegated to the NPU with CPU fall-back for unsupported operators
-   * [CMSIS-NN](https://github.com/ARM-software/CMSIS_5) is used to optimise CPU workload execution with int8 data type
+   * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
    * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
 
 * The provided set of common ML use-case functions will assist in implementing your application logic

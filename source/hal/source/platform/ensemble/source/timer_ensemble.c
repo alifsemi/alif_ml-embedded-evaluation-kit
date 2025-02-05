@@ -154,7 +154,7 @@ void platform_get_counters(pmu_counters* counters)
 
 #if defined (ARM_NPU)
     ethosu_pmu_counters npu_counters = ethosu_get_pmu_counters();
-    for (i = 0; i < ETHOSU_PMU_NCOUNTERS; ++i) {
+    for (i = 0; i < ETHOSU_USED_PMU_NCOUNTERS; ++i) {
         add_pmu_counter(
                 npu_counters.npu_evt_counters[i].counter_value,
                 npu_counters.npu_evt_counters[i].name,
