@@ -35,7 +35,6 @@ extern "C" {
 #include "hal_audio.h"          /* Audio interface */
 #include "hal_camera.h"         /* Camera interface */
 #include "hal_audio_alif.h"     /* Alif AUDIO functions */
-#include "hal_image.h"          /* Alif IMAGE functions */
 
 #include <inttypes.h>
 #include <stdbool.h>

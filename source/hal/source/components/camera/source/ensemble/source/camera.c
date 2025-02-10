@@ -43,10 +43,11 @@ static const ARM_DRIVER_CPI * const camera = &Driver_CPI;
 #include "image_processing.h"
 
 #include <stdatomic.h>
-
+#include <stdio.h>
 
 static uint8_t* buf              = 0;
 static atomic_int image_received = 0;
+static bool init_done = false;
 
 static void CameraEventHandler(uint32_t event)
 {
@@ -58,6 +59,10 @@ static void CameraEventHandler(uint32_t event)
 
 int32_t camera_init(uint8_t* buffer)
 {
+    if (init_done) {
+        printf("camera_init, already initialized!\n");
+        return 0;
+    }
 #ifdef MANUAL_CAMERA_POWER
     GPIO_Driver_PWR->SetValue(BOARD_CAMERA_POWER_PIN_NO, GPIO_PIN_OUTPUT_STATE_HIGH);
 #endif
@@ -102,8 +107,19 @@ int32_t camera_init(uint8_t* buffer)
     }
 
     buf = buffer;
+    init_done = true;
 
     return res;
+}
+
+void camera_uninit()
+{
+    if (init_done) {
+        camera->Stop();
+        camera->PowerControl(ARM_POWER_OFF);
+        camera->Uninitialize();
+        init_done = false;
+    }
 }
 
 void camera_start(uint32_t mode)
@@ -121,10 +137,15 @@ int32_t camera_gain(uint32_t gain)
     return camera->Control(CPI_CAMERA_SENSOR_GAIN, gain);
 }
 
-int32_t camera_wait(uint32_t timeout_ms)
+int32_t camera_wait()
 {
     while (!image_received) {
         __WFE();
     };
     return ARM_DRIVER_OK;
+}
+
+bool camera_image_ready()
+{
+    return image_received;
 }

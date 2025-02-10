@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <RTE_Device.h>
+#include "tiff.h"
 
 #define RGB_BYTES 		3
 #define RGBA_BYTES 		4
@@ -71,4 +72,5 @@ int crop_and_interpolate(uint8_t *image, uint32_t srcWidth, uint32_t srcHeight, 
 void white_balance(int width, int height, const uint8_t *sp, uint8_t *dp);
 int bayer_to_RGB(uint8_t *src, uint8_t *dest);
 
+const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_header, uint8_t *image_data, int image_size, uint8_t *raw_image);
 #endif /* IMAGE_PROCESSING_H_ */

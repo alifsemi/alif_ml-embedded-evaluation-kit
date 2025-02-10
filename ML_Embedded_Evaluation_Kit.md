@@ -260,7 +260,8 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     ```
 4. The output should be in `/build_he/bin/ethos-u-alif_kws.axf`
 
-*NOTE: The debug console for this use-case will be UART2, and the jumper on the AI/ML AppKit needs to be set accordingly as noted in the Gen 2 AI/ML AppKit Quick Start Guide.*
+*NOTE: The debug console for this use-case will be UART2, and the jumper on the AI/ML AppKit needs to be set accordingly as noted in the Gen 2 AI/ML AppKit Quick Start Guide.*<br>
+*NOTE: If build command ```make ethos-u-alif_kws -j``` is freezing, change it to ```make ethos-u-alif_kws -j4```. It changes the number of jobs at once to 4.<br>You can try other numbers for faster build. This is true for all build cases.*
 
 UART select jumpers set for UART2:
 

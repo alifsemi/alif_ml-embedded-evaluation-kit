@@ -71,7 +71,7 @@ namespace object_detection {
 using namespace arm::app::object_detection;
 }
 
-    bool ObjectDetectionInit()
+    bool ObjectDetectionInit(YoloFastestModel& model)
     {
         uint32_t ret = enable_peripheral_clocks();
         if (ret)
@@ -101,9 +101,20 @@ using namespace arm::app::object_detection;
 #endif // SHOW_UI
 
         /* Initialise the camera */
-        int err = hal_image_init();
-        if (0 != err) {
-            printf_err("hal_image_init failed with error: %d\n", err);
+        if (!hal_camera_init()) {
+            printf_err("hal_camera_init failed!\n");
+            return false;
+        }
+
+        TfLiteIntArray* inputShape = model.GetInputShape(0);
+
+        const int inputImgCols = inputShape->data[YoloFastestModel::ms_inputColsIdx];
+        const int inputImgRows = inputShape->data[YoloFastestModel::ms_inputRowsIdx];
+
+        auto bCamera = hal_camera_configure(inputImgCols, inputImgRows, HAL_CAMERA_MODE_SINGLE_FRAME, HAL_CAMERA_COLOUR_FORMAT_RGB888);
+        if (!bCamera) {
+            printf_err("Failed to configure camera.\n");
+            return false;
         }
 
         return true;
@@ -170,9 +181,12 @@ using namespace arm::app::object_detection;
         /* Ensure there are no results leftover from previous inference when running all. */
         results.clear();
 
-        const uint8_t* currImage = hal_get_image_data(inputImgCols, inputImgRows);
-        if (!currImage) {
-            printf_err("hal_get_image_data failed");
+        hal_camera_start();
+
+        uint32_t capturedFrameSize = 0;
+        const uint8_t* currImage = hal_camera_get_captured_frame(&capturedFrameSize);
+        if (!currImage || !capturedFrameSize) {
+            printf_err("hal_camera_get_captured_frame failed");
             return false;
         }
 

@@ -63,6 +63,10 @@ if (${FVP_VSI_ENABLED})
     endif()
 endif()
 
+if (${TARGET_PLATFORM} STREQUAL ensemble)
+    add_subdirectory(source/ensemble)
+endif()
+
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")

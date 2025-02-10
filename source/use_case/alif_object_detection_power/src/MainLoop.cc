@@ -76,10 +76,6 @@ void MainLoop()
 
     arm::app::YoloFastestModel model;  /* Model wrapper object. */
 
-    if (!alif::app::ObjectDetectionInit()) {
-        printf_err("Failed to initialise use case handler\n");
-    }
-
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
@@ -87,6 +83,10 @@ void MainLoop()
                     arm::app::object_detection::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
+    }
+
+    if (!alif::app::ObjectDetectionInit(model)) {
+        printf_err("Failed to initialise use case handler\n");
     }
 
     /* Instantiate application context. */
