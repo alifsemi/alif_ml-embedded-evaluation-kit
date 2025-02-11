@@ -40,7 +40,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-set(ENSEMBLE_CAMERA_MODULE ARX3A0 CACHE STRING "Camera module type for Ensemble kits")
+set(ENSEMBLE_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Ensemble kits")
 set_property(CACHE ENSEMBLE_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0")
 
 message(STATUS "Camera: ${ENSEMBLE_CAMERA_MODULE}")
