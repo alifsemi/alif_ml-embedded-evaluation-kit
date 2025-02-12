@@ -61,6 +61,15 @@ with open('model_int8_quantized.tflite', 'wb') as model_file:
     model_file.write(quantized_model)
 ```
 
+### Comparing the inference results
+The quantized model can be invoked in PC environment. This can be useful for comparing and validating the TFLM and Ethos-U inference results in target HW.
+By default the tflite interpreter operators are optimized and the results can differ slightly between the platforms.
+When creating reference or test data tensors one should use the tflite reference operators.
+
+```
+interpreter = tf.lite.Interpreter(model_path=model_path, experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_REF)
+```
+
 ### ONNX to TFLite
 There is an excellent tool for this conversion. [onnx2tf](https://github.com/PINTO0309/onnx2tf) manages to do a good job in converting the ONNX to TFLite (NCHW to NHWC). The tool also has automatic representative data for image processing ML models.
 - Operators [supported by onnx2tf](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
