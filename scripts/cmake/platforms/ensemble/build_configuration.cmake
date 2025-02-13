@@ -57,6 +57,11 @@ function(set_platform_global_defaults)
         "${RTSS_NPU_CONFIG_ID}"
         STRING)
 
+
+    USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead."
+        ON
+        BOOL)
+
     # Include NPU, CMSIS and LVGL configuration options
     include(npu_opts)
     include(cmsis_opts)

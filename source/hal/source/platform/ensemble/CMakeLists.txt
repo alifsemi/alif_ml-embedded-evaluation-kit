@@ -203,7 +203,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
     audio_ensemble
     hal_audio_static_streams
-    camera_ensemble
+    $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_ensemble,hal_camera_static_images>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
 )
 

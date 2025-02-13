@@ -94,3 +94,13 @@ generate_tflite_code(
     DESTINATION ${SRC_GEN_DIR}
     EXPRESSIONS ${EXTRA_MODEL_CODE}
     NAMESPACE   "arm" "app" "object_detection")
+
+# Rest are for static images use case
+if (NOT ${ALIF_CAMERA_ENABLED})
+    set_input_file_path_user_option(".bmp" object_detection)
+
+    # Generate input files
+    generate_images_code("${object_detection_FILE_PATH}"
+    ${SAMPLES_GEN_DIR}
+    "${${use_case}_IMAGE_SIZE}")
+endif()
