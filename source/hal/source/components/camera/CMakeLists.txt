@@ -64,9 +64,6 @@ if (${FVP_VSI_ENABLED})
 endif()
 
 if (${TARGET_PLATFORM} STREQUAL ensemble)
-    if (NOT ${ALIF_CAMERA_ENABLED})
-        target_compile_definitions(hal_camera_static_images PRIVATE HAL_CAMERA_LOOP>)
-    endif()
     add_subdirectory(source/ensemble)
 endif()
 

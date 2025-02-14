@@ -85,15 +85,13 @@ generate_tflite_code(
     NAMESPACE   "arm" "app" "img_class")
 
 # Rest are for static images use case
-if (NOT ${ALIF_CAMERA_ENABLED})
-    set_input_file_path_user_option(".bmp" "img_class")
+set_input_file_path_user_option(".bmp" "img_class")
 
-    USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
-        224
-        STRING)
+USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
+    224
+    STRING)
 
-    # Generate input files
-    generate_images_code("${img_class_FILE_PATH}"
-                        ${SAMPLES_GEN_DIR}
-                        "${${use_case}_IMAGE_SIZE}")
-endif()
+# Generate input files
+generate_images_code("${img_class_FILE_PATH}"
+                    ${SAMPLES_GEN_DIR}
+                    "${${use_case}_IMAGE_SIZE}")

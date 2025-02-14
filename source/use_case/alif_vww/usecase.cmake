@@ -58,11 +58,9 @@ generate_labels_code(
 )
 
 # Rest are for static images use case
-if (NOT ${ALIF_CAMERA_ENABLED})
-    set_input_file_path_user_option(".png" "vww")
+set_input_file_path_user_option(".png" "vww")
 
-    # Generate input files
-    generate_images_code("${vww_FILE_PATH}"
-                        ${SAMPLES_GEN_DIR}
-                        "${${use_case}_IMAGE_SIZE}")
-endif()
+# Generate input files
+generate_images_code("${vww_FILE_PATH}"
+                    ${SAMPLES_GEN_DIR}
+                    "${${use_case}_IMAGE_SIZE}")
