@@ -52,10 +52,6 @@ void MainLoop()
 
     arm::app::MobileNetModel model;  /* Model wrapper object. */
 
-    if (!alif::app::ClassifyImageInit()) {
-        printf_err("Failed to initialise use case handler\n");
-    }
-
 #if !SKIP_MODEL
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
@@ -66,6 +62,10 @@ void MainLoop()
         return;
     }
 #endif
+
+    if (!alif::app::ClassifyImageInit(model)) {
+        printf_err("Failed to initialise use case handler\n");
+    }
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;

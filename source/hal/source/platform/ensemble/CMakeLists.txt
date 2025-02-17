@@ -40,7 +40,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-set(ENSEMBLE_CAMERA_MODULE ARX3A0 CACHE STRING "Camera module type for Ensemble kits")
+set(ENSEMBLE_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Ensemble kits")
 set_property(CACHE ENSEMBLE_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0")
 
 message(STATUS "Camera: ${ENSEMBLE_CAMERA_MODULE}")
@@ -173,9 +173,6 @@ add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
 ## Platform component: audio
 add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
-## Platform component: image
-add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
-
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
@@ -203,11 +200,10 @@ target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
 
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     ${PLATFORM_DRIVERS_CORE}
-    image_ensemble
     $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
     audio_ensemble
     hal_audio_static_streams
-    hal_camera_static_images
+    $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_ensemble,hal_camera_static_images>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
 )
 

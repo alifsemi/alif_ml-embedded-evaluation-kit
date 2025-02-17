@@ -83,9 +83,15 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
         /* Initialise the camera */
-        int err = hal_image_init();
-        if (0 != err) {
-            printf_err("hal_image_init failed with error: %d\n", err);
+        if (!hal_camera_init()) {
+            printf_err("hal_camera_init failed!\n");
+            return false;
+        }
+
+        auto bCamera = hal_camera_configure(MIMAGE_X, MIMAGE_Y, HAL_CAMERA_MODE_SINGLE_FRAME, HAL_CAMERA_COLOUR_FORMAT_RGB888);
+        if (!bCamera) {
+            printf_err("Failed to configure camera.\n");
+            return false;
         }
 
         return true;
@@ -124,13 +130,16 @@ namespace app {
                 ctx.Get<std::vector<std::string>&>("labels"), results);
 
 #endif
-        const uint8_t *image_data = hal_get_image_data(MIMAGE_X, MIMAGE_Y);
-        if (!image_data) {
-            printf_err("hal_get_image_data failed");
+        hal_camera_start();
+
+        uint32_t capturedFrameSize = 0;
+        const uint8_t* image_data = hal_camera_get_captured_frame(&capturedFrameSize);
+        if (!image_data || !capturedFrameSize) {
+            printf_err("hal_camera_get_captured_frame failed");
             return false;
         }
 
- uint32_t lv_lock_state = lv_port_lock();
+        uint32_t lv_lock_state = lv_port_lock();
         tprof5 = Get_SysTick_Cycle_Count32();
         /* Display this image on the LCD. */
 #ifdef USE_LVGL_ZOOM

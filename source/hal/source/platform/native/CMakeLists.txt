@@ -83,8 +83,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     lcd_stubs
     hal_audio_static_streams
     hal_camera_static_images
-    audio_stubs
-    image_stubs)
+    audio_stubs)
 
 # Display status:
 message(STATUS "*******************************************************")

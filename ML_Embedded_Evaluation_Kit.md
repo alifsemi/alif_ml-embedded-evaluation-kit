@@ -256,7 +256,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
 3. Build the Project using Make
     ```
-    make ethos-u-alif_kws -j
+    make ethos-u-alif_kws -j4
     ```
 4. The output should be in `/build_he/bin/ethos-u-alif_kws.axf`
 
@@ -295,7 +295,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 3. Build the Project using Make.
     ```
-    make ethos-u-alif_img_class -j
+    make ethos-u-alif_img_class -j4
     ```
 4. The output should be produced in `build_hp/bin/ethos-u-alif_img_class.axf`
 
@@ -372,7 +372,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 5. Build the project using `Make`
     ```
-    make -j
+    make -j4
     ```
 
 6. Open Tera-Term or any other serial port console app. Connect to UART4 (for M55-HP) or UART2 (for M55-HE). Configure serial port settings to 115200, 8N1.
