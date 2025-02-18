@@ -616,6 +616,16 @@ The inference_runner use-case can be used for basic benchmarks.
 - [Deploying your own model](docs/deploying_model.md)
 
 
+## Memory usage and linker files
+
+Ensemble linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
+As there are Alif example projects which uses both cores, whole MRAM/SRAM0/SRAM1 is not used as there need to be space for both applications running on HE and HP core.
+So if you run only one core, you can take the full MRAM/SRAM0/SRAM1 into use.
+
+usecase.cmake files do have USER_OPTION `${use_case}_ACTIVATION_BUF_SZ` which defines the size of the Activation buffer.
+You need to check that size of this buffer aligns with your model size. In most cases`${use_case}_ACTIVATION_BUF_SZ` goes to SRAM1, for E1 (as there is no SRAM1) it goes to SRAM0.
+
+
 ## Further information
 
 Beyond the demo build described above, many other use cases and options of the upstream Arm ML Embedded Evaluation kit should work on Alif hardware.<br>
