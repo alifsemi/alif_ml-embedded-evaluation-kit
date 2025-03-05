@@ -16,8 +16,8 @@
 #include "log_macros.h"
 
 extern "C" {
-LV_IMG_DECLARE(Alif240);
-LV_IMG_DECLARE(Alif240_white);
+    LV_IMAGE_DECLARE(Alif240);
+    LV_IMAGE_DECLARE(Alif240_white);
 }
 namespace alif {
 namespace app {
@@ -42,7 +42,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_port_disp_init();
 
     uint32_t lv_lock_state = lv_port_lock();
-    lv_obj_t *screen = lv_scr_act();
+    lv_obj_t *screen = lv_screen_active();
 
     static lv_style_t style;
     lv_style_init(&style);
@@ -56,8 +56,8 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_add_style(screen, &style, LV_PART_MAIN);
 
     /* Grid layout for the screen */
-    lv_coord_t scrWidth = lv_obj_get_width(screen);
-    lv_coord_t scrHeight = lv_obj_get_height(screen);
+    int32_t scrWidth = lv_obj_get_width(screen);
+    int32_t scrHeight = lv_obj_get_height(screen);
     bool landscape;
     if (scrWidth > scrHeight) {
         landscape = true;
@@ -97,7 +97,7 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     /* Make a holder with a border for the camera image */
     /* (Serves to determine screen layout, as layout can get weird for zoomed image widgets) */
     imageHolder = lv_obj_create(screen);
-    lv_obj_move_background(imageHolder);
+    lv_obj_move_to_index(imageHolder, 0);
 #if LV_THEME_DEFAULT_DARK == 0
     lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x666666), LV_PART_MAIN);
 #else
@@ -175,29 +175,30 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_add_style(labelTime, &tiny, LV_PART_MAIN);
 
     /* Centre the image in its holder */
-    imageObj = lv_img_create(imageHolder);
-    static lv_img_dsc_t imageDesc;
+    imageObj = lv_image_create(imageHolder);
+    static lv_image_dsc_t imageDesc;
     imageDesc.data = (const uint8_t *)imgData;
     imageDesc.data_size = imgSize;
-    imageDesc.header.always_zero = 0;
-    imageDesc.header.reserved = 0;
-    imageDesc.header.cf = LV_IMG_CF_TRUE_COLOR;
+    imageDesc.header.magic = LV_IMAGE_HEADER_MAGIC;
+    imageDesc.header.cf = LV_COLOR_FORMAT_NATIVE;
     imageDesc.header.w = imgWidth;
     imageDesc.header.h = imgHeight;
-    lv_img_set_zoom(imageObj, imgZoom);
-    lv_img_set_antialias(imageObj, false);
-    lv_img_set_src(imageObj, &imageDesc);
+    imageDesc.header.stride = imgWidth * LV_COLOR_DEPTH/8;
+    imageDesc.header.flags = 0;
+    lv_image_set_scale(imageObj, imgZoom);
+    lv_image_set_antialias(imageObj, false);
+    lv_image_set_src(imageObj, &imageDesc);
     lv_obj_center(imageObj);
 
     /* Add a logo */
-    lv_obj_t *alifObj = lv_img_create(resultHolder);
+    lv_obj_t *alifObj = lv_image_create(resultHolder);
 #if LV_THEME_DEFAULT_DARK == 0
-    lv_img_set_src(alifObj, &Alif240);
+    lv_image_set_src(alifObj, &Alif240);
 #else
-    lv_img_set_src(alifObj, &Alif240_white);
+    lv_image_set_src(alifObj, &Alif240_white);
 #endif
     lv_obj_set_align(alifObj, LV_ALIGN_BOTTOM_MID);
-    lv_obj_move_background(alifObj);
+    lv_obj_move_to_index(alifObj, 0);
 
     lv_port_unlock(lv_lock_state);
 }

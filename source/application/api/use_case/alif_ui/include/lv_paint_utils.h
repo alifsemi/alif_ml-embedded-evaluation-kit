@@ -11,7 +11,7 @@
 #ifndef LV_PAINT_UTILS_H_
 #define LV_PAINT_UTILS_H_
 
-#include "lvgl.h"
+#include "lv_port.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,11 +20,11 @@ extern "C" {
 void write_to_lvgl_buf_doubled(
         int width, int height,
         const uint8_t *src,
-        lv_color_t *dst);
+        lvgl_pixel_t *dst);
 void write_to_lvgl_buf(
         int width, int height,
         const uint8_t *src,
-        lv_color_t *dst);
+        lvgl_pixel_t *dst);
 
 #ifdef __cplusplus
 }

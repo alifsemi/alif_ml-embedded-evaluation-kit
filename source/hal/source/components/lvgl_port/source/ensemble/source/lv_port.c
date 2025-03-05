@@ -16,7 +16,6 @@
 
 #include "LCD_panel.h"
 #include "Driver_CDC200.h"
-#include "lvgl.h"
 #include "lv_port.h"
 
 #define MY_DISP_HOR_RES RTE_PANEL_HACTIVE_TIME
@@ -43,53 +42,55 @@ static atomic_uint_fast32_t lv_ticks;
 
 static atomic_char pending_flush; // 0 = no pending flush, 1 = flush pending, 2 = flush in progress
 
-static void lv_disp_flush(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
+static void lv_display_flush(lv_display_t  * restrict disp, const lv_area_t * restrict area, uint8_t * restrict px_map)
 {
 #if LV_COLOR_DEPTH == 32
-// lv_rounder ensures x coordinates are multiples of 4
+    // lv_event_cb ensures x coordinates are multiples of 4
+    uint32_t * restrict buf32 = (uint32_t * restrict)px_map;
     for(int32_t y = area->y1; y <= area->y2; y++) {
         uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
         for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
-            uint32_t argb0 = (*color_p++).full;
-            uint32_t argb1 = (*color_p++).full;
+            uint32_t argb0 = (*buf32++);
+            uint32_t argb1 = (*buf32++);
             uint32_t b1r0g0b0 = (argb1 << 24) | (argb0 & 0x00ffffff);
             *dstp32++ = b1r0g0b0;
-            uint32_t argb2 = (*color_p++).full;
+            uint32_t argb2 = (*buf32++);
             uint32_t g2b2r1g1 = (argb2 << 16) | ((argb1 >> 8) & 0x0000ffff);
             *dstp32++ = g2b2r1g1;
-            uint32_t argb3 = (*color_p++).full;
+            uint32_t argb3 = (*buf32++);
             uint32_t r3g3b3r2 = (argb3 << 8) | ((argb2 >> 16) & 0x000000ff);
             *dstp32++ = r3g3b3r2;
         }
     }
 #else
-    lv_coord_t w = lv_area_get_width(area);
-    lv_coord_t x = area->x1;
+    uint16_t * restrict buf16 = (uint16_t * restrict)px_map; /*Let's say it's a 16 bit (RGB565) display*/
+    int32_t w = lv_area_get_width(area);
+    int32_t x = area->x1;
     for(int32_t y = area->y1; y <= area->y2; y++) {
-        memcpy(lcd_image[y][x], color_p, w * sizeof *color_p);
-        color_p += w;
+        memcpy(lcd_image[y][x], buf16, w * sizeof *buf16);
+        buf16 += w;
     }
 #endif
 
     pending_flush = 0;
-    lv_disp_flush_ready(disp_drv);
+    lv_display_flush_ready(disp);
 }
 
-static lv_disp_drv_t *pending_flush_disp_drv;
+static lv_display_t *pending_flush_disp;
 static lv_area_t pending_flush_area;
-static lv_color_t *pending_flush_color_p;
+static uint8_t *pending_flush_px_max;
 
 void do_pending_flush(void)
 {
     char expected = 1;
     if (atomic_compare_exchange_strong(&pending_flush, &expected, 2)) {
-        lv_disp_flush(pending_flush_disp_drv, &pending_flush_area, pending_flush_color_p);
+        lv_display_flush(pending_flush_disp, &pending_flush_area, pending_flush_px_max);
     }
 }
 
-static void lv_consider_immediate_flush(lv_disp_drv_t * restrict disp_drv)
+static void lv_consider_immediate_flush(lv_display_t * restrict disp)
 {
-    (void)(disp_drv);
+    (void)(disp);
 
     if (!pending_flush) {
         return;
@@ -101,7 +102,8 @@ static void lv_consider_immediate_flush(lv_disp_drv_t * restrict disp_drv)
     }
 }
 
-static void lv_disp_flush_async(lv_disp_drv_t * restrict disp_drv, const lv_area_t * restrict area, lv_color_t * restrict color_p)
+// (`px_map` contains the rendered image as raw pixel map and it should be copied to `area` on the display)
+static void lv_display_flush_async(lv_display_t * restrict disp, const lv_area_t * restrict area, uint8_t * restrict px_map)
 {
     /* LVGL should not call us to flush while we have one already pending - trap just in case */
     if (pending_flush) {
@@ -109,24 +111,34 @@ static void lv_disp_flush_async(lv_disp_drv_t * restrict disp_drv, const lv_area
             __WFE();
         }
     }
+
     /* Prepare the flush info */
-    pending_flush_disp_drv = disp_drv;
+    pending_flush_disp = disp;
     pending_flush_area = *area;
-    pending_flush_color_p = color_p;
+    pending_flush_px_max = px_map;
     pending_flush = 1;
 
     /* And then do it immediately if we can, being race-free with the display interrupt which
      * could also do it.
      */
-    lv_consider_immediate_flush(disp_drv);
+    lv_consider_immediate_flush(disp);
+}
+
+static void lv_display_flush_wait(lv_display_t * restrict disp)
+{
+    while (pending_flush) {
+        lv_consider_immediate_flush(disp);
+    }
 }
 
 #if LV_COLOR_DEPTH == 32
-static void lv_rounder(lv_disp_drv_t *disp_drv, lv_area_t *area)
+void lv_event_cb(lv_event_t * e)
 {
-    (void)(disp_drv);
-    area->x1 = area->x1 & ~(lv_coord_t) 3;
-    area->x2 = area->x2 | 3;
+    if (e->code == LV_EVENT_INVALIDATE_AREA) {
+        lv_area_t *area = lv_event_get_param(e);
+        area->x1 = area->x1 & ~(int32_t) 3;
+        area->x2 = area->x2 | 3;
+    }
 }
 #endif
 
@@ -143,8 +155,8 @@ void lv_port_disp_init(void)
     if (lv_inited)
     {
         uint32_t lv_lock_state = lv_port_lock();
-        lv_obj_t *screen = lv_scr_act();
-        uint32_t children = lv_obj_get_child_cnt(screen);
+        lv_obj_t *screen = lv_screen_active();
+        uint32_t children = lv_obj_get_child_count(screen);
         for (uint32_t i = 0; i < children; i++) {
             lv_obj_add_flag(lv_obj_get_child(screen, i), LV_OBJ_FLAG_HIDDEN);
         }
@@ -155,33 +167,26 @@ void lv_port_disp_init(void)
 
     LCD_Panel_init(&lcd_image[0][0][0]);
 
-    static lv_disp_drv_t disp_drv;
-    static lv_disp_draw_buf_t disp_buf;
     /* This drawing buffer should be in DCTM for speed. */
-    static lv_color_t buf_1[MY_DISP_BUFFER];
+    static lvgl_pixel_t buf_1[MY_DISP_BUFFER];
 
     lv_init();
+    lv_tick_set_cb(lv_port_get_ticks);
 
-    lv_disp_drv_init(&disp_drv);
-    lv_disp_draw_buf_init(&disp_buf, buf_1, NULL, MY_DISP_BUFFER);
-
-    disp_drv.draw_buf = &disp_buf;
-    disp_drv.flush_cb = lv_disp_flush_async;
-    disp_drv.wait_cb = lv_consider_immediate_flush;
+    lv_display_t * disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
+    lv_display_set_flush_cb(disp, lv_display_flush_async);
+    lv_display_set_buffers(disp, buf_1, NULL, MY_DISP_BUFFER, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    lv_display_set_flush_wait_cb(disp, lv_display_flush_wait);
 #if LV_COLOR_DEPTH == 32
-    disp_drv.rounder_cb = lv_rounder;
+    lv_display_add_event_cb(disp, lv_event_cb, LV_EVENT_INVALIDATE_AREA, NULL);
 #endif
-    disp_drv.hor_res = MY_DISP_HOR_RES;
-    disp_drv.ver_res = MY_DISP_VER_RES;
-    disp_drv.sw_rotate = true;
 #if ROTATE_DISPLAY == 90
-    disp_drv.rotated = LV_DISP_ROT_90;
+    lv_disp_set_rotation(disp, LV_DISPLAY_ROTATION_90);
 #elif ROTATE_DISPLAY == 180
-    disp_drv.rotated = LV_DISP_ROT_180;
+    lv_disp_set_rotation(disp, LV_DISPLAY_ROTATION_180);
 #elif ROTATE_DISPLAY == 270
-    disp_drv.rotated = LV_DISP_ROT_270;
+    lv_disp_set_rotation(disp, LV_DISPLAY_ROTATION_270);
 #endif
-    lv_disp_drv_register(&disp_drv);
 
     /* Set up priorities so that SysTick can interrupt LCD interrupts which
      * can interrupt the task handling. Most other hardware interrupts should
