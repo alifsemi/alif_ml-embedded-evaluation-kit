@@ -66,7 +66,7 @@ extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 namespace {
 
-lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 256x256x2 = 131,072
+lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 256x256x2 = 131,072
 };
 
 
@@ -196,12 +196,12 @@ namespace app {
             if (results[r].m_normalisedVal >= 0.7) {
                 lv_obj_add_state(label, LV_STATE_USER_1);
             } else {
-                lv_obj_clear_state(label, LV_STATE_USER_1);
+                lv_obj_remove_state(label, LV_STATE_USER_1);
             }
             if (results[r].m_normalisedVal < 0.2) {
                 lv_obj_add_state(label, LV_STATE_USER_2);
             } else {
-                lv_obj_clear_state(label, LV_STATE_USER_2);
+                lv_obj_remove_state(label, LV_STATE_USER_2);
             }
         }
         lv_port_unlock(lv_lock_state);

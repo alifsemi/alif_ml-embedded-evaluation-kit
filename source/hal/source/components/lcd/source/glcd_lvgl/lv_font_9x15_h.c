@@ -245,7 +245,6 @@ static const lv_font_fmt_txt_cmap_t cmaps[] = {
     }
 };
 
-static  lv_font_fmt_txt_glyph_cache_t cache;
 static const lv_font_fmt_txt_dsc_t font_dsc = {
     .glyph_bitmap = glyph_bitmap,
     .glyph_dsc = glyph_dsc,
@@ -255,8 +254,7 @@ static const lv_font_fmt_txt_dsc_t font_dsc = {
     .cmap_num = 1,
     .bpp = 1,
     .kern_classes = 0,
-    .bitmap_format = LV_FONT_FMT_TXT_PLAIN,
-    .cache = &cache
+    .bitmap_format = LV_FONT_FMT_TXT_PLAIN
 };
 
 const lv_font_t lv_font_9x15 = {

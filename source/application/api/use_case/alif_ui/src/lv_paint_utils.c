@@ -1,15 +1,16 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
 
 #include <inttypes.h>
 #include <stdlib.h>
+#include "lv_paint_utils.h"
 
 #if defined __clang__ || defined __GNUC__
 #pragma GCC diagnostic ignored "-Wvla"
@@ -36,13 +37,17 @@
 #error "Unsupported LV_COLOR_DEPTH"
 #endif
 
+#if (LV_COLOR_DEPTH == 32)
+#include "cmsis_compiler.h" // __REV requires this header
+#endif
+
 void write_to_lvgl_buf_doubled(
         int width, int height,
         const uint8_t * restrict src_ptr,
-        lv_color_t * restrict dst_ptr)
+        lvgl_pixel_t * restrict dst_ptr)
 {
     const uint8_t (*src)[width][RGB_BYTES] = (const uint8_t (*)[width][RGB_BYTES]) src_ptr;
-    lv_color_t (*dst)[width * 2] = (lv_color_t (*)[width * 2]) dst_ptr;
+    lvgl_pixel_t (*dst)[width * 2] = (lvgl_pixel_t (*)[width * 2]) dst_ptr;
     if (width % 16) {
         abort();
     }
@@ -88,8 +93,8 @@ void write_to_lvgl_buf_doubled(
 		}
 #elif ENABLE_WORD_WRITE
 		const uint8_t * restrict srcp = src[y1][0];
-		lv_color_t * restrict dstp = dst[y1 * 2];
-		lv_color_t * restrict dst2p = dst[y1 * 2 + 1];
+		lvgl_pixel_t * restrict dstp = dst[y1 * 2];
+		lvgl_pixel_t * restrict dst2p = dst[y1 * 2 + 1];
 		const uint32_t *srcp32 = (const uint32_t *)srcp;
 		uint32_t *dstp32 = (uint32_t *)dstp;
 		// Load 4 pixels as 3 words, and expand to 8 words, on two rows
@@ -149,7 +154,7 @@ void write_to_lvgl_buf_doubled(
 			x = (x1 << 1);
 			y = (y1 << 1);
 
-			lv_color_t c = lv_color_make(r, g, b);
+			lvgl_pixel_t c = lv_color_make(r, g, b);
 			dst[y][x] = c;
 			dst[y][x+1] = c;
 			dst[y+1][x] = c;
@@ -162,10 +167,10 @@ void write_to_lvgl_buf_doubled(
 void write_to_lvgl_buf(
         int width, int height,
         const uint8_t * restrict src_ptr,
-        lv_color_t * restrict dst_ptr)
+        lvgl_pixel_t * restrict dst_ptr)
 {
     const uint8_t (*src)[width][RGB_BYTES] = (const uint8_t (*)[width][RGB_BYTES]) src_ptr;
-    lv_color_t (*dst)[width] = (lv_color_t (*)[width]) dst_ptr;
+    lvgl_pixel_t (*dst)[width] = (lvgl_pixel_t (*)[width]) dst_ptr;
     if (width % 16) {
         abort();
     }
@@ -211,7 +216,7 @@ void write_to_lvgl_buf(
 #endif
 #elif ENABLE_WORD_WRITE
 		const uint8_t * restrict srcp = src[y][0];
-		lv_color_t * restrict dstp = dst[y];
+		lvgl_pixel_t * restrict dstp = dst[y];
 		const uint32_t *srcp32 = (const uint32_t *)srcp;
 		uint32_t *dstp32 = (uint32_t *)dstp;
 		// Load 4 pixels as 3 words, and expand to 4 words

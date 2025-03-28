@@ -48,7 +48,7 @@
 
 namespace {
 lv_style_t boxStyle;
-lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 192x192x2 = 73,728
+lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 192x192x2 = 73,728
 };
 
 using arm::app::Profiler;
@@ -257,7 +257,7 @@ using namespace arm::app::object_detection;
     static void DeleteBoxes(lv_obj_t *frame)
     {
         // Assume that child 0 of the frame is the image itself
-        int children = lv_obj_get_child_cnt(frame);
+        int children = lv_obj_get_child_count(frame);
         while (children > 1) {
             lv_obj_del(lv_obj_get_child(frame, 1));
             children--;

@@ -16,8 +16,8 @@
 #include "glcd.h"
 
 static lv_obj_t *canvas;
-static lv_draw_rect_dsc_t rect_dsc;
-static lv_draw_label_dsc_t text_dsc;
+static lv_color_t txt_bg_color;
+static lv_color_t txt_color;
 
 void GLCD_Initialize(void)
 {
@@ -26,22 +26,26 @@ void GLCD_Initialize(void)
 #error "LV_COLOR_DEPTH must be set to 16 to use GLCD emulation"
 #endif
     uint32_t lv_lock_state = lv_port_lock();
-    lv_obj_t *scr = lv_scr_act();
+    lv_obj_t *scr = lv_screen_active();
     lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
-    canvas = lv_canvas_create(lv_scr_act());
-    static LV_ATTRIBUTE_LARGE_RAM_ARRAY uint32_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(GLCD_WIDTH, GLCD_HEIGHT) / sizeof(uint32_t)];
-    lv_canvas_set_buffer(canvas, buffer, GLCD_WIDTH, GLCD_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    canvas = lv_canvas_create(lv_screen_active());
+    static LV_ATTRIBUTE_LARGE_RAM_ARRAY uint32_t buffer[_LV_DRAW_BUF_SIZE(GLCD_WIDTH, GLCD_HEIGHT, LV_COLOR_FORMAT_RGB565)/sizeof(uint32_t)];
+    lv_canvas_set_buffer(canvas, buffer, GLCD_WIDTH, GLCD_HEIGHT, LV_COLOR_FORMAT_RGB565);
     lv_obj_center(canvas);
-	lv_draw_rect_dsc_init(&rect_dsc);
-	lv_draw_label_dsc_init(&text_dsc);
-	extern const lv_font_t lv_font_9x15;
-	text_dsc.font = &lv_font_9x15;
-	// Use selection to draw the background
-	text_dsc.sel_start = 0;
-	text_dsc.sel_end = 0x7fff;
-	text_dsc.sel_bg_color.full = Black;
-	text_dsc.sel_color.full = White;
 	lv_port_unlock(lv_lock_state);
+}
+
+static lv_color_t rgb565_to_lv_color(unsigned short color)
+{
+    lv_color_t col;
+    unsigned blue5 = color & 0x1F;
+    unsigned green6 = (color >> 5) & 0x3F;
+    unsigned red5 = (color >> 11) & 0x1F;
+
+    col.blue = (blue5 * 0x21) >> 2;
+    col.green = (green6 * 0x41) >> 4;
+    col.red =  (red5 * 0x21) >> 2;
+    return col;
 }
 
 void GLCD_Clear(unsigned short color)
@@ -50,7 +54,7 @@ void GLCD_Clear(unsigned short color)
         return;
     }
     uint32_t lv_lock_state = lv_port_lock();
-    lv_canvas_fill_bg(canvas, (lv_color_t) { .full = color }, LV_OPA_COVER);
+    lv_canvas_fill_bg(canvas, rgb565_to_lv_color(color), LV_OPA_COVER);
     lv_port_unlock(lv_lock_state);
 }
 
@@ -114,7 +118,7 @@ void GLCD_Image(const void *data, const uint32_t width,
     for (j = height; j != 0; j -= downsample_factor) {
         uint32_t dst_x = pos_x;
         for (i = width; i != 0; i -= downsample_factor) {
-            lv_canvas_set_px_color(canvas, dst_x, dst_y, cvt_clr_fn(src_unsigned));
+            lv_canvas_set_px(canvas, dst_x, dst_y, cvt_clr_fn(src_unsigned), LV_OPA_COVER);
             src_unsigned += x_incr;
             dst_x++;
         }
@@ -137,7 +141,33 @@ void GLCD_DisplayString(
     switch (fi) {
     case 0: ;
         uint32_t lv_lock_state = lv_port_lock();
-        lv_canvas_draw_text(canvas, col * 9, ln * 15, col * 9, &text_dsc, s);
+
+        // This must be done with lvgl 9.x or it does not update any text
+        lv_obj_invalidate(canvas);
+
+        lv_layer_t layer1;
+        lv_canvas_init_layer(canvas, &layer1);
+
+        lv_draw_label_dsc_t text_dsc;
+        lv_draw_label_dsc_init(&text_dsc);
+
+        extern const lv_font_t lv_font_9x15;
+        text_dsc.font = &lv_font_9x15;
+        // Use selection to draw the background
+        text_dsc.sel_start = 0;
+        text_dsc.sel_end = 0x7fff;
+        text_dsc.sel_bg_color = txt_bg_color;
+        text_dsc.sel_color = txt_color;
+        text_dsc.text = s;
+
+        lv_area_t coords;
+        coords.x1 = col * 9;
+        coords.y1 = ln * 15;
+        coords.x2 = col * 9 + strlen(s) * 9 - 1;
+        coords.y2 = (ln + 1) * 15 - 1;
+
+        lv_draw_label(&layer1, &text_dsc, &coords);
+        lv_canvas_finish_layer(canvas, &layer1);
         lv_port_unlock(lv_lock_state);
         break;
     }
@@ -159,18 +189,27 @@ void GLCD_Box(
     if (!canvas) {
         return;
     }
-	rect_dsc.bg_color.full = color;
-	uint32_t lv_lock_state = lv_port_lock();
-	lv_canvas_draw_rect(canvas, x, y, w, h, &rect_dsc);
-	lv_port_unlock(lv_lock_state);
+
+    uint32_t lv_lock_state = lv_port_lock();
+
+    lv_layer_t rect_layer;
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_canvas_init_layer(canvas, &rect_layer);
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_color = rgb565_to_lv_color(color);
+
+    lv_area_t coords = {x, y, x + w, y + h};
+    lv_draw_rect(&rect_layer, &rect_dsc, &coords);
+    lv_canvas_finish_layer(canvas, &rect_layer);
+    lv_port_unlock(lv_lock_state);
 }
 
 void GLCD_SetTextColor(unsigned short color)
 {
-    text_dsc.sel_color.full = color;
+    txt_color = rgb565_to_lv_color(color);
 }
 
 void GLCD_SetBackColor(unsigned short color)
 {
-    text_dsc.sel_bg_color.full = color;
+    txt_bg_color = rgb565_to_lv_color(color);
 }
