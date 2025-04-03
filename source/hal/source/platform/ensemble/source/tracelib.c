@@ -59,7 +59,7 @@ const char * tr_prefix = NULL;
 uint16_t prefix_len;
 #define MAX_TRACE_LEN 256
 
-#ifdef M55_HP
+#if defined(M55_HP) || defined(RTSS_HP)
 #define STM_CHANNEL 0
 #define ITM_CHANNEL 0
 #else

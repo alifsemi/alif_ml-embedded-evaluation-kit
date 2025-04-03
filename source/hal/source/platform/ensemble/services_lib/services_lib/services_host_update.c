@@ -25,7 +25,7 @@
 #if defined(A32)
 #include "a32_device.h"
 #else
-#include "system_utils.h"
+#include "sys_utils.h"
 #endif
 
 /*******************************************************************************
@@ -69,7 +69,7 @@ uint32_t SERVICES_update_stoc(uint32_t services_handle,
 
   p_svc->send_image_address = LocalToGlobal((void *)image_address);
   p_svc->send_image_size = image_size;
-  uint32_t ret = SERVICES_send_request(services_handle, 
+  uint32_t ret = SERVICES_send_request(services_handle,
                                        SERVICE_UPDATE_STOC,
                                        DEFAULT_TIMEOUT);
 

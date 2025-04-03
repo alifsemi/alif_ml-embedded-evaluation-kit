@@ -307,35 +307,35 @@ typedef enum {
 } ioflex_mode_t;
 
 typedef enum {
-	NPU_HP,
-	NPU_HE,
-	ISIM,
-	OSPI_1,
-	CANFD,
-	SDC,
-	USB,
-	ETH,
-	GPU,
-	CDC200,
-	CAMERA,
-	MIPI_DSI,
-	MIPI_CSI,
-	LP_PERIPH
+	IP_CLOCK_NPU_HP,
+ 	IP_CLOCK_NPU_HE,
+ 	IP_CLOCK_ISIM,
+ 	IP_CLOCK_OSPI_1,
+ 	IP_CLOCK_CANFD,
+ 	IP_CLOCK_SDC,
+ 	IP_CLOCK_USB,
+ 	IP_CLOCK_ETH,
+ 	IP_CLOCK_GPU,
+ 	IP_CLOCK_CDC200,
+ 	IP_CLOCK_CAMERA,
+ 	IP_CLOCK_MIPI_DSI,
+ 	IP_CLOCK_MIPI_CSI,
+ 	IP_CLOCK_LP_PERIPH
 } ip_clock_gating_t;
 
-#define NPU_HP_MASK       (1 << NPU_HP)   // bit0
-#define NPU_HE_MASK       (1 << NPU_HE)   // bit1
-#define OSPI_1_MASK       (1 << OSPI_1)   // bit3
-#define CANFD_MASK        (1 << CANFD)    // bit4
-#define SDC_MASK          (1 << SDC)      // bit5
-#define USB_MASK          (1 << USB)      // bit6
-#define ETH_MASK          (1 << ETH)      // bit7
-#define GPU_MASK          (1 << GPU)      // bit8
-#define CDC200_MASK       (1 << CDC200)   // bit9
-#define CAMERA_MASK       (1 << CAMERA)   // bit10
-#define MIPI_DSI_MASK     (1 << MIPI_DSI) // bit11
-#define MIPI_CSI_MASK     (1 << MIPI_CSI) // bit12
-#define LP_PERIPH_MASK    (1 << LP_PERIPH)// bit13
+#define NPU_HP_MASK       (1 << IP_CLOCK_NPU_HP)   // bit0
+#define NPU_HE_MASK       (1 << IP_CLOCK_NPU_HE)   // bit1
+#define OSPI_1_MASK       (1 << IP_CLOCK_OSPI_1)   // bit3
+#define CANFD_MASK        (1 << IP_CLOCK_CANFD)    // bit4
+#define SDC_MASK          (1 << IP_CLOCK_SDC)      // bit5
+#define USB_MASK          (1 << IP_CLOCK_USB)      // bit6
+#define ETH_MASK          (1 << IP_CLOCK_ETH)      // bit7
+#define GPU_MASK          (1 << IP_CLOCK_GPU)      // bit8
+#define CDC200_MASK       (1 << IP_CLOCK_CDC200)   // bit9
+#define CAMERA_MASK       (1 << IP_CLOCK_CAMERA)   // bit10
+#define MIPI_DSI_MASK     (1 << IP_CLOCK_MIPI_DSI) // bit11
+#define MIPI_CSI_MASK     (1 << IP_CLOCK_MIPI_CSI) // bit12
+#define LP_PERIPH_MASK    (1 << IP_CLOCK_LP_PERIPH)// bit13
 
 typedef enum {
 	LDO_PHY,

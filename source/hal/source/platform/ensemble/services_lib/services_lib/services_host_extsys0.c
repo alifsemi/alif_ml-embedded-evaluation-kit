@@ -28,7 +28,7 @@
 #if defined(A32_LINUX)
 #include "a32_linux.h"
 #else
-#include "system_utils.h"
+#include "sys_utils.h"
 #endif
 
 /*******************************************************************************

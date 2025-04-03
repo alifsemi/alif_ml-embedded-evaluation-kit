@@ -21,7 +21,7 @@
 #if defined(A32)
 #include "a32_device.h"
 #else
-#include "system_utils.h"
+#include "sys_utils.h"
 #endif
 
 #define SERVICES_REQ_TIMEOUT_MS  0x20
@@ -97,7 +97,7 @@ uintptr_t SERVICES_prepare_packet_buffer(uint32_t size)
  * @param   channel_number
  * @return  Handle to be used in subsequent service calls
  */
-uint32_t SERVICES_register_channel(uint32_t mhu_id, 
+uint32_t SERVICES_register_channel(uint32_t mhu_id,
                                    uint32_t channel_number)
 {
   return mhu_id * MHU_NUMBER_OF_CHANNELS_MAX + channel_number;
@@ -145,8 +145,8 @@ void SERVICES_send_msg_acked_callback(uint32_t sender_id,
  * @param channel_number
  * @param service_data
  */
-void SERVICES_rx_msg_callback(uint32_t receiver_id, 
-                              uint32_t channel_number, 
+void SERVICES_rx_msg_callback(uint32_t receiver_id,
+                              uint32_t channel_number,
                               uint32_t service_data)
 {
   UNUSED(receiver_id);
@@ -215,7 +215,7 @@ uint32_t SERVICES_send_request(uint32_t services_handle,
   service_header_t * p_header = (service_header_t *)s_services_host.packet_buffer_address;
   p_header->hdr_service_id = service_id;
   p_header->hdr_flags = 0;
-  
+
   /**
    * Send a message to the SE
    */
@@ -235,12 +235,12 @@ uint32_t SERVICES_send_request(uint32_t services_handle,
                      s_services_host.wait_timeout;
   while (!s_new_msg_received)
   {
-    timeout--;  
+    timeout--;
     if (0 == timeout) // No response from SE
     {
       return SERVICES_REQ_TIMEOUT;
     }
-	
+
     //if (0 != s_services_host.fn_wait_ms(SERVICES_REQ_TIMEOUT_MS))
     //{
     //  break;

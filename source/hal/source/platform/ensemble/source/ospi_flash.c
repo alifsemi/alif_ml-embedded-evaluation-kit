@@ -17,11 +17,12 @@
 #include CMSIS_device_header
 
 #include "pinconf.h"
-#include "Driver_GPIO.h"
+#include "Driver_IO.h"
 #include "Driver_Flash.h"
 #include "Driver_OSPI.h"
 #include "IS25WX256.h"
 #include "ospi.h"
+#include "ospi_private.h"
 
 #include "log_macros.h"
 

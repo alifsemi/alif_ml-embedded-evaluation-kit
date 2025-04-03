@@ -52,12 +52,14 @@ SECTIONS
      */
     KEEP(*(.vectors))
 
-    *startup_M55*.c.obj(.text .rodata*)
-    *system_M55*.c.obj(.text .rodata*)
-    *mpu_M55*.c.obj(.text .rodata*)
+    *startup*.c.obj(.text* .rodata*)
+    *system*.c.obj(.text* .rodata*)
+    *mpu*.c.obj(.text* .rodata*)
+    *tgu.c.obj(.text* .rodata*)
+    *vectors.c.obj(.text* .rodata*)
+    *sau_tcm_ns_setup*(.text* .rodata*)
     *Main.cc.obj(.text .rodata*)
     *platform_drivers.c.obj(.text .rodata*)
-    *tcm_partition.c.obj(.text* .rodata*)
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)

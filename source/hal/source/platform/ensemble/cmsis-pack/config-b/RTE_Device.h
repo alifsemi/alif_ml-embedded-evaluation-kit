@@ -712,6 +712,94 @@
 #endif
 // </e> AR0145 [Driver_AR0145]
 
+// <e> AR0246 [Driver_AR0246]
+// <o> Enable/Disable AR0246 camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable AR0246 camera sensor
+// <i> default: enable
+#define RTE_AR0246_CAMERA_SENSOR_CSI_ENABLE     1
+
+#if (RTE_AR0246_CAMERA_SENSOR_CSI_ENABLE)
+
+// <o> Select camera AR0246 frequency
+// <i> Defines camera AR0246 frequency
+// <i> Default: 442000000
+#define RTE_AR0246_CAMERA_SENSOR_CSI_FREQ                    442000000
+
+// <o> select AR0246 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default: 0x2C(RAW12)
+#define RTE_AR0246_CAMERA_SENSOR_CSI_DATA_TYPE               0x2C
+
+// <o> select AR0246 number of lanes in DPHY
+// <i> defines select AR0246 number of lanes in DPHY.
+// <i> default: 2 two lane
+#define RTE_AR0246_CAMERA_SENSOR_CSI_N_LANES                 2
+
+// <o> select AR0246 virtual channel ID
+// <i> defines select AR0246 virtual channel ID.
+// <i> default: 0
+#define RTE_AR0246_CAMERA_SENSOR_CSI_VC_ID                   0
+
+// <o> select AR0246 override CPI color mode
+// <i> defines select AR0246 override CPI color mode.
+// <i> default: 1 (Enable)
+#define RTE_AR0246_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE     1
+
+// <o> select AR0246 CPI color mode
+// <i> defines select AR0246 CPI color mode.
+// <i> default: 2  (IPI-16 RAW 8)
+#define RTE_AR0246_CAMERA_SENSOR_CPI_COLOR_MODE              2
+
+// <o> select AR0246 frame height
+// <i> defines select AR0246 frame height.
+// <i> default: 472
+#define RTE_AR0246_CAMERA_SENSOR_FRAME_HEIGHT                472
+
+// <o> select AR0246 frame width
+// <i> defines select AR0246 frame width.
+// <i> default: 684
+#define RTE_AR0246_CAMERA_SENSOR_FRAME_WIDTH                 684
+
+// <o> Select camera sensor AR0246 CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor AR0246 CSI clock source division
+// <i> Default: 15
+#define RTE_AR0246_CAMERA_SENSOR_CSI_CLK_SCR_DIV             15
+
+// <o> Select camera sensor AR0246 reset pin number
+// <i> Defines camera sensor AR0246 reset pin number
+// <i> Default: 1
+#define RTE_AR0246_CAMERA_SENSOR_RESET_PIN_NO                 1
+
+// <o> Select camera sensor AR0246 reset GPIO port
+// <i> Defines camera sensor AR0246 reset GPIO port
+// <i> Default: 9
+#define RTE_AR0246_CAMERA_SENSOR_RESET_GPIO_PORT              9
+
+// <o> Select camera sensor AR0246 power pin number
+// <i> Defines camera sensor AR0246 power pin number
+// <i> Default: 5
+#define RTE_AR0246_CAMERA_SENSOR_POWER_PIN_NO                 5
+
+// <o> Select camera sensor AR0246 power GPIO port
+// <i> Defines camera sensor AR0246 power GPIO port
+// <i> Default: 7
+#define RTE_AR0246_CAMERA_SENSOR_POWER_GPIO_PORT              7
+
+// <o> RTE_AR0246_CAMERA_SENSOR_I2C_INSTANCE
+// <i> Defines camera sensor AR0246 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <4=>   I2C OVER I3C
+// <i> Default: 1
+#define RTE_AR0246_CAMERA_SENSOR_I2C_INSTANCE                 1
+
+#endif
+// </e> AR0246 [Driver_AR0246]
+
 // <e> MT9M114_MIPI [Driver_MT9M114_MIPI]
 // <o> Enable/Disable MT9M114 MIPI camera sensor
 //     <0=> disable
@@ -987,6 +1075,89 @@
 
 #endif
 // </e> OV5647_MIPI [Driver_OV5647_MIPI]
+
+// <e> OV5675_MIPI [Driver_OV5675_MIPI]
+// <o> Enable/Disable OV5675 MIPI camera sensor
+//     <0=> disable
+//     <1=> enable
+// <i> define if to enable or disable OV5675 MIPI camera sensor
+// <i> default: enable
+#define RTE_OV5675_CAMERA_SENSOR_ENABLE                  1
+
+#if (RTE_OV5675_CAMERA_SENSOR_ENABLE)
+
+// <o> Select camera OV5675 frequency
+// <i> Defines camera OV5675 frequency
+// <i> Default: 450000000
+#define RTE_OV5675_CAMERA_SENSOR_CSI_FREQ                   450000000
+
+// <o> select OV5675 CSI2 Data type
+// <i> defines select CSI2 Data type
+// <i> default:  0x2B (RAW10)
+#define RTE_OV5675_CAMERA_SENSOR_CSI_DATA_TYPE              0x2B
+
+// <o> select OV5675 number of lanes in DPHY
+// <i> defines select OV5675 number of lanes in DPHY.
+// <i> default: 2 lane
+#define RTE_OV5675_CAMERA_SENSOR_CSI_N_LANES                2
+
+// <o> select OV5675 virtual channel ID
+// <i> defines select OV5675 virtual channel ID.
+// <i> default: 0
+#define RTE_OV5675_CAMERA_SENSOR_CSI_VC_ID                  0
+
+// <o> select OV5675 override CPI color mode
+// <i> defines select OV5675 override CPI color mode.
+// <i> default: 1
+#define RTE_OV5675_CAMERA_SENSOR_OVERRIDE_CPI_COLOR_MODE    1
+
+// <o> select OV5675 CPI color mode
+// <i> defines select OV5675 CPI color mode.
+// <i> default: 2  (IPI-16 RAW 8)
+#define RTE_OV5675_CAMERA_SENSOR_CPI_COLOR_MODE             2
+
+// <o> select OV5675 frame height
+// <i> defines select OV5675 frame height.
+// <i> default: 972
+#define RTE_OV5675_CAMERA_SENSOR_FRAME_HEIGHT               972
+
+// <o> select OV5675 frame width
+// <i> defines select OV5675 frame width.
+// <i> default: 1296
+#define RTE_OV5675_CAMERA_SENSOR_FRAME_WIDTH                1296
+
+// <o> Select camera sensor OV5675 reset pin number
+// <i> Defines camera sensor OV5675 reset pin number
+// <i> Default: 1
+#define RTE_OV5675_CAMERA_SENSOR_RESET_PIN_NO               1
+
+// <o> Select camera sensor OV5675 reset GPIO port
+// <i> Defines camera sensor OV5675 reset GPIO port
+// <i> Default: 9
+#define RTE_OV5675_CAMERA_SENSOR_RESET_GPIO_PORT            9
+
+// <o> Select camera sensor OV5675 power pin number
+// <i> Defines camera sensor OV5675 power pin number
+// <i> Default: 5
+#define RTE_OV5675_CAMERA_SENSOR_POWER_PIN_NO               5
+
+// <o> Select camera sensor OV5675 power GPIO port
+// <i> Defines camera sensor OV5675 power GPIO port
+// <i> Default: 7
+#define RTE_OV5675_CAMERA_SENSOR_POWER_GPIO_PORT            7
+
+// <o RTE_OV5675_CAMERA_SENSOR_I2C_INSTANCE> Select camera sensor OV5675 i2c instance
+// <i> Defines camera sensor OV5675 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 1
+#define RTE_OV5675_CAMERA_SENSOR_I2C_INSTANCE               1
+
+#endif
+// </e> OV5675_MIPI [Driver_OV5675_MIPI]
 
 #endif
 // </e> MIPI_CSI2 (mipi csi2) [Driver_MIPI_CSI2]
@@ -1496,13 +1667,18 @@
 
 // <e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
 // <i> Configuration settings for Driver_I3C in component ::Drivers:I3C
-#define RTE_I3C   1
+#define RTE_I3C                             1
+
 #if RTE_I3C
-#define RTE_I3C_IRQ_PRI       0
+
+// <o> I3C IRQ priority <0-255>
+// <i> Defines I3C  Interrupt priority
+// <i> Default: 0
+#define RTE_I3C_IRQ_PRI                     0
 
 // <e> I2C (Inter Integrated Circuit) [Driver_I2CI3C]
 // <i> Configuration settings for Driver_I2CI3C in component ::Drivers:I2CI3C
-#define RTE_I2CI3C            1
+#define RTE_I2CI3C                          1
 // </e> I2C (Inter Integrated Circuit) [Driver_I2CI3C]
 
 // <o> I3C DMA ENABLE
@@ -1510,26 +1686,26 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for I3C
 // <i> Default: DISABLE
-#define RTE_I3C_DMA_ENABLE   0
+#define RTE_I3C_DMA_ENABLE                  0
 
 // <o> I3C DMA Selection
 //    <0=> DMA2(M55-HE)
 //    <1=> DMA0
 // <i> Defines Select DMA0 for I3C. By default DMA0 will be considered
 // <i> Default: DMA0
-#define RTE_I3C_SELECT_DMA0  1
+#define RTE_I3C_SELECT_DMA0                 1
 
 // <o> I3C DMA IRQ priority <0-255>
 // <i> Defines I3C DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I3C_DMA_IRQ_PRI  0
+#define RTE_I3C_DMA_IRQ_PRI                 0
 
 // <o> I3C blocking mode enable
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines Blocking mode support for I3C
 // <i> Default: DISABLE
-#define RTE_I3C_BLOCKING_MODE_ENABLE    0
+#define RTE_I3C_BLOCKING_MODE_ENABLE        0
 
 // <o> I3C Slave I2C/I3C Adaptive mode Enable
 //    <0=> DISABLE
@@ -1542,6 +1718,32 @@
 #endif
 // </e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
 
+// <e> IMU (Initial Measurement Unit) [Driver_IMU]
+// <i> Configuration settings for Driver_IMU in component ::Drivers:IMU
+#define RTE_IMU                             1
+
+#if RTE_IMU
+
+// <e> BMI323 (Initial Measurement Unit) [Driver_BMI323]
+// <i> Configuration settings for Driver_BMI323 in component ::Drivers:IMU
+#define RTE_BMI323                          1
+
+#if RTE_BMI323
+
+// <o> BMI323 IMU INT pin GPIO port number range <0-15>
+// <i> Defines BMI323 IMU INT pin GPIO port number.
+// <i> Default: 8
+#define RTE_BMI323_INT_GPIO_PORT            8
+
+// <o> BMI323 IMU INT pin number range <0-7>
+// <i> Defines BMI323 IMU INT pin number.
+// <i> Default: 4
+#define RTE_BMI323_INT_PIN_NO               4
+
+#endif
+//</e> BMI323 (Initial Measurement Unit) [Driver_BMI323]
+#endif
+// </e> IMU (Initial Measurement Unit) [Driver_IMU]
 
 // <h> SPI (Serial Peripheral Interface)
 // <e> SPI0 (Serial Peripheral Interface 0) [Driver_SPI0]
@@ -2072,7 +2274,7 @@
 
 // <e> LPSPI (Low Power Serial Peripheral Interface) [Driver_LPSPI]
 // <i> Configuration settings for Driver_LPSPI in component ::Drivers:SPI
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 
 #define RTE_LPSPI    1
 
@@ -2203,8 +2405,15 @@
 // <i> Defines LPSPI DMA Interrupt priority
 // <i> Default: 0
 #define RTE_LPSPI_DMA_IRQ_PRI                    0
+
+// <o> LPSPI blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for LPSPI
+// <i> Default: DISABLE
+#define RTE_LPSPI_BLOCKING_MODE_ENABLE           0
 #endif  //RTE_LPSPI
-#endif //M55_HE
+#endif //RTSS_HE
 
 // </e> LPSPI (Low Power Serial Peripheral Interface) [Driver_LPSPI]
 // </h> SPI (Serial Peripheral Interface)
@@ -2791,7 +3000,7 @@
 
 // <e> LPI2S (Low Power Integrated Interchip Sound) [Driver_SAILP]
 // <i> Configuration settings for Driver_SAILP in component ::Drivers:SAI
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 
 #define RTE_LPI2S     1
 
@@ -2891,10 +3100,29 @@
 #define RTE_LPI2S_BLOCKING_MODE_ENABLE   0
 
 #endif //RTE_LPI2S
-#endif //defined(M55_HE)
+#endif //defined(RTSS_HE)
 
 // </e> LPI2S (Low Power Integrated Interchip Sound) [Driver_SAILP]
 // </h> I2S (Integrated Interchip Sound)
+
+// <h> WM8904 Codec [Driver_WM8904]
+// <i> Configuration settings for Driver_WM8904 in component ::Drivers:WM8904
+#define RTE_WM8904_CODEC                      1
+
+#if RTE_WM8904_CODEC
+
+// <o> Select WM8904 i2c instance
+// <i> Defines WM8904 i2c instance
+//     <0=>   I2C0
+//     <1=>   I2C1
+//     <2=>   I2C2
+//     <3=>   I2C3
+//     <I3C=> I2C OVER I3C
+// <i> Default: 2
+#define RTE_WM8904_CODEC_I2C_INSTANCE         2
+#endif
+
+// </h> WM8904 Codec [Driver_WM8904]
 
 // <h> UART (Universal asynchronous receiver transmitter)
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
@@ -3443,7 +3671,7 @@
 
 // <e> LPUART (Low-Power Universal asynchronous receiver transmitter) [Driver_USARTLP]
 // <i> Configuration settings for Driver_USARTLP in component ::Drivers:USART
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 #define RTE_LPUART   1
 #endif
 
@@ -7064,19 +7292,17 @@
 #define RTE_DAC0_INPUT_BYP_MUX_EN   0
 
 // <o> DAC converts two's complement to unsigned binary data
+//   <i> DAC_out = (DAC_Input / 2^12) * Vref
+//   <i> DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
+//   <i> 2^12 represents DAC supports 12 bit resolution.
+//   <i> if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
+//   <i> DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
+//   <i> if dac_input > 2047 then,
+//   <i> DAC_out = ((dac_input - 2047) / 2^12) *vref
+//   <i> if dac_input < 2047 then,
+//   <i> DAC_out = ((dac_input + 2047) / 2^12) *vref
 //    <0=> DISABLE(input will be positive)
-//    DAC_out = (DAC_Input / 2^12) * Vref
-//    DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
-//    2^12 represents DAC supports 12 bit resolution.
-
 //    <1=> ENABLE (Input can be positive or negative)
-//    if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
-//    DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
-//    if dac_input > 2047 then,
-//    DAC_out = ((dac_input - 2047) / 2^12) *vref
-//    if dac_input < 2047 then,
-//    DAC_out = ((dac_input + 2047) / 2^12) *vref
-
 // <i> Default: DISABLE
 #define RTE_DAC0_TWOSCOMP_EN        0
 #endif
@@ -7094,19 +7320,17 @@
 #define RTE_DAC1_INPUT_BYP_MUX_EN   0
 
 // <o> DAC converts two's complement to unsigned binary data
+//   <i> DAC_out = (DAC_Input / 2^12) * Vref
+//   <i> DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
+//   <i> 2^12 represents DAC supports 12 bit resolution.
+//   <i> if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
+//   <i> DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
+//   <i> if dac_input > 2047 then,
+//   <i> DAC_out = ((dac_input - 2047) / 2^12) *vref
+//   <i> if dac_input < 2047 then,
+//   <i> DAC_out = ((dac_input + 2047) / 2^12) *vref
 //    <0=> DISABLE(input will be positive)
-//    DAC_out = (DAC_Input / 2^12) * Vref
-//    DAC input = 4000 ==> DAC_out = (4000 / 4096) * 1.8v ==> 1.757v
-//    2^12 represents DAC supports 12 bit resolution.
-
 //    <1=> ENABLE (Input can be positive or negative)
-//    if DAC input = 0xFFFF FFFF FFFF FFFF (in decimal: -1),
-//    DAC_IN(0-11bits) ==> 0xFFF(dac_input = 4095).
-//    if dac_input > 2047 then,
-//    DAC_out = ((dac_input - 2047) / 2^12) *vref
-//    if dac_input < 2047 then,
-//    DAC_out = ((dac_input + 2047) / 2^12) *vref
-
 // <i> Default: DISABLE
 #define RTE_DAC1_TWOSCOMP_EN        0
 #endif
@@ -7991,7 +8215,7 @@
 #endif
 // </e> CMP3 (Analog Comparator) [Driver_CMP3]
 
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 // <e> LPCMP (Low Power Analog Comparator) [Driver_LPCMP]
 // <i> Configuration settings for Driver_LPCMP in component ::Drivers:LPCMP
 #define RTE_LPCMP      1
@@ -8040,7 +8264,7 @@
 
 #endif
 // </e> LPCMP (Low Power Analog Comparator) [Driver_LPCMP]
-#endif //defined(M55_HE)
+#endif //defined(RTSS_HE)
 // </h> CMP (Analog Comparator)
 
 // <h> I2C (Inter Integrated Circuit)
@@ -8063,6 +8287,21 @@
 // <i> Defines RX FIFO threshold for I2C0.
 // <i> Default: 16
 #define RTE_I2C0_RX_FIFO_THRESHOLD   16
+
+// <o> I2C0 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for I2C0
+// <i> Default: DISABLE
+#define RTE_I2C0_DMA_ENABLE          0
+#if RTE_I2C0_DMA_ENABLE
+
+// <o> I2C0 DMA IRQ priority <0-255>
+// <i> Defines I2C0 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2C0_DMA_IRQ_PRI         0
+#endif
+
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C0]
 
@@ -8085,6 +8324,21 @@
 // <i> Defines RX FIFO threshold for I2C1.
 // <i> Default: 16
 #define RTE_I2C1_RX_FIFO_THRESHOLD   16
+
+// <o> I2C1 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for I2C1
+// <i> Default: DISABLE
+#define RTE_I2C1_DMA_ENABLE          0
+#if RTE_I2C1_DMA_ENABLE
+
+// <o> I2C1 DMA IRQ priority <0-255>
+// <i> Defines I2C1 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2C1_DMA_IRQ_PRI         0
+#endif
+
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C1]
 
@@ -8107,6 +8361,21 @@
 // <i> Defines RX FIFO threshold for I2C2.
 // <i> Default: 16
 #define RTE_I2C2_RX_FIFO_THRESHOLD   16
+
+// <o> I2C2 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for I2C2
+// <i> Default: DISABLE
+#define RTE_I2C2_DMA_ENABLE          0
+#if RTE_I2C2_DMA_ENABLE
+
+// <o> I2C2 DMA IRQ priority <0-255>
+// <i> Defines I2C2 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2C2_DMA_IRQ_PRI         0
+#endif
+
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C2]
 
@@ -8130,12 +8399,27 @@
 // <i> Defines RX FIFO threshold for I2C3.
 // <i> Default: 16
 #define RTE_I2C3_RX_FIFO_THRESHOLD   16
+
+// <o> I2C3 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for I2C3
+// <i> Default: DISABLE
+#define RTE_I2C3_DMA_ENABLE          0
+#if RTE_I2C3_DMA_ENABLE
+
+// <o> I2C3 DMA IRQ priority <0-255>
+// <i> Defines I2C3 DMA Interrupt priority
+// <i> Default: 0
+#define RTE_I2C3_DMA_IRQ_PRI         0
+#endif
+
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C3]
 
 // <e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
 // <i> Configuration settings for Driver_LPI2C in component ::Drivers:LPI2C
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 #define RTE_LPI2C   1
 #if RTE_LPI2C
 
@@ -8143,9 +8427,15 @@
 // <i> defines LPI2C interrupt priority
 // <i> default: 0
 #define RTE_LPI2C_IRQ_PRIORITY       0
+
+// <o> LPI2C Bus-Speed <1-400000>
+// <i> defines LPI2C Bus-Speed - It is used for Bit-time calculation in driver
+// <i> default: 400KHz
+#define RTE_LPI2C_BUS_SPEED          400000
+
 #endif
 // </e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
-#endif //defined(M55_HE)
+#endif //defined(RTSS_HE)
 // </h>
 
 // <e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
@@ -8174,7 +8464,7 @@
 // </e> DMA0 (Direct Memory Access Controller) [Driver_DMA0]
 
 // <e> DMA1 (Direct Memory Access Controller) [Driver_DMA1]
-#if defined(M55_HP)
+#if defined(RTSS_HP)
 
 // <i> Configuration settings for Driver_DMA1 in component ::Drivers:DMA
 #define RTE_DMA1      1
@@ -8204,7 +8494,7 @@
 
 // <e> DMA2 (Direct Memory Access Controller) [Driver_DMA2]
 // <i> Configuration settings for Driver_DMA2 in component ::Drivers:DMA
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 
 #define RTE_DMA2      1
 #if RTE_DMA2
@@ -9448,7 +9738,7 @@
 
 // </h> PDM (Pulse density modulation)
 
-#if defined(M55_HE)
+#if defined(RTSS_HE)
 // <h> LPPDM(Low Power Pulse Density Modulation)
 // <e> LPPDM (Low Power Pulse density modulation) [Driver_LPPDM]
 // <i> Configuration settings for Driver_LPPDM in component ::Drivers:LPPDM
@@ -9488,44 +9778,44 @@
 #endif
 #endif
 // </e> LPPDM (Low Power Pulse density modulation) [Driver_LPPDM]
-#endif //defined(M55_HE)
+#endif //defined(RTSS_HE)
 // </h> LPPDM (Low Power Pulse density modulation)
 
 // <h> CANFD (Controller Area Network - Fast Mode)
-// <e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
-// <i> Configuration settings for Driver_CANFD in component ::Drivers:CANFD
-#define RTE_CANFD 1
+// <e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
+// <i> Configuration settings for Driver_CANFD0 in component ::Drivers:CANFD
+#define RTE_CANFD0                           1
 
-#ifdef RTE_CANFD
+#if RTE_CANFD0
 
-// <o> CANFD IRQ priority <0-255>
-// <i> Defines Interrupt priority for CANFD.
+// <o> CANFD0 IRQ priority <0-255>
+// <i> Defines Interrupt priority for CANFD0.
 // <i> Default: 0
-#define RTE_CANFD_IRQ_PRIORITY              0
+#define RTE_CANFD0_IRQ_PRIORITY              0
 
-// <o> CANFD Clock Source
+// <o> CANFD0 Clock Source
 //    <0=> 38.4 MHz Clock
 //    <1=> 160 MHz Clock
-// <i> Defines Clock Source for CANFD.
+// <i> Defines Clock Source for CANFD0.
 // <i> Default: 160 MHz
-#define RTE_CANFD_CLK_SOURCE                1
+#define RTE_CANFD0_CLK_SOURCE                1
 
-// <o> CANFD Clock Speed (Hz) <160000-80000000>
-// <i> Defines Clock Speed for CANFD.
+// <o> CANFD0 Clock Speed (Hz) <160000-80000000>
+// <i> Defines Clock Speed for CANFD0.
 // <i> Maximum Clock speed is 80MHz
 // <i> Recommended speeds with 160MHz clock source: 20MHz, 40MHz, 80MHz
 // <i> Default: 20MHz
-#define RTE_CANFD_CLK_SPEED                 20000000
+#define RTE_CANFD0_CLK_SPEED                 20000000
 
-// <o> CANFD blocking mode enable
+// <o> CANFD0 blocking mode enable
 //    <0=> DISABLE
 //    <1=> ENABLE
-// <i> Defines Blocking mode support for CANFD
+// <i> Defines Blocking mode support for CANFD0
 // <i> Default: DISABLE
-#define RTE_CANFD_BLOCKING_MODE_ENABLE      0
+#define RTE_CANFD0_BLOCKING_MODE_ENABLE      0
 
 #endif
-// </e> CANFD (Controller Area Network - Fast Mode Interface) [Driver_CANFD]
+// </e> CANFD0 (Controller Area Network - Fast Mode Interface) [Driver_CANFD0]
 // </h> CANFD (Controller Area Network - Fast Mode)
 
 // <h> SDC (Secure Digital Controller)

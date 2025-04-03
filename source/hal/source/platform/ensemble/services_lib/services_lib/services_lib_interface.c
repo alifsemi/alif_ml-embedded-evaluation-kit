@@ -18,6 +18,7 @@
 #include "services_lib_interface.h"
 #include "services_lib_protocol.h"
 #include "mhu.h"
+#include "sys_utils.h"
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
@@ -38,9 +39,9 @@
 /**
  * @note
  */
-#if   CPU == M55_HE || defined(M55_HE)
+#if   CPU == M55_HE || defined(M55_HE) || defined(RTSS_HE)
 #define DTCM_GLOBAL_ADDRESS         HE_DTCM_GLOBAL_ADDRESS
-#elif CPU == M55_HP || defined(M55_HP)
+#elif CPU == M55_HP || defined(M55_HP) || defined(RTSS_HP)
 #define DTCM_GLOBAL_ADDRESS         HP_DTCM_GLOBAL_ADDRESS
 #else
 #error Target CPU is not defined

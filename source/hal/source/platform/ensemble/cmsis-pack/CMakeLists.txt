@@ -19,6 +19,9 @@ if (NOT DEFINED CORTEX_DFP_SRC_PATH)
     message(FATAL_ERROR "CORTEX_DFP_SRC_PATH path should be defined for ${CMSIS_DEVICE_TARGET}.")
 endif()
 
+
+string(TOLOWER "${ENSEMBLE_CORE_NEW}" ALIF_CORE_STRING)
+
 # 3.1 Create an interface library for CPU header only
 add_library(${CPU_HEADER_TARGET} INTERFACE)
 
@@ -26,6 +29,7 @@ add_library(${CPU_HEADER_TARGET} INTERFACE)
 target_include_directories(${CPU_HEADER_TARGET}
     INTERFACE
     ${CMSIS_SRC_PATH}/CMSIS/Core/Include
+    ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
     ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Include
     ${BOARDLIB_PATH}
     )
@@ -36,9 +40,12 @@ target_include_directories(${CPU_HEADER_TARGET}
     config-b
     config-b/${ENSEMBLE_CORE}
     ${ENSEMBLE_CMSIS_PATH}/drivers/include
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/include
-    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/include
-    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/config
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/include
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ALIF_CORE_STRING}/config
+    ${ENSEMBLE_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}
+    ${ENSEMBLE_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}/include
+    ${ENSEMBLE_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}/include/${ALIF_CORE_STRING}
+    ${ENSEMBLE_CMSIS_PATH}/Device/system/include
     )
 endif()
 
@@ -52,8 +59,9 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Include/config
     ${ENSEMBLE_CMSIS_PATH}/drivers/include
     ${ENSEMBLE_CMSIS_PATH}/components/Include
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/config
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/config
     ${BOARDLIB_PATH}
+    ${ENSEMBLE_CMSIS_PATH}/ospi_xip/source/ospi # hopyfully this wont'd be needed and ospi_private.h will be moved (also change the name)
     )
 
 target_include_directories(${CMSIS_DEVICE_TARGET}
@@ -61,18 +69,21 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source
     )
 
+
 ## Platform sources
 if (TARGET_REVISION STREQUAL "B")
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
-    ${ENSEMBLE_CMSIS_PATH}/Device/core/${ENSEMBLE_CORE}/source/startup_${ENSEMBLE_CORE}.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/mpu_M55.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_M55.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/system_utils.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tgu_M55.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/pm.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/clk.c
-    ${ENSEMBLE_CMSIS_PATH}/Device/common/source/tcm_partition.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/cache.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/mpu.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/pm.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/sau_tcm_ns_setup.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/startup.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/system.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/tgu.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/core/common/source/vectors.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/system/source/sys_utils.c
+    ${ENSEMBLE_CMSIS_PATH}/Device/system/source/sys_clocks.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_PDM.c
@@ -104,6 +115,7 @@ endif()
 target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
+    ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_IO.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
     ${ENSEMBLE_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c

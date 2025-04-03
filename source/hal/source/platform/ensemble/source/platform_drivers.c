@@ -43,7 +43,9 @@
 #include "board.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
-#include "power.h"
+#include "soc.h"
+#include "core_defines.h"
+#include "sys_utils.h"
 
 #include CMSIS_device_header
 
@@ -136,9 +138,9 @@ static uint32_t set_power_profiles()
 #ifdef OSPI_FLASH_SUPPORT
     default_runprof.ip_clock_gating |= OSPI_1_MASK;
 #endif
-#ifdef M55_HE
+#if defined(M55_HE) || defined(RTSS_HE)
     default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_160MHZ;
-#elif M55_HP
+#elif defined(M55_HP) || defined(RTSS_HP)
     default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_400MHZ;
 #endif
     default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
@@ -159,10 +161,10 @@ static uint32_t set_power_profiles()
         default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
         default_offprof.wakeup_events   = WE_LPGPIO;
         default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
-#ifdef M55_HE
+#if defined(M55_HE) || defined(RTSS_HE)
         default_offprof.vtor_address    = 0x80480000;
         default_offprof.vtor_address_ns = 0x80480000;
-#elif M55_HP
+#elif defined(M55_HP) || defined(RTSS_HP)
         default_offprof.vtor_address    = 0x80008000;
         default_offprof.vtor_address_ns = 0x80008000;
 #else
@@ -431,8 +433,8 @@ const address_range_t no_need_to_invalidate_areas[] = {
     },
     /* MRAM should never change while running */
     {
-        .base = MRAM_BASE,
-        .limit = MRAM_BASE + MRAM_SIZE - 1,
+        .base = SOC_FEAT_MRAM_BASE,
+        .limit = SOC_FEAT_MRAM_BASE + SOC_FEAT_MRAM_SIZE - 1,
     }
 };
 
@@ -471,6 +473,18 @@ bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 
 void MPU_Load_Regions(void)
 {
+    // Hopefully we can remove these memory area defined. But for now the file app_mem_regions.h is
+    // in same folder as CMSIS RTE_Device.h so we cannot use it. I have propsed to move file another location.
+
+#define APP_SRAM2_BASE 0x50000000
+#define APP_SRAM2_SIZE 0x00040000
+#define APP_SRAM3_BASE 0x50800000
+#define APP_SRAM3_SIZE 0x00100000
+#define APP_SRAM4_BASE 0x58000000
+#define APP_SRAM4_SIZE 0x00040000
+#define APP_SRAM5_BASE 0x58800000
+#define APP_SRAM5_SIZE 0x00040000
+
 
 /* Define the memory attribute index with the below properties */
 #define MEMATTRIDX_NORMAL_WT_RA_TRANSIENT    0
@@ -481,7 +495,7 @@ void MPU_Load_Regions(void)
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.
      */
-    static const ARM_MPU_Region_t mpu_table[] __STARTUP_RO_DATA_ATTRIBUTE = {
+    static const ARM_MPU_Region_t mpu_table[] = {
     { // ITCM (alias) at 01000000, SRAM0 at 02000000, SRAM1 at 08000000
     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
@@ -503,19 +517,19 @@ void MPU_Load_Regions(void)
     .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
     { // Other core's DTCM
-#if defined(M55_HE)
-    .RBAR = ARM_MPU_RBAR(SRAM2_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM3_BASE + SRAM3_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HP TCM (SRAM2 + SRAM3)
-#elif defined(M55_HP)
-    .RBAR = ARM_MPU_RBAR(SRAM4_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
-    .RLAR = ARM_MPU_RLAR(SRAM5_BASE + SRAM5_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HE TCM (SRAM4 + SRAM5)
+#if defined(M55_HE) || defined(RTSS_HE)
+    .RBAR = ARM_MPU_RBAR(APP_SRAM2_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(APP_SRAM3_BASE + APP_SRAM3_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HP TCM (SRAM2 + SRAM3)
+#elif defined(M55_HP) || defined(RTSS_HP)
+    .RBAR = ARM_MPU_RBAR(APP_SRAM4_BASE, ARM_MPU_SH_OUTER, 0, 1, 0),  // RW, NP, XA
+    .RLAR = ARM_MPU_RLAR(APP_SRAM5_BASE + APP_SRAM5_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)  // HE TCM (SRAM4 + SRAM5)
 #else
   #error device not specified!
 #endif
     },
     { // MRAM (80000000)
-    .RBAR = ARM_MPU_RBAR(MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
-    .RLAR = ARM_MPU_RLAR(MRAM_BASE + MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
+    .RBAR = ARM_MPU_RBAR(SOC_FEAT_MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
+    .RLAR = ARM_MPU_RLAR(SOC_FEAT_MRAM_BASE + SOC_FEAT_MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
     },
 #ifdef OSPI_FLASH_SUPPORT
     {   /* OSPI Regs - 16MB : RO-0, NP-0, XN-1  */

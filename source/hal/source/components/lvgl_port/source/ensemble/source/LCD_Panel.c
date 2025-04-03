@@ -15,6 +15,7 @@
 #include "board.h"
 #include "delay.h"
 #include "platform_drivers.h"
+#include "sys_utils.h"
 
 extern ARM_DRIVER_CDC200 Driver_CDC200;
 

@@ -155,7 +155,7 @@ void MHU_SESS_S_RX_IRQHandler()
 
 void MHU_RTSS_S_TX_IRQHandler()
 {
-#ifdef M55_HE
+#if defined(M55_HE) || defined(RTSS_HE)
   s_mhu_driver_out.sender_irq_handler(MHU_CPU_HP_MHU);
 #else
   s_mhu_driver_out.sender_irq_handler(MHU_CPU_HE_MHU);
@@ -164,7 +164,7 @@ void MHU_RTSS_S_TX_IRQHandler()
 
 void MHU_RTSS_S_RX_IRQHandler()
 {
-#ifdef M55_HE
+#if defined(M55_HE) || defined(RTSS_HE)
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_HP_MHU);
 #else
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_HE_MHU);
@@ -310,12 +310,12 @@ static void mhu_initialize(void)
   setup_irq(MHU0_SE_SENDER_IRQn);
   setup_irq(MHU0_SE_RECVER_IRQn);
 
-#ifndef M55_HE
+#if !defined(M55_HE) && !defined(RTSS_HE)
   setup_irq(MHU0_HE_SENDER_IRQn);
   setup_irq(MHU0_HE_RECVER_IRQn);
 #endif
 
-#ifndef M55_HP
+#if !defined(M55_HP) && !defined(RTSS_HP)
   setup_irq(MHU0_HP_SENDER_IRQn);
   setup_irq(MHU0_HP_RECVER_IRQn);
 #endif
@@ -358,10 +358,10 @@ int services_init (mhu_receive_callback_t cb)
     SERVICES_Setup(s_mhu_driver_out.send_message, MAXIMUM_TIMEOUT);
     SERVICES_wait_ms(2);
     services_handle = SERVICES_register_channel(MHU_CPU_SE_MHU, 0);
-#ifndef M55_HE
+#if !defined(M55_HE) && !defined(RTSS_HE)
     he_comms_handle = SERVICES_register_channel(MHU_CPU_HE_MHU, 0);
 #endif
-#ifndef M55_HP
+#if !defined(M55_HP) && !defined(RTSS_HP)
     hp_comms_handle = SERVICES_register_channel(MHU_CPU_HP_MHU, 0);
 #endif
 #ifndef A32

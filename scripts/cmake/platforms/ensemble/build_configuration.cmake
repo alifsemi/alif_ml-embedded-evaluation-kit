@@ -29,12 +29,9 @@
 #----------------------------------------------------------------------------
 
 function(set_platform_global_defaults)
-    message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
-    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION})")
-    message(STATUS "Alif SoC part number: ${ALIF_SOC_PART_NUMBER}")
 
-    USER_OPTION(ALIF_SOC_PART_NUMBER "Specify Alif SoC part number"
-        AE722F80F55D5XX
+    USER_OPTION(ALIF_DEVICE_SKU "Specify Alif SKU part number"
+        AE722F80F55D5
         STRING)
 
     USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: RTSS-HP, RTSS-HE or none"
@@ -42,11 +39,13 @@ function(set_platform_global_defaults)
         STRING)
 
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-        set(RTSS_NPU_CONFIG_ID "H256")
-        set(ENSEMBLE_CORE         "M55_HP")
+        set(RTSS_NPU_CONFIG_ID  "H256")
+        set(ENSEMBLE_CORE       "M55_HP")
+        set(ENSEMBLE_CORE_NEW   "RTSS_HP" CACHE STRING "Alif core")
     else()
-        set(RTSS_NPU_CONFIG_ID "H128")
-        set(ENSEMBLE_CORE         "M55_HE")
+        set(RTSS_NPU_CONFIG_ID  "H128")
+        set(ENSEMBLE_CORE       "M55_HE")
+        set(ENSEMBLE_CORE_NEW   "RTSS_HE" CACHE STRING "Alif core")
     endif()
 
     USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
@@ -73,6 +72,10 @@ function(set_platform_global_defaults)
     set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "B")
 
+    message(STATUS "Board:    Alif Semiconductor ${TARGET_BOARD}")
+    message(STATUS "Platform: Ensemble ${TARGET_SUBSYSTEM} (rev ${TARGET_REVISION})")
+    message(STATUS "Alif SoC part number: ${ALIF_DEVICE_SKU}")
+
     if (TARGET_REVISION STREQUAL "B")
         # Sanity check DevKit and AppKit
         if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") ))
@@ -95,7 +98,7 @@ function(set_platform_global_defaults)
     set(ENSEMBLE_CORE "${ENSEMBLE_CORE}" PARENT_SCOPE)
     add_compile_definitions(
         ${ENSEMBLE_CORE}
-        ${ALIF_SOC_PART_NUMBER}
+        ${ENSEMBLE_CORE_NEW}
         )
 
     set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")

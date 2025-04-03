@@ -28,7 +28,7 @@
 #if defined(A32_LINUX)
 #include "a32_linux.h"
 #else
-#include "system_utils.h"
+#include "sys_utils.h"
 #endif
 
 /*******************************************************************************
@@ -66,8 +66,8 @@ uint32_t SERVICES_cryptocell_get_rnd(uint32_t services_handle,
     SERVICES_prepare_packet_buffer(sizeof(get_rnd_svc_t));
 
   p_svc->send_rnd_length = rnd_len;
-  
-  uint32_t err = SERVICES_send_request(services_handle, 
+
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_GET_RND,
                                        DEFAULT_TIMEOUT);
   memcpy(rnd_value, (const void *)p_svc->resp_rnd, rnd_len);
@@ -88,8 +88,8 @@ uint32_t SERVICES_cryptocell_get_lcs(uint32_t services_handle,
 {
   get_lcs_svc_t * p_svc = (get_lcs_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(get_lcs_svc_t));
-  
-  uint32_t err = SERVICES_send_request(services_handle, 
+
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_GET_LCS,
                                        DEFAULT_TIMEOUT);
   *lcs_state = p_svc->resp_lcs;
@@ -146,7 +146,7 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_init(uint32_t services_handle,
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_aes_init_svc_t));
 
   p_svc->send_context_addr = LocalToGlobal((void *)ctx);
-  uint32_t err = SERVICES_send_request(services_handle, 
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_AES_INIT,
                                        DEFAULT_TIMEOUT);
   *error_code = 0;
@@ -178,8 +178,8 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_set_key(uint32_t services_handle,
   p_svc->send_key_addr = LocalToGlobal((void *)key);
   p_svc->send_key_bits = keybits;
   p_svc->send_direction = dir;
-  
-  uint32_t err = SERVICES_send_request(services_handle, 
+
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_AES_SET_KEY,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
@@ -200,14 +200,14 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_set_key(uint32_t services_handle,
  * @param output
  * @return
  */
-uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle, 
+uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
                                                uint32_t *error_code,
                                                uint32_t ctx,
-                                               uint32_t crypt_type, 
-                                               uint32_t mode, 
-                                               uint32_t length, 
-                                               uint32_t iv, 
-                                               uint32_t input, 
+                                               uint32_t crypt_type,
+                                               uint32_t mode,
+                                               uint32_t length,
+                                               uint32_t iv,
+                                               uint32_t input,
                                                uint32_t output)
 {
   mbedtls_aes_crypt_svc_t * p_svc = (mbedtls_aes_crypt_svc_t *)
@@ -220,8 +220,8 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
   p_svc->send_iv_addr = LocalToGlobal((void *)iv);
   p_svc->send_input_addr = LocalToGlobal((void *)input);
   p_svc->send_output_addr = LocalToGlobal((void *)output);
-  
-  uint32_t err = SERVICES_send_request(services_handle, 
+
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_AES_CRYPT,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
@@ -237,18 +237,18 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
  * @param sha_type
  * @return
  */
-uint32_t SERVICES_cryptocell_mbedtls_sha_starts(uint32_t services_handle, 
+uint32_t SERVICES_cryptocell_mbedtls_sha_starts(uint32_t services_handle,
                                                 uint32_t *error_code,
-                                                uint32_t ctx, 
+                                                uint32_t ctx,
                                                 uint32_t sha_type)
 {
   mbedtls_sha_svc_t * p_svc = (mbedtls_sha_svc_t *)
     SERVICES_prepare_packet_buffer(sizeof(mbedtls_sha_svc_t));
-  
+
   p_svc->send_context_addr = LocalToGlobal((void *)ctx);
   p_svc->send_sha_type = sha_type;
 
-  uint32_t err = SERVICES_send_request(services_handle, 
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_SHA_STARTS,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
@@ -265,10 +265,10 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_starts(uint32_t services_handle,
  * @param data
  * @return
  */
-uint32_t SERVICES_cryptocell_mbedtls_sha_process(uint32_t services_handle, 
+uint32_t SERVICES_cryptocell_mbedtls_sha_process(uint32_t services_handle,
                                                  uint32_t *error_code,
-                                                 uint32_t ctx, 
-                                                 uint32_t sha_type, 
+                                                 uint32_t ctx,
+                                                 uint32_t sha_type,
                                                  uint32_t data)
 {
   mbedtls_sha_svc_t * p_svc = (mbedtls_sha_svc_t *)
@@ -278,7 +278,7 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_process(uint32_t services_handle,
   p_svc->send_sha_type = sha_type;
   p_svc->send_data_addr = LocalToGlobal((void *)data);
 
-  uint32_t err = SERVICES_send_request(services_handle, 
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_SHA_PROCESS,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
@@ -296,11 +296,11 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_process(uint32_t services_handle,
  * @param data_length
  * @return
  */
-uint32_t SERVICES_cryptocell_mbedtls_sha_update(uint32_t services_handle, 
+uint32_t SERVICES_cryptocell_mbedtls_sha_update(uint32_t services_handle,
                                                 uint32_t *error_code,
-                                                uint32_t ctx, 
-                                                uint32_t sha_type, 
-                                                uint32_t data, 
+                                                uint32_t ctx,
+                                                uint32_t sha_type,
+                                                uint32_t data,
                                                 uint32_t data_length)
 {
   mbedtls_sha_svc_t * p_svc = (mbedtls_sha_svc_t *)
@@ -311,7 +311,7 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_update(uint32_t services_handle,
   p_svc->send_data_addr = LocalToGlobal((void *)data);
   p_svc->send_data_length = data_length;
 
-  uint32_t err = SERVICES_send_request(services_handle, 
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_SHA_UPDATE,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;
@@ -328,10 +328,10 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_update(uint32_t services_handle,
  * @param data
  * @return
  */
-uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle, 
+uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle,
                                                 uint32_t *error_code,
-                                                uint32_t ctx, 
-                                                uint32_t sha_type, 
+                                                uint32_t ctx,
+                                                uint32_t sha_type,
                                                 uint32_t data)
 {
   mbedtls_sha_svc_t * p_svc = (mbedtls_sha_svc_t *)
@@ -341,7 +341,7 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle,
   p_svc->send_sha_type = sha_type;
   p_svc->send_data_addr = LocalToGlobal((void *)data);
 
-  uint32_t err = SERVICES_send_request(services_handle, 
+  uint32_t err = SERVICES_send_request(services_handle,
                                        SERVICE_CRYPTOCELL_MBEDTLS_SHA_FINISH,
                                        DEFAULT_TIMEOUT);
   *error_code = p_svc->resp_error_code;

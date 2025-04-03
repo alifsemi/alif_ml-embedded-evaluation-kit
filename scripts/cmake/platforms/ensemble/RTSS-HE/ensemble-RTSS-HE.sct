@@ -57,12 +57,14 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ER_ROM __RO_BASE __RO_SIZE {                      ; load address = execution address
    ; MRAM has start-up code, LVGL read-only, and most constant data
    *(RESET, +First)
-   startup_M55*.o (+RO)
-   system_M55*.o (+RO)
-   mpu_M55*.o (+RO)
+   *startup*.o (+RO)
+   *system*.o (+RO)
+   *mpu*.o (+RO)
+   *tgu*.o (+RO)
+   *vectors*.o (+RO)
+   *sau_tcm_ns_setup*.o (+RO)
    Main.o (+RO)
    platform_drivers.o (+RO)
-   *tcm_partition.o (+RO)
    *(InRoot$$Sections)
    *(.init_array)
    *liblvgl.a(+RO)

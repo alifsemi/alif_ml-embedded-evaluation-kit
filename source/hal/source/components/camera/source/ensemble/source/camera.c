@@ -11,7 +11,6 @@
 /* System Includes */
 #include "RTE_Components.h"
 #include "RTE_Device.h"
-#include "global_map.h"
 
 /* Project Includes */
 #include "camera.h"
