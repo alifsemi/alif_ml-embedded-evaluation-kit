@@ -17,7 +17,6 @@
 #include "UseCaseHandler.hpp"
 
 #include "AdModel.hpp"
-#include "InputFiles.hpp"
 #include "Classifier.hpp"
 #include "hal.h"
 #include "AdMelSpectrogram.hpp"
@@ -109,9 +108,9 @@ using namespace arm::app::ad;
         int err;
 
         if (index == 0) {
-            err = hal_audio_init(audio::AdMelSpectrogram::ms_defaultSamplingFreq);
+            err = hal_audio_alif_init(audio::AdMelSpectrogram::ms_defaultSamplingFreq);
             if (err) {
-                printf_err("hal_audio_init failed with error: %d\n", err);
+                printf_err("hal_audio_alif_init failed with error: %d\n", err);
                 return false;
             }
             // Start first fill of final stride section of buffer
@@ -132,7 +131,7 @@ using namespace arm::app::ad;
         // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
         hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
         hal_set_audio_gain(machineGain);
-        hal_audio_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+        hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
         const int16_t* inferenceWindow = audio_inf;
 

@@ -256,7 +256,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
 3. Build the Project using Make
     ```
-    make ethos-u-alif_kws -j
+    make ethos-u-alif_kws -j4
     ```
 4. The output should be in `/build_he/bin/ethos-u-alif_kws.axf`
 
@@ -295,7 +295,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 3. Build the Project using Make.
     ```
-    make ethos-u-alif_img_class -j
+    make ethos-u-alif_img_class -j4
     ```
 4. The output should be produced in `build_hp/bin/ethos-u-alif_img_class.axf`
 
@@ -372,7 +372,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 5. Build the project using `Make`
     ```
-    make -j
+    make -j4
     ```
 
 6. Open Tera-Term or any other serial port console app. Connect to UART4 (for M55-HP) or UART2 (for M55-HE). Configure serial port settings to 115200, 8N1.
@@ -614,6 +614,16 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
 The inference_runner use-case can be used for basic benchmarks.
 - [Deploying your own model](docs/deploying_model.md)
+
+
+## Memory usage and linker files
+
+Ensemble linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
+As there are Alif example projects which uses both cores, whole MRAM/SRAM0/SRAM1 is not used as there need to be space for both applications running on HE and HP core.
+So if you run only one core, you can take the full MRAM/SRAM0/SRAM1 into use.
+
+usecase.cmake files do have USER_OPTION `${use_case}_ACTIVATION_BUF_SZ` which defines the size of the Activation buffer.
+You need to check that size of this buffer aligns with your model size. In most cases`${use_case}_ACTIVATION_BUF_SZ` goes to SRAM1, for E1 (as there is no SRAM1) it goes to SRAM0.
 
 
 ## Further information

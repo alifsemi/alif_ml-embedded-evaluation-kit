@@ -27,7 +27,6 @@
  * limitations under the License.
  */
 #include "hal.h"                      /* Brings in platform definitions. */
-#include "InputFiles.hpp"             /* For input images. */
 #include "YoloFastestModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
@@ -44,15 +43,11 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-void main_loop()
+void MainLoop()
 {
     init_trigger_rx();
 
     arm::app::YoloFastestModel model;  /* Model wrapper object. */
-
-    if (!alif::app::ObjectDetectionInit()) {
-        printf_err("Failed to initialise use case handler\n");
-    }
 
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
@@ -60,6 +55,11 @@ void main_loop()
                     arm::app::object_detection::GetModelPointer(),
                     arm::app::object_detection::GetModelLen())) {
         printf_err("Failed to initialise model\n");
+        return;
+    }
+
+    if (!alif::app::ObjectDetectionInit(model)) {
+        printf_err("Failed to initialise use case handler\n");
         return;
     }
 

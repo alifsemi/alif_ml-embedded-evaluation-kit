@@ -149,7 +149,7 @@ def write_hpp_file(
     print(f"++ Generating {header_file_path}")
     hdr = GenUtils.gen_header(env, header_template_file)
     env \
-        .get_template('TestData.hpp.template') \
+        .get_template('tests/TestData.hpp.template') \
         .stream(common_template_header=hdr,
                 ifm_count=template_params.ifm_count,
                 ofm_count=template_params.ofm_count,
@@ -159,7 +159,7 @@ def write_hpp_file(
         .dump(str(header_file_path))
 
     env \
-        .get_template('TestData.cc.template') \
+        .get_template('tests/TestData.cc.template') \
         .stream(common_template_header=hdr,
                 include_h=header_filename,
                 ifm_params=template_params.ifm_params,
@@ -195,7 +195,7 @@ def write_individual_cc_file(
                           for sub_arr in np.array_split(fm_data, math.ceil(len(fm_data) / 20)))
 
     env \
-        .get_template('iofmdata.cc.template') \
+        .get_template('tests/iofmdata.cc.template') \
         .stream(common_template_header=hdr,
                 include_h=header_filename,
                 var_name=template_params.var_name,

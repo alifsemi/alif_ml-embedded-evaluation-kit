@@ -7,11 +7,11 @@ For instructions on setting up the build environment and creating loadable image
 The instructions and build by default is for Generation 2 device AppKit.
 
 By default the build is for AppKit; for any other board set the `TARGET_BOARD` apropriately.
-The default camera for the build is `ARX3A0`. If you have `MT9M114` camera, set the `ENSEMBLE_CAMERA_MODULE` accordingly (`-DENSEMBLE_CAMERA_MODULE=MT9M114`).
+The default camera for the build is `MT9M114`. If you have `ARX3A0` camera, set the `ENSEMBLE_CAMERA_MODULE` accordingly (`-DENSEMBLE_CAMERA_MODULE=ARX3A0`).
 
 Supported camera modules:
-- ARX3A0 **This is the default camera**
-- MT9M114 **This camera module has also been shipped with Alif Semiconductor kits**
+- MT9M114 **This is the default camera**
+- ARX3A0 **This camera module has also been shipped with Alif Semiconductor kits**
 
 __IMPORTANT NOTE:__
 Due to syncing up with the latest from Upstream ARM ML Embedded Evaluation Kit, some dependencies have changed.

@@ -3,29 +3,25 @@
 - [Deployment](./deployment.md#deployment)
   - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
     - [Installing an FVP](./deployment.md#installing-an-fvp)
+      - [Arm® Corstone™-320 FVP](./deployment.md#arm_corstone_320-fvp)
     - [Deploying on an FVP](./deployment.md#deploying-on-an-fvp)
     - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
+    - [Virtual Streaming Interface](./deployment.md#virtual-streaming-interface)
+      - [VSI requirements](./deployment.md#vsi-requirements)
+      - [Deployment with VSI](./deployment.md#deployment-with-virtual-streaming-interface)
   - [MPS3 FPGA board](./deployment.md#mps3-fpga-board)
     - [MPS3 board top-view](./deployment.md#mps3-board-top_view)
     - [Deployment on MPS3 board](./deployment.md#deployment-on-mps3-board)
 
-The sample application for Arm® Ethos™-U55 can be deployed on two target platforms:
+The sample applications can be deployed on two primary target platforms:
 
 - A physical Arm MPS3 FPGA prototyping board
-- An MPS3 FVP
-
-Both implement the Arm® Corstone™-300 design. For further information, please refer to:
-[Arm Corstone-300](https://www.arm.com/products/iot/soc/corstone-300)
+- An MPS3 or MPS4 based FVP
 
 ## Fixed Virtual Platform
 
 The FVP is available publicly from the following page:
 [Arm Ecosystem FVP downloads](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
-
-Please ensure that you download the correct archive from the list under Arm® Corstone™-300. You need the one which:
-
-- Emulates MPS3 board and *not* for MPS2 FPGA board,
-- Contains support for Arm® Ethos™-U55 and Ethos™-U65 processors.
 
 ### Installing an FVP
 
@@ -38,7 +34,60 @@ To install an FVP:
 
 - Follow the instructions to install the FVP to your required location.
 
-> **Note**: The installation process is the same for other FVPs (Arm® Corstone™-310 and Corstone™-315) too.
+> **Note**: The installation process is the same for other supported FVPs (Arm® Corstone™-310, Corstone™-315, Corstone™-320).
+
+#### Arm® Corstone™-320 FVP
+
+An additional step is needed to run the Corstone™-320 FVP.  The FVP requires the `libpython3.9.so.1.0` library which may not be present on recent Ubuntu versions.
+
+There are a few ways to add this library to your environment.  Do *one of* the following:
+
+1. The library is packaged with the FVP and can be added to the local environment by running the following:
+
+    ```commandline
+    source ~/FVP_Corstone_SSE-320/scripts/runtime.sh
+    ```
+    
+    (Assuming the default FVP installation directory of `~/FVP_Corstone_SSE-320`).
+
+2. Another approach described in the release notes (`~/FVP_Corstone_SSE-320/doc/Corstone_SSE-320_FVP_ReleaseNotes.txt`) is to build Python3.9 from source:
+
+    ```commandline
+    sudo apt-get update
+    sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+      libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xzutils \
+      tk-dev liblzma-dev tk-dev
+    wget https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz
+    tar xzf Python-3.9.18.tgz
+    cd Python-3.9.18
+    ./configure --enable-optimizations --prefix=/opt/python/3.9.18/
+    make -j "$(nproc)"
+    sudo make altinstall
+
+    # Before running the FVP, set the following environment variable:
+    export PYTHONHOME=/opt/python/3.9.18
+    ```
+
+3. Finally, one other approach is to install the library from the deadsnakes PPA.
+
+    > Note: Arm® is not affiliated with deadsnakes - use at your own risk
+
+    The deadsnakes PPA can be added as follows:
+
+    ```commandline
+    sudo apt update
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    ```
+
+    The library can then be installed as follows:
+    
+    ```commandline
+    sudo apt update
+    sudo apt install libpython3.9-dev
+    ```
+
+The Corstone™-320 FVP can now be run in the same way as the other FVPs.
 
 ### Deploying on an FVP
 
@@ -52,7 +101,7 @@ For Arm Virtual Hardware, the installation paths are different (see Arm Virtual 
 [Useful Links](./arm_virtual_hardware.md#useful-links) section).
 
 > **NOTE**: The commandline arguments for the FVP mentioned below are valid for FVPs (and AVH) for
-> Arm® Corstone™-300, Corstone™-310 and Corstone™-315.
+> Arm® Corstone™-300, Corstone™-310, Corstone™-315 and Corstone™-320.
 
 To run a use-case on the FVP, from the [Build directory](../sections/building.md#create-a-build-directory):
 
@@ -95,27 +144,17 @@ Meanwhile, for *Ethos-U65*:
 The FVP supports many command-line parameters, such as:
 
 - Those passed by using `-C <param>=<value>`. The most important ones are:
-  - `ethosu.num_macs`: Sets the *Ethos-U* configuration for the model. The valid parameters are:
-    - *Ethos-U55*: `32`, `64`, `256`, and the default one `128`.
-    - *Ethos-U65*: `256`, and the default one `512`.
 
-    The number signifies the 8x8 MACs that are performed per cycle-count and that are available on
-    the hardware.
-  - For `MPS3` based FVPs:
-    - `cpu0.CFGITCMSZ`: The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB
-    - `cpu0.CFGDTCMSZ`: The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB
-    - `mps3_board.telnetterminal0.start_telnet`: Starts the telnet session if nothing connected.
-    - `mps3_board.uart0.out_file`: Sets the output file to hold the data written by the UART. Use `'-'` to send all output
-      to `stdout` and is empty by default).
-    - `mps3_board.uart0.shutdown_on_eot`: Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.
-    - `mps3_board.visualisation.disable-visualisation`: Enables, or disables, visualization and is disabled by default.
-  - For `MPS4` based FVPs, the equivalent parameters for the list above are:
-    - `mps4_board.subsystem.cpu0.CFGITCMSZ`
-    - `mps4_board.subsystem.cpu0.CFGDTCMSZ`
-    - `mps4_board.telnetterminal0.start_telnet`
-    - `mps4_board.uart0.out_file`
-    - `mps4_board.uart0.shutdown_on_eot`
-    - `mps4_board.visualisation.disable-visualisation` and `vis_hdlcd.disable_visualisation`.
+  | Arm® Corstone™-300 FVP and Arm® Corstone™-310 FVP | Arm® Corstone™-315 FVP and Arm® Corstone™-320 FVP                                      | Description                                                                                                                                                                                                                                                                 |
+  |---------------------------------------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | `ethosu.num_macs`                                 | `mps4_board.subsystem.ethosu.num_macs`                                                 | Sets the *Ethos-U* configuration for the model. The valid parameters are:<br/>- *Ethos-U55*: `32`, `64`, `256`, and the default one `128`.<br/>- *Ethos-U65*: `256`, and the default one `512`.<br/>- *Ethos-U85*: `128`, `512`, `1024`, `2048`, and the default one `256`. |
+  | `cpu0.CFGITCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGITCMSZ`                                                  | The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB                                                                                                                                                                                        |
+  | `cpu0.CFGDTCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGDTCMSZ`                                                  | The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB                                                                                                                                                                                        |
+  | `mps3_board.telnetterminal0.start_telnet`         | `mps4_board.telnetterminal0.start_telnet`                                              | Starts the telnet session if nothing connected.                                                                                                                                                                                                                             |
+  | `mps3_board.uart0.out_file`                       | `mps4_board.uart0.out_file`                                                            | Sets the output file to hold the data written by the UART. Use `'-'` to send all output to `stdout` and is empty by default).                                                                                                                                               |
+  | `mps3_board.uart0.shutdown_on_eot`                | `mps4_board.uart0.shutdown_on_eot`                                                     | Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.                                                                                                                                                                                                       |
+  | `mps3_board.visualisation.disable-visualisation`  | `mps4_board.visualisation.disable-visualisation`<br/>`vis_hdlcd.disable_visualisation` | Enables, or disables, visualization and is disabled by default.                                                                                                                                                                                                             |
+  | `ethosu.extra_args="--fast"`                      | `mps4_board.subsystem.ethosu.extra_args=="--fast"`                                     | Run the FVP in fast mode.  This is useful for functionally testing your application, but should *not* be used for performance testing.                                                                                                                                      |
 
   To start the model in `128` mode for *Ethos-U55*:
 
@@ -148,6 +187,8 @@ The FVP supports many command-line parameters, such as:
 If there is a need to run the FVP without the UI (e.g. running the FVP inside a Docker container),
 it can be done as follows.
 
+#### Arm® Corstone™-300 and Arm® Corstone™-310
+
 Add `-C mps3_board.visualisation.disable-visualisation=1` and `-C mps3_board.telnetterminal0.start_telnet=0`
 to the command line arguments when starting the FVP. For example:
 
@@ -157,7 +198,11 @@ FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
     -C mps3_board.telnetterminal0.start_telnet=0 \
     ./bin/mps3-sse-300/ethos-u-<use_case>.axf
    ```
+
+#### Arm® Corstone™-315 and Arm® Corstone™-320
+
 For an `MPS4` FVP, the arguments are similar. For example:
+
 ```commandline
 FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
     -C mps4_board.visualisation.disable-visualisation=1 \
@@ -166,18 +211,19 @@ FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
     ./bin/mps4-sse-315/ethos-u-<use_case>.axf
    ```
 
-Once the FVP reports waiting on telnet connections, connect to the first server port from another terminal.
+By default, there is no interaction on telnet needed and the application output can be directed to standard output by
+using an FVP option:
+
+- `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
+- `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
+
+Otherwise, once the FVP reports waiting on telnet connections, connect to the first server port from another terminal.
 Assuming the FVP has the telnet server running at the default port 5000, connect to it by:
 
 ```commandline
 telnet localhost 5000
 ```
 
-For applications that are configured with `USE_SINGLE_INPUT` CMake option, there is no interaction on telnet needed and
-the application output can be directed to standard output by using an FVP option:
-
-- `-C mps3_board.uart0.out_file='-'` for MPS3 based FVPs, OR
-- `-C mps4_board.uart0.out_file='-'` for MPS4 based FVPs.
 
 > **NOTE**: Dockerfile, provided within the repository, contains useful environment variables pre-assigned with
 > above arguments. These can be used directly from command-line. For example, to run MPS4 Arm® Corstone™-315 based
@@ -186,6 +232,57 @@ the application output can be directed to standard output by using an FVP option
 > ```commandline
 > ${FVP_315_U65} -a <path/to/ethos-u-<use_case>.axf> ${FVP_315_ARGS}
 > ```
+
+### Virtual Streaming Interface
+
+[Virtual Streaming Interface](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi.html) is available
+on certain FVPs and allows streaming data from the host machine into the application running on the FVP.
+
+#### VSI Requirements
+
+For details and up-to-date requirements, see
+[Python environment setup](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi__pyenv.html)
+which mentions:
+
+> The following packages are required on Linux systems (Ubuntu 20.04 and later):
+>   - libatomic1
+>   - python3.9
+>   - python3-pip
+
+In addition to the above, the VSI Python scripts depend on `opencv-python` package. We recommend using
+a virtual environment and installing this with pip.
+
+```shell
+$ pip install opencv-python "numpy<2.0.0"
+```
+
+**NOTE**: The requirement for Python version is driven by the FVP executable. Versions <= 11.26 require
+Python3.9 but this may change for future releases.
+
+
+#### Deployment with Virtual Streaming Interface
+
+If the applications have been configured with `-DFVP_VSI_ENABLED=ON`, FVP deployment needs an additional
+parameter to point to the Python scripts it should use.
+
+To run the VSI enabled application, append the command line with the `v_path` argument. For example:
+
+- Arm® MPS3 based FVPs (Arm® Corstone™-300 and Arm® Corstone™-310):
+
+```shell
+  $ FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
+    <other-arguments> \
+    -C mps3_board.v_path=dependencies/avh/interface/video/python
+  ```
+
+- Arm® MPS4 based FVPs (Arm® Corstone™-315 and Arm® Corstone™-320):
+
+```shell
+  $ <path_to_installed_FVP> \
+    FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
+    <other-arguments>
+    -C mps4_board.v_path=dependencies/avh/interface/video/python
+```
 
 ## MPS3 FPGA board
 

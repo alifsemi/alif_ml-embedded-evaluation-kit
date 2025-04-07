@@ -81,12 +81,14 @@ SECTIONS
      */
     *(EXCLUDE_FILE(*MicroMutableAllOpsResolver*.obj
                    *hal.c.obj
-                   *_allocator.o
-                   *flatbuffer*.o
+                   *_allocator*.o*
+                   *flatbuffer*.o*
                    *Profiler*.obj
                    *lcd*.obj
                    *timing_adapter.c.obj
-                   *s4*.o
+                   *s4*.o*
+                   *s8*.o*
+                   *s16*.o*
                    *cp-demangle.o)
     .text*)
 
@@ -211,7 +213,11 @@ SECTIONS
     . = ALIGN(4);
     *Profiler*.obj (*.text*)
     . = ALIGN(4);
-    *s4*.o (*.text*)  /* Temporary solution to move s4 operations to DDR. */
+    *s4*.o* (*.text*)  /* Temporary solution to move s4 operations to DDR. */
+    . = ALIGN(4);
+    *s8*.o* (*.text*)
+    . = ALIGN(4);
+    *s16*.o* (*.text*)
     . = ALIGN(4);
     *cp-demangle.o (*.text*) /* from stdc++ lib */
     . = ALIGN(4);
@@ -260,9 +266,9 @@ SECTIONS
     . = ALIGN(4);
     *hal.c.obj (*.text*)
     . = ALIGN(4);
-    *_allocator.o (*.text*)
+    *_allocator*.o* (*.text*)
     . = ALIGN(4);
-    *flatbuffer*.o (*.text*)
+    *flatbuffer*.o* (*.text*)
     . = ALIGN(4);
     *lcd*.obj (*.text*)
     . = ALIGN(4);

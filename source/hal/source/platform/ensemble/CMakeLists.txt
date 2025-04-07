@@ -40,7 +40,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Ensemble RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-set(ENSEMBLE_CAMERA_MODULE ARX3A0 CACHE STRING "Camera module type for Ensemble kits")
+set(ENSEMBLE_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Ensemble kits")
 set_property(CACHE ENSEMBLE_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0")
 
 message(STATUS "Camera: ${ENSEMBLE_CAMERA_MODULE}")
@@ -171,13 +171,16 @@ add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
 
 ## Platform component: audio
-add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
-
-## Platform component: image
-add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
+add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -191,15 +194,16 @@ endif()
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
     log
     platform_pmu
-    cmsis_ensemble
+    cmsis_device
     rte_components
 )
 
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     ${PLATFORM_DRIVERS_CORE}
-    image_ensemble
     $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
     audio_ensemble
+    hal_audio_static_streams
+    $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_ensemble,hal_camera_static_images>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:ensemble_services>
 )
 

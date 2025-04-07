@@ -223,8 +223,16 @@ def run(build_config: BuildConfig):
 
     # 3. Build default configuration
     logging.info("Building default configuration.")
-    target_platform = "mps3"
-    target_subsystem = "sse-300"
+
+    # Default platform for Arm Ethos-U85 is Arm Corstone-320
+    # using Arm MPS4 based FVP implementation. For other NPUs,
+    # we use Arm MPS3 FVP based on Arm Corstone-300 reference.
+    if build_config.npu_config_name.startswith('ethos-u85'):
+        target_platform = "mps4"
+        target_subsystem = "sse-320"
+    else:
+        target_platform = "mps3"
+        target_subsystem = "sse-300"
 
     build_dir = prep_build_dir(
         current_file_dir,

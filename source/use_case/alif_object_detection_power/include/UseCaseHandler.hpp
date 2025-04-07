@@ -30,11 +30,12 @@
 #define ALIF_OBJ_DET_POWER_HANDLER_HPP
 
 #include "AppContext.hpp"
+#include "YoloFastestModel.hpp"
 
 namespace alif {
 namespace app {
 
-    bool ObjectDetectionInit();
+    bool ObjectDetectionInit(arm::app::YoloFastestModel& model);
 
     /**
      * @brief       Handles the inference event.

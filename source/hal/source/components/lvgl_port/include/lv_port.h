@@ -1,9 +1,9 @@
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
- * terms stated in the Alif Semiconductor Software License Agreement 
+ * terms stated in the Alif Semiconductor Software License Agreement
  *
- * You should have received a copy of the Alif Semiconductor Software 
- * License Agreement with this file. If not, please write to: 
+ * You should have received a copy of the Alif Semiconductor Software
+ * License Agreement with this file. If not, please write to:
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
@@ -12,9 +12,21 @@
 #define LV_PORT_H_
 
 #include <stdint.h>
+#include "lvgl.h"
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if LV_COLOR_DEPTH == 32
+    /* ARGB8888 32-bit Format (4-bytes) */
+typedef lv_color32_t lvgl_pixel_t;
+#elif LV_COLOR_DEPTH == 24
+    /*  RGB8888 24-bit Format (3-bytes) */
+typedef lv_color_t lvgl_pixel_t;
+#elif LV_COLOR_DEPTH == 16
+    /*  RGB565  16-bit Format (2-bytes) */
+typedef lv_color16_t lvgl_pixel_t;
 #endif
 
 uint32_t lv_port_get_ticks(void);

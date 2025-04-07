@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2023, 2024 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,7 @@ namespace arm {
 namespace app {
 
     /* Maximum number of individual operations that can be enlisted. */
-    constexpr int kNumberOperators = 97;
+    constexpr int kNumberOperators = 98;
 
     /**  An Op resolver containing all ops is no longer supplied with TFLite Micro
      *   so we create our own instead for the generic inference runner.

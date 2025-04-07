@@ -46,15 +46,11 @@ namespace app {
 
 using ImgClassClassifier = arm::app::Classifier;
 
-void main_loop()
+void MainLoop()
 {
     init_trigger_rx();
 
     arm::app::MobileNetModel model;  /* Model wrapper object. */
-
-    if (!alif::app::ClassifyImageInit()) {
-        printf_err("Failed to initialise use case handler\n");
-    }
 
 #if !SKIP_MODEL
     /* Load the model. */
@@ -66,6 +62,10 @@ void main_loop()
         return;
     }
 #endif
+
+    if (!alif::app::ClassifyImageInit(model)) {
+        printf_err("Failed to initialise use case handler\n");
+    }
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;

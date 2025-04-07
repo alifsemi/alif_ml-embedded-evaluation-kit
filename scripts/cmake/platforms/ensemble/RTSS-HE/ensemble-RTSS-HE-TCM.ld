@@ -27,8 +27,8 @@
  * limitations under the License.
  */
 
-__STACK_SIZE = 0x00001000;
-__HEAP_SIZE  = 0x00007000;
+__STACK_SIZE = 0x00001800;
+__HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80480000;
 __ROM_SIZE = 0x000FF000;
 
@@ -61,7 +61,7 @@ SECTIONS
 
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
-    *libcmsis_ensemble.a:*(.text* .rodata*)
+    *libcmsis_device.a:*(.text* .rodata*)
     *libensemble_services.a:*(.text* .rodata*)
     *liblcd_*.a:*(.text* .rodata*)
     *libimage_*.a:*(.text* .rodata*)

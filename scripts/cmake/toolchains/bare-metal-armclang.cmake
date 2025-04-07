@@ -105,7 +105,6 @@ add_compile_options(
 
 # Compile definitions:
 add_compile_definitions(
-    CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\"
     $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>
     $<$<BOOL:${ARM_MATH_DSP}>:ARM_MATH_DSP>
     $<$<BOOL:${ARM_MATH_LOOPUNROLL}>:ARM_MATH_LOOPUNROLL>)
@@ -155,6 +154,7 @@ function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         --scatter=${LINKER_SCRIPT_PATH})
+    set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT_PATH})
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

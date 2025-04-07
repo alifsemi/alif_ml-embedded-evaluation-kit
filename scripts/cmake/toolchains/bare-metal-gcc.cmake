@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,7 +105,6 @@ add_compile_options(
 
 # Compile definitions:
 add_compile_definitions(
-    $<$<BOOL:${CPU_HEADER_FILE}>:CPU_HEADER_FILE=\"${CPU_HEADER_FILE}\">
     $<$<BOOL:${CPU_COMPILE_DEF}>:${CPU_COMPILE_DEF}>)
 
 # Link options:
@@ -143,6 +143,7 @@ function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-T ${LINKER_SCRIPT_PATH}")
+    set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT_PATH})
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

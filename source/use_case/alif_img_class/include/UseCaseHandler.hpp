@@ -30,11 +30,12 @@
 #define ALIF_IMG_CLASS_EVT_HANDLER_HPP
 
 #include "AppContext.hpp"
+#include "MobileNetModel.hpp"
 
 namespace alif {
 namespace app {
 
-    bool ClassifyImageInit();
+    bool ClassifyImageInit(arm::app::MobileNetModel& model);
 
     /**
      * @brief       Handles the inference event.

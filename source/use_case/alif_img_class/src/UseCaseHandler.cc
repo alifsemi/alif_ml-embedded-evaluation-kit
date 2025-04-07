@@ -29,7 +29,6 @@
 #include "UseCaseHandler.hpp"
 
 #include "Classifier.hpp"
-#include "InputFiles.hpp"
 #include "MobileNetModel.hpp"
 #include "ImageUtils.hpp"
 #include "ScreenLayout.hpp"
@@ -70,7 +69,7 @@ extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 namespace {
 
-lv_color_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 448x448x4 = 802,856
+lvgl_pixel_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 448x448x4 = 802,856
 };
 
 namespace alif {
@@ -84,17 +83,32 @@ namespace app {
         return s.substr(0, comma);
     }
 
-    bool ClassifyImageInit()
+    bool ClassifyImageInit(arm::app::MobileNetModel& model)
     {
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Image Classifier");
         lv_port_unlock(lv_lock_state);
 
+#if !SKIP_MODEL
+        TfLiteIntArray* inputShape = model.GetInputShape(0);
+        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
+        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
+#else
+        const uint32_t nCols       = MIMAGE_X;
+        const uint32_t nRows       = MIMAGE_Y;
+#endif
+
         /* Initialise the camera */
-        int err = hal_image_init();
-        if (0 != err) {
-            printf_err("hal_image_init failed with error: %d\n", err);
+        if (!hal_camera_init()) {
+            printf_err("hal_camera_init failed!\n");
+            return false;
+        }
+
+        auto bCamera = hal_camera_configure(nCols, nRows, HAL_CAMERA_MODE_SINGLE_FRAME, HAL_CAMERA_COLOUR_FORMAT_RGB888);
+        if (!bCamera) {
+            printf_err("Failed to configure camera.\n");
+            return false;
         }
 
         return true;
@@ -139,9 +153,12 @@ namespace app {
         const uint32_t nRows       = MIMAGE_Y;
 #endif
 
-        const uint8_t *image_data = hal_get_image_data(nCols, nRows);
-        if (!image_data) {
-            printf_err("hal_get_image_data failed");
+        hal_camera_start();
+
+        uint32_t capturedFrameSize = 0;
+        const uint8_t* image_data = hal_camera_get_captured_frame(&capturedFrameSize);
+        if (!image_data || !capturedFrameSize) {
+            printf_err("hal_camera_get_captured_frame failed");
             return false;
         }
 
@@ -216,12 +233,12 @@ namespace app {
             if (results[r].m_normalisedVal >= 0.7) {
                 lv_obj_add_state(label, LV_STATE_USER_1);
             } else {
-                lv_obj_clear_state(label, LV_STATE_USER_1);
+                lv_obj_remove_state(label, LV_STATE_USER_1);
             }
             if (results[r].m_normalisedVal < 0.2) {
                 lv_obj_add_state(label, LV_STATE_USER_2);
             } else {
-                lv_obj_clear_state(label, LV_STATE_USER_2);
+                lv_obj_remove_state(label, LV_STATE_USER_2);
             }
         }
 

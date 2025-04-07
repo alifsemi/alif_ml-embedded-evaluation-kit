@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +18,8 @@
 #ifndef RTE_COMPONENTS_H
 #define RTE_COMPONENTS_H
 
-#if defined(CPU_HEADER_FILE)
-#include CPU_HEADER_FILE /* Cortex M system header file from CMSIS. */
-#endif /* CPU_HEADER_FILE */
+#if defined(CMSIS_device_header)
+#include CMSIS_device_header
+#endif /* defined(CMSIS_device_header) */
 
 #endif  /* RTE_COMPONENTS_H */

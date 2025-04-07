@@ -1,16 +1,19 @@
 # Troubleshooting
 
-- [Troubleshooting](./troubleshooting.md#troubleshooting)
-  - [Inference results are incorrect for my custom files](./troubleshooting.md#inference-results-are-incorrect-for-my-custom-files)
-  - [The application does not work with my custom model](./troubleshooting.md#the-application-does-not-work-with-my-custom-model)
-  - [NPU configuration mismatch error when running inference](./troubleshooting.md#npu-configuration-mismatch-error-when-running-inference)
-  - [Errors when cloning the repository](./troubleshooting.md#errors-when-cloning-the-repository)
-  - [Problem installing Vela](./troubleshooting.md#problem-installing-vela)
-  - [No matching distribution found for ethos-u-vela==3.9.0](./troubleshooting.md#no-matching-distribution-found-for-ethos_u_vela)
-    - [How to update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  - [Error trying to build on Arm Virtual Hardware](./troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
-  - [Internal Compiler Error](./troubleshooting.md#internal-compiler-error)
-  - [Build issues with WSL2](./troubleshooting.md#build-issues-with-wsl2)
+<!-- TOC -->
+* [Troubleshooting](#troubleshooting)
+  * [Inference results are incorrect for my custom files](#inference-results-are-incorrect-for-my-custom-files)
+  * [The application does not work with my custom model](#the-application-does-not-work-with-my-custom-model)
+  * [NPU configuration mismatch error when running inference](#npu-configuration-mismatch-error-when-running-inference)
+  * [Errors when cloning the repository](#errors-when-cloning-the-repository)
+  * [Problem installing Vela](#problem-installing-vela)
+  * [No matching distribution found for Vela](#no-matching-distribution-found-for-vela)
+    * [How to update Python3 package to newer version](#how-to-update-python3-package-to-newer-version)
+  * [Error trying to build on Arm Virtual Hardware](#error-trying-to-build-on-arm-virtual-hardware)
+  * [Internal Compiler Error](#internal-compiler-error)
+  * [Build issues with WSL2](#build-issues-with-wsl2)
+  * [Missing libpython when running FVP](#missing-libpython-when-running-fvp)
+<!-- TOC -->
 
 ## Inference results are incorrect for my custom files
 
@@ -127,7 +130,7 @@ install --record /tmp/pip-record-jidxiokn/install-record.txt --single-version-ex
 
 To solve this issue install libpython3 on the system.
 
-## No matching distribution found for ethos-u-vela
+## No matching distribution found for Vela
 
 Vela 3.9.0 increases Python requirement to at least version 3.9, if not installed on your system the following error will occur:
 
@@ -137,8 +140,8 @@ ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.9
 ERROR: No matching distribution found for ethos-u-vela==3.9.0
 ```
 
-Ensure that the minimum Python 3.9 requirement is installed, and it's the default version.
-Check your current installed version of Python by running:
+We recommend using Python 3.10 at minimum.  Ensure that Python 3.10 is installed,
+and it's the default version. Check your current installed version of Python by running:
 
 ```commandline
 python3 --version
@@ -153,21 +156,49 @@ python3 --version
    ```
 
    For example:
-
+b
    ```log
-   Python 3.6.9
+   Python 3.8.0
    ```
 
-2. Install the Python 3.9 packages necessary on the system:
+2. Install the Python 3.10 packages necessary on the system:
 
    ```commandline
-   sudo apt-get install python3.9 python3.9-venv libpython3.9 libpython3.9-dev
+   sudo apt update
+   sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
    ```
+
+    If the packages aren't available, Python 3.10 can be installed from source:
+
+    ```commandline
+    sudo apt-get update
+    sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+      libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xzutils \
+      tk-dev liblzma-dev tk-dev
+    wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tgz
+    tar xzf Python-3.10.15.tgz
+    cd Python-3.10.15.tgz
+    ./configure --enable-optimizations --prefix=/opt/python/3.10.15/
+    make -j "$(nproc)"
+    sudo make altinstall
+    ```
+
+    Alternatively, it is possible to install the packages from the deadsnakes PPA:
+
+    > Note: Arm® is not affiliated with deadsnakes - use at your own risk
+
+    ```commandline
+    sudo apt update
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo apt update
+    sudo apt install python3.10 python3.10-venv libpython3.10 libpython3.10-dev
+    ```
 
 3. Explicitly specify this Python when executing the set-up Python scripts. For example:
 
     ```commandline
-    python3.9 ./set_up_default_resources.py
+    python3.10 ./set_up_default_resources.py
     ```
 > **Note:**: We do not recommend updating the Python version system-wide as it might break
 > various desktop utilities for your OS distribution. However, if you are using a container
@@ -176,8 +207,8 @@ python3 --version
 > * Update the `python3` alternatives (set as 1 your previous version displayed at step 1):
 >
 >   ```commandline
->   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
->   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+>   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 2
 >   ```
 >
 > * At the prompt, update the configuration by selecting Python3.9 as the chosen default alternative:
@@ -185,14 +216,14 @@ python3 --version
 >   ```commandline
 >   sudo update-alternatives --config python3
 >   ```
-> * Python3.9 is now set as default, you can check it by running:
+> * Python3.10 is now set as default, you can check it by running:
 >
 >   ```commandline
 >   python3 --version
 >   ```
 >
 >   ```log
->   Python 3.9.0
+>   Python 3.10.0
 >   ```
 
 Next section of the documentation: [Appendix](appendix.md).
@@ -206,7 +237,7 @@ The virtual environment was not created successfully because ensurepip is not
 available.  On Debian/Ubuntu systems, you need to install the python3-venv
 package using the following command.
 
-    apt install python3.9-venv
+    apt install python3.10-venv
 
 You may need to use sudo with that command.  After installing the python3-venv
 package, recreate your virtual environment.
@@ -234,7 +265,7 @@ You can fix this error by installing Python virtual environment and removing the
 rm -r resources_downloaded
 ```
 
-Follow the instructions to [update Python3 package to 3.9 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+Follow the instructions to [update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
 before attempting a rebuild with:
 
 ```commandline
@@ -285,3 +316,12 @@ To resolve this issue, remove any paths with spaces. Alternatively, if these
 paths are required, escape them using `\` or enclose them with quotes.
 
 Another example of a similar issue: [Discourse issue 171: Build error in makefile](https://discuss.mlplatform.org/t/build-error-in-makefile/171).
+
+## Missing libpython when running FVP
+
+When running an FVP, you may encounter the following error:
+
+```commandline
+FVP_Corstone_SSE-320: error while loading shared libraries: libpython3.9.so.1.0: cannot open shared object file: No such file or directory
+```
+This occurs when the `libpython3.9-dev` is missing on your system.  To resolve the issue, install the library as per the instructions [here](./deployment.md#arm_corstone_320-fvp).

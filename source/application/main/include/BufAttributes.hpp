@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,10 @@
 
 #ifndef BUF_ATTRIBUTES_HPP
 #define BUF_ATTRIBUTES_HPP
+
+#if defined(__cplusplus)
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 #if defined(ARM_NPU)
     /* When Arm NPU is defined, we use the config set by NPU mem parameters */
@@ -72,5 +77,9 @@
 #define LABELS_ATTRIBUTE
 
 #endif /* HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__)) */
+
+#if defined(__cplusplus)
+}
+#endif /* defined(__cplusplus) */
 
 #endif /* BUF_ATTRIBUTES_HPP */

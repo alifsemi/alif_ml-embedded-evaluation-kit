@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +24,10 @@ TEST_CASE("Common: Application context")
     SECTION("Add primitive type Parameter")
     {
         arm::app::ApplicationContext context;
-        context.Set<uint32_t>("imgIndex", 0);
-        auto data = context.Get<uint32_t>("imgIndex");
+        context.Set<uint32_t>("test", 0);
+        auto data = context.Get<uint32_t>("test");
 
         REQUIRE(0 == data);
-
     }
 
     SECTION("Add object parameter")

@@ -60,8 +60,9 @@ described in the failed ```git push``` output.
 
 ## Language version
 
-For this project, code written in C++ uses a subset of the `C++14` feature set and software may be written using the
-`C++14` language standard. Code written in C is compatible with the `C99` standard.
+The project was originally implemented to conform to the `C++14` standard for C++ code and the `C99` standard
+for C code.
+However, the project is now compiled with the `C++17` and `C11` standards so we can make use of newer language features.
 
 Software components written in C/C++ may use the language features allowed and is encouraged.
 
@@ -78,7 +79,8 @@ Software components written in C/C++ may use the language features allowed and i
 
   ```copyright
   /*
-  * SPDX-FileCopyrightText: Copyright <years additions were made to project> <your name>, Arm Limited and/or its affiliates <open-source-office@arm.com>
+  * SPDX-FileCopyrightText: Copyright <years additions were made to project> <your name>, Arm Limited and/or its
+  * affiliates <open-source-office@arm.com>
   * SPDX-License-Identifier: Apache-2.0
   *
   * Licensed under the Apache License, Version 2.0 (the "License");

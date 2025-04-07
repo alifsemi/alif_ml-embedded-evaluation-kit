@@ -66,26 +66,26 @@ The CMake build framework allows the parameters to control the behavior of each 
 For the CMake build configuration of the timing adapter, the SRAM AXI is assigned `index 0` and the flash, or DRAM, AXI
 bus has `index 1`.
 
-To change the bus parameter for the build a "***TA_\<index>_*"** prefix should be added to the above. For example,
-**TA0_MAXR=10** sets the maximum pending reads to 10 on the SRAM AXI bus.
+To change the bus parameter for the build an "***SRAM***" or "***EXT***" prefix should be added to the above. For example,
+**SRAM_MAXR=10** sets the maximum pending reads to 10 on the SRAM AXI bus.
 
 As an example, if we have the following parameters for the flash, or DRAM, region:
 
-- `TA1_MAXR` = "2"
+- `EXT_MAXR` = "2"
 
-- `TA1_MAXW` = "0"
+- `EXT_MAXW` = "0"
 
-- `TA1_MAXRW` = "0"
+- `EXT_MAXRW` = "0"
 
-- `TA1_RLATENCY` = "64"
+- `EXT_RLATENCY` = "64"
 
-- `TA1_WLATENCY` = "32"
+- `EXT_WLATENCY` = "32"
 
-- `TA1_PULSE_ON` = "320"
+- `EXT_PULSE_ON` = "320"
 
-- `TA1_PULSE_OFF` = "80"
+- `EXT_PULSE_OFF` = "80"
 
-- `TA1_BWCAP` = "50"
+- `EXT_BWCAP` = "50"
 
 For a clock rate of 500MHz, this would translate to:
 
@@ -109,24 +109,21 @@ For a clock rate of 500MHz, this would translate to:
 This suggests that the read operation is only limited by the overall bus bandwidth.
 
 Timing adapter requires recompilation to change parameters. Default timing adapter configuration file pointed to by
-`TA_CONFIG_FILE` build parameter is located in the `scripts/cmake folder` and contains all options for `AXI0` and `AXI1`
+`TA_CONFIG_FILE` build parameter is located in the `scripts/cmake folder` and contains all options for `SRAM` and `EXT`
 as previously described.
 
 here is an example of `scripts/cmake/timing_adapter/ta_config_u55_high_end.cmake`:
 
 ```cmake
-# Timing adapter options
-set(TA_INTERACTIVE OFF)
-
-# Timing adapter settings for AXI0
-set(TA0_MAXR "8")
-set(TA0_MAXW "8")
-set(TA0_MAXRW "0")
-set(TA0_RLATENCY "32")
-set(TA0_WLATENCY "32")
-set(TA0_PULSE_ON "3999")
-set(TA0_PULSE_OFF "1")
-set(TA0_BWCAP "4000")
+# Timing adapter settings for SRAM
+set(SRAM_MAXR       "8")
+set(SRAM_MAXW       "8")
+set(SRAM_MAXRW      "0")
+set(SRAM_RLATENCY   "32")
+set(SRAM_WLATENCY   "32")
+set(SRAM_PULSE_ON   "3999")
+set(SRAM_PULSE_OFF  "1")
+set(SRAM_BWCAP      "4000")
 ...
 ```
 
@@ -148,8 +145,8 @@ not support the feature. Additionally - base addresses of timer adapters blocks 
 
 | TA Number | Interface TA is placed on | Base address (non-secure/secure) | Size  |
 |-----------|---------------------------|----------------------------------|-------|
-| 0         | M0/AXI0 for Ethos-U NPU   | 0x4810_3000/0x5810_3000          | 0.5KB |
-| 1         | M1/AXI1 for Ethos-U NPU   | 0x4810_3200/0x5810_3200          | 0.5KB |
+| 0         | M0/SRAM0 for Ethos-U NPU  | 0x4810_3000/0x5810_3000          | 0.5KB |
+| 1         | M1/EXT0 for Ethos-U NPU   | 0x4810_3200/0x5810_3200          | 0.5KB |
 
 ### Timer Adapter for Corstone-310 FPGA:
 

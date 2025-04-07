@@ -28,7 +28,7 @@ conventions.
 
 The following sign indicates the important conventions to apply:
 
-> **Convention:** The code is developed using `C++14` and `C99` standards.
+> **Convention:** The code is developed using `C++17` and `C11` standards.
 
 ## Software project description
 
@@ -93,7 +93,7 @@ The main loop function has external linkage and the main executable for the use-
 the use-case code.
 
 ```C++
-void main_loop()
+void MainLoop()
 {
 
 ...
@@ -118,7 +118,7 @@ For example:
 #include "hal.h"
 #include "AppContext.hpp"
 
-void main_loop()
+void MainLoop()
 {
     /* Instantiate application context */
     arm::app::ApplicationContext caseContext;
@@ -243,13 +243,13 @@ Layer (HAL).
 Start by creating a `MainLoop.cc` file in the `src` directory (the one created under
 [Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)).  The name used is not important.
 
-Now define the `main_loop` function with the signature described in [Main loop function](./customizing.md#main-loop-function):
+Now define the `MainLoop` function with the signature described in [Main loop function](./customizing.md#main-loop-function):
 
 ```C++
 #include "hal.h"
 #include "log_macros.h"
 
-void main_loop()
+void MainLoop()
 {
     printf("Hello world!");
 }
@@ -434,7 +434,7 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-void main_loop()
+void MainLoop()
 {
     printf("Hello world!");
 

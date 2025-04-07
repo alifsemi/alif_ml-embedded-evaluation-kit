@@ -52,6 +52,21 @@
             }
         },
         {
+            "name": "mps4-320-platform",
+            "description": "Target MPS4 board, SSE-320 subsystem.",
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_PLATFORM": {
+                    "type": "STRING",
+                    "value": "mps4"
+                },
+                "TARGET_SUBSYSTEM": {
+                    "type": "STRING",
+                    "value": "sse-320"
+                }
+            }
+        },
+        {
             "name": "simple-platform",
             "description": "Target simple platform.",
             "hidden": true,

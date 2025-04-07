@@ -26,16 +26,21 @@ include(util_functions)
 message(STATUS "Assessing CMSIS configuration options...")
 
 USER_OPTION(CMSIS_SRC_PATH
-    "Path to CMSIS-5 sources"
-    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis"
+    "Path to CMSIS sources"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-6"
     PATH)
 
 USER_OPTION(CMSIS_DSP_SRC_PATH
-    "Path to CMSIS-5 DSP sources"
+    "Path to CMSIS DSP sources"
     "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-dsp"
     PATH)
 
 USER_OPTION(CMSIS_NN_SRC_PATH
-    "Path to CMSIS-5 NN sources"
+    "Path to CMSIS NN sources"
     "${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-nn"
+    PATH)
+
+USER_OPTION(CORTEX_DFP_SRC_PATH
+    "Path to Cortex DFP sources"
+    "${MLEK_DEPENDENCY_ROOT_DIR}/cortex-dfp"
     PATH)

@@ -28,14 +28,14 @@
 #include <new>
 #include <exception>
 
-extern void main_loop();
+extern void MainLoop();
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __ASM(" .global __ARM_use_no_argv\n");
 #endif
 
 /* Print application information. */
-static void print_application_intro()
+static void PrintApplicationIntro()
 {
     info("%s\n", PRJ_DES_STR);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
@@ -52,15 +52,15 @@ int main ()
 {
     if (hal_platform_init()) {
         /* Application information, UART should have been initialised. */
-        print_application_intro();
+        PrintApplicationIntro();
 
-        /* Check the version of TensorFlow Lite Micro. */
-        PrintTensorFlowVersion();
+        /* Enable TensorFlow Lite Micro logging. */
+        EnableTFLMLog();
 
         std::set_new_handler(out_of_heap);
 
         /* Run the application. */
-        main_loop();
+        MainLoop();
     }
 
     /* This is unreachable without errors. */

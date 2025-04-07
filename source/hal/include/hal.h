@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,10 +30,11 @@ extern "C" {
 #endif
 
 #include "platform_drivers.h"   /* Platform drivers */
-#include "hal_pmu.h"              /* Timer/profiler API */
+#include "hal_pmu.h"            /* Timer/profiler API */
 #include "hal_lcd.h"            /* LCD functions */
-#include "hal_audio.h"          /* AUDIO functions */
-#include "hal_image.h"          /* IMAGE functions */
+#include "hal_audio.h"          /* Audio interface */
+#include "hal_camera.h"         /* Camera interface */
+#include "hal_audio_alif.h"     /* Alif AUDIO functions */
 
 #include <inttypes.h>
 #include <stdbool.h>

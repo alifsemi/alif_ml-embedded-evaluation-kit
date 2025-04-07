@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,9 +75,8 @@ TEST_CASE("Inference by index")
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
 
-    REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, false));
+    REQUIRE(arm::app::ObjectDetectionHandler(caseContext));
 }
 
 
@@ -100,29 +100,6 @@ TEST_CASE("Inference run all images")
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("model", model);
-    caseContext.Set<uint32_t>("imgIndex", 0);
 
-    REQUIRE(arm::app::ObjectDetectionHandler(caseContext, 0, true));
-}
-
-
-TEST_CASE("List all images")
-{
-    /* Initialise the HAL and platform. */
-    hal_platform_init();
-
-    /* Model wrapper object. */
-    arm::app::YoloFastestModel model;
-
-    /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::object_detection::GetModelPointer(),
-                       arm::app::object_detection::GetModelLen()));
-
-    /* Instantiate application context. */
-    arm::app::ApplicationContext caseContext;
-    caseContext.Set<arm::app::Model&>("model", model);
-
-    REQUIRE(arm::app::ListFilesHandler(caseContext));
+    REQUIRE(arm::app::ObjectDetectionHandler(caseContext));
 }

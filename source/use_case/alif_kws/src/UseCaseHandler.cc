@@ -168,9 +168,9 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         std::vector<kws::KwsResult> infResults;
         static bool audio_inited;
         if (!audio_inited) {
-            int err = hal_audio_init(audioRate);
+            int err = hal_audio_alif_init(audioRate);
             if (err) {
-                printf_err("hal_audio_init failed with error: %d\n", err);
+                printf_err("hal_audio_alif_init failed with error: %d\n", err);
                 return false;
             }
             audio_inited = true;
@@ -193,7 +193,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
             hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
-            hal_audio_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+            hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
             const int16_t* inferenceWindow = audio_inf;
 

@@ -27,7 +27,6 @@
  * limitations under the License.
  */
 #include "hal.h"                      /* Brings in platform definitions. */
-#include "InputFiles.hpp"             /* For input images. */
 #include "YoloFastestModel.hpp"       /* Model class for running inference. */
 #include "UseCaseHandler.hpp"         /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
@@ -58,7 +57,7 @@ void button2_cb(unsigned int event)
     obj_button_pressed = true;
 }
 
-void main_loop()
+void MainLoop()
 {
 #ifdef SE_SERVICES_SUPPORT
     run_profile_t runprof   = default_runprof;
@@ -77,10 +76,6 @@ void main_loop()
 
     arm::app::YoloFastestModel model;  /* Model wrapper object. */
 
-    if (!alif::app::ObjectDetectionInit()) {
-        printf_err("Failed to initialise use case handler\n");
-    }
-
     /* Load the model. */
     if (!model.Init(arm::app::tensorArena,
                     sizeof(arm::app::tensorArena),
@@ -88,6 +83,10 @@ void main_loop()
                     arm::app::object_detection::GetModelLen())) {
         printf_err("Failed to initialise model\n");
         return;
+    }
+
+    if (!alif::app::ObjectDetectionInit(model)) {
+        printf_err("Failed to initialise use case handler\n");
     }
 
     /* Instantiate application context. */

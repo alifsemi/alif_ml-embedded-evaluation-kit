@@ -26,7 +26,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "InputFiles.hpp"           /* For input audio clips. */
 #include "KwsClassifier.hpp"        /* Classifier. */
 #include "MicroNetKwsModel.hpp"     /* Model class for running inference. */
 #include "hal.h"                    /* Brings in platform definitions. */
@@ -64,7 +63,7 @@ static void DisplayMenu()
     fflush(stdout);
 }
 
-void main_loop()
+void MainLoop()
 {
     init_trigger_tx();
 

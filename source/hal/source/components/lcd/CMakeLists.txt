@@ -9,7 +9,8 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +46,11 @@ set(LCD_MPS3_COMPONENT_TARGET lcd_mps3)
 add_library(${LCD_MPS3_COMPONENT_TARGET} STATIC)
 
 set(CLCD_CONFIG_BASE "0x4930A000" CACHE STRING "LCD configuration base address")
+option(LCD_TITLE_EN "Enables display of title string on LCD" ON)
+
+if (LCD_TITLE_EN)
+    set(LCD_TITLE_STRING "Arm ML Embedded Evaluation Kit" CACHE STRING "Title string")
+endif()
 
 ## Include directories - private
 target_include_directories(${LCD_MPS3_COMPONENT_TARGET}
@@ -60,7 +66,8 @@ target_sources(${LCD_MPS3_COMPONENT_TARGET}
 # Compile definitions
 target_compile_definitions(${LCD_MPS3_COMPONENT_TARGET}
     PRIVATE
-    CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE})
+    CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE}
+    $<$<BOOL:${LCD_TITLE_EN}>:LCD_TITLE_STRING=\"${LCD_TITLE_STRING}\">)
 
 ## Logging utilities:
 if (NOT TARGET log)

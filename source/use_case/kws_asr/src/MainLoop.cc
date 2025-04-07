@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "InputFiles.hpp"           /* For input images. */
 #include "Labels_micronetkws.hpp"   /* For MicroNetKws label strings. */
 #include "Labels_wav2letter.hpp"    /* For Wav2Letter label strings. */
 #include "KwsClassifier.hpp"        /* KWS classifier. */
@@ -42,33 +42,10 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-enum opcodes
-{
-    MENU_OPT_RUN_INF_NEXT = 1,       /* Run on next vector. */
-    MENU_OPT_RUN_INF_CHOSEN,         /* Run on a user provided vector index. */
-    MENU_OPT_RUN_INF_ALL,            /* Run inference on all. */
-    MENU_OPT_SHOW_MODEL_INFO,        /* Show model info. */
-    MENU_OPT_LIST_AUDIO_CLIPS        /* List the current baked audio clips. */
-};
-
-static void DisplayMenu()
-{
-    printf("\n\n");
-    printf("User input required\n");
-    printf("Enter option number from:\n\n");
-    printf("  %u. Classify next audio clip\n", MENU_OPT_RUN_INF_NEXT);
-    printf("  %u. Classify audio clip at chosen index\n", MENU_OPT_RUN_INF_CHOSEN);
-    printf("  %u. Run classification on all audio clips\n", MENU_OPT_RUN_INF_ALL);
-    printf("  %u. Show NN model info\n", MENU_OPT_SHOW_MODEL_INFO);
-    printf("  %u. List audio clips\n\n", MENU_OPT_LIST_AUDIO_CLIPS);
-    printf("  Choice: ");
-    fflush(stdout);
-}
-
 /** @brief   Verify input and output tensor are of certain min dimensions. */
 static bool VerifyTensorDimensions(const arm::app::Model& model);
 
-void main_loop()
+void MainLoop()
 {
     /* Model wrapper objects. */
     arm::app::MicroNetKwsModel kwsModel;
@@ -104,7 +81,6 @@ void main_loop()
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
     caseContext.Set<arm::app::Model&>("kwsModel", kwsModel);
     caseContext.Set<arm::app::Model&>("asrModel", asrModel);
-    caseContext.Set<uint32_t>("clipIndex", 0);
     caseContext.Set<uint32_t>("ctxLen", arm::app::asr::g_ctxLen);  /* Left and right context length (MFCC feat vectors). */
     caseContext.Set<int>("kwsFrameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("kwsFrameStride", arm::app::kws::g_FrameStride);
@@ -139,54 +115,9 @@ void main_loop()
     }
 
     /* Loop. */
-    bool executionSuccessful = true;
-    constexpr bool bUseMenu = NUMBER_OF_FILES > 1 ? true : false;
-
-    /* Loop. */
-    do {
-        int menuOption = MENU_OPT_RUN_INF_NEXT;
-        if (bUseMenu) {
-            DisplayMenu();
-            menuOption = arm::app::ReadUserInputAsInt();
-            printf("\n");
-        }
-        switch (menuOption) {
-            case MENU_OPT_RUN_INF_NEXT:
-                executionSuccessful = ClassifyAudioHandler(
-                        caseContext,
-                        caseContext.Get<uint32_t>("clipIndex"),
-                        false);
-                break;
-            case MENU_OPT_RUN_INF_CHOSEN: {
-                printf("    Enter the audio clip index [0, %d]: ",
-                       NUMBER_OF_FILES-1);
-                fflush(stdout);
-                auto clipIndex = static_cast<uint32_t>(
-                        arm::app::ReadUserInputAsInt());
-                executionSuccessful = ClassifyAudioHandler(caseContext,
-                                                           clipIndex,
-                                                           false);
-                break;
-            }
-            case MENU_OPT_RUN_INF_ALL:
-                executionSuccessful = ClassifyAudioHandler(
-                        caseContext,
-                        caseContext.Get<uint32_t>("clipIndex"),
-                        true);
-                break;
-            case MENU_OPT_SHOW_MODEL_INFO:
-                executionSuccessful = kwsModel.ShowModelInfoHandler();
-                executionSuccessful = asrModel.ShowModelInfoHandler();
-                break;
-            case MENU_OPT_LIST_AUDIO_CLIPS:
-                executionSuccessful = ListFilesHandler(caseContext);
-                break;
-            default:
-                printf("Incorrect choice, try again.");
-                break;
-        }
-    } while (executionSuccessful && bUseMenu);
-    info("Main loop terminated.\n");
+    bool executionSuccessful = ClassifyAudioHandler(caseContext);
+    info("Main loop terminated %s.\n",
+        executionSuccessful ? "successfully" : "with failure");
 }
 
 static bool VerifyTensorDimensions(const arm::app::Model& model)

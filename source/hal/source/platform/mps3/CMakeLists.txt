@@ -35,32 +35,30 @@ endif()
 if (TARGET_SUBSYSTEM STREQUAL sse-300)
     set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
     set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
-    set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
     set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
     set(ETHOS_U_IRQN         "56"           CACHE STRING "Ethos-U55 Interrupt")
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
     if (ETHOS_U_SEC_ENABLED)
-        set(ETHOS_U_BASE_ADDR    "0x58102000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_BASE_ADDR       "0x58102000"   CACHE STRING "Ethos-U NPU base address")
         if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-            set(TA0_BASE         "0x58103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-            set(TA1_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+            set(TA_SRAM_BASE        "0x58103000"   CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE         "0x58103200"   CACHE STRING "Ethos-U NPU EXT timing adapter")
         endif()
     else ()
-        set(ETHOS_U_BASE_ADDR    "0x48102000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_BASE_ADDR       "0x48102000"   CACHE STRING "Ethos-U NPU base address")
         if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-            set(TA0_BASE         "0x48103000"   CACHE STRING "Ethos-U NPU timing adapter 0")
-            set(TA1_BASE         "0x48103200"   CACHE STRING "Ethos-U NPU timing adapter 1")
+            set(TA_SRAM_BASE        "0x48103000"   CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE         "0x48103200"   CACHE STRING "Ethos-U NPU EXT timing adapter")
         endif()
-    endif ()
+    endif()
 endif()
 
 # Define target specific base addresses here (before adding the components)
 if (TARGET_SUBSYSTEM STREQUAL sse-310)
     set(UART0_BASE           "0x49303000"   CACHE STRING "UART base address")
     set(UART0_BAUDRATE       "115200"       CACHE STRING "UART baudrate")
-    set(SYSTEM_CORE_CLOCK    "25000000"     CACHE STRING "System peripheral clock (Hz)")
     set(CLCD_CONFIG_BASE     "0x4930A000"   CACHE STRING "LCD configuration base address")
 
     set(ETHOS_U_IRQN         "16"           CACHE STRING "Ethos-U55 Interrupt")
@@ -125,13 +123,24 @@ add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
 
 ## Platform component: audio
-add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
 ## Platform component: image
 add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
+
+## Platform component: Camera interface
+add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
+
+## Platform component: Audio interface
+add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
+
+# Add the platform headers to the CMSIS device target (provide access to platform's
+# memory map and interrupt numbers.
+target_include_directories(cmsis_device PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
 
 ## Logging utilities:
 if (NOT TARGET log)
@@ -147,8 +156,9 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     cmsis_device
     platform_pmu
     lcd_mps3
+    hal_audio_static_streams
+    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,hal_camera_static_images>
     audio_stubs
-    image_stubs
     $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_cmsdk,stdout>)
 
 # Set the CPU profiling definition

@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2023, 2024 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +32,7 @@ namespace app {
         mutableAllOpResolver.AddArgMin();
         mutableAllOpResolver.AddAssignVariable();
         mutableAllOpResolver.AddAveragePool2D();
+        mutableAllOpResolver.AddBatchMatMul();
         mutableAllOpResolver.AddBatchToSpaceNd();
         mutableAllOpResolver.AddBroadcastArgs();
         mutableAllOpResolver.AddBroadcastTo();
