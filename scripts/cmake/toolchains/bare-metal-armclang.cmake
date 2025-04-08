@@ -20,8 +20,6 @@ set(CMAKE_C_COMPILER                armclang)
 set(CMAKE_CXX_COMPILER              armclang)
 set(CMAKE_C_LINKER_PREFERENCE       armlink)
 set(CMAKE_ASM_LINKER_PREFERENCE     armlink)
-set(CMAKE_ASM_COMPILER              armasm)
-set(CMAKE_ASM_COMPILER_AR           armar)
 
 set(CMAKE_CROSSCOMPILING            true)
 set(CMAKE_SYSTEM_NAME               Generic)
@@ -111,7 +109,6 @@ add_compile_definitions(
 
 # Link options:
 add_link_options(${CPU_LINK_OPT})
-set(CMAKE_ASM_FLAGS "${CPU_LINK_OPT}")
 
 set(ARMCLANG_INFO_STR "sizes,totals,unused,veneers,summarysizes,inline,tailreorder")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
