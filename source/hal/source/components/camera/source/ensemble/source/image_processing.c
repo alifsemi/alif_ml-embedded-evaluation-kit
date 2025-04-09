@@ -50,6 +50,10 @@
 #include <arm_mve.h>
 #endif
 
+#if CIMAGE_SW_GAIN_CONTROL
+#include "camera.h"
+#endif
+
 #define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
 
 int frame_crop(const void *input_fb,
