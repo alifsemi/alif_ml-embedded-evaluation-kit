@@ -16,6 +16,8 @@
 #include "camera.h"
 #include "Driver_GPIO.h"
 
+#if defined(RTE_Drivers_CPI)
+
 #ifndef RTE_CPI
 #include "Driver_Camera_Controller.h"
 extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
@@ -148,3 +150,5 @@ bool camera_image_ready()
 {
     return image_received;
 }
+
+#endif // RTE_Drivers_CPI

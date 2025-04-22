@@ -45,6 +45,9 @@
 #include "RTE_Components.h"
 #include "RTE_Device.h"
 
+#if !defined(RTE_Drivers_CPI)
+#define USE_FAKE_CAMERA 1
+#endif
 
 #if __ARM_FEATURE_MVE & 1
 #include <arm_mve.h>

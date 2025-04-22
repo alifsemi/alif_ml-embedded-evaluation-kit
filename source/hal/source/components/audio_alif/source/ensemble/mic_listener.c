@@ -160,8 +160,13 @@ static void PDM_fifo_callback(uint32_t event)
 }
 
 /* PDM driver instance */
+#if defined(BOARD_PDM_INSTANCE) && (BOARD_PDM_INSTANCE == LP)
+extern ARM_DRIVER_PDM Driver_LPPDM;
+static ARM_DRIVER_PDM* const PDMdrv = &Driver_LPPDM;
+#else
 extern ARM_DRIVER_PDM Driver_PDM;
 static ARM_DRIVER_PDM* const PDMdrv = &Driver_PDM;
+#endif
 
 static const uint32_t ch_fir[18] = { 0x00000001, 0x00000003, 0x00000003, 0x000007F4, 0x00000004, 0x000007ED, 0x000007F5, 0x000007F4, 0x000007D3,
                                      0x000007FE, 0x000007BC, 0x000007E5, 0x000007D9, 0x00000793, 0x00000029, 0x0000072C, 0x00000072, 0x000002FD };
@@ -172,19 +177,19 @@ static int32_t pdm_mode(uint32_t sampling_rate)
     switch(sampling_rate)
     {
         case 8000:
-            return ARM_PDM_MODE_STANDARD_VOICE_512_CLK_FRQ;
+            return ARM_PDM_MODE_AUDIOFREQ_8K_DECM_64;
 
         case 16000:
-            return ARM_PDM_MODE_HIGH_QUALITY_1024_CLK_FRQ;
+            return ARM_PDM_MODE_AUDIOFREQ_16K_DECM_64;
 
         case 32000:
-            return ARM_PDM_MODE_WIDE_BANDWIDTH_AUDIO_1536_CLK_FRQ;
+            return ARM_PDM_MODE_AUDIOFREQ_32K_DECM_48;
 
         case 48000:
-            return ARM_PDM_MODE_FULL_BANDWIDTH_AUDIO_3071_CLK_FRQ;
+            return ARM_PDM_MODE_AUDIOFREQ_48K_DECM_64;
 
         case 96000:
-            return ARM_PDM_MODE_ULTRASOUND_4800_CLOCK_FRQ;
+            return ARM_PDM_MODE_AUDIOFREQ_96K_DECM_50;
 
         default:
             return -1;

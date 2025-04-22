@@ -33,4 +33,4 @@
 	url = org-115832732@github.com:AlifSemiDev/ensemble-cmsis-dfp_DEV.git
 [submodule "dependencies/boardlib"]
 	path = dependencies/boardlib
-	url = https://github.com/alifsemi/alif_boardlib.git
+	url = git@github.com:alifsemi/alif_boardlib.git

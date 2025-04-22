@@ -43,9 +43,13 @@ static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
 static void ospi_flash_enable_xip()
 {
-    // so far this is for the OSPI1 only.
+#ifdef M55_HE_E1C
+    OSPI_Type *ospi = (OSPI_Type *) OSPI0_BASE;
+    AES_Type *aes = (AES_Type *)AES0_BASE;
+#else
     OSPI_Type *ospi = (OSPI_Type *) OSPI1_BASE;
     AES_Type *aes = (AES_Type *)AES1_BASE;
+#endif
     ospi_disable(ospi);
 
     uint32_t val = (1 << 31)
@@ -83,8 +87,9 @@ static void ospi_flash_enable_xip()
     ospi->OSPI_XIP_MODE_BITS = 0x00;
     ospi->OSPI_XIP_INCR_INST = 0xFD;
     ospi->OSPI_XIP_WRAP_INST = 0xFD;
+#ifndef BALLETTO_DEVICE
     ospi->OSPI_XIP_SER = 1;
-
+#endif
     ospi->OSPI_XIP_CNT_TIME_OUT = 255;
 
     ospi_enable(ospi);

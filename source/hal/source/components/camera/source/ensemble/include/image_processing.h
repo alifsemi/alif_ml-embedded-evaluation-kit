@@ -56,6 +56,14 @@
 #define CIMAGE_USE_RGB565       (0)
 #define CIMAGE_RGB_WIDTH_MAX    CIMAGE_X
 #define CIMAGE_RGB_HEIGHT_MAX   CIMAGE_Y
+#elif !defined(RTE_Device_CPI)
+#define CIMAGE_X                (0)
+#define CIMAGE_Y                (0)
+#define CIMAGE_COLOR_CORRECTION (0)
+#define CIMAGE_SW_GAIN_CONTROL  (0)
+#define CIMAGE_USE_RGB565       (0)
+#define CIMAGE_RGB_WIDTH_MAX    CIMAGE_X
+#define CIMAGE_RGB_HEIGHT_MAX   CIMAGE_Y
 #else
 #error "Unsupported camera"
 #endif

@@ -126,15 +126,23 @@ static uint32_t set_power_profiles()
     // By default all the needed memories, power domains and gatings are enabled.
     // Use case can easily change these for more suitable settings extern default_runprof/default_offprof and change only
     // the needed values and call set_power_run_profile/set_power_off_profile
-    default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK | PD_DBSS_MASK;
+#ifdef BALLETTO_DEVICE // Balletto support only PFM
+    default_runprof.dcdc_mode     = DCDC_MODE_PFM_FORCED;
+    // No following memories on E1C/B1: SRAM0_MASK | SRAM1_MASK | SRAM6A_MASK | SRAM6B_MASK | SRAM7_1_MASK | SRAM7_2_MASK | SRAM7_3_MASK | SRAM8_MASK | SRAM9_MASK
+    default_runprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.phy_pwr_gating  = LDO_PHY_MASK;
+    default_runprof.ip_clock_gating = LP_PERIPH_MASK | NPU_HE_MASK;
+#else
     default_runprof.dcdc_mode       = DCDC_MODE_PWM;
+    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
+    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
+#endif
+    default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK | PD_DBSS_MASK;
     default_runprof.dcdc_voltage    = DCDC_VOUT_0825;
     default_runprof.aon_clk_src     = CLK_SRC_LFXO;
     default_runprof.run_clk_src     = CLK_SRC_PLL;
     default_runprof.scaled_clk_freq = SCALED_FREQ_XO_HIGH_DIV_38_4_MHZ;
-    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
-    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
-    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
 #ifdef OSPI_FLASH_SUPPORT
     default_runprof.ip_clock_gating |= OSPI_1_MASK;
 #endif
@@ -150,12 +158,17 @@ static uint32_t set_power_profiles()
         // No power domains on off profile -> device can go to chip STOP mode which is the most least power consumption state
         default_offprof.power_domains   = 0;
         default_offprof.dcdc_voltage    = DCDC_VOUT_0825;
+#ifdef BALLETTO_DEVICE // Balletto support only PFM
+        default_offprof.dcdc_mode       = DCDC_MODE_PFM_FORCED;
+        default_offprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK;
+#else
         default_offprof.dcdc_mode       = DCDC_MODE_PWM;
+        default_offprof.memory_blocks   = SERAM_MASK;
+#endif
         default_offprof.aon_clk_src     = CLK_SRC_LFXO;
         default_offprof.stby_clk_src    = CLK_SRC_HFRC;
         default_offprof.stby_clk_freq   = SCALED_FREQ_RC_STDBY_38_4_MHZ;
         // default_offprof.sysref_clk_src = /* SoC Reference Clock shared with all subsystems */
-        default_offprof.memory_blocks   = SERAM_MASK;
         default_offprof.ip_clock_gating = 0;
         default_offprof.phy_pwr_gating  = 0;
         default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
@@ -214,6 +227,8 @@ uint32_t enable_peripheral_clocks(void)
 
 int platform_init(void)
 {
+    int err = 0;
+
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
     ARM_MPU_Enable(MPU_CTRL_HFNMIENA_Msk);
 
@@ -246,15 +261,16 @@ int platform_init(void)
     se_err = (int)set_power_profiles();
 #endif // SE_SERVICES_SUPPORT
 
+#if !defined(SOC_VARIANT_E1C)
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
 
     HWSEMdrv->Initialize(NULL);
 
-    int err = 0;
     /* Only 1 core will do the pinmux */
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
         /* We're first to acquire the lock - we do it */
+#endif // SOC_VARIANT_E1C
         BOARD_Power_Init();
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
@@ -265,7 +281,7 @@ int platform_init(void)
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
 #endif
-
+#if !defined(SOC_VARIANT_E1C)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
         HWSEMdrv->Lock();
     } else {
@@ -274,6 +290,7 @@ int platform_init(void)
     }
 
     HWSEMdrv->Uninitialize();
+#endif // SOC_VARIANT_E1C
 
     // tracelib init here after pinmux is done.
     tracelib_init(NULL);
@@ -492,6 +509,51 @@ void MPU_Load_Regions(void)
 #define MEMATTRIDX_NORMAL_WB_RA_WA           2
 #define MEMATTRIDX_NORMAL_NON_CACHEABLE      3
 #define MEMATTRIDX_DEVICE_nGnRnE             7
+
+#if defined(SOC_VARIANT_E1C)
+
+     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
+      * to the system default, but we will turn it off later.
+      */
+     static const ARM_MPU_Region_t mpu_table[] = {
+     { // ITCM (alias) at 01000000, SRAM0 at 02000000, SRAM1 at 08000000
+     .RBAR = ARM_MPU_RBAR(0x01000000, ARM_MPU_SH_NON, 0, 1, 0),  // RW, NP, XA
+     .RLAR = ARM_MPU_RLAR(0x0FFFFFFF, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
+     },
+     { // SSE-700 Host Peripheral Region (1A000000)
+     .RBAR = ARM_MPU_RBAR(0x1A000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+     .RLAR = ARM_MPU_RLAR(0x1FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+     },
+     { // DTCM (20000000)
+     .RBAR = ARM_MPU_RBAR(DTCM_BASE, ARM_MPU_SH_NON, 0, 1, 1),  // RW, NP, XN
+     .RLAR = ARM_MPU_RLAR(DTCM_BASE + DTCM_SIZE - 1, MEMATTRIDX_NORMAL_WT_RA_TRANSIENT)
+     },
+     { // General peripherals
+     .RBAR = ARM_MPU_RBAR(0x40000000, ARM_MPU_SH_NON, 0, 0, 1),  // RW, P, XN
+     .RLAR = ARM_MPU_RLAR(0x4FFFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+     },
+     { // MRAM (80000000)
+     .RBAR = ARM_MPU_RBAR(SOC_FEAT_MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
+     .RLAR = ARM_MPU_RLAR(SOC_FEAT_MRAM_BASE + SOC_FEAT_MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
+     },
+ #ifdef OSPI_FLASH_SUPPORT
+     {   /* OSPI Regs - 16MB : RO-0, NP-1, XN-1  */
+         .RBAR = ARM_MPU_RBAR(0x83000000, ARM_MPU_SH_NON, 0, 1, 1),
+         .RLAR = ARM_MPU_RLAR(0x83FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
+     },
+     {   /* OSPI0 XIP(eg:hyperram) - 512MB : RO-0, NP-1, XN-0  */
+         .RBAR = ARM_MPU_RBAR(0xA0000000, ARM_MPU_SH_NON, 0, 1, 0),
+         .RLAR = ARM_MPU_RLAR(0xBFFFFFFF, MEMATTRIDX_NORMAL_WB_RA_WA)
+     },
+ #endif
+     { // System PPB
+     .RBAR = ARM_MPU_RBAR(0xE0000000, ARM_MPU_SH_NON, 1, 0, 1),  // RW, P, XN
+     .RLAR = ARM_MPU_RLAR(0xE00FFFFF, MEMATTRIDX_DEVICE_nGnRnE)
+     },
+     };
+
+ #else
+
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.
      */
@@ -546,6 +608,7 @@ void MPU_Load_Regions(void)
     .RLAR = ARM_MPU_RLAR(0xE00FFFFF, MEMATTRIDX_DEVICE_nGnRnE)
     },
     };
+#endif
 
     /* Mem Attribute for 0th index */
     ARM_MPU_SetMemAttr(MEMATTRIDX_NORMAL_WT_RA_TRANSIENT, ARM_MPU_ATTR(

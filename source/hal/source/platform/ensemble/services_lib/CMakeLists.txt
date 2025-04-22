@@ -72,6 +72,7 @@ target_sources(${ENSEMBLE_SERVICES_TARGET}
 target_link_libraries(${ENSEMBLE_SERVICES_TARGET} PUBLIC
     rte_components
     platform_drivers_if
+    cmsis_device
 )
 
 # 3. Display status:

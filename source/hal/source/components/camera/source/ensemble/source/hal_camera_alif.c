@@ -30,6 +30,10 @@
 #include <string.h>
 
 
+#if !defined(RTE_Drivers_CPI)
+#define USE_FAKE_CAMERA 1
+#endif
+
 /* Camera fills the raw_image buffer.
  * Bayer->RGB conversion transfers into the rgb_image buffer.
  * With MT9M114 camera this can be a RGB565 to RGB conversion.

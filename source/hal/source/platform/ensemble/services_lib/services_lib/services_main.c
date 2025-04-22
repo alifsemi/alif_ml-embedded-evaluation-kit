@@ -86,19 +86,33 @@ uint32_t receiver_base_address_list_1[NUM_MHU] =
 };
 
 #else
-#define NUM_MHU                5
 #define SE_MHU0_SEND_BASE      MHU_SESS_S_TX_BASE
 #define SE_MHU0_RECV_BASE      MHU_SESS_S_RX_BASE
+#define MHU0_SE_SENDER_IRQn    MHU_SESS_S_TX_IRQ_IRQn
+#define MHU0_SE_RECVER_IRQn    MHU_SESS_S_RX_IRQ_IRQn
+
+#ifdef M55_HE_E1C
+#define NUM_MHU                1
+#define MHU_CPU_SE_MHU         0
+uint32_t sender_base_address_list[NUM_MHU] =
+{
+  SE_MHU0_SEND_BASE,
+};
+
+uint32_t receiver_base_address_list[NUM_MHU] =
+{
+  SE_MHU0_RECV_BASE,
+};
+
+#else
+#define NUM_MHU                5
+
 #define M55_MHU0_SEND_BASE     MHU_RTSS_S_TX_BASE
 #define M55_MHU0_RECV_BASE     MHU_RTSS_S_RX_BASE
 #define A32_MHU0_SEND_BASE     MHU_APSS_S_TX_BASE
 #define A32_MHU0_RECV_BASE     MHU_APSS_S_RX_BASE
 #define A32_MHU1_SEND_BASE     MHU_APSS_NS_TX_BASE
 #define A32_MHU1_RECV_BASE     MHU_APSS_NS_RX_BASE
-
-
-#define MHU0_SE_SENDER_IRQn    MHU_SESS_S_TX_IRQ_IRQn
-#define MHU0_SE_RECVER_IRQn    MHU_SESS_S_RX_IRQ_IRQn
 
 #define MHU0_HE_SENDER_IRQn    MHU_RTSS_S_TX_IRQ_IRQn
 #define MHU0_HE_RECVER_IRQn    MHU_RTSS_S_RX_IRQ_IRQn
@@ -136,7 +150,8 @@ uint32_t receiver_base_address_list[NUM_MHU] =
   A32_MHU1_RECV_BASE,
 };
 
-#endif
+#endif // M55_HE_E1C
+#endif // A32
 
 static mhu_driver_in_t s_mhu_driver_in;
 static mhu_driver_out_t s_mhu_driver_out;
@@ -153,6 +168,7 @@ void MHU_SESS_S_RX_IRQHandler()
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_SE_MHU);
 }
 
+#ifndef M55_HE_E1C
 void MHU_RTSS_S_TX_IRQHandler()
 {
 #if defined(M55_HE) || defined(RTSS_HE)
@@ -180,6 +196,8 @@ void MHU_HP_S_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_HP_MHU);
 }
+
+#endif // M55_HE_E1C
 
 #ifdef A32
 void MHU_SESS_NS_TX_IRQHandler()
@@ -213,6 +231,7 @@ void MHU_HP_NS_RX_IRQHandler()
 }
 
 #else // A32
+#ifndef M55_HE_E1C
 void MHU_APSS_S_TX_IRQHandler()
 {
   s_mhu_driver_out.sender_irq_handler(MHU_CPU_A32_0_MHU);
@@ -233,7 +252,8 @@ void MHU_APSS_NS_RX_IRQHandler()
 {
   s_mhu_driver_out.receiver_irq_handler(MHU_CPU_A32_1_MHU);
 }
-#endif
+#endif // M55_HE_E1C
+#endif // A32
 
 static void setup_irq(int irq_num)
 {
@@ -243,12 +263,14 @@ static void setup_irq(int irq_num)
   NVIC_EnableIRQ(irq_num);
 }
 
+#ifndef M55_HE_E1C
 static void handle_my_msg(uint32_t service_data)
 {
     if (mhu_receive_callback) {
         mhu_receive_callback((void*)service_data);
     }
 }
+#endif
 
 void rx_msg_callback(uint32_t receiver_id,
                      uint32_t channel_number,
@@ -259,7 +281,7 @@ void rx_msg_callback(uint32_t receiver_id,
         case MHU_CPU_SE_MHU:
             SERVICES_rx_msg_callback(receiver_id, channel_number, service_data);
             break;
-
+#ifndef M55_HE_E1C
         case MHU_CPU_HE_MHU:
         case MHU_CPU_HP_MHU:
 #ifndef A32
@@ -268,9 +290,9 @@ void rx_msg_callback(uint32_t receiver_id,
 #endif
             handle_my_msg(service_data);
             break;
-
+#endif // M55_HE_E1C
         default:
-            printf("rx_msg_callback: Invalid channel_number = %ld\n", channel_number);
+            printf("rx_msg_callback: Invalid channel_number = %" PRIu32 "\n", channel_number);
     }
 }
 
@@ -310,11 +332,12 @@ static void mhu_initialize(void)
   setup_irq(MHU0_SE_SENDER_IRQn);
   setup_irq(MHU0_SE_RECVER_IRQn);
 
-#if !defined(M55_HE) && !defined(RTSS_HE)
+#if !defined(M55_HE) && !defined(RTSS_HE) && !defined(M55_HE_E1C)
   setup_irq(MHU0_HE_SENDER_IRQn);
   setup_irq(MHU0_HE_RECVER_IRQn);
 #endif
 
+#ifndef M55_HE_E1C
 #if !defined(M55_HP) && !defined(RTSS_HP)
   setup_irq(MHU0_HP_SENDER_IRQn);
   setup_irq(MHU0_HP_RECVER_IRQn);
@@ -324,7 +347,8 @@ static void mhu_initialize(void)
   setup_irq(MHU0_A32_RECVER_IRQn);
   setup_irq(MHU1_A32_SENDER_IRQn);
   setup_irq(MHU1_A32_RECVER_IRQn);
-#endif
+#endif // M55_HE_E1C
+#endif // A32
 
   MHU_driver_initialize(&s_mhu_driver_in, &s_mhu_driver_out);
 
@@ -358,13 +382,13 @@ int services_init (mhu_receive_callback_t cb)
     SERVICES_Setup(s_mhu_driver_out.send_message, MAXIMUM_TIMEOUT);
     SERVICES_wait_ms(2);
     services_handle = SERVICES_register_channel(MHU_CPU_SE_MHU, 0);
-#if !defined(M55_HE) && !defined(RTSS_HE)
+#if !defined(M55_HE) && !defined(RTSS_HE) && !defined(M55_HE_E1C)
     he_comms_handle = SERVICES_register_channel(MHU_CPU_HE_MHU, 0);
 #endif
-#if !defined(M55_HP) && !defined(RTSS_HP)
+#if !defined(M55_HP) && !defined(RTSS_HP) && !defined(M55_HE_E1C)
     hp_comms_handle = SERVICES_register_channel(MHU_CPU_HP_MHU, 0);
 #endif
-#ifndef A32
+#if !defined(A32) && !defined(M55_HE_E1C)
     a32_0_comms_handle = SERVICES_register_channel(MHU_CPU_A32_0_MHU, 0);
     a32_1_comms_handle = SERVICES_register_channel(MHU_CPU_A32_1_MHU, 0);
 #endif

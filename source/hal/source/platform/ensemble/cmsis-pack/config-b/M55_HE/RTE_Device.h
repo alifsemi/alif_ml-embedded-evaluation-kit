@@ -8417,24 +8417,24 @@
 #endif
 // </e> I2C (Inter Integrated Circuit) [Driver_I2C3]
 
-// <e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
-// <i> Configuration settings for Driver_LPI2C in component ::Drivers:LPI2C
+// <e> LPI2C0 (Low Power Inter-Integrated Circuit) [Driver_LPI2C0]
+// <i> Configuration settings for Driver_LPI2C0 in component ::Drivers:LPI2C
 #if defined(RTSS_HE)
-#define RTE_LPI2C   1
-#if RTE_LPI2C
+#define RTE_LPI2C0   1
+#if RTE_LPI2C0
 
-// <o> LPI2C IRQ PRIORITY <0-225>
-// <i> defines LPI2C interrupt priority
+// <o> LPI2C0 IRQ PRIORITY <0-225>
+// <i> defines LPI2C0 interrupt priority
 // <i> default: 0
-#define RTE_LPI2C_IRQ_PRIORITY       0
+#define RTE_LPI2C0_IRQ_PRIORITY       0
 
-// <o> LPI2C Bus-Speed <1-400000>
-// <i> defines LPI2C Bus-Speed - It is used for Bit-time calculation in driver
+// <o> LPI2C0 Bus-Speed <1-400000>
+// <i> defines LPI2C0 Bus-Speed - It is used for Bit-time calculation in driver
 // <i> default: 400KHz
-#define RTE_LPI2C_BUS_SPEED          400000
+#define RTE_LPI2C0_BUS_SPEED          400000
 
 #endif
-// </e> LPI2C (Low Power Inter-Integrated Circuit) [Driver_LPI2C]
+// </e> LPI2C0(Low Power Inter-Integrated Circuit) [Driver_LPI2C0]
 #endif //defined(RTSS_HE)
 // </h>
 

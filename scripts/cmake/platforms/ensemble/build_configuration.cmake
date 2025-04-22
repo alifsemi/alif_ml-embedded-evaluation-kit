@@ -30,10 +30,6 @@
 
 function(set_platform_global_defaults)
 
-    USER_OPTION(ALIF_DEVICE_SKU "Specify Alif SKU part number"
-        AE722F80F55D5
-        STRING)
-
     USER_OPTION(TARGET_SUBSYSTEM "Specify platform target subsystem: RTSS-HP, RTSS-HE or none"
         RTSS-HE
         STRING)
@@ -42,10 +38,33 @@ function(set_platform_global_defaults)
         set(RTSS_NPU_CONFIG_ID  "H256")
         set(ENSEMBLE_CORE       "M55_HP")
         set(ENSEMBLE_CORE_NEW   "RTSS_HP" CACHE STRING "Alif core")
+    elseif(TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
+        set(RTSS_NPU_CONFIG_ID  "H128")
+        set(ENSEMBLE_CORE       "M55_HE_E1C")
+        set(ENSEMBLE_CORE_NEW   "RTSS_HE" CACHE STRING "Alif core")
+        add_compile_definitions("M55_HE") # We need to also define M55_HE
+        add_compile_definitions("SOC_VARIANT_E1C") # TODO: do we need this anymore??
+        add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB
     else()
         set(RTSS_NPU_CONFIG_ID  "H128")
         set(ENSEMBLE_CORE       "M55_HE")
         set(ENSEMBLE_CORE_NEW   "RTSS_HE" CACHE STRING "Alif core")
+    endif()
+
+    if (TARGET_SUBSYSTEM STREQUAL RTSS-HE-E1C)
+        USER_OPTION(ALIF_DEVICE_SKU "Specify Alif SKU part number"
+            AE1C1F4051920
+            STRING)
+        USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead."
+            OFF
+            BOOL)
+    else()
+        USER_OPTION(ALIF_DEVICE_SKU "Specify Alif SKU part number"
+            AE722F80F55D5
+            STRING)
+        USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead."
+            ON
+            BOOL)
     endif()
 
     USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
@@ -56,18 +75,13 @@ function(set_platform_global_defaults)
         "${RTSS_NPU_CONFIG_ID}"
         STRING)
 
-
-    USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead."
-        ON
-        BOOL)
-
     # Include NPU, CMSIS and LVGL configuration options
     include(npu_opts)
     include(cmsis_opts)
     include(lvgl_opts)
 
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_E1C")
 
     set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "B")
@@ -77,9 +91,9 @@ function(set_platform_global_defaults)
     message(STATUS "Alif SoC part number: ${ALIF_DEVICE_SKU}")
 
     if (TARGET_REVISION STREQUAL "B")
-        # Sanity check DevKit and AppKit
-        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") ))
-            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit and AppKit but given value was ${TARGET_BOARD}")
+        # Sanity check DevKit, AppKit and DevKit_E1C
+        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_E1C")))
+            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit or DevKit_E1C but given value was ${TARGET_BOARD}")
         endif()
         set(ENSEMBLE_CMSIS_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
     endif()
