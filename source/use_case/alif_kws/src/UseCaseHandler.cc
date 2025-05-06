@@ -39,6 +39,8 @@
 #include "log_macros.h"
 #include "KwsProcessing.hpp"
 
+#include "audio/audio_out.h"
+
 #include <vector>
 
 #ifdef SE_SERVICES_SUPPORT
@@ -63,11 +65,12 @@ using arm::app::KwsPreProcess;
 using arm::app::KwsPostProcess;
 using arm::app::MicroNetKwsModel;
 
-#define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
-#define AUDIO_STRIDE 8000 // 0.5 seconds
+#define AUDIO_SAMPLES 256
+#define AUDIO_STRIDE 128
 #define RESULTS_MEMORY 8
 
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
+static int16_t audio_out[AUDIO_STRIDE*2];
 
 namespace alif {
 namespace app {
@@ -173,6 +176,13 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 printf_err("hal_audio_alif_init failed with error: %d\n", err);
                 return false;
             }
+
+            err = audio_out_init(audioRate);
+            if (err) {
+                printf_err("audio_out_init failed with error: %d\n", err);
+                return false;
+            }
+
             audio_inited = true;
         }
 
@@ -194,11 +204,25 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
             hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+            
+            // Alternate transmit buffers
+            if (index % 2 == 0) {
+                std::copy(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, audio_inf + AUDIO_SAMPLES, audio_out + AUDIO_STRIDE);
+                err = audio_out_transmit(audio_out + AUDIO_STRIDE, AUDIO_STRIDE);
+            } else {
+                std::copy(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, audio_inf + AUDIO_SAMPLES, audio_out);
+                err = audio_out_transmit(audio_out, AUDIO_STRIDE);
+            }
 
+            if (err) {
+                printf_err("audio_out_transmit failed with error: %d\n", err);
+                return false;
+            }
+/*
             const int16_t* inferenceWindow = audio_inf;
 
             uint32_t start = Get_SysTick_Cycle_Count32();
-            /* Run the pre-processing, inference and post-processing. */
+
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
                 printf_err("Pre-processing failed.");
                 return false;
@@ -219,7 +243,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             }
             printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
-            /* Add results from this window to our final results vector. */
+
             if (infResults.size() == RESULTS_MEMORY) {
                 infResults.erase(infResults.begin());
             }
@@ -232,7 +256,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
 #if VERIFY_TEST_OUTPUT
             DumpTensor(outputTensor);
-#endif /* VERIFY_TEST_OUTPUT */
+#endif
 
             hal_lcd_clear(COLOR_BLACK);
 
@@ -241,7 +265,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             }
 
             profiler.PrintProfilingResult();
-
+            */
             ++index;
         } while (!oneshot);
         return true;

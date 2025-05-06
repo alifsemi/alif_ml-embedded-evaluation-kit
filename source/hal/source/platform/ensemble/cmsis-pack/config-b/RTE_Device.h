@@ -2425,7 +2425,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S0 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S0_WSS_CLOCK_CYCLES   2
+#define RTE_I2S0_WSS_CLOCK_CYCLES   0
 
 // <o> I2S0 SCLK GATING
 //    <0=> NO_CLOCK_GATING

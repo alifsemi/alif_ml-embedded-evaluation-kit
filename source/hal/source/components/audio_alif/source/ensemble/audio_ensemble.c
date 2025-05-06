@@ -37,7 +37,7 @@ static int32_t srshr(int32_t n, unsigned shift)
 }
 #endif
 
-#define AUDIO_REC_SAMPLES 512
+#define AUDIO_REC_SAMPLES 256
 
 #ifdef USE_I2S_MICS
 #define AUDIO_REC_WIDTH 32
@@ -335,7 +335,7 @@ void audio_preprocessing(int16_t *audio, int samples)
     arm_mean_f16(audio_fp, samples, &audio_mean);
     arm_absmax_no_idx_f16(audio_fp, samples, &audio_absmax);
     //if (audio_absmax == INT16_MIN) audio_absmax = INT16_MAX; // CMSIS-DSP issue #66
-    printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
+    //printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
 
     if (auto_gain) {
         // Rescale to full range  while converting to integer
@@ -349,5 +349,5 @@ void audio_preprocessing(int16_t *audio, int samples)
     arm_mean_q15(audio, samples, &audio_mean_q15);
     arm_absmax_no_idx_q15(audio, samples, &audio_absmax_q15);
     if (audio_absmax_q15 == INT16_MIN) audio_absmax_q15 = INT16_MAX; // CMSIS-DSP issue #66
-    printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
+    //printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
 }
