@@ -6,7 +6,7 @@ In this example we use Alif Ensemble DevKit with E7 device, but you may as well 
 Alif Semiconductor Ensemble ML Embedded Evaluation Kit repository uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro) to run ML models.
 - Thus the most suitable format is TFLite quantized to int8
   - float32 will not be accelerated by the Ethos-U NPU
-  - Vela compiler typically supports uint8, int8 and int16, but there are [operator specific constraints](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/refs/heads/main/SUPPORTED_OPS.md)
+  - Vela compiler typically supports uint8, int8 and int16, but there are [operator specific constraints](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/main/SUPPORTED_OPS.md)
   - Experience has shown TFLM supports int8 the best. Some operators may lack uint8 or int16 implementation. If part of your model is accelerated and some operators are executed on CPU the safest bet compatibility-wise is to use int8 quantization.
   - For best performance the goal is to get as many operators as possible to be executed on NPU
   - int16 quantization (int8 quantization with int16 activations) may become useful if your model loses too much accuracy due to quantization error when quantizing to int8
@@ -119,7 +119,7 @@ onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -kat in
 - Other option would be to use [ExecuTorch](https://pytorch.org/executorch) instead of conversions (Not covered in this howto).
 - Even though the conversions between frameworks are possible, there are cases when you need to adapt the original model to get the model NPU accelerated in the target HW.
   - In other words, if you don't take into account the Ethos-U Vela constraints, it is easy to create a PyTorch model which is convertable to TFLite, but runs mainly on CPU.
-  - See the Ethos-U Vela generic [constraints](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/refs/heads/main/SUPPORTED_OPS.md#tflite-generic-constraints)
+  - See the Ethos-U Vela generic [constraints](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/main/SUPPORTED_OPS.md#tflite-generic-constraints)
 
 ## Vela compilation of the quantized TFLite model
 Now that we have an int8 quantized TFLite model we can use [Vela](https://developer.arm.com/documentation/109267/0101/Tool-support-for-the-Arm-Ethos-U-NPU/Ethos-U-Vela-compiler) to compile the model to an NPU optimised version.
