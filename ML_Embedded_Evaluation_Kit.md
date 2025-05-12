@@ -690,9 +690,9 @@ There are several build options – these determine the behavior of the porting 
 `-DTARGET_REVISION=<B>`<br>
 Specifies which revision (generation) of Ensemble device is being targeted – B is generation 2. (Default is B)
 
-`-DTARGET_BOARD=<DevKit|AppKit|DevKit_Baseboard|>`<br>
+`-DTARGET_BOARD=<DevKit|AppKit>`<br>
 Specifies the target board. (Default is AppKit)<br>
--DTARGET_REVISION=B supports the following boards: DevKit, AppKit and DevKit_Baseboard
+-DTARGET_REVISION=B supports the following boards: DevKit and AppKit
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
 Rotates the display by the specified amount and reorganizes the UI if necessary. 90 and 270 will be appreciably slower. (Default is 0)
