@@ -65,6 +65,7 @@ static void DAC_Callback(uint32_t event)
         running = false;
 
         if (!data_ready) {
+            printf("audio out underflow\n");
             return;
         }
 

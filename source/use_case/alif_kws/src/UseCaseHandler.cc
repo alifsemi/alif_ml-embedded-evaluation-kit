@@ -204,7 +204,31 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
 
             hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
-            
+
+            const int16_t* inferenceWindow = audio_inf;
+
+            uint32_t start = Get_SysTick_Cycle_Count32();
+
+            if (!preProcess.DoPreProcess(inferenceWindow, index)) {
+                printf_err("Pre-processing failed.");
+                return false;
+            }
+            //printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+
+            start = Get_SysTick_Cycle_Count32();
+            if (!RunInference(model, profiler)) {
+                printf_err("Inference failed.");
+                return false;
+            }
+            //printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+
+            start = Get_SysTick_Cycle_Count32();
+            if (!postProcess.DoPostProcess()) {
+                printf_err("Post-processing failed.");
+                return false;
+            }
+            //printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+
             // Alternate transmit buffers
             if (index % 2 == 0) {
                 std::copy(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, audio_inf + AUDIO_SAMPLES, audio_out + AUDIO_STRIDE);
@@ -218,32 +242,8 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 printf_err("audio_out_transmit failed with error: %d\n", err);
                 return false;
             }
-/*
-            const int16_t* inferenceWindow = audio_inf;
 
-            uint32_t start = Get_SysTick_Cycle_Count32();
-
-            if (!preProcess.DoPreProcess(inferenceWindow, index)) {
-                printf_err("Pre-processing failed.");
-                return false;
-            }
-            printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
-            start = Get_SysTick_Cycle_Count32();
-            if (!RunInference(model, profiler)) {
-                printf_err("Inference failed.");
-                return false;
-            }
-            printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
-            start = Get_SysTick_Cycle_Count32();
-            if (!postProcess.DoPostProcess()) {
-                printf_err("Post-processing failed.");
-                return false;
-            }
-            printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
-
+            /*
             if (infResults.size() == RESULTS_MEMORY) {
                 infResults.erase(infResults.begin());
             }

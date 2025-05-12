@@ -91,7 +91,7 @@ namespace app {
                                           useCache, this->m_numMfccVectorsInAudioStride);
         }
 
-        debug("Input tensor populated \n");
+        //debug("Input tensor populated \n");
 
         return true;
     }
