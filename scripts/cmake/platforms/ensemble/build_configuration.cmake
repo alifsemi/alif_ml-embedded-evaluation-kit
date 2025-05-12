@@ -68,15 +68,15 @@ function(set_platform_global_defaults)
     include(lvgl_opts)
 
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit" "DevKit_Baseboard")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
 
     set(TARGET_REVISION "B" CACHE STRING "Chip revision")
     set_property(CACHE TARGET_REVISION PROPERTY STRINGS "B")
 
     if (TARGET_REVISION STREQUAL "B")
-        # Sanity check DevKit, AppKit and DevKit_Baseboard
-        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") OR (TARGET_BOARD STREQUAL "DevKit_Baseboard")))
-            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit, AppKit and DevKit_Baseboard but given value was ${TARGET_BOARD}")
+        # Sanity check DevKit and AppKit
+        if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit") ))
+            message(FATAL_ERROR "'B' revision possible TARGET_BOARD values are: DevKit and AppKit but given value was ${TARGET_BOARD}")
         endif()
         set(ENSEMBLE_CMSIS_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-ensemble PARENT_SCOPE)
     endif()

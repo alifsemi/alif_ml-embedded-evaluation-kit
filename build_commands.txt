@@ -33,8 +33,8 @@ avoid RAM/MRAM conflicts with the primary core.
 There are three supported Alif Evaluation Kits: Alif Development Kit (DevKit) and two
 versions of the Alif AI/ML Application Kit (AppKit_Alpha1 and AppKit_Alpha2). The Alpha1
 was built in limited quantity and should be removed when Alpha2 adoption rises. To
-select between the boards, use one of the options TARGET_BOARD=AppKit (default),
-TARGET_BOARD=DevKit or TARGET_BOARD=DevKit_Baseboard
+select between the boards, use one of the options TARGET_BOARD=AppKit (default) or
+TARGET_BOARD=DevKit
 
 
 ; ------------ Image classification on CM55-HP with ARMCLANG ---------------------
