@@ -9,6 +9,7 @@
  */
 
 #include <stdatomic.h>
+#include <string.h>
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
@@ -42,33 +43,65 @@ static atomic_uint_fast32_t lv_ticks;
 
 static atomic_char pending_flush; // 0 = no pending flush, 1 = flush pending, 2 = flush in progress
 
+#if ROTATE_DISPLAY != 0
+static lvgl_pixel_t rotation_buf[MY_DISP_BUFFER];
+#endif
+
 static void lv_display_flush(lv_display_t  * restrict disp, const lv_area_t * restrict area, uint8_t * restrict px_map)
 {
 #if LV_COLOR_DEPTH == 32
+    uint32_t * restrict buf = (uint32_t * restrict)px_map;
+#else
+    uint16_t * restrict buf = (uint16_t * restrict)px_map; /*Let's say it's a 16 bit (RGB565) display*/
+#endif
+
+#if ROTATE_DISPLAY != 0
+    lv_area_t rotated_area;
+    lv_display_rotation_t rotation = lv_display_get_rotation(disp);
+    if (rotation != LV_DISPLAY_ROTATION_0) {
+        lv_color_format_t cf = lv_display_get_color_format(disp);
+        int32_t w = lv_area_get_width(area);
+        int32_t h = lv_area_get_height(area);
+        uint32_t w_stride = lv_draw_buf_width_to_stride(w, cf);
+        uint32_t h_stride = lv_draw_buf_width_to_stride(h, cf);
+
+        if (rotation == LV_DISPLAY_ROTATION_180) {
+            lv_draw_sw_rotate(buf, rotation_buf, w, h, w_stride, w_stride, rotation, cf);
+        } else {/* 90 or 270 */
+            lv_draw_sw_rotate(buf, rotation_buf, w, h, w_stride, h_stride, rotation, cf);
+        }
+
+        buf = rotation_buf;
+
+        rotated_area = *area;
+        lv_display_rotate_area(disp, &rotated_area);
+        area = &rotated_area;
+    }
+#endif //ROTATE_DISPLAY != 0
+
+#if LV_COLOR_DEPTH == 32
     // lv_event_cb ensures x coordinates are multiples of 4
-    uint32_t * restrict buf32 = (uint32_t * restrict)px_map;
     for(int32_t y = area->y1; y <= area->y2; y++) {
         uint32_t *restrict dstp32 = (uint32_t *) lcd_image[y][area->x1];
         for (int32_t count = (area->x2 + 1 - area->x1) / 4; count; count--) {
-            uint32_t argb0 = (*buf32++);
-            uint32_t argb1 = (*buf32++);
+            uint32_t argb0 = (*buf++);
+            uint32_t argb1 = (*buf++);
             uint32_t b1r0g0b0 = (argb1 << 24) | (argb0 & 0x00ffffff);
             *dstp32++ = b1r0g0b0;
-            uint32_t argb2 = (*buf32++);
+            uint32_t argb2 = (*buf++);
             uint32_t g2b2r1g1 = (argb2 << 16) | ((argb1 >> 8) & 0x0000ffff);
             *dstp32++ = g2b2r1g1;
-            uint32_t argb3 = (*buf32++);
+            uint32_t argb3 = (*buf++);
             uint32_t r3g3b3r2 = (argb3 << 8) | ((argb2 >> 16) & 0x000000ff);
             *dstp32++ = r3g3b3r2;
         }
     }
 #else
-    uint16_t * restrict buf16 = (uint16_t * restrict)px_map; /*Let's say it's a 16 bit (RGB565) display*/
     int32_t w = lv_area_get_width(area);
     int32_t x = area->x1;
     for(int32_t y = area->y1; y <= area->y2; y++) {
-        memcpy(lcd_image[y][x], buf16, w * sizeof *buf16);
-        buf16 += w;
+        memcpy(lcd_image[y][x], buf, w * sizeof *buf);
+        buf += w;
     }
 #endif
 
