@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lv_paint_utils.h"
 
 #if defined __clang__ || defined __GNUC__

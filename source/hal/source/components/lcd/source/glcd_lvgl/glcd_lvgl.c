@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lv_port.h"
 #include "lvgl.h"
@@ -29,7 +30,7 @@ void GLCD_Initialize(void)
     lv_obj_t *scr = lv_screen_active();
     lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
     canvas = lv_canvas_create(lv_screen_active());
-    static LV_ATTRIBUTE_LARGE_RAM_ARRAY uint32_t buffer[_LV_DRAW_BUF_SIZE(GLCD_WIDTH, GLCD_HEIGHT, LV_COLOR_FORMAT_RGB565)/sizeof(uint32_t)];
+    static LV_ATTRIBUTE_LARGE_RAM_ARRAY uint32_t buffer[LV_DRAW_BUF_SIZE(GLCD_WIDTH, GLCD_HEIGHT, LV_COLOR_FORMAT_RGB565)/sizeof(uint32_t)];
     lv_canvas_set_buffer(canvas, buffer, GLCD_WIDTH, GLCD_HEIGHT, LV_COLOR_FORMAT_RGB565);
     lv_obj_center(canvas);
 	lv_port_unlock(lv_lock_state);
