@@ -28,8 +28,8 @@
 [submodule "dependencies/Arm-2D"]
 	path = dependencies/Arm-2D
 	url = https://github.com/ARM-software/Arm-2D.git
-[submodule "dependencies/cmsis-ensemble-b"]
-	path = dependencies/cmsis-ensemble
+[submodule "dependencies/cmsis-alif"]
+	path = dependencies/cmsis-alif
 	url = org-115832732@github.com:AlifSemiDev/ensemble-cmsis-dfp_DEV.git
 [submodule "dependencies/boardlib"]
 	path = dependencies/boardlib

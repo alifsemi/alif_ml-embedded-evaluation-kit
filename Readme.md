@@ -1,4 +1,4 @@
-# Alif Semiconductor Ensemble  ML Embedded Evaluation Kit Examples
+# Alif Semiconductor ML Embedded Evaluation Kit Examples
 
 This repo contains different ML models that can be built to run on the Alif Beta AI/ML AppKit development board. It is based on the ARM ML embedded evaluation Kit.
 
@@ -7,7 +7,7 @@ For instructions on setting up the build environment and creating loadable image
 The instructions and build by default is for Generation 2 device AppKit.
 
 By default the build is for AppKit; for any other board set the `TARGET_BOARD` apropriately.
-The default camera for the build is `MT9M114`. If you have `ARX3A0` camera, set the `ENSEMBLE_CAMERA_MODULE` accordingly (`-DENSEMBLE_CAMERA_MODULE=ARX3A0`).
+The default camera for the build is `MT9M114`. If you have `ARX3A0` camera, set the `ALIF_CAMERA_MODULE` accordingly (`-DALIF_CAMERA_MODULE=ARX3A0`).
 
 Supported camera modules:
 - MT9M114 **This is the default camera**

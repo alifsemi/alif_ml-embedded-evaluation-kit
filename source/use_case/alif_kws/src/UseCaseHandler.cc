@@ -1,4 +1,4 @@
-/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+/* This file was ported to work on Alif Semiconductor devices. */
 
 /* Copyright (C) 2023-2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
@@ -31,7 +31,7 @@
 #include "KwsClassifier.hpp"
 #include "MicroNetKwsModel.hpp"
 #include "hal.h"
-#include "timer_ensemble.h"
+#include "timer_alif.h"
 #include "AudioUtils.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"

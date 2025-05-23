@@ -48,7 +48,7 @@ USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be 
     ON
     BOOL)
 
-USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, ensemble, simple_platform and native."
+USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, alif, simple_platform and native."
     mps3
     STRING)
 
