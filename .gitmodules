@@ -3,7 +3,7 @@
 	url = https://github.com/tensorflow/tflite-micro.git
 [submodule "dependencies/core_driver"]
 	path = dependencies/core-driver
-	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-driver
+	url = https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver.git
 [submodule "dependencies/core-platform"]
 	path = dependencies/core-platform
 	url = https://review.mlplatform.org/ml/ethos-u/ethos-u-core-platform

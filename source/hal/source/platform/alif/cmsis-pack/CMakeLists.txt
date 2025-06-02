@@ -52,6 +52,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     ${ALIF_CMSIS_PATH}/Device/core/common/include
     ${ALIF_CMSIS_PATH}/Device/core/${ALIF_CORE_STRING}/config
     ${ALIF_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}
+    ${ALIF_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}/config
     ${ALIF_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}/include
     ${ALIF_CMSIS_PATH}/Device/soc/${ALIF_DEVICE_SKU}/include/${ALIF_CORE_STRING}
     ${ALIF_CMSIS_PATH}/Device/system/include

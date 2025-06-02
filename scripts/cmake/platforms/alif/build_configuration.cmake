@@ -121,15 +121,6 @@ function(set_platform_global_defaults)
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
-    # Second AXI port M1 can't reach MRAM or OSPI on Alif devices with SKU starting AE7/AE1; overall performance loss of using
-    # only one port is minimal in most cases, so simplest just to always disable by default, rather than
-    # attempt to have any sort of dynamic switching based on model location.
-    #
-    # If not using MRAM or OSPI for the model data, then the user can set this back to two.
-    if (NOT ${ALIF_DEVICE_SKU} STREQUAL "AE822FA0E5597")
-        set(ETHOS_U_NPU_PORTS "1"          CACHE STRING "Ethos-U AXI ports")
-    endif()
-
 endfunction()
 
 function(platform_custom_post_build)

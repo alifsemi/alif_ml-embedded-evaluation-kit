@@ -46,6 +46,7 @@
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
+#include "app_mem_regions.h"
 
 #include CMSIS_device_header
 
@@ -432,6 +433,38 @@ uint64_t ethosu_address_remap(uint64_t address, int index)
     /* Double cast to avoid build warning about pointer/integer size mismatch */
     return LocalToGlobal((void *) (uint32_t) address);
 }
+
+unsigned int ethosu_config_select(uint64_t address, int index)
+{
+// #if ETHOS_U_BASE_ADDR == ETHOS_U85_NPU_BASE
+//     UNUSED(index);
+//     // Accessible regions to U85 are main SRAM (0), OSPI (2,A,B,C,D), MRAM (8) and TCMs (5)
+//     // SRAM and TCMs need to use SRAM ports, MRAM and OSPI need to use EXT port
+//     // Quick-and-dirty check that gives the right answer for valid addresses:
+//     return address & 0xA0000000 ? 2 : 0;
+// #else
+    // U55s' M1 AXI ports in Ensemble B can't reach MRAM or OSPI. Catch that here
+    // Could relax this for later chips.
+    // TODO: Change to soc feature flag in soc_features.h once it is done
+    if (address >= 0x80000000) {
+        return 0;
+    }
+    // Otherwise use original define scheme
+    switch (index) {
+    case -1: return NPU_QCONFIG; break;
+    default:
+    case 0: return NPU_REGIONCFG_0; break;
+    case 1: return NPU_REGIONCFG_1; break;
+    case 2: return NPU_REGIONCFG_2; break;
+    case 3: return NPU_REGIONCFG_3; break;
+    case 4: return NPU_REGIONCFG_4; break;
+    case 5: return NPU_REGIONCFG_5; break;
+    case 6: return NPU_REGIONCFG_6; break;
+    case 7: return NPU_REGIONCFG_7; break;
+    }
+// #endif
+}
+
 typedef struct address_range
 {
     uintptr_t base;
@@ -490,18 +523,6 @@ bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 
 void MPU_Load_Regions(void)
 {
-    // Hopefully we can remove these memory area defined. But for now the file app_mem_regions.h is
-    // in same folder as CMSIS RTE_Device.h so we cannot use it. I have propsed to move file another location.
-
-#define APP_SRAM2_BASE 0x50000000
-#define APP_SRAM2_SIZE 0x00040000
-#define APP_SRAM3_BASE 0x50800000
-#define APP_SRAM3_SIZE 0x00100000
-#define APP_SRAM4_BASE 0x58000000
-#define APP_SRAM4_SIZE 0x00040000
-#define APP_SRAM5_BASE 0x58800000
-#define APP_SRAM5_SIZE 0x00040000
-
 
 /* Define the memory attribute index with the below properties */
 #define MEMATTRIDX_NORMAL_WT_RA_TRANSIENT    0

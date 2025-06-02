@@ -204,7 +204,6 @@ ethosu_pmu_counters ethosu_get_pmu_counters(void)
 void ethosu_inference_begin(struct ethosu_driver* drv, void* userArg)
 {
     UNUSED(userArg);
-    ethosu_clear_cache_states();
     ETHOSU_PMU_CNTR_Disable(drv, get_event_mask());
     ETHOSU_PMU_CNTR_Enable(drv, get_event_mask());
 }
