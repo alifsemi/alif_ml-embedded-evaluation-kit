@@ -250,7 +250,8 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
     ```
 
 3. Build the Project using Make
@@ -286,7 +287,8 @@ UART select jumpers set for UART2:
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
     ```
 
 These cmake options permit the default use of LCD and SRAM, which is okay since the HE image has them disabled. The `CONSOLE_UART=4` option avoids the HE image’s use of UART and could be omitted to run standalone HP applications.
@@ -364,7 +366,8 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
       -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
-      -DLOG_LEVEL=LOG_LEVEL_Debug
+      -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+      -DALIF_DEVICE_SKU=AE722F80F55D5
     ```
 
 5. Build the project using `Make`
