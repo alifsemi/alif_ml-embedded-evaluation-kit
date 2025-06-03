@@ -63,6 +63,16 @@
 #endif /* defined(ETHOS_U_BASE_ADDR) */
 #endif /* ARM_NPU */
 
+#if defined(M55_HE) || defined(RTSS_HE)
+    // modem RAM, MRAM and OSPI
+    #define U55_M1_HIGHER_ADDRESS 0x60000000
+#elif defined(M55_HP) || defined(RTSS_HP)
+    // HE TCM, modem RAM, MRAM and OSPI
+    #define U55_M1_HIGHER_ADDRESS 0x58000000
+#else
+    #error device not specified!
+#endif
+
 uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 
 /** Platform name */
@@ -443,10 +453,9 @@ unsigned int ethosu_config_select(uint64_t address, int index)
 //     // Quick-and-dirty check that gives the right answer for valid addresses:
 //     return address & 0xA0000000 ? 2 : 0;
 // #else
-    // U55s' M1 AXI ports in Ensemble B can't reach MRAM or OSPI. Catch that here
-    // Could relax this for later chips.
-    // TODO: Change to soc feature flag in soc_features.h once it is done
-    if (address >= 0x80000000) {
+
+    // U55s' M1 AXI ports in Ensemble B can't reach MRAM or OSPI. Catch that here.
+    if ((!SOC_FEAT_U55_M1_CAN_ACCESS_HIGHER_ADDRESS) && (address >= U55_M1_HIGHER_ADDRESS)) {
         return 0;
     }
     // Otherwise use original define scheme
