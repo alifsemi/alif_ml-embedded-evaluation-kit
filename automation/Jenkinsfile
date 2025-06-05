@@ -13,15 +13,6 @@ pipeline {
                 }
             }
         }
-        // Dependencies are set using git submodule for now due to private dependency repositories.
-        // To be re-enabled again once boardlib and cmsis for B are publicly available.
-        // stage('Download dependencies') {
-        //     steps {
-        //         script {
-        //             common_funcs.download_dependencies()
-        //         }
-        //     }
-        // }
         stage('Setup resources') {
             steps {
                 script {
@@ -34,50 +25,50 @@ pipeline {
         stage('Build HP GCC Release') {
             steps {
                 script {
-                    common_funcs.build_hp("Release", "gcc", "B");
+                    common_funcs.build_hp("Release", "gcc", "AE722F80F55D5");
                 }
             }
         }
         // Remaining builds can be parallel
         stage('More builds') {
             parallel {
-                stage('Build HP GCC Debug') {
+                stage('Build HP GCC Debug E7') {
                     steps {
                         script {
-                            common_funcs.build_hp("Debug", "gcc", "B");
+                            common_funcs.build_hp("Debug", "gcc", "AE722F80F55D5");
                         }
                     }
                 }
                 stage('Build HE-TCM GCC Release') {
                     steps {
                         script {
-                            common_funcs.build_he_tcm("Release", "gcc", "B");
+                            common_funcs.build_he_tcm("Release", "gcc", "AE722F80F55D5");
                         }
                     }
                     post {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
-                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release_rev_b/bin/sectors/alif_kws/mram.bin"
+                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release_ae722f80f55d5/bin/sectors/alif_kws/mram.bin"
                         }
                     }
                 }
-                stage('Build HE-TCM GCC Debug') {
+                stage('Build HE-TCM GCC Debug E7') {
                     steps {
                         script {
-                            common_funcs.build_he_tcm("Debug", "gcc", "B");
+                            common_funcs.build_he_tcm("Debug", "gcc", "AE722F80F55D5");
                         }
                     }
                 }
             }
         }
-        stage('Test KWS HE Release') {
+        stage('Test KWS HE Release E7') {
             agent { label 'E7' }
             steps {
                 unstash name: "test_build_gnu_kws_he_release"
                 script {
                     try {
-                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_rev_b/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
+                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_ae722f80f55d5/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
                     } catch (Exception e) {
                         echo 'Exception occurred: ' + e.toString()
                         stageResult: 'UNSTABLE'

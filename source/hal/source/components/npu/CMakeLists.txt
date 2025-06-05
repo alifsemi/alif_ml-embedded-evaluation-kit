@@ -63,10 +63,6 @@ if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
     set(ETHOS_U_NPU_MEMORY_MODE Shared_Sram)
 endif()
 
-if (NOT DEFINED ETHOS_U_NPU_PORTS)
-    set(ETHOS_U_NPU_PORTS 2)
-endif()
-
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
     set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
@@ -110,12 +106,11 @@ endif()
 # NOTE: The above scheme is completely dependent on Vela and could potentially
 #       change.
 #
-if (ETHOS_U_NPU_PORTS EQUAL 2)
 # Common definitions:
 # For Ethos-U55/U65/U85, region configs are set as:
 #   0 or 1 = AXI0 set
 #   2 or 3 = AXI1 set
-target_compile_definitions(ethosu_core_driver PRIVATE
+target_compile_definitions(ethosu_core_driver PUBLIC
     NPU_REGIONCFG_2=1   # AXI0=M0
     NPU_REGIONCFG_3=1   # AXI0=M0
     NPU_REGIONCFG_4=1   # AXI0=M0
@@ -125,32 +120,20 @@ target_compile_definitions(ethosu_core_driver PRIVATE
 
 # Definitions relevant for all NPUs but depend on memory mode
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-    target_compile_definitions(ethosu_core_driver PRIVATE
+    target_compile_definitions(ethosu_core_driver PUBLIC
         NPU_QCONFIG=3       # AXI1=M1
         NPU_REGIONCFG_0=3   # AXI1=M1
         NPU_REGIONCFG_1=3)  # AXI1=M1
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
-    target_compile_definitions(ethosu_core_driver PRIVATE
+    target_compile_definitions(ethosu_core_driver PUBLIC
         NPU_QCONFIG=3       # AXI1=M1
         NPU_REGIONCFG_0=3   # AXI1=M1
         NPU_REGIONCFG_1=0)  # AXI0=M0
 else()
-    target_compile_definitions(ethosu_core_driver PRIVATE
+    target_compile_definitions(ethosu_core_driver PUBLIC
         NPU_QCONFIG=0       # AXI0=M0
         NPU_REGIONCFG_0=0   # AXI0=M0
         NPU_REGIONCFG_1=0)  # AXI0=M0
-endif()
-else()
-target_compile_definitions(ethosu_core_driver PRIVATE
-    NPU_QCONFIG=1       # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_0=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_1=0   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_2=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_3=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_4=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_5=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_6=1   # AXI0=M0 for U55/U65
-    NPU_REGIONCFG_7=1)  # AXI0=M0 for U55/U65
 endif()
 
 # Ethos-U55 and Ethos-U65 supports up to 128 bytes,

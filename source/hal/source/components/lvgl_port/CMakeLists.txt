@@ -21,6 +21,6 @@ set(LVGL_PORT_IFACE_TARGET lvgl_port_iface)
 add_library(${LVGL_PORT_IFACE_TARGET} INTERFACE)
 target_include_directories(${LVGL_PORT_IFACE_TARGET} INTERFACE include)
 
-if (${TARGET_PLATFORM} STREQUAL ensemble)
-    add_subdirectory(source/ensemble)
+if (${TARGET_PLATFORM} STREQUAL alif)
+    add_subdirectory(source/alif)
 endif()
