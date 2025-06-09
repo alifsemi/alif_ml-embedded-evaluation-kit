@@ -37,9 +37,8 @@ __OSPI_FLASH_SIZE = 0x02000000;
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00040000
-  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00100000
-  SRAM0 (rwx) : ORIGIN = 0x02000000, LENGTH = 0x00400000
-  SRAM1 (rwx) : ORIGIN = 0x02400000, LENGTH = 0x00400000
+  DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
+  SRAM  (rwx) : ORIGIN = 0x03000000, LENGTH = 0x00800000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
   OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
@@ -92,9 +91,9 @@ SECTIONS
     LONG ( LOADADDR(.data.dtcm.at_mram) )
     LONG ( ADDR(.data.dtcm.at_mram) )
     LONG ( SIZEOF(.data.dtcm.at_mram)/4 )
-    LONG ( LOADADDR(.data.sram0.at_mram) )
-    LONG ( ADDR(.data.sram0.at_mram) )
-    LONG ( SIZEOF(.data.sram0.at_mram)/4 )
+    LONG ( LOADADDR(.data.sram.at_mram) )
+    LONG ( ADDR(.data.sram.at_mram) )
+    LONG ( SIZEOF(.data.sram.at_mram)/4 )
     __copy_table_end__ = .;
   } > MRAM
 
@@ -105,10 +104,8 @@ SECTIONS
     LONG (SIZEOF(.bss.itcm)/4)
     LONG (ADDR(.bss))
     LONG (SIZEOF(.bss)/4)
-    LONG (ADDR(.bss.sram0))
-    LONG (SIZEOF(.bss.sram0)/4)
-    LONG (ADDR(.bss.sram1))
-    LONG (SIZEOF(.bss.sram1)/4)
+    LONG (ADDR(.bss.sram))
+    LONG (SIZEOF(.bss.sram)/4)
     __zero_table_end__ = .;
   } > MRAM
 
@@ -143,23 +140,19 @@ SECTIONS
 
   } > DTCM AT> MRAM
 
-  /* Place non-zero code/data here if required in SRAM0 */
-  .data.sram0.at_mram : ALIGN(8)
+  /* Place non-zero code/data here if required in SRAM */
+  .data.sram.at_mram : ALIGN(8)
   {
     * (ifm)
-  } > SRAM0 AT> MRAM
+  } > SRAM AT> MRAM
 
-  .bss.sram0 (NOLOAD) : ALIGN(8)
+  .bss.sram (NOLOAD) : ALIGN(8)
   {
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.lcd_image_buf)
-  } > SRAM0
-
-  .bss.sram1 (NOLOAD) : ALIGN(8)
-  {
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
-  } > SRAM1
+  } > SRAM
 
   .bss.itcm (NOLOAD) : ALIGN(8)
   {
