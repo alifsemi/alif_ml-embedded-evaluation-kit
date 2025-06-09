@@ -497,13 +497,13 @@ uint64_t ethosu_address_remap(uint64_t address, int index)
 
 unsigned int ethosu_config_select(uint64_t address, int index)
 {
-// #if ETHOS_U_BASE_ADDR == ETHOS_U85_NPU_BASE
-//     UNUSED(index);
-//     // Accessible regions to U85 are main SRAM (0), OSPI (2,A,B,C,D), MRAM (8) and TCMs (5)
-//     // SRAM and TCMs need to use SRAM ports, MRAM and OSPI need to use EXT port
-//     // Quick-and-dirty check that gives the right answer for valid addresses:
-//     return address & 0xA0000000 ? 2 : 0;
-// #else
+#if ETHOS_U_BASE_ADDR == ETHOS_U85_NPU_BASE
+    UNUSED(index);
+    // Accessible regions to U85 are main SRAM (0), OSPI (2,A,B,C,D), MRAM (8) and TCMs (5)
+    // SRAM and TCMs need to use SRAM ports, MRAM and OSPI need to use EXT port
+    // Quick-and-dirty check that gives the right answer for valid addresses:
+    return address & 0xA0000000 ? 2 : 0;
+#else
 
     // U55s' M1 AXI ports in Ensemble B can't reach MRAM or OSPI. Catch that here.
     if ((!SOC_FEAT_U55_M1_CAN_ACCESS_HIGHER_ADDRESS) && (address >= U55_M1_HIGHER_ADDRESS)) {
@@ -522,7 +522,7 @@ unsigned int ethosu_config_select(uint64_t address, int index)
     case 6: return NPU_REGIONCFG_6; break;
     case 7: return NPU_REGIONCFG_7; break;
     }
-// #endif
+#endif
 }
 
 typedef struct address_range
