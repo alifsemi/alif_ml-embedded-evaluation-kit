@@ -193,7 +193,7 @@
         #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 4
     #endif
 
-    #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_NONE
+    #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_HELIUM
 
     #if LV_USE_DRAW_SW_ASM == LV_DRAW_SW_ASM_CUSTOM
         #define  LV_DRAW_SW_ASM_CUSTOM_INCLUDE ""
