@@ -193,7 +193,12 @@
         #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 4
     #endif
 
+/* GCC (at least v13.3) fails to build Arm2D Helium parts properly so enable Helium optimization for LLVM compilers only*/
+#if defined(__clang__)
     #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_HELIUM
+#else
+    #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_NONE
+#endif
 
     #if LV_USE_DRAW_SW_ASM == LV_DRAW_SW_ASM_CUSTOM
         #define  LV_DRAW_SW_ASM_CUSTOM_INCLUDE ""
