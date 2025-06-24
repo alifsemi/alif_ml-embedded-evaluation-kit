@@ -27,7 +27,7 @@
 #include "ospi_hyperram_xip.h"
 #include "sys_ctrl_aes.h"
 
-#include "timer_ensemble.h"
+#include "timer_alif.h"
 #include "ospi_ram.h"
 #include "ram_test.h"
 #include "log_macros.h"
@@ -60,7 +60,8 @@ static const ospi_hyperram_xip_config issi_config = {
     .rxds_delay     = RXDS_DELAY,
     .wait_cycles    = WAIT_CYCLES,
     .slave_select   = 0,
-    .bus_width      = 16
+    .dfs            = 32,
+    .spi_mode       = OSPI_SPI_MODE_DUAL_OCTAL
 };
 
 extern ARM_DRIVER_OSPI ARM_Driver_OSPI_(DRIVER_OSPI_NUM);

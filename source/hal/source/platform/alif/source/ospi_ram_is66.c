@@ -21,7 +21,7 @@
 
 #include "board.h"
 #include "pinconf.h"
-#include "Driver_GPIO.h"
+#include "Driver_IO.h"
 #include "Driver_OSPI.h"
 #include "ospi.h"
 #include "ospi_hyperram_xip.h"
@@ -50,7 +50,8 @@
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
-static void hyperram_init(void);
+static void hyperram_init(OSPI_Type *o, uint8_t wait_cycles);
+
 
 static const ospi_hyperram_xip_config issi_config = {
     .instance       = DRIVER_OSPI_NUM,
@@ -60,7 +61,8 @@ static const ospi_hyperram_xip_config issi_config = {
     .rxds_delay     = RXDS_DELAY,
     .wait_cycles    = ISSI_WAIT_CYCLES,
     .slave_select   = 0,
-    .bus_width      = 8
+    .dfs            = 16,
+    .spi_mode       = OSPI_SPI_MODE_OCTAL
 };
 
 extern ARM_DRIVER_OSPI ARM_Driver_OSPI_(DRIVER_OSPI_NUM);
@@ -130,7 +132,7 @@ static void hyperram_write_register(uint32_t addr, uint16_t value)
 }
 #endif
 
-static void hyperram_init(void)
+static void hyperram_init(OSPI_Type *o, uint8_t wait_cycles)
 {
     int32_t ret = ospi_toggle_reset();
     if (ret != ARM_DRIVER_OK) {

@@ -25,7 +25,7 @@
 #include "ospi.h"
 #include "sys_ctrl_aes.h"
 
-#include "timer_ensemble.h"
+#include "timer_alif.h"
 #include "ospi_ram.h"
 #include "ram_test.h"
 #include "log_macros.h"
