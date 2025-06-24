@@ -111,6 +111,8 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
+      ; Cache area (if used)
+      * (.bss.NoInit.ethos_u_cache)
       ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
   }
