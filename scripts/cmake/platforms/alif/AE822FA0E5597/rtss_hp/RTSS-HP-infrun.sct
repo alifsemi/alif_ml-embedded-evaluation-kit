@@ -13,7 +13,14 @@
 
 /*On chip RAM Regions */
 #define SRAM_BASE                 0x03000000
-#define SRAM_SIZE                 0x00800000		/* 8M */
+#define SRAM_SIZE                 0x00700000		/* 8M */
+
+#if SRAM_BASE == 0x02000000
+#define UNSTRIPED_BASE            0x02700000
+#else
+#define UNSTRIPED_BASE            0x02380000
+#endif
+#define UNSTRIPED_SIZE            0x00100000
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
@@ -89,13 +96,16 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 ; avoid first page, where default A32_APP stub is loaded
   RW_SRAM SRAM_BASE+8192 SRAM_SIZE-8192  {  ; 8MB ----------------------------
       * (ifm)                                ; Baked-in inputs
-      * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
       ; Cache area (if used)
       * (.bss.NoInit.ethos_u_cache)
       ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
+  }
+  
+  RW_UNSTRIPED UNSTRIPED_BASE UNSTRIPED_SIZE {
+  	  * (.bss.lcd_image_buf)
   }
 
   PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }

@@ -13,7 +13,14 @@
 
 /*On chip RAM Regions */
 #define SRAM_BASE                 0x03000000
-#define SRAM_SIZE                 0x00800000		/* 8M */
+#define SRAM_SIZE                 0x00700000		/* 8M */
+
+#if SRAM_BASE == 0x02000000
+#define UNSTRIPED_BASE            0x02700000
+#else
+#define UNSTRIPED_BASE            0x02380000
+#endif
+#define UNSTRIPED_SIZE            0x00100000
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
@@ -74,7 +81,6 @@ LR_SRAM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
       * (ifm)                                ; Baked-in inputs
       * (.bss.large_ram)                     ; Large LVGL buffers
-      * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
       ; Cache area (if used)
@@ -108,6 +114,10 @@ LR_SRAM __RO_BASE __RO_SIZE  {                       ; load region size_region
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
+
+  RW_UNSTRIPED UNSTRIPED_BASE UNSTRIPED_SIZE {
+  	  * (.bss.lcd_image_buf)
+  }
 
   PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
