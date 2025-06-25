@@ -341,6 +341,7 @@ int platform_init(void)
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
+        tracelib_init(NULL);
 #ifdef OSPI_FLASH_SUPPORT
         err = ospi_flash_init();
         if (err) {
@@ -361,13 +362,14 @@ int platform_init(void)
     } else {
         /* Someone else got there first - they did it or are doing it. Wait until we see count 2 indicating they've finished */
         while (HWSEMdrv->GetCount() < 2);
+        tracelib_init(NULL);
     }
 
     HWSEMdrv->Uninitialize();
 #endif // BALLETTO_DEVICE
 
     // tracelib init here after pinmux is done.
-    tracelib_init(NULL);
+    //tracelib_init(NULL);
     fault_dump_enable(true);
 
     set_flash_to_wrap_and_enable_caching();
