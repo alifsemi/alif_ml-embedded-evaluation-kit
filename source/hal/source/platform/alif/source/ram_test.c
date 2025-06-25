@@ -128,12 +128,14 @@ void ram_random_test(uint8_t *test_ram)
             break;
         case 6:
 #if 1
+            if (pos + 7 > TEST_SIZE) break;
             check_ram[pos] = test_ram[pos] = val;
             check_ram[pos + 3] = test_ram[pos + 3] = val;
             check_ram[pos + 6] = test_ram[pos + 6] = val;
 #else
             pos = (pos &~ 0x1F);
 #if 1
+            if (pos + 0x1C > TEST_SIZE) break;
             *(uint32_t *)(test_ram+pos + 0xC) = val;
             *(uint16_t *)(test_ram+pos + 0x10) = val;
             *(uint8_t *)(test_ram+pos + 0x12) = val;
@@ -145,6 +147,7 @@ void ram_random_test(uint8_t *test_ram)
             *(uint32_t *)(check_ram+pos + 0x14) = val;
             *(uint32_t *)(check_ram+pos + 0x18) = val;
 #else
+            if (pos + 0xB > TEST_SIZE) break;
             *(uint32_t *)(check_ram+pos + 0x4) = val;
             *(uint16_t *)(check_ram+pos + 0x8) = val;
             *(uint8_t *)(check_ram+pos + 0xA) = val;
