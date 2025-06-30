@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,45 +23,40 @@
 namespace arm {
 namespace app {
 
-    DetectorPostProcess::DetectorPostProcess(
-        TfLiteTensor* modelOutput0,
-        TfLiteTensor* modelOutput1,
-        std::vector<object_detection::DetectionResult>& results,
-        const object_detection::PostProcessParams& postProcessParams)
-        :   m_outputTensor0{modelOutput0},
-            m_outputTensor1{modelOutput1},
-            m_results{results},
-            m_postProcessParams{postProcessParams}
+DetectorPostProcess::DetectorPostProcess(
+    std::shared_ptr<fwk::iface::TensorIface> modelOutput0,
+    std::shared_ptr<fwk::iface::TensorIface> modelOutput1,
+    std::vector<object_detection::DetectionResult>& results,
+    const object_detection::PostProcessParams& postProcessParams) :
+    m_outputTensor0{modelOutput0}, m_outputTensor1{modelOutput1}, m_results{results},
+    m_postProcessParams{postProcessParams}
 {
     /* Init PostProcessing */
+    const auto out0Quant = m_outputTensor0->GetQuantParams();
+    const auto out1Quant = m_outputTensor1->GetQuantParams();
+
     this->m_net = object_detection::Network{
-        .inputWidth  = postProcessParams.inputImgCols,
-        .inputHeight = postProcessParams.inputImgRows,
-        .numClasses  = postProcessParams.numClasses,
-        .branches =
-            {object_detection::Branch{.resolution  = postProcessParams.inputImgCols / 32,
-                                      .numBox      = 3,
-                                      .anchor      = postProcessParams.anchor1,
-                                      .modelOutput = this->m_outputTensor0->data.int8,
-                                      .scale       = (static_cast<TfLiteAffineQuantization*>(
-                                                    this->m_outputTensor0->quantization.params))
-                                                   ->scale->data[0],
-                                      .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
-                                                        this->m_outputTensor0->quantization.params))
-                                                       ->zero_point->data[0],
-                                      .size = this->m_outputTensor0->bytes},
-             object_detection::Branch{.resolution  = postProcessParams.inputImgCols / 16,
-                                      .numBox      = 3,
-                                      .anchor      = postProcessParams.anchor2,
-                                      .modelOutput = this->m_outputTensor1->data.int8,
-                                      .scale       = (static_cast<TfLiteAffineQuantization*>(
-                                                    this->m_outputTensor1->quantization.params))
-                                                   ->scale->data[0],
-                                      .zeroPoint = (static_cast<TfLiteAffineQuantization*>(
-                                                        this->m_outputTensor1->quantization.params))
-                                                       ->zero_point->data[0],
-                                      .size = this->m_outputTensor1->bytes}},
-        .topN = postProcessParams.topN};
+         .inputWidth  = postProcessParams.inputImgCols,
+         .inputHeight = postProcessParams.inputImgRows,
+         .numClasses  = postProcessParams.numClasses,
+         .branches = {object_detection::Branch{
+                           .resolution  = postProcessParams.inputImgCols / 32,
+                           .numBox      = 3,
+                           .anchor      = postProcessParams.anchor1,
+                           .modelOutput = this->m_outputTensor0->GetData<int8_t>(),
+                           .scale       = out0Quant.scale,
+                           .zeroPoint   = out0Quant.offset,
+                           .size        = this->m_outputTensor0->Bytes()},
+                      object_detection::Branch{
+                          .resolution  = postProcessParams.inputImgCols / 16,
+                           .numBox      = 3,
+                           .anchor      = postProcessParams.anchor2,
+                           .modelOutput = this->m_outputTensor1->GetData<int8_t>(),
+                           .scale       = out1Quant.scale,
+                           .zeroPoint   = out1Quant.offset,
+                           .size        = this->m_outputTensor1->Bytes()}},
+         .topN     = postProcessParams.topN
+    };
     /* End init */
 }
 

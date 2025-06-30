@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,11 @@
 
 #########################################################
 #  Common utility library used by use case libraries.   #
-#  NOTE: this library should not depend on HAL.         #
+#  NOTE:                                                #
+#  1. This library should not depend on HAL.            #
+#  2. This library should depend on ML framework        #
+#     interface and not on the framework wrapper        #
+#     itself.                                           #
 #########################################################
 
 cmake_minimum_required(VERSION 3.21.0)
@@ -31,30 +36,22 @@ project(${COMMON_UC_UTILS_TARGET}
 add_library(${COMMON_UC_UTILS_TARGET} STATIC)
 
 ## Include directories - public
-target_include_directories(${COMMON_UC_UTILS_TARGET}
-    PUBLIC
-    include
-    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
-    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
+target_include_directories(${COMMON_UC_UTILS_TARGET} PUBLIC include)
 
 ## Sources
-target_sources(${COMMON_UC_UTILS_TARGET}
-    PRIVATE
+target_sources(${COMMON_UC_UTILS_TARGET} PRIVATE
     source/Classifier.cc
     source/ImageUtils.cc
-    source/Mfcc.cc
-    source/Model.cc
-    source/TensorFlowLiteMicro.cc)
+    source/Mfcc.cc)
 
 # Link time library targets:
-target_link_libraries(${COMMON_UC_UTILS_TARGET}
-    PUBLIC
-    log                     # Logging functions
-    arm_math                # Math functions
-    tensorflow-lite-micro)  # TensorFlow Lite Micro library
+target_link_libraries(${COMMON_UC_UTILS_TARGET} PUBLIC
+    log                 # Logging functions
+    arm_math            # Math functions
+    ml-framework-iface) # ML framework interface
 
 # Display status:
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${COMMON_UC_UTILS_TARGET})
-message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "Library:                " ${COMMON_UC_UTILS_TARGET})
+message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "*******************************************************")

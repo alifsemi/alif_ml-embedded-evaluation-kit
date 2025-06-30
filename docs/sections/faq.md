@@ -31,14 +31,14 @@ If the problem persist contact your Arm representative or raise an issue at
 
 ----
 
-**Q: When pointing to the TensorFlow Lite file explicitly in the cmake command, I get the following error message:**
+**Q: When pointing to the TensorFlow Lite file explicitly in the CMake command, I get the following error message:**
 
 ```log
-CMake Error at scripts/cmake/util_functions.cmake:73 (message): Invalid file path.
-Description: NN models file to be used in the evaluation application. Model files must be in tflite format.
+CMake Error at scripts/cmake/util_functions.cmake:76 (message): Invalid file path.
+Description: Neural network model file to be used in the evaluation application.
 ```
 
-**A:** This issue is usually caused by an incorrect path to the model file, pointed by the `-D<use_case>_MODEL_TFLITE_PATH`
+**A:** This issue is usually caused by an incorrect path to the model file, pointed by the `-D<use_case>_MODEL_PATH`
 parameter. Check that the path is correct, clean the build folder and re-run the `cmake` command.
 
 ----

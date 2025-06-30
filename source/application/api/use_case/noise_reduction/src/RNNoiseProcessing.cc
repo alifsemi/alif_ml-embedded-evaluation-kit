@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +21,11 @@
 namespace arm {
 namespace app {
 
-    RNNoisePreProcess::RNNoisePreProcess(TfLiteTensor* inputTensor,
-            std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor, std::shared_ptr<rnn::FrameFeatures> frameFeatures)
-    :   m_inputTensor{inputTensor},
-        m_featureProcessor{featureProcessor},
+    RNNoisePreProcess::RNNoisePreProcess(
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+        std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
+        std::shared_ptr<rnn::FrameFeatures> frameFeatures) :
+        m_inputTensor{inputTensor}, m_featureProcessor{featureProcessor},
         m_frameFeatures{frameFeatures}
     {}
 
@@ -37,24 +39,26 @@ namespace app {
         auto input = static_cast<const int16_t*>(data);
         this->m_audioFrame = rnn::vec1D32F(input, input + inputSize);
         m_featureProcessor->PreprocessFrame(this->m_audioFrame.data(), inputSize, *this->m_frameFeatures);
+        const auto quant = this->m_inputTensor->GetQuantParams();
 
-        QuantizeAndPopulateInput(this->m_frameFeatures->m_featuresVec,
-                this->m_inputTensor->params.scale, this->m_inputTensor->params.zero_point,
-                this->m_inputTensor);
+        QuantizeAndPopulateInput(
+            this->m_frameFeatures->m_featuresVec, quant.scale, quant.offset, this->m_inputTensor);
 
         debug("Input tensor populated \n");
 
         return true;
     }
 
-    void RNNoisePreProcess::QuantizeAndPopulateInput(rnn::vec1D32F& inputFeatures,
-            const float quantScale, const int quantOffset,
-            TfLiteTensor* inputTensor)
+    void RNNoisePreProcess::QuantizeAndPopulateInput(
+        rnn::vec1D32F& inputFeatures,
+        const float quantScale,
+        const int quantOffset,
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor)
     {
         const float minVal = std::numeric_limits<int8_t>::min();
         const float maxVal = std::numeric_limits<int8_t>::max();
 
-        auto* inputTensorData = tflite::GetTensorData<int8_t>(inputTensor);
+        auto* inputTensorData = inputTensor->GetData<int8_t>();
 
         for (size_t i=0; i < inputFeatures.size(); ++i) {
             float quantValue = ((inputFeatures[i] / quantScale) + quantOffset);
@@ -62,25 +66,24 @@ namespace app {
         }
     }
 
-    RNNoisePostProcess::RNNoisePostProcess(TfLiteTensor* outputTensor,
-            std::vector<int16_t>& denoisedAudioFrame,
-            std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
-            std::shared_ptr<rnn::FrameFeatures> frameFeatures)
-    :   m_outputTensor{outputTensor},
-        m_denoisedAudioFrame{denoisedAudioFrame},
-        m_featureProcessor{featureProcessor},
-        m_frameFeatures{frameFeatures}
-        {
-            this->m_denoisedAudioFrameFloat.reserve(denoisedAudioFrame.size());
-            this->m_modelOutputFloat.resize(outputTensor->bytes);
-        }
+    RNNoisePostProcess::RNNoisePostProcess(
+        std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        std::vector<int16_t>& denoisedAudioFrame,
+        std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
+        std::shared_ptr<rnn::FrameFeatures> frameFeatures) :
+        m_outputTensor{outputTensor}, m_denoisedAudioFrame{denoisedAudioFrame},
+        m_featureProcessor{featureProcessor}, m_frameFeatures{frameFeatures}
+    {
+        this->m_denoisedAudioFrameFloat.reserve(denoisedAudioFrame.size());
+        this->m_modelOutputFloat.resize(outputTensor->Bytes());
+    }
 
     bool RNNoisePostProcess::DoPostProcess()
     {
-        const auto* outputData = tflite::GetTensorData<int8_t>(this->m_outputTensor);
-        auto outputQuantParams = GetTensorQuantParams(this->m_outputTensor);
+        const auto* outputData       = this->m_outputTensor->GetData<int8_t>();
+        const auto outputQuantParams = this->m_outputTensor->GetQuantParams();
 
-        for (size_t i = 0; i < this->m_outputTensor->bytes; ++i) {
+        for (size_t i = 0; i < this->m_outputTensor->Bytes(); ++i) {
             this->m_modelOutputFloat[i] = (static_cast<float>(outputData[i]) - outputQuantParams.offset)
                                   * outputQuantParams.scale;
         }

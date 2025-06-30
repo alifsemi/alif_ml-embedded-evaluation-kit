@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,38 +34,38 @@ namespace app {
 
 using namespace test;
 
-bool RunInference(arm::app::Model& model, const int8_t imageData[])
+bool RunInference(arm::app::fwk::iface::Model& model, const int8_t imageData[])
 {
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
+    auto inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
     const size_t copySz =
-        inputTensor->bytes < IFM_0_DATA_SIZE ? inputTensor->bytes : IFM_0_DATA_SIZE;
-    memcpy(inputTensor->data.data, imageData, copySz);
+        inputTensor->Bytes() < IFM_0_DATA_SIZE ? inputTensor->Bytes() : IFM_0_DATA_SIZE;
+    memcpy(inputTensor->GetData(), imageData, copySz);
 
     if (model.IsDataSigned()) {
-        arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
+        arm::app::image::ConvertUint8ToInt8(inputTensor->GetData(), copySz);
     }
 
     return model.RunInference();
 }
 
 template <typename T>
-void TestInference(int imageIdx, arm::app::Model& model, T tolerance)
+void TestInference(int imageIdx, arm::app::fwk::iface::Model& model, T tolerance)
 {
     auto image    = reinterpret_cast<const IFM_0_DATA_TYPE *>(GetIfmDataArray(imageIdx));
     auto goldenFV = reinterpret_cast<const OFM_0_DATA_TYPE *>(GetOfmDataArray(imageIdx));
 
     REQUIRE(RunInference(model, image));
 
-    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
+    auto outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
-    auto tensorData = tflite::GetTensorData<T>(outputTensor);
+    REQUIRE(outputTensor->Bytes() == OFM_0_DATA_SIZE);
+    auto tensorData = outputTensor->GetData<T>();
     REQUIRE(tensorData);
 
-    for (size_t i = 0; i < outputTensor->bytes; i++) {
+    for (size_t i = 0; i < outputTensor->Bytes(); i++) {
         REQUIRE(static_cast<int>(tensorData[i]) ==
                 Approx(static_cast<int>((T)goldenFV[i])).epsilon(tolerance));
     }
@@ -75,14 +75,15 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
 {
     SECTION("Executing inferences sequentially")
     {
-        arm::app::MobileNetModel model{};
+        arm::app::fwk::tflm::MobileNetModel model{};
 
         REQUIRE_FALSE(model.IsInited());
-        REQUIRE(model.Init(arm::app::tensorArena,
-                           sizeof(arm::app::tensorArena),
-                           arm::app::img_class::GetModelPointer(),
-                           arm::app::img_class::GetModelLen()));
-        REQUIRE(model.IsInited());
+
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                    arm::app::img_class::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model.Init(computeMem, modelMem));
 
         for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
             TestInference<uint8_t>(i, model, 1);
@@ -92,13 +93,14 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and MobileNeV2 Uint8", "
     for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
         DYNAMIC_SECTION("Executing inference with re-init")
         {
-            arm::app::MobileNetModel model{};
+            arm::app::fwk::tflm::MobileNetModel model{};
 
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init(arm::app::tensorArena,
-                               sizeof(arm::app::tensorArena),
-                               arm::app::img_class::GetModelPointer(),
-                               arm::app::img_class::GetModelLen()));
+            arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                        arm::app::img_class::GetModelLen()};
+            arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                          sizeof(arm::app::tensorArena)};
+            REQUIRE(model.Init(computeMem, modelMem));
             REQUIRE(model.IsInited());
 
             TestInference<uint8_t>(i, model, 1);

@@ -29,16 +29,16 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
-from set_up_default_resources import PathsConfig
-from set_up_default_resources import SetupConfig
+from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig
 from set_up_default_resources import default_downloads_path
+from set_up_default_resources import default_executorch_path
 from set_up_default_resources import default_npu_configs
 from set_up_default_resources import default_requirements_path
 from set_up_default_resources import default_use_case_resources_path
 from set_up_default_resources import get_default_npu_config_from_name
 from set_up_default_resources import set_up_resources
 from set_up_default_resources import valid_npu_configs
-
+from set_up_default_resources import valid_ml_frameworks, MLFramework
 
 @dataclass(frozen=True)
 class BuildConfig:
@@ -53,6 +53,7 @@ class BuildConfig:
         npu_config_name (str)      : Ethos-U NPU configuration name. See "valid_npu_config_names"
         make_jobs (int)            : The number of make jobs to use (`-j` flag).
         make_verbose (bool)        : Runs make with VERBOSE=1.
+        ml_framework               : Specifies ML framework to use for the build.
     """
     toolchain: str
     download_resources: bool
@@ -60,6 +61,7 @@ class BuildConfig:
     npu_config_name: str
     make_jobs: int
     make_verbose: bool
+    ml_framework: MLFramework
 
 
 class PipeLogging(threading.Thread):
@@ -130,8 +132,7 @@ def prep_build_dir(
         current_file_dir: Path,
         target_platform: str,
         target_subsystem: str,
-        npu_config_name: str,
-        toolchain: str
+        build_config: BuildConfig
 ) -> Path:
     """
     Create or clean the build directory for this project.
@@ -140,17 +141,19 @@ def prep_build_dir(
     ----------
     current_file_dir    : The current directory of the running script
     target_platform     : The name of the target platform, e.g. "mps3"
-    target_subsystem:   : The name of the target subsystem, e.g. "sse-300"
-    npu_config_name     : The NPU config name, e.g. "ethos-u55-32"
-    toolchain           : The name of the specified toolchain, e.g."arm"
+    target_subsystem    : The name of the target subsystem, e.g. "sse-300"
+    build_config        : Build config object
 
     Returns
     -------
     The path to the build directory
     """
+
     build_dir = (
             current_file_dir /
-            f"cmake-build-{target_platform}-{target_subsystem}-{npu_config_name}-{toolchain}"
+            (f"cmake-build-{target_platform}-{target_subsystem}" +
+            f"-{build_config.npu_config_name}-{build_config.toolchain}"+
+            f"-{build_config.ml_framework.value}")
     )
 
     try:
@@ -195,13 +198,42 @@ def run_command(
         sys.exit(err.returncode)
 
 
+def download_resources(build_config: BuildConfig) -> Path:
+    """
+    Download resources for MLEK use cases
+
+    Parameters
+    ----------
+    build_config (BuildArgs)    : Config for the build
+
+    Returns
+    -------
+    The path to the downloaded resources
+    """
+    setup_config = SetupConfig(
+        run_vela_on_models=build_config.run_vela_on_models,
+        set_up_tensorflow=(build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO),
+        set_up_executorch=(build_config.ml_framework == MLFramework.EXECUTORCH)
+    )
+    optimization_config = OptimizationConfig(
+        additional_npu_config_names=[build_config.npu_config_name]
+    )
+    paths_config = PathsConfig(
+        additional_requirements_file=default_requirements_path,
+        use_case_resources_file=default_use_case_resources_path,
+        downloads_dir=default_downloads_path,
+        executorch_path=default_executorch_path
+    )
+    return set_up_resources(setup_config, optimization_config, paths_config)
+
+
 def run(build_config: BuildConfig):
     """
     Run the helpers scripts.
 
     Parameters:
     ----------
-    args (BuildArgs)    : Arguments used to build the project
+    build_config (BuildArgs)    : Config for the build
     """
 
     current_file_dir = Path(__file__).parent.resolve()
@@ -210,18 +242,8 @@ def run(build_config: BuildConfig):
     toolchain_file_name = get_toolchain_file_name(build_config.toolchain)
 
     # 2. Download models if specified
-    if build_config.download_resources is True:
-        logging.info("Downloading resources.")
-        setup_config = SetupConfig(
-            run_vela_on_models=build_config.run_vela_on_models,
-            additional_npu_config_names=[build_config.npu_config_name],
-        )
-        paths_config = PathsConfig(
-            additional_requirements_file=default_requirements_path,
-            use_case_resources_file=default_use_case_resources_path,
-            downloads_dir=default_downloads_path
-        )
-        env_path = set_up_resources(setup_config, paths_config)
+    if build_config.download_resources:
+        env_path = download_resources(build_config)
     else:
         env_path = default_downloads_path / "env"
 
@@ -242,8 +264,7 @@ def run(build_config: BuildConfig):
         current_file_dir,
         target_platform,
         target_subsystem,
-        build_config.npu_config_name,
-        build_config.toolchain
+        build_config
     )
 
     logpipe = PipeLogging(logging.INFO)
@@ -257,13 +278,24 @@ def run(build_config: BuildConfig):
     )
     ethos_u_cfg = get_default_npu_config_from_name(build_config.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
+    framework_arg = ''
+    if build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO:
+        # TensorFlow Lite Micro is already the default option. Just ensure
+        # a clean build for the framework.
+        framework_arg = '-DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
+    elif build_config.ml_framework == MLFramework.EXECUTORCH:
+        # Current ExecuTorch rev doesn't support `Dedicated Sram`
+        framework_arg = '-DML_FRAMEWORK=ExecuTorch -DETHOS_U_NPU_MEMORY_MODE=Shared_Sram'
+    else:
+        raise NotImplementedError(f'Unsupported ML Framework {build_config.ml_framework}')
+
     cmake_command = (
         f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
         f" -DTARGET_SUBSYSTEM={target_subsystem}"
         f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
         f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
         f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
-        " -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON"
+        f" {framework_arg}"
     )
 
     run_command(cmake_command, logpipe, fail_message="Failed to configure the project.")
@@ -298,6 +330,13 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
+        "--ml-framework",
+        help=f"""Specify the ML framework to use for building the examples.
+        Valid values are: {valid_ml_frameworks}
+        """,
+        default=f'{MLFramework.TENSORFLOW_LITE_MICRO.value}'
+    )
+    parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
             {valid_npu_configs.names}""",
@@ -324,7 +363,8 @@ if __name__ == "__main__":
         run_vela_on_models=not parsed_args.skip_vela,
         npu_config_name=parsed_args.npu_config_name,
         make_jobs=parsed_args.make_jobs,
-        make_verbose=parsed_args.make_verbose
+        make_verbose=parsed_args.make_verbose,
+        ml_framework=MLFramework(parsed_args.ml_framework)
     )
 
     run(build)

@@ -30,7 +30,7 @@ namespace app {
      * @param[in]       results     Vector of classification results to be displayed.
      * @return          true if successful, false otherwise.
      **/
-    bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results);
+    bool PresentInferenceResult(const std::vector<ClassificationResult>& results);
 
     /**
      * @brief           Run inference using given model
@@ -40,7 +40,7 @@ namespace app {
      * @param[in]       profiler   Reference to the initialised profiler.
      * @return          true if inference succeeds, false otherwise.
      **/
-    bool RunInference(Model& model, Profiler& profiler);
+    bool RunInference(fwk::iface::Model& model, Profiler& profiler);
 
 #ifdef INTERACTIVE_MODE
     /**

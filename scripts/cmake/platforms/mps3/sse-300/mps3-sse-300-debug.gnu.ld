@@ -206,6 +206,8 @@ SECTIONS
     /* activation buffers a.k.a tensor arena when memory mode dedicated sram */
     *(activation_buf_dram)
     . = ALIGN (16);
+    /* explicit placement for global offset table */
+    * (.got*)
   } > DDR AT > DDR
 
   .text.at_ddr :

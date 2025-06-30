@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,7 @@
  */
 #include "ImageUtils.hpp"
 
+#include <array>
 #include <limits>
 
 namespace arm {
@@ -96,7 +98,7 @@ namespace image {
         }
     }
 
-    void ConvertImgToInt8(void* data, const size_t kMaxImageSize)
+    void ConvertUint8ToInt8(void* data, const size_t kMaxImageSize)
     {
         auto* tmp_req_data = static_cast<uint8_t*>(data);
         auto* tmp_signed_req_data = static_cast<int8_t*>(data);
@@ -107,12 +109,72 @@ namespace image {
         }
     }
 
+    void ConvertUint8ToInt8(int8_t* dst,
+                            const uint8_t* src,
+                            const size_t nElem,
+                            fwk::iface::TensorLayout layout)
+    {
+        constexpr size_t nChannels = 3;
+        const size_t imgArraySz    = nElem / nChannels;
+
+        if (layout == fwk::iface::TensorLayout::NCHW) {
+            for (size_t i = 0; i < imgArraySz; i++) {
+                for (size_t j = 0; j < nChannels; ++j) {
+                    dst[(j * imgArraySz) + i] =
+                        static_cast<int8_t>(static_cast<int32_t>(src[i * nChannels + j]) - 128);
+                }
+            }
+        } else {
+            for (size_t i = 0; i < nElem; ++i) {
+                dst[i] = static_cast<int8_t>(static_cast<int32_t>(src[i]) - 128);
+            }
+        }
+    }
+
+    static inline float Normalize(const uint8_t val, float mean, float std)
+    {
+        return ((static_cast<float>(val) / 255.f) - mean) / std;
+    }
+
+    void ConvertUint8ToFp32(float* dst,
+                            const uint8_t* src,
+                            const size_t nElem,
+                            fwk::iface::TensorLayout layout)
+    {
+        constexpr size_t nChannels = 3;
+        /**
+         * The normalisation process happens per channel, and these are the
+         * default values for the Red, Green and Blue channels. If needed,
+         * this function could accept these are arguments later.
+         *
+         * Mean and standard deviation values: {R,     G,     B    } */
+        const std::array<float, nChannels> mean{0.485, 0.456, 0.406};
+        const std::array<float, nChannels> stddev{0.229, 0.224, 0.225};
+        const size_t imgArraySz = nElem / nChannels;
+
+        if (layout == fwk::iface::TensorLayout::NCHW) {
+            for (size_t i = 0; i < imgArraySz; i++) {
+                for (size_t j = 0; j < nChannels; ++j) {
+                    dst[(j * imgArraySz) + i] =
+                        Normalize(src[i * nChannels + j], mean[j], stddev[j]);
+                }
+            }
+        } else {
+            for (size_t i = 0; i < nElem; i += nChannels) {
+                dst[i]     = Normalize(src[i], mean[0], stddev[0]);
+                dst[i + 1] = Normalize(src[i], mean[1], stddev[1]);
+                dst[i + 2] = Normalize(src[i], mean[2], stddev[2]);
+            }
+        }
+    }
+
     void RgbToGrayscale(const uint8_t* srcPtr, uint8_t* dstPtr, const size_t dstImgSz)
     {
         const float R = 0.299;
         const float G = 0.587;
         const float B = 0.114;
-        for (size_t i = 0; i < dstImgSz; ++i, srcPtr += 3) {
+        constexpr size_t nChannels = 3;
+        for (size_t i = 0; i < dstImgSz; ++i, srcPtr += nChannels) {
             uint32_t  int_gray = R * (*srcPtr) +
                                  G * (*(srcPtr + 1)) +
                                  B * (*(srcPtr + 2));

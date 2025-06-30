@@ -22,6 +22,8 @@ example.
 
 Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Preprocessing and feature extraction
 
 The *wav2letter* automatic speech recognition model that is used with the code samples, expects audio data to be
@@ -108,7 +110,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Automatic Speech Recognition use-case
 adds:
 
-- `asr_MODEL_TFLITE_PATH` - The path to the NN model file in `TFLite` format. The model is processed and then included
+- `asr_MODEL_PATH` - The path to the NN model file in `TFLite` format. The model is processed and then included
   into the application `axf` file. The default value points to one of the delivered set of models. Note that the
   parameters `asr_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. In
   other words:
@@ -267,7 +269,7 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
@@ -278,21 +280,21 @@ To run the application with a custom model, you must provide a `labels_<model_na
 associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
 provided `labels_wav2letter.txt` file for an example.
 
-Then, you must set `asr_MODEL_TFLITE_PATH` to the location of the Vela processed model file and `asr_LABELS_TXT_FILE`to
+Then, you must set `asr_MODEL_PATH` to the location of the Vela processed model file and `asr_LABELS_TXT_FILE`to
 the location of the associated labels file.
 
 For example:
 
 ```commandline
 cmake .. \
-    -Dasr_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dasr_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -Dasr_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=asr
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `asr_MODEL_TFLITE_PATH`, and the labels text file pointed to by
+The `.tflite` model file pointed to by `asr_MODEL_PATH`, and the labels text file pointed to by
 `asr_LABELS_TXT_FILE` are converted to C++ files during the CMake configuration stage. They are then compiled into the
 application for performing inference with.
 
@@ -300,7 +302,7 @@ The log from the configuration stage tells you what model path and labels file h
 
 ```log
 -- User option TARGET_PLATFORM is set to mps3
--- User option asr_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option asr_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- User option asr_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
 ...
@@ -360,78 +362,9 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `asr_FILE_PATH` points to a single file, or even a folder that contains a single
-input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user.
-
-For example:
-
-```log
-User input required
-Enter option number from:
-
-1. Classify next audio clip
-2. Classify audio clip at chosen index
-3. Run classification on all audio clips
-4. Show NN model info
-5. List audio clips
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next audio clip: Runs a single inference on the next in line.
-
-2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
-
-    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
-
-3. Run ... on all: Triggers sequential inference executions on all built-in applications.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 11544 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 296
-    INFO -    2:  39
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.110316
-    INFO - ZeroPoint[0] = -11
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 4292 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   1
-    INFO -    2: 148
-    INFO -    3:  29
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 783168
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-    ```
-
-5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    [INFO] List of Files:
-    [INFO] 0 => another_door.wav
-    [INFO] 1 => another_engineer.wav
-    [INFO] 2 => i_tell_you.wav
-    [INFO] 3 => testing_routine.wav
-    ```
+After the application has started inferences are executed on inputs from `asr_FILE_PATH`.
 
 ### Running Automatic Speech Recognition
-
-Please select the first menu option to execute Automatic Speech Recognition.
 
 The following example illustrates the output of an application:
 

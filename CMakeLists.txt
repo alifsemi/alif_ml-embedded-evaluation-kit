@@ -68,13 +68,9 @@ add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal)
 if (NOT DEFINED PROFILER_DIR)
     set(PROFILER_DIR ${SRC_PATH}/profiler)
 endif ()
+
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
-
-# Include the tensorflow build target
-include(tensorflow_lite_micro)
-
-# Add the common API library target (tensorflow-lite-micro target is needed)
-add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common)
+add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api)
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
@@ -115,7 +111,6 @@ message(STATUS "Use-cases excluded by platform configuration: ${EXCLUDED_USE_CAS
 message(STATUS "Building use-cases: ${USE_CASES}.")
 
 foreach(use_case ${USE_CASES})
-
     set(SRC_USE_CASE "")
     foreach(USE_CASES_SEARCH_DIR ${USE_CASES_SEARCH_DIR_LIST})
         if (EXISTS ${USE_CASES_SEARCH_DIR}/${use_case})
@@ -147,6 +142,18 @@ foreach(use_case ${USE_CASES})
 
     # Include the use case cmake file.
     include(${UC_CMAKE_FILE})
+
+    # Link ExecuTorch library if required
+    if (${use_case}_supports_${ML_FRAMEWORK})
+        if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+            set(ML_FWK_LINK_LIBS ml_framework_et)
+        elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+            set(ML_FWK_LINK_LIBS ml_framework_tflm)
+        endif()
+    else()
+        message(STATUS "${use_case} skipped")
+        continue()
+    endif ()
 
     file(GLOB_RECURSE UC_SRC
         "${SRC_USE_CASE}/${use_case}/src/*.cpp"
@@ -197,20 +204,12 @@ foreach(use_case ${USE_CASES})
         arm_math
         hal
         profiler
-        tensorflow-lite-micro
-        common_api)
+        common_api
+        ${ML_FWK_LINK_LIBS})
 
     # If an API exists for this use case, include the projects here and add to
     # the library list.
     foreach(API_TO_USE ${${use_case}_API_LIST})
-
-        # If the required target doesn't yet exist, include the project here:
-        if (NOT TARGET ${API_TO_USE}_api)
-            add_subdirectory(
-                ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
-                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
-        endif()
-
         # Check if the target now exists
         if (TARGET ${API_TO_USE}_api)
             message(STATUS "Using ${API_TO_USE}_api for ${use_case}")
@@ -226,11 +225,15 @@ foreach(use_case ${USE_CASES})
             "${SAMPLES_GEN_DIR}/*.c")
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${SRC_SAMPLES})
-
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
 
-    platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
+    # ExecuTorch doesn't have tests enabled yet.
+    # TODO: Remove once they are.
+    if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK} AND TARGET_PLATFORM STREQUAL native)
+        continue()
+    endif()
 
+    platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
 endforeach()
 
 print_useroptions()

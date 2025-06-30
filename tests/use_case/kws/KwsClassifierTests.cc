@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,10 @@
  * limitations under the License.
  */
 #include "KwsClassifier.hpp"
+#include "TensorFlowLiteMicro.hpp"
+#include "TflmTensor.hpp"
 
 #include <catch.hpp>
-
-TEST_CASE("Test invalid classifier")
-{
-    TfLiteTensor* outputTens = nullptr;
-    std::vector<arm::app::ClassificationResult> resultVec;
-    arm::app::KwsClassifier classifier;
-    std::vector<std::vector<float>> resultHistory;
-    REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 5, true, resultHistory));
-}
 
 TEST_CASE("Test valid classifier, average=0 should be same as 1)")
 {
@@ -36,7 +29,7 @@ TEST_CASE("Test valid classifier, average=0 should be same as 1)")
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
             outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
     std::vector<arm::app::ClassificationResult> resultVec;
     arm::app::KwsClassifier classifier;
 
@@ -61,7 +54,7 @@ TEST_CASE("Test valid classifier UINT8, average=1, softmax=false")
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
             outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
     std::vector<arm::app::ClassificationResult> resultVec;
     arm::app::KwsClassifier classifier;
 
@@ -83,7 +76,7 @@ TEST_CASE("Test valid classifier UINT8, average=2")
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
             outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
     std::vector<arm::app::ClassificationResult> resultVec;
     arm::app::KwsClassifier classifier;
 
@@ -108,7 +101,7 @@ TEST_CASE("Test valid classifier int8, average=0")
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
             outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
     std::vector<arm::app::ClassificationResult> resultVec;
     arm::app::KwsClassifier classifier;
 

@@ -32,11 +32,18 @@ using ImgClassClassifier = arm::app::Classifier;
 namespace arm {
 namespace app {
 
+    /** Based on ML framework, set up the model namespace. */
+#if defined(MLEK_FWK_TFLM)
+    using fwk::tflm::MobileNetModel;
+#elif defined(MLEK_FWK_EXECUTORCH)
+    using fwk::et::MobileNetModel;
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+
     /* Image classification inference handler. */
     bool ClassifyImageHandler(ApplicationContext& ctx)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
-        auto& model    = ctx.Get<Model&>("model");
+        auto& model    = ctx.Get<fwk::iface::Model&>("model");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 2;
         constexpr uint32_t dataPsnImgStartX          = 10;
@@ -50,24 +57,21 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
-            printf_err("Invalid input tensor dims\n");
-            return false;
-        } else if (inputTensor->dims->size < 4) {
+        auto inputTensor  = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        auto inputShape   = inputTensor->Shape();
+        if (inputShape.size() < 4) {
             printf_err("Input tensor dimension should be = 4\n");
             return false;
         }
 
         /* Get input shape for displaying the image. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
-        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
-        const uint32_t nChannels = inputShape->data[arm::app::MobileNetModel::ms_inputChannelsIdx];
+        const uint32_t nCols     = inputShape[MobileNetModel::ms_inputColsIdx];
+        const uint32_t nRows     = inputShape[MobileNetModel::ms_inputRowsIdx];
+        const uint32_t nChannels = inputShape[MobileNetModel::ms_inputChannelsIdx];
 
-        /* Set up pre and post-processing. */
-        ImgClassPreProcess preProcess = ImgClassPreProcess(inputTensor, model.IsDataSigned());
+        /* Set up pre- and post-processing. */
+        auto preProcess = ImgClassPreProcess(inputTensor);
 
         std::vector<ClassificationResult> results;
         ImgClassPostProcess postProcess =
@@ -116,7 +120,7 @@ namespace app {
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             const size_t imgSz =
-                inputTensor->bytes < capturedFrameSize ? inputTensor->bytes : capturedFrameSize;
+                inputTensor->Bytes() < capturedFrameSize ? inputTensor->Bytes() : capturedFrameSize;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
@@ -130,7 +134,7 @@ namespace app {
             }
 
             if (!postProcess.DoPostProcess()) {
-                printf_err("Post-processing failed.");
+                printf_err("Post-processing failed.\n");
                 return false;
             }
 

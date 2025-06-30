@@ -49,7 +49,7 @@ namespace app {
         auto& profiler                                     = ctx.Get<Profiler&>("profiler");
 
         /* Get model reference. */
-        auto& model = ctx.Get<RNNoiseModel&>("model");
+        auto& model = ctx.Get<fwk::tflm::RNNoiseModel&>("model");
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -60,12 +60,12 @@ namespace app {
         auto audioFrameStride   = ctx.Get<uint32_t>("frameStride");
         auto nrNumInputFeatures = ctx.Get<uint32_t>("numInputFeatures");
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        if (nrNumInputFeatures != inputTensor->bytes) {
+        auto inputTensor = model.GetInputTensor(0);
+        if (nrNumInputFeatures != inputTensor->Bytes()) {
             printf_err("Input features size must be equal to input tensor size."
                        " Feature size = %" PRIu32 ", Tensor size = %zu.\n",
                        nrNumInputFeatures,
-                       inputTensor->bytes);
+                       inputTensor->Bytes());
             return false;
         }
 
@@ -73,7 +73,7 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* outputTensor = model.GetOutputTensor(model.m_indexForModelOutput);
+        auto outputTensor = model.GetOutputTensor(model.m_indexForModelOutput);
 
         hal_audio_init();
         if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
@@ -317,7 +317,8 @@ namespace app {
         return numByteToBeWritten;
     }
 
-    size_t DumpOutputTensorsToMemory(Model& model, uint8_t* memAddress, const size_t memSize)
+    size_t
+    DumpOutputTensorsToMemory(fwk::iface::Model& model, uint8_t* memAddress, const size_t memSize)
     {
         const size_t numOutputs = model.GetNumOutputs();
         size_t numBytesWritten  = 0;
@@ -325,20 +326,21 @@ namespace app {
 
         /* Iterate over all output tensors. */
         for (size_t i = 0; i < numOutputs; ++i) {
-            const TfLiteTensor* tensor = model.GetOutputTensor(i);
-            const auto* tData          = tflite::GetTensorData<uint8_t>(tensor);
+            auto tensor         = model.GetOutputTensor(i);
+            const auto* tData   = tensor->GetData<uint8_t>();
+            const size_t nBytes = tensor->Bytes();
 #if VERIFY_TEST_OUTPUT
             DumpTensor(tensor);
 #endif /* VERIFY_TEST_OUTPUT */
             /* Ensure that we don't overflow the allowed limit. */
-            if (numBytesWritten + tensor->bytes <= memSize) {
-                if (tensor->bytes > 0) {
-                    std::memcpy(ptr, tData, tensor->bytes);
+            if (numBytesWritten + nBytes <= memSize) {
+                if (nBytes > 0) {
+                    std::memcpy(ptr, tData, nBytes);
 
-                    info("Copied %zu bytes for tensor %zu to 0x%p\n", tensor->bytes, i, ptr);
+                    info("Copied %zu bytes for tensor %zu to 0x%p\n", nBytes, i, ptr);
 
-                    numBytesWritten += tensor->bytes;
-                    ptr += tensor->bytes;
+                    numBytesWritten += nBytes;
+                    ptr += nBytes;
                 }
             } else {
                 printf_err("Error writing tensor %zu to memory @ 0x%p\n", i, memAddress);

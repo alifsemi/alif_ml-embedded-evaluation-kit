@@ -172,11 +172,11 @@ Please refer to Tensorflow Lite Micro documentation for more info.
 
 ## Build options
 
-The project build system allows you to specify custom neural network models (in the `.tflite` format) for each use-case
-along with the network inputs.
+The project build system allows you to specify custom neural network models for each use-case along with the network
+inputs.
 
-It also builds TensorFlow Lite for Microcontrollers library, Arm® *Ethos™-U* NPU driver library, and the CMSIS-DSP library
-from sources.
+It also builds the chosen ML framework (TensorFlow Lite for Microcontrollers or ExecuTorch) library,
+Arm® *Ethos™-U* NPU driver library, and the CMSIS-DSP library from sources.
 
 The build script is parameterized to support different options (see [common_opts.cmake](../../scripts/cmake/configuration_options/common_opts.cmake)).
 Default values for these parameters configure the build for all use-cases to be executed on an MPS3 FPGA or the Fixed Virtual
@@ -201,8 +201,21 @@ The build parameters are:
   build. All the valid toolchain files are located in the scripts directory. For example, see:
   [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
 
-- `TENSORFLOW_SRC_PATH`: the path to the root of the TensorFlow directory. The default value points to the
-  `dependencies/tensorflow` git submodule. Repository is hosted here: [tensorflow](https://github.com/tensorflow/tensorflow)
+- `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Valid options are `TensorFlowLiteMicro` and
+  `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
+  include them in the binary tree. All use case examples should advertise which framework they support and only
+  the examples that support the framework selected will be included in the binary tree.
+
+  > **NOTE**: ExecuTorch support is experimental with known limitations documented
+  > [here](../../Readme.md#known-limitations-for-experimental-branch).
+
+- `TENSORFLOW_SRC_PATH`: Path for TensorFlow Lite Micro source tree. Default value points to the
+  `dependencies/tensorflow` git submodule. Repository is hosted
+  here: [TensorFlow Lite Micro](https://github.com/tensorflow/tflite-micro.git)
+
+- `EXECUTORCH_SRC_PATH`: Path for ExecuTorch source tree. Default value points to
+  `dependencies/executorch` git submodule. Repository is hosted
+  here: [ExecuTorch](https://github.com/pytorch/executorch)
 
 - `ETHOS_U_NPU_DRIVER_SRC_PATH`: The path to the *Ethos-U* NPU core driver sources. The default value points to the
   `dependencies/core-driver` git submodule. Repository is hosted here:
@@ -242,7 +255,7 @@ The build parameters are:
   However, the user can override these defaults to a configuration ID from `H32`, `H64`, `H256`, `Y512`,
   `Z128`, `Z512`, `Z1024` and `Z2048`.
 
-  > **Note:** This ID is only used to choose which tflite file path is to be used by the CMake
+  > **Note:** This ID is only used to choose which tflite/pte file path is to be used by the CMake
   > configuration for all the use cases. If the user has overridden use-case specific model path
   > parameter `ETHOS_U_NPU_CONFIG_ID` parameter will become irrelevant for that use-case. Also, the
   > model files for the chosen `ETHOS_U_NPU_CONFIG_ID` are expected to exist in the default locations.
@@ -261,7 +274,7 @@ The build parameters are:
   `LOG_LEVEL_TRACE`, `LOG_LEVEL_DEBUG`, `LOG_LEVEL_INFO`, `LOG_LEVEL_WARN`, and `LOG_LEVEL_ERROR`. The default is set
   to: `LOG_LEVEL_INFO`.
 
-- `<use_case>_MODEL_TFLITE_PATH`: The path to the model file that is processed and is included into the application
+- `<use_case>_MODEL_PATH`: The path to the model file that is processed and is included into the application
   `axf` file. The default value points to one of the delivered set of models. Make sure that the model chosen is aligned
   with the `ETHOS_U_NPU_ENABLED` setting.
 
@@ -346,7 +359,7 @@ The build process uses three major steps:
 
 2. Configure the build for the platform chosen. This stage includes:
     - CMake options configuration
-    - When `<use_case>_MODEL_TFLITE_PATH` build options are not provided, the default neural network models can be
+    - When `<use_case>_MODEL_PATH` build options are not provided, the default neural network models can be
       downloaded from [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo). For native builds, the network input and
       output data for tests are downloaded.
     - Some files such as neural network models, network inputs, and output labels are automatically converted into C/C++
@@ -761,7 +774,7 @@ see section 3.3 in the specific use-case documentation.
 
 ## Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `MODEL_PATH`.
 
 > **Note:** If you want to run the model using *Ethos-U* NPU, ensure that your custom model has been run through the
 > Vela compiler successfully before continuing.
@@ -772,12 +785,12 @@ associated with the model.
 Each line of the file should correspond to one of the outputs in your model. See the provided
 `labels_mobilenet_v2_1.0_224.txt` file in the `img_class` use-case for an example.
 
-Then, you must set `<use_case>_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
+Then, you must set `<use_case>_MODEL_PATH` to the location of the Vela processed model file and
 `<use_case>_LABELS_TXT_FILE` to the location of the associated labels file (if necessary), like so:
 
 ```commandline
 cmake .. \
-    -D<use_case>_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -D<use_case>_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -D<use_case>_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DTARGET_PLATFORM=mps3 \
     -DTARGET_SUBSYSTEM=sse-300 \
@@ -788,7 +801,7 @@ cmake .. \
 >
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The TensorFlow Lite for Microcontrollers model pointed to by `<use_case>_MODEL_TFLITE_PATH` and the labels text file
+The TensorFlow Lite for Microcontrollers model pointed to by `<use_case>_MODEL_PATH` and the labels text file
 pointed to by `<use_case>_LABELS_TXT_FILE` are converted to C++ files during the CMake configuration stage. They are
 then compiled into the application for performing inference with.
 
@@ -796,7 +809,7 @@ The log from the configuration stage tells you what model path and labels file h
 
 ```log
 -- User option TARGET_PLATFORM is set to mps3
--- User option <use_case>_MODEL_TFLITE_PATH is set to
+-- User option <use_case>_MODEL_PATH is set to
 <path/to/custom_model_after_vela.tflite>
 ...
 -- User option <use_case>_LABELS_TXT_FILE is set to
@@ -907,7 +920,7 @@ And the cmake command:
 ```commandline
 cmake .. \
     -DETHOS_U_NPU_ID=U65 \
-    -D<use_case>_MODEL_TFLITE_PATH=<path/to/ethos_u65_vela_model.tflite>
+    -D<use_case>_MODEL_PATH=<path/to/ethos_u65_vela_model.tflite>
 ```
 
 ## Automatic file generation
@@ -934,14 +947,14 @@ For example:
 -- Generating labels file from /tmp/labels/labels_mobilenet_v2_1.0_224.txt
 -- writing to /tmp/build/generated/img_class/include/Labels.hpp and /tmp/build/generated/img_class/src/Labels.cc
 -- User option img_class_ACTIVATION_BUF_SZ is set to 0x00200000
--- User option img_class_MODEL_TFLITE_PATH is set to /tmp/models/mobilenet_v2_1.0_224_INT8.tflite
+-- User option img_class_MODEL_PATH is set to /tmp/models/mobilenet_v2_1.0_224_INT8.tflite
 -- Using /tmp/models/mobilenet_v2_1.0_224_INT8.tflite
 ++ Converting mobilenet_v2_1.0_224_INT8.tflite to    mobilenet_v2_1.0_224_INT8.tflite.cc
 ...
 ```
 
 In particular, the building options pointing to the input files `<use_case>_FILE_PATH`, the model
-`<use_case>_MODEL_TFLITE_PATH`, and labels text file `<use_case>_LABELS_TXT_FILE` are used by Python scripts in order to
+`<use_case>_MODEL_PATH`, and labels text file `<use_case>_LABELS_TXT_FILE` are used by Python scripts in order to
 generate not only the converted array files, but also some headers with utility functions.
 
 > **Note**: The utility functions generated for `labels` and the `tflite` files are used directly at application level.
@@ -1077,8 +1090,8 @@ generate_labels_code(
 ...
 
 # Generate model file
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
     NAMESPACE   "arm" "app" "img_class")
 ```
@@ -1104,8 +1117,8 @@ generate_tflite_code(
 >     "extern const int   g_myvariable2     = value2"
 > )
 >
-> generate_tflite_code(
->     MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+> generate_model_code(
+>     MODEL_PATH ${${use_case}_MODEL_PATH}
 >     DESTINATION ${SRC_GEN_DIR}
 >     EXPRESSIONS ${EXTRA_MODEL_CODE}
 >     NAMESPACE   "namespace1" "namespace2"

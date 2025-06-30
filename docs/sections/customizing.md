@@ -160,6 +160,9 @@ profiler.PrintProfilingResult();
 
 ## NN Model API
 
+> **WARNING**: Refers to stable API in main branch. Needs to be revised for ExecuTorch once support for it
+> is no longer in experimental state.
+
 The Model, which refers to neural network model, is an abstract class wrapping the underlying TensorFlow Lite Micro API.
 It provides methods to perform common operations such as TensorFlow Lite Micro framework initialization, inference
 execution, accessing input, and output tensor objects.
@@ -260,6 +263,9 @@ You can now start filling this function with logic.
 
 ## Implementing custom NN model
 
+> **WARNING**: Refers to stable API in main branch. Needs to be revised for ExecuTorch once support for it
+> is no longer in experimental state.
+
 Before inference could be run with a custom NN model, TensorFlow Lite Micro framework must learn about the operators, or
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
@@ -346,19 +352,19 @@ it:
 
 ```cmake
 # Generate model file
-USER_OPTION(${${use_case}_MODEL_TFLITE_PATH}
+USER_OPTION(${${use_case}_MODEL_PATH}
             "NN model tflite path"
             "Path-to-your-model.tflite"
             FILEPATH)
 
-generate_tflite_code(
-        MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+        MODEL_PATH ${${use_case}_MODEL_PATH}
         DESTINATION ${SRC_GEN_DIR}
         EXPRESSIONS ${EXTRA_MODEL_CODE}
         NAMESPACE   "arm" "app" "hello_world")
 ```
 
-Use the `${use-case}_MODEL_TFLITE_PATH` CMake configuration parameter to include custom model in the generation or
+Use the `${use-case}_MODEL_PATH` CMake configuration parameter to include custom model in the generation or
 compilation process. Please refer to: [Build options](./building.md#build-options) for further information.
 
 For more details on `usecase.cmake`, refer to: [Building options](./building.md#build-options).
@@ -392,9 +398,12 @@ These functions can now be used in the `Model.Init` call.
 
 ## Executing inference
 
+> **WARNING**: Refers to stable API in main branch. Needs to be revised for ExecuTorch once support for it
+> is no longer in experimental state.
+
 To run an inference successfully, you must use:
 
-- A TensorFlow Lite model file,
+- A TensorFlow Lite or the PTE (for ExecuTorch) model file,
 - An extended Model class,
 - A place to add the code to invoke inference,
 - A main loop function,
@@ -411,7 +420,7 @@ images with `generate_images_code` CMake function.
 > generated C++ sources for images store image data as a `uint8` array. For models that were quantized to an `int8` data
 > type, convert the image data to `int8` correctly *before* inference execution. Converting asymmetric data to symmetric
 > data involves positioning the zero value. In other words, subtracting an offset for `uint8` values. Please check the
-> image classification application source for the code example, such as the `ConvertImgToInt8` function.
+> image classification application source for the code example, such as the `ConvertUint8ToInt8` function.
 
 The following code adds inference invocation to the main loop function:
 
@@ -588,7 +597,7 @@ in the root of your use-case. However, the name of the file is not important.
 > the variable name with `${use_case}`, the use-case name, to avoid names collisions with other CMake variables. Here
 > are some useful variable names visible in use-case CMake file:
 >
-> - `DEFAULT_MODEL_PATH` – The default model path to use if use-case specific `${use_case}_MODEL_TFLITE_PATH` is not set
+> - `DEFAULT_MODEL_PATH` – The default model path to use if use-case specific `${use_case}_MODEL_PATH` is not set
 >  in the build arguments.
 >- `TARGET_NAME` – The name of the executable.
 > - `use_case` – The name of the current use-case.
@@ -614,18 +623,18 @@ endif()
 This can be used in subsequent section, for example:
 
 ```cmake
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH "Neural network model in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH "Neural network model in tflite format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )
 
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
     )
 ```
 
-This ensures that the model path pointed to by `${use_case}_MODEL_TFLITE_PATH` is converted to a C++ array and is picked
+This ensures that the model path pointed to by `${use_case}_MODEL_PATH` is converted to a C++ array and is picked
 up by the build system. More information on auto-generations is available under section:
 [Automatic file generation](./building.md#automatic-file-generation).
 

@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021,2023, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,21 @@
  * limitations under the License.
  */
 #include "Classifier.hpp"
+#include "TensorFlowLiteMicro.hpp"
+#include "TflmTensor.hpp"
 
 #include <catch.hpp>
 
-template<typename T>
-void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults, T defaultTensorValue) {
+template <typename T>
+void TestClassifierResult(std::vector<std::pair<uint32_t, T>>& selectedResults,
+                          T defaultTensorValue)
+{
     int dimArray[] = {1, 1001};
     std::vector <std::string> labels(1001);
     std::vector<T> outputVec(1001, defaultTensorValue);
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor     = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
 
     std::vector <arm::app::ClassificationResult> resultVec;
 
@@ -44,14 +48,6 @@ void test_classifier_result(std::vector<std::pair<uint32_t, T>>& selectedResults
 
 TEST_CASE("Common classifier")
 {
-    SECTION("Test invalid classifier")
-    {
-        TfLiteTensor* outputTens = nullptr;
-        std::vector <arm::app::ClassificationResult> resultVec;
-        arm::app::Classifier classifier;
-        REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 5, true));
-    }
-
     SECTION("Test classification results")
     {
         SECTION("uint8") {
@@ -59,7 +55,7 @@ TEST_CASE("Common classifier")
             std::vector<std::pair<uint32_t, uint8_t>> selectedResults {
                     {1000, 10}, {15, 9}, {0, 8}, {20, 7}, {10, 7} };
 
-            test_classifier_result(selectedResults, static_cast<uint8_t>(5));
+            TestClassifierResult(selectedResults, static_cast<uint8_t>(5));
         }
 
         SECTION("int8") {
@@ -67,7 +63,7 @@ TEST_CASE("Common classifier")
             std::vector<std::pair<uint32_t, int8_t>> selectedResults {
                     {1000, 10}, {15, 9}, {0, 8}, {20, -7}, {10, -7} };
 
-            test_classifier_result(selectedResults, static_cast<int8_t>(-100));
+            TestClassifierResult(selectedResults, static_cast<int8_t>(-100));
         }
 
         SECTION("float") {
@@ -75,8 +71,7 @@ TEST_CASE("Common classifier")
             std::vector<std::pair<uint32_t, float>> selectedResults {
                     {1000, 10.9f}, {15, 9.8f}, {0, 8.7f}, {20, -7.0f}, {10, -7.1f} };
 
-            test_classifier_result(selectedResults, -100.0f);
+            TestClassifierResult(selectedResults, -100.0f);
         }
-
     }
 }

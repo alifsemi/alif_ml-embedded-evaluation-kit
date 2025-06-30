@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -71,7 +71,7 @@ namespace app {
     static KWSOutput doKws(ApplicationContext& ctx, const int16_t* audioBuffer, uint32_t nElements)
     {
         auto& profiler                = ctx.Get<Profiler&>("profiler");
-        auto& kwsModel                = ctx.Get<Model&>("kwsModel");
+        auto& kwsModel                = ctx.Get<fwk::iface::Model&>("kwsModel");
         const auto kwsMfccFrameLength = ctx.Get<int>("kwsFrameLength");
         const auto kwsMfccFrameStride = ctx.Get<int>("kwsFrameStride");
         const auto kwsScoreThreshold  = ctx.Get<float>("kwsScoreThreshold");
@@ -80,9 +80,10 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
         constexpr int minTensorDims =
-            static_cast<int>((MicroNetKwsModel::ms_inputRowsIdx > MicroNetKwsModel::ms_inputColsIdx)
-                                 ? MicroNetKwsModel::ms_inputRowsIdx
-                                 : MicroNetKwsModel::ms_inputColsIdx);
+            static_cast<int>((fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx >
+                              fwk::tflm::MicroNetKwsModel::ms_inputColsIdx)
+                                 ? fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx
+                                 : fwk::tflm::MicroNetKwsModel::ms_inputColsIdx);
 
         /* Output struct from doing KWS. */
         KWSOutput output{};
@@ -93,20 +94,22 @@ namespace app {
         }
 
         /* Get Input and Output tensors for pre/post processing. */
-        TfLiteTensor* kwsInputTensor  = kwsModel.GetInputTensor(0);
-        TfLiteTensor* kwsOutputTensor = kwsModel.GetOutputTensor(0);
-        if (!kwsInputTensor->dims) {
+        auto kwsInputTensor            = kwsModel.GetInputTensor(0);
+        auto kwsOutputTensor           = kwsModel.GetOutputTensor(0);
+        const auto kwsInputTensorShape = kwsInputTensor->Shape();
+        if (kwsInputTensorShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return output;
-        } else if (kwsInputTensor->dims->size < minTensorDims) {
+        } else if (kwsInputTensorShape.size() < minTensorDims) {
             printf_err("Input tensor dimension should be >= %d\n", minTensorDims);
             return output;
         }
 
         /* Get input shape for feature extraction. */
-        TfLiteIntArray* inputShape     = kwsModel.GetInputShape(0);
-        const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
-        const uint32_t numMfccFrames   = inputShape->data[MicroNetKwsModel::ms_inputRowsIdx];
+        const uint32_t numMfccFeatures =
+            kwsInputTensorShape[fwk::tflm::MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFrames =
+            kwsInputTensorShape[fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx];
 
         /* We expect to be sampling 1 second worth of data at a time
          * NOTE: This is only used for time stamp calculation. */
@@ -210,7 +213,7 @@ namespace app {
      **/
     static bool doAsr(ApplicationContext& ctx, const KWSOutput& kwsOutput)
     {
-        auto& asrModel          = ctx.Get<Model&>("asrModel");
+        auto& asrModel          = ctx.Get<fwk::iface::Model&>("asrModel");
         auto& profiler          = ctx.Get<Profiler&>("profiler");
         auto asrMfccFrameLen    = ctx.Get<uint32_t>("asrFrameLength");
         auto asrMfccFrameStride = ctx.Get<uint32_t>("asrFrameStride");
@@ -228,14 +231,15 @@ namespace app {
         hal_lcd_clear(COLOR_BLACK);
 
         /* Get Input and Output tensors for pre/post processing. */
-        TfLiteTensor* asrInputTensor  = asrModel.GetInputTensor(0);
-        TfLiteTensor* asrOutputTensor = asrModel.GetOutputTensor(0);
+        auto asrInputTensor  = asrModel.GetInputTensor(0);
+        auto asrOutputTensor = asrModel.GetOutputTensor(0);
 
         /* Get input shape. Dimensions of the tensor should have been verified by
          * the callee. */
-        TfLiteIntArray* inputShape = asrModel.GetInputShape(0);
+        auto inputShape = asrModel.GetInputShape(0);
 
-        const uint32_t asrInputRows = asrInputTensor->dims->data[Wav2LetterModel::ms_inputRowsIdx];
+        const uint32_t asrInputRows =
+            asrInputTensor->Shape()[fwk::tflm::Wav2LetterModel::ms_inputRowsIdx];
         const uint32_t asrInputInnerLen = asrInputRows - (2 * asrInputCtxLen);
 
         /* Make sure the input tensor supports the above context and inner lengths. */
@@ -284,21 +288,20 @@ namespace app {
         /* Set up pre and post-processing objects. */
         AsrPreProcess asrPreProcess =
             AsrPreProcess(asrInputTensor,
-                          arm::app::Wav2LetterModel::ms_numMfccFeatures,
-                          inputShape->data[Wav2LetterModel::ms_inputRowsIdx],
+                          fwk::tflm::Wav2LetterModel::ms_numMfccFeatures,
+                          inputShape[fwk::tflm::Wav2LetterModel::ms_inputRowsIdx],
                           asrMfccFrameLen,
                           asrMfccFrameStride);
 
         std::vector<ClassificationResult> singleInfResult;
-        const uint32_t outputCtxLen = AsrPostProcess::GetOutputContextLen(asrModel, asrInputCtxLen);
         AsrPostProcess asrPostProcess =
-            AsrPostProcess(asrOutputTensor,
+            AsrPostProcess(asrModel,
                            ctx.Get<AsrClassifier&>("asrClassifier"),
                            ctx.Get<std::vector<std::string>&>("asrLabels"),
                            singleInfResult,
-                           outputCtxLen,
-                           Wav2LetterModel::ms_blankTokenIdx,
-                           Wav2LetterModel::ms_outputRowsIdx);
+                           asrInputCtxLen,
+                           fwk::tflm::Wav2LetterModel::ms_blankTokenIdx,
+                           fwk::tflm::Wav2LetterModel::ms_outputRowsIdx);
         /* Start sliding through audio clip. */
         while (audioDataSlider.HasNext()) {
 
@@ -349,8 +352,9 @@ namespace app {
                                asrScoreThreshold));
 
 #if VERIFY_TEST_OUTPUT
-            armDumpTensor(asrOutputTensor,
-                          asrOutputTensor->dims->data[Wav2LetterModel::ms_outputColsIdx]);
+            armDumpTensor(
+                asrOutputTensor,
+                asrOutputTensor->dims->data[fwk::tflm::Wav2LetterModel::ms_outputColsIdx]);
 #endif /* VERIFY_TEST_OUTPUT */
 
             /* Erase */

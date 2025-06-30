@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,26 +25,30 @@
 
 namespace arm {
 namespace app {
-    static uint8_t  tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+
     namespace asr {
         extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
     } /* namespace asr */
+
 } /* namespace app */
 } /* namespace arm */
 
 /** @brief   Verify input and output tensor are of certain min dimensions. */
-static bool VerifyTensorDimensions(const arm::app::Model& model);
+static bool VerifyTensorDimensions(const arm::app::fwk::iface::Model& model);
 
 void MainLoop()
 {
-    arm::app::Wav2LetterModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::Wav2LetterModel model; /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::asr::GetModelPointer(),
+                                                arm::app::asr::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::asr::GetModelPointer(),
-                    arm::app::asr::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     } else if (!VerifyTensorDimensions(model)) {
@@ -56,11 +60,16 @@ void MainLoop()
     arm::app::ApplicationContext caseContext;
     std::vector <std::string> labels;
     GetLabelsVector(labels);
-    arm::app::AsrClassifier classifier;  /* Classifier wrapper object. */
+
+    arm::app::AsrClassifier classifier{
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* Classifier wrapper object. */
 
     arm::app::Profiler profiler{"asr"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<uint32_t>("frameLength", arm::app::asr::g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", arm::app::asr::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::asr::g_ScoreThreshold);  /* Score threshold. */
@@ -73,23 +82,26 @@ void MainLoop()
         executionSuccessful ? "successfully" : "with failure");
 }
 
-static bool VerifyTensorDimensions(const arm::app::Model& model)
+static bool VerifyTensorDimensions(const arm::app::fwk::iface::Model& model)
 {
     /* Populate tensor related parameters. */
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
-    if (!inputTensor->dims) {
+    auto inputTensor = model.GetInputTensor(0);
+    if (inputTensor->Shape().empty()) {
         printf_err("Invalid input tensor dims\n");
         return false;
-    } else if (inputTensor->dims->size < 3) {
+    }
+    if (inputTensor->Shape().size() < 3) {
         printf_err("Input tensor dimension should be >= 3\n");
         return false;
     }
 
-    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-    if (!outputTensor->dims) {
+    auto outputTensor = model.GetOutputTensor(0);
+    if (outputTensor->Shape().empty()) {
         printf_err("Invalid output tensor dims\n");
         return false;
-    } else if (outputTensor->dims->size < 3) {
+    }
+
+    if (outputTensor->Shape().size() < 3) {
         printf_err("Output tensor dimension should be >= 3\n");
         return false;
     }

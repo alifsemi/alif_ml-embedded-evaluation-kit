@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,15 +34,17 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   inputTensor     Pointer to the TFLite Micro input Tensor.
+         * @param[in]   inputTensor     Shared pointer representing a tensor interface object.
          * @param[in]   rgb2Gray        Convert image from 3 channel RGB to 1 channel grayscale.
          * @param[in]   convertToInt8   Convert the image from uint8 to int8 range.
          **/
-        explicit DetectorPreProcess(TfLiteTensor* inputTensor, bool rgb2Gray, bool convertToInt8);
+        explicit DetectorPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                    bool rgb2Gray,
+                                    bool convertToInt8);
 
         /**
          * @brief       Should perform pre-processing of 'raw' input image data and load it into
-         *              TFLite Micro input tensor ready for inference
+         *              input tensor ready for inference.
          * @param[in]   input      Pointer to the data that pre-processing will work on.
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
@@ -49,7 +52,7 @@ namespace app {
         bool DoPreProcess(const void* input, size_t inputSize) override;
 
     private:
-        TfLiteTensor* m_inputTensor;
+        std::shared_ptr<fwk::iface::TensorIface> m_inputTensor;
         bool m_rgb2Gray;
         bool m_convertToInt8;
     };

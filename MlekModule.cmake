@@ -69,11 +69,16 @@ message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 
 # Make sure the following options are defined before proceeding.
 assert_defined(LOG_LEVEL)
-assert_defined(TENSORFLOW_SRC_PATH)
 assert_defined(TARGET_PLATFORM)
 assert_defined(USE_CASE_BUILD)
 assert_defined(CPU_PROFILE_ENABLED)
 assert_defined(CMAKE_TOOLCHAIN_FILE)
+
+if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+    assert_defined(EXECUTORCH_SRC_PATH)
+elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+    assert_defined(TENSORFLOW_SRC_PATH)
+endif()
 
 # Explicit policy definitions.
 if(POLICY CMP0123)

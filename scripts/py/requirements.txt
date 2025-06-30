@@ -3,11 +3,11 @@ cmake==3.30.5
 flatbuffers==24.3.25
 importlib_metadata==8.5.0
 Jinja2==3.1.6
-llvmlite==0.43.0
+llvmlite==0.44.0
 lxml==5.3.0
 MarkupSafe==3.0.2
-numba==0.60.0
-numpy==1.26.4
+numba==0.61.2
+numpy==2.2.6
 pillow==11.0.0
 pycparser==2.22
 resampy==0.4.3

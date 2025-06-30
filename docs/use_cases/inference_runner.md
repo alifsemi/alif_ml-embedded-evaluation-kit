@@ -32,6 +32,8 @@ then performed. Profiling results are then displayed in the console.
 The example use-case code can be found in the following directory:
 [source/use_case/inference_runner](../../source/use_case/inference_runner).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Prerequisites
 
 See [Prerequisites](../documentation.md#prerequisites)
@@ -43,7 +45,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Inference Runner use-case adds the
 following:
 
-- `inference_runner_MODEL_TFLITE_PATH` - The path to the NN model file in the `TFLite` format. The model is then
+- `inference_runner_MODEL_PATH` - The path to the NN model file in the `TFLite` format. The model is then
   processed and included in the application `axf` file. The default value points to one of the delivered set of models.
 
   Note that the parameters `TARGET_PLATFORM` and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. In other
@@ -139,32 +141,32 @@ The `bin` folder contains the following files:
 ### Add custom model
 
 The application performs inference using the model pointed to by the CMake parameter
-`inference_runner_MODEL_TFLITE_PATH`.
+`inference_runner_MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
 
 For further information: [Optimize model with Vela compiler](../sections/building.md#Optimize-custom-model-with-Vela-compiler).
 
-Then, you must set `inference_runner_MODEL_TFLITE_PATH` to the location of the Vela processed model file.
+Then, you must set `inference_runner_MODEL_PATH` to the location of the Vela processed model file.
 
 An example:
 
 ```commandline
 cmake .. \
-  -Dinference_runner_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+  -Dinference_runner_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
   -DUSE_CASE_BUILD=inference_runner
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `inference_runner_MODEL_TFLITE_PATH` is converted to C++ files during the CMake
+The `.tflite` model file pointed to by `inference_runner_MODEL_PATH` is converted to C++ files during the CMake
 configuration stage. It is then compiled into the application for performing inference with.
 
 The log from the configuration stage tells you what model path and labels file have been used, for example:
 
 ```stdout
--- User option inference_runner_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option inference_runner_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- Using <path/to/custom_model_after_vela.tflite>
 ++ Converting custom_model_after_vela.tflite to\

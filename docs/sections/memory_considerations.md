@@ -26,8 +26,8 @@ frequent read and write traffic.
 
 The second interface is expected to have a higher-latency, lower-bandwidth characteristic, and is typically wired to a
 flash device servicing read-only traffic. In this configuration, the Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU
-read the contents of the neural network model, or the `.tflite` file, from the flash memory region. With the Arm®
-*Ethos™-U* NPU requesting these read transactions over its second AXI bus.
+read the contents of the neural network model from the flash memory region. With the Arm® *Ethos™-U* NPU requesting
+these read transactions over its second AXI bus.
 
 The input and output tensors, along with any intermediate computation buffers, are placed on SRAM. Therefore, both the
 Arm® *Cortex™-M55* CPU and Arm® *Ethos™-U* NPU would be reading, or writing, to this region when running an inference.

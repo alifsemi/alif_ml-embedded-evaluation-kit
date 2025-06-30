@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,18 +35,18 @@ namespace app {
     public:
         /**
          * @brief           Constructor
-         * @param[in]       inputTensor        Pointer to the TFLite Micro input Tensor.
+         * @param[in]       inputTensor        Shared pointer representing a tensor interface object.
          * @param[in/out]   featureProcessor   RNNoise specific feature extractor object.
          * @param[in/out]   frameFeatures      RNNoise specific features shared between pre & post-processing.
          *
          **/
-        explicit RNNoisePreProcess(TfLiteTensor* inputTensor,
+        explicit RNNoisePreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
                                    std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
                                    std::shared_ptr<rnn::FrameFeatures> frameFeatures);
 
         /**
          * @brief       Should perform pre-processing of 'raw' input audio data and load it into
-         *              TFLite Micro input tensors ready for inference
+         *              input tensors ready for inference
          * @param[in]   input      Pointer to the data that pre-processing will work on.
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
@@ -53,7 +54,7 @@ namespace app {
         bool DoPreProcess(const void* input, size_t inputSize) override;
 
     private:
-        TfLiteTensor* m_inputTensor;                        /* Model input tensor. */
+        std::shared_ptr<fwk::iface::TensorIface> m_inputTensor; /* Model input tensor. */
         std::shared_ptr<rnn::RNNoiseFeatureProcessor> m_featureProcessor;   /* RNNoise feature processor shared between pre & post-processing. */
         std::shared_ptr<rnn::FrameFeatures> m_frameFeatures;                /* RNNoise features shared between pre & post-processing. */
         rnn::vec1D32F m_audioFrame;                         /* Audio frame cast to FP32 */
@@ -63,11 +64,12 @@ namespace app {
          * @param[in]        inputFeatures   Vector of floating point features to quantize.
          * @param[in]        quantScale      Quantization scale for the inputTensor.
          * @param[in]        quantOffset     Quantization offset for the inputTensor.
-         * @param[in,out]    inputTensor     TFLite micro tensor to populate.
+         * @param[in,out]    inputTensor     Tensor to populate.
          **/
         static void QuantizeAndPopulateInput(rnn::vec1D32F& inputFeatures,
-                float quantScale, int quantOffset,
-                TfLiteTensor* inputTensor);
+                                             float quantScale,
+                                             int quantOffset,
+                                             std::shared_ptr<fwk::iface::TensorIface> inputTensor);
     };
 
     /**
@@ -80,12 +82,12 @@ namespace app {
     public:
         /**
          * @brief           Constructor
-         * @param[in]       outputTensor         Pointer to the TFLite Micro output Tensor.
+         * @param[in]       outputTensor         Shared pointer representing a tensor interface object
          * @param[out]      denoisedAudioFrame   Vector to store the final denoised audio frame.
          * @param[in/out]   featureProcessor     RNNoise specific feature extractor object.
          * @param[in/out]   frameFeatures        RNNoise specific features shared between pre & post-processing.
          **/
-        RNNoisePostProcess(TfLiteTensor* outputTensor,
+        RNNoisePostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
                            std::vector<int16_t>& denoisedAudioFrame,
                            std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
                            std::shared_ptr<rnn::FrameFeatures> frameFeatures);
@@ -98,7 +100,7 @@ namespace app {
         bool DoPostProcess() override;
 
     private:
-        TfLiteTensor* m_outputTensor;                       /* Model output tensor. */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor; /* Model output tensor. */
         std::vector<int16_t>& m_denoisedAudioFrame;         /* Vector to store the final denoised frame. */
         rnn::vec1D32F m_denoisedAudioFrameFloat;            /* Internal vector to store the final denoised frame (FP32). */
         std::shared_ptr<rnn::RNNoiseFeatureProcessor> m_featureProcessor;   /* RNNoise feature processor shared between pre & post-processing. */

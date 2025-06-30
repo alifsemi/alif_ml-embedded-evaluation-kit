@@ -31,7 +31,7 @@ namespace app {
     bool ClassifyImageHandler(ApplicationContext& ctx)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
-        auto& model    = ctx.Get<Model&>("model");
+        auto& model    = ctx.Get<fwk::iface::Model&>("model");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
         constexpr uint32_t dataPsnImgStartX          = 10;
@@ -45,22 +45,24 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor      = model.GetInputTensor(0);
+        auto outputTensor     = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 4) {
+        } else if (inputShape.size() < 4) {
             printf_err("Input tensor dimension should be = 4\n");
             return false;
         }
 
         /* Get input shape for displaying the image. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols = inputShape->data[arm::app::VisualWakeWordModel::ms_inputColsIdx];
-        const uint32_t nRows = inputShape->data[arm::app::VisualWakeWordModel::ms_inputRowsIdx];
-        if (arm::app::VisualWakeWordModel::ms_inputChannelsIdx >=
-            static_cast<uint32_t>(inputShape->size)) {
+        const uint32_t nCols =
+            inputShape[arm::app::fwk::tflm::VisualWakeWordModel::ms_inputColsIdx];
+        const uint32_t nRows =
+            inputShape[arm::app::fwk::tflm::VisualWakeWordModel::ms_inputRowsIdx];
+        if (arm::app::fwk::tflm::VisualWakeWordModel::ms_inputChannelsIdx >=
+            static_cast<uint32_t>(inputShape.size())) {
             printf_err("Invalid channel index.\n");
             return false;
         }
@@ -117,7 +119,7 @@ namespace app {
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             const size_t imgSz =
-                inputTensor->bytes < capturedFrameSize ? inputTensor->bytes : capturedFrameSize;
+                inputTensor->Bytes() < capturedFrameSize ? inputTensor->Bytes() : capturedFrameSize;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(imgSrc, imgSz)) {

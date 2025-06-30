@@ -23,7 +23,8 @@
 
 namespace arm {
 namespace app {
-    bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results)
+
+    bool PresentInferenceResult(const std::vector<ClassificationResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 150;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -65,7 +66,7 @@ namespace app {
         return true;
     }
 
-    bool RunInference(arm::app::Model& model, Profiler& profiler)
+    bool RunInference(fwk::iface::Model& model, Profiler& profiler)
     {
         profiler.StartProfiling("Inference");
         bool runInf = model.RunInference();

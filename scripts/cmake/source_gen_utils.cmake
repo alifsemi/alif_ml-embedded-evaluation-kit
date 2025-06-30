@@ -83,7 +83,7 @@ endfunction()
 # @param[in]    NAMESPACE       model name space
 # NOTE: Uses python
 ##############################################################################
-function(generate_tflite_code)
+function(generate_model_code)
 
     set(multiValueArgs EXPRESSIONS NAMESPACE)
     set(oneValueArgs MODEL_PATH DESTINATION)

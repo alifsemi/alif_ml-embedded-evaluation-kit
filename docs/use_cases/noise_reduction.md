@@ -24,6 +24,8 @@ example.
 
 Use case code is stored in the following directory: [source/use_case/noise_reduction](../../source/use_case/noise_reduction).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ## How the default neural network model works
 
 Instead of replicating a "noisy audio in" and "clean audio out" problem, a simpler version is
@@ -140,7 +142,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, keyword spotting use
 case adds:
 
-- `noise_reduction_MODEL_TFLITE_PATH` - The path to the NN model file in *TFLite* format. The model
+- `noise_reduction_MODEL_PATH` - The path to the NN model file in *TFLite* format. The model
   is processed and is included in the application axf file. The default value points to one of the
   delivered set of models. Note that the parameter
   `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. Therefore:
@@ -266,7 +268,7 @@ cmake .. \
 ### Add custom model
 
 The application performs inference using the model pointed to by the CMake parameter
-`noise_reduction_MODEL_TFLITE_PATH`.
+`noise_reduction_MODEL_PATH`.
 
 > **Note:** If you want to run the model using *Ethos-U* ensure that your custom model has been
 > run through the Vela compiler successfully before continuing.
@@ -277,7 +279,7 @@ An example:
 
 ```commandline
 cmake .. \
-    -Dnoise_reduction_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dnoise_reduction_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -DUSE_CASE_BUILD=noise_reduction
 ```
 
@@ -287,14 +289,14 @@ cmake .. \
 >
 > **Note:** Before re-running the CMake command, clean the build directory.
 
-The `.tflite` model file, which is pointed to by `noise_reduction_MODEL_TFLITE_PATH`, is converted
+The `.tflite` model file, which is pointed to by `noise_reduction_MODEL_PATH`, is converted
 to C++ files during the CMake configuration stage. It is then compiled into the application for
 performing inference with.
 
 To see which model path was used, inspect the configuration stage log:
 
 ```log
--- User option noise_reduction_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option noise_reduction_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- Using <path/to/custom_model_after_vela.tflite>
 ++ Converting custom_model_after_vela.tflite to custom_model_after_vela.tflite.cc
@@ -350,133 +352,9 @@ includes error log entries containing information about the pre-built applicatio
 TensorFlow Lite Micro library version used, and the data type. As well as the input and output
 tensor sizes of the model that was compiled into the executable binary.
 
-After the application has started, if `noise_reduction_FILE_PATH` pointed to a single file (or a
-folder containing a single input file), then the inference starts immediately. If multiple inputs
-are chosen, then a menu is output and waits for the user input from telnet terminal.
-
-For example:
-
-```log
-User input required
-Enter option number from:
-
-  1. Run noise reduction on the next WAV
-  2. Run noise reduction on a WAV at chosen index
-  3. Run noise reduction on all WAVs
-  4. Show NN model info
-  5. List audio clips
-
-Choice:
-```
-
-1. “Run noise reduction on the next WAV”: Runs processing and inference on the next in line WAV file.
-
-    > **Note:** Depending on the size of the input WAV file, multiple inferences can be invoked.
-
-2. “Run noise reduction on a WAV at chosen index”: Runs processing and inference on the WAV file
-   corresponding to the chosen index.
-
-    > **Note:** Select the index in the range of supplied WAVs during application build. By default,
-    the pre-built application has three files and indexes from 0-2.
-
-3. “Run noise reduction on all WAVs”: Triggers sequential processing and inference executions on
-   all baked-in WAV files.
-
-4. “Show NN model info”: Prints information about the model data type, including the input and
-   output tensor sizes. For example:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 42 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:  42
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.221501
-    INFO - ZeroPoint[0] = 14
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 24 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:  24
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007843
-    INFO - ZeroPoint[0] = -1
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 48 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:  48
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.047942
-    INFO - ZeroPoint[0] = -128
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 96 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:  96
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007843
-    INFO - ZeroPoint[0] = -1
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 96 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:  96
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007843
-    INFO - ZeroPoint[0] = -1
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 22 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:  22
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 48 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:  48
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.047942
-    INFO - ZeroPoint[0] = -128
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 24 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:  24
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007843
-    INFO - ZeroPoint[0] = -1
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 1 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   1
-    INFO -          2:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 1940
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-    INFO - Use of Arm uNPU is enabled
-    ```
-
-5. “List audio clips”: Prints a list of pair audio indexes. The original filenames are embedded in
-    the application. For example:
-
-    ```log
-    INFO - List of Files:
-    INFO -  0 => p232_113.wav
-    INFO -  1 => p232_208.wav
-    INFO -  2 => p257_031.wav
-    ```
+After the application has started inferences are executed on inputs from `noise_reduction_FILE_PATH`
 
 ### Running Noise Reduction
-
-Selecting the first option runs inference on the first file.
 
 The following example illustrates an application output:
 

@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021,2023, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,16 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-bool RunInference(arm::app::Model& model, std::vector<int8_t> vec,
-                    const size_t sizeRequired, const size_t dataInputIndex)
+bool RunInference(arm::app::fwk::iface::Model& model,
+                  std::vector<int8_t> vec,
+                  const size_t sizeRequired,
+                  const size_t dataInputIndex)
 {
-    TfLiteTensor* inputTensor = model.GetInputTensor(dataInputIndex);
+    auto inputTensor = model.GetInputTensor(dataInputIndex);
     REQUIRE(inputTensor);
-    size_t copySz = inputTensor->bytes < sizeRequired ? inputTensor->bytes : sizeRequired;
+    size_t copySz = inputTensor->Bytes() < sizeRequired ? inputTensor->Bytes() : sizeRequired;
     const int8_t* vecData = vec.data();
-    memcpy(inputTensor->data.data, vecData, copySz);
+    memcpy(inputTensor->GetData(), vecData, copySz);
     return model.RunInference();
 }
 
@@ -55,13 +57,13 @@ void genRandom(size_t bytes, std::vector<int8_t>& randomAudio)
     std::generate(std::begin(randomAudio), std::end(randomAudio), gen);
 }
 
-bool RunInferenceRandom(arm::app::Model& model, const size_t dataInputIndex)
+bool RunInferenceRandom(arm::app::fwk::iface::Model& model, const size_t dataInputIndex)
 {
     std::array<size_t, 4> inputSizes = {IFM_0_DATA_SIZE, IFM_1_DATA_SIZE, IFM_2_DATA_SIZE, IFM_3_DATA_SIZE};
     std::vector<int8_t> randomAudio;
-    TfLiteTensor* inputTensor = model.GetInputTensor(dataInputIndex);
+    auto inputTensor = model.GetInputTensor(dataInputIndex);
     REQUIRE(inputTensor);
-    genRandom(inputTensor->bytes, randomAudio);
+    genRandom(inputTensor->Bytes(), randomAudio);
 
     REQUIRE(RunInference(model, randomAudio, inputSizes[dataInputIndex], dataInputIndex));
     return true;
@@ -69,56 +71,58 @@ bool RunInferenceRandom(arm::app::Model& model, const size_t dataInputIndex)
 
 TEST_CASE("Running random inference with TensorFlow Lite Micro and RNNoiseModel Int8", "[RNNoise]")
 {
-    arm::app::RNNoiseModel model{};
-
+    arm::app::fwk::tflm::RNNoiseModel model; /* Model wrapper object. */
     REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::rnn::GetModelPointer(),
-                       arm::app::rnn::GetModelLen()));
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                arm::app::rnn::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
     REQUIRE(model.IsInited());
 
     model.ResetGruState();
 
     for (int i = 1; i < 4; i++ ) {
-        TfLiteTensor* inputGruStateTensor = model.GetInputTensor(i);
-        auto* inputGruState = tflite::GetTensorData<int8_t>(inputGruStateTensor);
-        for (size_t tIndex = 0;  tIndex < inputGruStateTensor->bytes; tIndex++) {
-            REQUIRE(inputGruState[tIndex] == arm::app::GetTensorQuantParams(inputGruStateTensor).offset);
+        auto inputGruStateTensor = model.GetInputTensor(i);
+        auto* inputGruState      = inputGruStateTensor->GetData<int8_t>();
+        for (size_t tIndex = 0; tIndex < inputGruStateTensor->Bytes(); tIndex++) {
+            REQUIRE(inputGruState[tIndex] == inputGruStateTensor->GetQuantParams().offset);
         }
     }
 
     REQUIRE(RunInferenceRandom(model, 0));
 }
 
-class TestRNNoiseModel : public arm::app::RNNoiseModel
-{
+class TestRNNoiseModel : public arm::app::fwk::tflm::RNNoiseModel {
 public:
     bool CopyGruStatesTest() {
-        return RNNoiseModel::CopyGruStates();
+        return this->CopyGruStates();
     }
 
     std::vector<std::pair<size_t, size_t>> GetStateMap() {
-        return  m_gruStateMap;
+        return m_gruStateMap;
     }
-
 };
 
 /* This is true for gcc x86 platform, not guaranteed for other compilers and platforms. */
 TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
 {
     TestRNNoiseModel model{};
-    model.Init(arm::app::tensorArena,
-               sizeof(arm::app::tensorArena),
-               arm::app::rnn::GetModelPointer(),
-               arm::app::rnn::GetModelLen());
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                arm::app::rnn::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+
+    /* Load the model. */
+    REQUIRE(model.Init(computeMem, modelMem));
+    REQUIRE(model.IsInited());
 
     auto map = model.GetStateMap();
     for(auto& mapping: map) {
-        TfLiteTensor* gruOut = model.GetOutputTensor(mapping.first);
-        auto* outGruState = tflite::GetTensorData<uint8_t>(gruOut);
+        auto gruOut       = model.GetOutputTensor(mapping.first);
+        auto* outGruState = gruOut->GetData<uint8_t>();
 
-        for (size_t tIndex = 0;  tIndex < gruOut->bytes; tIndex++) {
+        for (size_t tIndex = 0; tIndex < gruOut->Bytes(); tIndex++) {
             REQUIRE(outGruState[tIndex] == 0);
         }
     }
@@ -128,10 +132,13 @@ TEST_CASE("Test initial GRU out state is 0", "[RNNoise]")
 TEST_CASE("Test GRU state copy", "[RNNoise]")
 {
     TestRNNoiseModel model{};
-    model.Init(arm::app::tensorArena,
-               sizeof(arm::app::tensorArena),
-               arm::app::rnn::GetModelPointer(),
-               arm::app::rnn::GetModelLen());
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                arm::app::rnn::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+
+    /* Load the model. */
+    REQUIRE(model.Init(computeMem, modelMem));
     REQUIRE(RunInferenceRandom(model, 0));
 
     auto map = model.GetStateMap();
@@ -139,23 +146,22 @@ TEST_CASE("Test GRU state copy", "[RNNoise]")
     std::vector<std::vector<uint8_t>> oldStates;
     for(auto& mapping: map) {
 
-        TfLiteTensor* gruOut = model.GetOutputTensor(mapping.first);
-        auto* outGruState = tflite::GetTensorData<uint8_t>(gruOut);
+        auto gruOut       = model.GetOutputTensor(mapping.first);
+        auto* outGruState = gruOut->GetData<uint8_t>();
         /* Save old output state. */
-        std::vector<uint8_t> oldState(gruOut->bytes);
-        memcpy(oldState.data(), outGruState, gruOut->bytes);
+        std::vector<uint8_t> oldState(gruOut->Bytes());
+        memcpy(oldState.data(), outGruState, gruOut->Bytes());
         oldStates.push_back(oldState);
     }
 
     model.CopyGruStatesTest();
     auto statesIter = oldStates.begin();
     for(auto& mapping: map) {
-        TfLiteTensor* gruInput = model.GetInputTensor(mapping.second);
-        auto* inGruState = tflite::GetTensorData<uint8_t>(gruInput);
-        for (size_t tIndex = 0;  tIndex < gruInput->bytes; tIndex++) {
+        auto gruInput    = model.GetInputTensor(mapping.second);
+        auto* inGruState = gruInput->GetData<uint8_t>();
+        for (size_t tIndex = 0; tIndex < gruInput->Bytes(); tIndex++) {
             REQUIRE((*statesIter)[tIndex] == inGruState[tIndex]);
         }
         statesIter++;
     }
-
 }

@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,10 @@
  * limitations under the License.
  */
 #include "AsrClassifier.hpp"
+#include "TflmTensor.hpp"
 #include "Wav2LetterModel.hpp"
 
 #include <catch.hpp>
-
-TEST_CASE("Test invalid classifier")
-{
-    TfLiteTensor* outputTens = nullptr;
-    std::vector <arm::app::ClassificationResult> resultVec;
-    arm::app::AsrClassifier classifier;
-
-    REQUIRE(!classifier.GetClassificationResults(outputTens, resultVec, {}, 1));
-}
-
 
 TEST_CASE("Test valid classifier UINT8") {
     int dimArray[] = {4, 1, 1, 246, 29};
@@ -36,9 +27,13 @@ TEST_CASE("Test valid classifier UINT8") {
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
                                 outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
     std::vector <arm::app::ClassificationResult> resultVec;
-    arm::app::AsrClassifier classifier;
+    arm::app::AsrClassifier classifier{
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* classifier */
 
     REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 1));
     REQUIRE(246 == resultVec.size());
@@ -52,7 +47,7 @@ TEST_CASE("Get classification results") {
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor tfTensor = tflite::testing::CreateQuantizedTensor(
                                 outputVec.data(), dims, 1, 0);
-    TfLiteTensor* outputTensor = &tfTensor;
+    auto outputTensor = std::make_shared<arm::app::fwk::tflm::TflmTensor>(&tfTensor);
 
     std::vector <arm::app::ClassificationResult> resultVec(10);
 
@@ -74,7 +69,8 @@ TEST_CASE("Get classification results") {
         {9, {1, 10}}
     };
 
-    const uint32_t nCols = outputTensor->dims->data[arm::app::Wav2LetterModel::ms_outputColsIdx];
+    const uint32_t nCols =
+        outputTensor->Shape()[arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx];
     for (size_t i = 0; i < selectedResults.size(); ++i) {
         uint32_t rIndex = selectedResults[i].first;
         uint32_t cIndex = selectedResults[i].second.first;
@@ -82,7 +78,11 @@ TEST_CASE("Get classification results") {
         outputVec[rIndex * nCols + cIndex] = value;
     }
 
-    arm::app::AsrClassifier classifier;
+    arm::app::AsrClassifier classifier{
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* classifier */
 
     REQUIRE(classifier.GetClassificationResults(outputTensor, resultVec, labels, 1));
     REQUIRE(resultVec[0].m_labelIdx == 3);

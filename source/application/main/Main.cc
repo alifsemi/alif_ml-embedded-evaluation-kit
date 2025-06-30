@@ -22,7 +22,6 @@
 
 #include "hal.h"                    /* our hardware abstraction api */
 #include "log_macros.h"
-#include "TensorFlowLiteMicro.hpp"  /* our inference logic api */
 
 #include <cstdio>
 
@@ -47,9 +46,6 @@ int main ()
     if (hal_platform_init()) {
         /* Application information, UART should have been initialised. */
         PrintApplicationIntro();
-
-        /* Enable TensorFlow Lite Micro logging. */
-        EnableTFLMLog();
 
         /* Run the application. */
         MainLoop();

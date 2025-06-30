@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #define KWS_CLASSIFIER_HPP
 
 #include "ClassificationResult.hpp"
-#include "TensorFlowLiteMicro.hpp"
 #include "Classifier.hpp"
+#include "Tensor.hpp"
 
 #include <vector>
 
@@ -47,15 +47,18 @@ namespace app {
          * @return          true if successful, false otherwise.
          **/
          using Classifier::GetClassificationResults;  /* We are overloading not overriding. */
-         bool GetClassificationResults(TfLiteTensor* outputTensor, std::vector<ClassificationResult>& vecResults,
-                 const std::vector <std::string>& labels, uint32_t topNCount,
-                 bool use_softmax, std::vector<std::vector<float>>& resultHistory);
+         bool GetClassificationResults(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                                       std::vector<ClassificationResult>& vecResults,
+                                       const std::vector<std::string>& labels,
+                                       uint32_t topNCount,
+                                       bool use_softmax,
+                                       std::vector<std::vector<float>>& resultHistory);
 
-        /**
-         * @brief        Average the given history of results.
-         * @param[in]    resultHistory   The history of results to take on average of.
-         * @param[out]   averageResult   The calculated average.
-         **/
+         /**
+          * @brief        Average the given history of results.
+          * @param[in]    resultHistory   The history of results to take on average of.
+          * @param[out]   averageResult   The calculated average.
+          **/
          static void AveragResults(const std::vector<std::vector<float>>& resultHistory,
                  std::vector<float>& averageResult);
     };

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,89 +32,96 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-using namespace test;
+namespace test {
+namespace kws {
 
-bool RunInference(arm::app::Model& model, const int8_t vec[])
-{
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
-    REQUIRE(inputTensor);
+    bool RunInference(arm::app::fwk::iface::Model& model, const int8_t vec[])
+    {
+        auto inputTensor = model.GetInputTensor(0);
+        REQUIRE(inputTensor);
 
-    const size_t copySz =
-        inputTensor->bytes < IFM_0_DATA_SIZE ? inputTensor->bytes : IFM_0_DATA_SIZE;
-    memcpy(inputTensor->data.data, vec, copySz);
+        const size_t copySz =
+            inputTensor->Bytes() < IFM_0_DATA_SIZE ? inputTensor->Bytes() : IFM_0_DATA_SIZE;
+        memcpy(inputTensor->GetData(), vec, copySz);
 
-    return model.RunInference();
-}
-
-bool RunInferenceRandom(arm::app::Model& model)
-{
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
-    REQUIRE(inputTensor);
-
-    std::random_device rndDevice;
-    std::mt19937 mersenneGen{rndDevice()};
-    std::uniform_int_distribution<short> dist{-128, 127};
-
-    auto gen = [&dist, &mersenneGen]() { return dist(mersenneGen); };
-
-    std::vector<int8_t> randomAudio(inputTensor->bytes);
-    std::generate(std::begin(randomAudio), std::end(randomAudio), gen);
-
-    REQUIRE(RunInference(model, randomAudio.data()));
-    return true;
-}
-
-template <typename T>
-void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::Model& model)
-{
-    REQUIRE(RunInference(model, input_goldenFV));
-
-    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-
-    REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
-    auto tensorData = tflite::GetTensorData<T>(outputTensor);
-    REQUIRE(tensorData);
-
-    for (size_t i = 0; i < outputTensor->bytes; i++) {
-        REQUIRE(static_cast<int>(tensorData[i]) == static_cast<int>(((T)output_goldenFV[i])));
+        return model.RunInference();
     }
-}
 
-TEST_CASE("Running random inference with TensorFlow Lite Micro and MicroNetKwsModel Int8",
-          "[MicroNetKws]")
-{
-    arm::app::MicroNetKwsModel model{};
+    bool RunInferenceRandom(arm::app::fwk::iface::Model& model)
+    {
+        auto inputTensor = model.GetInputTensor(0);
+        REQUIRE(inputTensor);
 
-    REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::kws::GetModelPointer(),
-                       arm::app::kws::GetModelLen()));
-    REQUIRE(model.IsInited());
+        std::random_device rndDevice;
+        std::mt19937 mersenneGen{rndDevice()};
+        std::uniform_int_distribution<short> dist{-128, 127};
 
-    REQUIRE(RunInferenceRandom(model));
-}
+        auto gen = [&dist, &mersenneGen]() { return dist(mersenneGen); };
 
-TEST_CASE("Running inference with TensorFlow Lite Micro and MicroNetKwsModel int8", "[MicroNetKws]")
-{
-    REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
-    for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
-        auto input_goldenFV = reinterpret_cast<const int8_t *>(GetIfmDataArray(i));
-        auto output_goldenFV = reinterpret_cast<const int8_t *>(GetOfmDataArray(i));
+        std::vector<int8_t> randomAudio(inputTensor->Bytes());
+        std::generate(std::begin(randomAudio), std::end(randomAudio), gen);
 
-        DYNAMIC_SECTION("Executing inference with re-init " << i)
-        {
-            arm::app::MicroNetKwsModel model{};
+        REQUIRE(RunInference(model, randomAudio.data()));
+        return true;
+    }
 
-            REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init(arm::app::tensorArena,
-                               sizeof(arm::app::tensorArena),
-                               arm::app::kws::GetModelPointer(),
-                               arm::app::kws::GetModelLen()));
-            REQUIRE(model.IsInited());
+    template <typename T>
+    void TestInference(const T* input_goldenFV,
+                       const T* output_goldenFV,
+                       arm::app::fwk::iface::Model& model)
+    {
+        REQUIRE(RunInference(model, input_goldenFV));
 
-            TestInference<int8_t>(input_goldenFV, output_goldenFV, model);
+        auto outputTensor = model.GetOutputTensor(0);
+
+        REQUIRE(outputTensor);
+        REQUIRE(outputTensor->Bytes() == OFM_0_DATA_SIZE);
+        auto tensorData = outputTensor->GetData<T>();
+        REQUIRE(tensorData);
+
+        for (size_t i = 0; i < outputTensor->Bytes(); i++) {
+            REQUIRE(static_cast<int>(tensorData[i]) == static_cast<int>((T)output_goldenFV[i]));
         }
     }
-}
+
+    TEST_CASE("Running random inference with Tflu and MicroNetKwsModel Int8", "[MicroNetKws]")
+    {
+        arm::app::fwk::tflm::MicroNetKwsModel model{};
+
+        REQUIRE_FALSE(model.IsInited());
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                    arm::app::kws::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model.Init(computeMem, modelMem));
+        REQUIRE(model.IsInited());
+
+        REQUIRE(RunInferenceRandom(model));
+    }
+
+    TEST_CASE("Running inference with Tflu and MicroNetKwsModel Int8", "[MicroNetKws]")
+    {
+        REQUIRE(NUMBER_OF_IFM_FILES == NUMBER_OF_OFM_FILES);
+        for (uint32_t i = 0; i < NUMBER_OF_IFM_FILES; ++i) {
+            auto input_goldenFV  = reinterpret_cast<const int8_t*>(GetIfmDataArray(i));
+            auto output_goldenFV = reinterpret_cast<const int8_t*>(GetOfmDataArray(i));
+
+            DYNAMIC_SECTION("Executing inference with re-init")
+            {
+                arm::app::fwk::tflm::MicroNetKwsModel model{};
+
+                REQUIRE_FALSE(model.IsInited());
+                arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                            arm::app::kws::GetModelLen()};
+                arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                              sizeof(arm::app::tensorArena)};
+                REQUIRE(model.Init(computeMem, modelMem));
+                REQUIRE(model.IsInited());
+
+                TestInference<int8_t>(input_goldenFV, output_goldenFV, model);
+            }
+        }
+    }
+
+} // namespace kws
+} // namespace test

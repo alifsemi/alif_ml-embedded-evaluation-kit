@@ -25,6 +25,8 @@ The model makes detection faces in size of 20x20 pixels and above.
 
 Use-case code could be found in the following directory:[source/use_case/object_detection](../../source/use_case/object_detection).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Prerequisites
 
 See [Prerequisites](../documentation.md#prerequisites)
@@ -36,7 +38,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Object Detection use-case
 specifies:
 
-- `object_detection_MODEL_TFLITE_PATH` - The path to the NN model file in the *TFLite* format. The model is then processed and
+- `object_detection_MODEL_PATH` - The path to the NN model file in the *TFLite* format. The model is then processed and
   included in the application `axf` file. The default value points to one of the delivered set of models.
   Note that the parameters `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with
   the chosen model. In other words:
@@ -192,7 +194,7 @@ of any image does not match `IMAGE_SIZE`, then it is rescaled and padded so that
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `object_detection_MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `object_detection_MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
@@ -203,20 +205,20 @@ For example:
 
 ```commandline
 cmake .. \
-    -Dobject_detection_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dobject_detection_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -DUSE_CASE_BUILD=object_detection
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `object_detection_MODEL_TFLITE_PATH` is converted to
+The `.tflite` model file pointed to by `object_detection_MODEL_PATH` is converted to
 C++ files during the CMake configuration stage. They are then compiled into
 the application for performing inference with.
 
 The log from the configuration stage tells you what model path and labels file have been used, for example:
 
 ```log
--- User option object_detection_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option object_detection_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- Using <path/to/custom_model_after_vela.tflite>
 ++ Converting custom_model_after_vela.tflite to custom_model_after_vela.tflite.cc
@@ -272,88 +274,9 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `object_detection_FILE_PATH` points to a single file, or even a folder that contains a
-single image, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user:
-
-```log
-User input required
-Enter option number from:
-
-  1. Run detection on next ifm
-  2. Run detection ifm at chosen index
-  3. Run detection on all ifm
-  4. Show NN model info
-  5. List ifm
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Run detection on next ifm: Runs a single inference on the next in line image from the collection of the compiled images.
-
-2. Run detection ifm at chosen index: Runs inference on the chosen image.
-
-    > **Note:** Please make sure to select image index from within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four images, with indexes from `0` to `3`.
-
-3. Run detection on all ifm: Triggers sequential inference executions on all built-in images.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes. For example:
-
-    ```log
-    INFO - Allocating tensors
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 36864 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 192
-    INFO -    2: 192
-    INFO -    3:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003921
-    INFO - ZeroPoint[0] = -128
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 648 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   6
-    INFO -    2:   6
-    INFO -    3:  18
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.134084
-    INFO - ZeroPoint[0] = 47
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 2592 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:  12
-    INFO -    2:  12
-    INFO -    3:  18
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.185359
-    INFO - ZeroPoint[0] = 10
-    INFO - Activation buffer (a.k.a tensor arena) size used: 443992
-    INFO - Number of operators: 3
-    INFO -  Operator 0: ethos-u
-    INFO -  Operator 1: RESIZE_NEAREST_NEIGHBOR
-    INFO -  Operator 2: ethos-u
-    ```
-
-5. List Images: Prints a list of pair image indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    INFO - List of Files:
-    INFO - 0 => couple.bmp
-    INFO - 1 => glasses.bmp
-    INFO - 2 => man_and_baby.bmp
-    INFO - 3 => pitch_and_roll.bmp
-    ```
+After the application has started, inferences are executed on inputs from `object_detection_FILE_PATH`.
 
 ### Running Object Detection
-
-Please select the first menu option to execute Object Detection.
 
 The following example illustrates an application output for detection:
 

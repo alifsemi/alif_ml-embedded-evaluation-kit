@@ -47,6 +47,10 @@
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "STRING",
                     "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                },
+                "ML_FRAMEWORK": {
+                    "type": "STRING",
+                    "value": "TensorFlowLiteMicro"
                 }
             }
         },

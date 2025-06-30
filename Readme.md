@@ -1,6 +1,10 @@
 
 # Arm® ML embedded evaluation kit
 
+> [!important]
+> This is an **experimental** branch to support ExecuTorch framework alongside TensorFlow Lite Micro.
+> Review the limitations [here](#known-limitations-for-experimental-branch) before proceeding.
+
 ## Overview
 
 The ML embedded evaluation kit provides a range of ready to use machine learning (ML) applications for users to develop ML workloads running on the Arm® Ethos-U NPU and
@@ -93,6 +97,12 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
     ###### GNU Arm Embedded toolchain
     ```commandline
     python3.10 ./build_default.py
+    ```
+
+    ###### Build with ExecuTorch framework
+    ML framework defaults to TensorFlow Lite Micro. To build with ExecuTorch
+    ```commandline
+    python3.10 ./build_default.py --ml-framework executorch
     ```
 
 5. Change directory to the generated cmake build folder which contains the `.axf` file output in the `bin`
@@ -201,6 +211,21 @@ please create a new GitLab issue here:
 
 This product conforms to Arm's inclusive language policy and, to the best of our knowledge,
 does not contain any non-inclusive language. If you find something that concerns you, email terms@arm.com.
+
+# Known Limitations for Experimental Branch
+
+This branch is experimental and not stable — breaking changes are expected in the near term. It serves as
+a preview of refactoring that allows `ExecuTorch` and `TensorFlow Lite Micro` to be supported within the same
+source tree. At this stage, only the **image classification example** is functional with the `ExecuTorch` path,
+with the following limitations:
+
+* Arm® Compiler is not supported
+* Runtime memory usage is higher than we would like
+* `Dedicated_Sram` mode is not supported on any NPU
+* Arm® Ethos™-U65 NPU is not supported
+
+The last two limitations are expected to be addressed with an upcoming update to a newer version of the
+ExecuTorch source tree.
 
 ## Licenses
 

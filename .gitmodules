@@ -22,3 +22,6 @@
 [submodule "dependencies/avh"]
 	path = dependencies/avh
 	url = https://github.com/ARM-software/AVH/
+[submodule "dependencies/executorch"]
+	path = dependencies/executorch
+	url = https://github.com/pytorch/executorch.git

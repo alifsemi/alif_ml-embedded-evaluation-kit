@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -60,14 +60,14 @@ extern "C" {
 
 /* Form the attributes, alignment is mandatory. */
 #define MAKE_ATTRIBUTE(x)           __attribute__((ALIGNMENT_REQ, x))
-#define MODEL_TFLITE_ATTRIBUTE      MAKE_ATTRIBUTE(MODEL_SECTION)
+#define MODEL_SECTION_ATTRIBUTE      MAKE_ATTRIBUTE(MODEL_SECTION)
 #define ACTIVATION_BUF_ATTRIBUTE    MAKE_ATTRIBUTE(ACTIVATION_BUF_SECTION)
 #define IFM_BUF_ATTRIBUTE           MAKE_ATTRIBUTE(IFM_BUF_SECTION)
 #define LABELS_ATTRIBUTE            MAKE_ATTRIBUTE(LABEL_SECTION)
 
 #else /* HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__)) */
 
-#define MODEL_TFLITE_ATTRIBUTE
+#define MODEL_SECTION_ATTRIBUTE
 #define ACTIVATION_BUF_ATTRIBUTE
 #define IFM_BUF_ATTRIBUTE
 #define LABELS_ATTRIBUTE

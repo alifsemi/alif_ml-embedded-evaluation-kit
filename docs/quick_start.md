@@ -44,6 +44,16 @@ To get started quickly, please follow these steps:
     python3 ./build_default.py --toolchain arm
     ```
 
+    Similarly, for using LLVM based toolchain like the Arm Toolchain for Embedded:
+    ```commandline
+    python3 ./build_default.py --toolchain llvm
+    ```
+
+    > By default, the ML framework used is TensorFlow Lite Micro. To build with ExecuTorch instead, use:
+    > ```commandline
+    > python3 ./build_default.py --ml-framework executorch
+    > ```
+
 5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
    start guide, we use the keyword spotting application and the FVP.
 

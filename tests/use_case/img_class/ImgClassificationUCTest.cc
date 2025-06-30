@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -39,20 +39,22 @@ namespace app {
 TEST_CASE("Model info")
 {
     /* Model wrapper object. */
-    arm::app::MobileNetModel model;
+    arm::app::fwk::tflm::MobileNetModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::img_class::GetModelPointer(),
-                       arm::app::img_class::GetModelLen()));
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                arm::app::img_class::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
-    REQUIRE(model.ShowModelInfoHandler());
+    model.LogInterpreterInfo();
+    REQUIRE(model.IsInited());
 }
 
 
@@ -62,20 +64,21 @@ TEST_CASE("Inference by index", "[.]")
     hal_platform_init();
 
     /* Model wrapper object. */
-    arm::app::MobileNetModel model;
+    arm::app::fwk::tflm::MobileNetModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::img_class::GetModelPointer(),
-                       arm::app::img_class::GetModelLen()));
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                arm::app::img_class::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
     arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     arm::app::Classifier classifier;    /* Classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
 
@@ -97,20 +100,21 @@ TEST_CASE("Inference run all images", "[.]")
     hal_platform_init();
 
     /* Model wrapper object. */
-    arm::app::MobileNetModel model;
+    arm::app::fwk::tflm::MobileNetModel model;
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::img_class::GetModelPointer(),
-                       arm::app::img_class::GetModelLen()));
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                arm::app::img_class::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
     arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     arm::app::Classifier classifier;    /* classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);
 

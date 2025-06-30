@@ -18,10 +18,11 @@
 #include "UseCaseHandler.hpp"
 
 #include "AdMelSpectrogram.hpp"
+#include "AdModel.hpp"
 #include "AdProcessing.hpp"
 #include "AudioUtils.hpp"
-#include "UseCaseCommonUtils.hpp"
 #include "ImageUtils.hpp"
+#include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
 
@@ -43,7 +44,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        auto& model = ctx.Get<Model&>("model");
+        auto& model = ctx.Get<fwk::iface::Model&>("model");
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -55,15 +56,20 @@ namespace app {
         const auto scoreThreshold     = ctx.Get<float>("scoreThreshold");
         const auto trainingMean       = ctx.Get<float>("trainingMean");
 
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        auto inputTensor  = model.GetInputTensor(0);
 
-        if (!inputTensor->dims) {
+        if (inputTensor->Shape().empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
         }
 
-        AdPreProcess preProcess{inputTensor, melSpecFrameLength, melSpecFrameStride, trainingMean};
+        AdPreProcess preProcess{inputTensor,
+                                fwk::tflm::AdModel::ms_inputRowsIdx,
+                                fwk::tflm::AdModel::ms_inputColsIdx,
+                                melSpecFrameLength,
+                                melSpecFrameStride,
+                                trainingMean};
         AdPostProcess postProcess{outputTensor};
         uint32_t machineOutputIndex = 0; /* default sample */
 

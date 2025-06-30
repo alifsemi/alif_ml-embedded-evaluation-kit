@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2023, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,12 +33,12 @@ namespace app {
 
 TEST_CASE("Testing Init failure due to insufficient tensor arena inf runner", "[inf runner]")
 {
-    arm::app::TestModel model{};
+    arm::app::fwk::tflm::TestModel model{};
     REQUIRE_FALSE(model.IsInited());
     size_t insufficientTensorArenaSz = 1000;
-    REQUIRE_FALSE(model.Init(arm::app::tensorArena,
-                             insufficientTensorArenaSz,
-                             arm::app::inference_runner::GetModelPointer(),
-                             arm::app::inference_runner::GetModelLen()));
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::inference_runner::GetModelPointer(),
+                                                arm::app::inference_runner::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena, insufficientTensorArenaSz};
+    REQUIRE_FALSE(model.Init(computeMem, modelMem));
     REQUIRE_FALSE(model.IsInited());
 }

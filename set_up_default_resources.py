@@ -17,28 +17,31 @@
 """
 Script to set up default resources for ML Embedded Evaluation Kit
 """
+import concurrent.futures
 import dataclasses
 import errno
 import fnmatch
+import itertools
 import json
 import logging
 import os
 import re
 import shutil
-import subprocess
 import sys
 import textwrap
 import typing
-import urllib.request
-import venv
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
-from dataclasses import dataclass
 from pathlib import Path
-from urllib.error import URLError
+from enum import Enum
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
-from scripts.py.vela_configs import NpuConfigs, NpuConfig
+from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
+from scripts.py.setup.python_venv import install_pip_package_if_needed
+from scripts.py.setup.python_venv import set_up_python_venv, is_pip_package_installed
+from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext
+from scripts.py.setup.use_case import UseCase, load_use_case_resources
+from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
 VELA_VERSION = "4.3.0"
@@ -97,131 +100,26 @@ default_npu_configs = NpuConfigs.create(
     valid_npu_configs.get("ethos-u85", 256),
 )
 
+class MLFramework(Enum):
+    """
+    Enum to pick ML framework to use for build.
+    """
+    TENSORFLOW_LITE_MICRO = "tflm"
+    EXECUTORCH = "executorch"
+
+
+valid_ml_frameworks: typing.Set[str] = {f.value for f in MLFramework}
+
 current_file_dir = Path(__file__).parent.resolve()
 default_use_case_resources_path = current_file_dir / 'scripts' / 'py' / 'use_case_resources.json'
 default_requirements_path = current_file_dir / 'scripts' / 'py' / 'requirements.txt'
 default_downloads_path = current_file_dir / 'resources_downloaded'
+default_executorch_path = current_file_dir / 'dependencies' / 'executorch'
+vela_config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
 
-
-@dataclass(frozen=True)
-class UseCaseResource:
-    """
-    Represent a use case's resource
-    """
-    name: str
-    url: str
-    sub_folder: typing.Optional[str] = None
-
-
-@dataclass(frozen=True)
-class UseCase:
-    """
-    Represent a use case
-    """
-    name: str
-    url_prefix: str
-    resources: typing.List[UseCaseResource]
-
-
-@dataclass(frozen=True)
-class SetupConfig:
-    """
-    Configuration for setup behaviour.
-
-    Attributes:
-        run_vela_on_models (bool)           :   Whether to run Vela on the downloaded models
-        additional_npu_config_names (list)  :   List of strings of Ethos-U NPU configs.
-        use_case_names (list)               :   List of names of use cases to set up resources for
-                                                (default is all).
-        arena_cache_size (int)              :   Specifies arena cache size in bytes. If a value
-                                                greater than 0 is provided, this will be taken
-                                                as the cache size. If 0, the default values, as per
-                                                the NPU config requirements, are used.
-        check_clean_folder (bool)           :   Indicates whether the resources folder needs to
-                                                be checked for updates and cleaned.
-    """
-    run_vela_on_models: bool = False
-    additional_npu_config_names: typing.List[str] = ()
-    use_case_names: typing.List[str] = ()
-    arena_cache_size: int = 0
-    check_clean_folder: bool = False
-
-
-@dataclass(frozen=True)
-class PathsConfig:
-    """
-    Configuration of paths to resources used by the setup process.
-
-    Attributes:
-        additional_requirements_file (str)  :   Path to a requirements.txt file if
-                                                additional packages need to be
-                                                installed.
-        use_case_resources_file (Path)      :   Path to a JSON file containing the use case
-                                                metadata resources.
-
-        downloads_dir (Path)                :  Path to store model resources files.
-    """
-    additional_requirements_file: Path = ""
-    use_case_resources_file: Path = ""
-    downloads_dir: Path = ""
-
-
-def load_use_case_resources(
-        use_case_resources_file: Path,
-        use_case_names: typing.List[str] = ()
-) -> typing.List[UseCase]:
-    """
-    Load use case metadata resources
-
-    Parameters
-    ----------
-    use_case_resources_file :   Path to a JSON file containing the use case
-                                metadata resources.
-    use_case_names          :   List of named use cases to restrict
-                                resource loading to.
-    Returns
-    -------
-    The use cases resources object parsed to a dict
-    """
-
-    with open(use_case_resources_file, encoding="utf8") as f:
-        parsed_use_cases = json.load(f)
-        use_cases = (
-            UseCase(
-                name=u["name"],
-                url_prefix=u["url_prefix"],
-                resources=[UseCaseResource(**r) for r in u["resources"]],
-            )
-            for u in parsed_use_cases
-        )
-
-        if len(use_case_names) == 0:
-            return list(use_cases)
-
-        return [uc for uc in use_cases if uc.name in use_case_names]
-
-
-def call_command(command: str, verbose: bool = True) -> str:
-    """
-    Helpers function that call subprocess and return the output.
-
-    Parameters:
-    ----------
-    command (string):  Specifies the command to run.
-    """
-    if verbose:
-        logging.info(command)
-    try:
-        proc = subprocess.run(
-            command, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
-        )
-        log = proc.stdout.decode("utf-8")
-        logging.info(log)
-        return log
-    except subprocess.CalledProcessError as err:
-        log = err.stdout.decode("utf-8")
-        logging.error(log)
-        raise err
+VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
+TOSA_URL = "https://git.gitlab.arm.com/tosa/tosa-reference-model.git"
+TOSA_VER = "70ed0b40fa831387e36abdb4f7fb9670a3464f5a"
 
 
 def get_default_npu_config_from_name(
@@ -257,23 +155,6 @@ def get_default_npu_config_from_name(
     return npu_config.overwrite_arena_cache_size(arena_cache_size)
 
 
-def remove_tree_dir(dir_path: Path):
-    """
-    Delete and re-create a directory
-
-    Parameters
-    ----------
-    dir_path    : The directory path
-    """
-    try:
-        # Remove the full directory.
-        shutil.rmtree(dir_path)
-        # Re-create an empty one.
-        os.mkdir(dir_path)
-    except OSError:
-        logging.error("Failed to delete %s.", dir_path)
-
-
 def initialize_use_case_resources_directory(
         use_case: UseCase,
         metadata: typing.Dict,
@@ -289,10 +170,12 @@ def initialize_use_case_resources_directory(
     @param download_dir:                The parent directory
     @param check_clean_folder:          Whether to clean the folder
     @param setup_script_hash_verified:  Whether the hash of this script is verified
+    @return                             The path to this use case's downloaded resources
     """
+    use_case_resources_dir = get_downloaded_resources_directory(use_case, download_dir)
     try:
         #  Does the usecase_name download dir exist?
-        (download_dir / use_case.name).mkdir()
+        use_case_resources_dir.mkdir()
     except OSError as err:
         if err.errno == errno.EEXIST:
             # The usecase_name download dir exist.
@@ -306,84 +189,55 @@ def initialize_use_case_resources_directory(
                 ):
                     if metadata_uc_url_prefix != use_case.url_prefix[idx]:
                         logging.info("Removing %s resources.", use_case.name)
-                        remove_tree_dir(download_dir / use_case.name)
+                        remove_tree_dir(use_case_resources_dir)
                         break
         elif err.errno != errno.EEXIST:
             logging.error("Error creating %s directory.", use_case.name)
             raise
 
 
-def download_file(url: str, dest: Path):
+def get_downloaded_resources_directory(use_case: UseCase, downloads_dir: Path) -> Path:
     """
-    Download a file
-
-    @param url:     The URL of the file to download
-    @param dest:    The destination of downloaded file
+    Get the directory for a use case's downloaded resources
+    :param use_case:        The use case
+    :param downloads_dir:   The parent directory for all downloaded resources
+    :return:                The directory for the specified use case's resources
     """
-    try:
-        with urllib.request.urlopen(url) as g:
-            with open(dest, "b+w") as f:
-                f.write(g.read())
-                logging.info("- Downloaded %s to %s.", url, dest)
-    except URLError:
-        logging.error("URLError while downloading %s.", url)
-        raise
+    return downloads_dir / use_case.name
 
 
-def download_resources(
+def get_resources_to_download(
         use_case: UseCase,
-        metadata: typing.Dict,
-        download_dir: Path,
-        check_clean_folder: bool,
-        setup_script_hash_verified: bool,
-):
+        download_dir: Path
+) -> typing.List[typing.Tuple[str, Path]]:
     """
     Download the resources associated with a use case
 
     @param use_case:                    The use case
-    @param metadata:                    The metadata
     @param download_dir:                The parent directory
-    @param check_clean_folder:          Whether to clean the folder
-    @param setup_script_hash_verified:  Whether the hash is already verified
+    @param parallel:                    Number of download threads to use
     """
-    initialize_use_case_resources_directory(
-        use_case,
-        metadata,
-        download_dir,
-        check_clean_folder,
-        setup_script_hash_verified
-    )
-
     reg_expr_str = r"{url_prefix:(.*\d)}"
     reg_expr_pattern = re.compile(reg_expr_str)
-    for res in use_case.resources:
-        res_name = res.name
-        url_prefix_idx = int(reg_expr_pattern.search(res.url).group(1))
-        res_url = use_case.url_prefix[url_prefix_idx] + re.sub(
-            reg_expr_str, "", res.url
+    to_download = []
+    for resource in use_case.resources:
+        url_prefix_idx = int(reg_expr_pattern.search(resource.url).group(1))
+        url = use_case.url_prefix[url_prefix_idx] + re.sub(
+            reg_expr_str, "", resource.url
         )
 
-        sub_folder = ""
-        if res.sub_folder is not None:
-            try:
-                #  Does the usecase_name/sub_folder download dir exist?
-                (download_dir / use_case.name / res.sub_folder).mkdir()
-            except OSError as err:
-                if err.errno != errno.EEXIST:
-                    logging.error(
-                        "Error creating %s/%s directory.",
-                        use_case.name,
-                        res.sub_folder
-                    )
-                    raise
-            sub_folder = res.sub_folder
+        dest_dir = get_downloaded_resources_directory(use_case, download_dir)
+        if resource.sub_folder is not None:
+            dest_dir = dest_dir / resource.sub_folder
 
-        res_dst = download_dir / use_case.name / sub_folder / res_name
+        os.makedirs(dest_dir, exist_ok=True)
+        dest = dest_dir / resource.name
 
-        if res_dst.is_file():
-            logging.info("File %s exists, skipping download.", res_dst)
+        if dest.is_file():
+            logging.info("File %s exists, skipping download.", dest)
         else:
-            download_file(res_url, res_dst)
+            to_download.append((url, dest))
+    return to_download
 
 
 def run_vela(
@@ -402,11 +256,21 @@ def run_vela(
     @param output_dir:          The output directory
     @return:                    True if the optimisation was skipped, false otherwise
     """
-    # model name after compiling with vela is an initial model name + _vela suffix
-    vela_optimised_model_path = model.parent / (model.stem + "_vela.tflite")
+    # We want the name to include the configuration suffix. For example: vela_H128,
+    # vela_Y512 etc.
+    new_suffix = f"_vela_{config.config_id}.tflite"
+    new_vela_optimised_model_path = output_dir / (model.stem + new_suffix)
+
+    if new_vela_optimised_model_path.is_file():
+        logging.info(
+            "File %s exists, skipping optimisation.",
+            new_vela_optimised_model_path
+        )
+        return True
+
+    work_dir = output_dir / config.config_name / model.stem
 
     vela_command_arena_cache_size = ""
-
     if config.arena_cache_size:
         vela_command_arena_cache_size = (
             f"--arena-cache-size={config.arena_cache_size}"
@@ -419,87 +283,34 @@ def run_vela(
             + f"--config {config_file} "
             + f"--memory-mode={config.memory_mode} "
             + f"--system-config={config.system_config} "
-            + f"--output-dir={output_dir} "
+            + f"--output-dir={work_dir} "
             + f"{vela_command_arena_cache_size}"
     )
 
-    # We want the name to include the configuration suffix. For example: vela_H128,
-    # vela_Y512 etc.
-    new_suffix = "_vela_" + config.config_id + ".tflite"
-    new_vela_optimised_model_path = model.parent / (model.stem + new_suffix)
+    call_command(vela_command)
 
-    skip_optimisation = new_vela_optimised_model_path.is_file()
+    # Relocate any other files output by Vela, e.g. csv output data
+    for vela_output in work_dir.glob("*"):
+        new_file_name = f"{vela_output.stem}_{config.config_id}{vela_output.suffix}"
+        logging.info("Renaming %s to %s.", vela_output.name, new_file_name)
+        vela_output.rename(output_dir / new_file_name)
+    work_dir.rmdir()
 
-    if skip_optimisation:
-        logging.info(
-            "File %s exists, skipping optimisation.",
-            new_vela_optimised_model_path
-        )
-    else:
-        call_command(vela_command)
-
-        # Rename default vela model.
-        vela_optimised_model_path.rename(new_vela_optimised_model_path)
-        logging.info(
-            "Renaming %s to %s.",
-            vela_optimised_model_path,
-            new_vela_optimised_model_path
-        )
-
-    return skip_optimisation
+    return False
 
 
-def run_vela_on_all_models(
-        download_dir: Path,
-        env_activate_cmd: str,
-        arena_cache_size: int,
-        npu_config_names: typing.List[str]
-):
+def find_unoptimized_tflite_files(download_dir: Path) -> typing.List[Path]:
     """
-    Run vela on downloaded models for the specified NPU configurations
-
-    @param download_dir:        Path to the downloaded resources directory
-    @param env_activate_cmd:    Command used to activate Python venv
-    @param npu_config_names:    Names of NPU configurations for which to run Vela
-    @param arena_cache_size:    The arena cache size
+    Find paths for .tflite files that have not yet been optimised with Vela
+    :param download_dir:    The parent directory in which to search for .tflite files
+    :return:                A list of paths for unoptimized .tflite files
     """
-    config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
-    models = [
+    return [
         Path(dirpath) / f
         for dirpath, dirnames, files in os.walk(download_dir)
         for f in fnmatch.filter(files, "*.tflite")
         if "vela" not in f
     ]
-
-    # Get npu config tuple for each config name in a list:
-    npu_configs = [
-        get_default_npu_config_from_name(name, arena_cache_size)
-        for name in npu_config_names
-    ]
-
-    logging.info("All models will be optimised for these configs:")
-    for config in npu_configs:
-        logging.info(config)
-
-    optimisation_skipped = False
-
-    for model in models:
-        for config in npu_configs:
-            optimisation_skipped = run_vela(
-                config,
-                env_activate_cmd,
-                model,
-                config_file,
-                output_dir=model.parent
-            ) or optimisation_skipped
-
-    # If any optimisation was skipped, show how to regenerate:
-    if optimisation_skipped:
-        logging.warning("One or more optimisations were skipped.")
-        logging.warning(
-            "To optimise all the models, please remove the directory %s.",
-            download_dir
-        )
 
 
 def initialize_resources_directory(
@@ -554,60 +365,166 @@ def initialize_resources_directory(
     return metadata_dict, setup_script_hash_verified
 
 
-def set_up_python_venv(
-        download_dir: Path,
-        additional_requirements_file: Path = ""
+def install_executorch(executorch_path: Path, env_activate_cmd: str) -> None:
+    """
+    Installs ExecuTorch Python bindings within Python virtual environment.
+
+    :param executorch_path:  Root of Executorch source tree.
+    :param env_activate_cmd: Command to activate the Python virtual
+                             environment where we need to install.
+    """
+    if not executorch_path.is_dir():
+        raise NotADirectoryError(f'Invalid dir {executorch_path}')
+
+    if len(env_activate_cmd.strip()) == 0:
+        raise ValueError('venv activation command cannot be empty.')
+
+    install_script = executorch_path / 'install_executorch.sh'
+
+    call_command(
+        command=f'{env_activate_cmd} && {install_script} --clean && {install_script}',
+        verbose=True
+    )
+
+
+def install_executorch_quantized_ops_lib(
+        executorch_path: Path,
+        env_activate_cmd: str
+) -> typing.List[Path]:
+    """
+    Builds the quantized ops shared library for host. The path to this lib
+    is needed for generating PTE files.
+    :param executorch_path:     Root of Executorch source tree
+    :param env_activate_cmd:    Command to activate the Python virtual
+                                environment where we need to install.
+    returns                     List of paths to generated shared_lib files.
+    """
+    if not executorch_path.is_dir():
+        raise NotADirectoryError(f'Invalid dir {executorch_path}')
+
+    if len(env_activate_cmd.strip()) == 0:
+        raise ValueError('venv activation command cannot be empty.')
+
+    script_dir = executorch_path / 'backends' / 'arm' / 'scripts'
+    install_script = script_dir / 'build_quantized_ops_aot_lib.sh'
+    expected_lib_path = executorch_path / 'cmake-out-aot-lib' / 'kernels' / 'quantized'
+    expected_ext = '.so'
+
+    call_command(
+        command=f'{env_activate_cmd} && {install_script}',
+        verbose=True
+    )
+
+    return list(expected_lib_path.glob('*' + expected_ext))
+
+
+def optimize_executorch_model(
+        model_name: str,
+        npu_config: NpuConfig,
+        setup_context: SetupContext,
+        output_dir: Path,
 ):
     """
-    Set up the Python environment with which to set up the resources
-
-    @param download_dir:                    Path to the resources_downloaded directory
-    @param additional_requirements_file:    Optional additional requirements file
-    @return:                                Path to the venv Python binary + activate command
+    Generate an optimized .pte file for ExecuTorch
+    :param model_name:      The named of the ExecuTorch model to optimize
+    :param npu_config:      The NPU config for which to optimize. If this is
+                            None, a TOSA PTE file is generated for native host.
+    :param setup_context:   The setup context
+    :param output_dir:      The output directory
+    :return:                True if optimization was skipped, False otherwise
     """
-    env_dirname = "env"
-    env_path = download_dir / env_dirname
-
-    venv_builder = venv.EnvBuilder(with_pip=True, upgrade_deps=True)
-    venv_context = venv_builder.ensure_directories(env_dir=env_path)
-
-    env_python = Path(venv_context.env_exe)
-
-    if not env_python.is_file():
-        # Create the virtual environment using current interpreter's venv
-        # (not necessarily the system's Python3)
-        venv_builder.create(env_dir=env_path)
-
-    if sys.platform == "win32":
-        env_activate = Path(f"{venv_context.bin_path}/activate.bat")
-        env_activate_cmd = str(env_activate)
+    if npu_config is not None:
+        # Should be --memory_mode {npu_config.memory_mode} but Dedicated_Sram mode
+        # doesn't work with current rev of ExecuTorch.
+        cfg = (f" --target {npu_config.config_name}"
+               f" --system_config {npu_config.system_config}"
+               " --delegate --quantize"
+               " --memory_mode Shared_Sram")
+        optimized_model_name = f"{model_name}_arm_delegate_{npu_config.config_name}.pte"
     else:
-        env_activate = Path(f"{venv_context.bin_path}/activate")
-        env_activate_cmd = f". {env_activate}"
+        cfg = " --quantize --target TOSA"
+        optimized_model_name = output_dir / f"{model_name}_arm_TOSA.pte"
 
-    if not env_activate.is_file():
-        venv_builder.install_scripts(venv_context, venv_context.bin_path)
+    optimized_model_path = output_dir / optimized_model_name
+    if optimized_model_path.is_file():
+        logging.info(
+            "File %s exists, skipping optimisation.",
+            optimized_model_path
+        )
+        return True
 
-    # Install additional requirements first, if a valid file has been provided
-    if additional_requirements_file and os.path.isfile(additional_requirements_file):
-        command = f"{env_python} -m pip install -r {additional_requirements_file}"
-        call_command(command)
+    call_command(
+        command=(f"{setup_context.env_activate_cmd} && python3 -m examples.arm.aot_arm_compiler"
+                 f" --model_name={model_name}"
+                 f"{cfg}"
+                 f" --so_library={setup_context.quantized_ops_lib_path}"
+                 f" --output {output_dir}"),
+        cwd=setup_context.paths_config.executorch_path)
 
-    # Make sure to have all the main requirements
+    return False
+
+
+def setup_executorch(setup_context: SetupContext) -> typing.List[Path]:
+    """
+    Installs Tosa tools and ExecuTorch in the Python virtual environment and builds the
+    quantized ops shared libraries.
+    :param setup_context:       SetupContext
+    :return: list of shared library files needed for generating PTE files.
+    """
+    # Install TOSA tools:
+    install_pip_package_if_needed(
+        f"git+{TOSA_URL}@{TOSA_VER}",
+        setup_context.env_activate_cmd,
+        installed_package_name="tosa-tools",
+        environment={
+            "CMAKE_POLICY_VERSION_MINIMUM": 3.5
+        },
+        no_deps=True
+    )
+
+    # Install ExecuTorch package
+    if not is_pip_package_installed("executorch", setup_context.env_activate_cmd):
+        install_executorch(default_executorch_path, setup_context.env_activate_cmd)
+
+    # Build and install quantized ops libraries:
+    lib_aot_quantized_ops_path = setup_context.env_path / "libquantized_ops_aot_lib.so"
+    if lib_aot_quantized_ops_path.exists():
+        et_ops_lib_list = [lib_aot_quantized_ops_path]
+    else:
+        et_ops_lib_list = install_executorch_quantized_ops_lib(
+            default_executorch_path,
+            setup_context.env_activate_cmd
+        )
+        if not et_ops_lib_list:
+            raise FileNotFoundError('No shared libraries found for ExecuTorch quantized ops')
+
+        logging.info('Libs required for pte file generation: %s,', et_ops_lib_list)
+        for file in et_ops_lib_list:
+            if file.is_file():
+                shutil.copy(file, setup_context.env_path / file.name)
+
+        et_ops_lib_list = [setup_context.env_path / file.name for file in et_ops_lib_list]
+        logging.info('Libs copied here: %s', et_ops_lib_list)
+
+    return et_ops_lib_list
+
+
+def setup_vela(env_activate_cmd: str):
+    """
+    Install Vela into the Python virtual environment
+    :param env_activate_cmd:    The command for activating the Python virtual environment
+    """
     if INSTALL_VELA_FROM_SOURCE:
-        vela_url = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
-        requirements = [f"git+{vela_url}@{VELA_VERSION}"]
+        install_pip_package_if_needed(
+            f"git+{VELA_URL}@{VELA_VERSION}",
+            env_activate_cmd,
+            installed_package_name="ethos-u-vela"
+        )
     else:
-        requirements = [f"ethos-u-vela=={VELA_VERSION}"]
-
-    command = f"{env_python} -m pip freeze"
-    packages = call_command(command)
-    for req in requirements:
-        if req not in packages:
-            command = f"{env_python} -m pip install {req}"
-            call_command(command)
-
-    return env_path, env_activate_cmd
+        install_pip_package_if_needed(
+            f"ethos-u-vela=={VELA_VERSION}",
+            env_activate_cmd
+        )
 
 
 def update_metadata(
@@ -660,7 +577,198 @@ def check_paths_config(paths_config: PathsConfig):
         logging.warning(textwrap.dedent(message))
 
 
-def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Path:
+def optimize_tflite_models_async(
+        executor: concurrent.futures.ThreadPoolExecutor,
+        unoptimized_models: typing.List[Path],
+        npu_configs: typing.List[NpuConfig],
+        env_activate_cmd: str
+) -> typing.List[concurrent.futures.Future[bool]]:
+    """
+    Run Vela on a list of models for the given NPU configs using a ThreadPoolExecutor
+    :param executor:            The ThreadPoolExecutor
+    :param unoptimized_models:  The list of tflite models to be optimized
+    :param npu_configs:         The NPU configs for which to optimize the models
+    :param env_activate_cmd:    The Python environment activation command
+    :return:                    A list of futures for the optimizations
+    """
+    return [
+        executor.submit(
+            run_vela,
+            npu_config,
+            env_activate_cmd,
+            model_path,
+            vela_config_file,
+            model_path.parent
+        )
+        for model_path, npu_config
+        in itertools.product(unoptimized_models, npu_configs)
+    ]
+
+
+def optimize_executorch_models_async(
+        executor: concurrent.futures.ThreadPoolExecutor,
+        use_cases: typing.List[UseCase],
+        npu_configs: typing.List[NpuConfig],
+        setup_context: SetupContext
+) -> typing.List[concurrent.futures.Future[bool]]:
+    """
+    Download and optimize ExecuTorch models for the specified use cases and NPU Configs
+    using a ThreadPoolExecutor
+    :param executor:        The ThreadPoolExecutor
+    :param use_cases:       The use cases for which to download and optimize ExecuTorch models
+    :param npu_configs:     The NPU configs for which to optimize the models
+    :param setup_context:   The setup context
+    :return:                A list of futures for the optimizations
+    """
+    return list(itertools.chain(*(
+        [
+            executor.submit(
+                optimize_executorch_model,
+                model_name,
+                npu_config,
+                setup_context,
+                setup_context.paths_config.downloads_dir / use_case.name
+            )
+            for model_name
+            in use_case.executorch_models
+        ]
+        for use_case, npu_config
+        in itertools.product(use_cases, npu_configs)
+    )))
+
+
+def parallel_setup(
+        setup_context: SetupContext,
+        use_cases: typing.List[UseCase],
+        resources_to_download: typing.List[typing.Tuple[str, Path]],
+        tflm_npu_configs: typing.List[NpuConfig],
+        executorch_npu_configs: typing.List[NpuConfig],
+):
+    """
+    Download and optimize models using a thread pool
+    :param setup_context:           The setup context
+    :param use_cases:               The list of use cases to generate resources for
+    :param resources_to_download:   The list of resources yet to be downloaded
+    :param tflm_npu_configs:        The list of NPU configs for which to generate
+                                    optimized TensorFlow Lite Micro models
+    :param executorch_npu_configs:  The list of NPU configs for which to generate
+                                    optimized ExecuTorch models
+    """
+    optimize_tflite = (setup_context.setup_config.set_up_tensorflow
+                       and setup_context.setup_config.run_vela_on_models)
+    optimize_executorch = (setup_context.setup_config.set_up_executorch
+                       and setup_context.setup_config.run_vela_on_models)
+    with concurrent.futures.ThreadPoolExecutor(
+            max_workers=setup_context.setup_config.parallel
+    ) as executor:
+        # Find previously-downloaded unoptimized models
+        unoptimized_models = []
+        if optimize_tflite:
+            unoptimized_models = find_unoptimized_tflite_files(
+                setup_context.paths_config.downloads_dir
+            )
+        # Start parallel downloads
+        download_futures = [
+            executor.submit(download_file, url, dest)
+            for url, dest in resources_to_download
+        ]
+        # Start optimizing previously-downloaded tflite models and ExecuTorch models
+        model_optimize_futures = []
+        if optimize_tflite:
+            model_optimize_futures += optimize_tflite_models_async(
+                executor, unoptimized_models, tflm_npu_configs, setup_context.env_activate_cmd
+            )
+        if optimize_executorch:
+            model_optimize_futures += optimize_executorch_models_async(
+                executor, use_cases, executorch_npu_configs, setup_context
+            )
+        # When tflite models finish downloading, start optimizing them
+        if optimize_tflite:
+            for download_future in concurrent.futures.as_completed(download_futures):
+                downloaded_path = download_future.result()
+                if downloaded_path.suffix.endswith("tflite"):
+                    model_optimize_futures += optimize_tflite_models_async(
+                        executor,
+                        [downloaded_path],
+                        tflm_npu_configs,
+                        setup_context.env_activate_cmd
+                    )
+        # Wait for all models to finish optimizing
+        concurrent.futures.wait(
+            model_optimize_futures,
+            return_when=concurrent.futures.ALL_COMPLETED
+        )
+
+        optimisation_skipped = any(future.result() for future in model_optimize_futures)
+
+        # If any optimisation was skipped, show how to regenerate:
+        if optimisation_skipped:
+            logging.warning("One or more optimisations were skipped.")
+            logging.warning(
+                "To optimise all the models, please remove the directory %s.",
+                setup_context.paths_config.downloads_dir
+            )
+
+
+def serial_setup(
+        setup_context: SetupContext,
+        use_cases: typing.List[UseCase],
+        resources_to_download: typing.List[typing.Tuple[str, Path]],
+        tflm_npu_configs: typing.List[NpuConfig],
+        executorch_npu_configs: typing.List[NpuConfig]
+):
+    """
+    Download and optimize models without parallelism
+    :param setup_context:           The setup context
+    :param use_cases:               The list of use cases to generate resources for
+    :param resources_to_download:   The list of resources yet to be downloaded
+    :param tflm_npu_configs:        The list of NPU configs for which to generate
+                                    optimized TensorFlow Lite Micro models
+    :param executorch_npu_configs:  The list of NPU configs for which to generate
+                                    optimized ExecuTorch models
+    """
+    for url, dest in resources_to_download:
+        download_file(url, dest)
+    optimisation_skipped = False
+    if (setup_context.setup_config.set_up_tensorflow
+            and setup_context.setup_config.run_vela_on_models):
+        model_paths = find_unoptimized_tflite_files(setup_context.paths_config.downloads_dir)
+        for model_path in model_paths:
+            for config in tflm_npu_configs:
+                optimisation_skipped = run_vela(
+                    config,
+                    setup_context.env_activate_cmd,
+                    model_path,
+                    vela_config_file,
+                    output_dir=model_path.parent
+                ) or optimisation_skipped
+
+    if (setup_context.setup_config.set_up_executorch
+            and setup_context.setup_config.run_vela_on_models):
+        to_optimize = itertools.product(use_cases, executorch_npu_configs)
+        for use_case, npu_config in to_optimize:
+            for model_name in use_case.executorch_models:
+                optimisation_skipped = optimize_executorch_model(
+                    model_name=model_name,
+                    npu_config=npu_config,
+                    setup_context=setup_context,
+                    output_dir=setup_context.paths_config.downloads_dir / use_case.name
+                ) or optimisation_skipped
+
+    # If any optimisation was skipped, show how to regenerate:
+    if optimisation_skipped:
+        logging.warning("One or more optimisations were skipped.")
+        logging.warning(
+            "To optimise all the models, please remove the directory %s.",
+            setup_context.paths_config.downloads_dir
+        )
+
+
+def set_up_resources(
+        setup_config: SetupConfig,
+        optimization_config: OptimizationConfig,
+        paths_config: PathsConfig
+) -> Path:
     """
     Helpers function that retrieve the output from a command.
 
@@ -676,6 +784,8 @@ def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Pa
     download_directory_path :   Root of the directory where the resources have been downloaded to.
     virtual_env_path        :   Path to the root of virtual environment.
     """
+    context = SetupContext(setup_config, optimization_config, paths_config)
+
     # Paths.
     check_paths_config(paths_config)
     metadata_file_path = paths_config.downloads_dir / "resources_downloaded_metadata.json"
@@ -701,20 +811,49 @@ def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Pa
         setup_script_hash
     )
 
-    env_path, env_activate = set_up_python_venv(
+    context.env_path, context.env_activate_cmd = set_up_python_venv(
         paths_config.downloads_dir,
         paths_config.additional_requirements_file
     )
 
+    setup_vela(context.env_activate_cmd)
+
+    if setup_config.set_up_executorch:
+        et_ops_lib_list = setup_executorch(context)
+        context.quantized_ops_lib_path = [
+            lib for lib in et_ops_lib_list
+            if lib.name == "libquantized_ops_aot_lib.so"
+        ][0]
+
     # Download models
+
+    npu_configs = [
+        get_default_npu_config_from_name(npu_config_name, optimization_config.arena_cache_size)
+        for npu_config_name in set(
+            default_npu_configs.names
+            + list(optimization_config.additional_npu_config_names)
+        )
+    ]
+
+    executorch_npu_configs = [config for config in npu_configs if config.processor_id != "U65"]
+
+    # For ExecuTorch, we need to generate TOSA PTE files for native host as well.
+    # Appending None here to the list as a temporary workaround.
+    executorch_npu_configs.append(None)
+
     logging.info("Downloading resources.")
+    to_download = []
     for use_case in use_case_resources:
-        download_resources(
+        initialize_use_case_resources_directory(
             use_case,
             metadata_dict,
             paths_config.downloads_dir,
             setup_config.check_clean_folder,
             setup_script_hash_verified
+        )
+        to_download += get_resources_to_download(
+            use_case,
+            download_dir=paths_config.downloads_dir,
         )
 
     # Run vela on models in resources_downloaded
@@ -725,15 +864,22 @@ def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Pa
     #
     # Note: To avoid to run vela twice on the same model, it's supposed that
     # downloaded model names don't contain the 'vela' word.
-    if setup_config.run_vela_on_models is True:
-        # Consolidate all config names while discarding duplicates:
-        run_vela_on_all_models(
-            paths_config.downloads_dir,
-            env_activate,
-            setup_config.arena_cache_size,
-            npu_config_names=list(
-                set(default_npu_configs.names + list(setup_config.additional_npu_config_names))
-            )
+
+    if setup_config.parallel > 1:
+        parallel_setup(
+            context,
+            use_case_resources,
+            to_download,
+            npu_configs,
+            executorch_npu_configs
+        )
+    else:
+        serial_setup(
+            context,
+            use_case_resources,
+            to_download,
+            npu_configs,
+            executorch_npu_configs
         )
 
     # Collect and write metadata
@@ -745,7 +891,7 @@ def set_up_resources(setup_config: SetupConfig, paths_config: PathsConfig) -> Pa
         metadata_file_path
     )
 
-    return env_path
+    return context.env_path
 
 
 if __name__ == "__main__":
@@ -754,6 +900,15 @@ if __name__ == "__main__":
         "--skip-vela",
         help="Do not run Vela optimizer on downloaded models.",
         action="store_true",
+    )
+    parser.add_argument(
+        "--ml-frameworks",
+        help=f"""Specify the ML frameworks for which to set up resources.
+        Valid values are: {valid_ml_frameworks}
+        """,
+        nargs="+",
+        default=[f'{MLFramework.TENSORFLOW_LITE_MICRO.value}'],
+        action="store",
     )
     parser.add_argument(
         "--additional-ethos-u-config-name",
@@ -780,6 +935,12 @@ if __name__ == "__main__":
         "--clean",
         help="Clean the directory and optimize the downloaded resources",
         action="store_true",
+    )
+    parser.add_argument(
+        "--parallel",
+        help="Number of threads to use for downloads and model optimisation",
+        type=int,
+        default=1
     )
     parser.add_argument(
         "--requirements-file",
@@ -811,18 +972,29 @@ if __name__ == "__main__":
     logging.basicConfig(filename="log_build_default.log", level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
+    ml_frameworks = valid_ml_frameworks \
+        if len(parsed_args.ml_frameworks) == 0 \
+        else valid_ml_frameworks.intersection(parsed_args.ml_frameworks)
+
     setup = SetupConfig(
         run_vela_on_models=not parsed_args.skip_vela,
-        additional_npu_config_names=parsed_args.additional_ethos_u_config_name,
         use_case_names=parsed_args.use_case,
-        arena_cache_size=parsed_args.arena_cache_size,
         check_clean_folder=parsed_args.clean,
+        set_up_executorch=MLFramework.EXECUTORCH.value in ml_frameworks,
+        set_up_tensorflow=MLFramework.TENSORFLOW_LITE_MICRO.value in ml_frameworks,
+        parallel=parsed_args.parallel
+    )
+
+    optimization = OptimizationConfig(
+        additional_npu_config_names=parsed_args.additional_ethos_u_config_name,
+        arena_cache_size=parsed_args.arena_cache_size,
     )
 
     paths = PathsConfig(
         use_case_resources_file=parsed_args.use_case_resources_file,
         downloads_dir=parsed_args.downloads_dir,
         additional_requirements_file=parsed_args.requirements_file,
+        executorch_path=default_executorch_path
     )
 
-    set_up_resources(setup, paths)
+    set_up_resources(setup, optimization, paths)

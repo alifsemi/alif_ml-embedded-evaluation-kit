@@ -25,10 +25,14 @@ set accordingly. More information on these cmake parameters is detailed in their
 
 ## The application does not work with my custom model
 
-Ensure that your model is in a fully quantized `.tflite` file format, either `uint8` or `int8`, and that it has
-successfully been run through the Vela compiler.
+For TensorFlow Lite Micro, ensure that your model is in a fully quantized `.tflite` file format, either `uint8` or
+`int8`, and that it has successfully been run through the Vela compiler. For ExecuTorch ensure the model has been
+generated using the Arm AOT compiler (which calls Vela) with `--quantize` and `--delegate` options passed to it and the
+right target selected with `--target <name>`. See the AOT compiler script
+[aot_arm_compiler.py](https://github.com/pytorch/executorch/blob/v0.6.0-rc2/examples/arm/aot_arm_compiler.py)
+in ExecuTorch source tree for more details.
 
-Also, please check that the cmake parameters used match the input requirements of your new model.
+Also, please check that the CMake parameters used match the input requirements of your new model.
 
 > **Note:** The Vela tool is not available within this software project. It is a separate Python tool that is available
 > from: <https://pypi.org/project/ethos-u-vela/>. The source code is hosted on
@@ -45,10 +49,13 @@ ERROR - Invoke failed.
 ERROR - Inference failed.
 ```
 
-It shows that the configuration of the Vela compiled `.tflite` file doesn't match the number of MACs units on the FVP.
+It shows that the configuration of model file doesn't match the number of MACs units on the FVP.
 
-The Vela configuration parameter `accelerator-config` used for producing the .`tflite` file that is used
-while building the application should match the MACs configuration that the FVP is emulating.
+For TensorFlow Lite Micro, the Vela configuration parameter `accelerator-config` used for producing the .`tflite` file
+that is used while building the application should match the MACs configuration that the FVP is emulating.
+For ExecuTorch, the Arm AOT compiler `--target` parameter determines the number of MACs the resulting model will run
+with.
+
 For example, if the `accelerator-config` from the Vela command was `ethos-u55-128`, the FVP should be emulating the
 128 MACs configuration of the Ethos™-U55 block(default FVP configuration). If the `accelerator-config` used was
 `ethos-u55-256`, the FVP must be executed with additional command line parameter to instruct it to emulate the

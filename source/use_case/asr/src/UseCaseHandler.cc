@@ -42,7 +42,7 @@ namespace app {
     /* ASR inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
-        auto& model          = ctx.Get<Model&>("model");
+        auto& model          = ctx.Get<fwk::iface::Model&>("model");
         auto& profiler       = ctx.Get<Profiler&>("profiler");
         auto mfccFrameLen    = ctx.Get<uint32_t>("frameLength");
         auto mfccFrameStride = ctx.Get<uint32_t>("frameStride");
@@ -56,14 +56,14 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
+        const auto inputTensor  = model.GetInputTensor(0);
+        const auto outputTensor = model.GetOutputTensor(0);
 
         /* Get input shape. Dimensions of the tensor should have been verified by
          * the callee. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
+        auto inputShape = model.GetInputShape(0);
 
-        const uint32_t inputRowsSize = inputShape->data[Wav2LetterModel::ms_inputRowsIdx];
+        const uint32_t inputRowsSize = inputShape[fwk::tflm::Wav2LetterModel::ms_inputRowsIdx];
         const uint32_t inputInnerLen = inputRowsSize - (2 * inputCtxLen);
 
         /* Audio data stride corresponds to inputInnerLen feature vectors. */
@@ -74,21 +74,21 @@ namespace app {
         const float secondsPerSample = (1.0 / audio::Wav2LetterMFCC::ms_defaultSamplingFreq);
 
         /* Set up pre and post-processing objects. */
-        AsrPreProcess preProcess = AsrPreProcess(inputTensor,
-                                                 Wav2LetterModel::ms_numMfccFeatures,
-                                                 inputShape->data[Wav2LetterModel::ms_inputRowsIdx],
-                                                 mfccFrameLen,
-                                                 mfccFrameStride);
+        AsrPreProcess preProcess =
+            AsrPreProcess(inputTensor,
+                          fwk::tflm::Wav2LetterModel::ms_numMfccFeatures,
+                          inputShape[fwk::tflm::Wav2LetterModel::ms_inputRowsIdx],
+                          mfccFrameLen,
+                          mfccFrameStride);
 
         std::vector<ClassificationResult> singleInfResult;
-        const uint32_t outputCtxLen = AsrPostProcess::GetOutputContextLen(model, inputCtxLen);
-        AsrPostProcess postProcess  = AsrPostProcess(outputTensor,
+        AsrPostProcess postProcess = AsrPostProcess(model,
                                                     ctx.Get<AsrClassifier&>("classifier"),
                                                     ctx.Get<std::vector<std::string>&>("labels"),
                                                     singleInfResult,
-                                                    outputCtxLen,
-                                                    Wav2LetterModel::ms_blankTokenIdx,
-                                                    Wav2LetterModel::ms_outputRowsIdx);
+                                                    inputCtxLen,
+                                                    fwk::tflm::Wav2LetterModel::ms_blankTokenIdx,
+                                                    fwk::tflm::Wav2LetterModel::ms_outputRowsIdx);
 
         hal_audio_init();
         if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
