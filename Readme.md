@@ -1,9 +1,8 @@
 
 # Arm® ML embedded evaluation kit
 
-> [!important]
-> This is an **experimental** branch to support ExecuTorch framework alongside TensorFlow Lite Micro.
-> Review the limitations [here](#known-limitations-for-experimental-branch) before proceeding.
+> ⚠️  **NOTE**: This is an **experimental** branch to support ExecuTorch framework alongside
+> TensorFlow Lite Micro. Review the limitations [here](#known-limitations-for-experimental-branch) before proceeding.
 
 ## Overview
 
