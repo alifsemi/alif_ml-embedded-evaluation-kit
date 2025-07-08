@@ -95,10 +95,10 @@ For ATfE/LLVM:
     ```
 
 > **Note:** Required version of CMake is also installed in the Python3 virtual environment created by
-> `setup_default_resources.py` script. See [Fetching resource files](./building.md#fetching-resource-files) section.
+> `set_up_default_resources.py` script. See [Fetching resource files](./building.md#fetching-resource-files) section.
 >
 > To add CMake to the PATH on Ubuntu for example, use: `export PATH=/absolute/path/for/cmake/:${PATH}`
-> Once `setup_default_resources.py` has been executed, activating the virtual environment will enable you
+> Once `set_up_default_resources.py` has been executed, activating the virtual environment will enable you
 > to use that CMake. Alternatively, from the root of the repository, you could use:
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
