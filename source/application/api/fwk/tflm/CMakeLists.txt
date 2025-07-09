@@ -31,7 +31,12 @@ if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
 endif()
 
 # Include the TensorFlow Lite Micro build target
-include(tensorflow_lite_micro)
+# if the target is not available. An external project
+# including this project can provide its own version
+# of the target.
+if (NOT TARGET google::tensorflow-lite-micro)
+    include(tensorflow_lite_micro)
+endif()
 
 # Create static library
 add_library(${ML_FWK_TFLM_TARGET} STATIC
@@ -51,15 +56,13 @@ add_library(${ML_FWK_TFLM_TARGET} STATIC
 
 ## Include directories - public
 target_include_directories(${ML_FWK_TFLM_TARGET} PUBLIC
-    include
-    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
-    ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
+    include)
 
 # Link time library targets:
 target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
-    mlek_log                # Logging functions
-    ml-framework-iface      # ML framework interface
-    tensorflow-lite-micro)  # TensorFlow Lite Micro library
+    mlek_log                        # Logging functions
+    ml-framework-iface              # ML framework interface
+    google::tensorflow-lite-micro)  # TensorFlow Lite Micro library
 
 target_compile_definitions(${ML_FWK_TFLM_TARGET} INTERFACE MLEK_FWK_TFLM=1)
 

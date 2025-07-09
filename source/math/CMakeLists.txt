@@ -35,7 +35,13 @@ target_include_directories(arm_math PUBLIC include)
 target_link_libraries(arm_math PRIVATE mlek_log)
 
 if (${CMAKE_CROSSCOMPILING})
-    include(cmsis-dsp)
+    # If CMSIS-DSP target doesn't exist, include the MLEK default
+    # configuration. An external project that wants to re-use this
+    # module is expected to declare this target before including
+    # this project
+    if (NOT TARGET arm::cmsis-dsp)
+        include(cmsis-dsp)
+    endif()
     target_link_libraries(arm_math PUBLIC arm::cmsis-dsp)
 endif ()
 

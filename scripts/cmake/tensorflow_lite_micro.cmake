@@ -94,7 +94,7 @@ function(build_tflite_micro_cmake)
     endif()
 
     # Create an alias to use in other parts of the project.
-    add_library(tensorflow-lite-micro ALIAS tflu)
+    add_library(google::tensorflow-lite-micro ALIAS tflu)
 endfunction()
 
 function(build_tflite_micro_makefile)
@@ -229,11 +229,16 @@ function(build_tflite_micro_makefile)
 
     target_include_directories(tensorflow-lite-micro
         INTERFACE
-        ${TENSORFLOW_SRC_PATH})
+        ${TENSORFLOW_SRC_PATH}
+        ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
+        ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
 
     target_compile_definitions(tensorflow-lite-micro
         INTERFACE
         TF_LITE_STATIC_MEMORY)
+
+    # Create an alias to use in other parts of the project.
+    add_library(google::tensorflow-lite-micro ALIAS tensorflow-lite-micro)
 
 endfunction()
 
