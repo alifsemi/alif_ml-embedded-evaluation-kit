@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +40,7 @@ if (NOT TARGET arm_math)
     add_subdirectory(${ARM_MATH_PROJECT_DIR} ${CMAKE_BINARY_DIR}/math)
 endif()
 
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     add_subdirectory(${LOGGING_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
 endif()
 

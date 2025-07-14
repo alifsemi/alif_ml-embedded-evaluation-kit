@@ -62,10 +62,10 @@ endif()
 set(EXECUTORCH_PAL_DEFAULT                      minimal)
 
 # Map ExecuTorch supported log levels
-if (${LOG_LEVEL} STREQUAL LOG_LEVEL_TRACE OR
-    ${LOG_LEVEL} STREQUAL LOG_LEVEL_DEBUG)
+if (${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_TRACE OR
+    ${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_DEBUG)
     set(EXECUTORCH_LOG_LEVEL                    "Debug")
-elseif(${LOG_LEVEL} STREQUAL LOG_LEVEL_INFO)
+elseif(${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_INFO)
     set(EXECUTORCH_LOG_LEVEL                    "Info")
 else()
     set(EXECUTORCH_LOG_LEVEL                    "Error")

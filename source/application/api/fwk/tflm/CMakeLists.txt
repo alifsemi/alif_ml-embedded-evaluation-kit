@@ -57,7 +57,7 @@ target_include_directories(${ML_FWK_TFLM_TARGET} PUBLIC
 
 # Link time library targets:
 target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
-    log                     # Logging functions
+    mlek_log                # Logging functions
     ml-framework-iface      # ML framework interface
     tensorflow-lite-micro)  # TensorFlow Lite Micro library
 

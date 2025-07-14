@@ -200,7 +200,6 @@ foreach(use_case ${USE_CASES})
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
-        log
         arm_math
         hal
         profiler

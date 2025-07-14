@@ -535,7 +535,7 @@ However, for clarity, here is the full list of available functions:
 - `warn` - printf wrapper for warning messages.
 - `printf_err` - printf wrapper for error messages.
 
-`printf` wrappers can be switched off with `LOG_LEVEL` define:
+`printf` wrappers can be switched off with `MLEK_LOG_LEVEL` define:
 
 `trace (0) < debug (1) < info (2) < warn (3) < error (4)`.
 

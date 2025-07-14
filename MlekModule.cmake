@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -68,7 +68,7 @@ set_platform_global_defaults()
 message(STATUS "Using CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 
 # Make sure the following options are defined before proceeding.
-assert_defined(LOG_LEVEL)
+assert_defined(MLEK_LOG_LEVEL)
 assert_defined(TARGET_PLATFORM)
 assert_defined(USE_CASE_BUILD)
 assert_defined(CPU_PROFILE_ENABLED)

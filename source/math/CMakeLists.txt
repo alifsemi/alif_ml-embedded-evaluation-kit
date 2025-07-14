@@ -32,7 +32,7 @@ target_sources(arm_math
 
 target_include_directories(arm_math PUBLIC include)
 
-target_link_libraries(arm_math PRIVATE log)
+target_link_libraries(arm_math PRIVATE mlek_log)
 
 if (${CMAKE_CROSSCOMPILING})
     include(cmsis-dsp)

@@ -270,9 +270,13 @@ The build parameters are:
   set to false, but can be turned on for FPGA targets. The FVP and the CPU core cycle counts are **not** meaningful and
   are not to be used.
 
-- `LOG_LEVEL`: Sets the verbosity level for the output of the application over `UART`, or `stdout`. Valid values are:
-  `LOG_LEVEL_TRACE`, `LOG_LEVEL_DEBUG`, `LOG_LEVEL_INFO`, `LOG_LEVEL_WARN`, and `LOG_LEVEL_ERROR`. The default is set
-  to: `LOG_LEVEL_INFO`.
+- `MLEK_LOG_ENABLE`: Enables/disables logging for the whole application. Default is set to `ON`, but if this
+  project is wrapped as a dependency, the definitions provided by logging interface could be overridden or disabled
+  altogether.
+
+- `MLEK_LOG_LEVEL`: Sets the verbosity level for the output of the application over `UART`, or `stdout`. Valid values
+  are: `MLEK_LOG_LEVEL_TRACE`, `MLEK_LOG_LEVEL_DEBUG`, `MLEK_LOG_LEVEL_INFO`, `MLEK_LOG_LEVEL_WARN`, and
+  `MLEK_LOG_LEVEL_ERROR`. The default is set to: `MLEK_LOG_LEVEL_INFO`.
 
 - `<use_case>_MODEL_PATH`: The path to the model file that is processed and is included into the application
   `axf` file. The default value points to one of the delivered set of models. Make sure that the model chosen is aligned

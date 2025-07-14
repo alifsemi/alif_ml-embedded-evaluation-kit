@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
-#  affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,16 +27,13 @@ message(STATUS "Assessing common user options...")
 
 include(util_functions)
 
-USER_OPTION(LOG_LEVEL "Log level for the application"
-    LOG_LEVEL_INFO
-    STRING)
+USER_OPTION(MLEK_LOG_ENABLE "Enable MLEK logging functions."
+    ON
+    BOOL)
 
-set_property(CACHE LOG_LEVEL PROPERTY STRINGS
-    LOG_LEVEL_TRACE
-    LOG_LEVEL_DEBUG
-    LOG_LEVEL_INFO
-    LOG_LEVEL_WARN
-    LOG_LEVEL_ERROR)
+USER_OPTION(MLEK_LOG_LEVEL "Log level for the application"
+    MLEK_LOG_LEVEL_INFO
+    STRING)
 
 USER_OPTION(ML_FRAMEWORK "Select the ML inference framework to be used."
     "TensorFlowLiteMicro"

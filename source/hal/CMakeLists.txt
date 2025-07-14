@@ -57,7 +57,7 @@ add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 # Link time library targets:
 target_link_libraries(${HAL_TARGET}
     PUBLIC
-    log                 # Logging functions
+    mlek_log            # Logging functions
     lcd_iface           # LCD interface
     platform_drivers    # Platform drivers implementing the required interfaces
 )

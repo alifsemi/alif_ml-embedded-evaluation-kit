@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or
 #  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -60,7 +60,7 @@ target_compile_definitions(${LCD_MPS3_COMPONENT_TARGET}
     $<$<BOOL:${LCD_TITLE_EN}>:LCD_TITLE_STRING=\"${LCD_TITLE_STRING}\">)
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -70,7 +70,7 @@ endif()
 ## Add dependencies
 target_link_libraries(${LCD_MPS3_COMPONENT_TARGET} PUBLIC
     ${LCD_IFACE_TARGET}
-    log)
+    mlek_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
@@ -96,7 +96,7 @@ target_sources(${LCD_STUBS_COMPONENT_TARGET}
 ## Add dependencies
 target_link_libraries(${LCD_STUBS_COMPONENT_TARGET} PUBLIC
     ${LCD_IFACE_TARGET}
-    log)
+    mlek_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
