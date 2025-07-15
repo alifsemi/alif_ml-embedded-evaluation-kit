@@ -65,6 +65,8 @@ iface::TensorType TflmTensor::Type()
         return iface::TensorType::INT8;
     case kTfLiteInt16:
         return iface::TensorType::INT16;
+    case kTfLiteInt32:
+        return iface::TensorType::INT32;
     case kTfLiteFloat16:
         return iface::TensorType::FP16;
     case kTfLiteFloat32:

@@ -29,10 +29,9 @@ import re
 import sys
 import textwrap
 import typing
-from argparse import ArgumentParser
-from argparse import ArgumentTypeError
-from pathlib import Path
+from argparse import ArgumentParser, ArgumentTypeError, Action
 from enum import Enum
+from pathlib import Path
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
@@ -122,24 +121,15 @@ def get_default_npu_config_from_name(
         config_name: str, arena_cache_size: int = 0
 ) -> typing.Optional[NpuConfig]:
     """
-    Gets the file suffix for the TFLite file from the
-    `accelerator_config` string.
-
-    Parameters:
-    ----------
-    config_name (str):      Ethos-U NPU configuration from valid_npu_config_names
-
-    arena_cache_size (int): Specifies arena cache size in bytes. If a value
-                            greater than 0 is provided, this will be taken
-                            as the cache size. If 0, the default values, as per
-                            the NPU config requirements, are used.
-
-    Returns:
-    -------
-    NpuConfig: An NpuConfig populated with defaults for the given config name
+    Gets the file suffix for the TFLite file from the `accelerator_config` string.
+    :param config_name:         Ethos-U NPU configuration from valid_npu_config_names
+    :param arena_cache_size:    Specifies arena cache size in bytes. If a value
+                                greater than 0 is provided, this will be taken
+                                as the cache size. If 0, the default values, as per
+                                the NPU config requirements, are used.
+    :return                     An NpuConfig populated with defaults for the given config name
     """
     npu_config = valid_npu_configs.get_by_name(config_name)
-
     if not npu_config:
         raise ValueError(
             f"""
@@ -147,7 +137,6 @@ def get_default_npu_config_from_name(
             Select one from {valid_npu_configs.names}.
             """
         )
-
     return npu_config.overwrite_arena_cache_size(arena_cache_size)
 
 
@@ -160,13 +149,12 @@ def initialize_use_case_resources_directory(
 ):
     """
     Initialize the resources_downloaded directory for a use case
-
-    @param use_case:                    The use case
-    @param metadata:                    The metadata
-    @param download_dir:                The parent directory
-    @param check_clean_folder:          Whether to clean the folder
-    @param setup_script_hash_verified:  Whether the hash of this script is verified
-    @return                             The path to this use case's downloaded resources
+    :param use_case:                    The use case
+    :param metadata:                    The metadata
+    :param download_dir:                The parent directory
+    :param check_clean_folder:          Whether to clean the folder
+    :param setup_script_hash_verified:  Whether the hash of this script is verified
+    :return                             The path to this use case's downloaded resources
     """
     use_case_resources_dir = get_downloaded_resources_directory(use_case, download_dir)
     try:
@@ -208,10 +196,9 @@ def get_resources_to_download(
 ) -> typing.List[typing.Tuple[str, Path]]:
     """
     Download the resources associated with a use case
-
-    @param use_case:                    The use case
-    @param download_dir:                The parent directory
-    @param parallel:                    Number of download threads to use
+    :param use_case:                    The use case
+    :param download_dir:                The parent directory
+    :param parallel:                    Number of download threads to use
     """
     reg_expr_str = r"{url_prefix:(.*\d)}"
     reg_expr_pattern = re.compile(reg_expr_str)
@@ -245,12 +232,12 @@ def run_vela(
 ) -> bool:
     """
     Run vela on the specified model
-    @param config:              The NPU configuration
-    @param env_activate_cmd:    The Python venv activation command
-    @param model:               The model
-    @param config_file:         The vela config file
-    @param output_dir:          The output directory
-    @return:                    True if the optimisation was skipped, false otherwise
+    :param config:              The NPU configuration
+    :param env_activate_cmd:    The Python venv activation command
+    :param model:               The model
+    :param config_file:         The vela config file
+    :param output_dir:          The output directory
+    :return:                    True if the optimisation was skipped, false otherwise
     """
     # We want the name to include the configuration suffix. For example: vela_H128,
     # vela_Y512 etc.
@@ -318,12 +305,11 @@ def initialize_resources_directory(
     """
     Sets up the resources_downloaded directory and checks to see if this script
     has been modified since the last time resources were downloaded
-
-    @param download_dir:        Path to the resources_downloaded directory
-    @param check_clean_folder:  Determines whether to clean the downloads directory
-    @param metadata_file_path:  Path to the metadata file
-    @param setup_script_hash:   The md5 hash of this script
-    @return:                    The metadata and a boolean to indicate whether this
+    :param download_dir:        Path to the resources_downloaded directory
+    :param check_clean_folder:  Determines whether to clean the downloads directory
+    :param metadata_file_path:  Path to the metadata file
+    :param setup_script_hash:   The md5 hash of this script
+    :return:                    The metadata and a boolean to indicate whether this
                                 script has changed since it was last run
     """
     metadata_dict = {}
@@ -481,11 +467,10 @@ def update_metadata(
 ):
     """
     Update the metadata file
-
-    @param metadata_dict        :   The metadata dictionary to update
-    @param setup_script_hash    :   The setup script hash
-    @param use_case_resources   :   The use case resources metadata
-    @param metadata_file_path   :   The metadata file path
+    :param metadata_dict        :   The metadata dictionary to update
+    :param setup_script_hash    :   The setup script hash
+    :param use_case_resources   :   The use case resources metadata
+    :param metadata_file_path   :   The metadata file path
     """
     metadata_dict["ethosu_vela_version"] = VELA_VERSION
     metadata_dict["set_up_script_md5sum"] = setup_script_hash.strip("\n")
@@ -498,17 +483,15 @@ def update_metadata(
 def get_default_use_cases_names() -> typing.List[str]:
     """
     Get the names of the default use cases
-
     :return :   List of use case names as strings
     """
-    use_case_resources = load_use_case_resources(default_use_case_resources_path)
+    use_case_resources = load_use_case_resources([default_use_case_resources_path])
     return [uc.name for uc in use_case_resources]
 
 
 def check_paths_config(paths_config: PathsConfig):
     """
     Runs pre-setup checks on the paths config
-
     :param paths_config:    PathsConfig used for setup
     """
     if paths_config.downloads_dir != default_downloads_path:
@@ -603,7 +586,7 @@ def parallel_setup(
     optimize_tflite = (setup_context.setup_config.set_up_tensorflow
                        and setup_context.setup_config.run_vela_on_models)
     optimize_executorch = (setup_context.setup_config.set_up_executorch
-                       and setup_context.setup_config.run_vela_on_models)
+                           and setup_context.setup_config.run_vela_on_models)
     with concurrent.futures.ThreadPoolExecutor(
             max_workers=setup_context.setup_config.parallel
     ) as executor:
@@ -615,7 +598,9 @@ def parallel_setup(
             )
         # Start parallel downloads
         download_futures = [
-            executor.submit(download_file, url, dest)
+            executor.submit(
+                download_file, url, dest, setup_context.setup_config.http_headers
+            )
             for url, dest in resources_to_download
         ]
         # Start optimizing previously-downloaded tflite models and ExecuTorch models
@@ -674,7 +659,7 @@ def serial_setup(
                                     optimized ExecuTorch models
     """
     for url, dest in resources_to_download:
-        download_file(url, dest)
+        download_file(url, dest, setup_context.setup_config.http_headers)
     optimisation_skipped = False
     if (setup_context.setup_config.set_up_tensorflow
             and setup_context.setup_config.run_vela_on_models):
@@ -716,19 +701,11 @@ def set_up_resources(
         paths_config: PathsConfig
 ) -> Path:
     """
-    Helpers function that retrieve the output from a command.
-
-    Parameters:
-    ----------
-    args (SetupArgs)        :   Arguments used to set up the project.
-
-    Returns
-    -------
-
-    Tuple of pairs of Paths: (download_directory_path,  virtual_env_path)
-
-    download_directory_path :   Root of the directory where the resources have been downloaded to.
-    virtual_env_path        :   Path to the root of virtual environment.
+    Run the setup.
+    :param setup_config         :   General setup configuration
+    :param optimization_config  :   Configuration related to model optimization
+    :param paths_config         :   Paths configuration
+    :return                     :   Path to the root of virtual environment.
     """
     context = SetupContext(setup_config, optimization_config, paths_config)
 
@@ -745,7 +722,7 @@ def set_up_resources(
     logging.info("Using Python version: %s", sys.version_info)
 
     use_case_resources = load_use_case_resources(
-        paths_config.use_case_resources_file,
+        paths_config.use_case_resources_files,
         setup_config.use_case_names
     )
     setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
@@ -799,15 +776,6 @@ def set_up_resources(
             download_dir=paths_config.downloads_dir,
         )
 
-    # Run vela on models in resources_downloaded
-    # New models will have same name with '_vela' appended.
-    # For example:
-    # original model:    kws_micronet_m.tflite
-    # after vela model:  kws_micronet_m_vela_H128.tflite
-    #
-    # Note: To avoid to run vela twice on the same model, it's supposed that
-    # downloaded model names don't contain the 'vela' word.
-
     if setup_config.parallel > 1:
         parallel_setup(
             context,
@@ -835,6 +803,19 @@ def set_up_resources(
     )
 
     return context.env_path
+
+
+class HttpHeadersAction(Action):
+    """
+    Action for collecting HTTP headers into a [domain] -> [[header1], [header2]...] dict mapping
+    """
+    def __call__(self, _, namespace, values, option_string=None):
+        domain, header = values
+        all_current_values = getattr(namespace, self.dest, None) or {}
+        headers_for_domain = all_current_values.get(domain, [])
+        headers_for_domain.append(tuple(v.strip() for v in header.split(":")))
+        all_current_values[domain] = headers_for_domain
+        setattr(namespace, self.dest, all_current_values)
 
 
 if __name__ == "__main__":
@@ -893,15 +874,29 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--use-case-resources-file",
-        help="Path to the use case resources file",
+        help="Path to a use case resources file",
         type=Path,
-        default=default_use_case_resources_path
+        nargs="+",
+        default=[],
+        action="append",
     )
     parser.add_argument(
         "--downloads-dir",
         help="Path to downloaded model resources",
         type=Path,
         default=default_downloads_path
+    )
+    parser.add_argument(
+        "--http-header",
+        help="""Specify HTTP Headers to set when downloading from a domain
+            Example:
+                --http-header my-internal-website.com 'Authorization: Bearer $TOKEN'"""
+        ,
+        type=str,
+        metavar=("DOMAIN", "HEADER"),
+        nargs=2,
+        default={},
+        action=HttpHeadersAction,
     )
 
     parsed_args = parser.parse_args()
@@ -925,7 +920,8 @@ if __name__ == "__main__":
         check_clean_folder=parsed_args.clean,
         set_up_executorch=MLFramework.EXECUTORCH.value in ml_frameworks,
         set_up_tensorflow=MLFramework.TENSORFLOW_LITE_MICRO.value in ml_frameworks,
-        parallel=parsed_args.parallel
+        parallel=parsed_args.parallel,
+        http_headers=parsed_args.http_header
     )
 
     optimization = OptimizationConfig(
@@ -933,8 +929,12 @@ if __name__ == "__main__":
         arena_cache_size=parsed_args.arena_cache_size,
     )
 
+    use_case_resources_files = [default_use_case_resources_path] \
+        if len(parsed_args.use_case_resources_file) == 0 \
+        else list(itertools.chain(*parsed_args.use_case_resources_file))
+
     paths = PathsConfig(
-        use_case_resources_file=parsed_args.use_case_resources_file,
+        use_case_resources_files=use_case_resources_files,
         downloads_dir=parsed_args.downloads_dir,
         additional_requirements_file=parsed_args.requirements_file,
         executorch_path=default_executorch_path

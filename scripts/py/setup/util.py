@@ -23,20 +23,69 @@ import shutil
 import subprocess
 import typing
 import urllib
+import urllib.parse
 import urllib.request
+from netrc import netrc
 from pathlib import Path
 from urllib.error import URLError
 
+default_netrc_path = Path(os.environ["HOME"]) / ".netrc"
+HttpHeadersType = typing.Dict[str, typing.List[typing.Tuple[str, str]]]
 
-def download_file(url: str, dest: Path) -> Path:
+
+def create_basic_auth_handler(
+        domain: str,
+        username: str,
+        password: str
+) -> urllib.request.BaseHandler:
+    """
+    Create an HTTPBasicAuthHandler for the specified domain and credentials
+    :param domain:      The top-level domain for which to provide credentials
+    :param username:    The username
+    :param password:    The password
+    :return:            The HTTPBasicAuthHandler
+    """
+    password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+    password_mgr.add_password(None, domain, username, password)
+    return urllib.request.HTTPBasicAuthHandler(password_mgr)
+
+
+def build_opener(domain: str) -> urllib.request.OpenerDirector:
+    """
+    Build an opener for the specified domain.
+    HTTP Basic Auth will be used if credentials for the
+    provided domain are found in the local ~/.netrc file.
+    :param domain:  The domain for which credentials will be searched in ~/.netrc
+    :return:        The opener with HTTP Basic Auth credentials added if found
+    """
+    handlers = []
+    if default_netrc_path.is_file():
+        netrc_entry = netrc().authenticators(domain)
+        if netrc_entry:
+            login, _, password = netrc_entry
+            handlers.append(create_basic_auth_handler(domain, login, password))
+    return urllib.request.build_opener(*handlers)
+
+
+def download_file(
+        url: str,
+        dest: Path,
+        http_headers: HttpHeadersType,
+) -> Path:
     """
     Download a file
 
     @param url:     The URL of the file to download
     @param dest:    The destination of downloaded file
     """
+    parsed_url = urllib.parse.urlparse(url)
+    opener = build_opener(parsed_url.netloc)
+    request = urllib.request.Request(url)
+    headers_for_domain = http_headers.get(parsed_url.netloc, [])
+    for key, value in headers_for_domain:
+        request.add_header(key, value)
     try:
-        with urllib.request.urlopen(url) as g:
+        with opener.open(request) as g:
             with open(dest, "b+w") as f:
                 f.write(g.read())
                 logging.info("- Downloaded %s to %s.", url, dest)

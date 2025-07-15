@@ -31,7 +31,7 @@ struct QuantParams {
 };
 
 /** Enum representing tensor data types supported. */
-enum class TensorType { INT8 = 0, UINT8 = 1, INT16 = 2, FP16 = 3, FP32 = 4, INVALID = 5 };
+enum class TensorType { INT8 = 0, UINT8 = 1, INT16 = 2, INT32 = 3, FP16 = 4, FP32 = 5, INVALID = 6 };
 
 /** Enum representing tensor layout. */
 enum class TensorLayout { NHWC = 0, NCHW = 1, INVALID = 2 };
@@ -50,6 +50,8 @@ const inline char* GetTensorDataTypeName(const TensorType type)
         return "uint8";
     case TensorType::INT16:
         return "int16";
+    case TensorType::INT32:
+        return "int32";
     case TensorType::FP16:
         return "fp16";
     case TensorType::FP32:
@@ -92,6 +94,8 @@ inline int GetTensorDataTypeSize(const TensorType type)
         [[fallthrough]];
     case TensorType::FP16:
         return 2;
+    case TensorType::INT32:
+        [[fallthrough]];
     case TensorType::FP32:
         return 4;
     default:

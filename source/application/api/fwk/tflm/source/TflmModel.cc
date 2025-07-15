@@ -235,6 +235,8 @@ bool TflmModel::IsDataSigned() const
     case iface::TensorType::INT8:
         [[fallthrough]];
     case iface::TensorType::INT16:
+        [[fallthrough]];
+    case iface::TensorType::INT32:
         return true;
     default:
         return false;

@@ -18,8 +18,10 @@
 Setup config definitions
 """
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+
+from .util import HttpHeadersType
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,7 @@ class SetupConfig:
     set_up_executorch: bool = True
     set_up_tensorflow: bool = True
     parallel: int = 1
+    http_headers: HttpHeadersType = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -71,14 +74,14 @@ class PathsConfig:
         additional_requirements_file (str)  :   Path to a requirements.txt file if
                                                 additional packages need to be
                                                 installed.
-        use_case_resources_file (Path)      :   Path to a JSON file containing the use case
+        use_case_resources_files (List)     :   List of Paths to JSON files containing the use case
                                                 metadata resources.
 
         downloads_dir (Path)                :  Path to store model resources files.
         executorch_path (Path)              :  Path to ExecuTorch repository
     """
     additional_requirements_file: Path = ""
-    use_case_resources_file: Path = ""
+    use_case_resources_files: typing.List[Path] = ""
     downloads_dir: Path = ""
     executorch_path: Path = ""
 

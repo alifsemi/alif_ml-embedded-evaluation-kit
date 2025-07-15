@@ -17,6 +17,7 @@
 """
 Use case domain object definitions
 """
+import itertools
 import json
 import typing
 from dataclasses import dataclass, field
@@ -44,8 +45,18 @@ class UseCase:
     executorch_models: typing.Optional[typing.List[str]] = field(default_factory=lambda: [])
 
 
+def load_use_case_resources_file(file_path: Path) -> typing.List[typing.Dict[str, typing.Any]]:
+    """
+    Load a use case resources file from the specified Path
+    :param file_path:   Path to the use case resources file
+    :return:            The file contents parsed to a Dictionary
+    """
+    with open(file_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 def load_use_case_resources(
-        use_case_resources_file: Path,
+        use_case_resources_files: typing.List[Path],
         use_case_names: typing.List[str] = ()
 ) -> typing.List[UseCase]:
     """
@@ -53,7 +64,7 @@ def load_use_case_resources(
 
     Parameters
     ----------
-    use_case_resources_file :   Path to a JSON file containing the use case
+    use_case_resources_files :  Paths to JSON files containing the use case
                                 metadata resources.
     use_case_names          :   List of named use cases to restrict
                                 resource loading to.
@@ -61,20 +72,23 @@ def load_use_case_resources(
     -------
     The use cases resources object parsed to a dict
     """
+    use_case_resources = list(
+        itertools.chain(*(
+            load_use_case_resources_file(file) for file in use_case_resources_files
+        ))
+    )
 
-    with open(use_case_resources_file, encoding="utf8") as f:
-        parsed_use_cases = json.load(f)
-        use_cases = (
-            UseCase(
-                name=u["name"],
-                url_prefix=u["url_prefix"],
-                resources=[UseCaseResource(**r) for r in u["resources"]],
-                executorch_models=u.get("executorch_models", []),
-            )
-            for u in parsed_use_cases
+    use_cases = (
+        UseCase(
+            name=u["name"],
+            url_prefix=u["url_prefix"],
+            resources=[UseCaseResource(**r) for r in u["resources"]],
+            executorch_models=u.get("executorch_models", []),
         )
+        for u in use_case_resources
+    )
 
-        if len(use_case_names) == 0:
-            return list(use_cases)
+    if len(use_case_names) == 0:
+        return list(use_cases)
 
-        return [uc for uc in use_cases if uc.name in use_case_names]
+    return [uc for uc in use_cases if uc.name in use_case_names]
