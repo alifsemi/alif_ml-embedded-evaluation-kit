@@ -35,7 +35,10 @@ endif()
 # including this project can provide its own version
 # of the target.
 if (NOT TARGET google::tensorflow-lite-micro)
+    set(TFLM_EXTERNAL_TARGET OFF)
     include(tensorflow_lite_micro)
+else()
+    set(TFLM_EXTERNAL_TARGET ON)
 endif()
 
 # Create static library
@@ -65,6 +68,15 @@ target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
     google::tensorflow-lite-micro)  # TensorFlow Lite Micro library
 
 target_compile_definitions(${ML_FWK_TFLM_TARGET} INTERFACE MLEK_FWK_TFLM=1)
+
+# Set the source file property to indicate that it should not use the logging
+# facility from the Cortex-M CPU generic target unless it is an internally
+# configured target. Reason: for external target, we can't assume that it
+# compiles the sources required.
+if (TFLM_EXTERNAL_TARGET)
+    set_source_files_properties(source/TensorFlowLiteMicro.cc
+        PROPERTIES COMPILE_DEFINITIONS TFLM_EXTERNAL_TARGET)
+endif()
 
 # Display status:
 message(STATUS "*******************************************************")

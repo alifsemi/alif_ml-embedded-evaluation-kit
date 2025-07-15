@@ -20,7 +20,7 @@
 
 /* If target is arm-none-eabi and arch profile is 'M', wire the logging for
  * TensorFlow Lite Micro */
-#if defined(__arm__) && (__ARM_ARCH_PROFILE == 77)
+#if defined(__arm__) && (__ARM_ARCH_PROFILE == 77) && !defined(TFLM_EXTERNAL_TARGET)
 #include "tensorflow/lite/micro/cortex_m_generic/debug_log_callback.h"
 
 #ifdef __cplusplus
@@ -39,8 +39,8 @@ void arm::app::fwk::tflm::EnableTFLMLog()
     RegisterDebugLogCallback(TFLMLog);
 }
 
-#else /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) */
+#else /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) && !defined(TFLM_EXTERNAL_TARGET) */
 
 void arm::app::fwk::tflm::EnableTFLMLog() {}
 
-#endif /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) */
+#endif /* defined(__arm__) && (__ARM_ARCH_PROFILE == 77) && !defined(TFLM_EXTERNAL_TARGET) */
