@@ -100,8 +100,6 @@ class SetupContext:
         self.env_path: Path = Path("/")
         self.env_activate_cmd: str = ""
 
-        self.quantized_ops_lib_path: Path = Path("/")
-
     @property
     def setup_config(self):
         """

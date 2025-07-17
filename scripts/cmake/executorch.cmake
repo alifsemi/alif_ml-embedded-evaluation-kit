@@ -33,11 +33,6 @@ if (ETHOS_U_NPU_ENABLED)
         message(FATAL_ERROR "Support for Arm Ethos-U65 is currently disabled in this "
                             "experimental branch. Use Arm Ethos-U55 or Arm Ethos-U85")
     endif()
-    if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Dedicated_Sram)
-        message(FATAL_ERROR "`Dedicated_Sram` memory mode is not supported "
-                            "by current rev of ExecuTorch."
-                            "Use `Sram_Only` or `Shared_Sram` modes")
-    endif()
 endif()
 
 # Validate pre-requisites.
@@ -50,22 +45,27 @@ set(EXECUTORCH_BUILD_EXECUTOR_RUNNER            OFF)
 set(EXECUTORCH_BUILD_KERNELS_QUANTIZED          ON)
 set(EXECUTORCH_BUILD_EXTENSION_RUNNER_UTIL      ON)
 set(EXECUTORCH_ENABLE_LOGGING                   ON)
+set(EXECUTORCH_BUILD_DEVTOOLS                   OFF)
+set(EXECUTORCH_ENABLE_EVENT_TRACER              OFF)
+set(GFLAGS_INTTYPES_FORMAT                      C99)
 
 if(TARGET_PLATFORM STREQUAL native)
     set(EXECUTORCH_BUILD_ARM_BAREMETAL          OFF)
+    set(EXECUTORCH_BUILD_CORTEX_M               OFF)
     set(EXECUTORCH_BUILD_CPUINFO                ON)
 else()
     set(EXECUTORCH_BUILD_ARM_BAREMETAL          ON)
+    set(EXECUTORCH_BUILD_CORTEX_M               ON)
     set(EXECUTORCH_BUILD_HOST_TARGETS           OFF)
 endif()
 
 set(EXECUTORCH_PAL_DEFAULT                      minimal)
 
 # Map ExecuTorch supported log levels
-if (${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_TRACE OR
-    ${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_DEBUG)
+if (${MLEK_LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_TRACE OR
+    ${MLEK_LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_DEBUG)
     set(EXECUTORCH_LOG_LEVEL                    "Debug")
-elseif(${LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_INFO)
+elseif(${MLEK_LOG_LEVEL} STREQUAL MLEK_LOG_LEVEL_INFO)
     set(EXECUTORCH_LOG_LEVEL                    "Info")
 else()
     set(EXECUTORCH_LOG_LEVEL                    "Error")
@@ -91,7 +91,8 @@ block(SCOPE_FOR VARIABLES)
     endif()
 
     # Add ET main subdirectory
-    add_subdirectory(${EXECUTORCH_SRC_PATH} ${CMAKE_BINARY_DIR}/executorch)
+    add_subdirectory(${EXECUTORCH_SRC_PATH}
+        ${CMAKE_BINARY_DIR}/executorch EXCLUDE_FROM_ALL)
 
     # Generate C++ bindings to register kernels into both PyTorch (for AOT) and
     # Executorch (for runtime). Here select all ops in functions.yaml
@@ -127,20 +128,35 @@ block(SCOPE_FOR VARIABLES)
     endif()
 endblock()
 
-set(MLEK_EXECUTORCH_LINK_STR)
-list(APPEND MLEK_EXECUTORCH_LINK_STR
-    "-Wl,--whole-archive"
-    $<$<BOOL:${ETHOS_U_NPU_ENABLED}>:executorch_delegate_ethos_u>
-    "-Wl,--no-whole-archive"
-    quantized_ops_lib
-    quantized_kernels
-    portable_kernels
-    executorch
-    extension_runner_util
-)
+# Collate the targets for easily linking against.
+add_library(mlek_executorch INTERFACE)
 
+target_link_libraries(mlek_executorch INTERFACE
+    extension_runner_util
+    quantized_ops_lib)
+
+# Based on target, link to the correct portable ops library
 if (TARGET_PLATFORM STREQUAL native)
-    list(APPEND MLEK_EXECUTORCH_LINK_STR portable_ops_lib)
+    target_link_libraries(mlek_executorch INTERFACE
+        portable_ops_lib)
 else()
-    list(APPEND MLEK_EXECUTORCH_LINK_STR arm_portable_ops_lib)
+    target_link_libraries(mlek_executorch INTERFACE
+        arm_portable_ops_lib
+        cortex_m_ops_lib)
+
+    if (TARGET executorch_delegate_ethos_u)
+        # Supress warnings from Arm Ethos-U delegate library
+        target_compile_options(executorch_delegate_ethos_u PRIVATE
+            -Wno-error=deprecated-declarations
+            -Wno-error=unused-parameter)
+
+        # Whole archive needs to be included for the delegate.
+        target_link_libraries(mlek_executorch INTERFACE
+            "-Wl,--whole-archive"
+            $<TARGET_FILE:executorch_delegate_ethos_u>
+            "-Wl,--no-whole-archive")
+    endif()
 endif()
+
+# Provide alias target for rest of projects to use
+add_library(meta::executorch ALIAS mlek_executorch)

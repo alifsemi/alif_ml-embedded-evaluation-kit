@@ -220,11 +220,8 @@ with the following limitations:
 
 * Arm® Compiler is not supported
 * Runtime memory usage is higher than we would like
-* `Dedicated_Sram` mode is not supported on any NPU
-* Arm® Ethos™-U65 NPU is not supported
-
-The last two limitations are expected to be addressed with an upcoming update to a newer version of the
-ExecuTorch source tree.
+* Arm® Ethos™-U65 NPU is not supported; this limitation could be resolved with minor tweaks within
+  Executorch tree.
 
 ## Licenses
 

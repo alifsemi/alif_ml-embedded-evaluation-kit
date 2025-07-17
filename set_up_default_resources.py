@@ -26,7 +26,6 @@ import json
 import logging
 import os
 import re
-import shutil
 import sys
 import textwrap
 import typing
@@ -34,6 +33,7 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from pathlib import Path
 from enum import Enum
+from tempfile import TemporaryDirectory
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
@@ -386,38 +386,6 @@ def install_executorch(executorch_path: Path, env_activate_cmd: str) -> None:
         verbose=True
     )
 
-
-def install_executorch_quantized_ops_lib(
-        executorch_path: Path,
-        env_activate_cmd: str
-) -> typing.List[Path]:
-    """
-    Builds the quantized ops shared library for host. The path to this lib
-    is needed for generating PTE files.
-    :param executorch_path:     Root of Executorch source tree
-    :param env_activate_cmd:    Command to activate the Python virtual
-                                environment where we need to install.
-    returns                     List of paths to generated shared_lib files.
-    """
-    if not executorch_path.is_dir():
-        raise NotADirectoryError(f'Invalid dir {executorch_path}')
-
-    if len(env_activate_cmd.strip()) == 0:
-        raise ValueError('venv activation command cannot be empty.')
-
-    script_dir = executorch_path / 'backends' / 'arm' / 'scripts'
-    install_script = script_dir / 'build_quantized_ops_aot_lib.sh'
-    expected_lib_path = executorch_path / 'cmake-out-aot-lib' / 'kernels' / 'quantized'
-    expected_ext = '.so'
-
-    call_command(
-        command=f'{env_activate_cmd} && {install_script}',
-        verbose=True
-    )
-
-    return list(expected_lib_path.glob('*' + expected_ext))
-
-
 def optimize_executorch_model(
         model_name: str,
         npu_config: NpuConfig,
@@ -434,16 +402,15 @@ def optimize_executorch_model(
     :return:                True if optimization was skipped, False otherwise
     """
     if npu_config is not None:
-        # Should be --memory_mode {npu_config.memory_mode} but Dedicated_Sram mode
-        # doesn't work with current rev of ExecuTorch.
         cfg = (f" --target {npu_config.config_name}"
                f" --system_config {npu_config.system_config}"
-               " --delegate --quantize"
-               " --memory_mode Shared_Sram")
+               f" --memory_mode {npu_config.memory_mode}"
+               f" --config {vela_config_file}"
+                " --delegate --quantize")
         optimized_model_name = f"{model_name}_arm_delegate_{npu_config.config_name}.pte"
     else:
-        cfg = " --quantize --target TOSA"
-        optimized_model_name = output_dir / f"{model_name}_arm_TOSA.pte"
+        cfg = " --target TOSA-1.0+INT"
+        optimized_model_name = output_dir / f"{model_name}_arm_TOSA-1.0+INT.pte"
 
     optimized_model_path = output_dir / optimized_model_name
     if optimized_model_path.is_file():
@@ -456,57 +423,40 @@ def optimize_executorch_model(
     call_command(
         command=(f"{setup_context.env_activate_cmd} && python3 -m examples.arm.aot_arm_compiler"
                  f" --model_name={model_name}"
-                 f"{cfg}"
-                 f" --so_library={setup_context.quantized_ops_lib_path}"
+                 f" {cfg}"
                  f" --output {output_dir}"),
         cwd=setup_context.paths_config.executorch_path)
 
     return False
 
 
-def setup_executorch(setup_context: SetupContext) -> typing.List[Path]:
+def setup_executorch(setup_context: SetupContext):
     """
-    Installs Tosa tools and ExecuTorch in the Python virtual environment and builds the
-    quantized ops shared libraries.
+    Installs TOSA tools and ExecuTorch in the Python virtual environment.
+    Note: ExecuTorch setup currently not supported on Microsoft Windows based systems.
     :param setup_context:       SetupContext
     :return: list of shared library files needed for generating PTE files.
     """
+    if sys.platform not in ['linux', 'darwin']:
+        raise EnvironmentError(f'{sys.platform} does not support ExecuTorch set up.')
+
     # Install TOSA tools:
-    install_pip_package_if_needed(
-        f"git+{TOSA_URL}@{TOSA_VER}",
-        setup_context.env_activate_cmd,
-        installed_package_name="tosa-tools",
-        environment={
-            "CMAKE_POLICY_VERSION_MINIMUM": 3.5
-        },
-        no_deps=True
-    )
+    executorch_path = setup_context.paths_config.executorch_path
+    if not is_pip_package_installed('tosa-tools', setup_context.env_activate_cmd):
+        with TemporaryDirectory() as tmpdir:
+            tosa_tools_install_script = (executorch_path /
+                                         'backends' / 'arm' / 'scripts' /
+                                         'install_reference_model.sh')
+            logging.info('Installing TOSA tools using %s', tosa_tools_install_script)
+            call_command((f'{setup_context.env_activate_cmd} && '
+                          f'{tosa_tools_install_script} {tmpdir}'),
+                         cwd=executorch_path)
+    else:
+        logging.info('tosa-tools package is already installed.')
 
     # Install ExecuTorch package
     if not is_pip_package_installed("executorch", setup_context.env_activate_cmd):
-        install_executorch(default_executorch_path, setup_context.env_activate_cmd)
-
-    # Build and install quantized ops libraries:
-    lib_aot_quantized_ops_path = setup_context.env_path / "libquantized_ops_aot_lib.so"
-    if lib_aot_quantized_ops_path.exists():
-        et_ops_lib_list = [lib_aot_quantized_ops_path]
-    else:
-        et_ops_lib_list = install_executorch_quantized_ops_lib(
-            default_executorch_path,
-            setup_context.env_activate_cmd
-        )
-        if not et_ops_lib_list:
-            raise FileNotFoundError('No shared libraries found for ExecuTorch quantized ops')
-
-        logging.info('Libs required for pte file generation: %s,', et_ops_lib_list)
-        for file in et_ops_lib_list:
-            if file.is_file():
-                shutil.copy(file, setup_context.env_path / file.name)
-
-        et_ops_lib_list = [setup_context.env_path / file.name for file in et_ops_lib_list]
-        logging.info('Libs copied here: %s', et_ops_lib_list)
-
-    return et_ops_lib_list
+        install_executorch(executorch_path, setup_context.env_activate_cmd)
 
 
 def setup_vela(env_activate_cmd: str):
@@ -819,14 +769,9 @@ def set_up_resources(
     setup_vela(context.env_activate_cmd)
 
     if setup_config.set_up_executorch:
-        et_ops_lib_list = setup_executorch(context)
-        context.quantized_ops_lib_path = [
-            lib for lib in et_ops_lib_list
-            if lib.name == "libquantized_ops_aot_lib.so"
-        ][0]
+        setup_executorch(context)
 
     # Download models
-
     npu_configs = [
         get_default_npu_config_from_name(npu_config_name, optimization_config.arena_cache_size)
         for npu_config_name in set(
@@ -835,6 +780,8 @@ def set_up_resources(
         )
     ]
 
+    # Arm AOT compiler (helper script within ExecuTorch) does not list support
+    # for Arm Ethos-U65 yet.
     executorch_npu_configs = [config for config in npu_configs if config.processor_id != "U65"]
 
     # For ExecuTorch, we need to generate TOSA PTE files for native host as well.

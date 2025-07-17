@@ -46,12 +46,14 @@ target_include_directories(${ML_FWK_ET_TARGET} PUBLIC
     include)
 
 # Link time library targets:
-target_link_libraries(${ML_FWK_ET_TARGET} PUBLIC
-    mlek_log                        # Logging functions
-    ml-framework-iface              # ML framework interface lib
-    ${MLEK_EXECUTORCH_LINK_STR})    # ExecuTorch libraries
+target_link_libraries(${ML_FWK_ET_TARGET}
+    PUBLIC
+    mlek_log            # Logging functions
+    ml-framework-iface  # ML framework interface lib
+    meta::executorch)   # ExecuTorch libraries
 
-target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE MLEK_FWK_EXECUTORCH=1)
+target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE
+    MLEK_FWK_EXECUTORCH=1)
 
 # Display status:
 message(STATUS "*******************************************************")
