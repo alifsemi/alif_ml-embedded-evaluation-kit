@@ -218,7 +218,7 @@ a preview of refactoring that allows `ExecuTorch` and `TensorFlow Lite Micro` to
 source tree. At this stage, only the **image classification example** is functional with the `ExecuTorch` path,
 with the following limitations:
 
-* Arm® Compiler is not supported
+* Arm® Compiler and Arm® Toolchain for Embedded are not supported
 * Runtime memory usage is higher than we would like
 * Arm® Ethos™-U65 NPU is not supported; this limitation could be resolved with minor tweaks within
   Executorch tree.
