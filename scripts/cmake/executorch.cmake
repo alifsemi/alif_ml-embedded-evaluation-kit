@@ -155,6 +155,11 @@ else()
             "-Wl,--whole-archive"
             $<TARGET_FILE:executorch_delegate_ethos_u>
             "-Wl,--no-whole-archive")
+
+        # Explicitly add dependency as some generators might not
+        # add it automatically when only TARGET_FILE is used
+        # in linking.
+        add_dependencies(mlek_executorch executorch_delegate_ethos_u)
     endif()
 endif()
 
