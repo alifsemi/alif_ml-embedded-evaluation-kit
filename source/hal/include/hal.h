@@ -31,7 +31,7 @@ extern "C" {
 
 #include "platform_drivers.h"   /* Platform drivers */
 #include "hal_pmu.h"            /* Timer/profiler API */
-#include "hal_lcd.h"            /* LCD functions */
+#include "hal_display.h"        /* Display interface */
 #include "hal_audio.h"          /* Audio interface */
 #include "hal_camera.h"         /* Camera interface */
 

@@ -34,7 +34,7 @@ namespace app {
 
         constexpr uint32_t dataPsnTxtYIncr = 16; /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result. */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -48,12 +48,12 @@ namespace app {
                                     std::to_string(results[i].m_labelIdx) + " (" +
                                     std::to_string(results[i].m_normalisedVal) + ")";
 
-            hal_lcd_display_text(
+            hal_display_show_text(
                 resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 
             resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
-            hal_lcd_display_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
+            hal_display_show_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
             rowIdx2 += dataPsnTxtYIncr;
 
             info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n",

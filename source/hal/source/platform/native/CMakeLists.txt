@@ -55,8 +55,8 @@ endif()
 ## Platform component: stdout
 add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
-## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+## Platform component: display
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
@@ -72,7 +72,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
     mlek_log
     platform_pmu
-    lcd_stubs
+    hal_display_stubs
     hal_audio_static_streams
     hal_camera_static_images)
 

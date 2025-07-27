@@ -137,7 +137,7 @@ namespace app {
 
         /* Display message on the LCD - inference running. */
         std::string str_inf{"Running KWS inference... "};
-        hal_lcd_display_text(
+        hal_display_show_text(
             str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
         /* Start sliding through audio clip. */
@@ -191,7 +191,7 @@ namespace app {
 
         /* Erase. */
         str_inf = std::string(str_inf.size(), ' ');
-        hal_lcd_display_text(
+        hal_display_show_text(
             str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
         if (!PresentInferenceResult(finalResults)) {
@@ -228,7 +228,7 @@ namespace app {
             return false;
         }
 
-        hal_lcd_clear(COLOR_BLACK);
+        hal_display_clear(COLOR_BLACK);
 
         /* Get Input and Output tensors for pre/post processing. */
         auto asrInputTensor  = asrModel.GetInputTensor(0);
@@ -280,7 +280,7 @@ namespace app {
 
         /* Display message on the LCD - inference running. */
         std::string str_inf{"Running ASR inference... "};
-        hal_lcd_display_text(
+        hal_display_show_text(
             str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
         size_t asrInferenceWindowLen = asrAudioDataWindowLen;
@@ -359,7 +359,7 @@ namespace app {
 
             /* Erase */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
         }
         if (!PresentInferenceResult(asrResults)) {
@@ -374,7 +374,7 @@ namespace app {
     /* KWS and ASR inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
-        hal_lcd_clear(COLOR_BLACK);
+        hal_display_clear(COLOR_BLACK);
         hal_audio_init();
         if (!hal_audio_configure(HAL_AUDIO_MODE_SINGLE_BURST,
                                  HAL_AUDIO_FORMAT_16KHZ_MONO_16BIT)) {
@@ -415,7 +415,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result. */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -434,7 +434,7 @@ namespace app {
                                     std::to_string(static_cast<int>(score * 100)) +
                                     std::string{"%)"};
 
-            hal_lcd_display_text(
+            hal_display_show_text(
                 resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, 0);
             rowIdx1 += dataPsnTxtYIncr;
 
@@ -459,7 +459,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 80;
         constexpr bool allow_multiple_lines  = true;
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Results from multiple inferences should be combined before processing. */
         std::vector<arm::app::ClassificationResult> combinedResults;
@@ -478,7 +478,7 @@ namespace app {
 
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
-        hal_lcd_display_text(finalResultStr.c_str(),
+        hal_display_show_text(finalResultStr.c_str(),
                              finalResultStr.size(),
                              dataPsnTxtStartX1,
                              dataPsnTxtStartY1,

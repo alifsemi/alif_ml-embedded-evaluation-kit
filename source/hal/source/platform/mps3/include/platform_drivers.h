@@ -24,7 +24,6 @@
 /* Platform components */
 #include "RTE_Components.h" /* For CPU related defintiions */
 #include "timer_mps3.h"     /* Timer functions. */
-#include "lcd_img.h"        /* LCD functions. */
 
 /**
  * @brief   Initialises the platform components.

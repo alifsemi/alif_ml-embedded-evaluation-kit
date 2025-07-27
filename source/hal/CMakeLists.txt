@@ -58,7 +58,7 @@ add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 target_link_libraries(${HAL_TARGET}
     PUBLIC
     mlek_log            # Logging functions
-    lcd_iface           # LCD interface
+    hal_display_iface   # Display interface
     platform_drivers    # Platform drivers implementing the required interfaces
 )
 

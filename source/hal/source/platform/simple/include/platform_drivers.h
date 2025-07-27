@@ -25,7 +25,6 @@
 #include "RTE_Components.h"         /* For CPU related defintiions */
 #include "timer_simple_platform.h"  /* timer implementation */
 #include "platform_pmu.h"           /* PMU definitions and API */
-#include "lcd_img.h"                /* LCD functions */
 
 /**
  * @brief   Initialises the platform components.

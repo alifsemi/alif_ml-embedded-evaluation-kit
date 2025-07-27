@@ -85,7 +85,7 @@ namespace app {
             AwaitUserInput(); // Wait for user input before moving forward.
 #endif /* INTERACTIVE_MODE */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
             uint32_t nElements = 0;
             hal_audio_start();
             auto audioData = hal_audio_get_captured_frame(&nElements);
@@ -106,7 +106,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Start sliding through audio clip. */
@@ -138,7 +138,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             ctx.Set<float>("result", result);
@@ -158,7 +158,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -175,7 +175,7 @@ namespace app {
             anomalyResult += std::string("Everything fine, no anomaly detected!");
         }
 
-        hal_lcd_display_text(
+        hal_display_show_text(
             anomalyScore.c_str(), anomalyScore.size(), dataPsnTxtStartX1, rowIdx1, false);
 
         info("%s\n", anomalyScore.c_str());

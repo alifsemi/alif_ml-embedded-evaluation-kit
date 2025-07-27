@@ -97,7 +97,7 @@ namespace app {
                 break;
             }
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
 
             auto startDumpAddress = memDumpBaseAddr + memDumpBytesWritten;
 
@@ -151,7 +151,7 @@ namespace app {
                 std::string str_inf{"Running inference... "};
 
                 /* Display message on the LCD - inference running. */
-                hal_lcd_display_text(str_inf.c_str(),
+                hal_display_show_text(str_inf.c_str(),
                                      str_inf.size(),
                                      dataPsnTxtInfStartX,
                                      dataPsnTxtInfStartY,
@@ -176,7 +176,7 @@ namespace app {
 
                 /* Erase. */
                 str_inf = std::string(str_inf.size(), ' ');
-                hal_lcd_display_text(str_inf.c_str(),
+                hal_display_show_text(str_inf.c_str(),
                                      str_inf.size(),
                                      dataPsnTxtInfStartX,
                                      dataPsnTxtInfStartY,
@@ -207,7 +207,7 @@ namespace app {
             profiler.PrintProfilingResult();
 
             std::string clearString{' '};
-            hal_lcd_display_text(clearString.c_str(),
+            hal_display_show_text(clearString.c_str(),
                                  clearString.size(),
                                  dataPsnTxtInfStartX,
                                  dataPsnTxtInfStartY,
@@ -216,7 +216,7 @@ namespace app {
             std::string completeMsg{"Inference complete!"};
 
             /* Display message on the LCD - inference complete. */
-            hal_lcd_display_text(completeMsg.c_str(),
+            hal_display_show_text(completeMsg.c_str(),
                                  completeMsg.size(),
                                  dataPsnTxtInfStartX,
                                  dataPsnTxtInfStartY,

@@ -142,8 +142,8 @@ bool RunInferenceHandler(ApplicationContext& ctx)
     std::string str_inf{"Running inference... "};
 
     /* Display message on the LCD - inference running. */
-    hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                         dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+    hal_display_show_text(str_inf.c_str(), str_inf.size(),
+                          dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     if (!RunInference(model, profiler)) {
         return false;
@@ -151,9 +151,8 @@ bool RunInferenceHandler(ApplicationContext& ctx)
 
     /* Erase. */
     str_inf = std::string(str_inf.size(), ' ');
-    hal_lcd_display_text(
-                            str_inf.c_str(), str_inf.size(),
-                            dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+    hal_display_show_text(str_inf.c_str(), str_inf.size(),
+                          dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     info("Final results:\n");
     info("Total number of inferences: 1\n");

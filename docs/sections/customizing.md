@@ -545,8 +545,8 @@ However, for clarity, here is the full list of available functions:
 
 The HAL exposes LCD functions to print text or an image to the board LCD. For example:
 
-- `hal_lcd_display_text`
-- `hal_lcd_display_image`
+- `hal_display_show_text`
+- `hal_display_show_image`
 
 Text presentation function has the following signature:
 
@@ -563,7 +563,7 @@ Here is an example that prints "Hello world" on the LCD screen:
 
 ```C++
 std::string hello("Hello world");
-hal_lcd_display_text(hello.c_str(), hello.size(), 10, 35, 0);
+hal_display_show_text(hello.c_str(), hello.size(), 10, 35, 0);
 ```
 
 The image presentation function has the following signature:
@@ -580,7 +580,7 @@ For example, the following code snippet visualizes an input tensor data for `Mob
 by a factor of two:
 
 ```C++
-hal_lcd_display_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
+hal_display_show_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
 Please refer to the [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api) section for more
@@ -720,13 +720,13 @@ the MPS3 platform implementation has:
 ```cmake
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
-    lcd_mps3)
+    hal_display_mps3)
 ```
 The implementation for simple platform on the other hand has:
 ```cmake
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
-    lcd_stubs)
+    hal_display_stubs)
 ```
 
 The standard output (stdout) component follows the same convention. It can expose three targets:

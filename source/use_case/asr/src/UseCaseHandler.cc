@@ -103,7 +103,7 @@ namespace app {
             AwaitUserInput(); // Wait for user input before moving forward.
 #endif /* INTERACTIVE_MODE */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
 
             /* Get the current audio buffer and respective size. */
             uint32_t audioArrSize = 0;
@@ -130,7 +130,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             size_t inferenceWindowLen = audioDataWindowLen;
@@ -183,7 +183,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             ctx.Set<std::vector<asr::AsrResult>>("results", finalResults);
@@ -204,7 +204,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 60;
         constexpr bool allow_multiple_lines  = true;
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
@@ -228,11 +228,11 @@ namespace app {
         /* Get the decoded result for the combined result. */
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
-        hal_lcd_display_text(finalResultStr.c_str(),
-                             finalResultStr.size(),
-                             dataPsnTxtStartX1,
-                             dataPsnTxtStartY1,
-                             allow_multiple_lines);
+        hal_display_show_text(finalResultStr.c_str(),
+                              finalResultStr.size(),
+                              dataPsnTxtStartX1,
+                              dataPsnTxtStartY1,
+                              allow_multiple_lines);
 
         info("Complete recognition: %s\n", finalResultStr.c_str());
         return true;

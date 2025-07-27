@@ -105,7 +105,7 @@ namespace app {
             AwaitUserInput(); // Wait for user input before moving forward.
 #endif /* INTERACTIVE_MODE */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
 
             uint32_t nElements = 0;
             hal_audio_start();
@@ -127,7 +127,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Start sliding through audio clip. */
@@ -168,7 +168,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             ctx.Set<std::vector<kws::KwsResult>>("results", finalResults);
@@ -189,7 +189,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
 
@@ -210,7 +210,7 @@ namespace app {
                                     std::to_string(static_cast<int>(score * 100)) +
                                     std::string{"%)"};
 
-            hal_lcd_display_text(
+            hal_display_show_text(
                 resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 

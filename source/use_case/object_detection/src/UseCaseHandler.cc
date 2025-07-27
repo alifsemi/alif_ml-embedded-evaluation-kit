@@ -61,7 +61,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 28;
 
-        hal_lcd_clear(COLOR_BLACK);
+        hal_display_clear(COLOR_BLACK);
 
         auto& model = ctx.Get<fwk::iface::Model&>("model");
         if (!model.IsInited()) {
@@ -138,7 +138,7 @@ namespace app {
             }
 
             /* Display image on the LCD. */
-            hal_lcd_display_image(
+            hal_display_show_image(
                 (arm::app::object_detection::channelsImageDisplayed == 3) ? currImage : dstPtr,
                 inputImgCols,
                 inputImgRows,
@@ -148,7 +148,7 @@ namespace app {
                 dataPsnImgDownscaleFactor);
 
             /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             if (!RunInference(model, profiler)) {
@@ -163,7 +163,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Draw boxes. */
@@ -188,7 +188,7 @@ namespace app {
     static bool
     PresentInferenceResult(const std::vector<object_detection::DetectionResult>& results)
     {
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* If profiling is enabled, and the time is valid. */
         info("Final results:\n");
@@ -217,32 +217,32 @@ namespace app {
 
         for (const auto& result : results) {
             /* Top line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                result.m_w / imgDownscaleFactor,
-                                lineThickness,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 result.m_w / imgDownscaleFactor,
+                                 lineThickness,
+                                 COLOR_GREEN);
             /* Bot line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + (result.m_y0 + result.m_h) / imgDownscaleFactor -
-                                    lineThickness,
-                                result.m_w / imgDownscaleFactor,
-                                lineThickness,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + (result.m_y0 + result.m_h) / imgDownscaleFactor -
+                                 lineThickness,
+                                 result.m_w / imgDownscaleFactor,
+                                 lineThickness,
+                                 COLOR_GREEN);
 
             /* Left line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                lineThickness,
-                                result.m_h / imgDownscaleFactor,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 lineThickness,
+                                 result.m_h / imgDownscaleFactor,
+                                 COLOR_GREEN);
             /* Right line. */
-            hal_lcd_display_box(imgStartX + (result.m_x0 + result.m_w) / imgDownscaleFactor -
-                                    lineThickness,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                lineThickness,
-                                result.m_h / imgDownscaleFactor,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + (result.m_x0 + result.m_w) / imgDownscaleFactor -
+                                 lineThickness,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 lineThickness,
+                                 result.m_h / imgDownscaleFactor,
+                                 COLOR_GREEN);
         }
     }
 

@@ -211,7 +211,6 @@ hal
 ├── CMakeLists.txt
 ├── include
 │   ├── hal.h
-│   ├── hal_lcd.h
 │   └── hal_pmu.h
 ├── readme.md
 └── source
@@ -219,7 +218,7 @@ hal
     │   ├── audio
     │   ├── camera
     │   ├── cmsis_device
-    │   ├── lcd
+    │   ├── display
     │   ├── npu
     │   ├── npu_ta
     │   ├── platform_pmu

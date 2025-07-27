@@ -22,42 +22,41 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
-project(lcd_component
-    DESCRIPTION     "LCD support library"
+project(display_component
+    DESCRIPTION     "Display support library"
     LANGUAGES       C CXX ASM)
 
 # Add top level interface library
-set(LCD_IFACE_TARGET lcd_iface)
-add_library(${LCD_IFACE_TARGET} INTERFACE)
-target_include_directories(${LCD_IFACE_TARGET} INTERFACE include)
+set(DISPLAY_IFACE_TARGET hal_display_iface)
+add_library(${DISPLAY_IFACE_TARGET} INTERFACE)
+target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE include)
 
 # Create static library for MPS3 LCD
-set(LCD_MPS3_COMPONENT_TARGET lcd_mps3)
-add_library(${LCD_MPS3_COMPONENT_TARGET} STATIC)
+set(DISPLAY_MPS3_TARGET hal_display_mps3)
+add_library(${DISPLAY_MPS3_TARGET} STATIC)
 
 set(CLCD_CONFIG_BASE "0x4930A000" CACHE STRING "LCD configuration base address")
-option(LCD_TITLE_EN "Enables display of title string on LCD" ON)
+option(DISPLAY_TITLE_EN "Enables display of title string on LCD" ON)
 
-if (LCD_TITLE_EN)
-    set(LCD_TITLE_STRING "Arm ML Embedded Evaluation Kit" CACHE STRING "Title string")
+if (DISPLAY_TITLE_EN)
+    set(DISPLAY_TITLE_STRING "Arm ML Embedded Evaluation Kit" CACHE STRING "Title string")
 endif()
 
 ## Include directories - private
-target_include_directories(${LCD_MPS3_COMPONENT_TARGET}
-    PRIVATE
-    source)
+target_include_directories(${DISPLAY_MPS3_TARGET} PRIVATE
+    source
+    source/glcd_mps3)
 
 ## Component sources
-target_sources(${LCD_MPS3_COMPONENT_TARGET}
-    PRIVATE
+target_sources(${DISPLAY_MPS3_TARGET} PRIVATE
     source/glcd_mps3/glcd_mps3.c
-    source/lcd_img.c)
+    source/glcd_mps3/hal_display_mps3.c)
 
 # Compile definitions
-target_compile_definitions(${LCD_MPS3_COMPONENT_TARGET}
+target_compile_definitions(${DISPLAY_MPS3_TARGET}
     PRIVATE
     CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE}
-    $<$<BOOL:${LCD_TITLE_EN}>:LCD_TITLE_STRING=\"${LCD_TITLE_STRING}\">)
+    $<$<BOOL:${DISPLAY_TITLE_EN}>:DISPLAY_TITLE_STRING=\"${DISPLAY_TITLE_STRING}\">)
 
 ## Logging utilities:
 if (NOT TARGET mlek_log)
@@ -68,38 +67,31 @@ if (NOT TARGET mlek_log)
 endif()
 
 ## Add dependencies
-target_link_libraries(${LCD_MPS3_COMPONENT_TARGET} PUBLIC
-    ${LCD_IFACE_TARGET}
+target_link_libraries(${DISPLAY_MPS3_TARGET} PUBLIC
+    ${DISPLAY_IFACE_TARGET}
     mlek_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${LCD_MPS3_COMPONENT_TARGET})
+message(STATUS "Library:                  " ${DISPLAY_MPS3_TARGET})
 message(STATUS "*******************************************************")
 
 # Create static library for LCD Stubs
-set(LCD_STUBS_COMPONENT_TARGET lcd_stubs)
-add_library(${LCD_STUBS_COMPONENT_TARGET} STATIC)
-
-## Include directories - private
-target_include_directories(${LCD_STUBS_COMPONENT_TARGET}
-    PRIVATE
-    source)
+set(DISPLAY_STUBS_TARGET hal_display_stubs)
+add_library(${DISPLAY_STUBS_TARGET} STATIC)
 
 ## Component sources
-target_sources(${LCD_STUBS_COMPONENT_TARGET}
-    PRIVATE
-    source/glcd_stubs/glcd_stubs.c
-    source/lcd_img.c)
+target_sources(${DISPLAY_STUBS_TARGET} PRIVATE
+    source/hal_display_stubs.c)
 
 ## Add dependencies
-target_link_libraries(${LCD_STUBS_COMPONENT_TARGET} PUBLIC
-    ${LCD_IFACE_TARGET}
+target_link_libraries(${DISPLAY_STUBS_TARGET} PUBLIC
+    ${DISPLAY_IFACE_TARGET}
     mlek_log)
 
 # Display status
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${LCD_STUBS_COMPONENT_TARGET})
+message(STATUS "Library:                 " ${DISPLAY_STUBS_TARGET})
 message(STATUS "*******************************************************")

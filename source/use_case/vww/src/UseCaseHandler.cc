@@ -94,7 +94,7 @@ namespace app {
             AwaitUserInput(); // Wait for user input before moving forward.
 #endif /* INTERACTIVE_MODE */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
             hal_camera_start();
 
             /* Strings for presentation/logging. */
@@ -106,16 +106,16 @@ namespace app {
             }
 
             /* Display this image on the LCD. */
-            hal_lcd_display_image(imgSrc,
-                                  nCols,
-                                  nRows,
-                                  displayChannels,
-                                  dataPsnImgStartX,
-                                  dataPsnImgStartY,
-                                  dataPsnImgDownscaleFactor);
+            hal_display_show_image(imgSrc,
+                                   nCols,
+                                   nRows,
+                                   displayChannels,
+                                   dataPsnImgStartX,
+                                   dataPsnImgStartY,
+                                   dataPsnImgDownscaleFactor);
 
             /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             const size_t imgSz =
@@ -139,7 +139,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Add results to context for access outside handler. */

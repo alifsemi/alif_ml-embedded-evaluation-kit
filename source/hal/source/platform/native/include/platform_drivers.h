@@ -20,7 +20,6 @@
 #define PLATFORM_DRIVERS_H
 
 #include "log_macros.h"     /* Logging related helpers. */
-#include "lcd_img.h"        /* LCD functions */
 #include "timer_native.h"   /* Native platform timer/profiler support */
 
 /**
