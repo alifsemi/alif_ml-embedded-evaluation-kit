@@ -64,6 +64,15 @@ math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMA
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
+# HDLCD parameters
+math(EXPR HDLCD_FRAME_BUFFER_BASE_ADDRESS "${DYNAMIC_OFM_BASE} + ${DYNAMIC_OFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+
+# Although the device is capable of better resolutions,
+# we currently stick to the resolution that is supported
+# for MPS3 based targets to keep parity.
+set(HDLCD_RES_WIDTH             320)
+set(HDLCD_RES_HEIGHT            240)
+set(HDLCD_BYTES_PER_PIXEL       4)
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)
@@ -79,10 +88,18 @@ target_include_directories(${PLATFORM_DRIVERS_TARGET}
     include
     include/${TARGET_SUBSYSTEM})
 
+## Compile definitions
+target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PRIVATE
+    HDLCD_FRAME_BUFFER_BASE_ADDRESS=${HDLCD_FRAME_BUFFER_BASE_ADDRESS}
+    HDLCD_BYTES_PER_PIXEL=${HDLCD_BYTES_PER_PIXEL}
+    HDLCD_RES_WIDTH=${HDLCD_RES_WIDTH}
+    HDLCD_RES_HEIGHT=${HDLCD_RES_HEIGHT})
+
 ## Platform sources
 target_sources(${PLATFORM_DRIVERS_TARGET}
     PRIVATE
     source/timer_mps4.c
+    source/hdlcd_drv.c
     source/platform_drivers.c)
 
 ## Directory for additional components required by MPS4:
@@ -126,7 +143,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     mlek_log
     cmsis_device
     platform_pmu
-    hal_display_stubs
+    hal_display_mps4
     hal_audio_static_streams
     $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,hal_camera_static_images>
     $<$<NOT:$<BOOL:${SEMIHOSTING_ENABLED}>>:stdout_retarget_cmsdk>)

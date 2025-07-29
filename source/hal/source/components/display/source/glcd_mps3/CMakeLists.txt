@@ -17,47 +17,44 @@
 #----------------------------------------------------------------------------
 
 #########################################################
-# Display library                                       #
+# Display library for MPS3                              #
 #########################################################
 
 cmake_minimum_required(VERSION 3.21.0)
 
 project(display_component
-    DESCRIPTION     "Display support library"
+    DESCRIPTION     "Display support library for MPS3"
     LANGUAGES       C CXX ASM)
 
-# Add top level interface library
-set(DISPLAY_IFACE_TARGET hal_display_iface)
-add_library(${DISPLAY_IFACE_TARGET} INTERFACE)
-target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE include)
+# Create static library for MPS3 LCD
+set(DISPLAY_MPS3_TARGET hal_display_mps3)
+add_library(${DISPLAY_MPS3_TARGET} STATIC)
 
-## Logging utilities:
-if (NOT TARGET mlek_log)
-    if (NOT DEFINED LOG_PROJECT_DIR)
-        message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
-    endif()
-    add_subdirectory(${LOG_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
+set(CLCD_CONFIG_BASE "0x4930A000" CACHE STRING "LCD configuration base address")
+option(DISPLAY_TITLE_EN "Enables display of title string on LCD" ON)
+
+if (DISPLAY_TITLE_EN)
+    set(DISPLAY_TITLE_STRING "Arm ML Embedded Evaluation Kit" CACHE STRING "Title string")
 endif()
 
-# Create static library for LCD Stubs
-set(DISPLAY_STUBS_TARGET hal_display_stubs)
-add_library(${DISPLAY_STUBS_TARGET} STATIC)
-
 ## Component sources
-target_sources(${DISPLAY_STUBS_TARGET} PRIVATE
-    source/hal_display_stubs.c)
+target_sources(${DISPLAY_MPS3_TARGET} PRIVATE
+    glcd_mps3.c
+    hal_display_mps3.c)
+
+# Compile definitions
+target_compile_definitions(${DISPLAY_MPS3_TARGET}
+    PRIVATE
+    CLCD_CONFIG_BASE=${CLCD_CONFIG_BASE}
+    $<$<BOOL:${DISPLAY_TITLE_EN}>:DISPLAY_TITLE_STRING=\"${DISPLAY_TITLE_STRING}\">)
 
 ## Add dependencies
-target_link_libraries(${DISPLAY_STUBS_TARGET} PUBLIC
-    ${DISPLAY_IFACE_TARGET}
+target_link_libraries(${DISPLAY_MPS3_TARGET} PUBLIC
+    hal_display_iface
     mlek_log)
 
-# Add sub projects
-add_subdirectory(source/glcd_mps3 EXCLUDE_FROM_ALL)
-add_subdirectory(source/hdlcd_mps4 EXCLUDE_FROM_ALL)
-
 # Display status
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library:                 " ${DISPLAY_STUBS_TARGET})
+message(STATUS "Library:                  " ${DISPLAY_MPS3_TARGET})
 message(STATUS "*******************************************************")
