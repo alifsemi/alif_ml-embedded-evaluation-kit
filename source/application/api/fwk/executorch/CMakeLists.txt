@@ -41,6 +41,9 @@ add_library(${ML_FWK_ET_TARGET} STATIC
     source/EtModel.cc
 )
 
+target_sources(${ML_FWK_ET_TARGET} PUBLIC
+    source/EtPal.cc)
+
 # Include directories - public
 target_include_directories(${ML_FWK_ET_TARGET} PUBLIC
     include)

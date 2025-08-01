@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,6 +140,14 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
   } > BRAM
   __exidx_end = .;
+
+  /* Dedicated section for global offset table */
+  .got.at_bram :
+  {
+    . = ALIGN(8);
+    *(.got*)
+    . = ALIGN(8);
+  } > BRAM AT > BRAM
 
   .sram :
   {
