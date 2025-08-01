@@ -224,11 +224,11 @@ void EtModel::LogTensorInfo(std::shared_ptr<iface::TensorIface> tensor)
 void EtModel::LogInterpreterInfo()
 {
     info("Number of input tensors:  %zu\n", this->GetNumInputs());
-    for (const auto& i : this->m_input) {
+    for (auto i : this->m_input) {
         this->LogTensorInfo(i);
     }
     info("Number of output tensors: %zu\n", this->GetNumOutputs());
-    for (const auto& o : this->m_output) {
+    for (auto o : this->m_output) {
         this->LogTensorInfo(o);
     }
 
@@ -366,16 +366,21 @@ bool EtModel::PrepareInputTensors()
         ET_CHECK_MSG(dataPtr != nullptr, "Could not allocate memory for input buffers.");
         inputs[numAllocated++] = dataPtr;
 
-        this->m_inputTensorImplMap.push_back({executorch::runtime::etensor::TensorImpl(
+        auto p = std::make_pair(executorch::runtime::etensor::TensorImpl(
             tensorMeta.get().scalar_type(),
             tensorMeta.get().sizes().size(),
             const_cast<executorch::aten::TensorImpl::SizesType*>(tensorMeta.get().sizes().data()),
             dataPtr,
             const_cast<executorch::aten::TensorImpl::DimOrderType*>(
-                tensorMeta.get().dim_order().data())), i});
+                tensorMeta.get().dim_order().data())), i);
+        this->m_inputTensorImplMap.push_back(p);
+    }
 
-        this->m_input.emplace_back(std::make_shared<EtTensor>(
-            &this->m_inputTensorImplMap[this->m_inputTensorImplMap.size() - 1].first));
+    this->m_input = std::vector<std::shared_ptr<iface::TensorIface>>(
+        this->m_inputTensorImplMap.size(), nullptr);
+    for (size_t i = 0; i < this->m_inputTensorImplMap.size(); i++) {
+        this->m_input[this->m_inputTensorImplMap[i].second] =
+            std::make_shared<EtTensor>(&this->m_inputTensorImplMap[i].first);
     }
     return true;
 }
