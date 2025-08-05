@@ -46,4 +46,7 @@ void SERVICES_Setup(MHU_send_message_t send_message, uint32_t timeout);
 int SERVICES_print(const char * fmt, ...);
 int32_t SERVICES_wait_ms(uint32_t wait_time_ms);
 
+void TEST_print(uint32_t services_handle, char *fmt, ...);
+void TEST_init(uint32_t services_handle);
+
 #endif /* __SERVICES_LIB_INTERFACE_H__ */

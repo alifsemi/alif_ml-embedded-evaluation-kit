@@ -13,7 +13,7 @@
  * @file mhu_driver.h
  * @brief Header file for MHU driver module
  * @par
- * @defgroup host_services Host Services
+ * @defgroup host_services host_services
  */
 
 #ifndef __MHU_DRIVER_H__

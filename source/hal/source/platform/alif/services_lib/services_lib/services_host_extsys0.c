@@ -2,7 +2,8 @@
  * @file services_host_extsys0.c
  *
  * @brief Extsys0 services service source file
- * @ingroup host-services
+ * @ingroup host_services
+ * @ingroup services-host-extsys0
  * @par
  *
  * Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
@@ -28,6 +29,7 @@
 #if defined(A32_LINUX)
 #include "a32_linux.h"
 #else
+//#include "system_utils.h"
 #include "sys_utils.h"
 #endif
 
@@ -53,6 +55,7 @@
  * @param boot_args
  * @param error_code
  * @return
+ * @ingroup services-host-extsys0
  */
 uint32_t SERVICES_Boot_Net_Proc(uint32_t services_handle,
                                 net_proc_boot_args_t* boot_args,
@@ -69,6 +72,7 @@ uint32_t SERVICES_Boot_Net_Proc(uint32_t services_handle,
   p_svc->send_nvds_copy_len = boot_args->nvds_copy_len;
   p_svc->send_trng_dst_addr = boot_args->trng_dst_addr;
   p_svc->send_trng_len      = boot_args->trng_len;
+  p_svc->send_internal_clock_select = boot_args->es0_clock_select;
 
   uint32_t ret = SERVICES_send_request(services_handle,
                                        SERVICE_EXTSYS0_BOOT_SET_ARGS,
@@ -84,6 +88,7 @@ uint32_t SERVICES_Boot_Net_Proc(uint32_t services_handle,
  * @param services_handle
  * @param error_code
  * @return
+ * @ingroup services-host-extsys0
  */
 uint32_t SERVICES_Shutdown_Net_Proc(uint32_t services_handle,
                                     uint32_t *error_code)

@@ -27,6 +27,10 @@
  *  M A C R O   D E F I N E S
  ******************************************************************************/
 
+#define TEST_PRINT_ENABLE    0 /* Enable printing from Test harness  */
+#define PRINT_VIA_CONSOLE    0 /* Print via Debugger console         */
+#define PRINT_VIA_SE_UART    1 /* Print via SE UART terminal         */
+
 #if ((DEVICE_TYPE == FUSION && DEVICE_REVISION == REV_B0) \
     || (DEVICE_TYPE == SPARK))
 #define HE_DTCM_GLOBAL_ADDRESS      0x58800000ul
@@ -134,4 +138,65 @@ void SERVICES_Setup(MHU_send_message_t send_message, uint32_t timeout)
   drv_debug_print_fn = &SERVICES_print;
 
   SERVICES_initialize(&services_init_params);
+}
+
+/**
+ * @fn    void TEST_print(uint32_t services_handle, char * fmt, ...)
+ * @param services_handle
+ * @param fmt
+ */
+void TEST_print(uint32_t services_handle, char *fmt, ...)
+{
+#if TEST_PRINT_ENABLE != 0
+    va_list     args;
+    static char buffer[PRINT_BUFFER_SIZE] = {0};
+    size_t      buffer_size;
+
+    /*
+     * @todo Handle long strings bigger than buffer size
+     */
+    va_start(args, fmt);
+    buffer_size = vsnprintf(buffer, PRINT_BUFFER_SIZE, fmt, args);
+    va_end(args);
+
+    /**
+     * Choice of Console printing or via the SE-UART
+     */
+#if PRINT_VIA_CONSOLE != 0
+    if (buffer_size >= 0) {
+        printf("%s", buffer);
+    }
+#endif
+#if PRINT_VIA_SE_UART != 0
+    SERVICES_uart_write(services_handle, strlen(buffer) + 1, (uint8_t *) buffer);
+#endif
+    (void) buffer_size;
+
+#else
+    (void)services_handle;
+    (void)fmt;
+#endif  // #if SERVICES_PRINT_ENABLE != 0
+}
+
+/**
+ * @fn    void TEST_init(uint32_t services_handle)
+ * @param services_handle
+ */
+void TEST_init(uint32_t services_handle)
+{
+    /* keep sending heartbeat services requests until one succeeds */
+    int retry_count = SERVICES_synchronize_with_se(services_handle);
+
+    TEST_print(services_handle, "SERVICES_synchronize_with_se() returned %d\n", retry_count);
+
+    /* Disable tracing output for services */
+    uint32_t service_error_code;
+    SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
+
+    /* show services version */
+    TEST_print(services_handle,
+               "SERVICES version %s %s %s\n",
+               SERVICES_version(),
+               __DATE__,
+               __TIME__);
 }

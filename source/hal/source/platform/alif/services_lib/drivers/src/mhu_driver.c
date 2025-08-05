@@ -11,7 +11,6 @@
 /**
  * @file mhu_driver.c
  * @brief MHU driver
- * @ingroup services
  * @par
  */
 #include "mhu_driver.h"
