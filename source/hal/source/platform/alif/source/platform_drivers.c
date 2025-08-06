@@ -46,9 +46,12 @@
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
+#include "sys_clocks.h"
 #include "app_mem_regions.h"
 
 #include CMSIS_device_header
+
+#define HW_REG32(base,offset) *((volatile uint32_t *)(base + offset))
 
 #if defined(ARM_NPU)
 #include "ethosu_driver.h"
@@ -94,6 +97,20 @@ static void ipc_rx_callback(void *data)
     uint16_t id = payload->id;
     printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
+#else
+#define PWR_CTRL_TX_DPHY_PWR_MASK          (1U << 0)    /* Mask off the power supply for MIPI TX DPHY */
+#define PWR_CTRL_TX_DPHY_ISO               (1U << 1)    /* Enable isolation for MIPI TX DPHY */
+#define PWR_CTRL_RX_DPHY_PWR_MASK          (1U << 4)    /* Mask off the power supply for MIPI RX DPHY */
+#define PWR_CTRL_RX_DPHY_ISO               (1U << 5)    /* Enable isolation for MIPI RX DPHY */
+#define PWR_CTRL_DPHY_PLL_PWR_MASK         (1U << 8)    /* Mask off the power supply for MIPI PLL */
+#define PWR_CTRL_DPHY_PLL_ISO              (1U << 9)    /* Enable isolation for MIPI PLL */
+#define PWR_CTRL_DPHY_VPH_1P8_PWR_BYP_EN   (1U << 12)   /* dphy vph 1p8 power bypass enable */
+
+#define CLK_ENA_CLK100M    (1U << 21) /* Enable 100M_CLK  */
+#define CLK_ENA_CLK38P4M   (1U << 23) /* Enable HFOSC_CLK */
+#if defined(EAGLE_DEVICE)
+#define CLK_ENA_CLK76P8M   (1U << 24) /* Enable 76M8_CLK  */
+#endif // EAGLE_DEVICE
 #endif
 
 #ifdef COPY_VECTORS
@@ -140,9 +157,14 @@ static uint32_t set_power_profiles()
 #ifdef BALLETTO_DEVICE // Balletto support only PFM
     default_runprof.dcdc_mode     = DCDC_MODE_PFM_FORCED;
     // No following memories on E1C/B1: SRAM0_MASK | SRAM1_MASK | SRAM6A_MASK | SRAM6B_MASK | SRAM7_1_MASK | SRAM7_2_MASK | SRAM7_3_MASK | SRAM8_MASK | SRAM9_MASK
-    default_runprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.memory_blocks   = SERAM_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
     default_runprof.phy_pwr_gating  = LDO_PHY_MASK;
     default_runprof.ip_clock_gating = LP_PERIPH_MASK | NPU_HE_MASK;
+#elif defined(EAGLE_DEVICE)
+    default_runprof.dcdc_mode       = DCDC_MODE_PWM;
+    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_1_MASK | SRAM0_2_MASK | SRAM0_3_MASK | SRAM0_4_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
+    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
 #else
     default_runprof.dcdc_mode       = DCDC_MODE_PWM;
     default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
@@ -171,11 +193,10 @@ static uint32_t set_power_profiles()
         default_offprof.dcdc_voltage    = DCDC_VOUT_0825;
 #ifdef BALLETTO_DEVICE // Balletto support only PFM
         default_offprof.dcdc_mode       = DCDC_MODE_PFM_FORCED;
-        default_offprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK;
 #else
         default_offprof.dcdc_mode       = DCDC_MODE_PWM;
-        default_offprof.memory_blocks   = SERAM_MASK;
 #endif
+        default_offprof.memory_blocks   = SERAM_MASK;
         default_offprof.aon_clk_src     = CLK_SRC_LFXO;
         default_offprof.stby_clk_src    = CLK_SRC_HFRC;
         default_offprof.stby_clk_freq   = SCALED_FREQ_RC_STDBY_38_4_MHZ;
@@ -206,8 +227,10 @@ void enable_mipi_power(void)
     // if SE_SERVICES_SUPPORT is defined, then in run profile dphy is already enabled.
 #ifndef SE_SERVICES_SUPPORT
     /* Enable MIPI power */
-    enable_mipi_dphy_power();
-    disable_mipi_dphy_isolation();
+    // enable_mipi_dphy_power
+    VBAT->PWR_CTRL &= ~( PWR_CTRL_TX_DPHY_PWR_MASK | PWR_CTRL_RX_DPHY_PWR_MASK | PWR_CTRL_DPHY_PLL_PWR_MASK | PWR_CTRL_DPHY_VPH_1P8_PWR_BYP_EN);
+    // disable_mipi_dphy_isolation
+    VBAT->PWR_CTRL &= ~( PWR_CTRL_TX_DPHY_ISO | PWR_CTRL_RX_DPHY_ISO | PWR_CTRL_DPHY_PLL_ISO );
 #endif
 }
 
@@ -229,15 +252,43 @@ uint32_t enable_peripheral_clocks(void)
                                         &service_error_code);
     }
 #else // SE_SERVICES_SUPPORT
-    enable_cgu_clk38p4m();
-    enable_cgu_clk100m();
+    // enable_cgu_clk38p4m
+    CGU->CLK_ENA |= CLK_ENA_CLK38P4M;
+    // enable_cgu_clk100m
+    CGU->CLK_ENA |= CLK_ENA_CLK100M;
 #endif // SE_SERVICES_SUPPORT
+
+    return (err + service_error_code);
+}
+
+uint32_t enable_audio_peripheral_clocks(void)
+{
+    uint32_t err = 0;
+    uint32_t service_error_code = 0;
+#if defined(EAGLE_DEVICE)
+#if SE_SERVICES_SUPPORT
+    // Enable I2S clk
+    err = SERVICES_clocks_enable_clock(services_handle,
+                                       CLKEN_HFOSCx2,
+                                       true,
+                                       &service_error_code);
+#else // SE_SERVICES_SUPPORT
+    // Enable I2S clk
+    CGU->CLK_ENA |= CLK_ENA_CLK76P8M;
+#endif // SE_SERVICES_SUPPORT
+#endif // EAGLE_DEVICE
 
     return (err + service_error_code);
 }
 
 int platform_init(void)
 {
+#if defined(EAGLE_DEVICE)
+    // Set the Eagle mode ON
+    uint32_t value = (1 << 31);
+    HW_REG32(0x1A60503C, 0x0) = value;
+#endif // EAGLE_DEVICE
+
     int err = 0;
 
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */

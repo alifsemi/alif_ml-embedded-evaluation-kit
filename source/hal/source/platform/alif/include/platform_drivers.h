@@ -70,6 +70,8 @@ extern uint32_t set_power_run_profile(run_profile_t runprof);
 extern uint32_t enable_peripheral_clocks(void);
 extern void enable_mipi_power(void);
 
+extern uint32_t enable_audio_peripheral_clocks(void);
+
 extern bool run_requested(void);
 extern void init_trigger_rx(void);
 extern void init_trigger_tx(void);

@@ -25,6 +25,7 @@
 
 #define RTE_Drivers_SAI
 #define RTE_Drivers_SPI
+#define RTE_Drivers_PDM
 
 #define RTE_Drivers_CDC200
 #define RTE_Drivers_MIPI_DSI

@@ -22,6 +22,7 @@
 
 #define RTE_Drivers_SAI
 #define RTE_Drivers_SPI
+#define RTE_Drivers_PDM
 
 #define RTE_Drivers_ISSI_FLASH
 #define RTE_Drivers_OSPI

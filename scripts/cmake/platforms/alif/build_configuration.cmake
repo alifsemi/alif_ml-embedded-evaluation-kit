@@ -37,6 +37,9 @@ function(set_platform_global_defaults)
     set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "Specify Alif SKU part number")
     set_property(CACHE ALIF_DEVICE_SKU PROPERTY STRINGS "AE1C1F4051920" "AE722F80F55D5" "AE822FA0E5597")
 
+    set(ALIF_BOARDLIB_PATH_END "appkit_gen2" CACHE STRING "Specify Alif boardlib path")
+    set_property(CACHE ALIF_BOARDLIB_PATH_END PROPERTY STRINGS "appkit_gen2" "devit_gen2" "devkit_e1c" "devkit_e8")
+
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
 
@@ -52,6 +55,14 @@ function(set_platform_global_defaults)
         endif()
     endif()
 
+
+    set(IS_EAGLE_DEVICE OFF CACHE BOOL "Is device an Eagle device.")
+    if (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597") # Add other SKUs which are Eagle devices
+        set(ALIF_BOARDLIB_PATH_END "devkit_e8" CACHE STRING "" FORCE)
+        set(IS_EAGLE_DEVICE ON CACHE BOOL "" FORCE)
+        add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
+    endif()
+
     if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
         set(RTSS_NPU_CONFIG_ID  "H256")
         set(ALIF_CORE           "RTSS_HP" CACHE STRING "Alif core") # Used by alif-cmsis
@@ -64,6 +75,7 @@ function(set_platform_global_defaults)
     set(IS_BALLETTO_DEVICE OFF CACHE BOOL "Is device a Balletto device.")
 
     if (ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") # Add other SKUs which are Balletto devices
+        set(ALIF_BOARDLIB_PATH_END "devkit_e1c" CACHE STRING "" FORCE)
         set(IS_BALLETTO_DEVICE ON CACHE BOOL "" FORCE)
         add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
         set(RTSS_NPU_CONFIG_ID  "H128")
@@ -84,6 +96,10 @@ function(set_platform_global_defaults)
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
         "${RTSS_NPU_CONFIG_ID}"
         STRING)
+
+    if ((ALIF_DEVICE_SKU STREQUAL "AE722F80F55D5") AND (TARGET_BOARD STREQUAL "DevKit"))
+        set(ALIF_BOARDLIB_PATH_END "devkit_gen2" CACHE STRING "" FORCE)
+    endif()
 
     # Include NPU, CMSIS and LVGL configuration options
     include(npu_opts)
@@ -110,6 +126,7 @@ function(set_platform_global_defaults)
 
     set(ALIF_CORE "${ALIF_CORE}" PARENT_SCOPE)
     set(ALIF_DEVICE_SKU "${ALIF_DEVICE_SKU}" PARENT_SCOPE)
+    set(ALIF_BOARDLIB_PATH_END "${ALIF_BOARDLIB_PATH_END}" PARENT_SCOPE)
     set(IS_BALLETTO_DEVICE ${IS_BALLETTO_DEVICE} PARENT_SCOPE)
 
     add_compile_definitions(

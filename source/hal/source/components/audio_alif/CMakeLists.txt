@@ -79,7 +79,8 @@ target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC
 
 target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
     ${AUDIO_IFACE_TARGET}
-    arm_math)
+    arm_math
+    platform_drivers_core)
 
 set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
 set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")

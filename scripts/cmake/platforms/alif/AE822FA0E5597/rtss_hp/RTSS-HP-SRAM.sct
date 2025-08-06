@@ -14,7 +14,7 @@
 /*On chip RAM Regions */
 #define SRAM0_BASE                0x02000000
 #define SRAM0_SIZE                0x00400000		/* 4M */
-#define SRAM1_BASE                0x08000000
+#define SRAM1_BASE                0x02400000
 #define SRAM1_SIZE                0x00400000		/* 4M */
 
 /* On Chip NVM */

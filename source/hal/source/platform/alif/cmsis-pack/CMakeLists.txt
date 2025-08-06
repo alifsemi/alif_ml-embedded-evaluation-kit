@@ -42,6 +42,7 @@ target_include_directories(${CPU_HEADER_TARGET}
     ${CMSIS_SRC_PATH}/CMSIS/Driver/Include
     ${CORTEX_DFP_SRC_PATH}/Device/${ARM_CPU}/Include
     ${BOARDLIB_PATH}
+    ${BOARDLIB_PATH}/${ALIF_BOARDLIB_PATH_END}
     )
 
 target_include_directories(${CPU_HEADER_TARGET}
@@ -71,6 +72,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/components/Include
     ${ALIF_CMSIS_PATH}/Device/core/common/config
     ${BOARDLIB_PATH}
+    ${BOARDLIB_PATH}/${ALIF_BOARDLIB_PATH_END}
     ${ALIF_CMSIS_PATH}/ospi_xip/source/ospi # hopyfully this wont'd be needed and ospi_private.h will be moved (also change the name)
     )
 
@@ -174,7 +176,9 @@ target_link_options(
     INTERFACE
     --entry Reset_Handler)
 
-message(STATUS "Alif cmsis-pack: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
+message(STATUS "Alif BOARDLIB_PATH                  : ${BOARDLIB_PATH}")
+message(STATUS "Alif Boardlib path                  : ${BOARDLIB_PATH}/${ALIF_BOARDLIB_PATH_END}")
+message(STATUS "Alif cmsis-pack, SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
 
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
