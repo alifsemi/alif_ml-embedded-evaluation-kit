@@ -38,8 +38,10 @@
         "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
       }
     ],
-    "executorch_models": [
-      "w2l"
+    "executorch_resources": [
+      {
+        "model": "w2l"
+      }
     ]
   },
   {
@@ -61,8 +63,14 @@
         "url": "{url_prefix:0}testing_output/MobilenetV2/Predictions/Reshape_11/0.npy"
       }
     ],
-    "executorch_models": [
-      "mv2"
+    "executorch_resources": [
+      {
+        "model": "mv2"
+      },
+      {
+        "model": "deit_tiny.py",
+        "path": "img_class/models"
+      }
     ]
   },
   {

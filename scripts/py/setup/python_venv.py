@@ -61,7 +61,7 @@ def set_up_python_venv(
 
     # Install additional requirements first, if a valid file has been provided
     if additional_requirements_file and os.path.isfile(additional_requirements_file):
-        call_command(f"{env_python} -m pip install -r {additional_requirements_file}")
+        install_requirements(env_activate_cmd, additional_requirements_file)
 
     return env_path, env_activate_cmd
 
@@ -75,6 +75,15 @@ def is_pip_package_installed(package_name: str, env_activate_cmd: str) -> bool:
     """
     packages = call_command(f"{env_activate_cmd} && pip freeze").split("\n")
     return len([package for package in packages if package.startswith(package_name)]) > 0
+
+
+def install_requirements(env_activate_cmd: str, requirements_file: Path):
+    """
+    Install a requirements file for a specified Python environment
+    :param env_activate_cmd:    Command to activate Python env
+    :param requirements_file:   Path to the requirements file
+    """
+    call_command(f"{env_activate_cmd} && python -m pip install -r {requirements_file}")
 
 
 def install_pip_package_if_needed(

@@ -98,35 +98,46 @@ def download_file(
 def call_command(
         command: str,
         verbose: bool = True,
-        cwd: typing.Optional[Path] = None
-) -> str:
+        cwd: typing.Optional[Path] = None,
+        buffer_logs: bool = False,
+        capture_output: bool = True
+) -> typing.Optional[str]:
     """
     Helpers function that call subprocess and return the output.
 
     Parameters:
     ----------
-    command (string):   Specifies the command to run.
-    verbose (bool):     When True, log the command before running.
-    cwd (Path):         Set the working directory in which to run the command.
+    command (string):       Specifies the command to run.
+    verbose (bool):         When True, log the command before running.
+    cwd (Path):             Set the working directory in which to run the command.
+    buffer_logs (bool):     When True, output will be buffered and written to the log
+                            when the command has finished running.
+                            When False, output will be written to the log
+                            line-by-line with no buffering.
+    capture_output (bool)   When True, capture the command output and return it.
     """
     if verbose:
-        logging.info(command)
-    try:
-        proc = subprocess.run(
-            command,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True,
-            cwd=cwd
-        )
-        log = proc.stdout.decode("utf-8")
+        logging.debug(command)
+    log = ""
+    with subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True,
+        cwd=cwd,
+        text=True
+    ) as proc:
+        for line in proc.stdout:
+            if capture_output:
+                log += line
+            if not buffer_logs:
+                logging.info(line.rstrip("\n"))
+    if buffer_logs:
         logging.info(log)
-        return log
-    except subprocess.CalledProcessError as err:
-        log = err.stdout.decode("utf-8")
-        logging.error(log)
-        raise err
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, proc.args,
+                                 output=proc.stdout, stderr=proc.stderr)
+    return log if capture_output else None
 
 
 def remove_tree_dir(dir_path: Path):

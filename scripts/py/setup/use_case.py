@@ -21,7 +21,18 @@ import itertools
 import json
 import typing
 from dataclasses import dataclass, field
+from enum import IntEnum
 from pathlib import Path
+
+
+class ExecutorchResourceType(IntEnum):
+    """
+    Denotes the type of ExecuTorch resource
+    Built-in models (e.g. "mv2") require no additional setup
+    Local projects may have requirements that need installing
+    """
+    BUILT_IN = 0
+    LOCAL_PROJECT = 1
 
 
 @dataclass(frozen=True)
@@ -35,14 +46,95 @@ class UseCaseResource:
 
 
 @dataclass(frozen=True)
+class ExecutorchResource:
+    """
+    Represent a use case's ExecuTorch project
+    """
+    type: ExecutorchResourceType = field(init=False)
+    resources_dir: Path
+    model: str
+    path: typing.Optional[Path] = None
+    requirements: typing.Optional[str] = None
+
+    def __post_init__(self):
+        if self.path:
+            object.__setattr__(self, "type", ExecutorchResourceType.LOCAL_PROJECT)
+            if self.resources_dir and not self.resources_dir.exists():
+                raise ValueError(f"Resources directory {self.resources_dir} does not exist")
+
+            if self.project_path and not self.project_path.exists():
+                raise ValueError(f"Project path {self.project_path} does not exist")
+
+            if self.model_path and not self.model_path.is_file():
+                raise ValueError(f"Model file {self.model_path} does not exist")
+
+            if self.requirements_path and not self.requirements_path.is_file():
+                raise ValueError(f"Requirements file {self.requirements_path} does not exist")
+        else:
+            object.__setattr__(self, "type", ExecutorchResourceType.BUILT_IN)
+
+    @property
+    def project_path(self) -> typing.Optional[Path]:
+        """
+        Get the full path to the local project directory
+        :return:    The full path to the local project directory,
+                    or None for built-in models
+        """
+        return self.resources_dir / self.path if self.path else None
+
+    @property
+    def model_path(self) -> typing.Optional[Path]:
+        """
+        Get the full path to the local model
+        :return:    The full path to the local model,
+                    or None for built-in models
+        """
+        return self.project_path / self.model if self.model else None
+
+    @property
+    def requirements_path(self) -> typing.Optional[Path]:
+        """
+        Get the full path to the requirements file if specified
+        :return:    The full path to the requirements file
+                    if it has been specified
+        """
+        return self.project_path / self.requirements if self.requirements else None
+
+    @property
+    def model_name(self) -> str:
+        """
+        Get the name of the model to be provided to the aot_arm_compiler.py script
+        This will either be a name for built-in models or a full path to a local model file
+        :return:    The model name
+        """
+        return self.model_path \
+            if self.type is ExecutorchResourceType.LOCAL_PROJECT \
+            else self.model
+
+    def is_local_project(self) -> bool:
+        """
+        Convenience function to denote if this resource is a local project
+        :return:    True if this resource is a local project
+        """
+        return self.type == ExecutorchResourceType.LOCAL_PROJECT
+
+    def is_built_in(self) -> bool:
+        """
+        Convenience function to denote if this resource is a built-in-model
+        :return:    True if this resource is a built-in-model
+        """
+        return self.type == ExecutorchResourceType.BUILT_IN
+
+
+@dataclass(frozen=True)
 class UseCase:
     """
     Represent a use case
     """
     name: str
-    url_prefix: str
+    url_prefix: typing.List[str]
     resources: typing.List[UseCaseResource]
-    executorch_models: typing.Optional[typing.List[str]] = field(default_factory=lambda: [])
+    executorch_resources: typing.List[ExecutorchResource] = field(default_factory=lambda: [])
 
 
 def load_use_case_resources_file(file_path: Path) -> typing.List[typing.Dict[str, typing.Any]]:
@@ -53,6 +145,34 @@ def load_use_case_resources_file(file_path: Path) -> typing.List[typing.Dict[str
     """
     with open(file_path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def to_use_case(
+        use_case_data: typing.Dict[str, typing.Any],
+        resources_dir: Path
+) -> UseCase:
+    """
+    Create a UseCase
+    :param use_case_data:   Dictionary of values read from use_case_resources.json
+    :param resources_dir:   Resource directory path
+    :return:                UseCase object
+    """
+    use_case_resources = [
+        UseCaseResource(**resource)
+        for resource in use_case_data.get("resources", [])
+    ]
+
+    executorch_resources = [
+        ExecutorchResource(resources_dir, **resource)
+        for resource in use_case_data.get("executorch_resources", [])
+    ]
+
+    return UseCase(
+        name=use_case_data["name"],
+        url_prefix=use_case_data.get("url_prefix", []),
+        resources=use_case_resources,
+        executorch_resources=executorch_resources,
+    )
 
 
 def load_use_case_resources(
@@ -72,21 +192,13 @@ def load_use_case_resources(
     -------
     The use cases resources object parsed to a dict
     """
-    use_case_resources = list(
-        itertools.chain(*(
-            load_use_case_resources_file(file) for file in use_case_resources_files
-        ))
-    )
-
-    use_cases = (
-        UseCase(
-            name=u["name"],
-            url_prefix=u["url_prefix"],
-            resources=[UseCaseResource(**r) for r in u["resources"]],
-            executorch_models=u.get("executorch_models", []),
-        )
-        for u in use_case_resources
-    )
+    use_cases = itertools.chain(*(
+        [
+            to_use_case(use_case_data, file.parent)
+            for use_case_data in load_use_case_resources_file(file)
+        ]
+        for file in use_case_resources_files
+    ))
 
     if len(use_case_names) == 0:
         return list(use_cases)

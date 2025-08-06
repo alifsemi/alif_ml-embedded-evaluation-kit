@@ -35,9 +35,10 @@ from pathlib import Path
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
-from scripts.py.setup.python_venv import install_pip_package_if_needed
-from scripts.py.setup.python_venv import set_up_python_venv, is_pip_package_installed
+from scripts.py.setup.python_venv import install_pip_package_if_needed, set_up_python_venv
+from scripts.py.setup.python_venv import is_pip_package_installed, install_requirements
 from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext
+from scripts.py.setup.use_case import ExecutorchResourceType, ExecutorchResource
 from scripts.py.setup.use_case import UseCase, load_use_case_resources
 from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
@@ -98,6 +99,7 @@ default_npu_configs = NpuConfigs.create(
     valid_npu_configs.get("ethos-u85", 256),
 )
 
+
 class MLFramework(Enum):
     """
     Enum to pick ML framework to use for build.
@@ -109,7 +111,7 @@ class MLFramework(Enum):
 valid_ml_frameworks: typing.Set[str] = {f.value for f in MLFramework}
 
 current_file_dir = Path(__file__).parent.resolve()
-default_use_case_resources_path = current_file_dir / 'scripts' / 'py' / 'use_case_resources.json'
+default_use_case_resources_path = current_file_dir / 'resources' / 'use_case_resources.json'
 default_requirements_path = current_file_dir / 'scripts' / 'py' / 'requirements.txt'
 default_downloads_path = current_file_dir / 'resources_downloaded'
 default_executorch_path = current_file_dir / 'dependencies' / 'executorch'
@@ -270,7 +272,7 @@ def run_vela(
             + f"{vela_command_arena_cache_size}"
     )
 
-    call_command(vela_command)
+    call_command(vela_command, buffer_logs=True)
 
     # Relocate any other files output by Vela, e.g. csv output data
     for vela_output in work_dir.glob("*"):
@@ -368,6 +370,7 @@ def install_executorch(executorch_path: Path, env_activate_cmd: str) -> None:
         verbose=True
     )
 
+
 def optimize_executorch_model(
         model_name: str,
         npu_config: NpuConfig,
@@ -388,7 +391,7 @@ def optimize_executorch_model(
                f" --system_config {npu_config.system_config}"
                f" --memory_mode {npu_config.memory_mode}"
                f" --config {vela_config_file}"
-                " --delegate --quantize")
+               " --delegate --quantize")
         optimized_model_name = f"{model_name}_arm_delegate_{npu_config.config_name}.pte"
     else:
         cfg = " --target TOSA-1.0+INT"
@@ -407,7 +410,11 @@ def optimize_executorch_model(
                  f" --model_name={model_name}"
                  f" {cfg}"
                  f" --output {output_dir}"),
-        cwd=setup_context.paths_config.executorch_path)
+        cwd=setup_context.paths_config.executorch_path,
+        verbose=True,
+        buffer_logs=False,
+        capture_output=False
+    )
 
     return False
 
@@ -417,7 +424,6 @@ def setup_executorch(setup_context: SetupContext):
     Installs TOSA tools and ExecuTorch in the Python virtual environment.
     Note: ExecuTorch setup currently not supported on Microsoft Windows based systems.
     :param setup_context:       SetupContext
-    :return: list of shared library files needed for generating PTE files.
     """
     if sys.platform not in ['linux', 'darwin']:
         raise EnvironmentError(f'{sys.platform} does not support ExecuTorch set up.')
@@ -425,14 +431,13 @@ def setup_executorch(setup_context: SetupContext):
     # Install TOSA tools:
     executorch_path = setup_context.paths_config.executorch_path
     if not is_pip_package_installed('tosa-tools', setup_context.env_activate_cmd):
-        tosa_req_file = (executorch_path / 'backends' / 'arm' /
-                         'requirements-arm-tosa.txt')
+        tosa_req_file = executorch_path/'backends'/'arm'/'requirements-arm-tosa.txt'
         logging.info('Installing TOSA tools using version specified in %s',
-                        tosa_req_file)
+                     tosa_req_file)
         call_command(('CMAKE_POLICY_VERSION_MINIMUM=3.5 BUILD_PYBIND=1 '
-                      f'{setup_context.env_activate_cmd} && '
-                      f'pip install --no-dependencies -r{tosa_req_file}'),
-                      cwd=executorch_path)
+                     f'{setup_context.env_activate_cmd} && '
+                     f'pip install --no-dependencies -r{tosa_req_file}'),
+                     cwd=executorch_path)
     else:
         logging.info('tosa-tools package is already installed.')
 
@@ -477,7 +482,7 @@ def update_metadata(
     metadata_dict["resources_info"] = [dataclasses.asdict(uc) for uc in use_case_resources]
 
     with open(metadata_file_path, "w", encoding="utf8") as metadata_file:
-        json.dump(metadata_dict, metadata_file, indent=4)
+        json.dump(metadata_dict, metadata_file, indent=4, default=str)
 
 
 def get_default_use_cases_names() -> typing.List[str]:
@@ -504,6 +509,24 @@ def check_paths_config(paths_config: PathsConfig):
                 ...
         """.strip("\n")
         logging.warning(textwrap.dedent(message))
+
+
+def install_executorch_project(
+        env_activate_cmd: str,
+        executorch_resource: ExecutorchResource
+):
+    """
+    Install dependencies required for specified ExecuTorch resource project
+    :param env_activate_cmd:    Python env activation command
+    :param executorch_resource: ExecuTorch resource
+    """
+    if executorch_resource.requirements_path:
+        if executorch_resource.requirements_path.exists():
+            install_requirements(env_activate_cmd, executorch_resource.requirements_path)
+        else:
+            raise FileNotFoundError(
+                f"Requirements file does not exist: {executorch_resource.requirements_path}"
+            )
 
 
 def optimize_tflite_models_async(
@@ -553,13 +576,20 @@ def optimize_executorch_models_async(
         [
             executor.submit(
                 optimize_executorch_model,
-                model_name,
+                executorch_model.model_name,
                 npu_config,
                 setup_context,
                 setup_context.paths_config.downloads_dir / use_case.name
             )
-            for model_name
-            in use_case.executorch_models
+            for executorch_model
+            in use_case.executorch_resources
+            # pylint: disable=fixme
+            # TODO: remove this when aot_arm_compiler supports .py files for U55
+            if not (
+                executorch_model.is_local_project()
+                and npu_config
+                and npu_config.processor_id == "U55"
+        )
         ]
         for use_case, npu_config
         in itertools.product(use_cases, npu_configs)
@@ -678,13 +708,20 @@ def serial_setup(
             and setup_context.setup_config.run_vela_on_models):
         to_optimize = itertools.product(use_cases, executorch_npu_configs)
         for use_case, npu_config in to_optimize:
-            for model_name in use_case.executorch_models:
-                optimisation_skipped = optimize_executorch_model(
-                    model_name=model_name,
-                    npu_config=npu_config,
-                    setup_context=setup_context,
-                    output_dir=setup_context.paths_config.downloads_dir / use_case.name
-                ) or optimisation_skipped
+            for executorch_resource in use_case.executorch_resources:
+                # pylint: disable=fixme
+                # TODO: remove this when aot_arm_compiler supports .py files for U55
+                if not (
+                        executorch_resource.is_local_project()
+                        and npu_config
+                        and npu_config.processor_id == "U55"
+                ):
+                    optimisation_skipped = optimize_executorch_model(
+                        model_name=executorch_resource.model_name,
+                        npu_config=npu_config,
+                        setup_context=setup_context,
+                        output_dir=setup_context.paths_config.downloads_dir / use_case.name
+                    ) or optimisation_skipped
 
     # If any optimisation was skipped, show how to regenerate:
     if optimisation_skipped:
@@ -744,6 +781,12 @@ def set_up_resources(
     if setup_config.set_up_executorch:
         setup_executorch(context)
 
+    for use_case in use_case_resources:
+        for executorch_resource in use_case.executorch_resources:
+            if executorch_resource.type == ExecutorchResourceType.LOCAL_PROJECT:
+                logging.info("Installing dependencies for %s", executorch_resource.model)
+                install_executorch_project(context.env_activate_cmd, executorch_resource)
+
     # Download models
     npu_configs = [
         get_default_npu_config_from_name(npu_config_name, optimization_config.arena_cache_size)
@@ -771,10 +814,11 @@ def set_up_resources(
             setup_config.check_clean_folder,
             setup_script_hash_verified
         )
-        to_download += get_resources_to_download(
-            use_case,
-            download_dir=paths_config.downloads_dir,
-        )
+        if setup_config.set_up_tensorflow:
+            to_download += get_resources_to_download(
+                use_case,
+                download_dir=paths_config.downloads_dir,
+            )
 
     if setup_config.parallel > 1:
         parallel_setup(
@@ -809,6 +853,7 @@ class HttpHeadersAction(Action):
     """
     Action for collecting HTTP headers into a [domain] -> [[header1], [header2]...] dict mapping
     """
+
     def __call__(self, _, namespace, values, option_string=None):
         domain, header = values
         all_current_values = getattr(namespace, self.dest, None) or {}
@@ -831,7 +876,7 @@ if __name__ == "__main__":
         Valid values are: {valid_ml_frameworks}
         """,
         nargs="+",
-        default=[f'{MLFramework.TENSORFLOW_LITE_MICRO.value}'],
+        default=[MLFramework.TENSORFLOW_LITE_MICRO.value],
         action="store",
     )
     parser.add_argument(
