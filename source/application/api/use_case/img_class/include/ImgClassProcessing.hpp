@@ -20,6 +20,7 @@
 #include "BaseProcessing.hpp"
 #include "Classifier.hpp"
 #include <memory>
+#include <array>
 
 namespace arm {
 namespace app {
@@ -32,11 +33,21 @@ namespace app {
     class ImgClassPreProcess : public BasePreProcess {
 
     public:
+        static constexpr size_t kNumChannels = 3;
+
         /**
          * @brief       Constructor
          * @param[in]   inputTensor     Shared pointer representing a tensor interface object.
+         * @param[in]   mean            Optional array representing per-channel mean value to be
+         *                              used for normalisation. Default is set to values expected
+         *                              by ImageNet dataset.
+         * @param[in]   stddev          Optional array representing per-channel standard deviation
+         *                              value to be used for normalisation. Default is set to values
+         *                              expected by ImageNet dataset.
          **/
-        explicit ImgClassPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor);
+        explicit ImgClassPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                    const std::array<float, kNumChannels> mean = {0.485, 0.456, 0.406},
+                                    const std::array<float, kNumChannels> stddev = {0.229, 0.224, 0.225});
 
         /**
          * @brief       Should perform pre-processing of 'raw' input image data and load it into
@@ -49,7 +60,8 @@ namespace app {
 
     private:
         std::shared_ptr<fwk::iface::TensorIface> m_inputTensor;
-        bool m_convertToInt8;
+        std::array<float, kNumChannels> m_mean{0.f, 0.f, 0.f};
+        std::array<float, kNumChannels> m_stddev{1.f, 1.f, 1.f};
     };
 
     /**

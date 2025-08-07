@@ -25,7 +25,12 @@ namespace arm {
 namespace app {
 
     ImgClassPreProcess::ImgClassPreProcess(
-        const std::shared_ptr<fwk::iface::TensorIface> inputTensor) : m_inputTensor{inputTensor}
+        const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+        const std::array<float, kNumChannels> mean,
+        const std::array<float, kNumChannels> stddev
+        ) : m_inputTensor{inputTensor},
+            m_mean{mean},
+            m_stddev{stddev}
     {}
 
     bool ImgClassPreProcess::DoPreProcess(const void* data, size_t inputSize)
@@ -51,11 +56,13 @@ namespace app {
             break;
         case fwk::iface::TensorType::FP32:
             assert(inputSize * sizeof(float) == this->m_inputTensor->Bytes());
-            image::ConvertUint8ToFp32(this->m_inputTensor->GetData<float>(),
-                                      src,
-                                      this->m_inputTensor->GetNumElements(),
-                                      this->m_inputTensor->Layout());
-            break;
+            return image::ConvertUint8ToFp32<kNumChannels>(
+                this->m_inputTensor->GetData<float>(),
+                src,
+                this->m_inputTensor->GetNumElements(),
+                this->m_inputTensor->Layout(),
+                this->m_mean,
+                this->m_stddev);
         default:
             return false;
         }

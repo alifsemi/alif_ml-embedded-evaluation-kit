@@ -37,6 +37,11 @@ namespace app {
     using fwk::tflm::MobileNetModel;
 #elif defined(MLEK_FWK_EXECUTORCH)
     using fwk::et::MobileNetModel;
+    namespace img_class {
+        extern const unsigned int g_numChannels;
+        extern const float g_normMean[];
+        extern const float g_normStddev[];
+    } /* namespace img_class */
 #endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
 
     /* Image classification inference handler. */
@@ -70,8 +75,45 @@ namespace app {
         const uint32_t nRows     = inputShape[MobileNetModel::ms_inputRowsIdx];
         const uint32_t nChannels = inputShape[MobileNetModel::ms_inputChannelsIdx];
 
+        if (nChannels != ImgClassPreProcess::kNumChannels) {
+            printf_err("Number of channels mismatch\n");
+            return false;
+        }
+
+#if defined(MLEK_FWK_EXECUTORCH)
+        /**
+         * For ExecuTorch we typically have input tensors in floating point.
+         * In this case, normalisation parameters should be made available
+         * with the model. We try to use these here.
+         */
         /* Set up pre- and post-processing. */
+        std::array<float, ImgClassPreProcess::kNumChannels> normMean{0.f, 0.f, 0.f};
+        std::array<float, ImgClassPreProcess::kNumChannels> normStddev{1.f, 1.f, 1.f};
+
+        if (inputTensor->Type() == fwk::iface::TensorType::FP32 ||
+            inputTensor->Type() == fwk::iface::TensorType::FP16) {
+
+            /* Check for mismatch in size of channels. */
+            if (ImgClassPreProcess::kNumChannels != img_class::g_numChannels) {
+                printf_err("Number of channels mismatch in norm parameters\n");
+                return false;
+            }
+
+            /* Assign values. */
+            for (size_t i = 0; i < ImgClassPreProcess::kNumChannels; ++i) {
+                normMean[i] = img_class::g_normMean[i];
+                normStddev[i] = img_class::g_normStddev[i];
+
+                if (0.f == normStddev[i]) {
+                    printf_err("Invalid std value: %f\n", normStddev[i]);
+                    return false;
+                }
+            }
+        }
+        auto preProcess = ImgClassPreProcess(inputTensor, normMean, normStddev);
+#else /* defined(MLEK_FWK_EXECUTORCH) */
         auto preProcess = ImgClassPreProcess(inputTensor);
+#endif /* defined(MLEK_FWK_EXECUTORCH) */
 
         std::vector<ClassificationResult> results;
         ImgClassPostProcess postProcess =

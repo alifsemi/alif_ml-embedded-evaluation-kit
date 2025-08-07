@@ -56,6 +56,21 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
         set(DEFAULT_MODEL_PATH          ${DEFAULT_MODEL_DIR}/mv2_arm_TOSA-1.0+INT.pte)
         set(DEFAULT_ACTIVATION_BUF_SZ   0x00C00000)
     endif()
+
+    USER_OPTION(${use_case}_NORM_MEAN "Model specific per-channel array of normalisation mean values."
+        "0.485, 0.456, 0.406"
+        STRING)
+
+    USER_OPTION(${use_case}_NORM_STD  "Model specific per-channel array of normalisation std values."
+        "0.229, 0.224, 0.225"
+        STRING)
+
+    set(EXTRA_MODEL_CODE
+        "/* Model parameters for ${use_case} */"
+        "extern const unsigned int g_numChannels = 3"
+        "extern const float g_normMean[]   = { ${${use_case}_NORM_MEAN} };"
+        "extern const float g_normStddev[] = { ${${use_case}_NORM_STD} };"
+    )
 endif()
 
 USER_OPTION(${use_case}_MODEL_PATH "Neural network model file to be used in the evaluation application."
@@ -84,9 +99,9 @@ generate_labels_code(
         OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
 )
 
-
 # Generate model file
 generate_model_code(
     MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
+    EXPRESSIONS ${EXTRA_MODEL_CODE}
     NAMESPACE   "arm" "app" "img_class")

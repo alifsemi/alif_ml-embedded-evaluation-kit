@@ -26,7 +26,7 @@
  * @TODO: Remove this bss mem from here. It should be passed into the init function
  *        like other memory regions.
  */
-constexpr size_t sTmpAllocationPoolSz = 0x100000; /**< 1 MiB of temp allocation pool size. */
+constexpr size_t sTmpAllocationPoolSz = 0x200000; /**< 2 MiB of temp allocation pool size. */
 static uint8_t __attribute__((aligned(16), section("ifm")))
     sTmpAllocationPool[sTmpAllocationPoolSz]; /**< temp allocation buffer */
 

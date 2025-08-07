@@ -17,7 +17,6 @@
  */
 #include "ImageUtils.hpp"
 
-#include <array>
 #include <limits>
 
 namespace arm {
@@ -127,43 +126,6 @@ namespace image {
         } else {
             for (size_t i = 0; i < nElem; ++i) {
                 dst[i] = static_cast<int8_t>(static_cast<int32_t>(src[i]) - 128);
-            }
-        }
-    }
-
-    static inline float Normalize(const uint8_t val, float mean, float std)
-    {
-        return ((static_cast<float>(val) / 255.f) - mean) / std;
-    }
-
-    void ConvertUint8ToFp32(float* dst,
-                            const uint8_t* src,
-                            const size_t nElem,
-                            fwk::iface::TensorLayout layout)
-    {
-        constexpr size_t nChannels = 3;
-        /**
-         * The normalisation process happens per channel, and these are the
-         * default values for the Red, Green and Blue channels. If needed,
-         * this function could accept these are arguments later.
-         *
-         * Mean and standard deviation values: {R,     G,     B    } */
-        const std::array<float, nChannels> mean{0.485, 0.456, 0.406};
-        const std::array<float, nChannels> stddev{0.229, 0.224, 0.225};
-        const size_t imgArraySz = nElem / nChannels;
-
-        if (layout == fwk::iface::TensorLayout::NCHW) {
-            for (size_t i = 0; i < imgArraySz; i++) {
-                for (size_t j = 0; j < nChannels; ++j) {
-                    dst[(j * imgArraySz) + i] =
-                        Normalize(src[i * nChannels + j], mean[j], stddev[j]);
-                }
-            }
-        } else {
-            for (size_t i = 0; i < nElem; i += nChannels) {
-                dst[i]     = Normalize(src[i], mean[0], stddev[0]);
-                dst[i + 1] = Normalize(src[i], mean[1], stddev[1]);
-                dst[i + 2] = Normalize(src[i], mean[2], stddev[2]);
             }
         }
     }
