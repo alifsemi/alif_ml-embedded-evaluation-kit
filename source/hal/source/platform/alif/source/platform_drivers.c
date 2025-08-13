@@ -82,6 +82,9 @@ uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
 
+static void set_flash_to_linear_and_disable_caching(void);
+static void set_flash_to_wrap_and_enable_caching(void);
+
 #ifdef SE_SERVICES_SUPPORT
 extern uint32_t services_handle;
 
@@ -89,9 +92,6 @@ run_profile_t default_runprof;
 off_profile_t default_offprof;
 
 static void MHU_msg_received(void* data);
-
-static void set_flash_to_linear_and_disable_caching(void);
-static void set_flash_to_wrap_and_enable_caching(void);
 
 // IPC callback
 static void ipc_rx_callback(void *data)

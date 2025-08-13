@@ -51,7 +51,7 @@ set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
 set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
 
-set(OSPI_RAM_SUPPORT ON CACHE BOOL "Enables OSPI RAM driver initialization")
+set(OSPI_RAM_SUPPORT OFF CACHE BOOL "Enables OSPI RAM driver initialization")
 
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
