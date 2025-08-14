@@ -12,9 +12,15 @@
 ; */
 
 /*On chip RAM Regions */
-#define SRAM_BASE                 0x02000000
-#define SRAM_SIZE                 0x00700000		/* 8M */
+#define SRAM_BASE                 0x03000000
+#define SRAM_SIZE                 0x006C0000		/* 8M */
 
+#if SRAM_BASE == 0x02000000
+#define UNSTRIPED_BASE            0x02700000
+#else
+#define UNSTRIPED_BASE            0x02380000
+#endif
+#define UNSTRIPED_SIZE            0x00100000
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
@@ -117,7 +123,10 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.NoInit.ethos_u_cache)
       ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
-      * (.bss.lcd_image_buf)
+  }
+  
+  RW_UNSTRIPED UNSTRIPED_BASE UNSTRIPED_SIZE {
+  	  * (.bss.lcd_image_buf)
   }
 
   PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }

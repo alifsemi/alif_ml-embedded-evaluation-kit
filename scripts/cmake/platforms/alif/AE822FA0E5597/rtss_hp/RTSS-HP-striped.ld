@@ -38,7 +38,8 @@ MEMORY
 {
   ITCM  (rwx)     : ORIGIN = 0x01000000, LENGTH = 0x00040000
   DTCM  (rwx)     : ORIGIN = 0x20000000, LENGTH = 0x00100000
-  SRAM  (rwx)     : ORIGIN = 0x02000000, LENGTH = 0x00800000
+  SRAM  (rwx)     : ORIGIN = 0x03000000, LENGTH = 0x00700000
+  UNSTRIPED (rwx) : ORIGIN = 0x02380000, LENGTH = 0x00100000
   MRAM  (rx)      : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
   OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
@@ -106,6 +107,8 @@ SECTIONS
     LONG (SIZEOF(.bss)/4)
     LONG (ADDR(.bss.sram))
     LONG (SIZEOF(.bss.sram)/4)
+    LONG (ADDR(.bss.unstriped))
+    LONG (SIZEOF(.bss.unstriped)/4)
     __zero_table_end__ = .;
   } > MRAM
 
@@ -152,8 +155,12 @@ SECTIONS
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.NoInit.ethos_u_cache)
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
-    * (.bss.lcd_image_buf)
   } > SRAM
+
+  .bss.unstriped (NOLOAD) :
+  {
+    * (.bss.lcd_image_buf)
+  } > UNSTRIPED
 
   .bss.itcm (NOLOAD) : ALIGN(8)
   {

@@ -34,7 +34,6 @@
 
 #include "hal.h"
 #include "log_macros.h"
-#include "power.h"
 
 #include <cinttypes>
 #include <cmath>
