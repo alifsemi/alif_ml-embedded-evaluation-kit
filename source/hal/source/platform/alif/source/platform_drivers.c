@@ -325,6 +325,15 @@ int platform_init(void)
     SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
 
     se_err = (int)set_power_profiles();
+
+    // TODO: Remove when fixed in SE. Happens with SE 107. Hopefully fixed in SE 108.
+    // ========== START of FIX =========
+    volatile uint32_t* reg;
+    // Power ON SRAM0 & 1 and enable clocks for em
+    reg = (volatile uint32_t*)(0x1a60A000 + 0x4);
+    *reg &= ~((1U << 13) | (1U << 9));
+    *reg &= ~((1U << 12) | (1U << 8));
+    // ========== END of FIX =========
 #endif // SE_SERVICES_SUPPORT
 
 #if !defined(BALLETTO_DEVICE)
