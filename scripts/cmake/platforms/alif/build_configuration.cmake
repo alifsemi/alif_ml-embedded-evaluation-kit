@@ -43,6 +43,13 @@ function(set_platform_global_defaults)
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
 
+    set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
+
+    # Sanity check for USE_STRIPED_SRAM
+    if ((USE_STRIPED_SRAM) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
+        message(FATAL_ERROR "USE_STRIPED_SRAM possible only with SKU AE822FA0E5597")
+    endif()
+
     # Sanity check DevKit or AppKit
     if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit")))
         message(FATAL_ERROR "Possible TARGET_BOARD values are: DevKit and AppKit but given value was ${TARGET_BOARD}")
@@ -56,11 +63,15 @@ function(set_platform_global_defaults)
     endif()
 
 
-    set(IS_EAGLE_DEVICE OFF CACHE BOOL "Is device an Eagle device.")
     if (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597") # Add other SKUs which are Eagle devices
         set(ALIF_BOARDLIB_PATH_END "devkit_e8" CACHE STRING "" FORCE)
-        set(IS_EAGLE_DEVICE ON CACHE BOOL "" FORCE)
         add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
+        if (USE_STRIPED_SRAM)
+            add_compile_definitions(USE_STRIPED_SRAM)
+            message(STATUS "Using Striped SRAM!")
+        else()
+            message(STATUS "Using Linear SRAM!")
+        endif()
     endif()
 
     if (ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") # Add other SKUs which are Balletto devices
@@ -90,6 +101,11 @@ function(set_platform_global_defaults)
         set(RTSS_NPU_CONFIG_ID "H128")
     endif()
 
+    # Sanity check for ETHOS_U_NPU_ID
+    if ((ETHOS_U_NPU_ID STREQUAL U85) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
+        message(FATAL_ERROR "ETHOS_U_NPU_ID U85 possible only with SKU AE822FA0E5597")
+    endif()
+
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
         "${RTSS_NPU_CONFIG_ID}"
         STRING)
@@ -97,7 +113,7 @@ function(set_platform_global_defaults)
     if ((ALIF_DEVICE_SKU STREQUAL "AE722F80F55D5") AND (TARGET_BOARD STREQUAL "DevKit"))
         set(ALIF_BOARDLIB_PATH_END "devkit_gen2" CACHE STRING "" FORCE)
     endif()
-    
+
     USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
         "Shared_Sram"
         STRING)
@@ -159,11 +175,74 @@ function(platform_custom_post_build)
 
     string(TOLOWER "${ALIF_CORE}" ALIF_CORE_STRING)
 
+    #####################################################
+    ## Support for linker file to include header start ##
+    #####################################################
+    add_library(${PARSED_TARGET_NAME}_linkerfile OBJECT)
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_options(${PARSED_TARGET_NAME}
+            PRIVATE
+            -T $<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>
+            "SHELL:-Xlinker -Map=bin/${target}.map"
+        )
+
+        target_sources(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.ld
+        )
+        set_source_files_properties(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.ld
+            PROPERTIES
+            LANGUAGE C
+        )
+        target_compile_options(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                -E
+                -P
+                -xc
+        )
+    else()
+        target_link_options(${PARSED_TARGET_NAME}
+            PRIVATE
+            --scatter=$<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>
+        )
+        target_sources(${PARSED_TARGET_NAME}_linkerfile
+        PRIVATE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.sct
+        )
+
+        set_source_files_properties(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.sct
+            PROPERTIES
+            LANGUAGE C
+        )
+
+        target_compile_options(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                -E
+                -xc
+        )
+    endif()
+
+    add_dependencies(${PARSED_TARGET_NAME}
+        ${PARSED_TARGET_NAME}_linkerfile
+    )
+
+    set_target_properties(${PARSED_TARGET_NAME} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>)
+
+    # Link rte_components so linker files can use the alif_mem_config.h
+    target_link_libraries(${PARSED_TARGET_NAME}_linkerfile
+        rte_components
+    )
+
     # Add link options for the linker script to be used:
-    add_linker_script(
-        ${PARSED_TARGET_NAME}                                                       # Target
-        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}   # Directory path
-        ${LINKER_SCRIPT_NAME})                                                      # Name of the file without suffix
+    # add_linker_script(
+    #     ${PARSED_TARGET_NAME}                                                       # Target
+    #     ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}   # Directory path
+    #     ${LINKER_SCRIPT_NAME})                                                      # Name of the file without suffix
+
+    #####################################################
+    ## Support for linker file to include header end ####
+    #####################################################
 
     add_target_map_file(
         ${PARSED_TARGET_NAME}

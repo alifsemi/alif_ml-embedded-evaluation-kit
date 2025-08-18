@@ -1,4 +1,5 @@
-#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
+; These are now processed from build_configuration.cmake
+;#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 
 ;/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
@@ -11,16 +12,12 @@
 ; *
 ; */
 
-/*On chip RAM Regions */
-#define SRAM_BASE                 0x03000000
-#define SRAM_SIZE                 0x00700000		/* 8M */
+#include "alif_mem_config.h"
 
-#if SRAM_BASE == 0x02000000
-#define UNSTRIPED_BASE            0x02700000
-#else
-#define UNSTRIPED_BASE            0x02380000
-#endif
-#define UNSTRIPED_SIZE            0x00100000
+/*On chip RAM Regions */
+#define SRAM_BASE                 ALIF_SRAM_BASE
+#define SRAM_SIZE                 ALIF_SRAM_SIZE    /* 7M */
+
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */

@@ -1,4 +1,5 @@
-#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
+; These are now processed from build_configuration.cmake
+;#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 
 ;/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
@@ -11,13 +12,16 @@
 ; *
 ; */
 
+#include "alif_mem_config.h"
+
 /*On chip RAM Regions */
-#define SRAM_BASE                 0x02000000
-#define SRAM_SIZE                 0x00700000		/* 8M */
+#define SRAM_BASE                 ALIF_SRAM_BASE
+#define SRAM_SIZE                 ALIF_SRAM_SIZE    /* 7M */
 
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
+
 /* External OSPI flash */
 #define OSPI_FLASH_BASE           0xC0000000
 #define OSPI_FLASH_SIZE           0x02000000        /* 32M */
@@ -117,7 +121,10 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       * (.bss.NoInit.ethos_u_cache)
       ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
-      * (.bss.lcd_image_buf)
+  }
+
+  RW_UNSTRIPED UNSTRIPED_BASE UNSTRIPED_SIZE {
+  	  * (.bss.lcd_image_buf)
   }
 
   PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }

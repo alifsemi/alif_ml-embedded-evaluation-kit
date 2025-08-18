@@ -679,7 +679,7 @@ void MPU_Load_Regions(void)
      },
      };
 
- #else
+ #else // BALLETTO_DEVICE
 
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.

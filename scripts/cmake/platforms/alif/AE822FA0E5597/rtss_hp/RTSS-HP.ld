@@ -27,6 +27,8 @@
  * limitations under the License.
  */
 
+#include "alif_mem_config.h"
+
 __STACK_SIZE = 0x00008000;
 __HEAP_SIZE  = 0x00017000;
 __ROM_BASE = 0x80008000;
@@ -34,12 +36,14 @@ __ROM_SIZE = 0x00477000;
 __OSPI_FLASH_BASE = 0xC0000000;
 __OSPI_FLASH_SIZE = 0x02000000;
 
+
 MEMORY
 {
-  ITCM  (rwx)     : ORIGIN = 0x01000000, LENGTH = 0x00040000
-  DTCM  (rwx)     : ORIGIN = 0x20000000, LENGTH = 0x00100000
-  SRAM  (rwx)     : ORIGIN = 0x02000000, LENGTH = 0x00800000
-  MRAM  (rx)      : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  ITCM  (rwx)     : ORIGIN = 0x01000000,     LENGTH = 0x00040000
+  DTCM  (rwx)     : ORIGIN = 0x20000000,     LENGTH = 0x00100000
+  SRAM  (rwx)     : ORIGIN = ALIF_SRAM_BASE, LENGTH = ALIF_SRAM_SIZE
+  UNSTRIPED (rwx) : ORIGIN = UNSTRIPED_BASE, LENGTH = UNSTRIPED_SIZE
+  MRAM  (rx)      : ORIGIN = __ROM_BASE,     LENGTH = __ROM_SIZE
   OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
 
@@ -106,6 +110,8 @@ SECTIONS
     LONG (SIZEOF(.bss)/4)
     LONG (ADDR(.bss.sram))
     LONG (SIZEOF(.bss.sram)/4)
+    LONG (ADDR(.bss.unstriped))
+    LONG (SIZEOF(.bss.unstriped)/4)
     __zero_table_end__ = .;
   } > MRAM
 
@@ -152,8 +158,12 @@ SECTIONS
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.NoInit.ethos_u_cache)
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
-    * (.bss.lcd_image_buf)
   } > SRAM
+
+  .bss.unstriped (NOLOAD) :
+  {
+    * (.bss.lcd_image_buf)
+  } > UNSTRIPED
 
   .bss.itcm (NOLOAD) : ALIGN(8)
   {
