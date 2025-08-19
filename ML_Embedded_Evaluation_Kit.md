@@ -709,3 +709,6 @@ both TCM and SRAM0/SRAM1.<br>
 If running on two cores, the M55-HE core must use the alternative RTSS-HE-TCM layout which uses only TCM. This will only fit the smallest use-cases such as kws or alif_kws, and GLCD_UI must be disabled.<br>
 To fit in TCM the kws use case must have its activation area reduced using `-Dkws_ACTIVATION_BUF_SZ=0x20000`. (This is already the default for alif_kws).
 Also noise_reduction use-case needs activation area reduced using `-Dnoise_reduction_ACTIVATION_BUF_SZ=0x20000` for TCM build.
+
+`-DETHOS_U_NPU_ID=<U55|U85>`<br>
+Specifies which NPU to use for interference. (Default is U55)
