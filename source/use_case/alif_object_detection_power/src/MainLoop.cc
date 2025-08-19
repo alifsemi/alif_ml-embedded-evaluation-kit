@@ -69,6 +69,14 @@ void MainLoop()
     if (set_power_run_profile(runprof)) {
         printf_err("Failed to set run profile\n");
     }
+    // TODO: Remove when fixed in SE. Happens with SE 107. Hopefully fixed in SE 108.
+    // ========== START of FIX =========
+    volatile uint32_t* reg;
+    // Power ON SRAM0 & 1 and enable clocks for em
+    reg = (volatile uint32_t*)(0x1a60A000 + 0x4);
+    *reg &= ~((1U << 13) | (1U << 9));
+    *reg &= ~((1U << 12) | (1U << 8));
+    // ========== END of FIX =========
 #endif
 
     BOARD_BUTTON2_Init(button2_cb);

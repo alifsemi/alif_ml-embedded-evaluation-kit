@@ -7,8 +7,8 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
-#ifndef OSPI_FLASH_H_
-#define OSPI_FLASH_H_
+#ifndef RAM_TEST_H_
+#define RAM_TEST_H_
 
 #include <stdint.h>
 
@@ -16,14 +16,9 @@
 extern "C" {
 #endif
 
-/**
- * @brief Initialize OSPI driver and flash chip. Enables XIP mode.
- *
- */
-int32_t ospi_flash_init(void);
-
-int32_t ospi_flash_set_linear(void);
-int32_t ospi_flash_set_wrap32(void);
+void ram_address_test(volatile uint8_t *ram, uint32_t size);
+void ram_linear_test(uint8_t *ram);
+void ram_random_test(uint8_t *test_ram);
 
 #ifdef __cplusplus
 }

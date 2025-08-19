@@ -13,6 +13,7 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  *  @ingroup host_services
+ *  @ingroup services-host-error
  */
 
 /******************************************************************************
@@ -44,11 +45,12 @@
  * @brief Error code to string conversion
  * @param error_code
  * @return
+ *  @ingroup services-host-error
  */
 char *SERVICES_error_to_string(uint32_t error_code)
 {
-  static char err_string[MAX_ERROR_STRING_LENGTH] = { 0 };
-  char *p_str = NULL;
+  static char err_string[MAX_ERROR_STRING_LENGTH] = { 0 }; /* return string */
+  char *p_str = NULL; /* Error string */
 
   switch (error_code)
    {
@@ -60,6 +62,8 @@ char *SERVICES_error_to_string(uint32_t error_code)
          p_str = "SERVICES_REQ_TIMEOUT          "; break;
        case SERVICES_RESP_UNKNOWN_COMMAND:
          p_str = "SERVICES_RESP_UNKNOWN_COMMAND "; break;
+       case SERVICE_INVALID_PARAMETER:
+           p_str = "SERVICES_INVALID_PARAMETER   "; break;
        default:
          p_str = ">>  Error UNKNOWN  <<"; break;
   }
@@ -72,6 +76,7 @@ char *SERVICES_error_to_string(uint32_t error_code)
  * @fn    const char *SERVICES_version(void)
  * @brief SERVICES version
  * @return version string
+ * @ingroup services-host-error
  */
 const char *SERVICES_version(void)
 {

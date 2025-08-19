@@ -43,21 +43,25 @@
 #include "board.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
+#include "ospi_ram.h"
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
+#include "sys_clocks.h"
 #include "app_mem_regions.h"
 
 #include CMSIS_device_header
+
+#define HW_REG32(base,offset) *((volatile uint32_t *)(base + offset))
 
 #if defined(ARM_NPU)
 #include "ethosu_driver.h"
 #include "ethosu_npu_init.h"
 
 #if defined(ETHOS_U_BASE_ADDR)
-    #if (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR)
+    #if (ETHOS_U_BASE_ADDR != ETHOS_U55_NPU_BASE && ETHOS_U_BASE_ADDR != ETHOS_U85_NPU_BASE)
         #error "NPU component configured with incorrect NPU base address."
-    #endif /* (ETHOS_U_NPU_BASE != ETHOS_U_BASE_ADDR) */
+    #endif /* (ETHOS_U_BASE_ADDR != ETHOS_U55_NPU_BASE && ETHOS_U_BASE_ADDR != ETHOS_U85_NPU_BASE) */
 #else
     #error "ETHOS_U_BASE_ADDR should have been defined by the NPU component."
 #endif /* defined(ETHOS_U_BASE_ADDR) */
@@ -78,6 +82,9 @@ uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
 
+static void set_flash_to_linear_and_disable_caching(void);
+static void set_flash_to_wrap_and_enable_caching(void);
+
 #ifdef SE_SERVICES_SUPPORT
 extern uint32_t services_handle;
 
@@ -94,6 +101,20 @@ static void ipc_rx_callback(void *data)
     uint16_t id = payload->id;
     printf("****** Got message from other CPU: %s, id: %d\n", st, id);
 }
+#else
+#define PWR_CTRL_TX_DPHY_PWR_MASK          (1U << 0)    /* Mask off the power supply for MIPI TX DPHY */
+#define PWR_CTRL_TX_DPHY_ISO               (1U << 1)    /* Enable isolation for MIPI TX DPHY */
+#define PWR_CTRL_RX_DPHY_PWR_MASK          (1U << 4)    /* Mask off the power supply for MIPI RX DPHY */
+#define PWR_CTRL_RX_DPHY_ISO               (1U << 5)    /* Enable isolation for MIPI RX DPHY */
+#define PWR_CTRL_DPHY_PLL_PWR_MASK         (1U << 8)    /* Mask off the power supply for MIPI PLL */
+#define PWR_CTRL_DPHY_PLL_ISO              (1U << 9)    /* Enable isolation for MIPI PLL */
+#define PWR_CTRL_DPHY_VPH_1P8_PWR_BYP_EN   (1U << 12)   /* dphy vph 1p8 power bypass enable */
+
+#define CLK_ENA_CLK100M    (1U << 21) /* Enable 100M_CLK  */
+#define CLK_ENA_CLK38P4M   (1U << 23) /* Enable HFOSC_CLK */
+#if defined(EAGLE_DEVICE)
+#define CLK_ENA_CLK76P8M   (1U << 24) /* Enable 76M8_CLK  */
+#endif // EAGLE_DEVICE
 #endif
 
 #ifdef COPY_VECTORS
@@ -140,9 +161,14 @@ static uint32_t set_power_profiles()
 #ifdef BALLETTO_DEVICE // Balletto support only PFM
     default_runprof.dcdc_mode     = DCDC_MODE_PFM_FORCED;
     // No following memories on E1C/B1: SRAM0_MASK | SRAM1_MASK | SRAM6A_MASK | SRAM6B_MASK | SRAM7_1_MASK | SRAM7_2_MASK | SRAM7_3_MASK | SRAM8_MASK | SRAM9_MASK
-    default_runprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.memory_blocks   = SERAM_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
     default_runprof.phy_pwr_gating  = LDO_PHY_MASK;
     default_runprof.ip_clock_gating = LP_PERIPH_MASK | NPU_HE_MASK;
+#elif defined(EAGLE_DEVICE)
+    default_runprof.dcdc_mode       = DCDC_MODE_PWM;
+    default_runprof.memory_blocks   = SERAM_MASK | SRAM0_1_MASK | SRAM0_2_MASK | SRAM0_3_MASK | SRAM0_4_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
+    default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
+    default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
 #else
     default_runprof.dcdc_mode       = DCDC_MODE_PWM;
     default_runprof.memory_blocks   = SERAM_MASK | SRAM0_MASK | SRAM1_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
@@ -171,11 +197,10 @@ static uint32_t set_power_profiles()
         default_offprof.dcdc_voltage    = DCDC_VOUT_0825;
 #ifdef BALLETTO_DEVICE // Balletto support only PFM
         default_offprof.dcdc_mode       = DCDC_MODE_PFM_FORCED;
-        default_offprof.memory_blocks   = SERAM_1_MASK | SERAM_2_MASK | SERAM_3_MASK | SERAM_4_MASK;
 #else
         default_offprof.dcdc_mode       = DCDC_MODE_PWM;
-        default_offprof.memory_blocks   = SERAM_MASK;
 #endif
+        default_offprof.memory_blocks   = SERAM_MASK;
         default_offprof.aon_clk_src     = CLK_SRC_LFXO;
         default_offprof.stby_clk_src    = CLK_SRC_HFRC;
         default_offprof.stby_clk_freq   = SCALED_FREQ_RC_STDBY_38_4_MHZ;
@@ -206,8 +231,10 @@ void enable_mipi_power(void)
     // if SE_SERVICES_SUPPORT is defined, then in run profile dphy is already enabled.
 #ifndef SE_SERVICES_SUPPORT
     /* Enable MIPI power */
-    enable_mipi_dphy_power();
-    disable_mipi_dphy_isolation();
+    // enable_mipi_dphy_power
+    VBAT->PWR_CTRL &= ~( PWR_CTRL_TX_DPHY_PWR_MASK | PWR_CTRL_RX_DPHY_PWR_MASK | PWR_CTRL_DPHY_PLL_PWR_MASK | PWR_CTRL_DPHY_VPH_1P8_PWR_BYP_EN);
+    // disable_mipi_dphy_isolation
+    VBAT->PWR_CTRL &= ~( PWR_CTRL_TX_DPHY_ISO | PWR_CTRL_RX_DPHY_ISO | PWR_CTRL_DPHY_PLL_ISO );
 #endif
 }
 
@@ -229,15 +256,43 @@ uint32_t enable_peripheral_clocks(void)
                                         &service_error_code);
     }
 #else // SE_SERVICES_SUPPORT
-    enable_cgu_clk38p4m();
-    enable_cgu_clk100m();
+    // enable_cgu_clk38p4m
+    CGU->CLK_ENA |= CLK_ENA_CLK38P4M;
+    // enable_cgu_clk100m
+    CGU->CLK_ENA |= CLK_ENA_CLK100M;
 #endif // SE_SERVICES_SUPPORT
+
+    return (err + service_error_code);
+}
+
+uint32_t enable_audio_peripheral_clocks(void)
+{
+    uint32_t err = 0;
+    uint32_t service_error_code = 0;
+#if defined(EAGLE_DEVICE)
+#if SE_SERVICES_SUPPORT
+    // Enable I2S clk
+    err = SERVICES_clocks_enable_clock(services_handle,
+                                       CLKEN_HFOSCx2,
+                                       true,
+                                       &service_error_code);
+#else // SE_SERVICES_SUPPORT
+    // Enable I2S clk
+    CGU->CLK_ENA |= CLK_ENA_CLK76P8M;
+#endif // SE_SERVICES_SUPPORT
+#endif // EAGLE_DEVICE
 
     return (err + service_error_code);
 }
 
 int platform_init(void)
 {
+#if defined(EAGLE_DEVICE)
+    // Set the Eagle mode ON
+    uint32_t value = (1 << 31);
+    HW_REG32(0x1A60503C, 0x0) = value;
+#endif // EAGLE_DEVICE
+
     int err = 0;
 
     /* Turn off PRIVDEFENA - only way to have address 0 unmapped */
@@ -270,6 +325,15 @@ int platform_init(void)
     SERVICES_system_set_services_debug(services_handle, false, &service_error_code);
 
     se_err = (int)set_power_profiles();
+
+    // TODO: Remove when fixed in SE. Happens with SE 107. Hopefully fixed in SE 108.
+    // ========== START of FIX =========
+    volatile uint32_t* reg;
+    // Power ON SRAM0 & 1 and enable clocks for em
+    reg = (volatile uint32_t*)(0x1a60A000 + 0x4);
+    *reg &= ~((1U << 13) | (1U << 9));
+    *reg &= ~((1U << 12) | (1U << 8));
+    // ========== END of FIX =========
 #endif // SE_SERVICES_SUPPORT
 
 #if !defined(BALLETTO_DEVICE)
@@ -286,26 +350,38 @@ int platform_init(void)
         BOARD_Clock_Init();
         BOARD_Pinmux_Init();
 
-#ifdef OSPI_FLASH_SUPPORT /* OSPI drivers compiled in, check if OSPI flash support is enabled */
+        tracelib_init(NULL);
+#ifdef OSPI_FLASH_SUPPORT
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
 #endif
+
+#ifdef OSPI_RAM_SUPPORT
+        err = ospi_ram_init();
+        if (err) {
+            printf_err("Failed initializing OSPI RAM. err=%d\n", err);
+        }
+#endif
+
 #if !defined(BALLETTO_DEVICE)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
         HWSEMdrv->Lock();
     } else {
         /* Someone else got there first - they did it or are doing it. Wait until we see count 2 indicating they've finished */
         while (HWSEMdrv->GetCount() < 2);
+        tracelib_init(NULL);
     }
 
     HWSEMdrv->Uninitialize();
 #endif // BALLETTO_DEVICE
 
     // tracelib init here after pinmux is done.
-    tracelib_init(NULL);
+    //tracelib_init(NULL);
     fault_dump_enable(true);
+
+    set_flash_to_wrap_and_enable_caching();
 
     info("Processor internal clock: %" PRIu32 "Hz\n", GetSystemCoreClock());
     info("%s: complete\n", __FUNCTION__);
@@ -446,13 +522,13 @@ uint64_t ethosu_address_remap(uint64_t address, int index)
 
 unsigned int ethosu_config_select(uint64_t address, int index)
 {
-// #if ETHOS_U_BASE_ADDR == ETHOS_U85_NPU_BASE
-//     UNUSED(index);
-//     // Accessible regions to U85 are main SRAM (0), OSPI (2,A,B,C,D), MRAM (8) and TCMs (5)
-//     // SRAM and TCMs need to use SRAM ports, MRAM and OSPI need to use EXT port
-//     // Quick-and-dirty check that gives the right answer for valid addresses:
-//     return address & 0xA0000000 ? 2 : 0;
-// #else
+#if ETHOS_U_BASE_ADDR == ETHOS_U85_NPU_BASE
+    UNUSED(index);
+    // Accessible regions to U85 are main SRAM (0), OSPI (2,A,B,C,D), MRAM (8) and TCMs (5)
+    // SRAM and TCMs need to use SRAM ports, MRAM and OSPI need to use EXT port
+    // Quick-and-dirty check that gives the right answer for valid addresses:
+    return address & 0xA0000000 ? 2 : 0;
+#else
 
     // U55s' M1 AXI ports in Ensemble B can't reach MRAM or OSPI. Catch that here.
     if ((!SOC_FEAT_U55_M1_CAN_ACCESS_HIGHER_ADDRESS) && (address >= U55_M1_HIGHER_ADDRESS)) {
@@ -471,7 +547,7 @@ unsigned int ethosu_config_select(uint64_t address, int index)
     case 6: return NPU_REGIONCFG_6; break;
     case 7: return NPU_REGIONCFG_7; break;
     }
-// #endif
+#endif
 }
 
 typedef struct address_range
@@ -512,6 +588,15 @@ static bool check_need_to_invalidate(const void *p, size_t bytes)
     return true;
 }
 
+#ifndef BOARD_OSPI_RAM_BASE
+#define BOARD_OSPI_RAM_BASE     0xA0000000
+#define BOARD_OSPI_RAM_SIZE     0x20000000
+#endif
+#ifndef BOARD_OSPI_FLASH_BASE
+#define BOARD_OSPI_FLASH_BASE   0xC0000000
+#define BOARD_OSPI_FLASH_SIZE   0x20000000
+#endif
+
 bool ethosu_area_needs_invalidate_dcache(const void *p, size_t bytes)
 {
     /* API says null pointer can be passed */
@@ -524,9 +609,20 @@ bool ethosu_area_needs_invalidate_dcache(const void *p, size_t bytes)
 
 bool ethosu_area_needs_flush_dcache(const void *p, size_t bytes)
 {
+#ifdef OSPI_RAM_SUPPORT
+    if (!p) {
+        return true;
+    }
+    uintptr_t area_start = (uintptr_t) p;
+    uintptr_t area_end = area_start + bytes;
+    if (area_end > BOARD_OSPI_RAM_BASE && area_start < BOARD_OSPI_RAM_BASE + BOARD_OSPI_RAM_SIZE) {
+        return true;
+    }
+#else
     /* We're not using writeback for any Ethos areas */
     UNUSED(p);
     UNUSED(bytes);
+#endif
     return false;
 }
 
@@ -538,6 +634,7 @@ void MPU_Load_Regions(void)
 #define MEMATTRIDX_DEVICE_nGnRE              1
 #define MEMATTRIDX_NORMAL_WB_RA_WA           2
 #define MEMATTRIDX_NORMAL_NON_CACHEABLE      3
+#define MEMATTRIDX_FLASH_SWITCHABLE          4
 #define MEMATTRIDX_DEVICE_nGnRnE             7
 
 #if defined(BALLETTO_DEVICE)
@@ -582,7 +679,7 @@ void MPU_Load_Regions(void)
      },
      };
 
- #else
+ #else // BALLETTO_DEVICE
 
     /* This is a complete map - the startup code enables PRIVDEFENA that falls back
      * to the system default, but we will turn it off later.
@@ -623,14 +720,22 @@ void MPU_Load_Regions(void)
     .RBAR = ARM_MPU_RBAR(SOC_FEAT_MRAM_BASE, ARM_MPU_SH_NON, 1, 1, 0),  // RO, NP, XA
     .RLAR = ARM_MPU_RLAR(SOC_FEAT_MRAM_BASE + SOC_FEAT_MRAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
     },
-#ifdef OSPI_FLASH_SUPPORT
+#if defined OSPI_FLASH_SUPPORT || defined OSPI_RAM_SUPPORT
     {   /* OSPI Regs - 16MB : RO-0, NP-0, XN-1  */
     .RBAR = ARM_MPU_RBAR(0x83000000, ARM_MPU_SH_NON, 0, 0, 1),
     .RLAR = ARM_MPU_RLAR(0x83FFFFFF, MEMATTRIDX_DEVICE_nGnRE)
     },
-    {   /* OSPI1 XIP(eg:flash) - 512MB */
-    .RBAR = ARM_MPU_RBAR(0xC0000000, ARM_MPU_SH_NON, 1, 1, 0),
-    .RLAR = ARM_MPU_RLAR(0xDFFFFFFF, MEMATTRIDX_NORMAL_NON_CACHEABLE)
+#endif
+#ifdef OSPI_RAM_SUPPORT
+    {   /* OSPI0 XIP(eg:PSRAM) */
+    .RBAR = ARM_MPU_RBAR(BOARD_OSPI_RAM_BASE, ARM_MPU_SH_NON, 0, 1, 0),
+    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_RAM_BASE + BOARD_OSPI_RAM_SIZE - 1, MEMATTRIDX_NORMAL_WB_RA_WA)
+    },
+#endif
+#ifdef OSPI_FLASH_SUPPORT
+    {   /* OSPI1 XIP(eg:flash) */
+    .RBAR = ARM_MPU_RBAR(BOARD_OSPI_FLASH_BASE, ARM_MPU_SH_NON, 1, 1, 0),
+    .RLAR = ARM_MPU_RLAR(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - 1, MEMATTRIDX_FLASH_SWITCHABLE)
     },
 #endif
     { // System PPB
@@ -664,10 +769,60 @@ void MPU_Load_Regions(void)
                                          ARM_MPU_ATTR_NON_CACHEABLE));
 
 
+#ifdef OSPI_FLASH_SUPPORT
+    /* Mem Attribute for 4th index - flash initially non cacheable (assuming traditional linear burst setup) */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                         ARM_MPU_ATTR_NON_CACHEABLE,
+                                         ARM_MPU_ATTR_NON_CACHEABLE));
+#endif
+
     ARM_MPU_SetMemAttr(MEMATTRIDX_DEVICE_nGnRnE, ARM_MPU_ATTR(   /* Attr7, Device Memory nGnRnE*/
                                          ARM_MPU_ATTR_DEVICE,
                                          ARM_MPU_ATTR_DEVICE_nGnRnE));
 
     /* Load the regions from the table */
     ARM_MPU_Load(0, &mpu_table[0], sizeof(mpu_table)/sizeof(ARM_MPU_Region_t));
+}
+
+static void set_flash_to_linear_and_disable_caching(void)
+{
+#ifdef OSPI_FLASH_SUPPORT
+    /* We assume flash can't mix wrap and linear accesses - true for IS25 and MX66 */
+    /* Flash is set up initially for 32-byte wrap to suit the M55 cache fills; switch to linear for Ethos now */
+    /* While set like this, M55 musn't generate cache fills, so mark non-cacheable */
+    /* No need for any cache maintenance - can retain any already loaded flash in the cache */
+    ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                         ARM_MPU_ATTR_NON_CACHEABLE,
+                                         ARM_MPU_ATTR_NON_CACHEABLE));
+    __DSB();
+    __ISB();
+
+    ospi_flash_set_linear();
+#endif
+}
+
+static void set_flash_to_wrap_and_enable_caching(void)
+{
+#ifdef OSPI_FLASH_SUPPORT
+    /* Ethos has finished, so we can set flash back to wrap mode, and then re-enable cache loading- if flash supports this switching */
+    if (ospi_flash_set_wrap32() == ARM_DRIVER_OK) {
+
+        ARM_MPU_SetMemAttr(MEMATTRIDX_FLASH_SWITCHABLE, ARM_MPU_ATTR(
+                                             /* NT=0, WB=0, RA=1, WA=0 */
+                                             ARM_MPU_ATTR_MEMORY_(0,0,1,0),
+                                             ARM_MPU_ATTR_MEMORY_(0,0,1,0)));
+        __DSB();
+        __ISB();
+    }
+#endif
+}
+
+void platform_ethosu_inference_begin(void)
+{
+    set_flash_to_linear_and_disable_caching();
+}
+
+void platform_ethosu_inference_end(void)
+{
+    set_flash_to_wrap_and_enable_caching();
 }

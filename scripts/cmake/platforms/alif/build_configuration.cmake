@@ -37,8 +37,18 @@ function(set_platform_global_defaults)
     set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "Specify Alif SKU part number")
     set_property(CACHE ALIF_DEVICE_SKU PROPERTY STRINGS "AE1C1F4051920" "AE722F80F55D5" "AE822FA0E5597")
 
+    set(ALIF_BOARDLIB_PATH_END "appkit_gen2" CACHE STRING "Specify Alif boardlib path")
+    set_property(CACHE ALIF_BOARDLIB_PATH_END PROPERTY STRINGS "appkit_gen2" "devit_gen2" "devkit_e1c" "devkit_e8")
+
     set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
+
+    set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
+
+    # Sanity check for USE_STRIPED_SRAM
+    if ((USE_STRIPED_SRAM) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
+        message(FATAL_ERROR "USE_STRIPED_SRAM possible only with SKU AE822FA0E5597")
+    endif()
 
     # Sanity check DevKit or AppKit
     if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit")))
@@ -52,37 +62,60 @@ function(set_platform_global_defaults)
         endif()
     endif()
 
-    if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
-        set(RTSS_NPU_CONFIG_ID  "H256")
-        set(ALIF_CORE           "RTSS_HP" CACHE STRING "Alif core") # Used by alif-cmsis
-    else()
-        set(RTSS_NPU_CONFIG_ID  "H128")
-        set(ALIF_CORE           "RTSS_HE" CACHE STRING "Alif core") # Used by alif-cmsis
+
+    if (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597") # Add other SKUs which are Eagle devices
+        set(ALIF_BOARDLIB_PATH_END "devkit_e8" CACHE STRING "" FORCE)
+        add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
+        if (USE_STRIPED_SRAM)
+            add_compile_definitions(USE_STRIPED_SRAM)
+            message(STATUS "Using Striped SRAM!")
+        else()
+            message(STATUS "Using Linear SRAM!")
+        endif()
     endif()
 
-
-    set(IS_BALLETTO_DEVICE OFF CACHE BOOL "Is device a Balletto device.")
-
     if (ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") # Add other SKUs which are Balletto devices
-        set(IS_BALLETTO_DEVICE ON CACHE BOOL "" FORCE)
+        set(ALIF_BOARDLIB_PATH_END "devkit_e1c" CACHE STRING "" FORCE)
+        set(IS_BALLETTO_DEVICE ON)
         add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
-        set(RTSS_NPU_CONFIG_ID  "H128")
-        set(ALIF_CORE           "RTSS_HE" CACHE STRING "Alif core" FORCE) # Used by alif-cmsis
         USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead. Disabled by default on E1C."
             OFF
             BOOL)
     else()
+        set(IS_BALLETTO_DEVICE OFF)
         USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead. Enabled by default."
             ON
             BOOL)
     endif()
 
-    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U65)"
+    USER_OPTION(ETHOS_U_NPU_ID "Arm Ethos-U NPU IP (U55 or U85)"
         "U55"
         STRING)
+    set_property(CACHE ETHOS_U_NPU_ID PROPERTY STRINGS "U55" "U85")
+
+    if (ETHOS_U_NPU_ID STREQUAL U85)
+        set(RTSS_NPU_CONFIG_ID "Z256")
+    elseif (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
+        set(RTSS_NPU_CONFIG_ID "H256")
+    else()
+        set(RTSS_NPU_CONFIG_ID "H128")
+    endif()
+
+    # Sanity check for ETHOS_U_NPU_ID
+    if ((ETHOS_U_NPU_ID STREQUAL U85) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
+        message(FATAL_ERROR "ETHOS_U_NPU_ID U85 possible only with SKU AE822FA0E5597")
+    endif()
 
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
         "${RTSS_NPU_CONFIG_ID}"
+        STRING)
+
+    if ((ALIF_DEVICE_SKU STREQUAL "AE722F80F55D5") AND (TARGET_BOARD STREQUAL "DevKit"))
+        set(ALIF_BOARDLIB_PATH_END "devkit_gen2" CACHE STRING "" FORCE)
+    endif()
+
+    USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
+        "Shared_Sram"
         STRING)
 
     # Include NPU, CMSIS and LVGL configuration options
@@ -108,16 +141,27 @@ function(set_platform_global_defaults)
     set(LINKER_SCRIPT_NAME "${TARGET_SUBSYSTEM}" CACHE STRING "Linker script name")
     set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/alif" PARENT_SCOPE)
 
+    if (TARGET_SUBSYSTEM STREQUAL RTSS-HP)
+        set(ALIF_CORE "RTSS_HP")
+    else()
+        set(ALIF_CORE "RTSS_HE")
+    endif()
     set(ALIF_CORE "${ALIF_CORE}" PARENT_SCOPE)
     set(ALIF_DEVICE_SKU "${ALIF_DEVICE_SKU}" PARENT_SCOPE)
+    set(ALIF_BOARDLIB_PATH_END "${ALIF_BOARDLIB_PATH_END}" PARENT_SCOPE)
     set(IS_BALLETTO_DEVICE ${IS_BALLETTO_DEVICE} PARENT_SCOPE)
 
     add_compile_definitions(
         ${ALIF_CORE}
         )
 
-    set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
-    set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
+    if (ETHOS_U_NPU_ID STREQUAL "U55")
+        set(ETHOS_U_BASE_ADDR    "0x400E1000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_IRQN         "55"           CACHE STRING "Ethos-U55 Interrupt")
+    else()
+        set(ETHOS_U_BASE_ADDR    "0x49042000"   CACHE STRING "Ethos-U NPU base address")
+        set(ETHOS_U_IRQN         "366"          CACHE STRING "Ethos-U85 Interrupt")
+    endif()
     set(ETHOS_U_SEC_ENABLED  "1"            CACHE STRING "Ethos-U NPU Security enable")
     set(ETHOS_U_PRIV_ENABLED "1"            CACHE STRING "Ethos-U NPU Privilege enable")
 
@@ -131,11 +175,74 @@ function(platform_custom_post_build)
 
     string(TOLOWER "${ALIF_CORE}" ALIF_CORE_STRING)
 
+    #####################################################
+    ## Support for linker file to include header start ##
+    #####################################################
+    add_library(${PARSED_TARGET_NAME}_linkerfile OBJECT)
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_options(${PARSED_TARGET_NAME}
+            PRIVATE
+            -T $<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>
+            "SHELL:-Xlinker -Map=bin/${target}.map"
+        )
+
+        target_sources(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.ld
+        )
+        set_source_files_properties(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.ld
+            PROPERTIES
+            LANGUAGE C
+        )
+        target_compile_options(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                -E
+                -P
+                -xc
+        )
+    else()
+        target_link_options(${PARSED_TARGET_NAME}
+            PRIVATE
+            --scatter=$<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>
+        )
+        target_sources(${PARSED_TARGET_NAME}_linkerfile
+        PRIVATE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.sct
+        )
+
+        set_source_files_properties(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.sct
+            PROPERTIES
+            LANGUAGE C
+        )
+
+        target_compile_options(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                -E
+                -xc
+        )
+    endif()
+
+    add_dependencies(${PARSED_TARGET_NAME}
+        ${PARSED_TARGET_NAME}_linkerfile
+    )
+
+    set_target_properties(${PARSED_TARGET_NAME} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${PARSED_TARGET_NAME}_linkerfile>)
+
+    # Link rte_components so linker files can use the alif_mem_config.h
+    target_link_libraries(${PARSED_TARGET_NAME}_linkerfile
+        rte_components
+    )
+
     # Add link options for the linker script to be used:
-    add_linker_script(
-        ${PARSED_TARGET_NAME}                                                       # Target
-        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}   # Directory path
-        ${LINKER_SCRIPT_NAME})                                                      # Name of the file without suffix
+    # add_linker_script(
+    #     ${PARSED_TARGET_NAME}                                                       # Target
+    #     ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}   # Directory path
+    #     ${LINKER_SCRIPT_NAME})                                                      # Name of the file without suffix
+
+    #####################################################
+    ## Support for linker file to include header end ####
+    #####################################################
 
     add_target_map_file(
         ${PARSED_TARGET_NAME}

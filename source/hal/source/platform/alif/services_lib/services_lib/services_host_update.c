@@ -1,5 +1,10 @@
 /**
  * @file services_host_update.c
+ * @brief Update (UPD) SERVICE.
+ *
+ * Used to allow updating (OTA) of SES images from an application CPU.
+ *
+ * Images are signed by ALIF.
  *
  * Copyright (C) 2024 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
@@ -10,6 +15,7 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  * @ingroup host_services
+ * @ingroup services-host-update
  */
 
 /******************************************************************************
@@ -25,6 +31,7 @@
 #if defined(A32)
 #include "a32_device.h"
 #else
+//#include "system_utils.h"
 #include "sys_utils.h"
 #endif
 
@@ -52,12 +59,20 @@
  *                                        uint32_t image_size,
  *                                        uint32_t *error_code)
  *
- * @brief   Update the whole STOC
+ * @brief Update the whole STOC
+ *
+ * UPD image can be placed in MRAM or TCM memory pointed to by
+ * image_address.
+ *
  * @param services_handle
- * @param image_address
- * @param image_size
+ * @param image_address Place where UPD image is stored
+ * @param image_size    UPD image size (deprecated)
  * @param error_code
- * @return
+ * @return Returns Boot loader (BL_ERROR_ ) codes 0x00 = SUCCESS
+ * @return BL_ERROR_ENTRY_NOT_SIGNED 0x17
+ * @return BL_ERROR_UPD_SIGNATURE_INCORRECT 0x21 Package is not UPD format
+ *
+ * @ingroup services-host-update
  */
 uint32_t SERVICES_update_stoc(uint32_t services_handle,
                               uint32_t image_address,
@@ -69,7 +84,7 @@ uint32_t SERVICES_update_stoc(uint32_t services_handle,
 
   p_svc->send_image_address = LocalToGlobal((void *)image_address);
   p_svc->send_image_size = image_size;
-  uint32_t ret = SERVICES_send_request(services_handle,
+  uint32_t ret = SERVICES_send_request(services_handle, 
                                        SERVICE_UPDATE_STOC,
                                        DEFAULT_TIMEOUT);
 

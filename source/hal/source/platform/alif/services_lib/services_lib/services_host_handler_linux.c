@@ -150,15 +150,12 @@ uint32_t SERVICES_register_channel(uint32_t mhu_id,
 }
 
 /**
- * @fn      uint32_t SERVICES_unregister_channel(uint32_t mhu_id,
- *                                             uint32_t channel_number)
+ * @fn void SERVICES_unregister_channel(uint32_t, uint32_t)
  * @brief   Unregister a MHU communication channel with the Services library
- * @param   mhu_id
- * @param   channel_number
- * @return
+ * @param mhu_id
+ * @param channel_number
  */
-void SERVICES_unregister_channel(uint32_t mhu_id,
-                                 uint32_t channel_number)
+void SERVICES_unregister_channel(uint32_t mhu_id, uint32_t channel_number)
 {
   if (mhu_id >= MHU_NUMBER) return;
 
@@ -175,10 +172,10 @@ void SERVICES_unregister_channel(uint32_t mhu_id,
 }
 
 /**
+ * @fn uint32_t SERVICES_send_request(uint32_t, uint16_t, uint32_t)
  * @brief Send services request to MHU
  * @param services_handle
  * @param service_id
- * @param service_data
  * @param service_timeout
  * @return
  */

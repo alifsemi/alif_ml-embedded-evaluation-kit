@@ -1,4 +1,5 @@
-#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
+; These are now processed from build_configuration.cmake
+;#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 
 ;/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
@@ -11,14 +12,16 @@
 ; *
 ; */
 
+#include "alif_mem_config.h"
+
 /*On chip RAM Regions */
-#define SRAM0_BASE                0x02000000
-#define SRAM0_SIZE                0x00400000		/* 4M */
-#define SRAM1_BASE                0x08000000
-#define SRAM1_SIZE                0x00400000		/* 4M */
+#define SRAM_BASE                 ALIF_SRAM_BASE
+#define SRAM_SIZE                 ALIF_SRAM_SIZE    /* 7M */
+
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
+
 /* External OSPI flash */
 #define OSPI_FLASH_BASE           0xC0000000
 #define OSPI_FLASH_SIZE           0x02000000        /* 32M */
@@ -87,21 +90,22 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
 
 ; avoid first page, where default A32_APP stub is loaded
-  RW_SRAM0 SRAM0_BASE+8192 SRAM0_SIZE-8192  {  ; 4MB ----------------------------
+  RW_SRAM SRAM_BASE+8192 SRAM_SIZE-8192  {  ; 8MB ----------------------------
       * (ifm)                                ; Baked-in inputs
       * (.bss.large_ram)                     ; Large LVGL buffers
-      * (.bss.lcd_image_buf)
       * (.bss.camera_frame_buf)              ; Camera Frame Buffer
       * (.bss.camera_frame_bayer_to_rgb_buf) ; (Optional) Camera Frame Buffer for Bayer to RGB Convertion.
-  }
-
-  RW_SRAM1 SRAM1_BASE SRAM1_SIZE-16  {  ; 2.5MB ----------------------------
-
+      ; Cache area (if used)
+      * (.bss.NoInit.ethos_u_cache)
       ; activation buffers a.k.a tensor arena when memory mode sram only or shared sram
       * (.bss.NoInit.activation_buf_sram)
   }
 
-  PADDING SRAM1_BASE+SRAM1_SIZE-16 ALIGN 16 FILL 0 16  {  }
+  RW_UNSTRIPED UNSTRIPED_BASE UNSTRIPED_SIZE {
+  	  * (.bss.lcd_image_buf)
+  }
+
+  PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }
 }
 
 LR_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE  {

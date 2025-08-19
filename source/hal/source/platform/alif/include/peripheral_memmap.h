@@ -35,6 +35,7 @@
 /******************************************************************************/
 /*                         Peripheral memory map                              */
 /******************************************************************************/
-#define ETHOS_U_NPU_BASE           (0x400E1000)    /* Ethos-U NPU base address*/
+#define ETHOS_U55_NPU_BASE         (0x400E1000)    /* Ethos-U55 NPU base address*/
+#define ETHOS_U85_NPU_BASE         (0x49042000)    /* Ethos-U85 NPU base address*/
 
 #endif /* PERIPHERAL_MEMMAP_H */

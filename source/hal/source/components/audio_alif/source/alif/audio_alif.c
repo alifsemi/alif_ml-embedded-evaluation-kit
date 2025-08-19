@@ -22,6 +22,7 @@
 
 #include "audio_data.h"
 #include "mic_listener.h"
+#include "platform_drivers.h"
 
 // At the time of writing, GCC produces incorrect assembly
 #if defined(__ARMCC_VERSION) && (__ARM_FEATURE_MVE & 2)
@@ -245,6 +246,12 @@ void audio_set_callback(audio_callback_t callback)
 
 int audio_init(int sampling_rate)
 {
+    int32_t ret = (int32_t)enable_audio_peripheral_clocks();
+    if (ret != 0) {
+        printf("audio_init enable_audio_peripheral_clocks failed: %" PRIi32 "\n", ret);
+        return ret;
+    }
+
     int32_t err = init_microphone(sampling_rate, AUDIO_REC_WIDTH);
 
     if (err == 0) {

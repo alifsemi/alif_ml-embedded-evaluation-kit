@@ -1,4 +1,5 @@
-#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
+; These are now processed from build_configuration.cmake
+;#! armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m55 -xc
 ; command above MUST be in first line (no comment above!)
 
 ;/* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.

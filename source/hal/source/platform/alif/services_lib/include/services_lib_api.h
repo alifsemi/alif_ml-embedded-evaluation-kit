@@ -2,7 +2,7 @@
  * @file services_lib_api.h
  *
  * @brief Services library public API header file
- * @defgroup host-services Host Services
+ * @defgroup host_services host_services
  * @par
  *
  * Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
@@ -39,10 +39,16 @@ extern "C" {
 #define DEFAULT_TIMEOUT                            (0)
 
 /**
+ * Maximum size of a Services packet
+ */
+#define SERVICES_MAX_PACKET_BUFFER_SIZE            600
+
+/**
  * Common Service error codes - follow the pattern from the PLL services
  */
 #define SERVICE_SUCCESS                            0x0
 #define SERVICE_FAIL                               0x200
+#define SERVICE_INVALID_PARAMETER                  0x201
 
 /**
  * Pin muxing/pad control error codes
@@ -77,36 +83,48 @@ extern "C" {
 #define PLL_ERROR_XTAL_ALREADY_RUNNING             0x204
 
 /**
- * Boot services error codes (returned by SERVICES_boot_process_toc_entry())
+ * Boot services error codes
  */
-#define BOOT_OK                                    0x00 // BL_STATUS_OK
-#define BOOT_ERROR_INVALID_TOC                     0x12 // BL_ERROR_INVALID_TOC
-#define BOOT_ERROR_INVALID_TOC_ENTRY_ID            0x15 // BL_ERROR_INVALID_TOC_ENTRY_ID
-#define BOOT_ERROR_INVALID_TOC_CPU_ID              0x16 // BL_ERROR_INVALID_TOC_CPU_ID
+#define BL_STATUS_OK                                  0x00
+#define BL_ERROR_APP_INVALID_TOC_ADDRESS              0x01
+#define BL_ERROR_APP_INVALID_TOC_OFFSET               0x02
+#define BL_ERROR_UNALIGNED_ADDRESS                    0x03
+#define BL_ERROR_INVALID_TOC_ADDRESS_RANGE            0x04
+#define BL_ERROR_INVALID_TOC_FLAGS                    0x05
+#define BL_ERROR_INVALID_ADDRESS                      0x06
+#define BL_ERROR_CERTIFICATE_NO_VERIFY_IN_MEMORY      0x07
+#define BL_ERROR_CERTIFICATE_NO_VERIFY_IN_FLASH       0x08
+#define BL_ERROR_CERTIFICATE_INVALID_LOAD_ADDRESS     0x09
+#define BL_ERROR_CERTIFICATE_INVALID_CHAIN            0x0A
+#define BL_ERROR_CERTIFICATE_STORAGE_ADDRESS_INVALID  0x0B
+#define BL_ERROR_DEVICE_ADDRESS_INVALID               0x0C
+#define BL_ERROR_UNCOMPRESS_FAILED                    0x0D
+#define BL_ERROR_SIGNATURE_VERIFY_FAILED              0x0E
+#define BL_ERROR_APP_ACCESSING_PROTECTED_AREA         0x0F
+#define BL_ERROR_ICV_ACCESSING_PROTECTED_AREA         0x10
+#define BL_ERROR_FAILED_TOC_CRC32                     0x11
+#define BL_ERROR_INVALID_TOC                          0x12
+#define BL_ERROR_EXCEED_MAXIMUM_TOC_ENTRIES           0x13
+#define BL_ERROR_NOT_IMAGE_NOT_DEVICE_CFG             0x14
+#define BL_ERROR_INVALID_TOC_ENTRY_ID                 0x15
+#define BL_ERROR_INVALID_CPU_ID                       0x16
+#define BL_ERROR_ENTRY_NOT_SIGNED                     0x17
+#define BL_ERROR_LOAD_TO_MRAM_NOT_ALLOWED             0x18
+#define BL_ERROR_NO_FREE_SLOTS                        0x19
+#define BL_ERROR_INVALID_M55_BOOT_ADDRESS             0x1A
+#define BL_TOC_OBJECT_NOT_FOUND                       0x1B
+#define BL_TOC_OBJECT_FOR_CPU_NOT_FOUND               0x1C
+#define BL_TOC_IMAGE_NOT_BOOTABLE                     0x1D
+#define BL_TOC_IMAGE_NOT_FOUND                        0x1E
+#define BL_ERROR_COMPRESSION_NOT_SUPPORTED            0x1F
+#define BL_TOC_IMAGE_DEVICE_MISMATCH                  0x20
+#define BL_ERROR_UPD_SIGNATURE_INCORRECT              0x21
+#define BL_ERROR_UPD_IMG_IN_MRAM_NOT_SUPPORTED        0x22
 
 /**
  * OTP Offsets
  */
-#define OTP_MANUFACTURE_INFO_DATA_START            0x51
-#define OTP_MANUFACTURE_INFO_DATA_END              0x58
-#define OTP_MANUFACTURE_INFO_SERIAL_NUMBER_START   0x59
-#define OTP_MANUFACTURE_INFO_SERIAL_NUMBER_END     0x5A
-#define OTP_MANUFACTURE_INFO_PART_NUMBER_START     0x5B
-#define OTP_MANUFACTURE_INFO_PART_NUMBER_END       0x5E
-#define OTP_CUSTOMER_SECURITY_FLAGS_START          0x5F
-
-#define OTP_ALIF_MANUFACTURE_INFO_PART_NUMBER_LENGTH_BYTES    16
-#define OTP_ALIF_MANUFACTURE_INFO_OPTIONAL_LENGTH_BYTES       32
-#define OTP_ALIF_MANUFACTURE_INFO_SERIAL_NUMBER_LENGTH_BYTES  8
-#define OTP_ALIF_HBK_LENGTH_BYTES                             16
-
-#define OTP_FIRMWARE_VERSION_DCU_LENGTH_BYTES                 40
-
-#define OTP_OSPI_KEY_OSPI0                         0x60
-#define OTP_OSPI_KEY_OSPI1                         0x64
-#define OSPI_KEY_LENGTH_BYTES                      16
-
-#define SERVICES_MAX_PACKET_BUFFER_SIZE            600
+#define OTP_CUSTOM_AREA_START                      0x70
 
 /**
  * MBED TLS
@@ -114,10 +132,16 @@ extern "C" {
 #define MBEDTLS_OP_DECRYPT                         0
 #define MBEDTLS_OP_ENCRYPT                         1
 
+#define MBEDTLS_AES_BLOCK_SIZE                     16
+
 #define MBEDTLS_AES_CRYPT_ECB                      0
 #define MBEDTLS_AES_CRYPT_CBC                      1
 #define MBEDTLS_AES_CRYPT_CTR                      2
 #define MBEDTLS_AES_CRYPT_OFB                      3
+
+#define MBEDTLS_AES_KEY_128                        128
+#define MBEDTLS_AES_KEY_192                        192
+#define MBEDTLS_AES_KEY_256                        256
 
 #define MBEDTLS_HASH_SHA1                          0
 #define MBEDTLS_HASH_SHA224                        1
@@ -146,6 +170,8 @@ extern "C" {
 #define OSPI_WRITE_OTP_KEY_OSPI1                   1
 #define OSPI_WRITE_EXTERNAL_KEY_OSPI0              2
 #define OSPI_WRITE_EXTERNAL_KEY_OSPI1              3
+
+#define OSPI_KEY_LENGTH_BYTES                      16
 
 /**
  * TOC related
@@ -214,7 +240,8 @@ typedef int32_t (*wait_ms_t)(uint32_t wait_time_ms);
 typedef int (*print_msg_t)(const char *fmt, ...);
 
 /**
- *  @enum SERVICES_cpuid_t
+ * @enum SERVICES_cpuid_t
+ * @brief CPU names
  */
 typedef enum {
 	HOST_CPU_0   = 0,                /*!< A32_0 CPU               HOST_CPU_0 */
@@ -224,17 +251,20 @@ typedef enum {
 } SERVICES_cpuid_t;
 
 /**
- *  @struct SERVICES_toc_info_t
+ * @struct SERVICES_toc_info_t
+ * @brief user facing TOC information
  */
 typedef struct {
-	uint8_t   image_identifier[TOC_NAME_LENGTH]; /*!< TOC name      */
-	uint32_t  version;                  /*!< TOC Version      */
-	uint32_t  cpu;                      /*!< TOC Cpu ID       */
-	uint32_t  store_address;            /*!< TOC MRAM address */
-	uint32_t  load_address;             /*!< TOC load         */
-	uint32_t  boot_address;             /*!< TOC boot address */
-	uint32_t  image_size;               /*!< TOC image size   */
-	uint32_t  flags;                    /*!< TOC flag state   */
+	uint8_t   image_identifier[TOC_NAME_LENGTH]; /*!< TOC name         */
+	uint32_t  version;                           /*!< TOC Version      */
+	uint32_t  cpu;                               /*!< TOC Cpu ID       */
+	uint32_t  store_address;                     /*!< TOC MRAM address */
+	uint32_t  load_address;                      /*!< TOC load         */
+	uint32_t  boot_address;                      /*!< TOC boot address */
+	uint32_t  image_size;                        /*!< TOC image size   */
+	uint32_t  processing_time;                   /*!< TOC process time */
+	uint32_t  flags;                             /*!< TOC flag state   */
+	uint8_t   flags_string[FLAG_STRING_SIZE];    /*!< TOC flag string  */
 } SERVICES_toc_info_t;
 
 /**
@@ -253,10 +283,13 @@ typedef struct {
 	uint8_t MfgData[32];  /*!< Manufacturing data    */
 	uint8_t SerialN[8];   /*!< SoC Serial number     */
 	uint8_t LCS;          /*!< SoC lifecycle state   */
+	uint32_t external_config[4]; /*!< External mem   */
+	uint32_t flags2;      /*!< Alt path options      */
 } SERVICES_version_data_t;
 
 /**
  * @struct SERVICES_toc_data_t
+ * @brief user facing structure for all TOC data
  */
 typedef struct {
 	uint32_t number_of_toc_entries;     /*!< Number of real TOC objects */
@@ -265,6 +298,7 @@ typedef struct {
 
 /**
  * @enum services_power_profile_t
+ * @brief Power profiles
  */
 typedef enum {
 	OFF_PROFILE = 0,               /*!< OFF_PROFILE                    */
@@ -276,90 +310,154 @@ typedef enum {
  * Clocks Services definitions
  */
 
-// Oscillator clock selectors
+/**
+ * @enum oscillator_source_t
+ * @brief Oscillator clock selectors
+ */
 typedef enum {
 	OSCILLATOR_SOURCE_RC,    // use RC as oscillator clock
 	OSCILLATOR_SOURCE_XTAL   // use XTAL  as oscillator clock
 } oscillator_source_t;
 
+/**
+ * @enum oscillator_target_t
+ * @brief Oscillator target selectors
+ */
 typedef enum {
 	OSCILLATOR_TARGET_SYS_CLOCKS,    // various system clocks
 	OSCILLATOR_TARGET_PERIPH_CLOCKS, // clock for peripherrals
 	OSCILLATOR_TARGET_S32K_CLOCK     // 32K low frequency clock
 } oscillator_target_t;
 
-// PLL clock selectors
+/**
+ * @enum pll_source_t
+ * @brief PLL clock selectors
+ */
 typedef enum {
 	PLL_SOURCE_PLL,  // use the PLL clocks
 	PLL_SOURCE_OSC   // use the OCS clocks (can be RC or XTAL)
 } pll_source_t;
 
-typedef enum {
-	PLL_TARGET_SYSREFCLK,
-	PLL_TARGET_SYSCLK,
-	PLL_TARGET_UART,
-	PLL_TARGET_ES0,
-	PLL_TARGET_ES1,
-	PLL_TARGET_SECENC,
-	PLL_TARGET_PD4_SRAM
-} pll_target_t;
+// ES0 CPU clock frequencies
+#define ES0_CLOCK_16MHZ   0
+#define ES0_CLOCK_24MHZ   4
+#define ES0_CLOCK_48MHZ   0xC
 
-typedef enum {
-	CLKEN_SYSPLL,
-	CLKEN_CPUPLL,
-	CLKEN_ES0,
-	CLKEN_ES1,
-	CLKEN_HFXO_OUT,
-	CLKEN_CLK_160M,
-	CLKEN_CLK_100M,
-	CLKEN_USB,
-	CLKEN_HFOSC,
-	CLKEN_SRAM0,
-	CLKEN_SRAM1
-} clock_enable_t;
-
-typedef enum {
-	A32_CLOCK_GATE = 0,
-	A32_REFCLK = 1,
-	A32_SYSPLL = 2,
-	A32_CPUPLL = 4
-} a32_source_t;
-
-typedef enum {
-	ACLK_CLOCK_GATE = 0,
-	ACLK_REFCLK = 1,
-	ACLK_SYSPLL = 2
-} aclk_source_t;
-
-typedef enum {
-	DIVIDER_CPUPLL,
-	DIVIDER_SYSPLL,
-	DIVIDER_ACLK,
-	DIVIDER_HCLK,
-	DIVIDER_PCLK
-} clock_divider_t;
-
+/**
+ * @struct net_proc_boot_args_t
+ * @brief ExtSys0 Boot arguments
+ */
 typedef struct {
 	uint32_t nvds_src_addr;
 	uint32_t nvds_dst_addr;
 	uint32_t nvds_copy_len;
 	uint32_t trng_dst_addr;
 	uint32_t trng_len;
+	uint32_t es0_clock_select;
 } net_proc_boot_args_t;
 
+/**
+ * @enum pll_target_t
+ * @brief PLL Target selectors
+ */
 typedef enum {
-	POWER_SETTING_BOR_EN,
-	POWER_SETTING_SCALED_CLK_FREQ
+	PLL_TARGET_SYSREFCLK,/**< PLL_TARGET_SYSREFCLK */
+	PLL_TARGET_SYSCLK,   /**< PLL_TARGET_SYSCLK */
+	PLL_TARGET_UART,     /**< PLL_TARGET_UART */
+	PLL_TARGET_ES0,      /**< PLL_TARGET_ES0 */
+	PLL_TARGET_ES1,      /**< PLL_TARGET_ES1 */
+	PLL_TARGET_SECENC,   /**< PLL_TARGET_SECENC */
+	PLL_TARGET_PD4_SRAM  /**< PLL_TARGET_PD4_SRAM */
+} pll_target_t;
+
+/**
+ * @enum clock_enable_t
+ * @brief Clock selectors
+ */
+typedef enum {
+	CLKEN_SYSPLL,  /**< CLKEN_SYSPLL */
+	CLKEN_CPUPLL,  /**< CLKEN_CPUPLL */
+	CLKEN_ES0,     /**< CLKEN_ES0 */
+	CLKEN_ES1,     /**< CLKEN_ES1 */
+	CLKEN_HFXO_OUT,/**< Not supported in FUSION and SPARK */
+	CLKEN_CLK_160M,/**< CLKEN_CLK_160M */
+	CLKEN_CLK_100M,/**< CLKEN_CLK_100M */
+	CLKEN_CLK_20M, /**< Renamed from CLKEN_USB */
+	CLKEN_HFOSC,   /**< CLKEN_HFOSC */
+	CLKEN_SRAM0,   /**< CLKEN_SRAM0 */
+	CLKEN_SRAM1,   /**< CLKEN_SRAM1 */
+	//*************************************************
+	// New in v106
+	CLKEN_HFOSCx2, /**< 76.8MHz, double the frequency of HFOSC above */
+	CLKEN_CLK_10M,
+	CLKEN_CLK_25M,
+	CLKEN_CLK_50M,
+	CLKEN_CLK_80M,
+	CLKEN_CLK_200M,
+	CLKEN_CLK_266M,
+	CLKEN_CLK_400M,
+	CLKEN_MRAM,
+	CLKEN_APB,
+	CLKEN_AHB,
+	CLKEN_ISP,
+	CLKEN_JPEG,
+	CLKEN_NPU
+} clock_enable_t;
+
+/**
+ * @enum a32_source_t
+ * @brief A32 clock sources
+ */
+typedef enum {
+	A32_CLOCK_GATE = 0,/**< A32_CLOCK_GATE */
+	A32_REFCLK = 1,    /**< A32_REFCLK */
+	A32_SYSPLL = 2,    /**< A32_SYSPLL */
+	A32_CPUPLL = 4     /**< A32_CPUPLL */
+} a32_source_t;
+
+/**
+ * @enum aclk_source_t
+ * @brief Clock sources
+ */
+typedef enum {
+	ACLK_CLOCK_GATE = 0,/**< ACLK_CLOCK_GATE */
+	ACLK_REFCLK = 1,    /**< ACLK_REFCLK */
+	ACLK_SYSPLL = 2     /**< ACLK_SYSPLL */
+} aclk_source_t;
+
+/**
+ * @enum clock_divider_t
+ * @brief Clock divider selectors
+ */
+typedef enum {
+	DIVIDER_CPUPLL,/**< DIVIDER_CPUPLL */
+	DIVIDER_SYSPLL,/**< DIVIDER_SYSPLL */
+	DIVIDER_ACLK,  /**< DIVIDER_ACLK */
+	DIVIDER_HCLK,  /**< DIVIDER_HCLK */
+	DIVIDER_PCLK   /**< DIVIDER_PCLK */
+} clock_divider_t;
+
+/**
+ * @enum power_setting_t
+ * @brief Power setting selectors
+ */
+typedef enum {
+	POWER_SETTING_BOR_EN,        /**< POWER_SETTING_BOR_EN */
+	POWER_SETTING_SCALED_CLK_FREQ/**< POWER_SETTING_SCALED_CLK_FREQ */
 } power_setting_t;
 
+/**
+ * @enum clock_setting_t
+ * @brief Clock frequency selectors
+ */
 typedef enum {
-    CLOCK_SETTING_HFOSC_FREQ,
-    CLOCK_SETTING_EXTSYS0_FREQ,
-    CLOCK_SETTING_EXTSYS1_FREQ,
-    CLOCK_SETTING_AXI_FREQ,
-    CLOCK_SETTING_AHB_FREQ,
-    CLOCK_SETTING_APB_FREQ,
-    CLOCK_SETTING_SYSREF_FREQ,
+    CLOCK_SETTING_HFOSC_FREQ,  /**< CLOCK_SETTING_HFOSC_FREQ */
+    CLOCK_SETTING_EXTSYS0_FREQ,/**< CLOCK_SETTING_EXTSYS0_FREQ */
+    CLOCK_SETTING_EXTSYS1_FREQ,/**< CLOCK_SETTING_EXTSYS1_FREQ */
+    CLOCK_SETTING_AXI_FREQ,    /**< CLOCK_SETTING_AXI_FREQ */
+    CLOCK_SETTING_AHB_FREQ,    /**< CLOCK_SETTING_AHB_FREQ */
+    CLOCK_SETTING_APB_FREQ,    /**< CLOCK_SETTING_APB_FREQ */
+    CLOCK_SETTING_SYSREF_FREQ, /**< CLOCK_SETTING_SYSREF_FREQ */
 } clock_setting_t;
 
 /*******************************************************************************
@@ -425,6 +523,17 @@ uint32_t SERVICES_cryptocell_mbedtls_aes_crypt(uint32_t services_handle,
 					       uint32_t iv,
 					       uint32_t input,
 					       uint32_t output);
+uint32_t SERVICES_cryptocell_mbedtls_aes(uint32_t services_handle,
+                           uint32_t *error_code,
+                           uint32_t key,
+                           uint32_t keybits,
+                           uint32_t direction,
+                           uint32_t crypt_type,
+                           uint32_t iv,
+                           uint32_t length,
+                           uint32_t input,
+                           uint32_t output);
+
 uint32_t SERVICES_cryptocell_mbedtls_sha_starts(uint32_t services_handle,
 						uint32_t *error_code,
 						uint32_t ctx,
@@ -445,6 +554,12 @@ uint32_t SERVICES_cryptocell_mbedtls_sha_finish(uint32_t services_handle,
 						uint32_t ctx,
 						uint32_t sha_type,
 						uint32_t data);
+uint32_t SERVICES_cryptocell_mbedtls_sha(uint32_t services_handle,
+                        uint32_t *error_code,
+                        uint32_t sha_type,
+                        uint32_t data,
+                        uint32_t data_length,
+                        uint32_t sha_sum);
 
 uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm_set_key(uint32_t services_handle,
 	uint32_t *error_code,
@@ -466,6 +581,21 @@ uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm_crypt(uint32_t services_handle,
 	uint32_t output_addr,
 	uint32_t tag_addr,
 	uint32_t tag_length);
+uint32_t SERVICES_cryptocell_mbedtls_ccm_gcm(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t crypt_type,
+    uint32_t key_addr,
+    uint32_t key_bits,
+    uint32_t length,
+    uint32_t iv_addr,
+    uint32_t iv_length,
+    uint32_t add_addr,
+    uint32_t add_length,
+    uint32_t input_addr,
+    uint32_t output_addr,
+    uint32_t tag_addr,
+    uint32_t tag_length);
+
 uint32_t SERVICES_cryptocell_mbedtls_chacha20_crypt(uint32_t services_handle,
 	uint32_t *error_code,
 	uint32_t key_addr,
@@ -493,21 +623,28 @@ uint32_t SERVICES_cryptocell_mbedtls_poly1305_crypt(uint32_t services_handle,
 	uint32_t mac_addr);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_init_setkey(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t key_addr,
-	uint32_t key_bits);
+	uint32_t ctx,
+	uint32_t key,
+	uint32_t keybits);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_update(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t input_addr,
-	uint32_t input_length);
+	uint32_t ctx,
+	uint32_t input,
+	uint32_t length);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_finish(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr,
-	uint32_t output_addr);
+	uint32_t ctx,
+	uint32_t output);
 uint32_t SERVICES_cryptocell_mbedtls_cmac_reset(uint32_t services_handle,
 	uint32_t *error_code,
-	uint32_t context_addr);
+	uint32_t ctx);
+uint32_t SERVICES_cryptocell_mbedtls_cmac(uint32_t services_handle,
+    uint32_t *error_code,
+    uint32_t key,
+    uint32_t keybits,
+    uint32_t input,
+    uint32_t length,
+    uint32_t output);
 
 uint32_t SERVICES_system_get_toc_version(uint32_t services_handle,
 	uint32_t *toc_version,
@@ -544,11 +681,18 @@ uint32_t SERVICES_system_write_otp(uint32_t services_handle,
 				   uint32_t otp_offset,
 				   uint32_t otp_value_word,
 				   uint32_t *error_code);
+uint32_t SERVICES_system_get_ecc_public_key(uint32_t services_handle,
+                   uint8_t *ecc_pubkey_buffer,
+                   uint32_t *error_code);
+
 
 uint32_t SERVICES_system_get_eui_extension(uint32_t services_handle,
 					bool is_eui48,
 					uint8_t *eui_extension,
 					uint32_t *error_code);
+uint32_t SERVICES_system_get_device_id64(uint32_t services_handle,
+                    uint8_t *device_id,
+                    uint32_t *error_code);
 
 uint32_t SERVICES_boot_process_toc_entry(uint32_t services_handle,
 					 const uint8_t *image_id,
@@ -624,6 +768,25 @@ uint32_t SERVICES_power_setting_get(uint32_t services_handle,
 				    power_setting_t setting_type,
 				    uint32_t *value,
 				    uint32_t *error_code);
+
+uint32_t SERVICES_power_stop_mode_raw_req(uint32_t services_handle,
+                                          uint32_t * error_code);
+uint32_t SERVICES_power_ewic_config_raw(uint32_t services_handle,
+                                        uint32_t ewic_source,
+                                        uint32_t *error_code);
+uint32_t SERVICES_power_wakeup_config_raw(uint32_t services_handle,
+                                          uint32_t vbat_wakeup_source,
+                                          uint32_t *error_code);
+uint32_t
+SERVICES_power_mem_retention_config_raw(uint32_t services_handle,
+                                        uint32_t mem_retention,
+                                        uint32_t *error_code);
+uint32_t
+SERVICES_power_m55_he_vtor_save_raw(uint32_t services_handle,
+                                    uint32_t ns_vtor_addr,
+                                    uint32_t se_vtor_addr,
+                                    uint32_t *error_code);
+
 
 // Clocks services
 uint32_t SERVICES_clocks_select_osc_source(uint32_t services_handle, oscillator_source_t source, oscillator_target_t target, uint32_t *error_code);
