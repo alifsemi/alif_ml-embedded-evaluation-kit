@@ -243,15 +243,15 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
 2. Configure the build using CMake.
     ```
-    cmake -DTARGET_PLATFORM=ensemble \
+    cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HE \
     -DTARGET_BOARD=AppKit \
-    -DTARGET_REVISION=B \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DGLCD_UI=OFF \
-    -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM \
+    -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
     ```
 
 3. Build the Project using Make
@@ -281,14 +281,14 @@ UART select jumpers set for UART2:
 
 2. Configure the build using CMake
     ```
-    cmake -DTARGET_PLATFORM=ensemble \
+    cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
     -DTARGET_BOARD=AppKit \
-    -DTARGET_REVISION=B \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
     ```
 
 These cmake options permit the default use of LCD and SRAM, which is okay since the HE image has them disabled. The `CONSOLE_UART=4` option avoids the HE image’s use of UART and could be omitted to run standalone HP applications.
@@ -360,14 +360,14 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
     cmake .. \
       -Dinference_runner_MODEL_TFLITE_PATH=<path_to_model>/models/har_int8_vela_H256.tflite
       -DUSE_CASE_BUILD=inference_runner \
-      -DTARGET_PLATFORM=ensemble \
+      -DTARGET_PLATFORM=alif \
       -DTARGET_SUBSYSTEM=RTSS-HP \
       -DTARGET_BOARD=AppKit \
-      -DTARGET_REVISION=B \
-      -DLINKER_SCRIPT_NAME=ensemble-RTSS-HP-infrun \
+      -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
-      -DLOG_LEVEL=LOG_LEVEL_Debug
+      -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+      -DALIF_DEVICE_SKU=AE722F80F55D5
     ```
 
 5. Build the project using `Make`
@@ -384,7 +384,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 1. Follow the same steps as above, except in step 4. Change the following in CMake command,
     ```
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
-    -DLINKER_SCRIPT_NAME=ensemble-RTSS-HP-infrun \
+    -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
     ```
 
 The output should be produced in `build_hp_infrun/bin/ethos-u-inference_runner.axf`
@@ -543,7 +543,7 @@ INFO -  Arch:       v1.1.0
 INFO -  Driver:     v0.16.0
 INFO -  MACs/cc:    128
 INFO -  Cmd stream: v0
-INFO - Target system design: Ensemble
+INFO - Target system design: Alif
 INFO - ARM ML Embedded Evaluation Kit
 INFO - Version 23.11.0 Build date: Apr 25 2024 @ 13:00:32
 INFO - Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
@@ -586,7 +586,7 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 
 ## Running a use-case with ML model data in external flash
 
-- For example use-cases asr and kws_asr have model which does not fit to Ensemble device MRAM. On Ensemble DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
+- For example use-cases asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
 - There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for kws and kws_asr
   - You can enable it also for alif_object_detection use-case by setting `-Dalif_object_detection_MODEL_IN_EXT_FLASH=ON`
   - For other use-case examples you need to add the following to `usecase.cmake`
@@ -618,7 +618,7 @@ The inference_runner use-case can be used for basic benchmarks.
 
 ## Memory usage and linker files
 
-Ensemble linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
+Alif linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
 As there are Alif example projects which uses both cores, whole MRAM/SRAM0/SRAM1 is not used as there need to be space for both applications running on HE and HP core.
 So if you run only one core, you can take the full MRAM/SRAM0/SRAM1 into use.
 
@@ -687,12 +687,11 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_REVISION=<B>`<br>
-Specifies which revision (generation) of Ensemble device is being targeted – B is generation 2. (Default is B)
+`-DDEVICE_SKU=<AE1C1F4051920|AE822FA0E5597|AE722F80F55D5>`<br>
+Specifies the Alif device. (Default is AE722F80F55D5)
 
 `-DTARGET_BOARD=<DevKit|AppKit>`<br>
 Specifies the target board. (Default is AppKit)<br>
--DTARGET_REVISION=B supports the following boards: DevKit and AppKit
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
 Rotates the display by the specified amount and reorganizes the UI if necessary. 90 and 270 will be appreciably slower. (Default is 0)
@@ -705,8 +704,11 @@ The Alif camera use cases switch over from the GLCD display to a full LVGL UI, a
 Specifies which UART to use for console. (Default is 2)
 
 `-DLINKER_SCRIPT_NAME`<br>
-Specifies a linker script/scatter file to use. The default is `ensemble-RTSS-<HE|HP>`, a layout which uses
+Specifies a linker script/scatter file to use. The default is `RTSS-<HE|HP>`, a layout which uses
 both TCM and SRAM0/SRAM1.<br>
-If running on two cores, the M55-HE core must use the alternative ensemble-RTSS-HE-TCM layout which uses only TCM. This will only fit the smallest use-cases such as kws or alif_kws, and GLCD_UI must be disabled.<br>
+If running on two cores, the M55-HE core must use the alternative RTSS-HE-TCM layout which uses only TCM. This will only fit the smallest use-cases such as kws or alif_kws, and GLCD_UI must be disabled.<br>
 To fit in TCM the kws use case must have its activation area reduced using `-Dkws_ACTIVATION_BUF_SZ=0x20000`. (This is already the default for alif_kws).
 Also noise_reduction use-case needs activation area reduced using `-Dnoise_reduction_ACTIVATION_BUF_SZ=0x20000` for TCM build.
+
+`-DETHOS_U_NPU_ID=<U55|U85>`<br>
+Specifies which NPU to use for interference. (Default is U55)

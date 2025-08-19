@@ -102,7 +102,7 @@ onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -cotof
 onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -cotof -cotoa 1e-5
 ```
 
-  - It is not always possible for onnx2tf to automatically detect the data layout of tensors (and use the generated calibration data). You may need to keep the tensor shape using `-k`, `-kt` or `-kat` (see --help for details). In this case error like this can appear: `ERROR: If the input OP of ONNX before conversion is NHWC or an irregular channel arrangement other than NCHW, use the -kt or -kat option.` 
+  - It is not always possible for onnx2tf to automatically detect the data layout of tensors (and use the generated calibration data). You may need to keep the tensor shape using `-k`, `-kt` or `-kat` (see --help for details). In this case error like this can appear: `ERROR: If the input OP of ONNX before conversion is NHWC or an irregular channel arrangement other than NCHW, use the -kt or -kat option.`
 
   - If your model is not using typical image data and you are using onnx2tf for quantization you may see a print like this
     `if --custom_input_op_name_np_data_path is not specified, all input OPs must assume 4D tensor image data.`
@@ -115,7 +115,7 @@ onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -kat in
 
 ### PyTorch to TFLite
 - To convert to TFLite you first need to export to ONNX and then convert the resulting ONNX to TFLite
-  - Tutorial on PyTorch [website](https://pytorch.org/tutorials/beginner/onnx/export_simple_model_to_onnx_tutorial.html) 
+  - Tutorial on PyTorch [website](https://pytorch.org/tutorials/beginner/onnx/export_simple_model_to_onnx_tutorial.html)
 - Other option would be to use [ExecuTorch](https://pytorch.org/executorch) instead of conversions (Not covered in this howto).
 - Even though the conversions between frameworks are possible, there are cases when you need to adapt the original model to get the model NPU accelerated in the target HW.
   - In other words, if you don't take into account the Ethos-U Vela constraints, it is easy to create a PyTorch model which is convertable to TFLite, but runs mainly on CPU.
@@ -185,7 +185,7 @@ Batch Inference time                34.33 ms,   29.13 inferences/s (batch size 1
 
 - NPU/CPU operator ratio gives a good idea of how well Vela was able to optimise
   - Experience has shown that Vela estimates of inference time are ok (when all or most of the model operators can be executed using NPU)
-  - If there is significant usage of CPU the inference time estimates are not reliable 
+  - If there is significant usage of CPU the inference time estimates are not reliable
 
 - You can investigate the optimised model with [netron](https://github.com/lutzroeder/netron)
 ```
@@ -196,12 +196,12 @@ netron vela_output/model_input_full_integer_quant_vela.tflite
   ![Visualise with netron](media/alif/model_input_full_integer_quant_vela.png)
 
 - The `Total SRAM used` in Vela output is an important figure. You need to have a 'tensor arena' of this size when executing the model in target using TFLM.
-  - There is a use-case specific compile time configuration 
+  - There is a use-case specific compile time configuration
   - For example `-Dinference_runner_ACTIVATION_BUF_SZ=0x200000`
 
 - It is a good idea to deploy the model to target using the inference_runner use-case and measure the actual inference time
   - Set the model using CMAKE option: `-Dinference_runner_MODEL_TFLITE_PATH=/home/<user>/build/alif_ml-embedded-evaluation-kit/vela_output/model_input_full_integer_quant_vela.tflite`
-  - You may need to change or adapt the linker file (`-DLINKER_SCRIPT_NAME=ensemble-RTSS-HP-infrun`) depending on the model and tensor arena size
+  - You may need to change or adapt the linker file (`-DLINKER_SCRIPT_NAME=RTSS-HP-infrun`) depending on the model and tensor arena size
 
 - Note that in inference runner use-case almost all the operators are added so that they are available as CPU operators:
   - [See operators added](../source/application/api/use_case/inference_runner/src/MicroMutableAllOpsResolver.cc)
