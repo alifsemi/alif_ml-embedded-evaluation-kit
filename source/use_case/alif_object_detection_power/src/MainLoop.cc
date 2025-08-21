@@ -32,6 +32,7 @@
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+#include "board_utils.h"
 
 #ifdef SE_SERVICES_SUPPORT
 #include "services_lib_api.h"
@@ -51,7 +52,7 @@ namespace app {
 
 volatile bool obj_button_pressed = false;
 
-void button2_cb(unsigned int event)
+void button2_cb(uint32_t event)
 {
     (void)event;
     obj_button_pressed = true;

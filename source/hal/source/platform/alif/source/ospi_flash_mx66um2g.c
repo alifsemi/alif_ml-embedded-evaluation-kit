@@ -18,7 +18,7 @@
 #include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
-#include "board.h"
+#include "board_defs.h"
 
 #include "pinconf.h"
 #include "Driver_GPIO.h"
@@ -378,4 +378,3 @@ const uint8_t *do_flash_write(const uint8_t *ptr, size_t len)
 }
 
 #endif // BOARD_HAS_MX66UM2G_FLASH
-

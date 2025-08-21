@@ -237,7 +237,7 @@
 // <o> ILI9806 LCD panel reset pin number
 // <i> Defines ILI9806 LCD panel reset pin number.
 // <i> Default: 5
-#define RTE_ILI9806E_PANEL_RESET_PIN_NO                  BOARD_LCD_RESET_PIN_NO
+#define RTE_ILI9806E_PANEL_RESET_PIN_NO                  BOARD_LCD_RESET_GPIO_PIN
 
 // <o> ILI9806 LCD panel reset pin GPIO port number
 // <i> Defines ILI9806 LCD panel reset pin GPIO port number.
@@ -247,7 +247,7 @@
 // <o> ILI9806 LCD panel back light pin number
 // <i> Defines ILI9806 LCD panel back light pin number.
 // <i> Default: 1
-#define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 BOARD_LCD_BACKLIGHT_PIN_NO
+#define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 BOARD_LCD_BACKLIGHT_GPIO_PIN
 
 // <o> ILI9806 LCD panel back light pin GPIO port number
 // <i> Defines ILI9806 LCD panel back light pin GPIO port number.

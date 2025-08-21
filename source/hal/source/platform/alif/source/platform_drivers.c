@@ -40,7 +40,8 @@
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 #include "Driver_HWSEM.h"
-#include "board.h"
+#include "board_utils.h"
+#include "board_config.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
 #include "ospi_ram.h"
@@ -85,8 +86,10 @@ static const char* s_platform_name = DESIGN_NAME;
 static void set_flash_to_linear_and_disable_caching(void);
 static void set_flash_to_wrap_and_enable_caching(void);
 
-#ifdef SE_SERVICES_SUPPORT
 extern uint32_t services_handle;
+uint32_t se_services_s_handle;
+
+#ifdef SE_SERVICES_SUPPORT
 
 run_profile_t default_runprof;
 off_profile_t default_offprof;
@@ -336,6 +339,9 @@ int platform_init(void)
     // ========== END of FIX =========
 #endif // SE_SERVICES_SUPPORT
 
+    // CMSIS uses this handle in board_config.c as we don't use se_services_port.c we need to init it here. No matter if the SE_SERVICES_SUPPORT is defined.
+    se_services_s_handle = services_handle;
+
 #if !defined(BALLETTO_DEVICE)
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
@@ -346,9 +352,9 @@ int platform_init(void)
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
         /* We're first to acquire the lock - we do it */
 #endif // BALLETTO_DEVICE
-        BOARD_Power_Init();
-        BOARD_Clock_Init();
-        BOARD_Pinmux_Init();
+        board_pins_config();
+        board_gpios_config();
+        BOARD_UTILS_Init();
 
         tracelib_init(NULL);
 #ifdef OSPI_FLASH_SUPPORT

@@ -245,13 +245,12 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HE \
-    -DTARGET_BOARD=AppKit \
+    -DTARGET_BOARD=AppKit-e7 \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
-    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \ ..
     ```
 
 3. Build the Project using Make
@@ -283,12 +282,11 @@ UART select jumpers set for UART2:
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
-    -DTARGET_BOARD=AppKit \
+    -DTARGET_BOARD=AppKit-e7 \
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
-    -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+    -DLOG_LEVEL=LOG_LEVEL_DEBUG \ ..
     ```
 
 These cmake options permit the default use of LCD and SRAM, which is okay since the HE image has them disabled. The `CONSOLE_UART=4` option avoids the HE image’s use of UART and could be omitted to run standalone HP applications.
@@ -362,12 +360,11 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
       -DUSE_CASE_BUILD=inference_runner \
       -DTARGET_PLATFORM=alif \
       -DTARGET_SUBSYSTEM=RTSS-HP \
-      -DTARGET_BOARD=AppKit \
+      -DTARGET_BOARD=AppKit-e7 \
       -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DLOG_LEVEL=LOG_LEVEL_DEBUG \
-      -DALIF_DEVICE_SKU=AE722F80F55D5
     ```
 
 5. Build the project using `Make`
@@ -687,11 +684,8 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DDEVICE_SKU=<AE1C1F4051920|AE822FA0E5597|AE722F80F55D5>`<br>
-Specifies the Alif device. (Default is AE722F80F55D5)
-
-`-DTARGET_BOARD=<DevKit|AppKit>`<br>
-Specifies the target board. (Default is AppKit)<br>
+`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8>`<br>
+Specifies the target board. (Default is AppKit-e7)<br>
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
 Rotates the display by the specified amount and reorganizes the UI if necessary. 90 and 270 will be appreciably slower. (Default is 0)

@@ -40,7 +40,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
--DTARGET_BOARD=AppKit -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+-DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------ Image classification on CM55-HP with GCC --------------------------
 cmake -DTARGET_PLATFORM=alif \
@@ -48,7 +48,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
--DTARGET_BOARD=AppKit -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+-DTARGET_BOARD=AppKit-e7 ..
 
 make ethos-u-alif_img_class -j
 
@@ -61,7 +61,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
--DTARGET_BOARD=AppKit -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+-DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
 cmake -DTARGET_PLATFORM=alif \
@@ -69,7 +69,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
--DTARGET_BOARD=AppKit -DALIF_DEVICE_SKU=AE722F80F55D5 ..
+-DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------Keyword spotting on CM55-HE GCC E1C ----------------
  cmake -DTARGET_PLATFORM=alif \
@@ -77,6 +77,6 @@ cmake -DTARGET_PLATFORM=alif \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
--DTARGET_BOARD=DevKit -DALIF_DEVICE_SKU=AE1C1F4051920 ..
+-DTARGET_BOARD=DevKit-e1c ..
 
 make ethos-u-alif_kws -j4

@@ -31,6 +31,3 @@
 [submodule "dependencies/cmsis-alif"]
 	path = dependencies/cmsis-alif
 	url = org-115832732@github.com:AlifSemiDev/ensemble-cmsis-dfp_DEV.git
-[submodule "dependencies/boardlib"]
-	path = dependencies/boardlib
-	url = git@github.com:alifsemi/alif_boardlib.git
