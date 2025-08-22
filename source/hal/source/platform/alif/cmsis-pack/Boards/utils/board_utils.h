@@ -17,14 +17,6 @@
 extern "C" {
 #endif
 
- // <o> User BUTTON1 (JOY_SW4 - down) GPIO port number and pin number
-#define BOARD_BUTTON1_GPIO_PORT                 LP
-#define BOARD_BUTTON1_PIN_NO                    3
-
-// <o> User BUTTON2 (JOY_SW5 - click) GPIO port number and pin number
-#define BOARD_BUTTON2_GPIO_PORT                 LP
-#define BOARD_BUTTON2_PIN_NO                    4
-
 typedef void (*BOARD_Callback_t) (uint32_t event);
 
 typedef enum {
