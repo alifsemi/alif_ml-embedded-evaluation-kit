@@ -186,9 +186,9 @@ const struct pinconf board_pinconf[] = {
     /* Selected:  JTAG0_TDATA1 */
     {PORT_4, PIN_5, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-    /* P4_6 on pin B4. Functions: [0]: GPIO4_6, [1]: >>>JTAG0_TDATA2<<<, [2]: OSPI0_SCLKN_B, [3]: LPI2S_WS_B, [4]: UT3_T0_A, [5]: LPCAM_D6_A, [6]: SD_D6_A, [7]: CS_MWS_ID3 */
-    /* Selected:  JTAG0_TDATA2  */
-    {PORT_4, PIN_6, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_READ_ENABLE | PADCTRL_SCHMITT_TRIGGER_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
+    /* P4_6 on pin B4. Functions: [0]: GPIO4_6, [1]: JTAG0_TDATA2, [2]: OSPI0_SCLKN_B, [3]: >>>LPI2S_WS_B<<<, [4]: UT3_T0_A, [5]: LPCAM_D6_A, [6]: SD_D6_A, [7]: CS_MWS_ID3 */
+    /* Selected:  LPI2S_WS_B  */
+    {PORT_4, PIN_6, PINMUX_ALTERNATE_FUNCTION_3, PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
 
     /* P4_7 on pin D6. Functions: [0]: GPIO4_7, [1]: >>>JTAG0_TDATA2<<<, [2]: ospi0_sclk_b, [3]: ut3_t1_a [4]: lpcam_d7_a, [5]: sd_d7_a, [6]: cmp1_out_b, [7]: cs_mws_id4 */
     /* Selected: JTAG0_TDATA2 */
@@ -322,7 +322,7 @@ const struct pinconf board_pinconf[] = {
     /* Selected:GPIO8_7 */
     {PORT_8, PIN_7, PINMUX_ALTERNATE_FUNCTION_0, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-    /* P9_0 on pin M2. Functions: [0]: GPIO9_0, [1]: LPUART_RX_C, [2]: LPI2S_SDI_C, [3]: SPI1_SS1_C, [4]: FAULT0_C, [5]: LPCAM_D0_C, [6]: SD_D0_C */
+    /* P9_0 on pin M2. Functions: [0]: GPIO9_0, [1]: LPUART_RX_C, [2]: >>>LPI2S_SDI_C<<<, [3]: SPI1_SS1_C, [4]: FAULT0_C, [5]: LPCAM_D0_C, [6]: SD_D0_C */
     /* Selected:  LPI2S_SDI_C */
     {PORT_9, PIN_0, PINMUX_ALTERNATE_FUNCTION_2, PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_BUS_REPEATER | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
