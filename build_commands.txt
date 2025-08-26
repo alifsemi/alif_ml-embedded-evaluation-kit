@@ -29,9 +29,9 @@ This allows the smallest models to be run faster from the DTCM, but no display i
 possible. This is selected below for the secondary core, where it's necessary to
 avoid RAM/MRAM conflicts with the primary core.
 
-There are three supported Alif Evaluation Kits: Alif Development Kit (DevKit) and two
-versions of the Alif AI/ML Application Kit (AppKit). To select between the boards,
-use one of the options TARGET_BOARD=AppKit (default) or TARGET_BOARD=DevKit
+There are four supported Alif Evaluation Kits: Alif Development Kits (DevKit-e7, DevKit-e8 and DevKit-e1c) and
+the Alif AI/ML Application Kit (AppKit-e7). To select between the boards,
+use one of the options TARGET_BOARD=AppKit-e7 (default) or TARGET_BOARD=DevKit-e7/DevKit-e8/DevKit-e1c
 
 
 ; ------------ Image classification on CM55-HP with ARMCLANG ---------------------
@@ -78,5 +78,13 @@ cmake -DTARGET_PLATFORM=alif \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
 -DTARGET_BOARD=DevKit-e1c ..
+
+; ------------Keyword spotting on CM55-HE GCC E8 ----------------
+ cmake -DTARGET_PLATFORM=alif \
+-DTARGET_SUBSYSTEM=RTSS-HE \
+-DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
+-DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+-DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DTARGET_BOARD=DevKit-e8 ..
 
 make ethos-u-alif_kws -j4
