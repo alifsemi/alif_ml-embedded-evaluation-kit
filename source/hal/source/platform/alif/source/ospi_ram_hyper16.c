@@ -19,7 +19,7 @@
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-#include "board.h"
+#include "board_defs.h"
 #include "pinconf.h"
 #include "Driver_GPIO.h"
 #include "Driver_OSPI.h"

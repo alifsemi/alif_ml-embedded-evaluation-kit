@@ -20,7 +20,7 @@
 #include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
-#include "board.h"
+#include "board_defs.h"
 
 #include "pinconf.h"
 #include "Driver_OSPI.h"
@@ -426,4 +426,3 @@ int32_t ospi_ram_init(void)
 }
 
 #endif //BOARD_HAS_APS512XX_RAM
-

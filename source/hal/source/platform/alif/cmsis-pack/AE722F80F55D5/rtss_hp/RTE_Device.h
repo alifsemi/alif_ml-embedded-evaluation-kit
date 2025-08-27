@@ -507,7 +507,7 @@
 // <o> Select camera sensor ARX3A0 reset pin number
 // <i> Defines camera sensor ARX3A0 reset pin number
 // <i> Default: 1
-#define RTE_ARX3A0_CAMERA_SENSOR_RESET_PIN_NO                BOARD_CAMERA_RESET_PIN_NO
+#define RTE_ARX3A0_CAMERA_SENSOR_RESET_PIN_NO                BOARD_CAMERA_RESET_GPIO_PIN
 
 // <o> Select camera sensor ARX3A0 reset GPIO port
 // <i> Defines camera sensor ARX3A0 reset GPIO port
@@ -517,7 +517,7 @@
 // <o> Select camera sensor ARX3A0 power pin number
 // <i> Defines camera sensor ARX3A0 power pin number
 // <i> Default: 5
-#define RTE_ARX3A0_CAMERA_SENSOR_POWER_PIN_NO                BOARD_CAMERA_POWER_PIN_NO
+#define RTE_ARX3A0_CAMERA_SENSOR_POWER_PIN_NO                BOARD_CAMERA_POWER_GPIO_PIN
 
 // <o> Select camera sensor ARX3A0 power GPIO port
 // <i> Defines camera sensor ARX3A0 power GPIO port
@@ -595,12 +595,12 @@
 // <o> Select camera sensor AR0144 reset pin number
 // <i> Defines camera sensor AR0144 reset pin number
 // <i> Default: 5
-#define RTE_AR0144_CAMERA_SENSOR_RESET_PIN_NO                 1
+#define RTE_AR0144_CAMERA_SENSOR_RESET_PIN_NO                 BOARD_CAMERA_RESET_GPIO_PIN
 
 // <o> Select camera sensor AR0144 reset GPIO port
 // <i> Defines camera sensor AR0144 reset GPIO port
 // <i> Default: 4
-#define RTE_AR0144_CAMERA_SENSOR_RESET_GPIO_PORT              9
+#define RTE_AR0144_CAMERA_SENSOR_RESET_GPIO_PORT              BOARD_CAMERA_RESET_GPIO_PORT
 
 // <o> Select camera sensor AR0144 power pin number
 // <i> Defines camera sensor AR0144 power pin number
@@ -854,7 +854,7 @@
 // <o> Select camera sensor MT9M114 MIPI reset pin number
 // <i> Defines camera sensor MT9M114 MIPI reset pin number
 // <i> Default: 1
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_RESET_PIN_NO                 BOARD_CAMERA_RESET_PIN_NO
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_RESET_PIN_NO                 BOARD_CAMERA_RESET_GPIO_PIN
 
 // <o> Select camera sensor MT9M114 MIPI reset GPIO port
 // <i> Defines camera sensor MT9M114 MIPI reset GPIO port
@@ -864,7 +864,7 @@
 // <o> Select camera sensor MT9M114 MIPI power pin number
 // <i> Defines camera sensor MT9M114 MIPI power pin number
 // <i> Default: 5
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_POWER_PIN_NO                 BOARD_CAMERA_POWER_PIN_NO
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_POWER_PIN_NO                 BOARD_CAMERA_POWER_GPIO_PIN
 
 // <o> Select camera sensor MT9M114 MIPI power GPIO port
 // <i> Defines camera sensor MT9M114 MIPI power GPIO port
@@ -1255,7 +1255,7 @@
 // <o> ILI9806 LCD panel reset pin number
 // <i> Defines ILI9806 LCD panel reset pin number.
 // <i> Default: 5
-#define RTE_ILI9806E_PANEL_RESET_PIN_NO                  BOARD_LCD_RESET_PIN_NO
+#define RTE_ILI9806E_PANEL_RESET_PIN_NO                  BOARD_LCD_RESET_GPIO_PIN
 
 // <o> ILI9806 LCD panel reset pin GPIO port number
 // <i> Defines ILI9806 LCD panel reset pin GPIO port number.
@@ -1265,7 +1265,7 @@
 // <o> ILI9806 LCD panel back light pin number
 // <i> Defines ILI9806 LCD panel back light pin number.
 // <i> Default: 1
-#define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 BOARD_LCD_BACKLIGHT_PIN_NO
+#define RTE_ILI9806E_PANEL_BL_LED_PIN_NO                 BOARD_LCD_BACKLIGHT_GPIO_PIN
 
 // <o> ILI9806 LCD panel back light pin GPIO port number
 // <i> Defines ILI9806 LCD panel back light pin GPIO port number.

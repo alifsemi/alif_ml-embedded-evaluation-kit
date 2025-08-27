@@ -37,46 +37,44 @@ function(set_platform_global_defaults)
     set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "Specify Alif SKU part number")
     set_property(CACHE ALIF_DEVICE_SKU PROPERTY STRINGS "AE1C1F4051920" "AE722F80F55D5" "AE822FA0E5597")
 
-    set(ALIF_BOARDLIB_PATH_END "appkit_gen2" CACHE STRING "Specify Alif boardlib path")
-    set_property(CACHE ALIF_BOARDLIB_PATH_END PROPERTY STRINGS "appkit_gen2" "devit_gen2" "devkit_e1c" "devkit_e8")
-
-    set(TARGET_BOARD "AppKit" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "DevKit" "AppKit")
+    set(TARGET_BOARD "AppKit-e7" CACHE STRING "Board type")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8")
 
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM
-    if ((USE_STRIPED_SRAM) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
-        message(FATAL_ERROR "USE_STRIPED_SRAM possible only with SKU AE822FA0E5597")
+    if ((USE_STRIPED_SRAM) AND NOT ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")))
+        message(FATAL_ERROR "USE_STRIPED_SRAM possible only with TARGET_BOARD DevKit-e4 or DevKit-e8")
     endif()
 
     # Sanity check DevKit or AppKit
-    if (NOT ((TARGET_BOARD STREQUAL "DevKit") OR (TARGET_BOARD STREQUAL "AppKit")))
-        message(FATAL_ERROR "Possible TARGET_BOARD values are: DevKit and AppKit but given value was ${TARGET_BOARD}")
-    endif()
-
-    # Sanity check E1C and E8 need to be Devkit
-    if ((ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") OR (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
-        if (NOT (TARGET_BOARD STREQUAL "DevKit"))
-            message(FATAL_ERROR "Possible TARGET_BOARD value for AE1C1F4051920 and AE822FA0E5597 is DevKit. Given value was ${TARGET_BOARD}")
-        endif()
+    if (NOT ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "DevKit-e7")
+        OR (TARGET_BOARD STREQUAL "DevKit-e8")))
+        message(FATAL_ERROR "Possible TARGET_BOARD values are: AppKit-e7, DevKit-e1c, DevKit-e4, DevKit-e7 and DevKit-e8 but given value was ${TARGET_BOARD}")
     endif()
 
 
-    if (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597") # Add other SKUs which are Eagle devices
-        set(ALIF_BOARDLIB_PATH_END "devkit_e8" CACHE STRING "" FORCE)
+    if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")) # Add other Devkits and AppKits which are Ensemble devices with Striping support
+        set(ALIF_DEVICE_SKU "AE822FA0E5597" CACHE STRING "" FORCE)
         add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
+        set(IS_EAGLE_DEVICE ON)
         if (USE_STRIPED_SRAM)
             add_compile_definitions(USE_STRIPED_SRAM)
             message(STATUS "Using Striped SRAM!")
         else()
             message(STATUS "Using Linear SRAM!")
         endif()
+    else()
+        set(IS_EAGLE_DEVICE OFF)
     endif()
 
-    if (ALIF_DEVICE_SKU STREQUAL "AE1C1F4051920") # Add other SKUs which are Balletto devices
-        set(ALIF_BOARDLIB_PATH_END "devkit_e1c" CACHE STRING "" FORCE)
+    if ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e7")) # Add other Devkit and AppKits which are Ensemble devices
+        set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "" FORCE)
+    endif()
+
+    if (TARGET_BOARD STREQUAL "DevKit-e1c") # Add other Devkit and AppKits which are Balletto devices
         set(IS_BALLETTO_DEVICE ON)
+        set(ALIF_DEVICE_SKU "AE1C1F4051920" CACHE STRING "" FORCE)
         add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
         USER_OPTION(ALIF_CAMERA_ENABLED "If enabled, does use the real camera, otherwise uses static images instead. Disabled by default on E1C."
             OFF
@@ -102,17 +100,13 @@ function(set_platform_global_defaults)
     endif()
 
     # Sanity check for ETHOS_U_NPU_ID
-    if ((ETHOS_U_NPU_ID STREQUAL U85) AND NOT (ALIF_DEVICE_SKU STREQUAL "AE822FA0E5597"))
-        message(FATAL_ERROR "ETHOS_U_NPU_ID U85 possible only with SKU AE822FA0E5597")
+    if ((ETHOS_U_NPU_ID STREQUAL U85) AND (NOT IS_EAGLE_DEVICE))
+        message(FATAL_ERROR "U85 NPU is not available on ${TARGET_BOARD}")
     endif()
 
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
         "${RTSS_NPU_CONFIG_ID}"
         STRING)
-
-    if ((ALIF_DEVICE_SKU STREQUAL "AE722F80F55D5") AND (TARGET_BOARD STREQUAL "DevKit"))
-        set(ALIF_BOARDLIB_PATH_END "devkit_gen2" CACHE STRING "" FORCE)
-    endif()
 
     USER_OPTION(ETHOS_U_NPU_MEMORY_MODE "Specifies the memory mode used in the Vela command."
         "Shared_Sram"
@@ -128,8 +122,6 @@ function(set_platform_global_defaults)
     message(STATUS "Alif Device SKU  : ${ALIF_DEVICE_SKU}")
 
     set(ALIF_CMSIS_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/cmsis-alif PARENT_SCOPE)
-
-    set(BOARDLIB_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/boardlib PARENT_SCOPE)
 
     set(CMAKE_SYSTEM_PROCESSOR cortex-m55 CACHE STRING "Cortex-M CPU to use")
 
@@ -148,7 +140,6 @@ function(set_platform_global_defaults)
     endif()
     set(ALIF_CORE "${ALIF_CORE}" PARENT_SCOPE)
     set(ALIF_DEVICE_SKU "${ALIF_DEVICE_SKU}" PARENT_SCOPE)
-    set(ALIF_BOARDLIB_PATH_END "${ALIF_BOARDLIB_PATH_END}" PARENT_SCOPE)
     set(IS_BALLETTO_DEVICE ${IS_BALLETTO_DEVICE} PARENT_SCOPE)
 
     add_compile_definitions(
