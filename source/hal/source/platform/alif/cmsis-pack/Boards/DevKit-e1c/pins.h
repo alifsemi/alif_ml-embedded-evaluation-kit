@@ -15,7 +15,7 @@
  * @brief    Pin MUX and Pin Config settings for "DevKit Gen 2 (DK-E1C)"
  *           project with AE1C1F4051920PH.
  * @bug      None.
- * @note     None.
+ * @note     File is copied from Alif CMSIS and modified manually to suit this project.
  ******************************************************************************/
 
 #ifndef __PINS_H__

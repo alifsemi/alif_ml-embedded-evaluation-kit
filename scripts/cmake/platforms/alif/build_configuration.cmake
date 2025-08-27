@@ -57,12 +57,15 @@ function(set_platform_global_defaults)
     if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")) # Add other Devkits and AppKits which are Ensemble devices with Striping support
         set(ALIF_DEVICE_SKU "AE822FA0E5597" CACHE STRING "" FORCE)
         add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
+        set(IS_EAGLE_DEVICE ON)
         if (USE_STRIPED_SRAM)
             add_compile_definitions(USE_STRIPED_SRAM)
             message(STATUS "Using Striped SRAM!")
         else()
             message(STATUS "Using Linear SRAM!")
         endif()
+    else()
+        set(IS_EAGLE_DEVICE OFF)
     endif()
 
     if ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e7")) # Add other Devkit and AppKits which are Ensemble devices
@@ -97,8 +100,8 @@ function(set_platform_global_defaults)
     endif()
 
     # Sanity check for ETHOS_U_NPU_ID
-    if ((ETHOS_U_NPU_ID STREQUAL U85) AND NOT ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")))
-        message(FATAL_ERROR "ETHOS_U_NPU_ID U85 possible only with TARGET_BOARD DevKit-e4 or DevKit-e8")
+    if ((ETHOS_U_NPU_ID STREQUAL U85) AND (NOT IS_EAGLE_DEVICE))
+        message(FATAL_ERROR "U85 NPU is not available on ${TARGET_BOARD}")
     endif()
 
     USER_OPTION(ETHOS_U_NPU_CONFIG_ID "Specifies the configuration ID for the NPU."
