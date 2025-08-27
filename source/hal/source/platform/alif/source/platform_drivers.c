@@ -40,7 +40,8 @@
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 #include "Driver_HWSEM.h"
-#include "board.h"
+#include "board_utils.h"
+#include "board_config.h"
 #include "tracelib.h"
 #include "ospi_flash.h"
 #include "ospi_ram.h"
@@ -85,8 +86,10 @@ static const char* s_platform_name = DESIGN_NAME;
 static void set_flash_to_linear_and_disable_caching(void);
 static void set_flash_to_wrap_and_enable_caching(void);
 
-#ifdef SE_SERVICES_SUPPORT
 extern uint32_t services_handle;
+uint32_t se_services_s_handle;
+
+#ifdef SE_SERVICES_SUPPORT
 
 run_profile_t default_runprof;
 off_profile_t default_offprof;
@@ -159,7 +162,7 @@ static uint32_t set_power_profiles()
     // Use case can easily change these for more suitable settings extern default_runprof/default_offprof and change only
     // the needed values and call set_power_run_profile/set_power_off_profile
 #ifdef BALLETTO_DEVICE // Balletto support only PFM
-    default_runprof.dcdc_mode     = DCDC_MODE_PFM_FORCED;
+    default_runprof.dcdc_mode       = DCDC_MODE_PFM_FORCED;
     // No following memories on E1C/B1: SRAM0_MASK | SRAM1_MASK | SRAM6A_MASK | SRAM6B_MASK | SRAM7_1_MASK | SRAM7_2_MASK | SRAM7_3_MASK | SRAM8_MASK | SRAM9_MASK
     default_runprof.memory_blocks   = SERAM_MASK | MRAM_MASK | FWRAM_MASK | BACKUP4K_MASK;
     default_runprof.phy_pwr_gating  = LDO_PHY_MASK;
@@ -211,8 +214,13 @@ static uint32_t set_power_profiles()
         default_offprof.wakeup_events   = WE_LPGPIO;
         default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
 #if defined(M55_HE) || defined(RTSS_HE)
+#ifdef BALLETTO_DEVICE
+        default_offprof.vtor_address    = 0x80000000;
+        default_offprof.vtor_address_ns = 0x80000000;
+#else
         default_offprof.vtor_address    = 0x80480000;
         default_offprof.vtor_address_ns = 0x80480000;
+#endif // BALLETTO_DEVICE
 #elif defined(M55_HP) || defined(RTSS_HP)
         default_offprof.vtor_address    = 0x80008000;
         default_offprof.vtor_address_ns = 0x80008000;
@@ -336,6 +344,9 @@ int platform_init(void)
     // ========== END of FIX =========
 #endif // SE_SERVICES_SUPPORT
 
+    // CMSIS uses this handle in board_config.c as we don't use se_services_port.c we need to init it here. No matter if the SE_SERVICES_SUPPORT is defined.
+    se_services_s_handle = services_handle;
+
 #if !defined(BALLETTO_DEVICE)
     extern ARM_DRIVER_HWSEM ARM_Driver_HWSEM_(0);
     ARM_DRIVER_HWSEM *HWSEMdrv = &ARM_Driver_HWSEM_(0);
@@ -346,9 +357,9 @@ int platform_init(void)
     if (HWSEMdrv->TryLock() == ARM_DRIVER_OK) {
         /* We're first to acquire the lock - we do it */
 #endif // BALLETTO_DEVICE
-        BOARD_Power_Init();
-        BOARD_Clock_Init();
-        BOARD_Pinmux_Init();
+        board_pins_config();
+        board_gpios_config();
+        BOARD_UTILS_Init();
 
         tracelib_init(NULL);
 #ifdef OSPI_FLASH_SUPPORT

@@ -14,7 +14,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "board.h"
+#include "board_defs.h"
 #include "mic_listener.h"
 #include <RTE_Device.h>
 
@@ -27,7 +27,7 @@ ARM_DRIVER_SAI       *i2s_drv;
 
 #define Driver_SAI4 Driver_SAILP
 
-extern ARM_DRIVER_SAI ARM_Driver_SAI_(BOARD_I2S_INSTANCE);
+extern ARM_DRIVER_SAI ARM_Driver_SAI_(BOARD_MIC_INPUT_I2S_INSTANCE);
 
 /**
   \fn          void sai_callback(uint32_t event)
@@ -53,7 +53,7 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
     int32_t status;
 
     /* Use the I2S2 as Receiver */
-    i2s_drv = &ARM_Driver_SAI_(BOARD_I2S_INSTANCE);
+    i2s_drv = &ARM_Driver_SAI_(BOARD_MIC_INPUT_I2S_INSTANCE);
 
     /* Verify if I2S protocol is supported */
     cap = i2s_drv->GetCapabilities();
