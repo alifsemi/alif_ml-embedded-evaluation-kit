@@ -22,7 +22,7 @@ pipeline {
         }
         // First build can end up doing some patching of Tensorflow
         // so run one build sequentially to start with
-        stage('Build HP GCC Release') {
+        stage('Build HP GCC Release DevKit-e7') {
             steps {
                 script {
                     common_funcs.build_hp("Release", "gcc", "DevKit-e7");
@@ -32,16 +32,32 @@ pipeline {
                 success {
                     archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                     archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
-                    stash name: "test_build_gnu_img_hp_release", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class/mram.bin"
-                    stash name: "test_build_gnu_obj_hp_release", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection/mram.bin"
-                    stash name: "test_build_gnu_vww_hp_release", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww/mram.bin"
+                    stash name: "test_build_gnu_img_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class/mram.bin"
+                    stash name: "test_build_gnu_obj_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection/mram.bin"
+                    stash name: "test_build_gnu_vww_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww/mram.bin"
                 }
             }
         }
-        // Remaining builds can be parallel
+        // Remaining builds can be parallel. Different Devkits could be run in same stage->stapes->script but then it would not be paraller so copy-paste stages to save build time.
         stage('More builds') {
             parallel {
-                stage('Build HP ARMCLANG Release') {
+                stage('Build HP GCC Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "gcc", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_img_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_img_class/mram.bin"
+                            stash name: "test_build_gnu_obj_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_object_detection/mram.bin"
+                            stash name: "test_build_gnu_vww_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_vww/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HP ARMCLANG Release DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_hp("Release", "armclang", "DevKit-e7");
@@ -51,20 +67,57 @@ pipeline {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
-                            stash name: "test_build_armclang_img_hp_release", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class/ER_ROM"
-                            stash name: "test_build_armclang_obj_hp_release", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection/ER_ROM"
-                            stash name: "test_build_armclang_vww_hp_release", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww/ER_ROM"
+                            stash name: "test_build_armclang_img_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class/ER_ROM"
+                            stash name: "test_build_armclang_obj_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection/ER_ROM"
+                            stash name: "test_build_armclang_vww_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww/ER_ROM"
                         }
                     }
                 }
-                stage('Build HP GCC Debug E7') {
+                stage('Build HP ARMCLANG Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "armclang", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_img_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_img_class/ER_ROM"
+                            stash name: "test_build_armclang_obj_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_object_detection/ER_ROM"
+                            stash name: "test_build_armclang_vww_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_vww/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HP GCC Debug DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_hp("Debug", "gcc", "DevKit-e7");
                         }
                     }
                 }
-                stage('Build HE-TCM GCC Release') {
+                stage('Build HP GCC Debug DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Debug", "gcc", "DevKit-e8");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc", "DevKit-e1c");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release_devkit_e1c", includes: "build_gcc_he_tcm_release_devkit-e1c/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_he_tcm("Release", "gcc", "DevKit-e7");
@@ -74,11 +127,39 @@ pipeline {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
-                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws/mram.bin"
+                            stash name: "test_build_gnu_kws_he_release_devkit_e7", includes: "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws/mram.bin"
                         }
                     }
                 }
-                stage('Build HE-TCM ARMCLANG Release') {
+                stage('Build HE-TCM GCC Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release_devkit_e8", includes: "build_gcc_he_tcm_release_devkit-e8/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HE-TCM ARMCLANG Release DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "armclang", "DevKit-e1c");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_kws_he_release_devkit_e1c", includes: "build_armclang_he_tcm_release_devkit-e1c/bin/sectors/alif_kws/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HE-TCM ARMCLANG Release DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_he_tcm("Release", "armclang", "DevKit-e7");
@@ -88,14 +169,42 @@ pipeline {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
-                            stash name: "test_build_armclang_kws_he_release", includes: "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws/ER_ROM"
+                            stash name: "test_build_armclang_kws_he_release_devkit_e7", includes: "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws/ER_ROM"
                         }
                     }
                 }
-                stage('Build HE-TCM GCC Debug E7') {
+                stage('Build HE-TCM ARMCLANG Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "armclang", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_kws_he_release_devkit_e8", includes: "build_armclang_he_tcm_release_devkit-e8/bin/sectors/alif_kws/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e1c");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e7");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e8");
                         }
                     }
                 }
@@ -106,7 +215,7 @@ pipeline {
                 stage('Test KWS HE GCC Release DevKit-E7') {
                     agent { label 'E7' }
                     steps {
-                        unstash name: "test_build_gnu_kws_he_release"
+                        unstash name: "test_build_gnu_kws_he_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin", "test_kws");
@@ -132,7 +241,7 @@ pipeline {
                 stage('Test KWS HE ARMCLANG Release DevKit-E7') {
                     agent { label 'E7' }
                     steps {
-                        unstash name: "test_build_armclang_kws_he_release"
+                        unstash name: "test_build_armclang_kws_he_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "ER_ROM", "ethos-u-alif_kws.bin", "test_kws");
@@ -159,7 +268,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_gnu_img_hp_release"
+                        unstash name: "test_build_gnu_img_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class", "mram.bin", "ethos-u-alif_img_class.bin", "test_img_class");
@@ -190,7 +299,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_armclang_img_hp_release"
+                        unstash name: "test_build_armclang_img_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class", "ER_ROM", "ethos-u-alif_img_class.bin", "test_img_class");
@@ -221,7 +330,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_gnu_obj_hp_release"
+                        unstash name: "test_build_gnu_obj_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection", "mram.bin", "ethos-u-alif_object_detection.bin", "test_object_detection");
@@ -252,7 +361,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_armclang_obj_hp_release"
+                        unstash name: "test_build_armclang_obj_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection", "ER_ROM", "ethos-u-alif_object_detection.bin", "test_object_detection");
@@ -283,7 +392,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_gnu_vww_hp_release"
+                        unstash name: "test_build_gnu_vww_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_vww.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww", "mram.bin", "ethos-u-alif_vww.bin", "test_vww");
@@ -314,7 +423,7 @@ pipeline {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
                     steps {
                         build job: 'camera_start_record'
-                        unstash name: "test_build_armclang_vww_hp_release"
+                        unstash name: "test_build_armclang_vww_hp_release_devkit_e7"
                         script {
                             try {
                             common_funcs.flash_and_run_pytest("alif_vww.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww", "ER_ROM", "ethos-u-alif_vww.bin", "test_vww");
