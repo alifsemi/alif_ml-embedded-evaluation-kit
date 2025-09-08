@@ -21,6 +21,9 @@ def build_hp(String build_type, String toolchain, String board) {
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
         mkdir $build_path
         pushd $build_path
         $cmake_cmd &&
@@ -37,6 +40,9 @@ def build_he_tcm(String build_type, String toolchain, String board) {
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
         mkdir $build_path
         pushd $build_path
         $cmake_cmd &&
@@ -46,7 +52,7 @@ def build_he_tcm(String build_type, String toolchain, String board) {
         exit \$exit_code"""
 }
 
-def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name) {
+def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name) {
     sh """#!/bin/bash -xe
         printenv NODE_NAME
         cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
@@ -65,7 +71,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
 
     def run_pytest = "\
     pytest \
-    -s \
+    -s -v -k $test_name \
     --tb=native \
     --root-logdir=pytest-logs \
     --junit-prefix=$target_binary_name \

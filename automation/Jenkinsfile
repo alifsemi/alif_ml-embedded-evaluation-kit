@@ -22,24 +22,102 @@ pipeline {
         }
         // First build can end up doing some patching of Tensorflow
         // so run one build sequentially to start with
-        stage('Build HP GCC Release') {
+        stage('Build HP GCC Release DevKit-e7') {
             steps {
                 script {
                     common_funcs.build_hp("Release", "gcc", "DevKit-e7");
                 }
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                    archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                    stash name: "test_build_gnu_img_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class/mram.bin"
+                    stash name: "test_build_gnu_obj_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection/mram.bin"
+                    stash name: "test_build_gnu_vww_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww/mram.bin"
+                }
+            }
         }
-        // Remaining builds can be parallel
+        // Remaining builds can be parallel. Different Devkits could be run in same stage->stapes->script but then it would not be paraller so copy-paste stages to save build time.
         stage('More builds') {
             parallel {
-                stage('Build HP GCC Debug E7') {
+                stage('Build HP GCC Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "gcc", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_img_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_img_class/mram.bin"
+                            stash name: "test_build_gnu_obj_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_object_detection/mram.bin"
+                            stash name: "test_build_gnu_vww_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8/bin/sectors/alif_vww/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HP ARMCLANG Release DevKit-e7') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "armclang", "DevKit-e7");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_img_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class/ER_ROM"
+                            stash name: "test_build_armclang_obj_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection/ER_ROM"
+                            stash name: "test_build_armclang_vww_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HP ARMCLANG Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Release", "armclang", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_img_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_img_class/ER_ROM"
+                            stash name: "test_build_armclang_obj_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_object_detection/ER_ROM"
+                            stash name: "test_build_armclang_vww_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8/bin/sectors/alif_vww/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HP GCC Debug DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_hp("Debug", "gcc", "DevKit-e7");
                         }
                     }
                 }
-                stage('Build HE-TCM GCC Release') {
+                stage('Build HP GCC Debug DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_hp("Debug", "gcc", "DevKit-e8");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc", "DevKit-e1c");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release_devkit_e1c", includes: "build_gcc_he_tcm_release_devkit-e1c/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Release DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_he_tcm("Release", "gcc", "DevKit-e7");
@@ -49,42 +127,328 @@ pipeline {
                         success {
                             archiveArtifacts artifacts: '*/bin/*', fingerprint: true
                             archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
-                            stash name: "test_build_gnu_kws_he_release", includes: "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws/mram.bin"
+                            stash name: "test_build_gnu_kws_he_release_devkit_e7", includes: "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws/mram.bin"
                         }
                     }
                 }
-                stage('Build HE-TCM GCC Debug E7') {
+                stage('Build HE-TCM GCC Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "gcc", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_kws_he_release_devkit_e8", includes: "build_gcc_he_tcm_release_devkit-e8/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HE-TCM ARMCLANG Release DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "armclang", "DevKit-e1c");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_kws_he_release_devkit_e1c", includes: "build_armclang_he_tcm_release_devkit-e1c/bin/sectors/alif_kws/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HE-TCM ARMCLANG Release DevKit-e7') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "armclang", "DevKit-e7");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_kws_he_release_devkit_e7", includes: "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HE-TCM ARMCLANG Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Release", "armclang", "DevKit-e8");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/ER_ROM', fingerprint: true
+                            stash name: "test_build_armclang_kws_he_release_devkit_e8", includes: "build_armclang_he_tcm_release_devkit-e8/bin/sectors/alif_kws/ER_ROM"
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug DevKit-e1c') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e1c");
+                        }
+                    }
+                }
+                stage('Build HE-TCM GCC Debug DevKit-e7') {
                     steps {
                         script {
                             common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e7");
                         }
                     }
                 }
-            }
-        }
-        stage('Test KWS HE Release E7') {
-            agent { label 'E7' }
-            steps {
-                unstash name: "test_build_gnu_kws_he_release"
-                script {
-                    try {
-                    common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin");
-                    } catch (Exception e) {
-                        echo 'Exception occurred: ' + e.toString()
-                        stageResult: 'UNSTABLE'
+                stage('Build HE-TCM GCC Debug DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_he_tcm("Debug", "gcc", "DevKit-e8");
+                        }
                     }
                 }
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
-                    archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
-                    junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+        }
+        stage('Test phase') {
+            parallel {
+                stage('Test KWS HE GCC Release DevKit-E7') {
+                    agent { label 'E7' }
+                    steps {
+                        unstash name: "test_build_gnu_kws_he_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin", "test_kws");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
                 }
-                cleanup {
-                    cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                stage('Test KWS HE ARMCLANG Release DevKit-E7') {
+                    agent { label 'E7' }
+                    steps {
+                        unstash name: "test_build_armclang_kws_he_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "ER_ROM", "ethos-u-alif_kws.bin", "test_kws");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Image Classification HP GCC Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_gnu_img_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class", "mram.bin", "ethos-u-alif_img_class.bin", "test_img_class");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'img_class_gcc_video', optional: true)
+                        stash name: "img_class_gcc_video", includes: "img_class_gcc_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_img_class_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_img_class.bin.xml'
+                            archiveArtifacts artifacts: 'img_class_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Image Classification HP ARMCLANG Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_armclang_img_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class", "ER_ROM", "ethos-u-alif_img_class.bin", "test_img_class");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'img_class_armclang_video', optional: true)
+                        stash name: "img_class_armclang_video", includes: "img_class_armclang_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_img_class_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_img_class.bin.xml'
+                            archiveArtifacts artifacts: 'img_class_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Object Detection HP GCC Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_gnu_obj_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection", "mram.bin", "ethos-u-alif_object_detection.bin", "test_object_detection");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'obj_det_gcc_video', optional: true)
+                        stash name: "obj_det_gcc_video", includes: "obj_det_gcc_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_obj_detect_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_object_detection.bin.xml'
+                            archiveArtifacts artifacts: 'obj_det_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Object Detection HP ARMCLANG Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_armclang_obj_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection", "ER_ROM", "ethos-u-alif_object_detection.bin", "test_object_detection");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'obj_det_armclang_video', optional: true)
+                        stash name: "obj_det_armclang_video", includes: "obj_det_armclang_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_obj_detect_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_object_detection.bin.xml'
+                            archiveArtifacts artifacts: 'obj_det_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Visual Wake Word HP GCC Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_gnu_vww_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww", "mram.bin", "ethos-u-alif_vww.bin", "test_vww");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'vww_gcc_video', optional: true)
+                        stash name: "vww_gcc_video", includes: "vww_gcc_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_vww.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_vww.bin.xml'
+                            archiveArtifacts artifacts: 'vww_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Visual Wake Word HP ARMCLANG Release DevKit-E7') {
+                    agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    steps {
+                        build job: 'camera_start_record'
+                        unstash name: "test_build_armclang_vww_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww", "ER_ROM", "ethos-u-alif_vww.bin", "test_vww");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter:'recording.mov', target:'vww_armclang_video', optional: true)
+                        stash name: "vww_armclang_video", includes: "vww_armclang_video/recording.mov"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_vww.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_vww.bin.xml'
+                            archiveArtifacts artifacts: 'vww_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
                 }
             }
         }
