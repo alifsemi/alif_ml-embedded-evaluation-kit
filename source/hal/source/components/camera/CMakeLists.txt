@@ -63,8 +63,8 @@ if (${FVP_VSI_ENABLED})
     endif()
 endif()
 
-if (${TARGET_PLATFORM} STREQUAL ensemble)
-    add_subdirectory(source/ensemble)
+if (${TARGET_PLATFORM} STREQUAL alif)
+    add_subdirectory(source/alif)
 endif()
 
 # Display status

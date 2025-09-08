@@ -1,4 +1,4 @@
-# /* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+# /* This file was ported to work on Alif Semiconductor devices. */
 #
 #/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
 # * Use, distribution and modification of this code is permitted under the
@@ -44,21 +44,21 @@ target_include_directories(${AUDIO_IFACE_TARGET}
     INTERFACE
     include
     source
-    source/ensemble
-    source/ensemble/include)
+    source/alif
+    source/alif/include)
 
-# Create static library for Ensemble data
-set(AUDIO_ENSEMBLE_COMPONENT_TARGET audio_ensemble)
-add_library(${AUDIO_ENSEMBLE_COMPONENT_TARGET} STATIC)
+# Create static library for Alif data
+set(AUDIO_ALIF_COMPONENT_TARGET audio_alif)
+add_library(${AUDIO_ALIF_COMPONENT_TARGET} STATIC)
 
 ## Component sources
-target_sources(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
+target_sources(${AUDIO_ALIF_COMPONENT_TARGET}
     PRIVATE
-    source/ensemble/audio_ensemble.c
-    source/ensemble/mic_listener.c)
+    source/alif/audio_alif.c
+    source/alif/mic_listener.c)
 
-# Ensemble TARGET_BOARD needs to be set
-target_compile_definitions(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
+# Alif TARGET_BOARD needs to be set
+target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
     PRIVATE
     TARGET_BOARD=BOARD_${TARGET_BOARD})
 
@@ -71,15 +71,16 @@ if (NOT TARGET log)
 endif()
 
 ## Add dependencies
-target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PUBLIC
+target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
     log
     cmsis_device
     rte_components)
 
-target_link_libraries(${AUDIO_ENSEMBLE_COMPONENT_TARGET} PRIVATE
+target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
     ${AUDIO_IFACE_TARGET}
-    arm_math)
+    arm_math
+    platform_drivers_core)
 
 set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
 set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
@@ -87,11 +88,11 @@ set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${AUDIO_ENSEMBLE_COMPONENT_TARGET})
+message(STATUS "Library                                : " ${AUDIO_ALIF_COMPONENT_TARGET})
 message(STATUS "Microphone type                        : " ${TARGET_MICS})
 message(STATUS "*******************************************************")
 
-target_compile_definitions(${AUDIO_ENSEMBLE_COMPONENT_TARGET}
+target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
         PRIVATE
         USE_${TARGET_MICS}_MICS)
 

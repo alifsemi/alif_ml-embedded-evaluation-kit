@@ -30,7 +30,7 @@ def test_max_kws_inference_times(dut: Dut):
     # Start one-shot test
     dut.write(MENU_OPT_RUN_ONCE)
 
-    # Check durations
-    expect_in_range(14.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
+    # Check durations, changed Preprocessing from 14->12 so armclang can be run with same test
+    expect_in_range(12.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
     expect_in_range(2.6, 2.8, get_time(dut, 'Inference'), 'Inference')
     expect_in_range(0.02, 0.055, get_time(dut, 'Postprocessing'), 'Postprocessing')

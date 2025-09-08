@@ -1,4 +1,4 @@
-/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+/* This file was ported to work on Alif Semiconductor devices. */
 
 /* Copyright (C) 2022 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
@@ -33,37 +33,6 @@
 #include "ethosu_driver.h"          /* Arm Ethos-U driver header */
 #include "log_macros.h"             /* Logging macros */
 
-/** Structure to maintain data cache states. */
-typedef struct _cpu_cache_state {
-    uint32_t dcache_invalidated : 1;
-    uint32_t dcache_cleaned : 1;
-} cpu_cache_state;
-
-/** Static CPU cache state object.
- * @note This logic around flipping these states is based on the driver
- *       calling the functions in this sequence:
- *
- *       Cache flush (ethosu_flush_dcache)
- *                  ↓
- *       Start inference (ethosu_inference_begin)
- *                  ↓
- *       Inference (ethosu_dev_run_command_stream)
- *                  ↓
- *       End inference (ethosu_inference_end)
- *                  ↓
- *       Cache invalidate (ethosu_dcache_invalidate)
- **/
-static cpu_cache_state s_cache_state = {.dcache_cleaned = 0, .dcache_invalidated = 0};
-
-/**
- * @brief   Gets the current CPU cache state.
- * @return  Pointer to the CPU cache state object.
- */
-static cpu_cache_state* ethosu_get_cpu_cache_state(void)
-{
-    return &s_cache_state;
-}
-
 bool __attribute__((weak)) ethosu_area_needs_flush_dcache(const uint32_t *p, size_t bytes)
 {
     UNUSED(p);
@@ -87,18 +56,17 @@ bool __attribute__((weak)) ethosu_area_needs_invalidate_dcache(const uint32_t *p
 #endif
 }
 
-void ethosu_clear_cache_states(void)
+void ethosu_flush_dcache(const uint64_t *base_addr, const size_t *base_addr_size, int num_base_addr)
 {
-    cpu_cache_state* const state = ethosu_get_cpu_cache_state();
-    trace("Clearing cache state members\n");
-    state->dcache_invalidated = 0;
-    state->dcache_cleaned     = 0;
-}
+    bool need_flush = false;
+    for (int i = 0; i < num_base_addr; i++) {
+        if (ethosu_area_needs_flush_dcache((void *)base_addr[i], base_addr_size[i])) {
+            need_flush = true;
+            break;
+        }
+    }
 
-void ethosu_flush_dcache(uint32_t *p, size_t bytes)
-{
-    cpu_cache_state* const state = ethosu_get_cpu_cache_state();
-    if (ethosu_area_needs_flush_dcache(p, bytes)) {
+    if (need_flush) {
 
         /**
          * @note We could choose to call the `SCB_CleanDCache_by_Addr` function
@@ -117,39 +85,33 @@ void ethosu_flush_dcache(uint32_t *p, size_t bytes)
          *       maintenance burden in these functions.
          */
 
-        /** Clean the cache if it hasn't been cleaned already  */
-        if (!state->dcache_cleaned) {
-            trace("Cleaning data cache\n");
-            SCB_CleanDCache();
-
-            /** Assert the cache cleaned state and clear the invalidation
-             *  state. */
-            state->dcache_cleaned     = 1;
-            state->dcache_invalidated = 0;
-        }
+        /** Clean the cache */
+        trace("Cleaning data cache\n");
+        SCB_CleanDCache();
     } else {
         __DSB();
     }
 }
 
-void ethosu_invalidate_dcache(uint32_t *p, size_t bytes)
+void ethosu_invalidate_dcache(const uint64_t *base_addr, const size_t *base_addr_size, int num_base_addr)
 {
-    cpu_cache_state* const state = ethosu_get_cpu_cache_state();
-    if (ethosu_area_needs_invalidate_dcache(p, bytes)) {
+    bool need_flush = false;
+    for (int i = 0; i < num_base_addr; i++) {
+        if (ethosu_area_needs_invalidate_dcache((void *)base_addr[i], base_addr_size[i])) {
+            need_flush = true;
+            break;
+        }
+    }
+
+    if (need_flush) {
         /**
          * See note in ethosu_flush_dcache function for why we clean the whole
          * cache instead of calling it for specific addresses.
          **/
-        if (!state->dcache_invalidated) {
-            trace("Invalidating data cache\n");
-            /* Not safe to simply invalidate without cleaning unless we know there are no write-back areas in the system */
-            SCB_CleanInvalidateDCache();
+        trace("Invalidating data cache\n");
+        /* Not safe to simply invalidate without cleaning unless we know there are no write-back areas in the system */
+        SCB_CleanInvalidateDCache();
 
-            /** Assert the cache invalidation state and clear the clean
-             *  state. */
-            state->dcache_invalidated = 1;
-            state->dcache_cleaned     = 0;
-        }
     } else {
         __DSB();
     }

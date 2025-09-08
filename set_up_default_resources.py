@@ -47,6 +47,17 @@ py3_version_minimum = (3, 10)
 # If false, install Vela package from PyPi using VELA_VERSION as the version
 INSTALL_VELA_FROM_SOURCE = False
 
+u55_macs_to_system_configs = {
+    32: "RTSS_HE_SRAM_MRAM",
+    64: "RTSS_HE_SRAM_MRAM",
+    128: "RTSS_HE_SRAM_MRAM",
+    256: "RTSS_HP_SRAM_MRAM",
+#    32: "RTSS_HE_SRAM_Only",
+#    64: "RTSS_HE_SRAM_Only",
+#    128: "RTSS_HE_SRAM_Only",
+#    256: "RTSS_HP_SRAM_Only",
+}
+
 u85_macs_to_system_configs = {
     128: "Ethos_U85_SYS_DRAM_Low",
     256: "Ethos_U85_SYS_DRAM_Low",
@@ -64,7 +75,8 @@ valid_npu_configs = NpuConfigs.create(
             processor_id="U55",
             prefix_id="H",
             memory_mode="Shared_Sram",
-            system_config="Ethos_U55_High_End_Embedded",
+#            memory_mode="Sram_Only",
+            system_config=u55_macs_to_system_configs[macs],
         ) for macs in (32, 64, 128, 256)
     ),
     *(
@@ -83,8 +95,8 @@ valid_npu_configs = NpuConfigs.create(
             macs=macs,
             processor_id="U85",
             prefix_id="Z",
-            memory_mode="Dedicated_Sram",
-            system_config=u85_macs_to_system_configs[macs]
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U85_SRAM_MRAM"
         ) for macs in (128, 256, 512, 1024, 2048)
     )
 )
@@ -92,7 +104,7 @@ valid_npu_configs = NpuConfigs.create(
 # Default NPU configurations (these are always run when the models are optimised)
 default_npu_configs = NpuConfigs.create(
     valid_npu_configs.get("ethos-u55", 128),
-    valid_npu_configs.get("ethos-u65", 256),
+    valid_npu_configs.get("ethos-u55", 256),
     valid_npu_configs.get("ethos-u85", 256),
 )
 
@@ -415,6 +427,7 @@ def run_vela(
             f"{env_activate_cmd} && vela {model} "
             + f"--accelerator-config={config.config_name} "
             + "--optimise Performance "
+#            + "--debug-force-regor "
             + f"--config {config_file} "
             + f"--memory-mode={config.memory_mode} "
             + f"--system-config={config.system_config} "
@@ -462,7 +475,7 @@ def run_vela_on_all_models(
     @param npu_config_names:    Names of NPU configurations for which to run Vela
     @param arena_cache_size:    The arena cache size
     """
-    config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
+    config_file = current_file_dir / "scripts" / "vela" / "ensemble_vela.ini"
     models = [
         Path(dirpath) / f
         for dirpath, dirnames, files in os.walk(download_dir)

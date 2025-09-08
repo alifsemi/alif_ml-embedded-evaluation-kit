@@ -14,13 +14,16 @@ def setup_resources() {
 * @param build_type Release or Debug
 * @param toolchain  Used toolchain, gcc or armclang
 */
-def build_hp(String build_type, String toolchain, String silicon_rev) {
+def build_hp(String build_type, String toolchain, String board) {
 
-    build_path = "build_${toolchain}_hp_${build_type}_rev_${silicon_rev}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class\\;alif_object_detection\\;alif_ad\\;alif_vww -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_REVISION=${silicon_rev} -DTARGET_BOARD=DevKit"
+    build_path = "build_${toolchain}_hp_${build_type}_${board}".toLowerCase()
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class\\;alif_object_detection\\;alif_ad\\;alif_vww -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_BOARD=${board}"
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
         mkdir $build_path
         pushd $build_path
         $cmake_cmd &&
@@ -30,13 +33,16 @@ def build_hp(String build_type, String toolchain, String silicon_rev) {
         exit \$exit_code"""
 }
 
-def build_he_tcm(String build_type, String toolchain, String silicon_rev) {
+def build_he_tcm(String build_type, String toolchain, String board) {
 
-    build_path = "build_${toolchain}_he_tcm_${build_type}_rev_${silicon_rev}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=ensemble -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=ensemble-RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_REVISION=${silicon_rev} -DTARGET_BOARD=DevKit -Dalif_kws_USE_APP_MENU=1"
+    build_path = "build_${toolchain}_he_tcm_${build_type}_${board}".toLowerCase()
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_BOARD=${board} -Dalif_kws_USE_APP_MENU=1"
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
         mkdir $build_path
         pushd $build_path
         $cmake_cmd &&
@@ -46,7 +52,7 @@ def build_he_tcm(String build_type, String toolchain, String silicon_rev) {
         exit \$exit_code"""
 }
 
-def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name) {
+def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name) {
     sh """#!/bin/bash -xe
         printenv NODE_NAME
         cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
@@ -65,7 +71,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
 
     def run_pytest = "\
     pytest \
-    -s \
+    -s -v -k $test_name \
     --tb=native \
     --root-logdir=pytest-logs \
     --junit-prefix=$target_binary_name \

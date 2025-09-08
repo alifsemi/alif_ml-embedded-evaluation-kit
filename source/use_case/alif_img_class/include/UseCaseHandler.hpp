@@ -1,4 +1,4 @@
-/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+/* This file was ported to work on Alif Semiconductor devices. */
 
 /* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
