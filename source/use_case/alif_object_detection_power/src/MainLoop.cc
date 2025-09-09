@@ -1,4 +1,4 @@
-/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+/* This file was ported to work on Alif Semiconductor devices. */
 
 /* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
@@ -32,6 +32,7 @@
 #include "UseCaseCommonUtils.hpp"     /* Utils functions. */
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+#include "board_utils.h"
 
 #ifdef SE_SERVICES_SUPPORT
 #include "services_lib_api.h"
@@ -51,7 +52,7 @@ namespace app {
 
 volatile bool obj_button_pressed = false;
 
-void button2_cb(unsigned int event)
+void button2_cb(uint32_t event)
 {
     (void)event;
     obj_button_pressed = true;
@@ -69,6 +70,14 @@ void MainLoop()
     if (set_power_run_profile(runprof)) {
         printf_err("Failed to set run profile\n");
     }
+    // TODO: Remove when fixed in SE. Happens with SE 107. Hopefully fixed in SE 108.
+    // ========== START of FIX =========
+    volatile uint32_t* reg;
+    // Power ON SRAM0 & 1 and enable clocks for em
+    reg = (volatile uint32_t*)(0x1a60A000 + 0x4);
+    *reg &= ~((1U << 13) | (1U << 9));
+    *reg &= ~((1U << 12) | (1U << 8));
+    // ========== END of FIX =========
 #endif
 
     BOARD_BUTTON2_Init(button2_cb);

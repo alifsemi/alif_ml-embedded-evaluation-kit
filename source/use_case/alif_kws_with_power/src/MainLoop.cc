@@ -1,4 +1,4 @@
-/* This file was ported to work on Alif Semiconductor Ensemble family of devices. */
+/* This file was ported to work on Alif Semiconductor devices. */
 
 /* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
@@ -34,6 +34,7 @@
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+#include "board_utils.h"
 
 #ifdef SE_SERVICES_SUPPORT
 extern run_profile_t default_runprof;
@@ -52,7 +53,7 @@ namespace app {
 
 volatile bool kws_button_pressed = false;
 
-void button2_cb(unsigned int event)
+void button2_cb(uint32_t event)
 {
     (void)event;
     kws_button_pressed = true;

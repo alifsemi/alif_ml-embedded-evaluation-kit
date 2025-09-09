@@ -34,7 +34,7 @@ bool hal_platform_init(void)
     }
 
     /* Initialise PMU */
-    // Commented out, called in Profiler.cc so that it is also uninitialized. This is need for Alif Ensemble chip to go power STOP mode.
+    // Commented out, called in Profiler.cc so that it is also uninitialized. This is need for Alif chip to go power STOP mode.
     //hal_pmu_init();
 
     return true;

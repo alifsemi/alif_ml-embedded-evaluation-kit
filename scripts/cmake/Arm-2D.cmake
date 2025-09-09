@@ -1,4 +1,4 @@
-# This file was ported to work on Alif Semiconductor Ensemble family of devices.
+# This file was ported to work on Alif Semiconductor devices.
 
 #  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
 #  Use, distribution and modification of this code is permitted under the
@@ -76,7 +76,7 @@ target_link_libraries(${ARM_2D_TARGET} PUBLIC
     cmsis-dsp
     rte_components
 )
-    
+
 # 6. Provide the library path for the top level CMake to use:
 set(ARM_2D_LIB   "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${ARM_2D_TARGET}.a")
 message(STATUS "ARM_2D_LIB set to be generated here: ${ARM_2D_LIB}")
