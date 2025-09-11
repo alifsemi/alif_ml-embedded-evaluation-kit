@@ -95,7 +95,7 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
 
     std::vector<executorch::runtime::Span<uint8_t>> plannedSpans; // Passed to the allocator
     const size_t numMemoryPlannedBuffers = methodMeta->num_memory_planned_buffers();
-    size_t plannedMemBeforeMark          = this->m_backendData.m_methodAllocPtr->UsedSize();
+    size_t plannedMemBeforeMark          = this->m_backendData.m_methodAllocPtr->UsedSizeCurrent();
 
     for (size_t id = 0; id < numMemoryPlannedBuffers; ++id) {
         size_t bufferSize = static_cast<size_t>(methodMeta->memory_planned_buffer_size(id).get());
@@ -108,7 +108,7 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
     }
 
     info("Total planned memory allocated: %zu bytes\n",
-         this->m_backendData.m_methodAllocPtr->UsedSize() - plannedMemBeforeMark);
+         this->m_backendData.m_methodAllocPtr->UsedSizeCurrent() - plannedMemBeforeMark);
 
     if (!this->m_backendData.m_plannedMemAllocPtr) {
         this->m_backendData.m_plannedMemAllocPtr = std::make_shared<HierarchicalAllocator>(
@@ -127,7 +127,7 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
                                             this->m_backendData.m_tmpAllocPtr.get());
     }
 
-    size_t methodMemBeforeMark = this->m_backendData.m_methodAllocPtr->UsedSize();
+    size_t methodMemBeforeMark = this->m_backendData.m_methodAllocPtr->UsedSizeCurrent();
 
     executorch::runtime::EventTracer* eventTracerPtr = nullptr;
     static auto method =
@@ -151,11 +151,11 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
     this->m_fnGetMethod = [&]() { return std::ref(method.get()); };
 
     info("Method memory allocated: %zu bytes\n",
-         this->m_backendData.m_methodAllocPtr->UsedSize() - methodMemBeforeMark);
+         this->m_backendData.m_methodAllocPtr->UsedSizeCurrent() - methodMemBeforeMark);
     info("Method %s loaded.\n", this->m_backendData.m_methodName.c_str());
 
     info("Preparing inputs...\n");
-    size_t input_membase = this->m_backendData.m_methodAllocPtr->UsedSize();
+    size_t input_membase = this->m_backendData.m_methodAllocPtr->UsedSizeCurrent();
 
     std::vector<std::pair<char*, size_t>> inputBuffers;
     if (!this->PrepareInputTensors()) {
@@ -164,7 +164,7 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
     }
 
     info("Inputs allocated: %zu bytes.\n",
-         this->m_backendData.m_methodAllocPtr->UsedSize() - input_membase);
+         this->m_backendData.m_methodAllocPtr->UsedSizeCurrent() - input_membase);
 
     std::vector<executorch::runtime::EValue> outputs(method->outputs_size());
     info("Preparing outputs; count: %zu\n", outputs.size());
@@ -238,10 +238,14 @@ void EtModel::LogInterpreterInfo()
 void EtModel::LogMemoryUsage() const
 {
     info("Total memory usage: \n");
-    info("\tMethod memory: %zu/%zu\n", this->m_backendData.m_methodAllocPtr->UsedSize(),
-                                       this->m_backendData.m_methodAllocPtr->size());
-    info("\tTemp memory:   %zu/%zu\n", this->m_backendData.m_tmpAllocPtr->UsedSize(),
-                                       this->m_backendData.m_tmpAllocPtr->size());
+    info("\tMethod memory: Used: %zu; Peak: %zu; Available: %lu\n",
+        this->m_backendData.m_methodAllocPtr->UsedSizeCurrent(),
+        this->m_backendData.m_methodAllocPtr->UsedSizePeak(),
+        this->m_backendData.m_methodAllocPtr->size());
+    info("\tTemp memory: Used: %zu; Peak: %zu; Available: %lu\n",
+        this->m_backendData.m_tmpAllocPtr->UsedSizeCurrent(),
+        this->m_backendData.m_tmpAllocPtr->UsedSizePeak(),
+        this->m_backendData.m_tmpAllocPtr->size());
 }
 
 bool EtModel::IsInited() const

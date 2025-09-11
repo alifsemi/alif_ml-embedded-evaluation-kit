@@ -33,7 +33,6 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from pathlib import Path
 from enum import Enum
-from tempfile import TemporaryDirectory
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
 from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
@@ -44,12 +43,12 @@ from scripts.py.setup.use_case import UseCase, load_use_case_resources
 from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
-VELA_VERSION = "4.3.0"
+VELA_VERSION = "d37febc1715edf0d236c2ff555739a8a9aadcf9a"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
 # If false, install Vela package from PyPi using VELA_VERSION as the version
-INSTALL_VELA_FROM_SOURCE = False
+INSTALL_VELA_FROM_SOURCE = True
 
 u85_macs_to_system_configs = {
     128: "Ethos_U85_SYS_DRAM_Low",
@@ -118,9 +117,6 @@ default_executorch_path = current_file_dir / 'dependencies' / 'executorch'
 vela_config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
 
 VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
-TOSA_URL = "https://git.gitlab.arm.com/tosa/tosa-reference-model.git"
-TOSA_VER = "70ed0b40fa831387e36abdb4f7fb9670a3464f5a"
-
 
 def get_default_npu_config_from_name(
         config_name: str, arena_cache_size: int = 0
@@ -443,14 +439,14 @@ def setup_executorch(setup_context: SetupContext):
     # Install TOSA tools:
     executorch_path = setup_context.paths_config.executorch_path
     if not is_pip_package_installed('tosa-tools', setup_context.env_activate_cmd):
-        with TemporaryDirectory() as tmpdir:
-            tosa_tools_install_script = (executorch_path /
-                                         'backends' / 'arm' / 'scripts' /
-                                         'install_reference_model.sh')
-            logging.info('Installing TOSA tools using %s', tosa_tools_install_script)
-            call_command((f'{setup_context.env_activate_cmd} && '
-                          f'{tosa_tools_install_script} {tmpdir}'),
-                         cwd=executorch_path)
+        tosa_req_file = (executorch_path / 'backends' / 'arm' /
+                         'requirements-arm-tosa.txt')
+        logging.info('Installing TOSA tools using version specified in %s',
+                        tosa_req_file)
+        call_command(('CMAKE_POLICY_VERSION_MINIMUM=3.5 BUILD_PYBIND=1 '
+                      f'{setup_context.env_activate_cmd} && '
+                      f'pip install --no-dependencies -r{tosa_req_file}'),
+                      cwd=executorch_path)
     else:
         logging.info('tosa-tools package is already installed.')
 

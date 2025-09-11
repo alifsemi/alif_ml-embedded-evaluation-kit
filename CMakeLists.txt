@@ -218,6 +218,24 @@ foreach(use_case ${USE_CASES})
         endif()
     endforeach()
 
+    # If the use case has additional library target requirements,
+    # link them here.
+    if (DEFINED ${use_case}_LINK_LIBS)
+        message(STATUS "Additional link libraries specified for ${use_case}: "
+                       "${${use_case}_LINK_LIBS}")
+
+        # For each library target, check if it exists before linking.
+        foreach(_LIB ${${use_case}_LINK_LIBS})
+            if (TARGET ${_LIB})
+                target_link_libraries(${UC_LIB_NAME} PUBLIC ${_LIB})
+            else()
+                message(STATUS "${_LIB} will not be linked. "
+                               "Target does not exist.")
+            endif()
+
+        endforeach()
+    endif()
+
     file(GLOB_RECURSE SRC_SAMPLES
             "${SAMPLES_GEN_DIR}/*.cc"
             "${SAMPLES_GEN_DIR}/*.cpp"

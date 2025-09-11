@@ -20,7 +20,7 @@
 namespace arm::app::fwk::et {
 
 EtMemoryAllocator::EtMemoryAllocator(uint32_t size, uint8_t* baseAddress) :
-    MemoryAllocator(size, baseAddress), m_used(0)
+    MemoryAllocator(size, baseAddress), m_used(0), m_peak(0)
 {}
 
 void* EtMemoryAllocator::allocate(size_t size, size_t alignment)
@@ -34,18 +34,33 @@ void* EtMemoryAllocator::allocate(size_t size, size_t alignment)
         } else {
             this->m_used = (this->m_used | (alignment - 1)) + 1 + size;
         }
+
+        if (this->m_used > this->m_peak) {
+            this->m_peak = this->m_used;
+        }
     }
     return ret;
 }
 
-size_t EtMemoryAllocator::UsedSize() const
+size_t EtMemoryAllocator::UsedSizeCurrent() const
 {
     return this->m_used;
+}
+
+size_t EtMemoryAllocator::UsedSizePeak() const
+{
+    return this->m_peak;
 }
 
 size_t EtMemoryAllocator::FreeSize() const
 {
     return (this->size() - this->m_used);
+}
+
+void EtMemoryAllocator::reset()
+{
+    MemoryAllocator::reset();
+    this->m_used = 0;
 }
 
 } /* namespace arm::app::fwk::et */

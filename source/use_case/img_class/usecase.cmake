@@ -99,6 +99,15 @@ generate_labels_code(
         OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
 )
 
+if (COMMAND generate_pte_ops_lib)
+    generate_pte_ops_lib(
+        MODEL_PATH      "${${use_case}_MODEL_PATH}"     # Path to the model PTE
+        LIB_NAME        "${use_case}_portable_ops_lib"  # Library target name
+        SELECT_OPS_LIST "")                             # Always included ops list
+
+    set(${use_case}_LINK_LIBS ${use_case}_portable_ops_lib)
+endif()
+
 # Generate model file
 generate_model_code(
     MODEL_PATH ${${use_case}_MODEL_PATH}

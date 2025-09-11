@@ -94,33 +94,6 @@ block(SCOPE_FOR VARIABLES)
     add_subdirectory(${EXECUTORCH_SRC_PATH}
         ${CMAKE_BINARY_DIR}/executorch EXCLUDE_FROM_ALL)
 
-    # Generate C++ bindings to register kernels into both PyTorch (for AOT) and
-    # Executorch (for runtime). Here select all ops in functions.yaml
-    set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
-
-    # Set up build for portable ops library.
-    include(${EXECUTORCH_SRC_PATH}/tools/cmake/Utils.cmake)
-    include(${EXECUTORCH_SRC_PATH}/tools/cmake/Codegen.cmake)
-
-    # @TODO Placeholder for experimentation - this needs to come from user.
-    set(EXECUTORCH_SELECT_OPS_LIST "aten::_softmax.out")
-    gen_selected_ops(
-        LIB_NAME "arm_portable_ops_lib"
-        OPS_SCHEMA_YAML ""
-        ROOT_OPS "${EXECUTORCH_SELECT_OPS_LIST}"
-        INCLUDE_ALL_OPS ""
-    )
-
-    generate_bindings_for_kernels(
-        LIB_NAME "arm_portable_ops_lib"
-        FUNCTIONS_YAML ${EXECUTORCH_SRC_PATH}/kernels/portable/functions.yaml
-    )
-
-    gen_operators_lib(
-        LIB_NAME "arm_portable_ops_lib"
-        KERNEL_LIBS portable_kernels
-        DEPS executorch
-    )
 
     if(EXECUTORCH_ENABLE_EVENT_TRACER)
         target_compile_options(executorch INTERFACE -DET_EVENT_TRACER_ENABLED)
@@ -141,10 +114,41 @@ if (TARGET_PLATFORM STREQUAL native)
         portable_ops_lib)
 else()
     target_link_libraries(mlek_executorch INTERFACE
-        arm_portable_ops_lib
-        cortex_m_ops_lib)
+        cortex_m_ops_lib
+        kernels_util_all_deps)
+
+    # Workaround for Arm CMSIS-NN library mistakenly expected to be placed in
+    # the BINARY_DIR for the target. This can be removed once fixed in ExecuTorch
+    # source tree - backends/cortex_m/CMakeLists.txt.
+    if (TARGET cmsis-nn)
+        get_target_property(CMSIS_NN_BIN_DIR cmsis-nn BINARY_DIR)
+
+        add_custom_target(cmsis_nn_workaround
+            COMMAND ${CMAKE_COMMAND} -E copy    # Copy file
+                $<TARGET_FILE:cmsis-nn>         # Source
+                ${CMSIS_NN_BIN_DIR}             # Destination
+            COMMENT "Copying the cmsis-nn lib to ${CMSIS_NN_BIN_DIR}"
+            DEPENDS cmsis-nn)
+
+        add_dependencies(cortex_m_ops_lib cmsis_nn_workaround)
+    endif()
 
     if (TARGET executorch_delegate_ethos_u)
+        # If Arm Ethos-U NPU driver is defined as a target, we edit its
+        # include directory paths for it to be installed as a dependency
+        # for the Arm Ethos-U NPU backend within ExecuTorch.
+        if (TARGET ethosu_core_driver AND EXECUTORCH_BUILD_ARM_BAREMETAL)
+            install(TARGETS ethosu_core_driver EXPORT ExecuTorchTargets)
+            get_target_property(_NPU_INTERFACE_INC
+                ethosu_core_driver INTERFACE_INCLUDE_DIRECTORIES)
+            set_target_properties(ethosu_core_driver
+                PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
+
+            target_include_directories(ethosu_core_driver PUBLIC
+                $<BUILD_INTERFACE:${_NPU_INTERFACE_INC}>
+                $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
+        endif()
+
         # Supress warnings from Arm Ethos-U delegate library
         target_compile_options(executorch_delegate_ethos_u PRIVATE
             -Wno-error=deprecated-declarations
@@ -165,3 +169,94 @@ endif()
 
 # Provide alias target for rest of projects to use
 add_library(meta::executorch ALIAS mlek_executorch)
+
+# Include code generation wrappers from ExecuTorch.
+set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
+include(${EXECUTORCH_SRC_PATH}/tools/cmake/Utils.cmake)
+include(${EXECUTORCH_SRC_PATH}/tools/cmake/Codegen.cmake)
+
+##############################################################################
+# This function generates a portable ops library for the PTE model file.
+# @param[in]    MODEL_PATH      path to a PTE file
+# @param[in]    LIB_NAME        output target library name.
+# @param[in]    SELECT_OPS_LIST ops list that should always be included
+##############################################################################
+function(generate_pte_ops_lib)
+
+    if (NOT EXECUTORCH_BUILD_ARM_BAREMETAL)
+        message(STATUS "Skipping custom portable ops lib generation. "
+                       "Generation of PTE specific portable ops lib "
+                       "is required only for bare-metal Arm targets.")
+        return()
+    endif()
+
+    set(oneValueArgs MODEL_PATH LIB_NAME SELECT_OPS_LIST)
+    cmake_parse_arguments(PARSED "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+    # Absolute paths for passing into python script
+    get_filename_component(ABS_MODEL_PATH ${PARSED_MODEL_PATH} ABSOLUTE)
+
+    # Ensure Python virtual environment bin location is available.
+    set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
+
+    # Override the Python executable set by ExecuTorch's Utils.cmake
+    # It expects a conda environment and sets this. We set it here
+    # for our virtual environment python to be used instead.
+    set(PYTHON_EXECUTABLE ${PYTHON})
+
+    message(STATUS "Attempting PTE ops library generation: ${PARSED_LIB_NAME}")
+    message(STATUS "    PTE file: ${PARSED_MODEL_PATH}")
+    message(STATUS "    Select ops list: ${PARSED_SELECT_OPS_LIST}")
+
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE}
+            "${EXECUTORCH_SRC_PATH}/codegen/tools/gen_oplist.py"
+            --model_file_path=${PARSED_MODEL_PATH}
+            --output_path=${CMAKE_CURRENT_BINARY_DIR}/${PARSED_LIB_NAME}-ops.yaml
+        COMMAND_ERROR_IS_FATAL  ANY
+        COMMAND_ECHO            STDOUT
+        OUTPUT_VARIABLE         OPS_YML_GEN_RESULT)
+
+    message(DEBUG "Ops report for ${PARSED_LIB_NAME}:"
+                  "${OPS_YML_GEN_RESULT}")
+
+    # Does the op list contain any aten or dim order ops? If so, we can provide
+    # the path to PTE file for ops lib gen. Otherwise, we pass in an empty argument.
+    if (OPS_YML_GEN_RESULT MATCHES "aten::" OR
+        OPS_YML_GEN_RESULT MATCHES "dim_order_ops::")
+        set(PTE_FOR_OPS_LIB ${PARSED_MODEL_PATH})
+    else()
+        message(STATUS "No aten or dim_order_ops found in ${PARSED_MODEL_PATH}")
+        set(PTE_FOR_OPS_LIB "")
+    endif()
+
+    # Generate C++ bindings to register kernels into both PyTorch (for AOT) and
+    # Executorch (for runtime). Here select all ops in functions.yaml
+    if ("${PARSED_SELECT_OPS_LIST}" STREQUAL "" AND
+        "${PTE_FOR_OPS_LIB}" STREQUAL "")
+        message(STATUS "No portable ops library needs to be generated.")
+        return()
+    endif()
+
+    gen_selected_ops(
+        LIB_NAME                "${PARSED_LIB_NAME}"
+        OPS_SCHEMA_YAML         ""
+        ROOT_OPS                "${PARSED_SELECT_OPS_LIST}"
+        INCLUDE_ALL_OPS         ""
+        OPS_FROM_MODEL          "${PTE_FOR_OPS_LIB}"
+        DTYPE_SELECTIVE_BUILD   "${EXECUTORCH_ENABLE_DTYPE_SELECTIVE_BUILD}"
+    )
+
+    generate_bindings_for_kernels(
+        LIB_NAME                "${PARSED_LIB_NAME}"
+        FUNCTIONS_YAML          "${EXECUTORCH_SRC_PATH}/kernels/portable/functions.yaml"
+        DTYPE_SELECTIVE_BUILD   "${EXECUTORCH_ENABLE_DTYPE_SELECTIVE_BUILD}"
+    )
+
+    gen_operators_lib(
+        LIB_NAME                "${PARSED_LIB_NAME}"
+        KERNEL_LIBS             portable_kernels
+        DEPS                    executorch
+        DTYPE_SELECTIVE_BUILD   "${EXECUTORCH_ENABLE_DTYPE_SELECTIVE_BUILD}"
+    )
+endfunction()

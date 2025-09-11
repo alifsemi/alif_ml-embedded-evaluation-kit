@@ -38,7 +38,13 @@ public:
      * @brief   Gets the total numbers of bytes allocated by this allocator.
      * @return  Number of bytes as `size_t`
      */
-    size_t UsedSize() const;
+    size_t UsedSizeCurrent() const;
+
+    /**
+     * @brief   Gets the peak usage, in bytes, allocated by this allocator.
+     * @return  Number of bytes as `size_t`
+     */
+    size_t UsedSizePeak() const;
 
     /**
      * @brief   Gets the total numbers of free space in this allocator's buffer.
@@ -55,8 +61,14 @@ public:
      */
     virtual void* allocate(size_t size, size_t alignment = kDefaultAlignment) override;
 
+    /**
+     * @brief   Resets the allocator.
+     */
+    virtual void reset() override;
+
 private:
     size_t m_used; /**< Number of bytes used (allocated). */
+    size_t m_peak; /**< Peak bytes used by this allocator */
 };
 } /* namespace arm::app::fwk::et */
 
