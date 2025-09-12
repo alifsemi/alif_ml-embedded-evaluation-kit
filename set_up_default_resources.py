@@ -372,20 +372,31 @@ def install_executorch(executorch_path: Path, env_activate_cmd: str) -> None:
 
 
 def optimize_executorch_model(
-        model_name: str,
+        model_name: str | Path,
         npu_config: NpuConfig,
         setup_context: SetupContext,
         output_dir: Path,
 ):
     """
     Generate an optimized .pte file for ExecuTorch
-    :param model_name:      The named of the ExecuTorch model to optimize
+    :param model_name:      Model to optimize. This can be a name of an ExecuTorch
+                            model or path to a Python script returning a tuple of
+                            `torch.nn.Module` and representative input tensor.
     :param npu_config:      The NPU config for which to optimize. If this is
                             None, a TOSA PTE file is generated for native host.
     :param setup_context:   The setup context
     :param output_dir:      The output directory
     :return:                True if optimization was skipped, False otherwise
     """
+    model_script = None
+
+    # This section sets up the script path to be passed to the aot_arm_compiler
+    # if needed. This helps with skipping PTE file generation if the model
+    # already exists by resetting the `model_name`.
+    if str(model_name).endswith('.py'):
+        model_script = model_name
+        model_name = Path(model_script).name.split('.')[0]
+
     if npu_config is not None:
         cfg = (f" --target {npu_config.config_name}"
                f" --system_config {npu_config.system_config}"
@@ -407,7 +418,7 @@ def optimize_executorch_model(
 
     call_command(
         command=(f"{setup_context.env_activate_cmd} && python3 -m examples.arm.aot_arm_compiler"
-                 f" --model_name={model_name}"
+                 f" --model_name={model_name if model_script is None else model_script}"
                  f" {cfg}"
                  f" --output {output_dir}"),
         cwd=setup_context.paths_config.executorch_path,
@@ -581,15 +592,7 @@ def optimize_executorch_models_async(
                 setup_context,
                 setup_context.paths_config.downloads_dir / use_case.name
             )
-            for executorch_model
-            in use_case.executorch_resources
-            # pylint: disable=fixme
-            # TODO: remove this when aot_arm_compiler supports .py files for U55
-            if not (
-                executorch_model.is_local_project()
-                and npu_config
-                and npu_config.processor_id == "U55"
-        )
+            for executorch_model in use_case.executorch_resources
         ]
         for use_case, npu_config
         in itertools.product(use_cases, npu_configs)
@@ -709,19 +712,12 @@ def serial_setup(
         to_optimize = itertools.product(use_cases, executorch_npu_configs)
         for use_case, npu_config in to_optimize:
             for executorch_resource in use_case.executorch_resources:
-                # pylint: disable=fixme
-                # TODO: remove this when aot_arm_compiler supports .py files for U55
-                if not (
-                        executorch_resource.is_local_project()
-                        and npu_config
-                        and npu_config.processor_id == "U55"
-                ):
-                    optimisation_skipped = optimize_executorch_model(
-                        model_name=executorch_resource.model_name,
-                        npu_config=npu_config,
-                        setup_context=setup_context,
-                        output_dir=setup_context.paths_config.downloads_dir / use_case.name
-                    ) or optimisation_skipped
+                optimisation_skipped = optimize_executorch_model(
+                    model_name=executorch_resource.model_name,
+                    npu_config=npu_config,
+                    setup_context=setup_context,
+                    output_dir=setup_context.paths_config.downloads_dir / use_case.name
+                ) or optimisation_skipped
 
     # If any optimisation was skipped, show how to regenerate:
     if optimisation_skipped:
