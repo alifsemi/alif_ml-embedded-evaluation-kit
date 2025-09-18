@@ -398,6 +398,12 @@ def optimize_executorch_model(
         model_name = Path(model_script).name.split('.')[0]
 
     if npu_config is not None:
+        # pylint: disable=fixme
+        # TODO: Remove this once Arm Ethos-U55 NPU is supported.
+        if (str(model_name).find('conformer') >=0 and npu_config.processor_id == "U55"):
+            logging.info('Conformer model is currently unsupported for %s', npu_config)
+            return False
+
         cfg = (f" --target {npu_config.config_name}"
                f" --system_config {npu_config.system_config}"
                f" --memory_mode {npu_config.memory_mode}"

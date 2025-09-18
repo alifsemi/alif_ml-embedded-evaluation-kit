@@ -17,8 +17,8 @@
 #----------------------------------------------------------------------------
 
 # Specify the ML frameworks the use case supports
-set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
-if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro;ExecuTorch")
+if (NOT ${ML_FRAMEWORK} IN_LIST ${use_case}_ML_FRAMEWORK)
     set(${use_case}_supports_${ML_FRAMEWORK} OFF)
     return()
 endif ()
@@ -80,24 +80,36 @@ generate_labels_code(
     OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
 )
 
+if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
+    USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
+        0x00200000
+        STRING)
 
-USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00200000
-    STRING)
+    if (ETHOS_U_NPU_ENABLED)
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    else()
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)
+    endif()
 
-if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
-else()
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)
+    set(EXTRA_MODEL_CODE
+        "/* Model parameters for ${use_case} */"
+        "extern const int   g_FrameLength    = 512"
+        "extern const int   g_FrameStride    = 160"
+        "extern const int   g_ctxLen         =  98"
+        "extern const float g_ScoreThreshold = ${${use_case}_MODEL_SCORE_THRESHOLD}"
+        )
+elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
+    USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
+        0x00600000 # 6 MiB of activation buffer
+        STRING)
+
+    if (ETHOS_U_NPU_ENABLED)
+        string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_model_arm_delegate_${_NPU_CFG_ID}.pte)
+    else()
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_model_arm_TOSA-1.0+INT.pte)
+    endif()
 endif()
-
-set(EXTRA_MODEL_CODE
-    "/* Model parameters for ${use_case} */"
-    "extern const int   g_FrameLength    = 512"
-    "extern const int   g_FrameStride    = 160"
-    "extern const int   g_ctxLen         =  98"
-    "extern const float g_ScoreThreshold = ${${use_case}_MODEL_SCORE_THRESHOLD}"
-    )
 
 USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH}

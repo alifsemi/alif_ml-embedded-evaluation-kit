@@ -58,6 +58,19 @@ target_link_libraries(${ML_FWK_ET_TARGET}
 target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE
     MLEK_FWK_EXECUTORCH=1)
 
+# By default, use 16 MiB of temporary allocation size. Note that
+# this may be overridden by the platform definitions.
+set(ML_FWK_TMP_MEM_SIZE "0x01000000" CACHE STRING "Temporary memory allocation size")
+
+# If the platform mandates a temporary memory location, enforce it here.
+if (DEFINED ML_FWK_TMP_MEM_BASE)
+    target_compile_definitions(${ML_FWK_ET_TARGET} PRIVATE
+        ML_FWK_TMP_MEM_BASE=${ML_FWK_TMP_MEM_BASE})
+endif()
+
+target_compile_definitions(${ML_FWK_ET_TARGET} PRIVATE
+    ML_FWK_TMP_MEM_SIZE=${ML_FWK_TMP_MEM_SIZE})
+
 # Display status:
 message(STATUS "*******************************************************")
 message(STATUS "Library: "                ${ML_FWK_ET_TARGET})

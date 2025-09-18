@@ -17,11 +17,21 @@
  */
 #include "Labels.hpp"                /* For label strings. */
 #include "UseCaseHandler.hpp"        /* Handlers for different user options. */
-#include "Wav2LetterModel.hpp"       /* Model class for running inference. */
-#include "UseCaseCommonUtils.hpp"    /* Utils functions. */
-#include "AsrClassifier.hpp"         /* Classifier. */
 #include "log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
+#include "UseCaseCommonUtils.hpp"    /* Utils functions. */
+
+/** Based on ML framework, set up the model namespace. */
+#if defined(MLEK_FWK_TFLM)
+#include "Wav2LetterModel.hpp"       /* Model class for running inference. */
+#include "AsrClassifier.hpp"         /* Classifier. */
+
+using AsrModel = arm::app::fwk::tflm::Wav2LetterModel;
+#elif defined(MLEK_FWK_EXECUTORCH)
+#include "EtModel.hpp"
+
+using AsrModel = arm::app::fwk::et::EtModel;
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
 
 namespace arm {
 namespace app {
@@ -40,7 +50,7 @@ static bool VerifyTensorDimensions(const arm::app::fwk::iface::Model& model);
 
 void MainLoop()
 {
-    arm::app::fwk::tflm::Wav2LetterModel model; /* Model wrapper object. */
+    AsrModel model; /* Model wrapper object. */
 
     arm::app::fwk::iface::MemoryRegion modelMem{arm::app::asr::GetModelPointer(),
                                                 arm::app::asr::GetModelLen()};
@@ -56,6 +66,7 @@ void MainLoop()
         return;
     }
 
+#if defined(MLEK_FWK_TFLM)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
     std::vector <std::string> labels;
@@ -78,6 +89,20 @@ void MainLoop()
     caseContext.Set<arm::app::AsrClassifier&>("classifier", classifier);
 
     bool executionSuccessful = ClassifyAudioHandler(caseContext);
+
+#elif defined(MLEK_FWK_EXECUTORCH)
+    /**
+     * For ExecuTorch, the pre- and post-processing have not yet been
+     * implemented. We only validate the functional flow for inference
+     * here for now.
+     * @TODO: Remove this conditional check once the end to end pipeline
+     * is ready.
+     **/
+    arm::app::Profiler profiler{"asr"};
+    info("Running test inference...\n");
+    bool executionSuccessful = RunInference(model, profiler);
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+
     info("Main loop terminated %s.\n",
         executionSuccessful ? "successfully" : "with failure");
 }

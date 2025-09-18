@@ -22,13 +22,18 @@
 
 #include <memory>
 
-/**
- * @TODO: Remove this bss mem from here. It should be passed into the init function
- *        like other memory regions.
- */
-constexpr size_t sTmpAllocationPoolSz = 0x200000; /**< 2 MiB of temp allocation pool size. */
+#if !(defined(ML_FWK_TMP_MEM_SIZE))
+#error "ML_FWK_TMP_MEM_SIZE should be defined."
+#endif /* ML_FWK_TMP_MEM_SIZE */
+
+constexpr size_t sTmpAllocationPoolSz = ML_FWK_TMP_MEM_SIZE; /**< Temp allocation pool size. */
+
+#if !(defined(ML_FWK_TMP_MEM_BASE))
 static uint8_t __attribute__((aligned(16), section("ifm")))
     sTmpAllocationPool[sTmpAllocationPoolSz]; /**< temp allocation buffer */
+#else /* !(defined(ML_FWK_TMP_MEM_BASE)) */
+static uint8_t* sTmpAllocationPool = reinterpret_cast<uint8_t *>(ML_FWK_TMP_MEM_BASE);
+#endif /* !(defined(ML_FWK_TMP_MEM_BASE)) */
 
 namespace arm::app::fwk::et {
 
@@ -86,7 +91,8 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
         return false;
     }
 
-    info("Setting up method allocator pool. Size: %zu bytes.\n", computeBuffer.size);
+    info("Setting up method allocator pool. Base: %p, size: %zu bytes.\n",
+         computeBuffer.data, computeBuffer.size);
 
     if (!this->m_backendData.m_methodAllocPtr) {
         this->m_backendData.m_methodAllocPtr =
@@ -116,6 +122,9 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
     }
 
     if (!this->m_backendData.m_tmpAllocPtr) {
+         info("Setting up temporary allocator pool. Base: %p, size: %zu bytes.\n",
+            sTmpAllocationPool, sTmpAllocationPoolSz);
+
         this->m_backendData.m_tmpAllocPtr =
             std::make_shared<EtMemoryAllocator>(sTmpAllocationPoolSz, sTmpAllocationPool);
     }

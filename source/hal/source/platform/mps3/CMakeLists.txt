@@ -85,7 +85,9 @@ set(DYNAMIC_IFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved fo
 math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
-
+math(EXPR TMP_BASE      "${DYNAMIC_OFM_BASE} + ${DYNAMIC_OFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(ML_FWK_TMP_MEM_BASE "${TMP_BASE}" CACHE STRING "Region used by ML framework for any temporary allocations")
+set(ML_FWK_TMP_MEM_SIZE "0x02000000" CACHE STRING "Buffer size for ML framework's temporary allocations")
 
 # 2. Create static library
 add_library(${PLATFORM_DRIVERS_TARGET} STATIC)

@@ -40,7 +40,9 @@
     ],
     "executorch_resources": [
       {
-        "model": "w2l"
+        "model": "conformer_model.py",
+        "requirements": "requirements.txt",
+        "path": "asr/models"
       }
     ]
   },

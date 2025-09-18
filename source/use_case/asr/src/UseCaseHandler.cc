@@ -15,6 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if defined(MLEK_FWK_TFLM)
+
 #include "UseCaseHandler.hpp"
 
 #include "AsrClassifier.hpp"
@@ -240,3 +242,6 @@ namespace app {
 
 } /* namespace app */
 } /* namespace arm */
+
+#endif /* defined(MLEK_FWK_TFLM) */
+
