@@ -119,6 +119,7 @@ vela_config_file = current_file_dir / "scripts" / "vela" / "default_vela.ini"
 
 VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
 
+
 def get_default_npu_config_from_name(
         config_name: str, arena_cache_size: int = 0
 ) -> typing.Optional[NpuConfig]:
@@ -166,17 +167,15 @@ def initialize_use_case_resources_directory(
         if err.errno == errno.EEXIST:
             # The usecase_name download dir exist.
             if check_clean_folder and not setup_script_hash_verified:
-                for idx, metadata_uc_url_prefix in enumerate(
-                        [
-                            f
-                            for f in metadata["resources_info"]
-                            if f["name"] == use_case.name
-                        ][0]["url_prefix"]
-                ):
-                    if metadata_uc_url_prefix != use_case.url_prefix[idx]:
-                        logging.info("Removing %s resources.", use_case.name)
-                        remove_tree_dir(use_case_resources_dir)
-                        break
+                for resources_info in metadata.get("resources_info", []):
+                    use_case_info = info[0] if len(info := [
+                        f for f in resources_info if f["name"] == use_case.name
+                    ]) > 0 else {}
+                    for i, url_prefix in enumerate(use_case_info.get("url_prefix", [])):
+                        if url_prefix != use_case.url_prefix[i]:
+                            logging.info("Removing %s resources.", use_case.name)
+                            remove_tree_dir(use_case_resources_dir)
+                            break
         elif err.errno != errno.EEXIST:
             logging.error("Error creating %s directory.", use_case.name)
             raise
@@ -400,7 +399,7 @@ def optimize_executorch_model(
     if npu_config is not None:
         # pylint: disable=fixme
         # TODO: Remove this once Arm Ethos-U55 NPU is supported.
-        if (str(model_name).find('conformer') >=0 and npu_config.processor_id == "U55"):
+        if (str(model_name).find('conformer') >= 0 and npu_config.processor_id == "U55"):
             logging.info('Conformer model is currently unsupported for %s', npu_config)
             return False
 
@@ -448,12 +447,12 @@ def setup_executorch(setup_context: SetupContext):
     # Install TOSA tools:
     executorch_path = setup_context.paths_config.executorch_path
     if not is_pip_package_installed('tosa-tools', setup_context.env_activate_cmd):
-        tosa_req_file = executorch_path/'backends'/'arm'/'requirements-arm-tosa.txt'
+        tosa_req_file = executorch_path / 'backends' / 'arm' / 'requirements-arm-tosa.txt'
         logging.info('Installing TOSA tools using version specified in %s',
                      tosa_req_file)
         call_command(('CMAKE_POLICY_VERSION_MINIMUM=3.5 BUILD_PYBIND=1 '
-                     f'{setup_context.env_activate_cmd} && '
-                     f'pip install --no-dependencies -r{tosa_req_file}'),
+                      f'{setup_context.env_activate_cmd} && '
+                      f'pip install --no-dependencies -r{tosa_req_file}'),
                      cwd=executorch_path)
     else:
         logging.info('tosa-tools package is already installed.')
@@ -463,16 +462,24 @@ def setup_executorch(setup_context: SetupContext):
         install_executorch(executorch_path, setup_context.env_activate_cmd)
 
 
-def setup_vela(env_activate_cmd: str):
+def setup_vela(
+        env_activate_cmd: str,
+        parallel: int
+):
     """
     Install Vela into the Python virtual environment
     :param env_activate_cmd:    The command for activating the Python virtual environment
+    :param parallel:            Number of threads used to build Vela (only used when
+                                `INSTALL_VELA_FROM_SOURCE` is set to `True`)
     """
     if INSTALL_VELA_FROM_SOURCE:
         install_pip_package_if_needed(
             f"git+{VELA_URL}@{VELA_VERSION}",
             env_activate_cmd,
-            installed_package_name="ethos-u-vela"
+            installed_package_name="ethos-u-vela",
+            environment={
+                "CMAKE_BUILD_PARALLEL_LEVEL": parallel,
+            },
         )
     else:
         install_pip_package_if_needed(
@@ -778,7 +785,7 @@ def set_up_resources(
         paths_config.additional_requirements_file
     )
 
-    setup_vela(context.env_activate_cmd)
+    setup_vela(context.env_activate_cmd, setup_config.parallel)
 
     if setup_config.set_up_executorch:
         setup_executorch(context)

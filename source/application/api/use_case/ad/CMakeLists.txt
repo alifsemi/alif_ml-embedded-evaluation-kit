@@ -28,8 +28,7 @@ project(${AD_API_TARGET}
 # Create static library
 add_library(${AD_API_TARGET} STATIC
     src/AdProcessing.cc
-    src/AdMelSpectrogram.cc
-    src/MelSpectrogram.cc)
+    src/AdMelSpectrogram.cc)
 
 target_include_directories(${AD_API_TARGET} PUBLIC include)
 

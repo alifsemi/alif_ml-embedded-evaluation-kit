@@ -243,13 +243,6 @@ foreach(use_case ${USE_CASES})
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${SRC_SAMPLES})
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
-
-    # ExecuTorch doesn't have tests enabled yet.
-    # TODO: Remove once they are.
-    if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK} AND TARGET_PLATFORM STREQUAL native)
-        continue()
-    endif()
-
     platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
 endforeach()
 

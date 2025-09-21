@@ -27,11 +27,14 @@ project(${ASR_API_TARGET}
 
 # Create static library
 add_library(${ASR_API_TARGET} STATIC
+        src/AsrClassifier.cc
+        src/ConformerMelSpectrogram.cc
+        src/ConformerProcessing.cc
+        src/OutputDecode.cc
+        src/Wav2LetterMfcc.cc
         src/Wav2LetterPreprocess.cc
         src/Wav2LetterPostprocess.cc
-        src/Wav2LetterMfcc.cc
-        src/AsrClassifier.cc
-        src/OutputDecode.cc)
+)
 
 target_include_directories(${ASR_API_TARGET} PUBLIC include)
 

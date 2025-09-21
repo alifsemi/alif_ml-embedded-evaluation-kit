@@ -71,11 +71,10 @@ function(platform_custom_post_build)
 
     # Add tests only if they exists for the usecase
     if (NOT ${TEST_SRC_USE_CASE} STREQUAL "")
-
-        set(TEST_RESOURCES_INCLUDE
-                "${TEST_SRCS}/utils/"
-                "${TEST_SRC_USE_CASE}/${use_case}/include/"
-                )
+        if (NOT ${use_case}_supports_${ML_FRAMEWORK})
+            message(STATUS "Use case ${use_case} does not support ${ML_FRAMEWORK} - skipping tests.")
+            return()
+        endif ()
 
         # Define Test sources and new target to run unit tests
         file(GLOB_RECURSE TEST_SOURCES
@@ -89,7 +88,38 @@ function(platform_custom_post_build)
                 "${TEST_SRC_USE_CASE}/${use_case}/**/*.cpp"
                 "${TEST_SRC_USE_CASE}/${use_case}/**/*.cc"
                 "${TEST_SRC_USE_CASE}/${use_case}/**/*.c"
-                )
+        )
+
+        # Exclude all ML framework-specific sources until we determine the ones to include
+        list(FILTER TEST_SOURCES EXCLUDE REGEX "^${TEST_SRC_USE_CASE}\/${use_case}\/(tflm|executorch)\/.*$")
+
+        set(FWK_TEST_SOURCES_DIR "")
+        if (ML_FRAMEWORK STREQUAL "TensorFlowLiteMicro")
+            set(FWK_TEST_SOURCES_DIR "tflm")
+        elseif (ML_FRAMEWORK STREQUAL "ExecuTorch")
+            set(FWK_TEST_SOURCES_DIR "executorch")
+        else ()
+            message(FATAL_ERROR "Invalid ML_FRAMEWORK value: ${ML_FRAMEWORK}")
+        endif ()
+
+        # Add sources for the specified ML framework
+        file(GLOB_RECURSE FWK_TEST_SOURCES
+            "${TEST_SRCS}/fwk/${FWK_TEST_SOURCES_DIR}/*.cpp"
+            "${TEST_SRCS}/fwk/${FWK_TEST_SOURCES_DIR}/*.cc"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/*.cpp"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/*.cc"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/*.c"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/**/*.cpp"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/**/*.cc"
+            "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/**/*.c"
+        )
+        list(APPEND TEST_SOURCES ${FWK_TEST_SOURCES})
+
+        set(TEST_RESOURCES_INCLUDE
+                "${TEST_SRCS}/utils/"
+                "${TEST_SRC_USE_CASE}/${use_case}/include/"
+                "${TEST_SRC_USE_CASE}/${use_case}/${FWK_TEST_SOURCES_DIR}/include/"
+        )
 
         set(TEST_SRC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/src)
         set(TEST_INC_GEN_DIR ${CMAKE_BINARY_DIR}/generated/${use_case}/tests/include)

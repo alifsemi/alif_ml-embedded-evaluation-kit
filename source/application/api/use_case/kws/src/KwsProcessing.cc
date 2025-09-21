@@ -38,7 +38,7 @@ namespace app {
                 (this->m_mfccFrameLength - this->m_mfccFrameStride);
 
         /* Creating an MFCC feature sliding window for the data required for 1 inference. */
-        this->m_mfccSlidingWindow = audio::SlidingWindow<const int16_t>(nullptr, this->m_audioDataWindowSize,
+        this->m_mfccSlidingWindow = audio::SlidingWindow<const int16_t>(this->m_audioDataWindowSize,
                 this->m_mfccFrameLength, this->m_mfccFrameStride);
 
         /* For longer audio clips we choose to move by half the audio window size

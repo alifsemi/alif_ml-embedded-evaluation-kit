@@ -42,6 +42,7 @@ target_include_directories(${COMMON_UC_UTILS_TARGET} PUBLIC include)
 target_sources(${COMMON_UC_UTILS_TARGET} PRIVATE
     source/Classifier.cc
     source/ImageUtils.cc
+    source/MelSpectrogram.cc
     source/Mfcc.cc)
 
 # Link time library targets:

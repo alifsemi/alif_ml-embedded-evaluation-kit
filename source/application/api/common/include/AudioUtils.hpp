@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,13 +37,32 @@ namespace audio {
          * @param[in] windowSize   Sliding window size in T type wise elements.
          * @param[in] stride       Stride size in T type wise elements.
          */
-        SlidingWindow(T *data, size_t dataSize,
-                      size_t windowSize, size_t stride) {
-            m_start = data;
-            m_dataSize = dataSize;
-            m_size = windowSize;
-            m_stride = stride;
-        }
+        SlidingWindow(T *data, size_t dataSize, size_t windowSize, size_t stride)
+            : m_start(data),
+              m_dataSize(dataSize),
+              m_windowSize(windowSize),
+              m_stride(stride)
+        {}
+
+        /**
+         * @brief     Creates the window slider through the given data.
+         *
+         * @param[in] dataSize     Size in T type elements wise.
+         * @param[in] windowSize   Sliding window size in T type wise elements.
+         * @param[in] stride       Stride size in T type wise elements.
+         */
+        SlidingWindow(size_t dataSize, size_t windowSize, size_t stride) :
+            SlidingWindow(nullptr, dataSize, windowSize, stride) 
+        {}
+
+        /**
+         * @brief     Creates the window slider through the given data.
+         *
+         * @param[in] windowSize   Sliding window size in T type wise elements.
+         * @param[in] stride       Stride size in T type wise elements.
+         */
+        SlidingWindow(size_t windowSize, size_t stride) :
+            SlidingWindow(nullptr, 0, windowSize, stride) {}
 
         SlidingWindow() = default;
 
@@ -56,9 +76,8 @@ namespace audio {
             if (HasNext()) {
                 m_count++;
                 return m_start + Index() * m_stride;
-            } else {
-                return nullptr;
             }
+            return nullptr;
         }
 
         /**
@@ -66,7 +85,7 @@ namespace audio {
          * @return true if next data portion is available.
          */
         virtual bool HasNext() {
-            return m_size + m_count * m_stride <= m_dataSize;
+            return m_windowSize + m_count * m_stride <= m_dataSize;
         }
 
         /**
@@ -87,11 +106,22 @@ namespace audio {
         }
 
         /**
+         * @brief     Resets the slider to the start of the new data.
+         * @param[in] newStart   Pointer to the new data to slide through.
+         * @param[in] dataSize   Size in T type elements wise.
+         */
+        virtual void Reset(T *newStart, size_t dataSize) {
+            m_start = newStart;
+            m_dataSize = dataSize;
+            Reset();
+        }
+
+        /**
          * @brief  Gets current index of the sliding window.
          * @return Current position of the sliding window in number of strides.
          */
         size_t Index() {
-            return m_count == 0? 0: m_count - 1;
+            return m_count == 0 ? 0 : m_count - 1;
         }
 
         /**
@@ -101,7 +131,7 @@ namespace audio {
          * @return Index from the start of the data where the next sliding window will begin.
          */
         virtual uint32_t NextWindowStartIndex() {
-            return m_count == 0? 0: ((m_count) * m_stride);
+            return m_count == 0 ? 0: m_count * m_stride;
         }
 
         /**
@@ -118,17 +148,17 @@ namespace audio {
          * @return Maximum number of whole strides.
          */
          size_t TotalStrides() {
-            if (m_size > m_dataSize) {
+            if (m_windowSize > m_dataSize) {
                 return 0;
             }
-            return ((m_dataSize - m_size)/m_stride);
+            return (m_dataSize - m_windowSize) / m_stride;
         }
 
 
     protected:
         T *m_start = nullptr;
         size_t m_dataSize = 0;
-        size_t m_size = 0;
+        size_t m_windowSize = 0;
         size_t m_stride = 0;
         size_t m_count = 0;
     };
@@ -147,7 +177,7 @@ namespace audio {
          * @return true if next data portion is available.
          */
         bool HasNext() {
-            return this->m_count < 1 + this->FractionalTotalStrides() && (this->NextWindowStartIndex() < this->m_dataSize);
+            return this->m_count < 1 + this->FractionalTotalStrides() && this->NextWindowStartIndex() < this->m_dataSize;
         }
 
         /**
@@ -156,15 +186,12 @@ namespace audio {
         * @return Number of strides to cover all data.
         */
         float FractionalTotalStrides() {
-            if (this->m_dataSize < this->m_size) {
+            if (this->m_dataSize < this->m_windowSize) {
                 return 0;
-            } else {
-                return ((this->m_dataSize - this->m_size) / static_cast<float>(this->m_stride));
             }
+            return (this->m_dataSize - this->m_windowSize) / static_cast<float>(this->m_stride);
         }
     };
-
-
 } /* namespace audio */
 } /* namespace app */
 } /* namespace arm */

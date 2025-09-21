@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@
 
 #include "PlatformMath.hpp"
 
+#include <cfloat>
 #include <vector>
 #include <cstdint>
 #include <cmath>
@@ -40,12 +41,13 @@ namespace audio {
         uint32_t    m_frameLen;
         uint32_t    m_frameLenPadded;
         bool        m_useHtkMethod;
+        float       m_melEnergyMin;
 
         /** @brief  Constructor */
         MfccParams(float samplingFreq, uint32_t numFbankBins,
                    float melLoFreq, float melHiFreq,
                    uint32_t numMfccFeats, uint32_t frameLen,
-                   bool useHtkMethod);
+                   bool useHtkMethod, float melEnergyMin = FLT_MIN);
 
         MfccParams()  = delete;
 

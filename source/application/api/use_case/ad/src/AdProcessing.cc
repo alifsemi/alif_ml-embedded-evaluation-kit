@@ -64,7 +64,6 @@ namespace app {
         /* Creating a Mel Spectrogram sliding window for the data required for 1 inference.
          * "resizing" done here by multiplying stride by resize scale. */
         this->m_melWindowSlider = audio::SlidingWindow<const int16_t>(
-            nullptr, /* to be populated later. */
             this->m_audioDataWindowSize,
             melSpectrogramFrameLen,
             melSpectrogramFrameStride * this->m_inputResizeScale);

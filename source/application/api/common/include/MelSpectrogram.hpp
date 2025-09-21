@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,7 @@
 #include <cmath>
 #include <limits>
 #include <string>
+#include <cfloat>
 
 namespace arm {
 namespace app {
@@ -37,13 +39,14 @@ namespace audio {
         float       m_melLoFreq;
         float       m_melHiFreq;
         uint32_t    m_frameLen;
-        uint32_t    m_frameLenPadded;
         bool        m_useHtkMethod;
+        float       m_melEnergyMin;
 
         /** @brief  Constructor */
         MelSpecParams(const float samplingFreq, const uint32_t numFbankBins,
                       const float melLoFreq, const float melHiFreq,
-                      const uint32_t frameLen, const bool useHtkMethod);
+                      const uint32_t frameLen, const bool useHtkMethod,
+                      const float melEnergyMin = FLT_MIN);
 
         MelSpecParams()  = delete;
         ~MelSpecParams() = default;
@@ -67,10 +70,11 @@ namespace audio {
         *               audio data e.g. 640 samples.
         * @param[in]    audioData       Vector of audio samples to calculate
         *               features for.
-        * @param[in]    trainingMean    Value to subtract from the the computed mel spectrogram, default 0.
+        * @param[in]    trainingMean    Value to subtract from the computed mel spectrogram, default 0.
         * @return       Vector of extracted Mel Spectrogram features.
         **/
-        std::vector<float> ComputeMelSpec(const std::vector<int16_t>& audioData, float trainingMean = 0);
+        template <typename T>
+        std::vector<float> ComputeMelSpec(const std::vector<T>& audioData, float trainingMean = 0);
 
         /**
          * @brief       Constructor
@@ -130,8 +134,7 @@ namespace audio {
          *                            used for calculation
          * @return      Mel transformed frequency in floating point
          **/
-        static float MelScale(const float    freq,
-                              const bool     useHTKMethod = true);
+        virtual float MelScale(const float freq, const bool useHTKMethod = true);
 
         /**
          * @brief       Inverse Mel transform - convert MEL warped frequency
@@ -141,8 +144,7 @@ namespace audio {
          *                            used for calculation
          * @return      Real world frequency in floating point
          **/
-        static float InverseMelScale(const float melFreq,
-                                     const bool  useHTKMethod = true);
+        virtual float InverseMelScale(const float melFreq, const bool  useHTKMethod = true);
 
         /**
          * @brief       Populates MEL energies after applying the MEL filter
@@ -181,7 +183,7 @@ namespace audio {
          * @param[in]   rightMel     high Mel frequency value
          * @param[in]   useHTKMethod bool to signal if HTK method is to be
          *                           used for calculation
-         * @return      Return float value to be applied 
+         * @return      Return float value to be applied
          *              when populating the filter bank.
          */
         virtual float GetMelFilterBankNormaliser(
@@ -189,17 +191,33 @@ namespace audio {
                 const float&   rightMel,
                 const bool     useHTKMethod);
 
-    private:
+        /**
+         * @brief       Returns a floating point value for the given input
+         * @tparam      T   input data type.
+         * @return      floating point equivalent (value is unmodified if
+         *              it is already in floating point). For integer values
+         *              the value is normalised.
+         */
+        template <typename T> float ToFloat(T input);
+
+        /**
+         * @brief           Convert a FFT value to a mel energy
+         * @param fftValue  FFT value
+         * @return          Mel energy
+         */
+        virtual float MelEnergy(float fftValue);
+
         MelSpecParams                   m_params;
         std::vector<float>              m_frame;
+        uint32_t                        m_frameLenPadded;
         std::vector<float>              m_buffer;
         std::vector<float>              m_melEnergies;
         std::vector<float>              m_windowFunc;
         std::vector<std::vector<float>> m_melFilterBank;
-        std::vector<uint32_t>            m_filterBankFilterFirst;
-        std::vector<uint32_t>            m_filterBankFilterLast;
+        std::vector<uint32_t>           m_filterBankFilterFirst;
+        std::vector<uint32_t>           m_filterBankFilterLast;
         bool                            m_filterBankInitialised;
-        arm::app::math::FftInstance     m_fftInstance;
+        math::FftInstance               m_fftInstance;
 
         /**
          * @brief       Initialises the filter banks.
@@ -217,7 +235,7 @@ namespace audio {
          * @brief       Create mel filter banks for Mel Spectrogram calculation.
          * @return      2D vector of floats
          **/
-        std::vector<std::vector<float>> CreateMelFilterBank();
+        virtual std::vector<std::vector<float>> CreateMelFilterBank();
 
         /**
          * @brief       Computes the magnitude from an interleaved complex array
