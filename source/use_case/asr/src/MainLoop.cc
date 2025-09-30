@@ -101,6 +101,7 @@ void MainLoop()
     arm::app::Profiler profiler{"asr"};
     info("Running test inference...\n");
     bool executionSuccessful = RunInference(model, profiler);
+    profiler.PrintProfilingResult();
 #endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
 
     info("Main loop terminated %s.\n",

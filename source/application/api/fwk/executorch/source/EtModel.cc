@@ -247,11 +247,11 @@ void EtModel::LogInterpreterInfo()
 void EtModel::LogMemoryUsage() const
 {
     info("Total memory usage: \n");
-    info("\tMethod memory: Used: %zu; Peak: %zu; Available: %lu\n",
+    info("\tMethod memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
         this->m_backendData.m_methodAllocPtr->UsedSizeCurrent(),
         this->m_backendData.m_methodAllocPtr->UsedSizePeak(),
         this->m_backendData.m_methodAllocPtr->size());
-    info("\tTemp memory: Used: %zu; Peak: %zu; Available: %lu\n",
+    info("\tTemp memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
         this->m_backendData.m_tmpAllocPtr->UsedSizeCurrent(),
         this->m_backendData.m_tmpAllocPtr->UsedSizePeak(),
         this->m_backendData.m_tmpAllocPtr->size());

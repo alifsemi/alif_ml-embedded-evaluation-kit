@@ -43,7 +43,7 @@ from scripts.py.setup.use_case import UseCase, load_use_case_resources
 from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
-VELA_VERSION = "d37febc1715edf0d236c2ff555739a8a9aadcf9a"
+VELA_VERSION = "0c6f872974630c061c4de5a90aa3a8e15e04f16f"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
