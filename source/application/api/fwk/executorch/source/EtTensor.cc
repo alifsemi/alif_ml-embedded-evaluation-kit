@@ -52,6 +52,8 @@ iface::TensorType EtTensor::Type()
         return iface::TensorType::INT8;
     case executorch::aten::ScalarType::QUInt8:
         return iface::TensorType::UINT8;
+    case executorch::aten::ScalarType::Int:
+        return iface::TensorType::INT32;
     case executorch::aten::ScalarType::Float:
         return iface::TensorType::FP32;
     default:

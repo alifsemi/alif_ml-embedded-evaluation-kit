@@ -244,4 +244,3 @@ namespace app {
 } /* namespace arm */
 
 #endif /* defined(MLEK_FWK_TFLM) */
-

@@ -91,6 +91,11 @@ void __attribute__((noreturn)) RETARGET(_exit)(int return_code)
     while (1) {}
 }
 
+void __attribute__((constructor(101))) _retarget_init(void)
+{
+    UartStdOutInit();
+}
+
 /*
  ********************************************************************
  *        Functions for Arm Compiler and GNU toolchains             *

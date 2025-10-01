@@ -30,9 +30,15 @@ list(APPEND ${use_case}_API_LIST "asr")
 
 set_input_file_path_user_option(".wav" ${use_case})
 
-USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_wav2letter.txt
-    FILEPATH)
+if (${ML_FRAMEWORK} STREQUAL "ExecuTorch")
+    USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/librispeech_sp.pieces
+        FILEPATH)
+else ()
+    USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_wav2letter.txt
+        FILEPATH)
+endif ()
 
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
     16000
@@ -100,7 +106,7 @@ if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
         )
 elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
     USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-        0x00600000 # 6 MiB of activation buffer
+        0x00200000 # 2 MiB of activation buffer
         STRING)
 
     if (ETHOS_U_NPU_ENABLED)
@@ -109,6 +115,13 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
     else()
         set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_model_arm_TOSA-1.0+INT.pte)
     endif()
+
+    set(EXTRA_MODEL_CODE
+        "/* Model parameters for ${use_case} */"
+        "extern const int   g_melSpecWindowSize = 512"
+        "extern const int   g_melSpecHopSize    = 160"
+        "extern const int   g_chunkSize         = 1500"
+        )
 endif()
 
 USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."

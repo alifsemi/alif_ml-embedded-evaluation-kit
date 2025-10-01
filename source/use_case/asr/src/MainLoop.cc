@@ -28,9 +28,9 @@
 
 using AsrModel = arm::app::fwk::tflm::Wav2LetterModel;
 #elif defined(MLEK_FWK_EXECUTORCH)
-#include "EtModel.hpp"
+#include "ConformerModel.hpp"
 
-using AsrModel = arm::app::fwk::et::EtModel;
+using AsrModel = arm::app::fwk::et::ConformerModel;
 #endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
 
 namespace arm {
@@ -61,48 +61,40 @@ void MainLoop()
     if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
-    } else if (!VerifyTensorDimensions(model)) {
+    }
+
+    if (!VerifyTensorDimensions(model)) {
         printf_err("Model's input or output dimension verification failed\n");
         return;
     }
-
-#if defined(MLEK_FWK_TFLM)
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
     std::vector <std::string> labels;
     GetLabelsVector(labels);
 
+    arm::app::Profiler profiler{"asr"};
+
+#if defined(MLEK_FWK_TFLM)
     arm::app::AsrClassifier classifier{
         arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
         arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
         arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
         arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* Classifier wrapper object. */
-
-    arm::app::Profiler profiler{"asr"};
-    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<uint32_t>("frameLength", arm::app::asr::g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", arm::app::asr::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::asr::g_ScoreThreshold);  /* Score threshold. */
     caseContext.Set<uint32_t>("ctxLen", arm::app::asr::g_ctxLen);  /* Left and right context length (MFCC feat vectors). */
-    caseContext.Set<const std::vector <std::string>&>("labels", labels);
     caseContext.Set<arm::app::AsrClassifier&>("classifier", classifier);
+#elif defined(MLEK_FWK_EXECUTORCH)
+    caseContext.Set<uint32_t>("melSpecWindowSize", arm::app::asr::g_melSpecWindowSize);
+    caseContext.Set<uint32_t>("melSpecHopSize", arm::app::asr::g_melSpecHopSize);
+    caseContext.Set<uint32_t>("chunkSize", arm::app::asr::g_chunkSize);
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+    caseContext.Set<arm::app::Profiler&>("profiler", profiler);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
+    caseContext.Set<const std::vector <std::string>&>("labels", labels);
 
     bool executionSuccessful = ClassifyAudioHandler(caseContext);
-
-#elif defined(MLEK_FWK_EXECUTORCH)
-    /**
-     * For ExecuTorch, the pre- and post-processing have not yet been
-     * implemented. We only validate the functional flow for inference
-     * here for now.
-     * @TODO: Remove this conditional check once the end to end pipeline
-     * is ready.
-     **/
-    arm::app::Profiler profiler{"asr"};
-    info("Running test inference...\n");
-    bool executionSuccessful = RunInference(model, profiler);
-    profiler.PrintProfilingResult();
-#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
 
     info("Main loop terminated %s.\n",
         executionSuccessful ? "successfully" : "with failure");
