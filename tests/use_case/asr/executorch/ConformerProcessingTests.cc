@@ -19,7 +19,9 @@
 #include <catch.hpp>
 #include <cstdio>
 #include <filesystem>
+#include <map>
 
+#include "ConformerLogitsFixtures.hpp"
 #include "ConformerMelSpecFixtures.hpp"
 #include "ConformerProcessing.hpp"
 #include "EtTensor.hpp"
@@ -28,13 +30,38 @@
 
 std::shared_ptr<arm::app::fwk::et::EtTensor> CreateTestTensor(
     executorch::runtime::testing::TensorFactory<executorch::aten::ScalarType::Float>* tensorFactory,
-    const std::vector<int32_t>& shape)
+    const std::vector<int32_t>& shape
+)
 {
     auto tensor = tensorFactory->zeros(shape);
     return std::make_shared<arm::app::fwk::et::EtTensor>(arm::app::fwk::et::EtTensor(tensor));
 }
 
-TEST_CASE("Conformer processing")
+template <std::size_t DIMS>
+std::shared_ptr<arm::app::fwk::et::EtTensor> CreateTestTensor(
+    executorch::runtime::testing::TensorFactory<executorch::aten::ScalarType::Float>* tensorFactory,
+    const std::array<size_t, DIMS>& shape,
+    const float* data,
+    const size_t dataSize
+)
+{
+    const size_t shapeProduct = std::accumulate(
+        shape.begin(),
+        shape.end(),
+        1,
+        std::multiplies<size_t>()
+    );
+    REQUIRE(dataSize <= shapeProduct);
+
+    auto sizes = std::vector<int32_t>(shape.begin(), shape.end());
+    auto tensor = tensorFactory->zeros(sizes);
+    auto etTensor =
+        std::make_shared<arm::app::fwk::et::EtTensor>(arm::app::fwk::et::EtTensor(tensor));
+    memcpy(etTensor->GetData(), data, dataSize * sizeof(float));
+    return etTensor;
+}
+
+TEST_CASE("Conformer pre-processing")
 {
     auto tensorFactory =
         executorch::runtime::testing::TensorFactory<executorch::aten::ScalarType::Float>();
@@ -87,5 +114,84 @@ TEST_CASE("Conformer processing")
 
         float actualChunkSize = *static_cast<float*>(inputTensorChunkSize->GetData());
         REQUIRE(actualChunkSize == static_cast<float>(chunkSize));
+    }
+}
+
+TEST_CASE("Conformer post-processing")
+{
+    SECTION("Arg max 1D")
+    {
+        auto fixtures = std::map<std::vector<float>, uint32_t>{
+            {{0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2, 0.1}, 4},
+            {{0.4, 0.5, 0.5, 0.5, 0.5, 0.5}, 1},
+            {{-0.4, -0.5, -0.5, -0.5, -0.5, -0.5}, 0},
+            {{-0.4, -0.2, 0.5, -0.5}, 2}
+        };
+
+        for (const auto& fixture : fixtures) {
+            auto testLogits     = fixture.first;
+            auto expectedArgMax = fixture.second;
+            auto actualArgMax =
+                arm::app::ConformerPostProcess::ArgMax1D(testLogits.data(), testLogits.size());
+            REQUIRE(actualArgMax == expectedArgMax);
+        }
+    }
+
+    SECTION("Arg max 2D")
+    {
+        auto input = anotherDoorInt8Logits;
+        auto actualArgMax = arm::app::ConformerPostProcess::ArgMax2D(
+            input.data(), input.size(), anotherDoorInt8LogitsShape
+        );
+        REQUIRE(std::equal(
+            actualArgMax.begin(),
+            actualArgMax.end(),
+            anotherDoorInt8ArgMax.begin(),
+            anotherDoorInt8ArgMax.end()
+            )
+        );
+    }
+
+    SECTION("Decode")
+    {
+        auto input = anotherDoorInt8Logits;
+        std::array<size_t, 2> inputShape;
+        std::copy(
+            anotherDoorInt8LogitsShape.begin(),
+            anotherDoorInt8LogitsShape.end(),
+            inputShape.data()
+        );
+        std::string actualDecoded;
+
+        arm::app::ConformerPostProcess::Decode(
+            input.data(), input.size(), inputShape, sentencePieceVocab, actualDecoded
+        );
+        REQUIRE(actualDecoded == anotherDoorInt8Decoded);
+    }
+
+    SECTION("Decoded output from output tensors")
+    {
+        auto tensorFactory =
+            executorch::runtime::testing::TensorFactory<executorch::aten::ScalarType::Float>();
+        auto outputTensorLogits = CreateTestTensor(
+            &tensorFactory,
+            anotherDoorInt8LogitsShape,
+            anotherDoorInt8Logits.data(),
+            anotherDoorInt8Logits.size()
+        );
+        const auto chunkSize = static_cast<float>(anotherDoorInt8LogitsShape[0]);
+        std::array<size_t, 1> shape = {1};
+        auto outputTensorChunkSize = CreateTestTensor(
+            &tensorFactory,
+            shape,
+            &chunkSize,
+            1
+        );
+        std::string actualDecoded;
+        auto conformerPostProcess = arm::app::ConformerPostProcess(
+            outputTensorLogits, outputTensorChunkSize, sentencePieceVocab, actualDecoded
+        );
+        conformerPostProcess.DoPostProcess();
+        REQUIRE(actualDecoded == anotherDoorInt8Decoded);
     }
 }

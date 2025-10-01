@@ -53,9 +53,9 @@ namespace arm::app
         explicit ConformerPreProcess(
             const std::shared_ptr<fwk::iface::TensorIface>& inputTensorMelSpec,
             const std::shared_ptr<fwk::iface::TensorIface>& inputTensorChunkSize,
-            int32_t melSpecWindowSize,
-            int32_t melSpecHopSize,
-            int32_t chunkSize
+            uint32_t melSpecWindowSize,
+            uint32_t melSpecHopSize,
+            uint32_t chunkSize
         );
 
         /**
@@ -80,13 +80,79 @@ namespace arm::app
     private:
         const std::shared_ptr<fwk::iface::TensorIface> m_inputTensorMelSpec;
         const std::shared_ptr<fwk::iface::TensorIface> m_inputTensorChunkSize;
-        const int32_t m_melSpecWindowSize;
-        const int32_t m_melSpecHopSize;
-        const int32_t m_chunkSize;
+        const uint32_t m_melSpecWindowSize;
+        const uint32_t m_melSpecHopSize;
+        const uint32_t m_chunkSize;
 
         audio::ConformerMelSpectrogram m_melSpectrogram;
         audio::SlidingWindow<const T> m_slidingWindow;
 
+    };
+
+    class ConformerPostProcess : BasePostProcess {
+    public:
+        /**
+         * @brief                           Constructor
+         * @param outputTensorLogits        First output tensor representing logits
+         * @param outputTensorChunkSize      Second input tensor containing chunk size
+         */
+        explicit ConformerPostProcess(
+            const std::shared_ptr<fwk::iface::TensorIface>& outputTensorLogits,
+            const std::shared_ptr<fwk::iface::TensorIface>& outputTensorChunkSize,
+            const std::vector<std::string>& labels,
+            std::string& decodedResult
+        );
+
+        /**
+         * @brief               Compute ArgMax for a 1D array of floats
+         * @param logits        Input data (logits)
+         * @param logitsSize    Size of input data
+         * @return              ArgMax for input data
+         */
+        static uint32_t ArgMax1D(
+            const float * logits,
+            size_t logitsSize
+        );
+
+        /**
+         * @brief               Compute ArgMax for a 2D array of floats
+         * @param logits        Input data (logits)
+         * @param logitsSize    Size of input data
+         * @param logitsShape   Shape of 2D input data (must be a vector of length 2)
+         * @return              1D vector of ArgMax values for 2D input data
+         */
+        static std::vector<uint32_t> ArgMax2D(
+            const float * logits,
+            size_t logitsSize,
+            const std::array<size_t, 2>& logitsShape
+        );
+
+        /**
+         * @brief               Decode logits to output string
+         * @param logits        Input data (logits)
+         * @param logitsSize    Size of input data
+         * @param logitsShape   Shape of 2D input data (must be a vector of length 2)
+         * @param labels        1D vector of labels
+         * @return              Decoded string comprised of labels determined by input logits
+         */
+        static void Decode(
+            const float * logits,
+            size_t logitsSize,
+            const std::array<size_t, 2>& logitsShape,
+            const std::vector<std::string>& labels,
+            std::string& decodedResult
+        );
+
+        /**
+         * @brief   Carry out postprocessing and populate the decoded results
+         * @return  True if postprocessing succeeded, false otherwise
+         */
+        bool DoPostProcess() override;
+    private:
+        const std::shared_ptr<fwk::iface::TensorIface> m_outputTensorLogits;
+        const std::shared_ptr<fwk::iface::TensorIface> m_outputTensorChunkSize;
+        const std::vector<std::string>& m_labels;
+        std::string& m_decodedResult;
     };
 } /* namespace arm::app */
 
