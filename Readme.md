@@ -215,7 +215,7 @@ does not contain any non-inclusive language. If you find something that concerns
 
 This branch is experimental and not stable — breaking changes are expected in the near term. It serves as
 a preview of refactoring that allows `ExecuTorch` and `TensorFlow Lite Micro` to be supported within the same
-source tree. At this stage, only the **image classification example** is functional with the `ExecuTorch` path,
+source tree. At this stage, **image classification and ASR examples** are functional with the `ExecuTorch` path,
 with the following limitations:
 
 * Arm® Compiler and Arm® Toolchain for Embedded are not supported

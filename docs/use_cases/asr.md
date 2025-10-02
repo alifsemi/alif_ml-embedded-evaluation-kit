@@ -22,7 +22,12 @@ example.
 
 Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr).
 
-> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+> **NOTE**: This use case supports `TensorFlow Lite Micro` by default. It also has experimental support for
+> `ExecuTorch` which can be enabled by providing `-DML_FRAMEWORK=ExecuTorch` to the CMake project configuration.
+> See limitations of `ExecuTorch` support [here](../../Readme.md#known-limitations-for-experimental-branch).
+> The ExecuTorch pipeline includes a placeholder Conformer model to demonstrate the functional flow.
+> For instructions on training and quantizing a Conformer model, refer to:
+> [ML-examples/pytorch-conformer-train-quantize](https://github.com/Arm-Examples/ML-examples/tree/main/pytorch-conformer-train-quantize).
 
 ### Preprocessing and feature extraction
 
