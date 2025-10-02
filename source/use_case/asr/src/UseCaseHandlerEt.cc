@@ -96,6 +96,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
+            hal_display_set_text_color(COLOR_WHITE);
             hal_display_show_text(
                 str_inf.c_str(),
                 str_inf.size(),
@@ -129,7 +130,17 @@ namespace app {
                 dataPsnTxtInfStartY,
                 false
             );
+            str_inf = decodedResult;
+            hal_display_set_text_color(COLOR_GREEN);
+            hal_display_show_text(
+                str_inf.c_str(),
+                str_inf.size(),
+                dataPsnTxtInfStartX,
+                dataPsnTxtInfStartY,
+                true
+            );
 
+            profiler.PrintProfilingResult();
             info("Decoded output: %s\n", decodedResult.c_str());
         }
         return true;

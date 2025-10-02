@@ -68,7 +68,8 @@ set(ML_FWK_TMP_MEM_BASE "${TMP_BASE}" CACHE STRING "Region used by ML framework 
 set(ML_FWK_TMP_MEM_SIZE "0x02000000" CACHE STRING "Buffer size for ML framework's temporary allocations")
 
 # HDLCD parameters
-math(EXPR HDLCD_FRAME_BUFFER_BASE_ADDRESS "${DYNAMIC_OFM_BASE} + ${DYNAMIC_OFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+math(EXPR FB_BASE       "${ML_FWK_TMP_MEM_BASE} + ${ML_FWK_TMP_MEM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+set(HDLCD_FRAME_BUFFER_BASE_ADDRESS "${FB_BASE}" CACHE STRING "HDLCD buffer region.")
 
 # Although the device is capable of better resolutions,
 # we currently stick to the resolution that is supported
