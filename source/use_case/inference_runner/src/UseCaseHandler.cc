@@ -47,13 +47,13 @@ namespace app {
             uint8_t* tData = inputTensor->GetData<uint8_t>();
 
 #if defined(DYNAMIC_IFM_BASE) && defined(DYNAMIC_IFM_SIZE)
-            if (curInputIdx + inputTensor->bytes > DYNAMIC_IFM_SIZE) {
+            if (curInputIdx + inputTensor->Bytes() > DYNAMIC_IFM_SIZE) {
                 printf_err("IFM reserved buffer size insufficient\n");
                 return;
             }
             memcpy(tData, reinterpret_cast<void *>(DYNAMIC_IFM_BASE + curInputIdx),
-                    inputTensor->bytes);
-            curInputIdx += inputTensor->bytes;
+                    inputTensor->Bytes());
+            curInputIdx += inputTensor->Bytes();
 #else /* defined(DYNAMIC_IFM_BASE) */
             /* Create a random input. */
             for (size_t j = 0; j < inputTensor->Bytes(); ++j) {
@@ -70,18 +70,18 @@ namespace app {
     }
 
 #if defined (DYNAMIC_OFM_BASE) && defined(DYNAMIC_OFM_SIZE)
-static void PopulateDynamicOfm(const Model& model)
+static void PopulateDynamicOfm(const fwk::iface::Model& model)
 {
     /* Dump the output to a known memory location */
     const size_t numOutputs = model.GetNumOutputs();
     size_t curCopyIdx = 0;
-    uint8_t* const dstPtr = reinterpret_cast<uint8_t *>(DYNAMIC_OFM_BASE);
+    auto* const dstPtr = reinterpret_cast<uint8_t *>(DYNAMIC_OFM_BASE);
 
     for (size_t outputIdx = 0; outputIdx < numOutputs; ++outputIdx) {
-        auto* outputTensor   = model.GetOutputTensor(outputIdx);
-        uint8_t* const tData = outputTensor->GetData<uint8_t>();
+        auto outputTensor = model.GetOutputTensor(outputIdx);
+        auto* const tData = outputTensor->GetData<uint8_t>();
 
-        if (tData && outputTensor->bytes > 0) {
+        if (tData && outputTensor->Bytes() > 0) {
             if (curCopyIdx + outputTensor->Bytes() > DYNAMIC_OFM_SIZE) {
                 printf_err("OFM reserved buffer size insufficient\n");
                 return;

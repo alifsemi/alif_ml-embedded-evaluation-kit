@@ -793,12 +793,11 @@ def set_up_resources(
 
     if setup_config.set_up_executorch:
         setup_executorch(context)
-
-    for use_case in use_case_resources:
-        for executorch_resource in use_case.executorch_resources:
-            if executorch_resource.type == ExecutorchResourceType.LOCAL_PROJECT:
-                logging.info("Installing dependencies for %s", executorch_resource.model)
-                install_executorch_project(context.env_activate_cmd, executorch_resource)
+        for use_case in use_case_resources:
+            for executorch_resource in use_case.executorch_resources:
+                if executorch_resource.type == ExecutorchResourceType.LOCAL_PROJECT:
+                    logging.info("Installing dependencies for %s", executorch_resource.model)
+                    install_executorch_project(context.env_activate_cmd, executorch_resource)
 
     # Download models
     npu_configs = [
