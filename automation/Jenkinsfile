@@ -41,6 +41,70 @@ pipeline {
         // Remaining builds can be parallel. Different Devkits could be run in same stage->stapes->script but then it would not be paraller so copy-paste stages to save build time.
         stage('More builds') {
             parallel {
+                stage('Build inference runner GCC Release DevKit-e7') {
+                    steps {
+                        script {
+                            common_funcs.build_inf_runner("Release", "gcc", "DevKit-e7", "HP");
+                            common_funcs.build_inf_runner("Release", "gcc", "DevKit-e7", "HE");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_inf_hp_release_devkit_e7", includes: "build_gcc_hp_release_devkit-e7_inf_runner/bin/sectors/inference_runner/mram.bin"
+                            stash name: "test_build_gnu_inf_he_release_devkit_e7", includes: "build_gcc_he_release_devkit-e7_inf_runner/bin/sectors/inference_runner/mram.bin"
+                        }
+                    }
+                }
+                stage('Build inference runner GCC Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_inf_runner("Release", "gcc", "DevKit-e8", "HP");
+                            common_funcs.build_inf_runner("Release", "gcc", "DevKit-e8", "HE");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_gnu_inf_hp_release_devkit_e8", includes: "build_gcc_hp_release_devkit-e8_inf_runner/bin/sectors/inference_runner/mram.bin"
+                            stash name: "test_build_gnu_inf_he_release_devkit_e8", includes: "build_gcc_he_release_devkit-e8_inf_runner/bin/sectors/inference_runner/mram.bin"
+                        }
+                    }
+                }
+                stage('Build inference runner ARMCLANG Release DevKit-e7') {
+                    steps {
+                        script {
+                            common_funcs.build_inf_runner("Release", "armclang", "DevKit-e7", "HP");
+                            common_funcs.build_inf_runner("Release", "armclang", "DevKit-e7", "HE");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_armclang_inf_hp_release_devkit_e7", includes: "build_armclang_hp_release_devkit-e7_inf_runner/bin/sectors/inference_runner/mram.bin"
+                            stash name: "test_build_armclang_inf_he_release_devkit_e7", includes: "build_armclang_he_release_devkit-e7_inf_runner/bin/sectors/inference_runner/mram.bin"
+                        }
+                    }
+                }
+                stage('Build inference runner ARMCLANG Release DevKit-e8') {
+                    steps {
+                        script {
+                            common_funcs.build_inf_runner("Release", "armclang", "DevKit-e8", "HP");
+                            common_funcs.build_inf_runner("Release", "armclang", "DevKit-e8", "HE");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_armclang_inf_hp_release_devkit_e8", includes: "build_armclang_hp_release_devkit-e8_inf_runner/bin/sectors/inference_runner/mram.bin"
+                            stash name: "test_build_armclang_inf_he_release_devkit_e8", includes: "build_armclang_he_release_devkit-e8_inf_runner/bin/sectors/inference_runner/mram.bin"
+                        }
+                    }
+                }
                 stage('Build HP GCC Release DevKit-e8') {
                     steps {
                         script {
@@ -212,6 +276,32 @@ pipeline {
         }
         stage('Test phase') {
             parallel {
+                stage('Test Inference runner HP GCC Release DevKit-E7') {
+                    agent { label 'E7' }
+                    steps {
+                        unstash name: "test_build_gnu_inf_hp_release_devkit_e7"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("inference_runner_hp.json", "build_gcc_he_release_devkit-e7_inf_runner/bin/sectors/inference_runner/mram.bin", "mram.bin", "ethos-u-inference_runner.bin", "test_inference_runner");
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'inference_runner_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-inference_runner.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-inference_runner.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
                 stage('Test KWS HE GCC Release DevKit-E7') {
                     agent { label 'E7' }
                     steps {
