@@ -1,5 +1,6 @@
 cffi==1.17.1
 cmake==3.30.5
+executorch==1.0.0
 flatbuffers==24.3.25
 importlib_metadata==8.5.0
 Jinja2==3.1.6
@@ -14,4 +15,7 @@ resampy==0.4.3
 scipy==1.14.1
 six==1.16.0
 soundfile==0.12.1
+torch==2.9.0
+torchao==0.14.0
+torchvision==0.24.0
 zipp==3.20.2

@@ -33,6 +33,7 @@ class ExecutorchResourceType(IntEnum):
     """
     BUILT_IN = 0
     LOCAL_PROJECT = 1
+    CHECKPOINT_DOWNLOAD = 2
 
 
 @dataclass(frozen=True)
@@ -55,9 +56,10 @@ class ExecutorchResource:
     model: str
     path: typing.Optional[Path] = None
     requirements: typing.Optional[str] = None
+    lowering: typing.Optional[Path] = None
 
     def __post_init__(self):
-        if self.path:
+        if self.path and not str(self.model).endswith('.pt2'):
             object.__setattr__(self, "type", ExecutorchResourceType.LOCAL_PROJECT)
             if self.resources_dir and not self.resources_dir.exists():
                 raise ValueError(f"Resources directory {self.resources_dir} does not exist")
@@ -70,6 +72,11 @@ class ExecutorchResource:
 
             if self.requirements_path and not self.requirements_path.is_file():
                 raise ValueError(f"Requirements file {self.requirements_path} does not exist")
+
+            if self.lowering_script and not self.lowering_script.is_file():
+                raise ValueError(f"Lowering script {self.lowering_script} does not exist")
+        elif str(self.model).endswith('.pt2'):
+            object.__setattr__(self, "type", ExecutorchResourceType.CHECKPOINT_DOWNLOAD)
         else:
             object.__setattr__(self, "type", ExecutorchResourceType.BUILT_IN)
 
@@ -85,11 +92,15 @@ class ExecutorchResource:
     @property
     def model_path(self) -> typing.Optional[Path]:
         """
-        Get the full path to the local model
+        Get the full path to the local model.
         :return:    The full path to the local model,
                     or None for built-in models
         """
-        return self.project_path / self.model if self.model else None
+        if self.is_local_project():
+            return self.project_path / self.model if self.model else None
+
+        return None
+
 
     @property
     def requirements_path(self) -> typing.Optional[Path]:
@@ -98,7 +109,22 @@ class ExecutorchResource:
         :return:    The full path to the requirements file
                     if it has been specified
         """
+        if not self.path:
+            return None
+
         return self.project_path / self.requirements if self.requirements else None
+
+    @property
+    def lowering_script(self) -> typing.Optional[Path]:
+        """
+        Get the full path to the lowering script if specified
+        :return:    The full path to the lowering script
+                    if it has been specified
+        """
+        if not self.path:
+            return None
+
+        return self.project_path / self.lowering if self.lowering else None
 
     @property
     def model_name(self) -> str:
@@ -124,6 +150,14 @@ class ExecutorchResource:
         :return:    True if this resource is a built-in-model
         """
         return self.type == ExecutorchResourceType.BUILT_IN
+
+    def is_checkpoint_download(self) -> bool:
+        """
+        Convenience function to denote if this resource is a downloaded checkpoint model
+        :return:    True if this resource is a checkpoint
+        """
+        return self.type == ExecutorchResourceType.CHECKPOINT_DOWNLOAD
+
 
 
 @dataclass(frozen=True)

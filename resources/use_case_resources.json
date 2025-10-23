@@ -22,7 +22,8 @@
   {
     "name": "asr",
     "url_prefix": [
-      "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/"
+      "https://github.com/ARM-software/ML-zoo/raw/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8/",
+      "https://huggingface.co/Arm/stt_en_conformer_executorch_small/resolve/87d021a59a62a4c9640b5b568067ae8063550d26/"
     ],
     "resources": [
       {
@@ -36,13 +37,21 @@
       {
         "name": "ofm0.npy",
         "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+      },
+      {
+        "name": "conformer.pt2",
+        "url": "{url_prefix:1}Conformer_ArmQuantizer_quant_exported_program.pt2?download=true"
+      },
+      {
+        "name": "conformer_tokenizer.model",
+        "url": "{url_prefix:1}tokenizer.model?download=true"
       }
     ],
     "executorch_resources": [
       {
-        "model": "conformer_model.py",
-        "requirements": "requirements.txt",
-        "path": "asr/models"
+        "model": "conformer.pt2",
+        "path": "asr/models",
+        "lowering": "conformer_pte_gen.py"
       }
     ]
   },
@@ -71,6 +80,7 @@
       },
       {
         "model": "deit_tiny.py",
+        "requirements": "requirements.txt",
         "path": "img_class/models"
       }
     ]

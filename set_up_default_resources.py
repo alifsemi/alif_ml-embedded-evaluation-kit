@@ -43,12 +43,12 @@ from scripts.py.setup.use_case import UseCase, load_use_case_resources
 from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
-VELA_VERSION = "0c6f872974630c061c4de5a90aa3a8e15e04f16f"
+VELA_VERSION = "4.4.1"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
 # If false, install Vela package from PyPi using VELA_VERSION as the version
-INSTALL_VELA_FROM_SOURCE = True
+INSTALL_VELA_FROM_SOURCE = False
 
 u85_macs_to_system_configs = {
     128: "Ethos_U85_SYS_DRAM_Low",
@@ -375,6 +375,7 @@ def optimize_executorch_model(
         npu_config: NpuConfig,
         setup_context: SetupContext,
         output_dir: Path,
+        lowering_script: Path = None
 ):
     """
     Generate an optimized .pte file for ExecuTorch
@@ -385,16 +386,22 @@ def optimize_executorch_model(
                             None, a TOSA PTE file is generated for native host.
     :param setup_context:   The setup context
     :param output_dir:      The output directory
+    :param lowering_script  Optional script for lowering to specific NPU config backend.
+                            Default aot_arm_compiler will be used if this is not supplied.
     :return:                True if optimization was skipped, False otherwise
     """
-    model_script = None
+    model_res = None
 
-    # This section sets up the script path to be passed to the aot_arm_compiler
-    # if needed. This helps with skipping PTE file generation if the model
-    # already exists by resetting the `model_name`.
+    # This section sets up the script/checkpoint path to be passed to the
+    # aot_arm_compiler (or lowering script) if needed. This helps with skipping
+    # PTE file generation if the model already exists by resetting the
+    # `model_name`.
     if str(model_name).endswith('.py'):
-        model_script = model_name
-        model_name = Path(model_script).name.split('.')[0]
+        model_res = model_name
+        model_name = Path(model_res).name.split('.')[0]
+    elif str(model_name).endswith('.pt2'):
+        model_res = output_dir / model_name
+        model_name = Path(model_res).name.split('.')[0]
 
     if npu_config is not None:
         # pylint: disable=fixme
@@ -414,6 +421,7 @@ def optimize_executorch_model(
         optimized_model_name = output_dir / f"{model_name}_arm_TOSA-1.0+INT.pte"
 
     optimized_model_path = output_dir / optimized_model_name
+    logging.info('Looking for %s', optimized_model_path)
     if optimized_model_path.is_file():
         logging.info(
             "File %s exists, skipping optimisation.",
@@ -421,9 +429,11 @@ def optimize_executorch_model(
         )
         return True
 
+    optimize_arg = "-m examples.arm.aot_arm_compiler" if lowering_script is None\
+                      else lowering_script
     call_command(
-        command=(f"{setup_context.env_activate_cmd} && python3 -m examples.arm.aot_arm_compiler"
-                 f" --model_name={model_name if model_script is None else model_script}"
+        command=(f"{setup_context.env_activate_cmd} && python3 {optimize_arg}"
+                 f" --model_name={model_name if model_res is None else model_res}"
                  f" {cfg}"
                  f" --output {output_dir}"),
         cwd=setup_context.paths_config.executorch_path,
@@ -603,7 +613,8 @@ def optimize_executorch_models_async(
                 executorch_model.model_name,
                 npu_config,
                 setup_context,
-                setup_context.paths_config.downloads_dir / use_case.name
+                setup_context.paths_config.downloads_dir / use_case.name,
+                executorch_model.lowering_script
             )
             for executorch_model in use_case.executorch_resources
         ]
@@ -636,12 +647,6 @@ def parallel_setup(
     with concurrent.futures.ThreadPoolExecutor(
             max_workers=setup_context.setup_config.parallel
     ) as executor:
-        # Find previously-downloaded unoptimized models
-        unoptimized_models = []
-        if optimize_tflite:
-            unoptimized_models = find_unoptimized_tflite_files(
-                setup_context.paths_config.downloads_dir
-            )
         # Start parallel downloads
         download_futures = [
             executor.submit(
@@ -649,27 +654,25 @@ def parallel_setup(
             )
             for url, dest in resources_to_download
         ]
+        # Wait for all models to finish downloading
+        concurrent.futures.wait(
+            download_futures,
+            return_when=concurrent.futures.ALL_COMPLETED
+        )
         # Start optimizing previously-downloaded tflite models and ExecuTorch models
         model_optimize_futures = []
-        if optimize_tflite:
-            model_optimize_futures += optimize_tflite_models_async(
-                executor, unoptimized_models, tflm_npu_configs, setup_context.env_activate_cmd
-            )
         if optimize_executorch:
             model_optimize_futures += optimize_executorch_models_async(
                 executor, use_cases, executorch_npu_configs, setup_context
             )
-        # When tflite models finish downloading, start optimizing them
         if optimize_tflite:
-            for download_future in concurrent.futures.as_completed(download_futures):
-                downloaded_path = download_future.result()
-                if downloaded_path.suffix.endswith("tflite"):
-                    model_optimize_futures += optimize_tflite_models_async(
-                        executor,
-                        [downloaded_path],
-                        tflm_npu_configs,
-                        setup_context.env_activate_cmd
-                    )
+            model_paths = find_unoptimized_tflite_files(setup_context.paths_config.downloads_dir)
+            model_optimize_futures += optimize_tflite_models_async(
+                executor,
+                model_paths,
+                tflm_npu_configs,
+                setup_context.env_activate_cmd
+            )
         # Wait for all models to finish optimizing
         concurrent.futures.wait(
             model_optimize_futures,
@@ -729,7 +732,8 @@ def serial_setup(
                     model_name=executorch_resource.model_name,
                     npu_config=npu_config,
                     setup_context=setup_context,
-                    output_dir=setup_context.paths_config.downloads_dir / use_case.name
+                    output_dir=setup_context.paths_config.downloads_dir / use_case.name,
+                    lowering_script=executorch_resource.lowering_script
                 ) or optimisation_skipped
 
     # If any optimisation was skipped, show how to regenerate:
@@ -823,11 +827,10 @@ def set_up_resources(
             setup_config.check_clean_folder,
             setup_script_hash_verified
         )
-        if setup_config.set_up_tensorflow:
-            to_download += get_resources_to_download(
-                use_case,
-                download_dir=paths_config.downloads_dir,
-            )
+        to_download += get_resources_to_download(
+            use_case,
+            download_dir=paths_config.downloads_dir,
+        )
 
     if setup_config.parallel > 1:
         parallel_setup(

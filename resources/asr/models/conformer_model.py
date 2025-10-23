@@ -15,6 +15,13 @@
 #  limitations under the License.
 """
 Script to generate a placeholder Conformer model.
+This script can be used directly with AOT Arm compiler from ExecuTorch
+where a placeholder model with representative data sets are used.
+
+By default, we download a trained conformer model and this script is not
+invoked. However, it can be used to experiment with different audio chunk
+sizes for performance benchmarking. It depends on `conformer` package which
+can be installed using the `requirement.txt` file present alongside.
 """
 import typing
 import torch
