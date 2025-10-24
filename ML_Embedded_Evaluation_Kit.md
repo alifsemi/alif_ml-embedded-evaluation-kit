@@ -365,6 +365,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+      -DGLCD_UI=NO \
     ```
 
 5. Build the project using `Make`

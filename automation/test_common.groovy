@@ -52,6 +52,25 @@ def build_he_tcm(String build_type, String toolchain, String board) {
         exit \$exit_code"""
 }
 
+def build_inf_runner(String build_type, String toolchain, String board, String core) {
+
+    build_path = "build_${toolchain}_${core}_${build_type}_${board}_inf_runner".toLowerCase()
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=inference_runner -DLINKER_SCRIPT_NAME=RTSS-${core}-infrun -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_BOARD=${board} -DGLCD_UI=NO"
+
+    sh """#!/bin/bash -xe
+        export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
+        mkdir $build_path
+        pushd $build_path
+        $cmake_cmd &&
+        make -j 4
+        exit_code=\$?
+        popd
+        exit \$exit_code"""
+}
+
 def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name) {
     sh """#!/bin/bash -xe
         printenv NODE_NAME
@@ -103,5 +122,6 @@ return [
     setup_resources: this.&setup_resources,
     build_hp: this.&build_hp,
     build_he_tcm: this.&build_he_tcm,
+    build_inf_runner: this.&build_inf_runner,
     flash_and_run_pytest: this.&flash_and_run_pytest,
 ]
