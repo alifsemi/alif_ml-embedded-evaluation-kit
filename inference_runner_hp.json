@@ -1,0 +1,16 @@
+{
+    "HP_Image": {
+        "binary": "ethos-u-inference_runner.bin",
+        "version" : "1.0.0",
+        "mramAddress": "0x80008000",
+        "cpu_id": "M55_HP",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "DEVICE": {
+        "disabled" : false,
+        "binary": "app-device-config.json",
+        "version" : "0.5.00",
+        "signed": true
+    }
+}

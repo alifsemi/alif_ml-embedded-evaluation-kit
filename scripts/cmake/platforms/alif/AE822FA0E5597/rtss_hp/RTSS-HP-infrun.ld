@@ -129,7 +129,7 @@ SECTIONS
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
   } > SRAM
 
-  .bss.unstriped (NOLOAD)
+  .bss.unstriped (NOLOAD) :
   {
     * (.bss.lcd_image_buf)
   } > UNSTRIPED
