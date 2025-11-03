@@ -52,7 +52,7 @@ def get_deit_tiny(option: str):
     else:
         raise ValueError(f'Unsupported option: {option}')
 
-    return (deit_tiny, model_inputs)
+    return deit_tiny, model_inputs
 
 
 ModelUnderTest, ModelInputs = get_deit_tiny(option='linspace')

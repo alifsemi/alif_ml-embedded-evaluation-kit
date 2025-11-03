@@ -17,14 +17,16 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Image Classification example.
 
-This use-case example solves the classical computer vision problem of image classification. The ML sample was developed
-using the *MobileNet v2* model that was trained on the *ImageNet* dataset.
+This use-case example solves the classical computer vision problem of image classification. The ML sample works with
+the *MobileNet v2* model with TensorFlow Lite Micro, or either the *MobileNet v2* or *DeiT tiny* model with ExecuTorch.
+These models were both trained with the *ImageNet* dataset, and the overall pipeline is the same for both models.
 
 Use-case code could be found in the following directory: [source/use_case/img_class](../../source/use_case/img_class).
 
 > **NOTE**: This use case supports `TensorFlow Lite Micro` by default. It also has experimental support for
 > `ExecuTorch` which can be enabled by providing `-DML_FRAMEWORK=ExecuTorch` to the CMake project configuration.
 > See limitations of `ExecuTorch` support [here](../../Readme.md#known-limitations-for-experimental-branch).
+> The ExecuTorch pipeline works with *MobileNet v2* or *DeiT tiny*.
 
 ### Prerequisites
 
@@ -41,6 +43,10 @@ specifies:
   `PTE` (for ExecuTorch) format. The model is then processed and included in the application `axf` file.
   The default value points to one of the delivered set of models.
 
+  When using ExecuTorch, there are two included models: *MobileNet V2* (default) and *DeiT tiny*.
+  To use *DeiT tiny*, use this argument to reference the generated `PTE` model for your target platform
+  under the `resources_downloaded/img_class/` directory.
+
     Note that the parameters `img_class_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with
     the chosen model. In other words:
 
@@ -48,6 +54,21 @@ specifies:
     falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
   - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
     model in this case results in a runtime error.
+
+- `img_class_NORM_MEAN` and `img_class_NORM_STD` - These options are available
+  when [building with ExecuTorch](../sections/building.md#build-options) and should be used together.
+  They specify the normalisation mean and standard deviation values for each of the three input channels,
+  and are used for converting uint8 image data to float32 which is the input type for the ExecuTorch models
+  provided with this use case.
+
+  The default values correspond to the *MobileNet V2* ExecuTorch model.
+  To use *DeiT tiny*, these options must be provided with values specific to that model:
+    - *MobileNet V2* (default):
+      - `-Dimg_class_NORM_MEAN="0.485, 0.456, 0.406"`
+      - `-Dimg_class_NORM_STD="0.229, 0.224, 0.225"`
+    - *DeiT tiny*:
+      - `-Dimg_class_NORM_MEAN="0.5, 0.5, 0.5"`
+      - `-Dimg_class_NORM_STD="0.5, 0.5, 0.5"`
 
 - `img_class_FILE_PATH`: The path to the directory containing the images, or a path to a single image file, that is to
    be used in the application. The default value points to the `resources/img_class/samples` folder containing the
@@ -62,6 +83,10 @@ specifies:
 - `img_class_LABELS_TXT_FILE`: The path to the text file for the label. The file is used to map a classified class index
   to the text label. The default value points to the delivered `labels.txt` file inside the delivery package. Change
   this parameter to point to the custom labels file to map custom NN model output correctly.
+
+  For the included `TFlite` version of *MobileNet V2*, this argument should reference the `labels_mobilenet_v2_1.0_224.txt` file.
+  For either of the included ExecuTorch models (*MobileNet V2* or *DeiT tiny*), this argument should reference
+  the `labels_mobilenet_v2_1.IMAGENET1K_V2.txt` file.
 
 - `img_class_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it
   is set to 2MiB and is enough for most models.
@@ -206,7 +231,7 @@ For further information: [Optimize model with Vela compiler](../sections/buildin
 To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
 associated with the model. Each line of the file must correspond to one of the outputs in your model.
 
-Refer to the provided `labels_mobilenet_v2_1.0_224.txt` file for an example.
+Refer to the provided `labels_mobilenet_v2_1.0_224.txt` and `labels_mobilenet_v2_1.IMAGENET1K_V2.txt` files for examples.
 
 Then, you must set `img_class_MODEL_PATH` to the location of the Vela processed model file and
 `img_class_LABELS_TXT_FILE` to the location of the associated labels file.
@@ -351,4 +376,4 @@ The profiling section of the log shows that for this inference:
   model is not cycle-approximate or cycle-accurate
 
 The application prints the top five classes with indexes, a confidence score, and labels from the associated
-*labels_mobilenet_v2_1.0_224.txt* file. The FVP window also shows the output on its LCD section.
+labels file (e.g. `labels_mobilenet_v2_1.0_224.txt`). The FVP window also shows the output on its LCD section.

@@ -227,8 +227,8 @@ void EtModel::LogTensorInfo(std::shared_ptr<iface::TensorIface> tensor)
     }
     shapeStr.erase(shapeStr.size() - 2, shapeStr.size());
     shapeStr += "]";
-    info("\tShape: %s\n", shapeStr.c_str());
-    info("\tType: %s\n", fwk::iface::GetTensorDataTypeName(tensor->Type()));
+    info("\tShape:\t%s\n", shapeStr.c_str());
+    info("\tType:\t%s\n", fwk::iface::GetTensorDataTypeName(tensor->Type()));
 }
 
 void EtModel::LogInterpreterInfo()
