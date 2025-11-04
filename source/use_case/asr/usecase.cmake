@@ -23,6 +23,18 @@ if (NOT ${ML_FRAMEWORK} IN_LIST ${use_case}_ML_FRAMEWORK)
     return()
 endif ()
 
+# Default Conformer model is not supported on all NPUs yet.
+# TODO: Remove this check once this limitation is resolved.
+if (DEFINED ETHOS_U_NPU_ID)
+    if (${ML_FRAMEWORK} STREQUAL "ExecuTorch"
+        AND ${ETHOS_U_NPU_ID} STREQUAL "U55"
+        AND NOT DEFINED ${use_case}_MODEL_PATH)
+        message(STATUS "Arm Ethos-U55 NPU is not supported with Conformer model yet.")
+        message(STATUS "Build this example for Arm Ethos-U85 NPU instead.")
+        return()
+    endif()
+endif()
+
 set(${use_case}_supports_${ML_FRAMEWORK} ON)
 
 # Append the API to use for this use case
