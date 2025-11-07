@@ -133,6 +133,13 @@ else()
         add_dependencies(cortex_m_ops_lib cmsis_nn_workaround)
     endif()
 
+    # Issue with ExecuTorch 1.0.0 in cortex_m_kernels library
+    # Has been fixed in latest ExecuTorch - can be removed once
+    # we migrate.
+    if (TARGET cortex_m_kernels)
+        target_compile_definitions(cortex_m_kernels PRIVATE False=false)
+    endif()
+
     if (TARGET executorch_delegate_ethos_u)
         # If Arm Ethos-U NPU driver is defined as a target, we edit its
         # include directory paths for it to be installed as a dependency
