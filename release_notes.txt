@@ -1,3 +1,10 @@
+Changes for 25.12
+    * Added support for ExecuTorch framework alongside TensorFlow Lite Micro
+    * Support for 25.08 NPU components and dependencies (core-driver, core-platform, Vela 4.4.1, CMSIS-6, CMSIS-DSP, CMSIS-NN, TensorFlow Lite Micro and ExecuTorch 1.0.0)
+    * Updated ASR use case to allow building with Conformer model via ExecuTorch
+    * Updated Image Classification use case to support ExecuTorch version of MobileNet V2 and also DeiT tiny
+    * Set up script updated with support for downloading and optimising models using multiple threads
+
 Changes for 25.05
     * Added support for newer LLVM based Arm Toolchain for Embedded (ATfE) for versions 19.1.5, 20.0.0 and 20.1.0.
     * Updated bare-metal toolchain files to always add function and data sections for both toolchains.
