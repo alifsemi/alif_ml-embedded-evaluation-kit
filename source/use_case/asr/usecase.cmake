@@ -139,7 +139,7 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
         )
 endif()
 
-USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite or pte format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )

@@ -23,6 +23,9 @@
 
 namespace arm::app::fwk::iface {
 
+/**
+ * @brief   Memory region used by underlying framework
+ */
 struct MemoryRegion {
     uint8_t* data{nullptr};
     size_t size{0};

@@ -22,13 +22,6 @@ example.
 
 Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr).
 
-> **NOTE**: This use case supports `TensorFlow Lite Micro` by default. It also has experimental support for
-> `ExecuTorch` which can be enabled by providing `-DML_FRAMEWORK=ExecuTorch` to the CMake project configuration.
-> See limitations of `ExecuTorch` support [here](../../Readme.md#known-limitations-for-experimental-branch).
-> The ExecuTorch pipeline includes a *Conformer* model derived from the
-> [sooftware/conformer](https://github.com/sooftware/conformer) project using trained weights
-> available from [Hugging Face](https://huggingface.co/Arm/stt_en_conformer_executorch_small).
-
 ### Preprocessing and feature extraction
 
 The preprocessing implementation is similar for both the *wav2letter* and *Conformer* versions of the

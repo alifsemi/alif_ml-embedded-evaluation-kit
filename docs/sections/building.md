@@ -149,8 +149,8 @@ For ATfE/LLVM:
 
 > **Note:** Add it to the path environment variable, if needed.
 
-- Access to the internet to download the third-party dependencies, specifically: TensorFlow Lite Micro, Arm®
-  *Ethos™-U55* NPU driver, and CMSIS. Instructions for downloading these are listed under:
+- Access to the internet to download the third-party dependencies, specifically: TensorFlow Lite Micro, ExecuTorch,
+  Arm® *Ethos™-U55* NPU driver, and CMSIS. Instructions for downloading these are listed under:
   [preparing build environment](./building.md#preparing-build-environment).
 
 > **NOTE**: A Docker image built from the `Dockerfile` provided will have all the above packages installed and
@@ -167,7 +167,7 @@ For ATfE/LLVM:
   - Python Pillow
   - curl
 
-> **Note:** Due to the fast paced nature of development, this list might not be exhaustive.
+> **Note:** Due to the fast-paced nature of development, this list might not be exhaustive.
 Please refer to Tensorflow Lite Micro documentation for more info.
 
 ## Build options
@@ -205,9 +205,6 @@ The build parameters are:
   `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
   include them in the binary tree. All use case examples should advertise which framework they support and only
   the examples that support the framework selected will be included in the binary tree.
-
-  > **NOTE**: ExecuTorch support is experimental with known limitations documented
-  > [here](../../Readme.md#known-limitations-for-experimental-branch).
 
 - `TENSORFLOW_SRC_PATH`: Path for TensorFlow Lite Micro source tree. Default value points to the
   `dependencies/tensorflow` git submodule. Repository is hosted
@@ -283,7 +280,7 @@ The build parameters are:
   with the `ETHOS_U_NPU_ENABLED` setting.
 
   - When using the *Ethos-U* NPU backend, the NN model is assumed to be optimized by Vela compiler. However, even if
-    not, if it is supported by TensorFlow Lite Micro, it falls back on the CPU and execute.
+    not, if it is supported by the specified ML framework it falls back on the CPU and is executed.
 
   - When use of the *Ethos-U* NPU is disabled, and if a Vela optimized model is provided, then the application reports
     a failure at runtime.
@@ -381,12 +378,13 @@ Certain third-party sources are required to be present on the development machin
 repository to link against.
 
 1. [TensorFlow Lite Micro repository](https://github.com/tensorflow/tensorflow)
-2. [Ethos-U NPU core driver repository](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver)
-3. [Ethos-U NPU core platform repository](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-platform)
-4. [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
-5. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
-6. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
-7. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)
+2. [ExecuTorch repository](https://github.com/pytorch/executorch)
+3. [Ethos-U NPU core driver repository](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver)
+4. [Ethos-U NPU core platform repository](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-platform)
+5. [CMSIS-6](https://github.com/ARM-software/CMSIS_6.git)
+6. [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP.git)
+7. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
+8. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)
 
 > **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
@@ -394,7 +392,7 @@ repository to link against.
 To pull the submodules:
 
 ```sh
-git submodule update --init
+git submodule update --init -j 4  # set the number of parallel threads to use
 ```
 
 This downloads all required components and places them in a tree under `dependencies` directory.
@@ -408,13 +406,13 @@ dependencies
   ├── core-driver
   ├── core-platform
   ├── cortex-dfp
+  ├── executorch
   └── tensorflow
 ```
 
 > **Note:** The default source paths for the `TPIP` sources assume the above directory structure. However, all the
-> relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH` `ETHOS_U_NPU_DRIVER_SRC_PATH`,
-> `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH` and `CORTEX_DFP_SRC_PATH`. When using `CMSIS_SRC_PATH`
-> configuration argument, ensure that `CMSIS_VER` also reflects the CMSIS version correctly. 
+> relevant paths can be overridden by CMake configuration arguments `TENSORFLOW_SRC_PATH`, `EXECUTORCH_SRC_PATH`,
+> `ETHOS_U_NPU_DRIVER_SRC_PATH`, `CMSIS_SRC_PATH`, `CMSIS_DSP_SRC_PATH`, `CMSIS_NN_SRC_PATH` and `CORTEX_DFP_SRC_PATH`.
 
 #### Fetching resource files
 
@@ -462,9 +460,24 @@ Additional command line arguments supported by this script are:
   or the default 256 MACs configuration of the Arm® *Ethos™-U85* NPU.
 
 - `--use-case-resources-file`: Path to a JSON file pointing to resources to be downloaded. See the default
-  [use_case_resources.json](../../scripts/py/use_case_resources.json) as an example.
+  [use_case_resources.json](../../resources/use_case_resources.json) as an example.
 
 - `--downloads-dir`: Root directory where the resources are downloaded.
+
+- `--ml-frameworks`: Select whether TensorFlow Lite Micro and/or ExecuTorch models are downloaded and optimised.
+  defaults to `tflm`.
+
+- `--use-case`: Limit the model downloading and optimisation to the specified list of use cases.
+
+- `--parallel`: Specify the number of threads used to download and optimise modules in parallel.
+
+- `--requirements-file`: Provide the path to a requirements.txt file that will be installed into the Python environment.
+
+- `--use-case-resources-file`: Provide paths to additional files of the same structure as
+  [use_case_resources.json](../../resources/use_case_resources.json) for downloading and optimising additional models.
+
+- `--http-header`: When downloading models from other locations, e.g. services that require authorisation,
+  this argument can be used to set additional HTTP headers that are needed for the download to succeed.
 
 > **NOTE**: If you provide a different location by providing `downloads-dir` option, ensure `RESOURCES_PATH` is set
 > correctly for the associated CMake configuration. See [build options](building.md#build-options) for details.
@@ -476,22 +489,28 @@ with default settings i.e., for `mps3` target, `sse-300` subsystem and *Ethos-U5
 Under the hood, it invokes all the necessary
 CMake commands that are described in the next sections.
 
-If using the `Arm GNU embedded toolchain`, execute:
+If using the `Arm GNU embedded toolchain`, run:
 
 ```commandline
 ./build_default.py
 ```
 
-If using the `Arm Compiler`, execute:
+If using the `Arm Compiler`, run:
 
 ```commandline
 ./build_default.py --toolchain arm
 ```
 
-For LLVM/Clang builds, use:
+For LLVM/Clang builds, run:
 
 ```commandline
 ./build_default.py --toolchain llvm
+```
+
+To build ExecuTorch use cases instead of TensorFlow Lite Micro, run:
+
+```commandline
+./build_default.py --ml-framework executorch
 ```
 
 Additional command line arguments supported by this script are:
@@ -533,7 +552,7 @@ mkdir build && cd build
 
 #### Using GNU Arm Embedded toolchain
 
-On Linux, if using `Arm GNU embedded toolchain`, execute the following command to build the application to run on the
+On Linux, if using `Arm GNU Toolchain`, execute the following command to build the application to run on the
 Arm® *Ethos™-U* NPU when providing only the mandatory arguments for CMake configuration:
 
 ```commandline

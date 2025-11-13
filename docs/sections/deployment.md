@@ -114,9 +114,10 @@ telnetterminal5: Listening for serial connection on port 5003
     ALL RIGHTS RESERVED
 ```
 
-This also launches a telnet window with the standard output from the sample application. And also error log entries
-containing information about the pre-built application version, TensorFlow Lite Micro library version used, and data
-type. It also includes the input and output tensor sizes of the model that are compiled into the executable binary.
+This also launches a telnet window with the standard output from the sample application.
+And also error log entries containing information about the pre-built application version,
+TensorFlow Lite Micro or ExecuTorch library version used, and data type.
+It also includes the input and output tensor sizes of the model that are compiled into the executable binary.
 
 > **Note:** For details on the specific use-case, follow the instructions in the corresponding documentation.
 

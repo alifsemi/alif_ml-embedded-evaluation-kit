@@ -114,9 +114,8 @@ public:
     const iface::MemoryRegion& GetModelBuffer() const override;
 
     /**
-     * @brief       Gets the allocator pointer for this instance.
-     * @return      Pointer to a tflite::MicroAllocator object, if
-     *              available; nullptr otherwise.
+     * @brief       Gets ExecuTorch backend data.
+     * @return      Backend data
      **/
     const EtBackendData& GetBackendData() const;
 

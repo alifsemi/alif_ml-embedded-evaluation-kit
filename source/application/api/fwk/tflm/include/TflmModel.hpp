@@ -23,6 +23,9 @@
 
 namespace arm::app::fwk::tflm {
 
+/**
+ * Backend data for TensorFlow Lite Micro framework.
+ */
 struct TflmBackendData {
     const tflite::Model* m_pModel{nullptr};        /**< Tflite model pointer. */
     tflite::MicroAllocator* m_pAllocator{nullptr}; /**< Tflite micro allocator. */
@@ -101,9 +104,8 @@ public:
     const iface::MemoryRegion& GetModelBuffer() const override;
 
     /**
-     * @brief       Gets the allocator pointer for this instance.
-     * @return      Pointer to a tflite::MicroAllocator object, if
-     *              available; nullptr otherwise.
+     * @brief       Gets TensorFlow Lite Micro backend data.
+     * @return      Backend data, with pointers to the model, memory allocator and interpreter.
      **/
     const TflmBackendData& GetBackendData() const;
 

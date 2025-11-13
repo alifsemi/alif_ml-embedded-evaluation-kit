@@ -23,11 +23,6 @@ These models were both trained with the *ImageNet* dataset, and the overall pipe
 
 Use-case code could be found in the following directory: [source/use_case/img_class](../../source/use_case/img_class).
 
-> **NOTE**: This use case supports `TensorFlow Lite Micro` by default. It also has experimental support for
-> `ExecuTorch` which can be enabled by providing `-DML_FRAMEWORK=ExecuTorch` to the CMake project configuration.
-> See limitations of `ExecuTorch` support [here](../../Readme.md#known-limitations-for-experimental-branch).
-> The ExecuTorch pipeline works with *MobileNet v2* or *DeiT tiny*.
-
 ### Prerequisites
 
 See [Prerequisites](../documentation.md#prerequisites)

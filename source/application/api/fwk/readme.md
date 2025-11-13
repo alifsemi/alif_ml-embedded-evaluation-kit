@@ -25,9 +25,17 @@ This namespace contains **pure virtual interfaces** for components like `Tensors
 are used by [`common_api`](../common) and [`use_case` APIs](../use_case). The application logic should also rely
 on this interface wherever possible.
 
-#### `fwk::tflm`
+### `fwk::tflm`
 
 This namespace contains TensorFlow Lite Micro specific implementation of `Tensors` as `TflmTensor` class and
 `Model` as `TflmModel` class. These, specifically `TflmModel`, are used to instantiate TensorFlow Lite Micro
+specific models in the examples. However, once instantiated, the other orchestration logic relies on interface
+exposed by `fwk::iface` namespace.
+
+
+### `fwk::et`
+
+This namespace contains ExecuTorch specific implementation of `Tensors` as `EtTensor` class and
+`Model` as `EtModel` class. These, specifically `EtModel`, are used to instantiate ExecuTorch
 specific models in the examples. However, once instantiated, the other orchestration logic relies on interface
 exposed by `fwk::iface` namespace.

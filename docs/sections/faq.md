@@ -31,7 +31,7 @@ If the problem persist contact your Arm representative or raise an issue at
 
 ----
 
-**Q: When pointing to the TensorFlow Lite file explicitly in the CMake command, I get the following error message:**
+**Q: When pointing to the TensorFlow Lite or ExecuTorch model file explicitly in the CMake command, I get the following error message:**
 
 ```log
 CMake Error at scripts/cmake/util_functions.cmake:76 (message): Invalid file path.

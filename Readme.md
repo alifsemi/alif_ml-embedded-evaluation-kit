@@ -1,12 +1,9 @@
 
-# Arm® ML embedded evaluation kit
-
-> ⚠️  **NOTE**: This is an **experimental** branch to support ExecuTorch framework alongside
-> TensorFlow Lite Micro. Review the limitations [here](#known-limitations-for-experimental-branch) before proceeding.
+# Arm® ML Embedded Evaluation Kit
 
 ## Overview
 
-The ML embedded evaluation kit provides a range of ready to use machine learning (ML) applications for users to develop ML workloads running on the Arm® Ethos-U NPU and
+The ML Embedded Evaluation Kit provides a range of ready-to-use machine learning (ML) applications for users to develop ML workloads running on the Arm® Ethos-U NPU and
 Arm® Cortex-M CPUs. You can also access metrics such as inference cycle count to estimate performance.
 
 >*The Arm® Ethos-U NPU is a new class of ML processor, specifically designed
@@ -16,7 +13,9 @@ to accelerate ML computation in constrained embedded and IoT devices.*
 
 Experiment with the included end-to-end software use cases and create your own ML applications for Cortex-M CPU and Ethos-U NPU.
 
-|                          ML application                          |                                         Description                                         |                                                                                                                               Neural Network Models (TensorFlow Lite Micro)                                                                                                                               |                                                                         Neural Network Models (ExecuTorch)                                                                          |
+The ML Embedded Evaluation Kit supports both TensorFlow™ Lite for Microcontrollers and ExecuTorch frameworks.
+
+|                          ML application                          |                                         Description                                         |                                                                                                                     Neural Network Models<br/>(TensorFlow™ Lite for Microcontrollers)                                                                                                                     |                                                                       Neural Network Models<br/>(ExecuTorch)                                                                        |
 |:----------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 |      [Image classification](./docs/use_cases/img_class.md)       |                     Recognize the presence of objects in a given image                      |                                                                     [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)                                                                     | [Mobilenet V2](https://docs.pytorch.org/vision/0.24/models/generated/torchvision.models.mobilenet_v2.html) / [DeiT tiny](https://huggingface.co/timm/deit_tiny_patch16_224.fb_in1k) |
 |         [Keyword spotting(KWS)](./docs/use_cases/kws.md)         |                     Recognize the presence of a key word in a recording                     |                                                                           [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)                                                                            |                                                                                                                                                                                     |
@@ -60,14 +59,14 @@ To run evaluations using this software, we suggest using:
 >
 > Arm® Corstone™-315 and Corstone™-320 design implementations are publicly available as a [Fixed Virtual Platform of the MPS4 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-### Quick Start
+## Quick Start
 
 To run ML applications on the Cortex-M and Ethos-U NPU:
 
 1. First, verify that you have installed all of [the required prerequisites](docs/sections/building.md#build-prerequisites).
-   > **NOTE**: `Dockerfile` is also available if you would like to build a Docker image.
+   > **NOTE**: `Dockerfile` is also available if you would like to create a build environment using Docker.
 
-2. Clone the *Ethos-U* evaluation kit repository:
+2. Clone the ML Embedded Evaluation Kit (MLEK) repository:
 
     ```commandline
     git clone "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git"
@@ -77,29 +76,29 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
 3. Pull all the external dependencies with the following command:
 
     ```commandline
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 
 4. Next, run the `build_default` Python script. It handles the downloading of the neural network models, compiling using 
 [Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela), and building the project using CMake.
 
-    ###### Arm compiler
+    ##### Arm Compiler for Embedded
     ````commandline
     python3.10 ./build_default.py --toolchain arm
     ````
 
-   ###### Arm Toolchain for Embedded
+   ##### Arm Toolchain for Embedded
     ```commandline
     python3.10 ./build_default.py --toolchain llvm
     ```
 
-    ###### GNU Arm Embedded toolchain
+    ##### Arm GNU Toolchain
     ```commandline
     python3.10 ./build_default.py
     ```
 
-    ###### Build with ExecuTorch framework
-    ML framework defaults to TensorFlow Lite Micro. To build with ExecuTorch
+    ##### Build with ExecuTorch framework
+    ML framework defaults to TensorFlow™ Lite for Microcontrollers. To build with ExecuTorch:
     ```commandline
     python3.10 ./build_default.py --ml-framework executorch
     ```
@@ -110,11 +109,11 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
    following commands:
 
     ```commandline
-   From auto-generated (or custom) build directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
-   
-   From root directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
+    # From auto-generated (or custom) build directory:
+    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
+
+    # From root directory:
+    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
     ```
 
 6. A telnet window is launched through which you can interact with the application and obtain performance figures.
@@ -125,7 +124,7 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
 > **Note:** The default flow assumes Arm® *Ethos™-U55* NPU usage, configured to use 128 Multiply-Accumulate units
 > and is sharing SRAM with the Arm® *Cortex®-M55*.
 >
-> Ml embedded evaluation kit supports:
+> ML Embedded Evaluation Kit supports:
 >
 > | *Ethos™-U* NPU | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
 > |----------------|-----------------|-------------------------|---------------------|------------------------------|
@@ -154,20 +153,48 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
   - [Contributions](./docs/documentation.md#contributing)
   - **[FAQ](./docs/documentation.md#faq)**
 
+## ML framework compatibility
+
+The ML Embedded Evaluation Kit provides use cases implemented with both TensorFlow™ Lite for Microcontrollers and ExecuTorch.
+The current level of support for these frameworks against Arm NPUs and toolchains is indicated here.
+
+
+| Platform           | NPU             | TensorFlow™ Lite for Microcontrollers | ExecuTorch              |
+|--------------------|-----------------|---------------------------------------|-------------------------|
+| Arm® Corstone™-300 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
+| Arm® Corstone™-300 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-310 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
+| Arm® Corstone™-310 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-315 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-320 | Arm® Ethos™-U85 | ✅ Supported                           | ✅ Supported             |
+| Simple platform    | n/a             | ✅ Supported                           | ❌ Not yet supported     |
+| Native             | n/a             | ✅ Supported                           | ⚠️ Partially supported* |
+
+*The *Conformer* model for the ASR use case currently works only on Arm® Corstone™-320 with Arm® Ethos™-U85.
+
+| Toolchain                  | TensorFlow™ Lite for Microcontrollers | ExecuTorch          |
+|----------------------------|---------------------------------------|---------------------|
+| Arm Compiler for Embedded  | ✅ Supported                           | ❌ Not yet supported |
+| Arm Toolchain for Embedded | ✅ Supported                           | ❌ Not yet supported |
+| Arm GNU Toolchain          | ✅ Supported                           | ✅ Supported         |
+
 ## Software and hardware overview
 
 * The ML use cases have common code such as initializing the Hardware Abstraction Layer (HAL)
 
-* The common application code can be run on native host machine (x86_64 or aarch64) or Arm
-   Cortex-M architecture because of the HAL
+* The common application code can be run on native host machine (x86_64 or aarch64) or Arm® Cortex®-M architecture because of the HAL
 
-* Google® TensorFlow™ Lite for Microcontrollers inference engine is used to schedule
-  the execution of neural network models
-
-*  The [Ethos-U NPU driver](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver) is integrated TensorFlow Lite for Microcontrollers
-   *  ML operators are delegated to the NPU with CPU fall-back for unsupported operators
-   * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
-   * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
+* The ML framework abstraction layer wraps one of two inference engines supported by the project:
+    * Google® TensorFlow™ Lite for Microcontrollers
+      * The [Ethos-U NPU driver](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver)
+        is integrated into TensorFlow™ Lite for Microcontrollers
+      * ML operators are delegated to the NPU with CPU fall-back for unsupported operators
+      * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
+      * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
+    * PyTorch® ExecuTorch
+      * The [Ethos-U NPU driver](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver) is invoked
+        via the ExecuTorch Ethos™-U delegate
+      * ML operators unsupported by the NPU fall back to CPU via the ExecuTorch Portable Operator Library
 
 * The provided set of common ML use-case functions will assist in implementing your application logic
    * When modifying use-case code, there is no requirement to modify other components of the eval kit
@@ -176,7 +203,7 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
 A high level overview of the different components in the software, and the platforms supported out-of-the-box, is shown
 in the diagram below.
 
-![APIs](docs/media/APIs_description.png)
+![APIs](docs/media/apis-description.png)
 >Note: The Ethos-U NPU software stack is described [here](https://developer.arm.com/documentation/101888/0500/NPU-software-overview/NPU-software-components?lang=en).
 
 For a more detailed description of the build graph with all major components, see [Building](./docs/documentation.md#building).
@@ -211,30 +238,18 @@ please create a new GitLab issue here:
 This product conforms to Arm's inclusive language policy and, to the best of our knowledge,
 does not contain any non-inclusive language. If you find something that concerns you, email terms@arm.com.
 
-# Known Limitations for Experimental Branch
-
-This branch is experimental and not stable — breaking changes are expected in the near term. It serves as
-a preview of refactoring that allows `ExecuTorch` and `TensorFlow Lite Micro` to be supported within the same
-source tree. At this stage, **image classification and ASR examples** are functional with the `ExecuTorch` path,
-with the following limitations:
-
-* Arm® Compiler and Arm® Toolchain for Embedded are not supported
-* Runtime memory usage is higher than we would like
-* Arm® Ethos™-U65 NPU is not supported; this limitation could be resolved with minor tweaks within
-  Executorch tree.
-
 ## Licenses
 
 The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](LICENSE_APACHE_2.0.txt).
 
 Application input data sample files are provided under their original license:
 
-|  | Licence | Provenience |
-|---------------|---------|---------|
-| [Automatic Speech Recognition Samples](./resources/asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/> |
-| [Image Classification Samples](./resources/img_class/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
-| [Keyword Spotting Samples](./resources/kws/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
+|                                                                                                   | Licence                                                                                         | Provenience                                                        |
+|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| [Automatic Speech Recognition Samples](./resources/asr/samples/files.md)                          | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/>                                       |
+| [Image Classification Samples](./resources/img_class/samples/files.md)                            | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |
+| [Keyword Spotting Samples](./resources/kws/samples/files.md)                                      | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
 | [Keyword Spotting and Automatic Speech Recognition Samples](./resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
-| [Visual Wake Word Samples](./resources/vww/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
-| [Noise Reduction Samples](./resources/noise_reduction/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <https://datashare.ed.ac.uk/handle/10283/2791/> |
-| [Object Detection Samples](./resources/object_detection/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
+| [Visual Wake Word Samples](./resources/vww/samples/files.md)                                      | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |
+| [Noise Reduction Samples](./resources/noise_reduction/samples/files.md)                           | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <https://datashare.ed.ac.uk/handle/10283/2791/>                    |
+| [Object Detection Samples](./resources/object_detection/samples/files.md)                         | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |

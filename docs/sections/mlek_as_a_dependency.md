@@ -26,13 +26,15 @@ Other useful readings:
 The use case APIs consist of:
 - `common` component - required for all use cases. This is available as a
   [CMake project](../../source/application/api/common/CMakeLists.txt) that depends on:
-  - `TENSORFLOW_SRC_PATH` variable being defined
   - Following CMake target libraries:
     - [log](../../source/log/readme.md)
     - [arm_math](../../source/math/readme.md)
+- `fwk` component - abstraction layer over the underlying ML framework - TensorFlow Lite Micro or ExecuTorch.
+  This is available as a [CMake project](../../source/application/api/fwk/CMakeLists.txt) that depends on *either*:
     - [tensorflow-lite-micro](../../scripts/cmake/tensorflow_lite_micro.cmake): this is a third-party dependency and the
       project wrapping MLEK could provide its own variant.
-
+    - [executorch](../../scripts/cmake/executorch.cmake): this is a third-party dependency and the
+      project wrapping MLEK could provide its own variant.
 - `use case specific APIs` are individual CMake projects in
   [source/application/api/use_case](../../source/application/api/use_case) subdirectories. These will only depend on
   the `common` target, which also brings in its dependencies listed above.
