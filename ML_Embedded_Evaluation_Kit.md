@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a brief set of instructions to a select set of AI/ML use-case demos on a single Cortex-M55 core with Ethos-U55 NPU.
+This is a brief set of instructions to a select set of AI/ML use-case demos on a single Cortex-M55 core with Ethos-U55 or U85 NPU.
 
 We will show building three applications:
 1. Key Word Spotting (KWS) application which runs on the Cortex-M55 High-Efficiency core (H55-HE / M55_1)
@@ -232,7 +232,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
 ### Building The Key Word Spotting (KWS) Use-Case For The M55-HE Core.
 
-1. Create a build directory for M55-HE core based applications. You can put this directory under alif_ml-embedded-evaluation-kit forlder.
+1. Create a build directory for M55-HE core based applications. You can put this directory under alif_ml-embedded-evaluation-kit folder.
     ```
     mkdir build_alif_kws
     cd build_alif_kws
@@ -467,6 +467,8 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
 			}
 	}
 	```
+**NOTE:** When using **DevKit-e1c** board, please use "app-device-config-e1c.json" in the DEVICE section instead.
+
 2. Create a second new JSON file called `/home/$USER/app-release-exec-linux\build\config\img_class_demo.json` with the following content.
     ```
 	{
@@ -705,8 +707,8 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8>`<br>
-Specifies the target board. (Default is AppKit-e7)<br>
+`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8|DevKit-e1c>`<br>
+Specifies the target board. (Default is AppKit-e7) In case of using DevKit-e1c, use "app-device-config-e1c.json" in the DEVICE section of the .json file. <br>
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
 Rotates the display by the specified amount and reorganizes the UI if necessary. 90 and 270 will be appreciably slower. (Default is 0)
