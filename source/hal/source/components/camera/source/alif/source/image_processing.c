@@ -601,6 +601,23 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
 #endif
 
 #if !CIMAGE_USE_RGB565
+
+    // Crop in bayer space
+#if defined(CIMAGE_X_ORIG) && defined(CIMAGE_Y_ORIG)
+    if (frame_crop(raw_image,
+                   CIMAGE_X_ORIG,
+                   CIMAGE_Y_ORIG,
+                   (CIMAGE_X_ORIG - CIMAGE_X) / 2,
+                   (CIMAGE_Y_ORIG - CIMAGE_Y) / 2,
+                   raw_image,
+                   CIMAGE_X,
+                   CIMAGE_Y,
+                   8)) {
+        printf_err("Crop in bayer space failed\n");
+        return NULL;
+    }
+#endif
+
     /* TIFF image can be dumped in Arm Development Studio using the command
      *
      *     dump value camera.tiff rgb_image
