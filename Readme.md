@@ -12,6 +12,7 @@ The default camera for the build is `MT9M114`. If you have `ARX3A0` camera, set 
 Supported camera modules:
 - MT9M114 **This is the default camera**
 - ARX3A0 **This camera module has also been shipped with Alif Semiconductor kits**
+- OV5675 **Adapter board needed**
 
 __IMPORTANT NOTE:__
 Due to syncing up with the latest from Upstream ARM ML Embedded Evaluation Kit, some dependencies have changed.

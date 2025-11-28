@@ -1082,7 +1082,7 @@
 //     <1=> enable
 // <i> define if to enable or disable OV5675 MIPI camera sensor
 // <i> default: enable
-#define RTE_OV5675_CAMERA_SENSOR_ENABLE                  1
+#define RTE_OV5675_CAMERA_SENSOR_ENABLE                     ALIF_CAMERA_MODULE_OV5675
 
 #if (RTE_OV5675_CAMERA_SENSOR_ENABLE)
 

@@ -126,6 +126,7 @@ if (NOT IS_BALLETTO_DEVICE)
     ${ALIF_CMSIS_PATH}/drivers/source/csi.c
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},MT9M114>:${ALIF_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},ARX3A0>:${ALIF_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},OV5675>:${ALIF_CMSIS_PATH}/components/Source/OV5675_camera_sensor.c>
     )
 endif() # not DevKit_E1C
 
