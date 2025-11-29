@@ -30,16 +30,19 @@ if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
 endif()
 
-# Include the TensorFlow Lite Micro build target
-# if the target is not available. An external project
-# including this project can provide its own version
-# of the target.
-if (NOT TARGET google::tensorflow-lite-micro)
-    set(TFLM_EXTERNAL_TARGET OFF)
-    include(tensorflow_lite_micro)
-else()
-    set(TFLM_EXTERNAL_TARGET ON)
-endif()
+option(INCLUDE_TFLM "Include TensorFlow Lite Micro itself in the build" ON)
+if (INCLUDE_TFLM)
+    # Include the TensorFlow Lite Micro build target
+    # if the target is not available. An external project
+    # including this project can provide its own version
+    # of the target.
+    if (NOT TARGET google::tensorflow-lite-micro)
+        set(TFLM_EXTERNAL_TARGET OFF)
+        include(tensorflow_lite_micro)
+    else()
+        set(TFLM_EXTERNAL_TARGET ON)
+    endif()
+endif ()
 
 # Create static library
 add_library(${ML_FWK_TFLM_TARGET} STATIC
@@ -63,9 +66,9 @@ target_include_directories(${ML_FWK_TFLM_TARGET} PUBLIC
 
 # Link time library targets:
 target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
-    mlek_log                        # Logging functions
-    ml-framework-iface              # ML framework interface
-    google::tensorflow-lite-micro)  # TensorFlow Lite Micro library
+    mlek_log                                                    # Logging functions
+    ml-framework-iface                                          # ML framework interface
+    $<$<BOOL:${INCLUDE_TFLM}>:google::tensorflow-lite-micro>)   # TensorFlow Lite Micro library
 
 target_compile_definitions(${ML_FWK_TFLM_TARGET} INTERFACE MLEK_FWK_TFLM=1)
 

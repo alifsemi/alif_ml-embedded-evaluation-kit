@@ -26,6 +26,10 @@ project(${ML_FWK_IFACE_TARGET}
     DESCRIPTION     "ML framework interface library"
     LANGUAGES       CXX)
 
+if (NOT DEFINED ML_FRAMEWORK)
+    message(FATAL_ERROR "ML_FRAMEWORK must be defined")
+endif ()
+
 # Add interface library
 add_library(${ML_FWK_IFACE_TARGET} INTERFACE)
 target_include_directories(${ML_FWK_IFACE_TARGET} INTERFACE iface)
