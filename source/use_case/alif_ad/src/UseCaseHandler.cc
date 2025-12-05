@@ -181,7 +181,7 @@ using namespace arm::app::ad;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -198,13 +198,13 @@ using namespace arm::app::ad;
             anomalyResult += std::string("Everything fine, no anomaly!");
         }
 
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyThreshold.c_str(), anomalyThreshold.size(),
                 dataPsnTxtStartX1, rowIdx1, false);
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyScore.c_str(), anomalyScore.size(),
                 dataPsnTxtStartX1, rowIdx2, false);
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyResult.c_str(), anomalyResult.size(),
                 dataPsnTxtStartX1, rowIdx3, false);
 

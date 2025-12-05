@@ -235,7 +235,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
 
             if (!PresentInferenceResult(infResults)) {
                 return false;
@@ -254,7 +254,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
 
@@ -275,7 +275,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                     std::string{"s: "} + topKeyword + std::string{" ("} +
                     std::to_string(static_cast<int>(score * 100)) + std::string{"%)"};
 
-            hal_lcd_display_text(resultStr.c_str(), resultStr.size(),
+            hal_display_show_text(resultStr.c_str(), resultStr.size(),
                     dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 

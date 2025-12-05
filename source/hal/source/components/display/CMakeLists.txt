@@ -29,7 +29,9 @@ project(display_component
 # Add top level interface library
 set(DISPLAY_IFACE_TARGET hal_display_iface)
 add_library(${DISPLAY_IFACE_TARGET} INTERFACE)
-target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE include)
+target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE
+glcd_mps3
+include)
 
 ## Logging utilities:
 if (NOT TARGET mlek_log)
@@ -55,6 +57,7 @@ target_link_libraries(${DISPLAY_STUBS_TARGET} PUBLIC
 # Add sub projects
 add_subdirectory(source/glcd_mps3 EXCLUDE_FROM_ALL)
 add_subdirectory(source/hdlcd_mps4 EXCLUDE_FROM_ALL)
+add_subdirectory(source/glcd_lvgl EXCLUDE_FROM_ALL)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
