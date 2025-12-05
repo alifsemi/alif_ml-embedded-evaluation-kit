@@ -24,10 +24,13 @@ Use-case code could be found in the following directory: [source/use_case/asr](.
 
 ### Preprocessing and feature extraction
 
+The preprocessing implementation is similar for both the *wav2letter* and *Conformer* versions of the
+use case, however there are some differences.
+
+#### Preprocessing for *wav2letter*
+
 The *wav2letter* automatic speech recognition model that is used with the code samples, expects audio data to be
 preprocessed in a specific way before performing an inference.
-
-This section provides an overview of the feature extraction process used.
 
 First, the audio data is normalized to the range (`-1`, `1`).
 
@@ -69,7 +72,39 @@ different to the one currently implemented.
 The amount of time that audio samples that are offset for long audio clips is specific to the included *wav2letter*
 model.
 
+#### Preprocessing for *Conformer*
+
+For the *Conformer* version of the automatic speech recognition use case, the preprocessing differs from
+what we have for *wav2letter*.
+
+The process starts the same way, by normalising the audio input to the range (`-1`, `1`).
+
+Next, we compute a Mel Spectrogram of the input audio sample.  For *wav2letter* we went a step further and
+computed the MFCC from this spectrogram, but for *Conformer* the Mel Spectrogram is all we need.
+
+Our implementation of the Mel Spectrogram computation is intended to be as close as possible
+to that found in the
+[torchaudio](https://docs.pytorch.org/audio/2.9.0/generated/torchaudio.transforms.MelSpectrogram.html) project,
+as this was used for training the model.
+
+Unlike *wav2letter* where we run inference for a sliding window over the input audio data,
+for *Conformer* we consider the entire input audio clip at once up to a fixed length.
+In the case of the specific *Conformer* model provided, the audio input length is 15 seconds
+(this duration is a configurable parameter when training, quantizing and exporting the model).
+For input audio clips shorter than this, we right-pad the Mel Spectrogram with a placeholder value of `-20.0`.
+In our case, the input tensor is of size 1500*80 where 80 is the number of mels
+and 1500 corresponds to each 100ms time interval for which spectrogram data has been calculated.
+
+At this point, no further preprocessing is needed; unlike *wav2letter*,
+we have no need to consider left/right contexts or compute first or second-order derivatives.
+This input data is now ready to be passed into the model for inference.
+
 ### Postprocessing
+
+The postprocessing between *wav2letter* and *Conformer* is similar, but there is more to consider for
+the *wav2letter* use case as we have to combine model consecutive model outputs to get the final result.
+
+#### Postprocessing for *wav2letter*
 
 After performing an inference, the raw output must be postprocessed to get a usable result.
 
@@ -97,6 +132,18 @@ from the output.
 For the final output, the results from all inferences are combined before decoding. What you are left with is then
 displayed to the console.
 
+#### Postprocessing for *Conformer*
+
+The output tensor for our *Conformer* model is of size 374*129, where 374 is the number of output tokens
+(related to the audio input length, which is 15 seconds for our specific trained *Conformer* model)
+and 129 is a probability distribution over the vocabulary range (the vocabulary size is a configurable
+parameter of the SentencePiece tokeniser used in the *Conformer* training process).
+
+Similarly to the *wav2letter* postprocessing, we take the highest probability token at each time step which is obtained
+by taking the index of the highest value in the probability distribution (argmax) and looking up the corresponding
+label from the vocabulary data.  We then deduplicate any repeating tokens and return the resulting string
+as the decoded text.
+
 ### Prerequisites
 
 See [Prerequisites](../documentation.md#prerequisites)
@@ -108,10 +155,11 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Automatic Speech Recognition use-case
 adds:
 
-- `asr_MODEL_TFLITE_PATH` - The path to the NN model file in `TFLite` format. The model is processed and then included
-  into the application `axf` file. The default value points to one of the delivered set of models. Note that the
-  parameters `asr_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. In
-  other words:
+- `asr_MODEL_PATH` - The path to the NN model file in `TFLite` (for TensorFlow Lite Micro) or
+  `PTE` (for ExecuTorch) format. The model is processed and then included into the application `axf` file.
+  The default value points to one of the delivered set of models. Note that the parameters
+  `asr_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model.
+  In other words:
   - If `ETHOS_U_NPU_ENABLED` is set to `On` or `1`, then the NN model is assumed to be optimized. The model naturally
     falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
   - If `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, then the NN model is assumed to be unoptimized. Supplying an
@@ -121,8 +169,10 @@ adds:
   application. The default value points to the `resources/asr/samples` folder that contains the delivered set of audio
   clips.
 
-- `asr_LABELS_TXT_FILE`: The path to the text file for the label. The file is used to map letter class index to the text
-  label. The default value points to the delivered `labels.txt` file inside the delivery package.
+- `asr_LABELS_TXT_FILE`: The path to the text file for the label. The file is used to map token class index to the text
+  label. The default value points to the delivered `labels.txt` file inside the delivery package for *wav2letter*,
+  or to `librispeech_sp.pieces` for the labels of the SentencePiece tokeniser trained on the LibriSpeech test-clean
+  dataset that was used to train the *Conformer* model.
 
 - `asr_AUDIO_RATE`: The input data sampling rate. Each audio file from `asr_FILE_PATH` is preprocessed during the build
   to match the NN model input requirements. The default value is `16000`.
@@ -267,7 +317,7 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
@@ -276,23 +326,23 @@ For further information: [Optimize model with Vela compiler](../sections/buildin
 
 To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
 associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
-provided `labels_wav2letter.txt` file for an example.
+provided `labels_wav2letter.txt` or `librispeech_sp.pieces` files for an example.
 
-Then, you must set `asr_MODEL_TFLITE_PATH` to the location of the Vela processed model file and `asr_LABELS_TXT_FILE`to
+Then, you must set `asr_MODEL_PATH` to the location of the Vela processed model file and `asr_LABELS_TXT_FILE`to
 the location of the associated labels file.
 
 For example:
 
 ```commandline
 cmake .. \
-    -Dasr_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dasr_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -Dasr_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=asr
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `asr_MODEL_TFLITE_PATH`, and the labels text file pointed to by
+The `.tflite` model file pointed to by `asr_MODEL_PATH`, and the labels text file pointed to by
 `asr_LABELS_TXT_FILE` are converted to C++ files during the CMake configuration stage. They are then compiled into the
 application for performing inference with.
 
@@ -300,7 +350,7 @@ The log from the configuration stage tells you what model path and labels file h
 
 ```log
 -- User option TARGET_PLATFORM is set to mps3
--- User option asr_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option asr_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- User option asr_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
 ...
@@ -360,80 +410,13 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `asr_FILE_PATH` points to a single file, or even a folder that contains a single
-input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user.
-
-For example:
-
-```log
-User input required
-Enter option number from:
-
-1. Classify next audio clip
-2. Classify audio clip at chosen index
-3. Run classification on all audio clips
-4. Show NN model info
-5. List audio clips
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next audio clip: Runs a single inference on the next in line.
-
-2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
-
-    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
-
-3. Run ... on all: Triggers sequential inference executions on all built-in applications.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 11544 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 296
-    INFO -    2:  39
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.110316
-    INFO - ZeroPoint[0] = -11
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 4292 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   1
-    INFO -    2: 148
-    INFO -    3:  29
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 783168
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-    ```
-
-5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    [INFO] List of Files:
-    [INFO] 0 => another_door.wav
-    [INFO] 1 => another_engineer.wav
-    [INFO] 2 => i_tell_you.wav
-    [INFO] 3 => testing_routine.wav
-    ```
+After the application has started inferences are executed on inputs from `asr_FILE_PATH`.
 
 ### Running Automatic Speech Recognition
 
-Please select the first menu option to execute Automatic Speech Recognition.
+#### Running with *wav2letter*
 
-The following example illustrates the output of an application:
+The following example illustrates the output of the use case using *wav2letter* on *Corstone™-300*:
 
 ```log
 INFO - Running inference on audio clip 0 => another_door.wav
@@ -453,21 +436,21 @@ INFO - NPU IDLE cycles: 476
 INFO - NPU TOTAL cycles: 28451172
 ```
 
-It can take several minutes to complete each inference. The average time is around 5-7 minutes, and on this audio clip,
-multiple inferences were required to cover the whole clip.
+It can take several minutes to complete each inference. The average time is around 5-7 minutes,
+and on this audio clip, multiple inferences were required to cover the whole clip.
 
 The profiling section of the log shows that for the first inference:
 
 - *Ethos-U* PMU report:
 
-  - 28,451,172 total cycle: The number of NPU cycles.
+  - 28,451,172 total cycles: The number of NPU cycles.
 
   - 28,450,696 active cycles: The number of NPU cycles that were used for computation.
 
   - 476 idle cycles: The number of cycles for which the NPU was idle.
 
   - 6,564,262 AXI0 read beats: The number of AXI beats with read transactions from the AXI0 bus. AXI0 is the bus where
-    - the *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
+    the *Ethos-U* NPU reads and writes to the computation buffers, activation buf, or tensor arenas.
 
   - 928,889 AXI0 write beats: The number of AXI beats with write transactions to the AXI0 bus.
 
@@ -478,3 +461,48 @@ The profiling section of the log shows that for the first inference:
   model is not cycle-approximate or cycle-accurate.
 
 The application prints the decoded output from each of the inference runs, and the final combined result.
+
+#### Running with *Conformer*
+
+The following example illustrates the output of the use case using *Conformer* on *Corstone™-320*:
+
+```log
+INFO - Using sample audio: another_door.wav
+INFO - Profile for Inference:
+INFO - NPU ACTIVE: 206205334 cycles
+INFO - NPU ETHOSU_PMU_SRAM_RD_DATA_BEAT_RECEIVED: 13858306 beats
+INFO - NPU ETHOSU_PMU_SRAM_WR_DATA_BEAT_WRITTEN: 7968438 beats
+INFO - NPU ETHOSU_PMU_EXT_RD_DATA_BEAT_RECEIVED: 26978241 beats
+INFO - NPU ETHOSU_PMU_EXT_WR_DATA_BEAT_WRITTEN: 18985466 beats
+INFO - NPU IDLE: 722 cycles
+INFO - NPU TOTAL: 206206056 cycles
+INFO - Decoded output: and he walked immediately out of the apartment by another door
+```
+
+It can take several minutes to complete the inference.
+
+The profiling section of the log shows that for the first inference:
+
+- *Ethos-U* PMU report:
+
+  - 206,206,056 total cycles: The number of NPU cycles.
+
+  - 206,205,334 active cycles: The number of NPU cycles that were used for computation.
+
+  - 722 idle cycles: The number of cycles for which the NPU was idle.
+
+  - 13,858,306 SRAM read beats: The total number of AXI beats with
+    read transactions from the AXI buses connected to SRAM.
+    These are the buses through which the *Ethos-U* NPU reads and writes
+    to the computation buffers, activation buf, or tensor arenas.
+
+  - 7,968,438 EXT write beats: The total number of AXI beats with write transactions over the AXI buses connected to SRAM.
+
+  - 26,978,241 EXT read beats: The total number of AXI beats with
+    read transactions from the AXI buses connected to DRAM.
+    These are the buses through the *Ethos-U* NPU reads the model. So, read-only.
+
+- For FPGA platforms, a CPU cycle count can also be enabled. However, do not use cycle counters for FVP, as the CPU
+  model is not cycle-approximate or cycle-accurate.
+
+The application prints the decoded output from inference run.

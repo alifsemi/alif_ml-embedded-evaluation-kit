@@ -1,11 +1,11 @@
 # Deployment
-
 - [Deployment](./deployment.md#deployment)
   - [Fixed Virtual Platform](./deployment.md#fixed-virtual-platform)
     - [Installing an FVP](./deployment.md#installing-an-fvp)
       - [Arm® Corstone™-320 FVP](./deployment.md#arm_corstone_320-fvp)
     - [Deploying on an FVP](./deployment.md#deploying-on-an-fvp)
     - [Running the FVP without the UI](./deployment.md#running-the-fvp-without-the-ui)
+    - [Semihosting](./deployment.md#semihosting)
     - [Virtual Streaming Interface](./deployment.md#virtual-streaming-interface)
       - [VSI requirements](./deployment.md#vsi-requirements)
       - [Deployment with VSI](./deployment.md#deployment-with-virtual-streaming-interface)
@@ -97,9 +97,6 @@ to the home directory of the user: `~/FVP_Corstone_SSE-300`. The installation, t
 executable under `~/FVP_Corstone_SSE-300/model/<OS>_<compiler-version>/` directory. For the example
 below, we assume it is: `~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4`.
 
-For Arm Virtual Hardware, the installation paths are different (see Arm Virtual Hardware's
-[Useful Links](./arm_virtual_hardware.md#useful-links) section).
-
 > **NOTE**: The commandline arguments for the FVP mentioned below are valid for FVPs (and AVH) for
 > Arm® Corstone™-300, Corstone™-310, Corstone™-315 and Corstone™-320.
 
@@ -117,9 +114,10 @@ telnetterminal5: Listening for serial connection on port 5003
     ALL RIGHTS RESERVED
 ```
 
-This also launches a telnet window with the standard output from the sample application. And also error log entries
-containing information about the pre-built application version, TensorFlow Lite Micro library version used, and data
-type. It also includes the input and output tensor sizes of the model that are compiled into the executable binary.
+This also launches a telnet window with the standard output from the sample application.
+And also error log entries containing information about the pre-built application version,
+TensorFlow Lite Micro or ExecuTorch library version used, and data type.
+It also includes the input and output tensor sizes of the model that are compiled into the executable binary.
 
 > **Note:** For details on the specific use-case, follow the instructions in the corresponding documentation.
 
@@ -145,16 +143,17 @@ The FVP supports many command-line parameters, such as:
 
 - Those passed by using `-C <param>=<value>`. The most important ones are:
 
-  | Arm® Corstone™-300 FVP and Arm® Corstone™-310 FVP | Arm® Corstone™-315 FVP and Arm® Corstone™-320 FVP                                      | Description                                                                                                                                                                                                                                                                 |
-  |---------------------------------------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | Arm® Corstone™-300 FVP and Arm® Corstone™-310 FVP | Arm® Corstone™-315 FVP and Arm® Corstone™-320 FVP                                      | Description                                                                                                                                                                                                                                                                |
+  |---------------------------------------------------|----------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
   | `ethosu.num_macs`                                 | `mps4_board.subsystem.ethosu.num_macs`                                                 | Sets the *Ethos-U* configuration for the model. The valid parameters are:<br/>- *Ethos-U55*: `32`, `64`, `256`, and the default one `128`.<br/>- *Ethos-U65*: `256`, and the default one `512`.<br/>- *Ethos-U85*: `128`, `512`, `1024`, `2048`, and the default one `256`. |
-  | `cpu0.CFGITCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGITCMSZ`                                                  | The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB                                                                                                                                                                                        |
-  | `cpu0.CFGDTCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGDTCMSZ`                                                  | The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB                                                                                                                                                                                        |
-  | `mps3_board.telnetterminal0.start_telnet`         | `mps4_board.telnetterminal0.start_telnet`                                              | Starts the telnet session if nothing connected.                                                                                                                                                                                                                             |
-  | `mps3_board.uart0.out_file`                       | `mps4_board.uart0.out_file`                                                            | Sets the output file to hold the data written by the UART. Use `'-'` to send all output to `stdout` and is empty by default).                                                                                                                                               |
-  | `mps3_board.uart0.shutdown_on_eot`                | `mps4_board.uart0.shutdown_on_eot`                                                     | Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.                                                                                                                                                                                                       |
-  | `mps3_board.visualisation.disable-visualisation`  | `mps4_board.visualisation.disable-visualisation`<br/>`vis_hdlcd.disable_visualisation` | Enables, or disables, visualization and is disabled by default.                                                                                                                                                                                                             |
-  | `ethosu.extra_args="--fast"`                      | `mps4_board.subsystem.ethosu.extra_args=="--fast"`                                     | Run the FVP in fast mode.  This is useful for functionally testing your application, but should *not* be used for performance testing.                                                                                                                                      |
+  | `cpu0.CFGITCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGITCMSZ`                                                  | The ITCM size for the *Cortex-M* CPU. The size of ITCM is *pow(2, CFGITCMSZ - 1)* KB                                                                                                                                                                                       |
+  | `cpu0.CFGDTCMSZ`                                  | `mps4_board.subsystem.cpu0.CFGDTCMSZ`                                                  | The DTCM size for the *Cortex-M* CPU. The size of DTCM is *pow(2, CFGDTCMSZ - 1)* KB                                                                                                                                                                                       |
+  | `mps3_board.telnetterminal0.start_telnet`         | `mps4_board.telnetterminal0.start_telnet`                                              | Starts the telnet session if nothing connected.                                                                                                                                                                                                                            |
+  | `mps3_board.uart0.out_file`                       | `mps4_board.uart0.out_file`                                                            | Sets the output file to hold the data written by the UART. Use `'-'` to send all output to `stdout` and is empty by default).                                                                                                                                              |
+  | `mps3_board.uart0.shutdown_on_eot`                | `mps4_board.uart0.shutdown_on_eot`                                                     | Shut down the simulation when an `EOT (ASCII 4)` char is transmitted.                                                                                                                                                                                                      |
+  | `mps3_board.visualisation.disable-visualisation`  | `mps4_board.visualisation.disable-visualisation`<br/>`vis_hdlcd.disable_visualisation` | Enables, or disables, visualization and is disabled by default.                                                                                                                                                                                                            |
+  | `ethosu.extra_args="--fast"`                      | `mps4_board.subsystem.ethosu.extra_args="--fast"`                                      | Run the FVP in fast mode.  This is useful for functionally testing your application, but should *not* be used for performance testing.                                                                                                                                     |
+  | `cpu0.semihosting-enable`                         | `mps4_board.subsystem.cpu0.semihosting-enable`                                         | Toggles semihosting. Default value is `0` and to enable semihosting, it can be set to `1`                                                                                                                                                                                  |
 
   To start the model in `128` mode for *Ethos-U55*:
 
@@ -233,6 +232,20 @@ telnet localhost 5000
 > ${FVP_315_U65} -a <path/to/ethos-u-<use_case>.axf> ${FVP_315_ARGS}
 > ```
 
+### Semihosting
+
+FVPs allow semihosting support which can be enabled by passing in additional command line arguments. Note that this
+needs to be enabled for the application being deployed too.
+
+* For `MPS3` based targets: `-C cpu0.semihosting-enable=1`
+* For `MPS4` based targets: `-C mps4_board.subsystem.cpu0.semihosting-enable=1`
+
+> **NOTE**: For some toolchains (e.g.: the GNU Arm Embedded Toolchain) it may be necessary to set these values too:
+> * `MPS3`: `-C cpu0.semihosting-stack_base=0 -C cpu0.semihosting-stack_limit=0`
+> * `MPS4`: `-C mps4_board.subsystem.cpu0.semihosting-stack_base=0 -C mps4_board.subsystem.cpu0.semihosting-stack_limit=0`
+>
+> Read more on this [here](https://developer.arm.com/documentation/ka005824/latest/).
+
 ### Virtual Streaming Interface
 
 [Virtual Streaming Interface](https://arm-software.github.io/AVH/main/simulation/html/group__arm__vsi.html) is available
@@ -296,8 +309,9 @@ To run the VSI enabled application, append the command line with the `v_path` ar
 Once the board has booted, the micro SD card is enumerated as a mass storage device. On most systems, this is
 automatically mounted. However, manual mounting is sometimes required.
 
-Also, check for four serial-over-USB ports that are available for use through this connection. On Linux-based machines,
-these would typically be */dev/ttyUSB\<n\>* to */dev/ttyUSB\<n+3\>*.
+Also, check for four serial-over-USB ports that are available for use through this connection. 
+* On Linux-based machines, these would typically be */dev/ttyUSB\<n\>* to */dev/ttyUSB\<n+3\>*.
+* On macOS® machines, these would typically be */dev/tty.usbserial-\<n\>* to */dev/tty.usbserial-\<n+3\>*.
 
 The default configuration for all of them is `115200`, `8/N/1`. So, 15200 Baud, 8 bits, no parity, and one stop bit,
 with no flow control.
@@ -361,10 +375,11 @@ this size, you must use the approach described below.
     however, this is the FPGA SRAM (or BRAM) region instead. This is because the ITCM is only 32kB which cannot
     accommodate the code footprint for our applications.
 
-    Assuming that the micro SD card is mounted at `/media/user/V2M-MPS3/`, we can use:
+    For Linux machines, with the assumption that the micro SD card is mounted at `/media/user/V2M-MPS3/`, we can use:
     ```commandline
     cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/ && sync
     ```
+    For macOS®, the micro SD card is likely mounted at  `/Volumes/V2M-MPS3`.
 
     Note that the `itcm.bin` (or `bram.bin`) and `ddr.bin` files correspond to the part of the application residing in
     the first and second load region respectively, as defined in the
@@ -377,23 +392,31 @@ this size, you must use the approach described below.
 
    For example, with revision `C` of the MPS3 board hardware, using an application note directory named `AN552`, we can
    replace the `images.txt` file by:
-
     ```commandline
     cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN552/images.txt && sync
     ```
 
-> **NOTE**: Make sure the SD card is unmounted correctly after all the files have been copied. For example:
-> ```commandline
-> umount /media/user/V2M-MPS3
-> ```
+   > **NOTE**: Make sure the SD card is unmounted correctly after all the files have been copied. For example:
+    > 
+    > On Linux:
+    > ```commandline
+    > umount /media/user/V2M-MPS3
+    > ```
+    > On macOS®:
+    > ```commandline
+    > diskutil eject /Volumes/V2M-MPS3
+    > ```
+    
 
-3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0`. This can be typically done using
+3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0` or `/dev/tty.usbserial-000000`. This can be typically done using
    `minicom`, `screen`, or `Putty` applications. Make sure the configuration is set to 115200 8/N/1 and that the
    flow control setting is switched off:
 
     ```commandline
     minicom --D /dev/ttyUSB0
     ```
+
+    You should see an output similar to:
 
     ```log
     Welcome to minicom 2.7.1
@@ -404,7 +427,7 @@ this size, you must use the approach described below.
     Cmd>
     ```
 
-4. In another terminal, open the second serial port. For example: `/dev/ttyUSB1`:
+4. In another terminal, open the second serial port. For example: `/dev/ttyUSB1` or `/dev/tty.usbserial-000001`:
 
     ```commandline
     minicom --D /dev/ttyUSB1

@@ -9,9 +9,9 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
-
+ 
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,7 @@ bool __attribute__((weak)) ethosu_area_needs_invalidate_dcache(const uint32_t *p
     return false;
 #endif
 }
+
 
 void ethosu_flush_dcache(const uint64_t *base_addr, const size_t *base_addr_size, int num_base_addr)
 {

@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021,2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021,2023, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,20 +17,29 @@
  */
 #include "AsrClassifier.hpp"
 
+#include "Tensor.hpp"
 #include "log_macros.h"
-#include "TensorFlowLiteMicro.hpp"
-#include "Wav2LetterModel.hpp"
 
 namespace arm {
 namespace app {
 
-    template<typename T>
-    bool AsrClassifier::GetTopResults(TfLiteTensor* tensor,
+    AsrClassifier::AsrClassifier(uint32_t inputRowsIdx,
+                                 uint32_t inputColsIdx,
+                                 uint32_t outputRowsIdx,
+                                 uint32_t outputColsIdx) :
+        m_inputTensorRowsIdx(inputRowsIdx), m_inputTensorColsIdx(inputColsIdx),
+        m_outputTensorRowsIdx(outputRowsIdx), m_outputTensorColsIdx(outputColsIdx)
+    {}
+
+    template <typename T>
+    bool AsrClassifier::GetTopResults(const std::shared_ptr<fwk::iface::TensorIface> tensor,
                                       std::vector<ClassificationResult>& vecResults,
-                                      const std::vector <std::string>& labels, double scale, double zeroPoint)
+                                      const std::vector<std::string>& labels,
+                                      double scale,
+                                      double zeroPoint)
     {
-        const uint32_t nElems = tensor->dims->data[Wav2LetterModel::ms_outputRowsIdx];
-        const uint32_t nLetters = tensor->dims->data[Wav2LetterModel::ms_outputColsIdx];
+        const uint32_t nElems   = tensor->Shape()[this->m_outputTensorRowsIdx];
+        const uint32_t nLetters = tensor->Shape()[this->m_outputTensorColsIdx];
 
         if (nLetters != labels.size()) {
             printf("Output size doesn't match the labels' size\n");
@@ -45,7 +55,7 @@ namespace app {
         /* Final results' container. */
         vecResults = std::vector<ClassificationResult>(nElems);
 
-        T* tensorData = tflite::GetTensorData<T>(tensor);
+        T* tensorData = tensor->GetData<T>();
 
         /* Get the top 1 results. */
         for (uint32_t i = 0, row = 0; i < nElems; ++i, row+=nLetters) {
@@ -66,40 +76,47 @@ namespace app {
 
         return true;
     }
-    template bool AsrClassifier::GetTopResults<uint8_t>(TfLiteTensor* tensor,
-                                                        std::vector<ClassificationResult>& vecResults,
-                                                        const std::vector <std::string>& labels,
-                                                        double scale, double zeroPoint);
-    template bool AsrClassifier::GetTopResults<int8_t>(TfLiteTensor* tensor,
-                                                       std::vector<ClassificationResult>& vecResults,
-                                                       const std::vector <std::string>& labels,
-                                                       double scale, double zeroPoint);
+    template bool
+    AsrClassifier::GetTopResults<uint8_t>(const std::shared_ptr<fwk::iface::TensorIface> tensor,
+                                          std::vector<ClassificationResult>& vecResults,
+                                          const std::vector<std::string>& labels,
+                                          double scale,
+                                          double zeroPoint);
+    template bool
+    AsrClassifier::GetTopResults<int8_t>(const std::shared_ptr<fwk::iface::TensorIface> tensor,
+                                         std::vector<ClassificationResult>& vecResults,
+                                         const std::vector<std::string>& labels,
+                                         double scale,
+                                         double zeroPoint);
 
     bool AsrClassifier::GetClassificationResults(
-            TfLiteTensor* outputTensor,
-            std::vector<ClassificationResult>& vecResults,
-            const std::vector <std::string>& labels, uint32_t topNCount, bool use_softmax)
+        const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        std::vector<ClassificationResult>& vecResults,
+        const std::vector<std::string>& labels,
+        uint32_t topNCount,
+        bool use_softmax)
     {
             UNUSED(use_softmax);
             vecResults.clear();
 
-            constexpr int minTensorDims = static_cast<int>(
-                (Wav2LetterModel::ms_outputRowsIdx > Wav2LetterModel::ms_outputColsIdx)?
-                 Wav2LetterModel::ms_outputRowsIdx : Wav2LetterModel::ms_outputColsIdx);
+            const auto minTensorDims = (this->m_outputTensorRowsIdx > this->m_outputTensorColsIdx)
+                                           ? this->m_outputTensorRowsIdx
+                                           : this->m_outputTensorColsIdx;
 
-            constexpr uint32_t outColsIdx = Wav2LetterModel::ms_outputColsIdx;
+            const uint32_t outColsIdx = this->m_outputTensorColsIdx;
+            auto outputShape          = outputTensor->Shape();
 
             /* Health checks. */
             if (outputTensor == nullptr) {
                 printf_err("Output vector is null pointer.\n");
                 return false;
-            } else if (outputTensor->dims->size < minTensorDims) {
+            } else if (outputShape.size() < minTensorDims) {
                 printf_err("Output tensor expected to be %dD\n", minTensorDims);
                 return false;
-            } else if (static_cast<uint32_t>(outputTensor->dims->data[outColsIdx]) < topNCount) {
+            } else if (outputShape[outColsIdx] < topNCount) {
                 printf_err("Output vectors are smaller than %" PRIu32 "\n", topNCount);
                 return false;
-            } else if (static_cast<uint32_t>(outputTensor->dims->data[outColsIdx]) != labels.size()) {
+            } else if (outputShape[outColsIdx] != labels.size()) {
                 printf("Output size doesn't match the labels' size\n");
                 return false;
             }
@@ -109,27 +126,23 @@ namespace app {
             }
 
             /* To return the floating point values, we need quantization parameters. */
-            QuantParams quantParams = GetTensorQuantParams(outputTensor);
+            auto quantParams = outputTensor->GetQuantParams();
 
             bool resultState;
 
-            switch (outputTensor->type) {
-                case kTfLiteUInt8:
-                    resultState = this->GetTopResults<uint8_t>(
-                            outputTensor, vecResults,
-                            labels, quantParams.scale,
-                            quantParams.offset);
-                    break;
-                case kTfLiteInt8:
-                    resultState = this->GetTopResults<int8_t>(
-                            outputTensor, vecResults,
-                            labels, quantParams.scale,
-                            quantParams.offset);
-                    break;
-                default:
-                    printf_err("Tensor type %s not supported by classifier\n",
-                        TfLiteTypeGetName(outputTensor->type));
-                    return false;
+            switch (outputTensor->Type()) {
+            case fwk::iface::TensorType::UINT8:
+                resultState = this->GetTopResults<uint8_t>(
+                    outputTensor, vecResults, labels, quantParams.scale, quantParams.offset);
+                break;
+            case fwk::iface::TensorType::INT8:
+                resultState = this->GetTopResults<int8_t>(
+                    outputTensor, vecResults, labels, quantParams.scale, quantParams.offset);
+                break;
+            default:
+                printf_err("Tensor type %s not supported by classifier\n",
+                           fwk::iface::GetTensorDataTypeName(outputTensor->Type()));
+                return false;
             }
 
             if (!resultState) {

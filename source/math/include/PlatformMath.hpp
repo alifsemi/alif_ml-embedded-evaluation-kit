@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,12 @@
 
 /* See if ARM DSP functions can be used. */
 #if (defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1))
-#include "arm_math.h"
-#define M_PI (PI)
-#else /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
-#include <cmath>
+#   include "arm_math.h"
+#   if !defined(M_PI)
+#       define M_PI (PI)
+#   endif /* !defined(M_PI) */
+#else  /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
+#   include <cmath>
 #endif /* (defined (__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1)) */
 
 #include <vector>

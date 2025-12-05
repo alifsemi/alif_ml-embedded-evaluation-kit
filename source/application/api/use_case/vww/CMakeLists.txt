@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +27,7 @@ project(${VWW_API_TARGET}
 
 # Create static library
 add_library(${VWW_API_TARGET} STATIC
-        src/VisualWakeWordProcessing.cc
-        src/VisualWakeWordModel.cc)
+        src/VisualWakeWordProcessing.cc)
 
 target_include_directories(${VWW_API_TARGET} PUBLIC include)
 

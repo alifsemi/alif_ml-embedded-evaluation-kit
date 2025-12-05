@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -33,9 +33,9 @@ assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
 function(build_tflite_micro_cmake)
     include(FetchContent)
     set(CORE_SOFTWARE_REPO_URL "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-software")
-    set(CORE_SOFTWARE_GIT_REF  "24.11")
+    set(CORE_SOFTWARE_GIT_REF  "25.02")
     set(TFLM_CMAKE_URL "${CORE_SOFTWARE_REPO_URL}/-/raw/${CORE_SOFTWARE_GIT_REF}/tflite_micro.cmake?ref_type=tags&inline=false")
-    set(TFLM_CMAKE_MD5 "704cd5574eb2ec462aa4c9ab1afec6dc")
+    set(TFLM_CMAKE_MD5 "7ee273b9d993d8552f7d1fc129f276fd")
 
     FetchContent_Declare(TensorFlow_Lite_Micro_CMake_Wrapper
         URL                 ${TFLM_CMAKE_URL}
@@ -94,7 +94,7 @@ function(build_tflite_micro_cmake)
     endif()
 
     # Create an alias to use in other parts of the project.
-    add_library(tensorflow-lite-micro ALIAS tflu)
+    add_library(google::tensorflow-lite-micro ALIAS tflu)
 endfunction()
 
 function(build_tflite_micro_makefile)
@@ -229,11 +229,16 @@ function(build_tflite_micro_makefile)
 
     target_include_directories(tensorflow-lite-micro
         INTERFACE
-        ${TENSORFLOW_SRC_PATH})
+        ${TENSORFLOW_SRC_PATH}
+        ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
+        ${TENSORFLOW_SRC_PATH}/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
 
     target_compile_definitions(tensorflow-lite-micro
         INTERFACE
         TF_LITE_STATIC_MEMORY)
+
+    # Create an alias to use in other parts of the project.
+    add_library(google::tensorflow-lite-micro ALIAS tensorflow-lite-micro)
 
 endfunction()
 

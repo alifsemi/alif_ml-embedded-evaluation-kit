@@ -9,7 +9,7 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -33,69 +33,61 @@ if (NOT DEFINED CMSIS_DSP_SRC_PATH)
     message(FATAL_ERROR "CMSIS-DSP path should be defined for CMSIS-DSP library to be built")
 endif()
 if (NOT DEFINED CMSIS_SRC_PATH)
-    message(FATAL_ERROR "CMSIS-5 path should be defined to include CMSIS-CORE")
+    message(FATAL_ERROR "CMSIS path should be defined to include CMSIS-CORE")
 endif()
 
-# 3. Form a list of all the sources we need in CSMS-DSP library
+# List of config options to configure CMSIS-DSP
 set(CMSIS_DSP_SRC_DIR       "${CMSIS_DSP_SRC_PATH}/Source")
-set(CMSIS_DSP_INC_DIR       "${CMSIS_DSP_SRC_PATH}/Include")
-set(CMSIS_DSP_PRI_INC_DIR   "${CMSIS_DSP_SRC_PATH}/PrivateInclude")
-set(CMSIS_CORE_INC_DIR      "${CMSIS_SRC_PATH}/CMSIS/Core/Include")
+set(CMSISCORE               "${CMSIS_SRC_PATH}/CMSIS/Core")
 
-file(GLOB_RECURSE
-    CMSIS_DSP_SRC
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55 OR
+    CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85 OR
+    CMAKE_SYSTEM_PROCESSOR STREQUAL armv8.1-m.main)
+    set(HELIUM              ON)
+    set(MVEF                ON)
+    set(MVEI                ON)
+endif()
 
-    "${CMSIS_DSP_SRC_DIR}/BasicMathFunctions/arm_*.c"
-    "${CMSIS_DSP_SRC_DIR}/FastMathFunctions/arm_*.c"
-    "${CMSIS_DSP_SRC_DIR}/CommonTables/arm_*.c"
-    "${CMSIS_DSP_SRC_DIR}/TransformFunctions/arm_*.c"
-    "${CMSIS_DSP_SRC_DIR}/StatisticsFunctions/arm_*.c"
+# There is a known issue with Arm GNU Compiler version 14.
+# See https://github.com/ARM-software/CMSIS-DSP/issues/242
+# and https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/issues/4
+set(DISABLEFLOAT16          ON)
 
-    # Issue with q15 and q31 functions with Arm GNU toolchain, we only
-    # need f32 functions.
-    "${CMSIS_DSP_SRC_DIR}/ComplexMathFunctions/arm_*f32.c")
+add_subdirectory(${CMSIS_DSP_SRC_DIR} ${CMAKE_BINARY_DIR}/cmsis-dsp)
 
-# 4. Create static library
-set(CMSIS_DSP_TARGET        cmsis-dsp)
+# Filter out sources we don't need in this project
+if (CMSIS_DSP_MIN_REQ_SRC_LIST)
+    get_target_property(_MLEK_CMSIS_DSP_SOURCES CMSISDSP SOURCES)
 
-add_library(${CMSIS_DSP_TARGET} STATIC ${CMSIS_DSP_SRC})
+    # Exclude fixed signed/unsigned, f16 and f64 support. We only use f32
+    # functions.
+    list(FILTER _MLEK_CMSIS_DSP_SOURCES
+         EXCLUDE
+         REGEX ".*(f16|[\\u|\\q][0-9]|f64)")
 
-target_include_directories(${CMSIS_DSP_TARGET} PUBLIC
-                           ${CMSIS_DSP_INC_DIR}
-                           ${CMSIS_CORE_INC_DIR})
-target_include_directories(${CMSIS_DSP_TARGET} PRIVATE
-                           ${CMSIS_DSP_PRI_INC_DIR})
+    # Include only the modules we need:
+    set(MLEK_CMSIS_DSP_MODULES_REQ
+        BasicMathFunctions
+        FastMathFunctions
+        CommonTables
+        TransformFunctions
+        StatisticsFunctions
+        ComplexMathFunctions)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(${CMSIS_DSP_TARGET} PUBLIC -flax-vector-conversions)
+    string(JOIN "|" _MLEK_CMSIS_DSP_INC_REGEX ${MLEK_CMSIS_DSP_MODULES_REQ})
 
-    # There is a known issue with -O0 optimisation option that affects
-    # FFT functions from CMSIS-DSP when compiling with Arm GNU embedded
-    # toolchain version 10.2.1 or 10.3-2021.07
-    if (CMAKE_BUILD_TYPE STREQUAL Debug)
-        message(WARNING "There are known issues with CMSIS-DSP builds using "
-                        "MVE extension without optimisation. Forcing -O3 "
-                        "optimisation level")
-        target_compile_options(${CMSIS_DSP_TARGET} PUBLIC -O3)
-    endif()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
-    # For Arm Compiler the floating-point standard conformance is set to'std'
-    # by default. As we need NaN's and infinity definitions, we set the mode
-    # to 'full'.
-    target_compile_options(${CMSIS_DSP_TARGET} PRIVATE -ffp-mode=full)
-endif ()
+    list(FILTER _MLEK_CMSIS_DSP_SOURCES
+         INCLUDE
+         REGEX ".*(${_MLEK_CMSIS_DSP_INC_REGEX})")
 
-# 5. General compile definitions
-target_compile_definitions(${CMSIS_DSP_TARGET} PUBLIC ARM_MATH_LOOPUNROLL)
+    set_target_properties(CMSISDSP PROPERTIES
+        SOURCES "${_MLEK_CMSIS_DSP_SOURCES}")
 
-# 6. Provide the library path for the top level CMake to use:
-set(CMSIS_DSP_LIB   "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${CMSIS_DSP_TARGET}.a")
-message(STATUS "CMSIS_DSP_LIB set to be generated here: ${CMSIS_DSP_LIB}")
+    message(DEBUG "Required CMSIS DSP sources: ${_MLEK_CMSIS_DSP_SOURCES}")
+endif()
 
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${CMSIS_DSP_TARGET})
-message(STATUS "Build type                             : " ${CMAKE_BUILD_TYPE})
-message(STATUS "TARGET_PLATFORM                        : " ${TARGET_PLATFORM})
-message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "*******************************************************")
+# Enable fast-math option
+target_compile_options(CMSISDSP PRIVATE -ffast-math)
+
+# Create alias to use for linking with other libs.
+add_library(arm::cmsis-dsp ALIAS CMSISDSP)

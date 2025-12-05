@@ -9,7 +9,7 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -51,9 +51,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include("${CMAKE_CURRENT_SOURCE_DIR}/MlekModule.cmake")
 
 project(arm_ml_embedded_evaluation_kit
-        VERSION     24.11.0
-        DESCRIPTION "ARM ML Embedded Evaluation Kit"
-        LANGUAGES   C CXX ASM)
+        VERSION         25.12.0
+        DESCRIPTION     "ARM ML Embedded Evaluation Kit"
+        LANGUAGES       C CXX ASM)
 
 enforce_compiler_version()
 setup_source_generator()
@@ -84,13 +84,9 @@ add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal EXCLUDE_FROM_ALL)
 if (NOT DEFINED PROFILER_DIR)
     set(PROFILER_DIR ${SRC_PATH}/profiler)
 endif ()
+
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler EXCLUDE_FROM_ALL)
-
-# Include the tensorflow build target
-include(tensorflow_lite_micro)
-
-# Add the common API library target (tensorflow-lite-micro target is needed)
-add_subdirectory(${SRC_PATH}/application/api/common ${CMAKE_BINARY_DIR}/api/common EXCLUDE_FROM_ALL)
+add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api EXCLUDE_FROM_ALL)
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
@@ -104,9 +100,14 @@ file(GLOB_RECURSE SRC_APPLICATION
     )
 list(FILTER SRC_APPLICATION EXCLUDE REGEX ".*main\\.c.*$")
 set(SRC_MAIN "${SRC_PATH}/application/main/Main.cc")
+
+list(APPEND SRC_MAIN_DEFS
+    "PRJ_VER_STR=\"${PROJECT_VERSION}\""
+    "PRJ_DES_STR=\"${PROJECT_DESCRIPTION}\""
+    "PRJ_COMPILER=\"${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}\"")
 set_source_files_properties(${SRC_MAIN}
     PROPERTIES COMPILE_DEFINITIONS
-    "PRJ_VER_STR=\"${PROJECT_VERSION}\";PRJ_DES_STR=\"${PROJECT_DESCRIPTION}\"")
+    "${SRC_MAIN_DEFS}")
 
 list(JOIN USE_CASE_BUILD "" USE_CASE_BUILD_STR)
 list(APPEND USE_CASES_SEARCH_DIR_LIST ${SRC_PATH}/use_case)
@@ -126,7 +127,6 @@ message(STATUS "Use-cases excluded by platform configuration: ${EXCLUDED_USE_CAS
 message(STATUS "Building use-cases: ${USE_CASES}.")
 
 foreach(use_case ${USE_CASES})
-
     set(SRC_USE_CASE "")
     foreach(USE_CASES_SEARCH_DIR ${USE_CASES_SEARCH_DIR_LIST})
         if (EXISTS ${USE_CASES_SEARCH_DIR}/${use_case})
@@ -159,6 +159,18 @@ foreach(use_case ${USE_CASES})
     # Include the use case cmake file.
     include(${UC_CMAKE_FILE})
 
+    # Link ExecuTorch library if required
+    if (${use_case}_supports_${ML_FRAMEWORK})
+        if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+            set(ML_FWK_LINK_LIBS ml_framework_et)
+        elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+            set(ML_FWK_LINK_LIBS ml_framework_tflm)
+        endif()
+    else()
+        message(STATUS "${use_case} skipped")
+        continue()
+    endif ()
+
     file(GLOB_RECURSE UC_SRC
         "${SRC_USE_CASE}/${use_case}/src/*.cpp"
         "${SRC_USE_CASE}/${use_case}/src/*.cc"
@@ -189,6 +201,11 @@ foreach(use_case ${USE_CASES})
         ${UC_SRC}
         ${SRC_GEN})
 
+    # Checking and setting the interactive mode
+    if(INTERACTIVE_MODE)
+        target_compile_definitions(${UC_LIB_NAME} PUBLIC "INTERACTIVE_MODE")
+    endif()
+
     target_include_directories(${UC_LIB_NAME} PUBLIC
         ${APPLICATION_INCLUDE_DIRS}
         ${UC_INCLUDE}
@@ -205,28 +222,19 @@ foreach(use_case ${USE_CASES})
     endif()
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
-        log
         arm_math
         hal
         profiler
-        tensorflow-lite-micro
-        common_api)
+        common_api
+        ${ML_FWK_LINK_LIBS})
 
     # If an API exists for this use case, include the projects here and add to
     # the library list.
     foreach(API_TO_USE ${${use_case}_API_LIST})
-
-        # If the required target doesn't yet exist, include the project here:
-        if (NOT TARGET ${API_TO_USE}_api)
-            add_subdirectory(
-                ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
-                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
-            if (ETHOS_U_NPU_ASSUMED)
-                target_compile_definitions(${API_TO_USE}_api PRIVATE
-                    ETHOS_U_NPU_ASSUMED=1)
-            endif()
+        if (ETHOS_U_NPU_ASSUMED)
+            target_compile_definitions(${API_TO_USE}_api PRIVATE
+            ETHOS_U_NPU_ASSUMED=1)
         endif()
-
         # Check if the target now exists
         if (TARGET ${API_TO_USE}_api)
             message(STATUS "Using ${API_TO_USE}_api for ${use_case}")
@@ -236,18 +244,33 @@ foreach(use_case ${USE_CASES})
         endif()
     endforeach()
 
+    # If the use case has additional library target requirements,
+    # link them here.
+    if (DEFINED ${use_case}_LINK_LIBS)
+        message(STATUS "Additional link libraries specified for ${use_case}: "
+                       "${${use_case}_LINK_LIBS}")
+
+        # For each library target, check if it exists before linking.
+        foreach(_LIB ${${use_case}_LINK_LIBS})
+            if (TARGET ${_LIB})
+                target_link_libraries(${UC_LIB_NAME} PUBLIC ${_LIB})
+            else()
+                message(STATUS "${_LIB} will not be linked. "
+                               "Target does not exist.")
+            endif()
+
+        endforeach()
+    endif()
+
     file(GLOB_RECURSE SRC_SAMPLES
             "${SAMPLES_GEN_DIR}/*.cc"
             "${SAMPLES_GEN_DIR}/*.cpp"
             "${SAMPLES_GEN_DIR}/*.c")
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${SRC_SAMPLES})
-
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
-
     platform_custom_post_build(TARGET_NAME ${TARGET_NAME}
                                MODEL_IN_EXT_FLASH ${${use_case}_MODEL_IN_EXT_FLASH})
-
 endforeach()
 
 print_useroptions()

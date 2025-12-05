@@ -21,6 +21,8 @@ This document describes the process of setting up and running the ArmÂ® *Ethosâ„
 
 Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Preprocessing and feature extraction
 
 The Anomaly Detection model that is used with the Code Samples and expects audio data to be preprocessed in a specific
@@ -62,7 +64,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 
 In addition to the already specified build option in the main documentation, the Anomaly Detection use-case adds:
 
-- `ad_MODEL_TFLITE_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
+- `ad_MODEL_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
   the application `axf` file. The default value points to one of the delivered set of models.
 
     Note that the parameters `ad_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the
@@ -220,7 +222,7 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter ``ad_MODEL_TFLITE_PATH``.
+The application performs inference using the model pointed to by the CMake parameter ``ad_MODEL_PATH``.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing. Please refer to this section for more help:
@@ -230,20 +232,20 @@ For example:
 
 ```commandline
 cmake .. \
-    -Dad_MODEL_TFLITE_PATH=<path/to/custom_ad_model_after_vela.tflite> \
+    -Dad_MODEL_PATH=<path/to/custom_ad_model_after_vela.tflite> \
     -DUSE_CASE_BUILD=ad
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `ad_MODEL_TFLITE_PATH` is converted to C++ files during the CMake configuration
+The `.tflite` model file pointed to by `ad_MODEL_PATH` is converted to C++ files during the CMake configuration
 stage and is then compiled into the application for performing inference with.
 
 The log from the configuration stage tells you what model path has been used. For example:
 
 ```log
 -- User option TARGET_PLATFORM is set to fastmodel
--- User option ad_MODEL_TFLITE_PATH is set to <path/to/custom_ad_model_after_vela.tflite>
+-- User option ad_MODEL_PATH is set to <path/to/custom_ad_model_after_vela.tflite>
 ...
 -- Using <path/to/custom_ad_model_after_vela.tflite>
 ++ Converting custom_ad_model_after_vela.tflite to custom_ad_model_after_vela.tflite.cc
@@ -302,72 +304,9 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `ad_FILE_PATH` points to a single file, or even a folder that contains a single
-input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user. For example:
-
-```log
-User input required
-Enter option number from:
-
-  1. Classify next audio signal
-  2. Classify audio signal at chosen index
-  3. Run classification on all audio signals
-  4. Show NN model info
-  5. List audio signals
-
-  Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next audio clip: Runs a single inference on the next in line.
-
-2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
-
-    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, the pre-built application has one file with index `0`.
-
-3. Run ... on all: Triggers sequential inference executions on all built-in applications.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 1024 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:  32
-    INFO -    2:  32
-    INFO -    3:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.192437
-    INFO - ZeroPoint[0] = 11
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 8 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   8
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.048891
-    INFO - ZeroPoint[0] = -30
-    INFO - Activation buffer (a.k.a tensor arena) size used: 321252
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-    ```
-
-5. List: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    INFO - List of Files:
-    INFO - 0 =>; random_id_00_000000.wav
-    ```
+After the application has started inferences are executed on inputs from `ad_FILE_PATH`.
 
 ### Running Anomaly Detection
-
-Please select the first menu option to execute the Anomaly Detection.
 
 The following example illustrates the output of an application:
 

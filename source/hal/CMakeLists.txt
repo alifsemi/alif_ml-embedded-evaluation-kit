@@ -9,7 +9,8 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,12 +67,19 @@ add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 # Link time library targets:
 target_link_libraries(${HAL_TARGET}
     PUBLIC
-    log                 # Logging functions
-    lcd_iface           # LCD interface
-    stdout_iface        # Standard output (and error) interface
+    mlek_log            # Logging functions
+    hal_display_iface   # Display interface
     audio_iface         # Audio interface
     platform_drivers    # Platform drivers implementing the required interfaces
 )
+
+# Add a simple test target to verify HAL boots. Exclude it
+# from `all` target to reduce noise.
+if (COMMAND platform_custom_post_build)
+    add_executable(hal-test EXCLUDE_FROM_ALL source/hal_test.c)
+    target_link_libraries(hal-test PRIVATE ${HAL_TARGET})
+    platform_custom_post_build(TARGET_NAME hal-test)
+endif()
 
 # Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

@@ -27,6 +27,7 @@
 - Arm®, Keil® and µVision® are registered trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
 - Microsoft® and Windows® are proprietary registered trademarks of Microsoft and its group of companies.
 - TensorFlow™, the TensorFlow logo, and any related marks are trademarks of Google Inc.
+- PyTorch®, the PyTorch logo and any related marks are trademarks of The Linux Foundation®.
 
 ## Prerequisites
 
@@ -36,10 +37,14 @@ Before starting the setup process, please make sure that you have:
   > **Note:** Currently, Microsoft® Windows® is not supported as a build environment.
 
 - At least one of the following toolchains:
-  - GNU Arm Embedded toolchain (version 10.2.1 or above) -
+  - GNU Arm Toolchain (version 13.2.1 or above) -
   [GNU Arm Embedded toolchain downloads](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-  - Arm Compiler (version 6.19 or above) with a valid license -
+  - Arm Compiler (version 6.22 or above) with a valid license -
   [Arm Compiler download Page](https://developer.arm.com/tools-and-software/embedded/arm-compiler/downloads)
+  - Arm Toolchain for Embedded (version 19.1.5 or above) -
+  [ATfE releases](https://github.com/arm/arm-toolchain/releases).
+  Read more on ATfE [here](https://developer.arm.com/Tools%20and%20Software/Arm%20Toolchain%20for%20Embedded).
+  Current level of support for ATfE, in this repository, is **experimental**.
 
 - An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
   - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package (`AN555`). See
@@ -59,10 +64,8 @@ Before starting the setup process, please make sure that you have:
 
 ### Additional reading
 
-This document contains information that is specific to Arm® Ethos™-U55 and Arm® Ethos™-U65 products. Please refer to the following documents
-for additional information:
-
-- ML platform overview: <https://mlplatform.org/>
+This document contains information that is specific to Arm® Ethos™-U55, Arm® Ethos™-U65 and Arm® Ethos™-U85 products.
+Please refer to the following documents for additional information:
 
 - Arm® ML processors technical overview: <https://developer.arm.com/ip-products/processors/machine-learning>
 
@@ -88,7 +91,7 @@ for additional information:
 
 - Arm® ML-Zoo: <https://github.com/ARM-software/ML-zoo/>
 
-- Arm® Ethos-U NPU™ software: <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u>
+- Arm® Ethos-U NPU™ software: <https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela>
 
 To access Arm documentation online, please visit: <http://developer.arm.com>
 
@@ -116,6 +119,10 @@ The repository has the following structure:
 │     ├── application
 │     │    ├── api
 │     │    │    ├── common
+│     │    │    ├──  fwk
+│     │    │    │    ├── executorch
+│     │    │    │    ├── iface
+│     │    │    │    └── tflm
 │     │    │    └── use_case
 │     │    └── main
 │     ├── hal
@@ -166,14 +173,23 @@ What these folders contain:
 
   - `application`: All sources that form the *core* of the application. The `use-case` part of the sources depend on the
     sources themselves, such as:
+
     - `main`: Contains the main function and calls to platform initialization logic to set up things before launching
       the main loop. Also contains sources common to all use-case implementations.
 
-    - `api`: Contains **platform-agnostic** API that all the use case examples can use. It depends only on TensorFlow
-      Lite Micro and math functionality exposed by `math` module. It is further subdivided into:
+    - `api`: Contains **platform-agnostic** API that all the use case examples can use.
 
-      - `common`: Common part of the API. This consists of the generic code like neural network model initialisation,
-        running an inference, and some common logic used for image and audio use cases.
+      - `common`: Contains functionality that is common across ML use cases, including pre- and post-processing
+          methods for image and audio data, as well as some data structures for conveniently handling intermediate
+          data and results.
+          It depends on the math functionality exposed by the `math` and the ML framework abstraction layer.
+
+      - `fwk`: ML framework abstraction layer.  This library contains generic classes representing models and tensors
+        that are independent of the underlying ML framework used (TensorFlow Lite Micro or ExecuTorch).
+        This allows use case application logic to work with either framework with no changes.
+
+        This library contains implementations of the abstraction layer for TensorFlow Lite Micro and ExecuTorch,
+        and one of these implementations will be used at build time depending on the ML framework selected (see [available build options](./sections/building.md#build-options) for details).
 
       - `use_case`: This contains "model" and "processing" APIs for each individual use case. For example, KWS use case
         contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
@@ -209,7 +225,6 @@ hal
 ├── CMakeLists.txt
 ├── include
 │   ├── hal.h
-│   ├── hal_lcd.h
 │   └── hal_pmu.h
 ├── readme.md
 └── source
@@ -217,7 +232,7 @@ hal
     │   ├── audio
     │   ├── camera
     │   ├── cmsis_device
-    │   ├── lcd
+    │   ├── display
     │   ├── npu
     │   ├── npu_ta
     │   ├── platform_pmu
@@ -263,10 +278,11 @@ What these folders contain:
 
 ## Models and resources
 
-The models used in the use-cases implemented in this project can be downloaded from:
+### TensorFlow Lite models
+
+The TensorFlow Lite models used in the use-cases implemented in this project can be downloaded from:
 
 - [Arm ML-Zoo](https://github.com/ARM-software/ML-zoo) ( [Apache 2.0 License](https://github.com/ARM-software/ML-zoo/blob/master/LICENSE) )
-
   - [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)
   - [MicroNet for Keyword Spotting](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)
   - [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_pruned_int8)
@@ -275,11 +291,23 @@ The models used in the use-cases implemented in this project can be downloaded f
   - [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8/rnnoise_INT8.tflite)
 
 - [Emza Visual Sense ModelZoo](https://github.com/emza-vs/ModelZoo) ( [Apache 2.0 License](https://github.com/emza-vs/ModelZoo/blob/v1.0/LICENSE) )
-
   - [YOLO Fastest](https://github.com/emza-vs/ModelZoo/blob/v1.0/object_detection/yolo-fastest_192_face_v4.tflite)
 
-When using *Ethos-U* NPU backend, Vela compiler optimizes the the NN model. However, if not and it is supported by
-TensorFlow Lite Micro, then it falls back on the CPU and execute.
+### ExecuTorch models
+
+- [torchvision](https://docs.pytorch.org/vision/0.24/)
+  - [MobileNet V2](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.mobilenet_v2.html)
+
+- [Hugging Face - PyTorch Image Models (timm)](https://huggingface.co/timm) ( [Apache 2.0 License](https://github.com/huggingface/pytorch-image-models/blob/main/LICENSE) )
+  - [DeiT tiny](https://huggingface.co/timm/deit_tiny_patch16_224.fb_in1k)
+
+- [Hugging Face - Arm](https://huggingface.co/Arm/)
+  - [Conformer](https://huggingface.co/Arm/stt_en_conformer_executorch_small) ( [BigScience OpenRAIL-M v1.1](https://huggingface.co/Arm/stt_en_conformer_executorch_small/blob/main/LICENSE) )
+
+### Vela compiler
+
+When using *Ethos-U* NPU backend, Vela compiler optimizes the NN model. However, if not and it is supported by
+TensorFlow Lite Micro, then it falls back on the CPU and executed.
 
 ![Vela compiler](./media/vela_flow.jpg)
 
@@ -363,7 +391,7 @@ For further information, please see:
   - [Application context](./sections/customizing.md#application-context)
   - [Profiler](./sections/customizing.md#profiler)
   - [NN Model API](./sections/customizing.md#nn-model-api)
-  - [Adding custom ML use-case](./sections/customizing.md#adding-custom-ml-use_case)
+  - [Adding custom ML use-case](./sections/customizing.md#adding-custom-ml-use-case)
   - [Implementing main loop](./sections/customizing.md#implementing-main-loop)
   - [Implementing custom NN model](./sections/customizing.md#implementing-custom-nn-model)
   - [Executing inference](./sections/customizing.md#executing-inference)
@@ -402,7 +430,7 @@ For further information, please see:
   - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
   - [No matching distribution found for Vela](./sections/troubleshooting.md#no-matching-distribution-found-for-vela)
     - [How to update Python3 package to 3.10 version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  - [Error trying to build on Arm Virtual Hardware](./sections/troubleshooting.md#error-trying-to-build-on-arm-virtual-hardware)
+  - [Error with Python environment](./sections/troubleshooting.md#error-with-python-environment)
   - [Internal Compiler Error](./sections/troubleshooting.md#internal-compiler-error)
   - [Build issues with WSL2](./sections/troubleshooting.md#build-issues-with-wsl2)
 

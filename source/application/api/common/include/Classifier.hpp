@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +19,10 @@
 #define CLASSIFIER_HPP
 
 #include "ClassificationResult.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "Tensor.hpp"
 
+#include <memory>
+#include <set>
 #include <vector>
 
 namespace arm {
@@ -39,7 +42,8 @@ namespace app {
         /**
          * @brief       Gets the top N classification results from the
          *              output vector.
-         * @param[in]   outputTensor   Inference output tensor from an NN model.
+         * @param[in]   outputTensor   Output tensor retrieved from the model interface, expressed
+         *                             as a shared pointer.
          * @param[out]  vecResults     A vector of classification results.
          *                             populated by this function.
          * @param[in]   labels         Labels vector to match classified classes.
@@ -48,11 +52,12 @@ namespace app {
          * @return      true if successful, false otherwise.
          **/
 
-        virtual bool GetClassificationResults(
-            TfLiteTensor* outputTensor,
-            std::vector<ClassificationResult>& vecResults,
-            const std::vector <std::string>& labels, uint32_t topNCount,
-            bool use_softmax);
+        virtual bool
+        GetClassificationResults(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                                 std::vector<ClassificationResult>& vecResults,
+                                 const std::vector<std::string>& labels,
+                                 uint32_t topNCount,
+                                 bool use_softmax);
 
         /**
         * @brief       Populate the elements of the Classification Result object.

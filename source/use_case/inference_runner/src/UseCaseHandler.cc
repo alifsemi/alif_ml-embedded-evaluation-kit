@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@
 namespace arm {
 namespace app {
 
-static void PopulateInputTensor(const Model& model)
-{
-    const size_t numInputs = model.GetNumInputs();
+    static void PopulateInputTensor(const fwk::iface::Model& model)
+    {
+        const size_t numInputs = model.GetNumInputs();
 
 #if defined(DYNAMIC_IFM_BASE) && defined(DYNAMIC_IFM_SIZE)
     size_t curInputIdx = 0;
@@ -37,26 +37,26 @@ static void PopulateInputTensor(const Model& model)
     /* Populate each input tensor with random data. */
     for (size_t inputIndex = 0; inputIndex < numInputs; inputIndex++) {
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(inputIndex);
+        auto inputTensor = model.GetInputTensor(inputIndex);
 
-        debug("Populating input tensor %zu@%p\n", inputIndex, inputTensor);
-        debug("Total input size to be populated: %zu\n", inputTensor->bytes);
+        debug("Populating input tensor %zu@%p\n", inputIndex, inputTensor->GetData());
+        debug("Total input size to be populated: %zu\n", inputTensor->Bytes());
 
-        if (inputTensor->bytes > 0) {
+        if (inputTensor->Bytes() > 0) {
 
-            uint8_t* tData = tflite::GetTensorData<uint8_t>(inputTensor);
+            uint8_t* tData = inputTensor->GetData<uint8_t>();
 
 #if defined(DYNAMIC_IFM_BASE) && defined(DYNAMIC_IFM_SIZE)
-            if (curInputIdx + inputTensor->bytes > DYNAMIC_IFM_SIZE) {
+            if (curInputIdx + inputTensor->Bytes() > DYNAMIC_IFM_SIZE) {
                 printf_err("IFM reserved buffer size insufficient\n");
                 return;
             }
             memcpy(tData, reinterpret_cast<void *>(DYNAMIC_IFM_BASE + curInputIdx),
-                    inputTensor->bytes);
-            curInputIdx += inputTensor->bytes;
+                    inputTensor->Bytes());
+            curInputIdx += inputTensor->Bytes();
 #else /* defined(DYNAMIC_IFM_BASE) */
             /* Create a random input. */
-            for (size_t j = 0; j < inputTensor->bytes; ++j) {
+            for (size_t j = 0; j < inputTensor->Bytes(); ++j) {
                 tData[j] = static_cast<uint8_t>(std::rand() & 0xFF);
             }
 #endif /* defined(DYNAMIC_IFM_BASE) && defined(DYNAMIC_IFM_SIZE) */
@@ -67,27 +67,27 @@ static void PopulateInputTensor(const Model& model)
     info("%d input tensor/s populated with %d bytes with data read from 0x%08x\n",
         numInputs, curInputIdx, DYNAMIC_IFM_BASE);
 #endif /* defined(DYNAMIC_IFM_BASE) */
-}
+    }
 
 #if defined (DYNAMIC_OFM_BASE) && defined(DYNAMIC_OFM_SIZE)
-static void PopulateDynamicOfm(const Model& model)
+static void PopulateDynamicOfm(const fwk::iface::Model& model)
 {
     /* Dump the output to a known memory location */
     const size_t numOutputs = model.GetNumOutputs();
     size_t curCopyIdx = 0;
-    uint8_t* const dstPtr = reinterpret_cast<uint8_t *>(DYNAMIC_OFM_BASE);
+    auto* const dstPtr = reinterpret_cast<uint8_t *>(DYNAMIC_OFM_BASE);
 
     for (size_t outputIdx = 0; outputIdx < numOutputs; ++outputIdx) {
-        TfLiteTensor* outputTensor = model.GetOutputTensor(outputIdx);
-        uint8_t* const tData = tflite::GetTensorData<uint8_t>(outputTensor);
+        auto outputTensor = model.GetOutputTensor(outputIdx);
+        auto* const tData = outputTensor->GetData<uint8_t>();
 
-        if (tData && outputTensor->bytes > 0) {
-            if (curCopyIdx + outputTensor->bytes > DYNAMIC_OFM_SIZE) {
+        if (tData && outputTensor->Bytes() > 0) {
+            if (curCopyIdx + outputTensor->Bytes() > DYNAMIC_OFM_SIZE) {
                 printf_err("OFM reserved buffer size insufficient\n");
                 return;
             }
-            memcpy(dstPtr + curCopyIdx, tData, outputTensor->bytes);
-            curCopyIdx += outputTensor->bytes;
+            memcpy(dstPtr + curCopyIdx, tData, outputTensor->Bytes());
+            curCopyIdx += outputTensor->Bytes();
         }
     }
 
@@ -117,7 +117,7 @@ static void DumpOutputs(const Model& model, const char* message)
 bool RunInferenceHandler(ApplicationContext& ctx)
 {
     auto& profiler = ctx.Get<Profiler&>("profiler");
-    auto& model = ctx.Get<Model&>("model");
+    auto& model    = ctx.Get<fwk::iface::Model&>("model");
 
     constexpr uint32_t dataPsnTxtInfStartX = 150;
     constexpr uint32_t dataPsnTxtInfStartY = 40;
@@ -142,8 +142,8 @@ bool RunInferenceHandler(ApplicationContext& ctx)
     std::string str_inf{"Running inference... "};
 
     /* Display message on the LCD - inference running. */
-    hal_lcd_display_text(str_inf.c_str(), str_inf.size(),
-                         dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+    hal_display_show_text(str_inf.c_str(), str_inf.size(),
+                          dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     if (!RunInference(model, profiler)) {
         return false;
@@ -151,9 +151,8 @@ bool RunInferenceHandler(ApplicationContext& ctx)
 
     /* Erase. */
     str_inf = std::string(str_inf.size(), ' ');
-    hal_lcd_display_text(
-                            str_inf.c_str(), str_inf.size(),
-                            dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+    hal_display_show_text(str_inf.c_str(), str_inf.size(),
+                          dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
     info("Final results:\n");
     info("Total number of inferences: 1\n");

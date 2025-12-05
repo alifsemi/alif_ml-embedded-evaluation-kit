@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,11 +68,10 @@ endif()
 add_subdirectory(${COMPONENTS_DIR}/cmsis_device ${CMAKE_BINARY_DIR}/cmsis_device)
 
 ## Platform component: stdout
-set(STDOUT_RETARGET ON CACHE BOOL "Retarget stdout/err to UART")
 add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
-## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+## Platform component: display
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: audio
 add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
@@ -94,7 +94,7 @@ target_include_directories(cmsis_device PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -104,13 +104,13 @@ endif()
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         cmsis_device
-        log
+        mlek_log
         platform_pmu
-        lcd_stubs
+        hal_display_stubs
         hal_audio_static_streams
         hal_camera_static_images
         audio_stubs
-        $<IF:$<BOOL:STDOUT_RETARGET>,stdout_retarget_pl011,stdout>)
+        $<IF:$<BOOL:${STDOUT_RETARGET}>,stdout_retarget_pl011,stdout>)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)
@@ -128,7 +128,7 @@ if (ETHOS_U_NPU_ENABLED)
         ethos_u_npu)
 
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED)
-        ## Platform component: Ethos-U timing apadpter initialization
+        ## Platform component: Ethos-U timing adapter initialization
         add_subdirectory(${COMPONENTS_DIR}/npu_ta ${CMAKE_BINARY_DIR}/npu_ta)
 
         target_link_libraries(${PLATFORM_DRIVERS_TARGET}

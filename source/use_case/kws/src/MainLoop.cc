@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,7 +26,7 @@
 
 namespace arm {
 namespace app {
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
     namespace kws {
         extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
@@ -36,13 +36,15 @@ namespace app {
 
 void MainLoop()
 {
-    arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::MicroNetKwsModel model; /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                arm::app::kws::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -52,7 +54,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::kws::g_ScoreThreshold);  /* Normalised score threshold. */

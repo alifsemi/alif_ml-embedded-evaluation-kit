@@ -9,7 +9,7 @@
   * [Problem installing Vela](#problem-installing-vela)
   * [No matching distribution found for Vela](#no-matching-distribution-found-for-vela)
     * [How to update Python3 package to newer version](#how-to-update-python3-package-to-newer-version)
-  * [Error trying to build on Arm Virtual Hardware](#error-trying-to-build-on-arm-virtual-hardware)
+  * [Error with Python environment](#error-with-python-environment)
   * [Internal Compiler Error](#internal-compiler-error)
   * [Build issues with WSL2](#build-issues-with-wsl2)
   * [Missing libpython when running FVP](#missing-libpython-when-running-fvp)
@@ -25,14 +25,18 @@ set accordingly. More information on these cmake parameters is detailed in their
 
 ## The application does not work with my custom model
 
-Ensure that your model is in a fully quantized `.tflite` file format, either `uint8` or `int8`, and that it has
-successfully been run through the Vela compiler.
+For TensorFlow Lite Micro, ensure that your model is in a fully quantized `.tflite` file format, either `uint8` or
+`int8`, and that it has successfully been run through the Vela compiler. For ExecuTorch ensure the model has been
+generated using the Arm AOT compiler (which calls Vela) with `--quantize` and `--delegate` options passed to it and the
+right target selected with `--target <name>`. See the AOT compiler script
+[aot_arm_compiler.py](https://github.com/pytorch/executorch/blob/d6e25e26bf27660ea937cff68cb4c49dbb041d5d/examples/arm/aot_arm_compiler.py)
+in ExecuTorch source tree for more details.
 
-Also, please check that the cmake parameters used match the input requirements of your new model.
+Also, please check that the CMake parameters used match the input requirements of your new model.
 
 > **Note:** The Vela tool is not available within this software project. It is a separate Python tool that is available
 > from: <https://pypi.org/project/ethos-u-vela/>. The source code is hosted on
-> <https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/>.
+> <https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela>.
 
 ## NPU configuration mismatch error when running inference
 
@@ -45,10 +49,13 @@ ERROR - Invoke failed.
 ERROR - Inference failed.
 ```
 
-It shows that the configuration of the Vela compiled `.tflite` file doesn't match the number of MACs units on the FVP.
+It shows that the configuration of model file doesn't match the number of MACs units on the FVP.
 
-The Vela configuration parameter `accelerator-config` used for producing the .`tflite` file that is used
-while building the application should match the MACs configuration that the FVP is emulating.
+For TensorFlow Lite Micro, the Vela configuration parameter `accelerator-config` used for producing the .`tflite` file
+that is used while building the application should match the MACs configuration that the FVP is emulating.
+For ExecuTorch, the Arm AOT compiler `--target` parameter determines the number of MACs the resulting model will run
+with.
+
 For example, if the `accelerator-config` from the Vela command was `ethos-u55-128`, the FVP should be emulating the
 128 MACs configuration of the Ethos™-U55 block(default FVP configuration). If the `accelerator-config` used was
 `ethos-u55-256`, the FVP must be executed with additional command line parameter to instruct it to emulate the
@@ -80,7 +87,7 @@ INFO - ARM ML Embedded Evaluation Kit
 If you see following errors when cloning the repository:
 
 - ```log
-   fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+   fatal: unable to access 'https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git':
    server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
   ```
 
@@ -92,7 +99,7 @@ If you see following errors when cloning the repository:
   ```
 
 - ```log
-  fatal: unable to access 'https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit/':
+  fatal: unable to access 'https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git':
   error:06FFF089:digital envelope routines:CRYPTO_internal:bad key length
   ```
 
@@ -228,9 +235,9 @@ b
 
 Next section of the documentation: [Appendix](appendix.md).
 
-## Error trying to build on Arm Virtual Hardware
+## Error with Python environment
 
-If trying to build on Arm Virtual Hardware and you encounter an error similar to the following:
+If trying to build and you encounter an error similar to the following:
 
 ```log
 The virtual environment was not created successfully because ensurepip is not

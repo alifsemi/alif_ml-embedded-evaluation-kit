@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -82,7 +82,11 @@ function(platform_custom_post_build)
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.map)
 
     set(SECTORS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sectors)
-    set(SECTORS_BIN_DIR ${SECTORS_DIR}/${use_case})
+    if (DEFINED use_case)
+        set(SECTORS_BIN_DIR ${SECTORS_DIR}/${use_case})
+    else()
+        set(SECTORS_BIN_DIR ${SECTORS_DIR}/${PARSED_TARGET_NAME})
+    endif()
 
     file(REMOVE_RECURSE ${SECTORS_BIN_DIR})
     file(MAKE_DIRECTORY ${SECTORS_BIN_DIR})
@@ -99,28 +103,31 @@ function(platform_custom_post_build)
             SECTION_PATTERNS    "${LINKER_SECTION_TAGS}"
             OUTPUT_BIN_NAMES    "${LINKER_OUTPUT_BIN_TAGS}")
 
-    set(MPS4_FPGA_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/scripts/mps4/${TARGET_SUBSYSTEM}/images.txt")
+    set(MPS4_FPGA_CONFIG "${MLEK_SCRIPTS_DIR}/mps4/${TARGET_SUBSYSTEM}/images.txt")
 
     add_custom_command(TARGET ${PARSED_TARGET_NAME}
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy ${MPS4_FPGA_CONFIG} ${SECTORS_DIR})
 
+    get_target_property(EXCLUDED_TARGET ${PARSED_TARGET_NAME} EXCLUDE_FROM_ALL)
+
     # Add tests for application on FVP if FVP path specified
-    if (BUILD_FVP_TESTS)
-        set(AXF_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PARSED_TARGET_NAME}.axf")
-        set(TEST_TARGET_NAME "${use_case}_fvp_test")
+    if (BUILD_FVP_TESTS AND NOT EXCLUDED_TARGET)
+        set(TEST_TARGET_NAME "${PARSED_TARGET_NAME}_fvp_test")
 
-        message(STATUS "Adding FVP test for ${use_case}")
-
+        message(STATUS "Adding FVP test for ${PARSED_TARGET_NAME}")
         add_test(
             NAME "${TEST_TARGET_NAME}"
-            COMMAND ${FVP_PATH} -a ${AXF_PATH}
+            COMMAND ${FVP_PATH} -a $<TARGET_FILE:${PARSED_TARGET_NAME}>
                 -C mps4_board.telnetterminal0.start_telnet=0
                 -C mps4_board.uart0.out_file='-'
                 -C mps4_board.uart0.shutdown_on_eot=1
                 -C mps4_board.visualisation.disable-visualisation=1
                 -C vis_hdlcd.disable_visualisation=1
                 --stat)
+
+        set_tests_properties(${TEST_TARGET_NAME} PROPERTIES
+            REQUIRED_FILES "$<TARGET_FILE:${PARSED_TARGET_NAME}>;${FVP_PATH}")
     endif ()
 
 endfunction()

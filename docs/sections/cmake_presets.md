@@ -71,15 +71,20 @@ where config-name is one of:
 ```commandline
 native
 mps3-300-gcc
-mps3-300-clang
+mps3-300-llvm
+mps3-300-armclang
 mps3-310-gcc
-mps3-310-clang
+mps3-310-llvm
+mps3-310-armclang
 mps4-315-gcc
-mps4-315-clang
+mps4-315-llvm
+mps4-315-armclang
 mps4-320-gcc
-mps4-320-clang
+mps4-320-llvm
+mps4-320-armclang
 simple-gcc
-simple-clang
+simple-llvm
+simple-armclang
 ```
 This will automatically configure and build the evaluation-kit into a corresponding folder.
 You can still pass in build flags as usual, for example:

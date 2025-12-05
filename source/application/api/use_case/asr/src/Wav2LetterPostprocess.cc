@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,30 +16,28 @@
  * limitations under the License.
  */
 #include "Wav2LetterPostprocess.hpp"
-
-#include "Wav2LetterModel.hpp"
 #include "log_macros.h"
 
 #include <cmath>
+#include <cstring>
 
 namespace arm {
 namespace app {
 
-    AsrPostProcess::AsrPostProcess(TfLiteTensor* outputTensor, AsrClassifier& classifier,
-            const std::vector<std::string>& labels, std::vector<ClassificationResult>& results,
-            const uint32_t outputContextLen,
-            const uint32_t blankTokenIdx, const uint32_t reductionAxisIdx
-            ):
-            m_classifier(classifier),
-            m_outputTensor(outputTensor),
-            m_labels{labels},
-            m_results(results),
-            m_outputContextLen(outputContextLen),
-            m_countIterations(0),
-            m_blankTokenIdx(blankTokenIdx),
-            m_reductionAxisIdx(reductionAxisIdx)
+    AsrPostProcess::AsrPostProcess(const fwk::iface::Model& model,
+                                   AsrClassifier& classifier,
+                                   const std::vector<std::string>& labels,
+                                   std::vector<ClassificationResult>& results,
+                                   const uint32_t inputContextLen,
+                                   const uint32_t blankTokenIdx,
+                                   const uint32_t reductionAxisIdx) :
+        m_classifier(classifier), m_model(model), m_labels{labels}, m_results(results),
+        m_inputContextLen(inputContextLen), m_countIterations(0), m_blankTokenIdx(blankTokenIdx),
+        m_reductionAxisIdx(reductionAxisIdx)
     {
-        this->m_outputInnerLen = AsrPostProcess::GetOutputInnerLen(this->m_outputTensor, this->m_outputContextLen);
+        this->m_outputTensor     = model.GetOutputTensor(0);
+        this->m_outputContextLen = this->GetOutputContextLen();
+        this->m_outputInnerLen   = this->GetOutputInnerLen();
         this->m_totalLen = (2 * this->m_outputContextLen + this->m_outputInnerLen);
     }
 
@@ -50,74 +49,55 @@ namespace app {
         }
 
         /* Irrespective of tensor type, we use unsigned "byte" */
-        auto* ptrData = tflite::GetTensorData<uint8_t>(this->m_outputTensor);
-        const uint32_t elemSz = AsrPostProcess::GetTensorElementSize(this->m_outputTensor);
+        const auto ptrData    = this->m_outputTensor->GetData<uint8_t>();
+        const uint32_t elemSz = fwk::iface::GetTensorDataTypeSize(this->m_outputTensor->Type());
 
         /* Other health checks. */
         if (0 == elemSz) {
             printf_err("Tensor type not supported for post processing\n");
             return false;
-        } else if (elemSz * this->m_totalLen > this->m_outputTensor->bytes) {
+        } else if (elemSz * this->m_totalLen > this->m_outputTensor->Bytes()) {
             printf_err("Insufficient number of tensor bytes\n");
             return false;
         }
 
         /* Which axis do we need to process? */
-        switch (this->m_reductionAxisIdx) {
-            case Wav2LetterModel::ms_outputRowsIdx:
-                this->EraseSectionsRowWise(
-                        ptrData, elemSz * this->m_outputTensor->dims->data[Wav2LetterModel::ms_outputColsIdx],
-                        this->m_lastIteration);
-                break;
-            default:
-                printf_err("Unsupported axis index: %" PRIu32 "\n", this->m_reductionAxisIdx);
-                return false;
+        if (this->m_reductionAxisIdx == this->m_classifier.m_outputTensorRowsIdx) {
+            this->EraseSectionsRowWise(
+                ptrData,
+                elemSz * this->m_outputTensor->Shape()[this->m_classifier.m_outputTensorColsIdx],
+                this->m_lastIteration);
+        } else {
+            printf_err("Unsupported axis index: %" PRIu32 "\n", this->m_reductionAxisIdx);
+            return false;
         }
-        this->m_classifier.GetClassificationResults(this->m_outputTensor,
-                this->m_results, this->m_labels, 1);
-
+        this->m_classifier.GetClassificationResults(
+            this->m_outputTensor, this->m_results, this->m_labels, 1);
         return true;
     }
 
-    bool AsrPostProcess::IsInputValid(TfLiteTensor* tensor, const uint32_t axisIdx) const
+    bool AsrPostProcess::IsInputValid(const std::shared_ptr<fwk::iface::TensorIface> tensor,
+                                      const uint32_t axisIdx) const
     {
         if (nullptr == tensor) {
             return false;
         }
 
-        if (static_cast<int>(axisIdx) >= tensor->dims->size) {
-            printf_err("Invalid axis index: %" PRIu32 "; Max: %d\n",
-                axisIdx, tensor->dims->size);
+        const auto shape = tensor->Shape();
+
+        if (axisIdx >= shape.size()) {
+            printf_err("Invalid axis index: %" PRIu32 "; Max: %zu\n", axisIdx, shape.size());
             return false;
         }
 
-        if (static_cast<int>(this->m_totalLen) !=
-                             tensor->dims->data[axisIdx]) {
-            printf_err("Unexpected tensor dimension for axis %" PRIu32", got %d.\n",
-                axisIdx, tensor->dims->data[axisIdx]);
+        if (this->m_totalLen != shape[axisIdx]) {
+            printf_err("Unexpected tensor dimension for axis %" PRIu32 ", got %zu.\n",
+                       axisIdx,
+                       shape[axisIdx]);
             return false;
         }
 
         return true;
-    }
-
-    uint32_t AsrPostProcess::GetTensorElementSize(TfLiteTensor* tensor)
-    {
-        switch(tensor->type) {
-            case kTfLiteUInt8:
-            case kTfLiteInt8:
-                return 1;
-            case kTfLiteInt16:
-                return 2;
-            case kTfLiteInt32:
-            case kTfLiteFloat32:
-                return 4;
-            default:
-                printf_err("Unsupported tensor type %s\n",
-                    TfLiteTypeGetName(tensor->type));
-        }
-
-        return 0;
     }
 
     bool AsrPostProcess::EraseSectionsRowWise(
@@ -157,57 +137,61 @@ namespace app {
         return true;
     }
 
-    uint32_t AsrPostProcess::GetNumFeatureVectors(const Model& model)
+    uint32_t AsrPostProcess::GetNumFeatureVectors() const
     {
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        const int inputRows = std::max(inputTensor->dims->data[Wav2LetterModel::ms_inputRowsIdx], 0);
+        const auto inputTensor = this->m_model.GetInputTensor(0);
+        const size_t inputRows = inputTensor->Shape()[this->m_classifier.m_inputTensorRowsIdx];
         if (inputRows == 0) {
             printf_err("Error getting number of input rows for axis: %" PRIu32 "\n",
-                    Wav2LetterModel::ms_inputRowsIdx);
+                       this->m_classifier.m_inputTensorRowsIdx);
         }
         return inputRows;
     }
 
-    uint32_t AsrPostProcess::GetOutputInnerLen(const TfLiteTensor* outputTensor, const uint32_t outputCtxLen)
+    uint32_t AsrPostProcess::GetOutputInnerLen() const
     {
-        const uint32_t outputRows = std::max(outputTensor->dims->data[Wav2LetterModel::ms_outputRowsIdx], 0);
+        const uint32_t outputRows =
+            this->m_outputTensor->Shape()[this->m_classifier.m_outputTensorRowsIdx];
         if (outputRows == 0) {
             printf_err("Error getting number of output rows for axis: %" PRIu32 "\n",
-                    Wav2LetterModel::ms_outputRowsIdx);
+                       this->m_classifier.m_outputTensorRowsIdx);
         }
 
         /* Watching for underflow. */
-        int innerLen = (outputRows - (2 * outputCtxLen));
-
-        return std::max(innerLen, 0);
-    }
-
-    uint32_t AsrPostProcess::GetOutputContextLen(const Model& model, const uint32_t inputCtxLen)
-    {
-        const uint32_t inputRows = AsrPostProcess::GetNumFeatureVectors(model);
-        const uint32_t inputInnerLen = inputRows - (2 * inputCtxLen);
-        constexpr uint32_t ms_outputRowsIdx = Wav2LetterModel::ms_outputRowsIdx;
-
-        /* Check to make sure that the input tensor supports the above
-         * context and inner lengths. */
-        if (inputRows <= 2 * inputCtxLen || inputRows <= inputInnerLen) {
-            printf_err("Input rows not compatible with ctx of %" PRIu32 "\n",
-                       inputCtxLen);
+        if (this->m_outputContextLen * 2 > outputRows) {
+            printf_err("Invalid context length.\n");
             return 0;
         }
 
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        const uint32_t outputRows = std::max(outputTensor->dims->data[ms_outputRowsIdx], 0);
+        return (outputRows - (2 * this->m_outputContextLen));
+    }
+
+    uint32_t AsrPostProcess::GetOutputContextLen() const
+    {
+        const uint32_t inputRows     = this->GetNumFeatureVectors();
+        const uint32_t inputInnerLen = inputRows - (2 * this->m_inputContextLen);
+        const uint32_t outputRowsIdx = this->m_classifier.m_outputTensorRowsIdx;
+
+        /* Check to make sure that the input tensor supports the above
+         * context and inner lengths. */
+        if (inputRows <= 2 * this->m_inputContextLen || inputRows <= inputInnerLen) {
+            printf_err("Input rows not compatible with ctx of %" PRIu32 "\n",
+                       this->m_inputContextLen);
+            return 0;
+        }
+
+        const auto outputTensor   = this->m_model.GetOutputTensor(0);
+        const uint32_t outputRows = outputTensor->Shape()[outputRowsIdx];
         if (outputRows == 0) {
             printf_err("Error getting number of output rows for axis: %" PRIu32 "\n",
-                       Wav2LetterModel::ms_outputRowsIdx);
+                       this->m_classifier.m_outputTensorRowsIdx);
             return 0;
         }
 
         const float inOutRowRatio = static_cast<float>(inputRows) /
                                      static_cast<float>(outputRows);
 
-        return std::round(static_cast<float>(inputCtxLen) / inOutRowRatio);
+        return std::round(static_cast<float>(this->m_inputContextLen) / inOutRowRatio);
     }
 
 } /* namespace app */

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,7 +22,6 @@
 
 #include "hal.h"                    /* our hardware abstraction api */
 #include "log_macros.h"
-#include "TensorFlowLiteMicro.hpp"  /* our inference logic api */
 
 #include <cstdio>
 #include <new>
@@ -39,7 +38,9 @@ static void PrintApplicationIntro()
 {
     info("%s\n", PRJ_DES_STR);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
-    info("Copyright 2021-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>\n\n");
+    info("Compiler: %s\n", PRJ_COMPILER);
+    info("Copyright 2021-2025 Arm Limited and/or "
+         "its affiliates <open-source-office@arm.com>\n\n");
 }
 
 static void out_of_heap()
@@ -53,9 +54,6 @@ int main ()
     if (hal_platform_init()) {
         /* Application information, UART should have been initialised. */
         PrintApplicationIntro();
-
-        /* Enable TensorFlow Lite Micro logging. */
-        EnableTFLMLog();
 
         std::set_new_handler(out_of_heap);
 

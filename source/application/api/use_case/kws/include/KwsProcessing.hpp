@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   inputTensor        Pointer to the TFLite Micro input Tensor.
+         * @param[in]   inputTensor        Shared pointer representing a tensor interface object.
          * @param[in]   numFeatures        How many MFCC features to use.
          * @param[in]   numFeatureFrames   Number of MFCC vectors that need to be calculated
          *                                 for an inference.
@@ -45,12 +45,15 @@ namespace app {
          *                                 sliding a window through the audio sample.
          * @param[in]   mfccFrameStride    Number of audio samples between consecutive windows.
          **/
-        explicit KwsPreProcess(TfLiteTensor* inputTensor, size_t numFeatures, size_t numFeatureFrames,
-                               int mfccFrameLength, int mfccFrameStride);
+        explicit KwsPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                               size_t numFeatures,
+                               size_t numFeatureFrames,
+                               int mfccFrameLength,
+                               int mfccFrameStride);
 
         /**
          * @brief       Should perform pre-processing of 'raw' input audio data and load it into
-         *              TFLite Micro input tensors ready for inference.
+         *              input tensors ready for inference.
          * @param[in]   input      Pointer to the data that pre-processing will work on.
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
@@ -61,7 +64,7 @@ namespace app {
         size_t m_audioDataStride;       /* Amount of audio to stride across if doing >1 inference in longer clips. */
 
     private:
-        TfLiteTensor* m_inputTensor;    /* Model input tensor. */
+        const std::shared_ptr<fwk::iface::TensorIface> m_inputTensor; /* Model input tensor. */
         const int m_mfccFrameLength;
         const int m_mfccFrameStride;
         const size_t m_numMfccFrames;   /* How many sets of m_numMfccFeats. */
@@ -86,15 +89,16 @@ namespace app {
          * @param[in]       cacheSize     Size of the feature vectors cache (number of feature vectors).
          * @return          Function to be called providing audio sample and sliding window index.
          */
-        std::function<void (std::vector<int16_t>&, int, bool, size_t)>
-        GetFeatureCalculator(audio::MicroNetKwsMFCC&  mfcc,
-                             TfLiteTensor*            inputTensor,
-                             size_t                   cacheSize);
+        std::function<void(std::vector<int16_t>&, int, bool, size_t)>
+        GetFeatureCalculator(audio::MicroNetKwsMFCC& mfcc,
+                             std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                             size_t cacheSize);
 
-        template<class T>
-        std::function<void (std::vector<int16_t>&, size_t, bool, size_t)>
-        FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
-                    std::function<std::vector<T> (std::vector<int16_t>& )> compute);
+        template <class T>
+        std::function<void(std::vector<int16_t>&, size_t, bool, size_t)>
+        FeatureCalc(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                    size_t cacheSize,
+                    std::function<std::vector<T>(std::vector<int16_t>&)> compute);
     };
 
     /**
@@ -105,7 +109,7 @@ namespace app {
     class KwsPostProcess : public BasePostProcess {
 
     private:
-        TfLiteTensor* m_outputTensor;                      /* Model output tensor. */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor; /* Model output tensor. */
         KwsClassifier& m_kwsClassifier;                    /* KWS Classifier object. */
         const std::vector<std::string>& m_labels;          /* KWS Labels. */
         std::vector<ClassificationResult>& m_results;      /* Results vector for a single inference. */
@@ -113,14 +117,16 @@ namespace app {
     public:
         /**
          * @brief           Constructor
-         * @param[in]       outputTensor   Pointer to the TFLite Micro output Tensor.
+         * @param[in]       outputTensor   Shared pointer representing a tensor interface object
          * @param[in]       classifier     Classifier object used to get top N results from classification.
          * @param[in]       labels         Vector of string labels to identify each output of the model.
          * @param[in/out]   results        Vector of classification results to store decoded outputs.
          **/
-        KwsPostProcess(TfLiteTensor* outputTensor, KwsClassifier& classifier,
+        KwsPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                       KwsClassifier& classifier,
                        const std::vector<std::string>& labels,
-                       std::vector<ClassificationResult>& results, size_t averagingWindowLen = 1);
+                       std::vector<ClassificationResult>& results,
+                       size_t averagingWindowLen = 1);
 
         /**
          * @brief    Should perform post-processing of the result of inference then

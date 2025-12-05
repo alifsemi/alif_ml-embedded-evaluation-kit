@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022-2023, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,36 +17,32 @@
  */
 #include "KwsClassifier.hpp"
 
-#include "TensorFlowLiteMicro.hpp"
 #include "PlatformMath.hpp"
+#include "Tensor.hpp"
 #include "log_macros.h"
-#include "../include/KwsClassifier.hpp"
 
-
-#include <vector>
 #include <algorithm>
-#include <string>
-#include <set>
-#include <cstdint>
 #include <cinttypes>
-
+#include <string>
+#include <vector>
 
 namespace arm {
 namespace app {
 
-    bool KwsClassifier::GetClassificationResults(TfLiteTensor* outputTensor,
-            std::vector<ClassificationResult>& vecResults, const std::vector <std::string>& labels,
-            uint32_t topNCount, bool useSoftmax, std::vector<std::vector<float>>& resultHistory)
+    bool KwsClassifier::GetClassificationResults(
+        const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        std::vector<ClassificationResult>& vecResults,
+        const std::vector<std::string>& labels,
+        uint32_t topNCount,
+        bool useSoftmax,
+        std::vector<std::vector<float>>& resultHistory)
     {
         if (outputTensor == nullptr) {
             printf_err("Output vector is null pointer.\n");
             return false;
         }
 
-        uint32_t totalOutputSize = 1;
-        for (int inputDim = 0; inputDim < outputTensor->dims->size; inputDim++) {
-            totalOutputSize *= outputTensor->dims->data[inputDim];
-        }
+        const uint32_t totalOutputSize = outputTensor->GetNumElements();
 
         /* Health check */
         if (totalOutputSize < topNCount) {
@@ -63,7 +60,7 @@ namespace app {
         vecResults.clear();
 
         /* De-Quantize Output Tensor */
-        QuantParams quantParams = GetTensorQuantParams(outputTensor);
+        auto quantParams = outputTensor->GetQuantParams();
 
         /* Floating point tensor data to be populated
          * NOTE: The assumption here is that the output tensor size isn't too
@@ -72,34 +69,34 @@ namespace app {
         resultData.resize(totalOutputSize);
 
         /* Populate the floating point buffer */
-        switch (outputTensor->type) {
-            case kTfLiteUInt8: {
-                uint8_t* tensor_buffer = tflite::GetTensorData<uint8_t>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    resultData[i] = quantParams.scale *
-                        (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
-                }
-                break;
+        switch (outputTensor->Type()) {
+        case fwk::iface::TensorType::UINT8: {
+            uint8_t* tensor_buffer = outputTensor->GetData<uint8_t>();
+            for (size_t i = 0; i < totalOutputSize; ++i) {
+                resultData[i] =
+                    quantParams.scale * (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
             }
-            case kTfLiteInt8: {
-                int8_t* tensor_buffer = tflite::GetTensorData<int8_t>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    resultData[i] = quantParams.scale *
-                        (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
-                }
-                break;
+            break;
+        }
+        case fwk::iface::TensorType::INT8: {
+            int8_t* tensor_buffer = outputTensor->GetData<int8_t>();
+            for (size_t i = 0; i < totalOutputSize; ++i) {
+                resultData[i] =
+                    quantParams.scale * (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
             }
-            case kTfLiteFloat32: {
-                float* tensor_buffer = tflite::GetTensorData<float>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    resultData[i] = tensor_buffer[i];
-                }
-                break;
+            break;
+        }
+        case fwk::iface::TensorType::FP32: {
+            float* tensor_buffer = outputTensor->GetData<float>();
+            for (size_t i = 0; i < totalOutputSize; ++i) {
+                resultData[i] = tensor_buffer[i];
             }
-            default:
-                printf_err("Tensor type %s not supported by classifier\n",
-                    TfLiteTypeGetName(outputTensor->type));
-                return false;
+            break;
+        }
+        default:
+            printf_err("Tensor type %s not supported by classifier\n",
+                       fwk::iface::GetTensorDataTypeName(outputTensor->Type()));
+            return false;
         }
 
         if (useSoftmax) {

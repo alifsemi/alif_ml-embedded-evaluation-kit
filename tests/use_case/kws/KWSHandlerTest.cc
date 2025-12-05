@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -39,20 +39,22 @@ namespace arm {
 TEST_CASE("Model info")
 {
     /* Model wrapper object. */
-    arm::app::MicroNetKwsModel model;
+    arm::app::fwk::tflm::MicroNetKwsModel model{};
 
-    /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen()));
+    REQUIRE_FALSE(model.IsInited());
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                arm::app::kws::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
-    REQUIRE(model.ShowModelInfoHandler());
+    model.LogInterpreterInfo();
+    REQUIRE(model.IsInited());
 }
 
 TEST_CASE("Inference run all clips")
@@ -61,20 +63,19 @@ TEST_CASE("Inference run all clips")
     hal_platform_init();
 
     /* Model wrapper object. */
-    arm::app::MicroNetKwsModel model;
-
-    /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen()));
+    arm::app::fwk::tflm::MicroNetKwsModel model{};
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                arm::app::kws::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);  /* 640 sample length for MicroNet. */
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);  /* 320 sample stride for MicroNet. */
     caseContext.Set<float>("scoreThreshold", 0.7);       /* Normalised score threshold. */

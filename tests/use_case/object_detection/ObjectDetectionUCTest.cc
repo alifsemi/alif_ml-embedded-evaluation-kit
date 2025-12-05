@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,20 +38,23 @@ namespace arm {
 TEST_CASE("Model info")
 {
     /* Model wrapper object. */
-    arm::app::YoloFastestModel model;
+    arm::app::fwk::tflm::YoloFastestModel model;
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                arm::app::object_detection::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::object_detection::GetModelPointer(),
-                       arm::app::object_detection::GetModelLen()));
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
-    REQUIRE(model.ShowModelInfoHandler());
+    model.LogInterpreterInfo();
+    REQUIRE(model.IsInited());
 }
 
 
@@ -61,20 +64,22 @@ TEST_CASE("Inference by index")
     hal_platform_init();
 
     /* Model wrapper object. */
-    arm::app::YoloFastestModel model;
+    arm::app::fwk::tflm::YoloFastestModel model;
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                arm::app::object_detection::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::object_detection::GetModelPointer(),
-                       arm::app::object_detection::GetModelLen()));
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext));
 }
@@ -86,20 +91,21 @@ TEST_CASE("Inference run all images")
     hal_platform_init();
 
     /* Model wrapper object. */
-    arm::app::YoloFastestModel model;
+    arm::app::fwk::tflm::YoloFastestModel model;
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                arm::app::object_detection::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::object_detection::GetModelPointer(),
-                       arm::app::object_detection::GetModelLen()));
+    REQUIRE(model.Init(computeMem, modelMem));
 
     /* Instantiate application context. */
     arm::app::ApplicationContext caseContext;
 
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     REQUIRE(arm::app::ObjectDetectionHandler(caseContext));
 }

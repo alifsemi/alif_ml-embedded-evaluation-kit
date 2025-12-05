@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,13 @@
 #ifndef ASR_WAV2LETTER_PREPROCESS_HPP
 #define ASR_WAV2LETTER_PREPROCESS_HPP
 
-#include "TensorFlowLiteMicro.hpp"
-#include "Wav2LetterMfcc.hpp"
 #include "AudioUtils.hpp"
-#include "DataStructures.hpp"
 #include "BaseProcessing.hpp"
+#include "DataStructures.hpp"
+#include "Tensor.hpp"
+#include "Wav2LetterMfcc.hpp"
 #include "log_macros.h"
+#include <memory>
 
 namespace arm {
 namespace app {
@@ -35,18 +36,18 @@ namespace app {
     public:
         /**
          * @brief       Constructor.
-         * @param[in]   inputTensor        Pointer to the TFLite Micro input Tensor.
+         * @param[in]   inputTensor        Shared pointer representing a tensor interface object.
          * @param[in]   numMfccFeatures    Number of MFCC features per window.
          * @param[in]   numFeatureFrames   Number of MFCC vectors that need to be calculated
          *                                 for an inference.
          * @param[in]   mfccWindowLen      Number of audio elements to calculate MFCC features per window.
          * @param[in]   mfccWindowStride   Stride (in number of elements) for moving the MFCC window.
          */
-        AsrPreProcess(TfLiteTensor* inputTensor,
-                      uint32_t  numMfccFeatures,
-                      uint32_t  numFeatureFrames,
-                      uint32_t  mfccWindowLen,
-                      uint32_t  mfccWindowStride);
+        AsrPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                      uint32_t numMfccFeatures,
+                      uint32_t numFeatureFrames,
+                      uint32_t mfccWindowLen,
+                      uint32_t mfccWindowStride);
 
         /**
          * @brief       Calculates the features required from audio data. This
@@ -161,7 +162,7 @@ namespace app {
 
     private:
         audio::Wav2LetterMFCC   m_mfcc;          /* MFCC instance. */
-        TfLiteTensor*           m_inputTensor;   /* Model input tensor. */
+        std::shared_ptr<fwk::iface::TensorIface> m_inputTensor; /* Model input tensor. */
 
         /* Actual buffers to be populated. */
         Array2d<float>   m_mfccBuf;              /* Contiguous buffer 1D: MFCC */

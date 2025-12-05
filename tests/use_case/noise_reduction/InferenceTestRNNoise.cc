@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,18 +35,19 @@ namespace app {
 namespace test {
 namespace noise_reduction {
 
-    bool RunInference(arm::app::Model& model, const std::vector<std::vector<int8_t>> inData)
+    bool RunInference(arm::app::fwk::iface::Model& model,
+                      const std::vector<std::vector<int8_t>> inData)
     {
         for (size_t i = 0; i < model.GetNumInputs(); ++i) {
-            TfLiteTensor* inputTensor = model.GetInputTensor(i);
+            auto inputTensor = model.GetInputTensor(i);
             REQUIRE(inputTensor);
-            memcpy(inputTensor->data.data, inData[i].data(), inData[i].size());
+            memcpy(inputTensor->GetData(), inData[i].data(), inData[i].size());
         }
 
         return model.RunInference();
     }
 
-    bool RunInferenceRandom(arm::app::Model& model)
+    bool RunInferenceRandom(arm::app::fwk::iface::Model& model)
     {
         std::random_device rndDevice;
         std::mt19937 mersenneGen{rndDevice()};
@@ -56,9 +57,9 @@ namespace noise_reduction {
 
         std::vector<std::vector<int8_t>> randomInput{NUMBER_OF_IFM_FILES};
         for (size_t i = 0; i < model.GetNumInputs(); ++i) {
-            TfLiteTensor* inputTensor = model.GetInputTensor(i);
+            auto inputTensor = model.GetInputTensor(i);
             REQUIRE(inputTensor);
-            randomInput[i].resize(inputTensor->bytes);
+            randomInput[i].resize(inputTensor->Bytes());
             std::generate(std::begin(randomInput[i]), std::end(randomInput[i]), gen);
         }
 
@@ -68,38 +69,37 @@ namespace noise_reduction {
 
     TEST_CASE("Running random inference with Tflu and RNNoise Int8", "[RNNoise]")
     {
-        arm::app::RNNoiseModel model{};
-
+        arm::app::fwk::tflm::RNNoiseModel model; /* Model wrapper object. */
         REQUIRE_FALSE(model.IsInited());
-        REQUIRE(model.Init(arm::app::tensorArena,
-                           sizeof(arm::app::tensorArena),
-                           arm::app::rnn::GetModelPointer(),
-                           arm::app::rnn::GetModelLen()));
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                    arm::app::rnn::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model.Init(computeMem, modelMem));
         REQUIRE(model.IsInited());
-
         REQUIRE(RunInferenceRandom(model));
     }
 
     template <typename T>
     void TestInference(const std::vector<std::vector<T>> input_goldenFV,
                        const std::vector<std::vector<T>> output_goldenFV,
-                       arm::app::Model& model)
+                       arm::app::fwk::iface::Model& model)
     {
         for (size_t i = 0; i < model.GetNumInputs(); ++i) {
-            TfLiteTensor* inputTensor = model.GetInputTensor(i);
+            auto inputTensor = model.GetInputTensor(i);
             REQUIRE(inputTensor);
         }
 
         REQUIRE(RunInference(model, input_goldenFV));
 
         for (size_t i = 0; i < model.GetNumOutputs(); ++i) {
-            TfLiteTensor* outputTensor = model.GetOutputTensor(i);
+            auto outputTensor = model.GetOutputTensor(i);
 
             REQUIRE(outputTensor);
-            auto tensorData = tflite::GetTensorData<T>(outputTensor);
+            auto tensorData = outputTensor->GetData<T>();
             REQUIRE(tensorData);
 
-            for (size_t j = 0; j < outputTensor->bytes; j++) {
+            for (size_t j = 0; j < outputTensor->Bytes(); j++) {
                 REQUIRE(static_cast<int>(tensorData[j]) ==
                         static_cast<int>((output_goldenFV[i][j])));
             }
@@ -128,13 +128,13 @@ namespace noise_reduction {
 
         DYNAMIC_SECTION("Executing inference with re-init")
         {
-            arm::app::RNNoiseModel model{};
-
+            arm::app::fwk::tflm::RNNoiseModel model; /* Model wrapper object. */
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init(arm::app::tensorArena,
-                               sizeof(arm::app::tensorArena),
-                               arm::app::rnn::GetModelPointer(),
-                               arm::app::rnn::GetModelLen()));
+            arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                        arm::app::rnn::GetModelLen()};
+            arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                          sizeof(arm::app::tensorArena)};
+            REQUIRE(model.Init(computeMem, modelMem));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(goldenInputFV, goldenOutputFV, model);

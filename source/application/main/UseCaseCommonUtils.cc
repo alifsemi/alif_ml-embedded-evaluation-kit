@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -23,7 +23,8 @@
 
 namespace arm {
 namespace app {
-    bool PresentInferenceResult(const std::vector<arm::app::ClassificationResult>& results)
+
+    bool PresentInferenceResult(const std::vector<ClassificationResult>& results)
     {
         constexpr uint32_t dataPsnTxtStartX1 = 150;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
@@ -33,7 +34,7 @@ namespace app {
 
         constexpr uint32_t dataPsnTxtYIncr = 16; /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result. */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -47,12 +48,12 @@ namespace app {
                                     std::to_string(results[i].m_labelIdx) + " (" +
                                     std::to_string(results[i].m_normalisedVal) + ")";
 
-            hal_lcd_display_text(
+            hal_display_show_text(
                 resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 
             resultStr = std::to_string(i + 1) + ") " + results[i].m_label;
-            hal_lcd_display_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
+            hal_display_show_text(resultStr.c_str(), resultStr.size(), dataPsnTxtStartX2, rowIdx2, 0);
             rowIdx2 += dataPsnTxtYIncr;
 
             info("%" PRIu32 ") %" PRIu32 " (%f) -> %s\n",
@@ -65,7 +66,7 @@ namespace app {
         return true;
     }
 
-    bool RunInference(arm::app::Model& model, Profiler& profiler)
+    bool RunInference(fwk::iface::Model& model, Profiler& profiler)
     {
         profiler.StartProfiling("Inference");
         bool runInf = model.RunInference();
@@ -74,15 +75,15 @@ namespace app {
         return runInf;
     }
 
-    int ReadUserInputAsInt()
+#ifdef INTERACTIVE_MODE
+    void AwaitUserInput()
     {
-        char chInput[128];
-        memset(chInput, 0, sizeof(chInput));
-
-        hal_get_user_input(chInput, sizeof(chInput));
-        return atoi(chInput);
+        info("Press any key to continue...\n");
+        hal_await_user_input();
     }
+#endif /* INTERACTIVE_MODE */
 
+#if VERIFY_TEST_OUTPUT
     void DumpTensorData(const uint8_t* tensorData, size_t size, size_t lineBreakForNumElements)
     {
         char strhex[8];
@@ -114,5 +115,6 @@ namespace app {
 
         DumpTensorData(tensorData, tensorSz, lineBreakForNumElements);
     }
+#endif /* VERIFY_TEST_OUTPUT */
 } /* namespace app */
 } /* namespace arm */

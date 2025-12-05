@@ -21,6 +21,8 @@ This document describes the process of setting up and running the ArmÂ® *Ethosâ„
 
 Use-case code could be found in the following directory: [source/use_case/kws](../../source/use_case/kws).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Preprocessing and feature extraction
 
 The `MicroNet` keyword spotting model that is used with the Code Samples expects audio data to be preprocessed in a
@@ -76,7 +78,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 
 In addition to the already specified build option in the main documentation, the Keyword Spotting use-case adds:
 
-- `kws_MODEL_TFLITE_PATH` - The path to the NN model file in `TFLite` format. The model is processed and then included
+- `kws_MODEL_PATH` - The path to the NN model file in `TFLite` format. The model is processed and then included
   into the application `axf` file. The default value points to one of the delivered set of models. Note that the
   parameters `kws_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. In
   other words:
@@ -237,7 +239,7 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `kws_MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `kws_MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
@@ -248,28 +250,28 @@ To run the application with a custom model, you must provide a `labels_<model_na
 associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
 provided `micronet_kws_labels.txt` file for an example.
 
-Then, you must set `kws_MODEL_TFLITE_PATH` to the location of the Vela processed model file and `kws_LABELS_TXT_FILE`to
+Then, you must set `kws_MODEL_PATH` to the location of the Vela processed model file and `kws_LABELS_TXT_FILE`to
 the location of the associated labels file.
 
 For example:
 
 ```commandline
 cmake .. \
-    -Dkws_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dkws_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -Dkws_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=kws
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `kws_MODEL_TFLITE_PATH` and labels text file pointed to by `kws_LABELS_TXT_FILE`
+The `.tflite` model file pointed to by `kws_MODEL_PATH` and labels text file pointed to by `kws_LABELS_TXT_FILE`
 are converted to C++ files during the CMake configuration stage. They are then compiled into the application for
 performing inference with.
 
 The log from the configuration stage tells you what model path and labels file have been used, for example:
 
 ```log
--- User option kws_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option kws_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- User option kws_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
 ...
@@ -329,77 +331,9 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `kws_FILE_PATH` points to a single file, or even a folder that contains a single
-input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user.
-
-For example:
-
-```log
-User input required
-Enter option number from:
-
-1. Classify next audio clip
-2. Classify audio clip at chosen index
-3. Run classification on all audio clips
-4. Show NN model info
-5. List audio clips
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next audio clip: Runs a single inference on the next in line.
-
-2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
-
-    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
-
-3. Run ... on all: Triggers sequential inference executions on all built-in applications.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 490 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  49
-    INFO - 		2:  10
-    INFO - 		3:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.201095
-    INFO - ZeroPoint[0] = -5
-    INFO - Model OUTPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 12 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  12
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.056054
-    INFO - ZeroPoint[0] = -54
-    INFO - Activation buffer (a.k.a tensor arena) size used: 127068
-    INFO - Number of operators: 0
-    INFO - 	Operator 0: ethos-u
-    ```
-
-5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    [INFO] List of Files:
-    [INFO] 0 => down.wav
-    [INFO] 1 => right_left_up.wav
-    [INFO] 2 => yes.wav
-    [INFO] 3 => yes_no_go_stop.wav
-    ```
+After the application has started inferences are executed on inputs from `kws_FILE_PATH`.
 
 ### Running Keyword Spotting
-
-Please select the first menu option to execute inference on the first file.
 
 The following example illustrates the output for classification:
 
