@@ -47,5 +47,5 @@ USER_OPTION(CORTEX_DFP_SRC_PATH
 
 USER_OPTION(CMSIS_DSP_MIN_REQ_SRC_LIST
     "Reduce compile time by only using required CMSIS-DSP sources"
-    ON
+    OFF
     BOOL)

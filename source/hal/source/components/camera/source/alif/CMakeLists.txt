@@ -55,7 +55,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
 endif()
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -66,7 +66,7 @@ endif()
 target_link_libraries(${CAMERA_ALIF_COMPONENT_TARGET} PUBLIC
     ${CAMERA_IFACE_TARGET}
     hal_camera_interface
-    log
+    mlek_log
     cmsis_device
     platform_drivers_core
     rte_components)

@@ -51,7 +51,7 @@ endif()
 # There is a known issue with Arm GNU Compiler version 14.
 # See https://github.com/ARM-software/CMSIS-DSP/issues/242
 # and https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/issues/4
-set(DISABLEFLOAT16          ON)
+set(DISABLEFLOAT16          OFF)
 
 add_subdirectory(${CMSIS_DSP_SRC_DIR} ${CMAKE_BINARY_DIR}/cmsis-dsp)
 

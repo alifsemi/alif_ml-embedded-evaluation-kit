@@ -168,11 +168,10 @@ endif()
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 
 ## Platform component: stdout
-set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART" FORCE)
-add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
+#add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
 ## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: lvgl port
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
