@@ -39,7 +39,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HP \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------ Image classification on CM55-HP with GCC --------------------------
@@ -47,7 +47,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HP \
 -DCONSOLE_UART=4 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
 make ethos-u-alif_img_class -j
@@ -60,7 +60,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------Keyword spotting on CM55-HE GCC ----------------------------
@@ -68,7 +68,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------Keyword spotting on CM55-HE GCC E1C ----------------
@@ -76,7 +76,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=DevKit-e1c ..
 
 ; ------------Keyword spotting on CM55-HE GCC E8 ----------------
@@ -84,7 +84,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
--DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=DevKit-e8 ..
 
 make ethos-u-alif_kws -j4
