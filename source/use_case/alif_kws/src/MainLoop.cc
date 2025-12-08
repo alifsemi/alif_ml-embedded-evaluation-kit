@@ -67,13 +67,15 @@ void MainLoop()
 {
     init_trigger_tx();
 
-    arm::app::MicroNetKwsModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::MicroNetKwsModel model;  /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                arm::app::kws::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::kws::GetModelPointer(),
-                    arm::app::kws::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -83,7 +85,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"kws"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<int>("frameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("frameStride", arm::app::kws::g_FrameStride);
     caseContext.Set<int>("audioRate", arm::app::kws::g_AudioRate);
@@ -99,20 +101,20 @@ void MainLoop()
 
     bool executionSuccessful = true;
 
-#if USE_APP_MENU
-    constexpr bool bUseMenu = true;
-#else
-    constexpr bool bUseMenu = false;
-#endif
+// #if USE_APP_MENU
+//     constexpr bool bUseMenu = true;
+// #else
+//     constexpr bool bUseMenu = false;
+// #endif
 
     /* Loop. */
     do {
         int menuOption = MENU_OPT_RUN_CONTINUOUS;
-        if (bUseMenu) {
-            DisplayMenu();
-            menuOption = arm::app::ReadUserInputAsInt();
-            printf("\n");
-        }
+        // if (bUseMenu) {
+        //     DisplayMenu();
+        //     menuOption = arm::app::ReadUserInputAsInt();
+        //     printf("\n");
+        // }
         switch (menuOption) {
             case MENU_OPT_RUN_ONCE:
                 executionSuccessful = alif::app::ClassifyAudioHandler(caseContext, true);
@@ -124,6 +126,6 @@ void MainLoop()
                 printf("Incorrect choice, try again.");
                 break;
         }
-    } while (executionSuccessful || bUseMenu);
+    } while (executionSuccessful/* || bUseMenu*/);
     info("Main loop terminated.\n");
 }
