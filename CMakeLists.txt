@@ -231,9 +231,15 @@ foreach(use_case ${USE_CASES})
     # If an API exists for this use case, include the projects here and add to
     # the library list.
     foreach(API_TO_USE ${${use_case}_API_LIST})
-        if (ETHOS_U_NPU_ASSUMED)
-            target_compile_definitions(${API_TO_USE}_api PRIVATE
-            ETHOS_U_NPU_ASSUMED=1)
+        # We need this so that alif_ui is not linked if not defined in API_LIST
+        if (NOT TARGET ${API_TO_USE}_api)
+            add_subdirectory(
+                ${SRC_PATH}/application/api/use_case/${API_TO_USE}  # Source path
+                ${CMAKE_BINARY_DIR}/api/use_case/${API_TO_USE})     # Binary path
+            if (ETHOS_U_NPU_ASSUMED)
+                target_compile_definitions(${API_TO_USE}_api PRIVATE
+                    ETHOS_U_NPU_ASSUMED=1)
+            endif()
         endif()
         # Check if the target now exists
         if (TARGET ${API_TO_USE}_api)

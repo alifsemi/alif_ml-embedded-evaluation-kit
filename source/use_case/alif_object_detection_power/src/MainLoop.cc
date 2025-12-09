@@ -83,19 +83,22 @@ void MainLoop()
     BOARD_BUTTON2_Init(button2_cb);
     BOARD_BUTTON2_Control(BOARD_BUTTON_ENABLE_INTERRUPT);
 
-    arm::app::YoloFastestModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::YoloFastestModel model;  /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                arm::app::object_detection::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::object_detection::GetModelPointer(),
-                    arm::app::object_detection::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
 
     if (!alif::app::ObjectDetectionInit(model)) {
         printf_err("Failed to initialise use case handler\n");
+        return;
     }
 
     /* Instantiate application context. */
@@ -103,22 +106,20 @@ void MainLoop()
 
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     /* Loop. */
     do {
         alif::app::ObjectDetectionHandler(caseContext);
 
-        __disable_irq();
         while (obj_button_pressed) {
             info("Going to chip STOP mode...\n");
+            __disable_irq();
             pm_core_enter_deep_sleep_request_subsys_off();
             __enable_irq();
             __ISB();
             __disable_irq();
-            info("Waiting for all IRQ are handled...\n");
         }
-        __enable_irq();
 
     } while (1);
 }

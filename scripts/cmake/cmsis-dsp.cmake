@@ -86,6 +86,10 @@ if (CMSIS_DSP_MIN_REQ_SRC_LIST)
     message(DEBUG "Required CMSIS DSP sources: ${_MLEK_CMSIS_DSP_SOURCES}")
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(CMSISDSP PUBLIC -flax-vector-conversions)
+endif()
+
 # Enable fast-math option
 target_compile_options(CMSISDSP PRIVATE -ffast-math)
 

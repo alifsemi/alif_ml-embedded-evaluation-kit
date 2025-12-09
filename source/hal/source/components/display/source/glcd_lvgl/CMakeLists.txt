@@ -62,6 +62,7 @@ target_compile_definitions(${DISPLAY_LVGL_TARGET}
 ## Add dependencies
 target_link_libraries(${DISPLAY_LVGL_TARGET} PUBLIC
     hal_display_iface
+    lvgl
     mlek_log)
 
 # Display status

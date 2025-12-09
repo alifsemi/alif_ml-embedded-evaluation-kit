@@ -47,10 +47,10 @@ using arm::app::KwsClassifier;
 using arm::app::Profiler;
 using arm::app::ClassificationResult;
 using arm::app::ApplicationContext;
-using arm::app::Model;
+using arm::app::fwk::iface::Model;
 using arm::app::KwsPreProcess;
 using arm::app::KwsPostProcess;
-using arm::app::MicroNetKwsModel;
+using arm::app::fwk::tflm::MicroNetKwsModel;
 
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
@@ -99,20 +99,20 @@ static std::string last_label;
         }
 
         /* Get Input and Output tensors for pre/post processing. */
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < minTensorDims) {
+        } else if (inputShape.size() < minTensorDims) {
             printf_err("Input tensor dimension should be >= %d\n", minTensorDims);
             return false;
         }
 
         /* Get input shape for feature extraction. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
-        const uint32_t numMfccFrames = inputShape->data[arm::app::MicroNetKwsModel::ms_inputRowsIdx];
+        const uint32_t numMfccFeatures = inputShape[arm::app::fwk::tflm::MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFrames   = inputShape[arm::app::fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx];
 
         /* We expect to be sampling 1 second worth of data at a time.
         *  NOTE: This is only used for time stamp calculation. */

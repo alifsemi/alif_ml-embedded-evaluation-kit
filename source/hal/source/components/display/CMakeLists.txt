@@ -30,8 +30,8 @@ project(display_component
 set(DISPLAY_IFACE_TARGET hal_display_iface)
 add_library(${DISPLAY_IFACE_TARGET} INTERFACE)
 target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE
-glcd_mps3
-include)
+    source/glcd_mps3 # include gcld.h
+    include)
 
 ## Logging utilities:
 if (NOT TARGET mlek_log)
