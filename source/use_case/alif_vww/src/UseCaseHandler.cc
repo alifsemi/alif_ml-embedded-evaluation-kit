@@ -59,6 +59,7 @@
 #define LV_ZOOM         (1 * 256)
 #endif
 
+using arm::app::fwk::iface::Model;
 
 extern "C" {
 extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
@@ -110,16 +111,16 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 4) {
-            printf_err("Input tensor dimension should be = 4\n");
+        } else if (inputShape.size() < 4) {
+            printf_err("Input tensor dimension should be >= 4\n");
             return false;
         }
-
 
         /* Set up pre and post-processing. */
         VisualWakeWordPreProcess preProcess = VisualWakeWordPreProcess(inputTensor);
@@ -168,7 +169,7 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-            const size_t imgSz = inputTensor->bytes;
+            const size_t imgSz = inputTensor->Bytes();
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(image_data, imgSz)) {
