@@ -110,6 +110,14 @@ list(REMOVE_ITEM USE_CASES "" ${EXCLUDED_USE_CASES})
 message(STATUS "Use-cases excluded by platform configuration: ${EXCLUDED_USE_CASES}")
 message(STATUS "Building use-cases: ${USE_CASES}.")
 
+if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+    set(ML_FWK_SUFFIX    et)
+elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+    set(ML_FWK_SUFFIX    tflm)
+else()
+    message(FATAL_ERROR "ML_FRAMEWORK should be defined.")
+endif()
+
 foreach(use_case ${USE_CASES})
     set(SRC_USE_CASE "")
     foreach(USE_CASES_SEARCH_DIR ${USE_CASES_SEARCH_DIR_LIST})
@@ -143,18 +151,12 @@ foreach(use_case ${USE_CASES})
     # Include the use case cmake file.
     include(${UC_CMAKE_FILE})
 
-    # Link ExecuTorch library if required
-    if (${use_case}_supports_${ML_FRAMEWORK})
-        if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
-            set(ML_FWK_LINK_LIBS ml_framework_et)
-        elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
-            set(ML_FWK_LINK_LIBS ml_framework_tflm)
-        endif()
-    else()
+    # Proceed only if use case supports the chosen ML framework
+    if (NOT ${use_case}_supports_${ML_FRAMEWORK})
         message(STATUS "${use_case} skipped")
         continue()
     endif ()
-
+ 
     file(GLOB_RECURSE UC_SRC
         "${SRC_USE_CASE}/${use_case}/src/*.cpp"
         "${SRC_USE_CASE}/${use_case}/src/*.cc"
@@ -200,21 +202,18 @@ foreach(use_case ${USE_CASES})
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
     target_link_libraries(${UC_LIB_NAME} PUBLIC
-        arm_math
         hal
-        profiler
-        common_api
-        ${ML_FWK_LINK_LIBS})
+        profiler)
 
     # If an API exists for this use case, include the projects here and add to
     # the library list.
     foreach(API_TO_USE ${${use_case}_API_LIST})
         # Check if the target now exists
-        if (TARGET ${API_TO_USE}_api)
-            message(STATUS "Using ${API_TO_USE}_api for ${use_case}")
-            target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_api)
+        if (TARGET ${API_TO_USE}_${ML_FWK_SUFFIX}_impl)
+            target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_${ML_FWK_SUFFIX}_impl)
+            message(STATUS "Using ${API_TO_USE}_${ML_FWK_SUFFIX}_impl target for ${UC_LIB_NAME}")
         else()
-            message(FATAL_ERROR "${API_TO_USE}_api target not found!")
+            message(FATAL_ERROR "${API_TO_USE}_${ML_FWK_SUFFIX}_impl target not found!")
         endif()
     endforeach()
 

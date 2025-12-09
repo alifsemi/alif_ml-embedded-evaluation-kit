@@ -31,6 +31,7 @@ if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
 endif()
 
 option(INCLUDE_TFLM "Include TensorFlow Lite Micro itself in the build" ON)
+
 if (INCLUDE_TFLM)
     # Include the TensorFlow Lite Micro build target
     # if the target is not available. An external project

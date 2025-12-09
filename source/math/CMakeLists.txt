@@ -45,6 +45,8 @@ if (${CMAKE_CROSSCOMPILING})
     target_link_libraries(arm_math PUBLIC arm::cmsis-dsp)
 endif ()
 
+add_library(mlek::arm_math ALIAS arm_math)
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                    : " arm_math)
 message(STATUS "CMAKE_SYSTEM_PROCESSOR     : " ${CMAKE_SYSTEM_PROCESSOR})

@@ -56,6 +56,8 @@ endif()
 
 target_include_directories(${MLEK_LOG_TARGET} INTERFACE include)
 
+add_library(mlek::log ALIAS mlek_log)
+
 message(STATUS "**************************************************")
 message(STATUS "Library:                " ${MLEK_LOG_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})

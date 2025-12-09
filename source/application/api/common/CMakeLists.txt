@@ -51,6 +51,8 @@ target_link_libraries(${COMMON_UC_UTILS_TARGET} PUBLIC
     arm_math            # Math functions
     ml_framework_iface) # ML framework interface
 
+add_library(mlek::common_api ALIAS common_api)
+
 # Display status:
 message(STATUS "*******************************************************")
 message(STATUS "Library:                " ${COMMON_UC_UTILS_TARGET})

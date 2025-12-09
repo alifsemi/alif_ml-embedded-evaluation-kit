@@ -39,6 +39,54 @@ The use case APIs consist of:
   [source/application/api/use_case](../../source/application/api/use_case) subdirectories. These will only depend on
   the `common` target, which also brings in its dependencies listed above.
 
+To use these components, developers can either use MLEK as a submodule or fetch the project at configuration stage.
+
+Below snippet assumes `MLEK_ROOT` is defined pointing to where MLEK resides and that the framework (TensorFlow Lite
+Micro or ExecuTorch) and CMSIS-DSP libraries are available as targets within the current build tree.
+
+```cmake
+# Enable or disable. By default logging is enabled.
+set(MLEK_LOG_ENABLE OFF)
+
+# Select which framework MLEK should use. Note: this could be set to `ExecuTorch`
+set(ML_FRAMEWORK "TensorFlowLiteMicro")
+
+# Satisfy the two dependencies MLEK relies on:
+add_library(google::tensorflow-lite-micro ALIAS user_defined_tflite_micro_target)
+add_library(arm::cmsis-dsp ALIAS user_defined_cmsis_dsp_target)
+
+# Now, add the MLEK API project
+add_subdirectory(${MLEK_ROOT}/source/application/api ${CMAKE_BINARY_DIR}/mlek/api)
+```
+
+This will expose certain interface library targets that will bring all their dependencies with them when linked
+against. For example, to use both the keyword-spotting and object-detection pipelines, the application target
+could link against the implementation targets.
+
+```cmake
+target_link_libraries(my_custom_app PRIVATE
+    mlek::kws::tflm_impl
+    mlek::object_detection_tflm_impl)
+```
+
+Note that the targets exposed will depend on the ML framework itself and not all API's are common for both. For ExecuTorch, a snippet pulling in image-classification and automatic-speech-recognition pipelines might look something like:
+
+```cmake
+# Select which framework MLEK should use.
+set(ML_FRAMEWORK "ExecuTorch")
+
+# Satisfy the two dependencies MLEK relies on:
+add_library(meta::executorch ALIAS user_defined_executorch_target)
+add_library(arm::cmsis-dsp ALIAS user_defined_cmsis_dsp_target)
+
+# Now, add the MLEK API project
+add_subdirectory(${MLEK_ROOT}/source/application/api ${CMAKE_BINARY_DIR}/mlek/api)
+
+target_link_libraries(my_custom_app PRIVATE
+    mlek::img_class::et_impl
+    mlek::asr_et_impl)
+```
+
 ### Wrapping the complete project
 
 The top level [CMakeLists.txt](../../CMakeLists.txt) file expects certain common options to have been defined and the
