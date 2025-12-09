@@ -48,6 +48,8 @@
 #define USE_LVGL_ZOOM
 
 using ImgClassClassifier = arm::app::Classifier;
+using arm::app::fwk::iface::Model;
+using arm::app::fwk::tflm::MobileNetModel;
 
 #define MIMAGE_X 224
 #define MIMAGE_Y 224
@@ -83,7 +85,7 @@ namespace app {
         return s.substr(0, comma);
     }
 
-    bool ClassifyImageInit(arm::app::MobileNetModel& model)
+    bool ClassifyImageInit(MobileNetModel& model)
     {
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
@@ -91,9 +93,10 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
-        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
+        auto inputTensor = model.GetInputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        const uint32_t nCols  = inputShape[MobileNetModel::ms_inputColsIdx];
+        const uint32_t nRows  = inputShape[MobileNetModel::ms_inputRowsIdx];
 #else
         const uint32_t nCols       = MIMAGE_X;
         const uint32_t nRows       = MIMAGE_Y;
@@ -126,31 +129,24 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 4) {
-            printf_err("Input tensor dimension should be = 4\n");
+        } else if (inputShape.size() < 4) {
+            printf_err("Input tensor dimension should be >= 4\n");
             return false;
         }
 
-        /* Get input shape for displaying the image. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
-        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
-
         /* Set up pre and post-processing. */
-        ImgClassPreProcess preProcess = ImgClassPreProcess(inputTensor, model.IsDataSigned());
+        ImgClassPreProcess preProcess = ImgClassPreProcess(inputTensor);
 
         std::vector<ClassificationResult> results;
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
-#else
-        const uint32_t nCols       = MIMAGE_X;
-        const uint32_t nRows       = MIMAGE_Y;
 #endif
 
         hal_camera_start();
@@ -197,7 +193,7 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-        const size_t imgSz = inputTensor->bytes;
+        const size_t imgSz = inputTensor->Bytes();
 
 #if SHOW_INF_TIME
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();

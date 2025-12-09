@@ -50,14 +50,16 @@ void MainLoop()
 {
     init_trigger_rx();
 
-    arm::app::MobileNetModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::MobileNetModel model;  /* Model wrapper object. */
 
 #if !SKIP_MODEL
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),
+                                                arm::app::img_class::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::img_class::GetModelPointer(),
-                    arm::app::img_class::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -72,7 +74,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"img_class"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     ImgClassClassifier classifier;  /* Classifier wrapper object. */
     caseContext.Set<arm::app::Classifier&>("classifier", classifier);

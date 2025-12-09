@@ -24,6 +24,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+
+# Specify the ML frameworks the use case supports
+set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
+if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+    set(${use_case}_supports_${ML_FRAMEWORK} OFF)
+    return()
+endif ()
+
+set(${use_case}_supports_${ML_FRAMEWORK} ON)
+
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "img_class" "alif_ui")
 
@@ -73,14 +83,14 @@ else()
     set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8.tflite)
 endif()
 
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )
 
 # Generate model file
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
     NAMESPACE   "arm" "app" "img_class")
 
