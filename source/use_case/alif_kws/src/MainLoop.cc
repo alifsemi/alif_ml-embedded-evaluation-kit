@@ -46,23 +46,6 @@ namespace app {
 } /* namespace app */
 } /* namespace arm */
 
-enum opcodes
-{
-    MENU_OPT_RUN_ONCE = 1,
-    MENU_OPT_RUN_CONTINUOUS,
-};
-
-static void DisplayMenu()
-{
-    printf("\n\n");
-    printf("User input required\n");
-    printf("Enter option number from:\n\n");
-    printf("  %u. Run classification on one audio window\n", MENU_OPT_RUN_ONCE);
-    printf("  %u. Run classification continuously\n\n", MENU_OPT_RUN_CONTINUOUS);
-    printf("  Choice: ");
-    fflush(stdout);
-}
-
 void MainLoop()
 {
     init_trigger_tx();
@@ -101,31 +84,14 @@ void MainLoop()
 
     bool executionSuccessful = true;
 
-// #if USE_APP_MENU
-//     constexpr bool bUseMenu = true;
-// #else
-//     constexpr bool bUseMenu = false;
-// #endif
-
     /* Loop. */
     do {
-        int menuOption = MENU_OPT_RUN_CONTINUOUS;
-        // if (bUseMenu) {
-        //     DisplayMenu();
-        //     menuOption = arm::app::ReadUserInputAsInt();
-        //     printf("\n");
-        // }
-        switch (menuOption) {
-            case MENU_OPT_RUN_ONCE:
-                executionSuccessful = alif::app::ClassifyAudioHandler(caseContext, true);
-                break;
-            case MENU_OPT_RUN_CONTINUOUS:
-                executionSuccessful = alif::app::ClassifyAudioHandler(caseContext, false);
-                break;
-            default:
-                printf("Incorrect choice, try again.");
-                break;
-        }
-    } while (executionSuccessful/* || bUseMenu*/);
+#ifdef INTERACTIVE_MODE
+        arm::app::AwaitUserInput(); // Wait for user input before moving forward.
+        executionSuccessful = alif::app::ClassifyAudioHandler(caseContext, true);
+#else
+        executionSuccessful = alif::app::ClassifyAudioHandler(caseContext, false);
+#endif /* INTERACTIVE_MODE */
+    } while (executionSuccessful);
     info("Main loop terminated.\n");
 }

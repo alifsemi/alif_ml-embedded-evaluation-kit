@@ -137,7 +137,7 @@ void tracef(const char * format, ...)
 }
 
 #if defined USE_UART || defined USE_SEMIHOSTING
-static char UartPutc(char ch)
+char UartPutc(char ch)
 {
     if (ch == '\n') {
         (void)UartPutc('\r');
@@ -147,7 +147,7 @@ static char UartPutc(char ch)
     return ch;
 }
 
-static char UartGetc(void)
+char UartGetc(void)
 {
     char c;
 #ifdef USE_UART
@@ -207,6 +207,17 @@ unsigned int GetLine(char *lp, unsigned int len)
     return 1;
 }
 #else // USE_UART || USE_SEMIHOSTING
+char UartPutc(char ch)
+{
+    (void)ch;
+    return 0;
+}
+
+char UartGetc(void)
+{
+    return 0;
+}
+
 unsigned int GetLine(char *user_input, unsigned int size)
 {
     (void) user_input;
