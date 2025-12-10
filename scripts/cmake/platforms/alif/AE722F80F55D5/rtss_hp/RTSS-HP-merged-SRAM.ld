@@ -78,6 +78,8 @@ SECTIONS
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s4.c.obj(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s16.c.obj(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
