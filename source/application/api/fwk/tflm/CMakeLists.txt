@@ -67,7 +67,7 @@ target_include_directories(${ML_FWK_TFLM_TARGET} PUBLIC
 # Link time library targets:
 target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
     mlek_log                                                    # Logging functions
-    ml-framework-iface                                          # ML framework interface
+    ml_framework_iface                                          # ML framework interface
     $<$<BOOL:${INCLUDE_TFLM}>:google::tensorflow-lite-micro>)   # TensorFlow Lite Micro library
 
 target_compile_definitions(${ML_FWK_TFLM_TARGET} INTERFACE MLEK_FWK_TFLM=1)

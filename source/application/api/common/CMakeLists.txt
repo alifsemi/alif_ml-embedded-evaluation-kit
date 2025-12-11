@@ -49,7 +49,7 @@ target_sources(${COMMON_UC_UTILS_TARGET} PRIVATE
 target_link_libraries(${COMMON_UC_UTILS_TARGET} PUBLIC
     mlek_log            # Logging interface
     arm_math            # Math functions
-    ml-framework-iface) # ML framework interface
+    ml_framework_iface) # ML framework interface
 
 # Display status:
 message(STATUS "*******************************************************")
