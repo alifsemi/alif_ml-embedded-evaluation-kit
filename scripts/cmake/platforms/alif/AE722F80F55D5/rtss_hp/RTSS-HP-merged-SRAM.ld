@@ -84,6 +84,13 @@ SECTIONS
     *(startup_ro_data)
   } > MRAM
 
+#ifndef NDEBUG
+  .libcmsis_nn.at_mram : ALIGN(16)
+  {
+    *libcmsis-nn.a:arm_*_s8.c.obj(.text* .rodata*)
+  } > MRAM
+#endif
+
   .copy.table.at_mram : ALIGN(4)
   {
     __copy_table_start__ = .;
