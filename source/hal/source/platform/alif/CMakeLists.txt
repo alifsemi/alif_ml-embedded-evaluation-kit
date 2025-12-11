@@ -92,6 +92,9 @@ math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMA
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
 
+# override the default 16 MiB of temporary allocation size with smaller one. Used with Executorch.
+set(ML_FWK_TMP_MEM_SIZE "0x00200000" CACHE STRING "Buffer size for ML framework's temporary allocations")
+
 #set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
 # 2. Create static libraries

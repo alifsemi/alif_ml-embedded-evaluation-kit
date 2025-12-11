@@ -29,7 +29,7 @@
 constexpr size_t sTmpAllocationPoolSz = ML_FWK_TMP_MEM_SIZE; /**< Temp allocation pool size. */
 
 #if !(defined(ML_FWK_TMP_MEM_BASE))
-static uint8_t __attribute__((aligned(16), section("ifm")))
+static uint8_t __attribute__((aligned(16), section(".bss.NoInit.temp_buf_sram")))
     sTmpAllocationPool[sTmpAllocationPoolSz]; /**< temp allocation buffer */
 #else /* !(defined(ML_FWK_TMP_MEM_BASE)) */
 static uint8_t* sTmpAllocationPool = reinterpret_cast<uint8_t *>(ML_FWK_TMP_MEM_BASE);

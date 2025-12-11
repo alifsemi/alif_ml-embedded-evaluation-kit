@@ -50,6 +50,15 @@ cmake -DTARGET_PLATFORM=alif \
 -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
+; ------------ Image classification on CM55-HP with GCC E8 and ExecuTorch -----------
+cmake -DTARGET_PLATFORM=alif \
+-DTARGET_SUBSYSTEM=RTSS-HP \
+-DCONSOLE_UART=4 \
+-DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
+-DTARGET_BOARD=AppKit-e8 \
+-DETHOS_U_NPU_ID=U85 -DML_FRAMEWORK=ExecuTorch ..
+
 make ethos-u-alif_img_class -j
 
 
@@ -88,3 +97,37 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_BOARD=DevKit-e8 ..
 
 make ethos-u-alif_kws -j4
+
+
+TODO! Check below diff which must be set for ExecuTorch or run will fail with.
+Where and how to document, and could we compile all with PIC?:
+MMFSR = 82 (MMARVALID, DACCVIOL)
+MMFAR = 720AE11A
+
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f886cf2e86..54aa31566d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -296,7 +296,7 @@ if(EXECUTORCH_BUILD_TESTS)
+ endif()
+
+ # TODO(dbort): Fix these warnings and remove this flag.
+-set(_common_compile_options -Wno-deprecated-declarations -fPIC)
++set(_common_compile_options -Wno-deprecated-declarations)
+
+ # Let files say "include <executorch/path/to/header.h>".
+ # TODO(#6475): This requires/assumes that the repo lives in a directory named
+diff --git a/third-party/CMakeLists.txt b/third-party/CMakeLists.txt
+index 767ac367e1..e85cfb5fc1 100644
+--- a/third-party/CMakeLists.txt
++++ b/third-party/CMakeLists.txt
+@@ -125,7 +125,7 @@ add_dependencies(flatccrt flatcc_cli)
+ # systems.
+ #
+ # Learn more: https://github.com/pytorch/executorch/pull/2467
+-set_property(TARGET flatccrt PROPERTY POSITION_INDEPENDENT_CODE ON)
++set_property(TARGET flatccrt PROPERTY POSITION_INDEPENDENT_CODE OFF)
+ install(
+   TARGETS flatccrt
+   DESTINATION ${CMAKE_BINARY_DIR}/lib
