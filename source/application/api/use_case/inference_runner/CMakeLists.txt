@@ -26,7 +26,7 @@ project(${INFERENCE_RUNNER_API_TARGET}
         LANGUAGES       C CXX)
 
 # Create an aliased library, inference runner doesn't need any API other than this.
-add_library(${INFERENCE_RUNNER_API_TARGET} ALIAS ml-framework-iface)
+add_library(${INFERENCE_RUNNER_API_TARGET} ALIAS ml_framework_iface)
 
 message(STATUS "*******************************************************")
 message(STATUS "Library:                " ${INFERENCE_RUNNER_API_TARGET})

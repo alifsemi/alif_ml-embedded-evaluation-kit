@@ -52,7 +52,7 @@ target_include_directories(${ML_FWK_ET_TARGET} PUBLIC
 target_link_libraries(${ML_FWK_ET_TARGET}
     PUBLIC
     mlek_log            # Logging functions
-    ml-framework-iface  # ML framework interface lib
+    ml_framework_iface  # ML framework interface lib
     meta::executorch)   # ExecuTorch libraries
 
 target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE

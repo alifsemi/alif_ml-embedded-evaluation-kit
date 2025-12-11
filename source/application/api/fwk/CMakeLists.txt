@@ -21,7 +21,7 @@
 #########################################################
 cmake_minimum_required(VERSION 3.21.0)
 
-set(ML_FWK_IFACE_TARGET   ml-framework-iface)
+set(ML_FWK_IFACE_TARGET   ml_framework_iface)
 project(${ML_FWK_IFACE_TARGET}
     DESCRIPTION     "ML framework interface library"
     LANGUAGES       CXX)
