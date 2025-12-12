@@ -47,9 +47,9 @@ target_sources(${COMMON_UC_UTILS_TARGET} PRIVATE
 
 # Link time library targets:
 target_link_libraries(${COMMON_UC_UTILS_TARGET} PUBLIC
-    mlek_log            # Logging interface
-    arm_math            # Math functions
-    ml_framework_iface) # ML framework interface
+    mlek::log                 # Logging interface
+    mlek::arm_math            # Math functions
+    mlek::ml_framework_iface) # ML framework interface
 
 add_library(mlek::common_api ALIAS common_api)
 

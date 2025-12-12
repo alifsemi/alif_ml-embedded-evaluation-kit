@@ -28,39 +28,16 @@ cmake_minimum_required(VERSION 3.21.0)
 project(ml-embedded-eval-kit-api
         DESCRIPTION     "Platform agnostic API for all examples.")
 
-set(SOURCE_ROOT             ${CMAKE_CURRENT_LIST_DIR}/../../../source)
+set(SOURCE_ROOT     ${CMAKE_CURRENT_LIST_DIR}/../../../source)
+set(API_PROJECT_DIR ${SOURCE_ROOT}/application/api)
 
-set(LOGGING_PROJECT_DIR     ${SOURCE_ROOT}/log)
-set(ARM_MATH_PROJECT_DIR    ${SOURCE_ROOT}/math)
-set(API_COMMON_PROJECT_DIR  ${SOURCE_ROOT}/application/api/common)
-set(API_FWK_PROJECT_DIR     ${SOURCE_ROOT}/application/api/fwk)
-set(API_UC_PROJECT_DIR      ${SOURCE_ROOT}/application/api/use_case)
+option(CMSIS_PACK_GEN_FLOW "Enable CMSIS-pack generation flow" ON)
 
 # Include support for TensorFlow Lite Micro
 set(ML_FRAMEWORK "TensorFlowLiteMicro" CACHE STRING "Choice of ML framework")
 
-# Exclude TensorFlow Lite Micro itself from the MLEK CMSIS pack
-set(INCLUDE_TFLM    OFF)
-
-# Add dependencies first:
-if (NOT TARGET arm_math)
-    add_subdirectory(${ARM_MATH_PROJECT_DIR} ${CMAKE_BINARY_DIR}/math)
-endif()
-
-if (NOT TARGET mlek_log)
-    add_subdirectory(${LOGGING_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
-endif()
-
 # Add common part and the APIs:
-add_subdirectory(${API_COMMON_PROJECT_DIR}  ${CMAKE_BINARY_DIR}/common)
-add_subdirectory(${API_FWK_PROJECT_DIR}     ${CMAKE_BINARY_DIR}/fwk)
-
-file(GLOB UC_API_LIST "${API_UC_PROJECT_DIR}/*")
-list(FILTER UC_API_LIST EXCLUDE REGEX ".(md|txt)") # Remove files from UC_API_LIST
-
-foreach(API ${UC_API_LIST})
-    add_subdirectory(${API} ${CMAKE_BINARY_DIR}/${API})
-endforeach()
+add_subdirectory(${API_PROJECT_DIR}  ${CMAKE_BINARY_DIR}/api)
 
 # Any custom steps that are required for the CMSIS pack generation flow
 # must be declared here:

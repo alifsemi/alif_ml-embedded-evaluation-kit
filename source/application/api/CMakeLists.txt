@@ -34,16 +34,6 @@ add_subdirectory(fwk)
 add_subdirectory(common)
 add_subdirectory(use_case)
 
-if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
-    set(ML_FWK_SUFFIX et)
-elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
-    set(ML_FWK_SUFFIX tflm)
-else()
-    message(FATAL_ERROR "ML_FRAMEWORK should be defined.")
-endif()
-
-set(ML_FWK_LINK_LIBS ml_framework_${ML_FWK_SUFFIX})
-
 ###############################################################################
 # Function to create an ML framework specific implementation interface library
 # to allow easier use of targets defined in this CMake project.
@@ -57,11 +47,15 @@ function(create_mlek_impl_lib_target)
     set(oneValueArgs API_NAME)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN})
-    set(TARGET_LIB_NAME ${PARSED_API_NAME}_${ML_FWK_SUFFIX}_impl)
+    set(TARGET_LIB_NAME ${PARSED_API_NAME}_impl)
+    if (NOT TARGET mlek::ml_framework_impl)
+        message(FATAL_ERROR "mlek::ml_framework_impl target must exist before creating ${TARGET_LIB_NAME}")
+    endif()
     add_library(${TARGET_LIB_NAME} INTERFACE)
     target_link_libraries(${TARGET_LIB_NAME} INTERFACE
-        ${PARSED_API_NAME}_api # API target (relies on abstract fwk interface)
-        ml_framework_${ML_FWK_SUFFIX}) # The ML framework impl to pull in
+        ${PARSED_API_NAME}_api      # API target (relies on abstract fwk interface)
+        mlek::ml_framework_impl)    # The ML framework impl to pull in
+
     add_library(mlek::${TARGET_LIB_NAME} ALIAS ${TARGET_LIB_NAME})
     message(STATUS "Created interface target: mlek::${TARGET_LIB_NAME}")
 endfunction()

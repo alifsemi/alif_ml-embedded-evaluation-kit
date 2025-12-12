@@ -28,6 +28,8 @@ project(${INFERENCE_RUNNER_API_TARGET}
 # Create an aliased library, inference runner doesn't need any API other than this.
 add_library(${INFERENCE_RUNNER_API_TARGET} ALIAS common_api)
 
+add_library(mlek::${INFERENCE_RUNNER_API_TARGET} ALIAS common_api)
+
 message(STATUS "*******************************************************")
 message(STATUS "Library:                " ${INFERENCE_RUNNER_API_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})

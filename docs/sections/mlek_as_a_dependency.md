@@ -65,11 +65,12 @@ could link against the implementation targets.
 
 ```cmake
 target_link_libraries(my_custom_app PRIVATE
-    mlek::kws::tflm_impl
-    mlek::object_detection_tflm_impl)
+    mlek::kws_impl
+    mlek::object_detection_impl)
 ```
 
-Note that the targets exposed will depend on the ML framework itself and not all API's are common for both. For ExecuTorch, a snippet pulling in image-classification and automatic-speech-recognition pipelines might look something like:
+For ExecuTorch, a snippet pulling in image-classification and automatic-speech-recognition pipelines might
+look something like:
 
 ```cmake
 # Select which framework MLEK should use.
@@ -83,9 +84,29 @@ add_library(arm::cmsis-dsp ALIAS user_defined_cmsis_dsp_target)
 add_subdirectory(${MLEK_ROOT}/source/application/api ${CMAKE_BINARY_DIR}/mlek/api)
 
 target_link_libraries(my_custom_app PRIVATE
-    mlek::img_class::et_impl
-    mlek::asr_et_impl)
+    mlek::img_class_impl
+    mlek::asr_impl)
 ```
+
+Applications may also choose **not** to use consolidated interface targets if they need finer controls over what
+is pulled into the build tree. Some of the targets that may be useful:
+
+| Library target           | Type      | Comments                       |
+|:-------------------------|:----------|:-------------------------------|
+| mlek::common_api         | STATIC    | Common utilities for use cases |
+| mlek::log                | INTERFACE | Exposes logging header         |
+| mlek::ml_framework_iface | INTERFACE | ML framework abstraction       |
+| mlek::arm_math           | STATIC    | Math utils, wrapping CMSIS-DSP |
+
+Each use cases will have two targets exposed. The `_api` targets only links to the ML framework interface
+library and not the actual ML framework library itself. The `_impl` target pulls in the framework library
+targets too. For example, image classification pipeline will configure following CMake targets:
+
+| Library target           | Type      | Depends on                                          |
+|:-------------------------|:----------|:----------------------------------------------------|
+| mlek::img_class_api      | STATIC    | ml_framework_iface, common_api                      |
+| mlek::img_class_impl     | INTERFACE | ml_framework_et OR ml_framework_tflm, img_class_api |
+
 
 ### Wrapping the complete project
 

@@ -33,15 +33,18 @@ endif ()
 # Add interface library
 add_library(${ML_FWK_IFACE_TARGET} INTERFACE)
 target_include_directories(${ML_FWK_IFACE_TARGET} INTERFACE iface)
+add_library(mlek::${ML_FWK_IFACE_TARGET} ALIAS ${ML_FWK_IFACE_TARGET})
 
 if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
     message(STATUS "Adding ExecuTorch framework to the build...")
     add_subdirectory(executorch)
-endif ()
-
-if ("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+    add_library(mlek::ml_framework_impl ALIAS ml_framework_et)
+elseif ("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
     message(STATUS "Adding TensorFlow Lite Micro framework to the build...")
     add_subdirectory(tflm)
+    add_library(mlek::ml_framework_impl ALIAS ml_framework_tflm)
+else ()
+    message(FATAL_ERROR "Unsupported ML framework '${ML_FRAMEWORK}'.")
 endif ()
 
 # Display status:
