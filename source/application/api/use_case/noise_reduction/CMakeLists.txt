@@ -34,6 +34,8 @@ target_include_directories(${NOISE_REDUCTION_API_TARGET} PUBLIC include)
 
 target_link_libraries(${NOISE_REDUCTION_API_TARGET} PUBLIC common_api)
 
+add_library(mlek::${NOISE_REDUCTION_API_TARGET} ALIAS ${NOISE_REDUCTION_API_TARGET})
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${NOISE_REDUCTION_API_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})

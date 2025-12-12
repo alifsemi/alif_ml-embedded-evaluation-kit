@@ -30,16 +30,23 @@ if (NOT "ExecuTorch" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
 endif()
 
-# Include the ExecuTorch build target
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-include(executorch)
+# For CMSIS pack generation flow, we don't need to include the ExecuTorch lib
+# or link against it.
+if (NOT CMSIS_PACK_GEN_FLOW)
+    # Include the ExecuTorch build target if the target is
+    # not available. An external project including this
+    # project can provide its own version of the target.
+    if (NOT TARGET meta::executorch)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+        include(executorch)
+    endif()
+endif()
 
 # Create static library
 add_library(${ML_FWK_ET_TARGET} STATIC
     source/EtModelAllocator.cc
     source/EtTensor.cc
-    source/EtModel.cc
-)
+    source/EtModel.cc)
 
 target_sources(${ML_FWK_ET_TARGET} PUBLIC
     source/EtPal.cc)
@@ -49,11 +56,10 @@ target_include_directories(${ML_FWK_ET_TARGET} PUBLIC
     include)
 
 # Link time library targets:
-target_link_libraries(${ML_FWK_ET_TARGET}
-    PUBLIC
-    mlek_log            # Logging functions
-    ml_framework_iface  # ML framework interface lib
-    meta::executorch)   # ExecuTorch libraries
+target_link_libraries(${ML_FWK_ET_TARGET} PUBLIC
+    mlek::log                                                   # Logging functions
+    mlek::ml_framework_iface                                    # ML framework interface lib
+    $<$<NOT:$<BOOL:${CMSIS_PACK_GEN_FLOW}>>:meta::executorch>)  # ExecuTorch libraries
 
 target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE
     MLEK_FWK_EXECUTORCH=1)
@@ -70,6 +76,8 @@ endif()
 
 target_compile_definitions(${ML_FWK_ET_TARGET} PRIVATE
     ML_FWK_TMP_MEM_SIZE=${ML_FWK_TMP_MEM_SIZE})
+
+add_library(mlek::${ML_FWK_ET_TARGET} ALIAS ${ML_FWK_ET_TARGET})
 
 # Display status:
 message(STATUS "*******************************************************")

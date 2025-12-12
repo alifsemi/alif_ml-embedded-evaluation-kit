@@ -40,6 +40,8 @@ target_include_directories(${ASR_API_TARGET} PUBLIC include)
 
 target_link_libraries(${ASR_API_TARGET} PUBLIC common_api)
 
+add_library(mlek::${ASR_API_TARGET} ALIAS ${ASR_API_TARGET})
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${ASR_API_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})

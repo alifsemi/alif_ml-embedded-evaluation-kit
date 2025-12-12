@@ -30,9 +30,9 @@ if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
 endif()
 
-option(INCLUDE_TFLM "Include TensorFlow Lite Micro itself in the build" ON)
-
-if (INCLUDE_TFLM)
+# For CMSIS pack generation flow, we don't need to include TensorFlow Lite
+# Micro lib or link against it.
+if (NOT CMSIS_PACK_GEN_FLOW)
     # Include the TensorFlow Lite Micro build target
     # if the target is not available. An external project
     # including this project can provide its own version
@@ -67,9 +67,9 @@ target_include_directories(${ML_FWK_TFLM_TARGET} PUBLIC
 
 # Link time library targets:
 target_link_libraries(${ML_FWK_TFLM_TARGET} PUBLIC
-    mlek_log                                                    # Logging functions
-    ml_framework_iface                                          # ML framework interface
-    $<$<BOOL:${INCLUDE_TFLM}>:google::tensorflow-lite-micro>)   # TensorFlow Lite Micro library
+    mlek::log                                                               # Logging functions
+    mlek::ml_framework_iface                                                # ML framework interface
+    $<$<NOT:$<BOOL:${CMSIS_PACK_GEN_FLOW}>>:google::tensorflow-lite-micro>) # TensorFlow Lite Micro library
 
 target_compile_definitions(${ML_FWK_TFLM_TARGET} INTERFACE MLEK_FWK_TFLM=1)
 
@@ -81,6 +81,8 @@ if (TFLM_EXTERNAL_TARGET)
     set_source_files_properties(source/TensorFlowLiteMicro.cc
         PROPERTIES COMPILE_DEFINITIONS TFLM_EXTERNAL_TARGET)
 endif()
+
+add_library(mlek::${ML_FWK_TFLM_TARGET} ALIAS ${ML_FWK_TFLM_TARGET})
 
 # Display status:
 message(STATUS "*******************************************************")

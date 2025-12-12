@@ -33,6 +33,8 @@ target_include_directories(${OBJECT_DETECTION_API_TARGET} PUBLIC include)
 
 target_link_libraries(${OBJECT_DETECTION_API_TARGET} PUBLIC common_api)
 
+add_library(mlek::${OBJECT_DETECTION_API_TARGET} ALIAS ${OBJECT_DETECTION_API_TARGET})
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${OBJECT_DETECTION_API_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})

@@ -33,6 +33,8 @@ target_include_directories(${IMG_CLASS_API_TARGET} PUBLIC include)
 
 target_link_libraries(${IMG_CLASS_API_TARGET} PUBLIC common_api)
 
+add_library(mlek::${IMG_CLASS_API_TARGET} ALIAS ${IMG_CLASS_API_TARGET})
+
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${IMG_CLASS_API_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
