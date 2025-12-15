@@ -63,7 +63,7 @@ target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
     TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -73,7 +73,7 @@ endif()
 ## Add dependencies
 target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
-    log
+    mlek_log
     cmsis_device
     rte_components)
 

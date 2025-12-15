@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ML_EMBEDDED_CORE_LOG_H
-#define ML_EMBEDDED_CORE_LOG_H
+#ifndef MLEK_BASIC_LOGGER_H
+#define MLEK_BASIC_LOGGER_H
+
+#if !defined(UNUSED)
+#define UNUSED(x) ((void)(x))
+#endif /* #if !defined(UNUSED) */
+
+#if defined(MLEK_LOG_ENABLE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,29 +31,26 @@ extern "C" {
 #include <inttypes.h>
 #include <stdio.h>
 
-#define LOG_LEVEL_TRACE 0
-#define LOG_LEVEL_DEBUG 1
-#define LOG_LEVEL_INFO  2
-#define LOG_LEVEL_WARN  3
-#define LOG_LEVEL_ERROR 4
+#define MLEK_LOG_LEVEL_TRACE    (0)
+#define MLEK_LOG_LEVEL_DEBUG    (1)
+#define MLEK_LOG_LEVEL_INFO     (2)
+#define MLEK_LOG_LEVEL_WARN     (3)
+#define MLEK_LOG_LEVEL_ERROR    (4)
 
-#ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_LEVEL_INFO
-#endif /*LOG_LEVEL*/
+#ifndef MLEK_LOG_LEVEL
+#define MLEK_LOG_LEVEL MLEK_LOG_LEVEL_INFO
+#endif /* MLEK_LOG_LEVEL */
 
-#if !defined(UNUSED)
-#define UNUSED(x) ((void)(x))
-#endif /* #if !defined(UNUSED) */
 
-#if (LOG_LEVEL == LOG_LEVEL_TRACE)
+#if (MLEK_LOG_LEVEL == MLEK_LOG_LEVEL_TRACE)
 #define trace(...)      \
     printf("TRACE - "); \
     printf(__VA_ARGS__)
 #else
 #define trace(...)
-#endif /* LOG_LEVEL == LOG_LEVEL_TRACE */
+#endif /* LOG_LEVEL == MLEK_LOG_LEVEL_TRACE */
 
-#if (LOG_LEVEL <= LOG_LEVEL_DEBUG)
+#if (MLEK_LOG_LEVEL <= MLEK_LOG_LEVEL_DEBUG)
 #define debug(...)      \
     printf("DEBUG - "); \
     printf(__VA_ARGS__)
@@ -54,7 +58,7 @@ extern "C" {
 #define debug(...)
 #endif /* LOG_LEVEL > LOG_LEVEL_TRACE */
 
-#if (LOG_LEVEL <= LOG_LEVEL_INFO)
+#if (MLEK_LOG_LEVEL <= MLEK_LOG_LEVEL_INFO)
 #define info(...)      \
     printf("INFO - "); \
     printf(__VA_ARGS__)
@@ -62,7 +66,7 @@ extern "C" {
 #define info(...)
 #endif /* LOG_LEVEL > LOG_LEVEL_DEBUG */
 
-#if (LOG_LEVEL <= LOG_LEVEL_WARN)
+#if (MLEK_LOG_LEVEL <= MLEK_LOG_LEVEL_WARN)
 #define warn(...)      \
     printf("WARN - "); \
     printf(__VA_ARGS__)
@@ -70,7 +74,7 @@ extern "C" {
 #define warn(...)
 #endif /* LOG_LEVEL > LOG_LEVEL_INFO */
 
-#if (LOG_LEVEL <= LOG_LEVEL_ERROR)
+#if (MLEK_LOG_LEVEL <= MLEK_LOG_LEVEL_ERROR)
 #define printf_err(...) \
     printf("ERROR - "); \
     printf(__VA_ARGS__)
@@ -82,4 +86,32 @@ extern "C" {
 }
 #endif
 
-#endif /* ML_EMBEDDED_CORE_LOG_H */
+#else /* defined(MLEK_LOG_ENABLE) */
+
+/**
+ * Logging macros in this file will not be used.
+ * Provide stubs if the definitions have not been overridden externally.
+ */
+#if !defined(trace)
+    #define trace(...)
+#endif
+
+#if !defined(debug)
+    #define debug(...)
+#endif
+
+#if !defined(info)
+    #define info(...)
+#endif
+
+#if !defined(warn)
+    #define warn(...)
+#endif
+
+#if !defined(printf_err)
+    #define printf_err(...)
+#endif
+
+#endif /* defined(MLEK_LOG_ENABLE) */
+
+#endif /* MLEK_BASIC_LOGGER_H */

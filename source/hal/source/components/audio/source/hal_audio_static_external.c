@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -17,6 +17,7 @@
  */
 #include "log_macros.h"
 #include "hal_audio_static_external.h"
+#include <stddef.h>
 
 /** These functions must be provided to this interface */
 __attribute__((weak)) const char* get_sample_data_filename(uint32_t idx)

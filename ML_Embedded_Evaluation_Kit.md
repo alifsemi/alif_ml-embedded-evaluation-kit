@@ -249,7 +249,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
     -DUSE_CASE_BUILD=alif_kws ..
     ```
 
@@ -286,7 +286,7 @@ UART select jumpers set for UART2:
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
     -DUSE_CASE_BUILD=alif_img_class ..
     ```
 
@@ -365,7 +365,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
       -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
-      -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+      -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
       -DGLCD_UI=NO \
     ```
 

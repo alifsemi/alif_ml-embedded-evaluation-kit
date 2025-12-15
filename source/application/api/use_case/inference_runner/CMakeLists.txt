@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2023, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,14 +25,10 @@ project(${INFERENCE_RUNNER_API_TARGET}
         DESCRIPTION     "Inference runner use case API library"
         LANGUAGES       C CXX)
 
-# Create static library
-add_library(${INFERENCE_RUNNER_API_TARGET} STATIC src/TestModel.cc src/MicroMutableAllOpsResolver.cc)
-
-target_include_directories(${INFERENCE_RUNNER_API_TARGET} PUBLIC include)
-
-target_link_libraries(${INFERENCE_RUNNER_API_TARGET} PUBLIC common_api)
+# Create an aliased library, inference runner doesn't need any API other than this.
+add_library(${INFERENCE_RUNNER_API_TARGET} ALIAS ml-framework-iface)
 
 message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${INFERENCE_RUNNER_API_TARGET})
-message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "Library:                " ${INFERENCE_RUNNER_API_TARGET})
+message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "*******************************************************")

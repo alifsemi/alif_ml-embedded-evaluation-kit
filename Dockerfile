@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -52,12 +52,19 @@ RUN apt-get update && \
 # Check versions
 RUN gcc --version && g++ --version && python3 --version
 
-# Download and install GNU GCC 13.2 embedded toolchain
-RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \
-    echo "6cd1bbc1d9ae57312bcd169ae283153a9572bd6a8e4eeae2fedfbc33b115fdbb gcc-arm-none-eabi.tar.xz" | sha256sum -c && \
+# Download and install Arm GNU toolchain version 14.2 (arm-none-eabi)
+RUN curl -L https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz -o gcc-arm-none-eabi.tar.xz && \
+    echo "62a63b981fe391a9cbad7ef51b17e49aeaa3e7b0d029b36ca1e9c3b2a9b78823 gcc-arm-none-eabi.tar.xz" | sha256sum -c && \
     mkdir /opt/gcc-arm-none-eabi && \
     tar -xf  gcc-arm-none-eabi.tar.xz -C /opt/gcc-arm-none-eabi --strip-components 1 && \
     rm gcc-arm-none-eabi.tar.xz
+
+# Download and install Arm Toolchain for Embedded (ATfE) version 20.1.0
+RUN curl -L https://github.com/arm/arm-toolchain/releases/download/release-20.1.0-ATfE/ATfE-20.1.0-Linux-x86_64.tar.xz -o ATfE-20.1.0.tar.xz && \
+    echo "c1179396608c07bf68f3014923cfdfcd11c8402a3732f310c23d07c9a726b275 ATfE-20.1.0.tar.xz" | sha256sum -c && \
+    mkdir /opt/ATfE && \
+    tar -xf ATfE-20.1.0.tar.xz -C /opt/ATfE --strip-components 1 && \
+    rm ATfE-20.1.0.tar.xz
 
 # Download and install Arm Corstone-300 FVP
 RUN wget "${FVP_BASE_URL}/FVP/Corstone-300/${FVP_300}_${FVP_VER_300}_Linux64.tgz" 2>/dev/null && \
@@ -92,7 +99,7 @@ RUN wget "${FVP_BASE_URL}/FVP/Corstone-320/${FVP_320}_${FVP_VER_320}_Linux64.tgz
     rm "${FVP_320}_${FVP_VER_320}_Linux64.tgz"
 
 # Clone the ml-embedded-evaluation-kit repository
-RUN git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit" ${EVAL_KIT_DIR}
+RUN git clone "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git" ${EVAL_KIT_DIR}
 
 # Change working directory
 WORKDIR ${EVAL_KIT_DIR}
@@ -105,7 +112,7 @@ RUN python3 ./set_up_default_resources.py
 
 # Update PATH to make the required version of CMake and GNU embedded toolchain is available.
 # And add env variables to make access to the different FVPs easier.
-ENV PATH="${EVAL_KIT_DIR}/resources_downloaded/env/bin:/opt/gcc-arm-none-eabi/bin:${PATH}" \
+ENV PATH="${EVAL_KIT_DIR}/resources_downloaded/env/bin:/opt/gcc-arm-none-eabi/bin:/opt/ATfE/bin:${PATH}" \
     FVP_300_U55="/home/${FVP_300}/models/Linux64_GCC-9.3/${FVP_300}_Ethos-U55" \
     FVP_300_U65="/home/${FVP_300}/models/Linux64_GCC-9.3/${FVP_300}_Ethos-U65" \
     FVP_310_U55="/home/${FVP_310}/models/Linux64_GCC-9.3/${FVP_310}" \

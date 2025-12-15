@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,11 @@
 #ifndef DETECTOR_POST_PROCESSING_HPP
 #define DETECTOR_POST_PROCESSING_HPP
 
-#include "ImageUtils.hpp"
-#include "DetectionResult.hpp"
-#include "YoloFastestModel.hpp"
 #include "BaseProcessing.hpp"
+#include "DetectionResult.hpp"
+#include "ImageUtils.hpp"
+#include "Tensor.hpp"
+#include <memory>
 
 #include <forward_list>
 
@@ -69,13 +71,13 @@ namespace object_detection {
     public:
         /**
          * @brief        Constructor.
-         * @param[in]    outputTensor0       Pointer to the TFLite Micro output Tensor at index 0.
-         * @param[in]    outputTensor1       Pointer to the TFLite Micro output Tensor at index 1.
+         * @param[in]    outputTensor0       Shared pointer to output tensor interface object at index 0.
+         * @param[in]    outputTensor1       Shared pointer to output tensor interface object at index 1.
          * @param[out]   results             Vector of detected results.
          * @param[in]    postProcessParams   Struct of various parameters used in post-processing.
          **/
-        explicit DetectorPostProcess(TfLiteTensor* outputTensor0,
-                                     TfLiteTensor* outputTensor1,
+        explicit DetectorPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor0,
+                                     std::shared_ptr<fwk::iface::TensorIface> outputTensor1,
                                      std::vector<object_detection::DetectionResult>& results,
                                      const object_detection::PostProcessParams& postProcessParams);
 
@@ -87,8 +89,8 @@ namespace object_detection {
         bool DoPostProcess() override;
 
     private:
-        TfLiteTensor* m_outputTensor0;                                   /* Output tensor index 0 */
-        TfLiteTensor* m_outputTensor1;                                   /* Output tensor index 1 */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor0;        /* Output tensor index 0 */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor1;        /* Output tensor index 1 */
         std::vector<object_detection::DetectionResult>& m_results;       /* Single inference results. */
         const object_detection::PostProcessParams& m_postProcessParams;  /* Post processing param struct. */
         object_detection::Network m_net;                                 /* YOLO network object. */

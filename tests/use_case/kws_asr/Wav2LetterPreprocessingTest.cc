@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "TflmTensor.hpp"
 #include "Wav2LetterPreprocess.hpp"
 
-#include <limits>
 #include <catch.hpp>
+#include <cstdint>
+#include <limits>
 
 constexpr uint32_t numMfccFeatures = 13;
 constexpr uint32_t numMfccVectors  = 10;
@@ -109,18 +111,20 @@ TEST_CASE("Preprocessing calculation INT8")
     TfLiteIntArray* dims= tflite::testing::IntArrayFromInts(dimArray);
     TfLiteTensor inputTensor = tflite::testing::CreateQuantizedTensor(
             tensorVec.data(), dims, quantScale, quantOffset, "preprocessedInput");
+    std::shared_ptr<arm::app::fwk::iface::TensorIface> inputTensorPtr =
+        std::make_shared<arm::app::fwk::tflm::TflmTensor>(&inputTensor);
 
     /* Initialise pre-processing module. */
-    arm::app::AsrPreProcess prep{&inputTensor,
-                                 numMfccFeatures, numMfccVectors, mfccWindowLen, mfccWindowStride};
+    arm::app::AsrPreProcess prep{
+        inputTensorPtr, numMfccFeatures, numMfccVectors, mfccWindowLen, mfccWindowStride};
 
     /* Invoke pre-processing. */
     REQUIRE(prep.DoPreProcess(testWav.data(), testWav.size()));
 
     /* Wrap the tensor with a std::vector for ease. */
-    auto* tensorData = tflite::GetTensorData<int8_t>(&inputTensor);
-    std::vector <int8_t> vecResults =
-            std::vector<int8_t>(tensorData, tensorData + inputTensor.bytes);
+    auto* tensorData = inputTensorPtr->GetData<int8_t>();
+    std::vector<int8_t> vecResults =
+        std::vector<int8_t>(tensorData, tensorData + inputTensorPtr->Bytes());
 
     /* Check sizes. */
     REQUIRE(vecResults.size() == sizeof(expectedResult));

@@ -186,6 +186,9 @@ function(platform_custom_post_build)
             PROPERTIES
             LANGUAGE C
         )
+
+        message(STATUS "Using Linker file: ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.ld")
+
         target_compile_options(${PARSED_TARGET_NAME}_linkerfile
             PRIVATE
                 -E
@@ -206,6 +209,8 @@ function(platform_custom_post_build)
             PROPERTIES
             LANGUAGE C
         )
+
+        message(STATUS "Using Linker file: ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${ALIF_DEVICE_SKU}/${ALIF_CORE_STRING}/${LINKER_SCRIPT_NAME}.sct")
 
         target_compile_options(${PARSED_TARGET_NAME}_linkerfile
             PRIVATE

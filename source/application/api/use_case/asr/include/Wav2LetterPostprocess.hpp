@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 #ifndef ASR_WAV2LETTER_POSTPROCESS_HPP
 #define ASR_WAV2LETTER_POSTPROCESS_HPP
 
-#include "TensorFlowLiteMicro.hpp"   /* TensorFlow headers. */
-#include "BaseProcessing.hpp"
-#include "Model.hpp"
 #include "AsrClassifier.hpp"
 #include "AsrResult.hpp"
+#include "BaseProcessing.hpp"
+#include "Model.hpp"
+#include "Tensor.hpp"
 #include "log_macros.h"
 
 namespace arm {
@@ -37,18 +37,23 @@ namespace app {
 
         /**
          * @brief           Constructor
-         * @param[in]       outputTensor       Pointer to the TFLite Micro output Tensor.
+         * @param[in]       model              Model object reference.
          * @param[in]       classifier         Object used to get top N results from classification.
-         * @param[in]       labels             Vector of string labels to identify each output of the model.
-         * @param[in/out]   result             Vector of classification results to store decoded outputs.
-         * @param[in]       outputContextLen   Left/right context length for output tensor.
+         * @param[in]       labels             Vector of string labels to identify each output of
+         *the model.
+         * @param[in/out]   results            Vector of classification results to store decoded
+         *outputs.
+         * @param[in]       inputContextLen    Left/right context length for input tensor.
          * @param[in]       blankTokenIdx      Index in the labels that the "Blank token" takes.
-         * @param[in]       reductionAxis      The axis that the logits of each time step is on.
+         * @param[in]       reductionAxisIdx   The axis that the logits of each time step is on.
          **/
-        AsrPostProcess(TfLiteTensor* outputTensor, AsrClassifier& classifier,
-                       const std::vector<std::string>& labels, asr::ResultVec& result,
-                       uint32_t outputContextLen,
-                       uint32_t blankTokenIdx, uint32_t reductionAxis);
+        AsrPostProcess(const fwk::iface::Model& model,
+                       AsrClassifier& classifier,
+                       const std::vector<std::string>& labels,
+                       asr::ResultVec& results,
+                       uint32_t inputContextLen,
+                       uint32_t blankTokenIdx,
+                       uint32_t reductionAxisIdx);
 
         /**
          * @brief    Should perform post-processing of the result of inference then
@@ -57,20 +62,19 @@ namespace app {
          **/
         bool DoPostProcess() override;
 
-        /** @brief   Gets the output inner length for post-processing. */
-        static uint32_t GetOutputInnerLen(const TfLiteTensor*, uint32_t outputCtxLen);
-
         /** @brief   Gets the output context length (left/right) for post-processing. */
-        static uint32_t GetOutputContextLen(const Model& model, uint32_t inputCtxLen);
+        uint32_t GetOutputContextLen() const;
 
         /** @brief   Gets the number of feature vectors to be computed. */
-        static uint32_t GetNumFeatureVectors(const Model& model);
+        uint32_t GetNumFeatureVectors() const;
 
     private:
         AsrClassifier& m_classifier;                /* ASR Classifier object. */
-        TfLiteTensor* m_outputTensor;               /* Model output tensor. */
+        const fwk::iface::Model& m_model;           /* Model reference */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor; /* Model output tensor. */
         const std::vector<std::string>& m_labels;   /* ASR Labels. */
         asr::ResultVec & m_results;                 /* Results vector for a single inference. */
+        uint32_t m_inputContextLen;                 /* length of left/right contexts for input */
         uint32_t m_outputContextLen;                /* lengths of left/right contexts for output. */
         uint32_t m_outputInnerLen;                  /* Length of output inner context. */
         uint32_t m_totalLen;                        /* Total length of the required axis. */
@@ -78,20 +82,16 @@ namespace app {
         uint32_t m_blankTokenIdx;                   /* Index of the labels blank token. */
         uint32_t m_reductionAxisIdx;                /* Axis containing output logits for a single step. */
 
+        /** @brief   Gets the output inner length for post-processing. */
+        uint32_t GetOutputInnerLen() const;
+
         /**
          * @brief    Checks if the tensor and axis index are valid
          *           inputs to the object - based on how it has been initialised.
          * @return   true if valid, false otherwise.
          */
-        bool IsInputValid(TfLiteTensor*  tensor,
+        bool IsInputValid(const std::shared_ptr<fwk::iface::TensorIface> tensor,
                           uint32_t axisIdx) const;
-
-        /**
-         * @brief    Gets the tensor data element size in bytes based
-         *           on the tensor type.
-         * @return   Size in bytes, 0 if not supported.
-         */
-        static uint32_t GetTensorElementSize(TfLiteTensor* tensor);
 
         /**
          * @brief    Erases sections from the data assuming row-wise

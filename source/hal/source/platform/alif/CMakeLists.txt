@@ -168,11 +168,10 @@ endif()
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 
 ## Platform component: stdout
-set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART" FORCE)
-add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
+#add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
 ## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: lvgl port
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
@@ -190,7 +189,7 @@ add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -199,7 +198,7 @@ endif()
 
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
-    log
+    mlek_log
     platform_pmu
     cmsis_device
     rte_components
@@ -207,7 +206,7 @@ target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
 
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     ${PLATFORM_DRIVERS_CORE}
-    $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
+    $<IF:$<BOOL:${GLCD_UI}>,hal_display_lvgl,hal_display_stubs>
     audio_alif
     hal_audio_static_streams
     $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_alif,hal_camera_static_images>

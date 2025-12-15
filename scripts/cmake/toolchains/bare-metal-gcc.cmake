@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -81,7 +81,7 @@ set(CMAKE_CXX_FLAGS_DEBUG          "-Og   -g"          CACHE STRING "Flags used 
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during MINSIZEREL builds.")
 set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -g -DNDEBUG" CACHE STRING "Flags used by the CXX compiler during RELEASE builds.")
 
-# Warning options
+# Warning options:
 add_compile_options(
     -Wall
     -Wextra
@@ -135,7 +135,7 @@ endfunction()
 
 # Function to add linker option to use the chosen linker script.
 function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
-    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.ld
+    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.gnu.ld
         CACHE STRING "Linker script path")
     if (NOT EXISTS ${LINKER_SCRIPT_PATH})
         message(FATAL_ERROR "Linker script not found: ${LINKER_SCRIPT_PATH}")
@@ -143,7 +143,9 @@ function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-T ${LINKER_SCRIPT_PATH}")
-    set_target_properties(${TARGET_NAME} PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT_PATH})
+    set_target_properties(${TARGET_NAME}
+        PROPERTIES
+        LINK_DEPENDS ${LINKER_SCRIPT_PATH})
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

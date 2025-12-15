@@ -37,19 +37,20 @@ using ViusalWakeWordClassifier = arm::app::Classifier;
 
 void MainLoop()
 {
-    arm::app::VisualWakeWordModel model;  /* Model wrapper object. */
+
+    arm::app::fwk::tflm::VisualWakeWordModel model;  /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::vww::GetModelPointer(),
+                                                arm::app::vww::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     if (!alif::app::ClassifyImageInit()) {
         printf_err("Failed to initialise use case handler\n");
     }
 
-
-
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::vww::GetModelPointer(),
-                    arm::app::vww::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -59,7 +60,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"vww"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<uint32_t>("imgIndex", 0);
 
     ViusalWakeWordClassifier classifier;  /* Classifier wrapper object. */

@@ -1,3 +1,23 @@
+Changes for 25.12
+    * Added support for ExecuTorch framework alongside TensorFlow Lite Micro
+    * Support for 25.08 NPU components and dependencies (core-driver, core-platform, Vela 4.4.1, CMSIS-6, CMSIS-DSP, CMSIS-NN, TensorFlow Lite Micro and ExecuTorch 1.0.0)
+    * Updated ASR use case to allow building with Conformer model via ExecuTorch
+    * Updated Image Classification use case to support ExecuTorch version of MobileNet V2 and also DeiT tiny
+    * Set up script updated with support for downloading and optimising models using multiple threads
+
+Changes for 25.05
+    * Added support for newer LLVM based Arm Toolchain for Embedded (ATfE) for versions 19.1.5, 20.0.0 and 20.1.0.
+    * Updated bare-metal toolchain files to always add function and data sections for both toolchains.
+    * Updated CMSIS-DSP build to only build required sources by default.
+    * Added interactive mode option to allow user control when running use cases.
+    * General documentation updates - fixing broken links, adding macOS® support commands for FPGA deployment and updating URLs to GitLab.
+
+Changes for 25.02
+    * Support for 25.02 NPU components and dependencies (core-driver, core-platform, Vela 4.2.0, CMSIS-6, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro)
+    * Fix for CMSIS-NN usage in TensorFlow Lite Micro. This bug was introduced in Sep 2024
+    * Minor update to generic BSP with `CMSIS_device_header` definition preferred to `CPU_HEADER_FILE`
+    * General documentation updates - removed Arm Virtual Hardware references from documentation.
+
 Changes in 24.11
     * Support for 24.11 NPU components and dependencies (core-driver, core-platform, Vela 4.1.0, CMSIS-6, CMSIS-DSP, CMSIS-NN and TensorFlow Lite Micro).
     * Added support for Arm® Corstone™-320 FVP, which includes Arm® Ethos™-U85 NPU

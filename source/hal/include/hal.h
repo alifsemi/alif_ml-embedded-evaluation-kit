@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -31,7 +31,7 @@ extern "C" {
 
 #include "platform_drivers.h"   /* Platform drivers */
 #include "hal_pmu.h"            /* Timer/profiler API */
-#include "hal_lcd.h"            /* LCD functions */
+#include "hal_display.h"        /* Display interface */
 #include "hal_audio.h"          /* Audio interface */
 #include "hal_camera.h"         /* Camera interface */
 #include "hal_audio_alif.h"     /* Alif AUDIO functions */
@@ -54,12 +54,9 @@ bool hal_platform_init(void);
 void hal_platform_release(void);
 
 /**
- * @brief       Gets user input from the stdin interface.
- * @param[out]  user_input  Pointer to a buffer where the input will be stored.
- * @param[in]   size        Buffer size in bytes.
- * @return      True if successful, false otherwise.
+ * @brief       Wait for any user input from the stdin interface.
  */
-bool hal_get_user_input(char* user_input, int size);
+void hal_await_user_input();
 
 #ifdef __cplusplus
 }

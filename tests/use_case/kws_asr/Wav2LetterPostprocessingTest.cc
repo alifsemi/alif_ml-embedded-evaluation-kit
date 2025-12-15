@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Wav2LetterPostprocess.hpp"
-#include "Wav2LetterModel.hpp"
-#include "ClassificationResult.hpp"
 #include "BufAttributes.hpp"
+#include "ClassificationResult.hpp"
+#include "TflmTensor.hpp"
+#include "Wav2LetterModel.hpp"
+#include "Wav2LetterPostprocess.hpp"
 
 #include <algorithm>
 #include <catch.hpp>
@@ -39,104 +40,78 @@ namespace arm {
 } /* namespace arm */
 
 template <typename T>
-static TfLiteTensor GetTestTensor(
-        std::vector<int>&      shape,
-        T                      initVal,
-        std::vector<T>&        vectorBuf)
+static std::vector<T>
+VectorFromTensor(const std::shared_ptr<arm::app::fwk::iface::TensorIface>& tensor)
 {
-    REQUIRE(0 != shape.size());
-
-    shape.insert(shape.begin(), shape.size());
-    uint32_t sizeInBytes = sizeof(T);
-    for (size_t i = 1; i < shape.size(); ++i) {
-        sizeInBytes *= shape[i];
-    }
-
-    /* Allocate mem. */
-    vectorBuf = std::vector<T>(sizeInBytes, initVal);
-    TfLiteIntArray* dims = tflite::testing::IntArrayFromInts(shape.data());
-    return tflite::testing::CreateQuantizedTensor(
-            vectorBuf.data(), dims,
-            1, 0, "test-tensor");
+    auto* tData = tensor->GetData<T>();
+    return std::vector<int8_t>(tData, tData + tensor->GetNumElements());
 }
 
 TEST_CASE("Checking return value")
 {
-    SECTION("Mismatched post processing parameters and tensor size")
-    {
-        const uint32_t outputCtxLen = 5;
-        arm::app::AsrClassifier classifier;
-        arm::app::Wav2LetterModel model;
-        model.Init(arm::app::tensorArena,
-                   sizeof(arm::app::tensorArena),
-                   arm::app::asr::GetModelPointer(),
-                   arm::app::asr::GetModelLen());
-        std::vector<std::string> placeholderLabels = {"a", "b", "$"};
-        const uint32_t blankTokenIdx = 2;
-        std::vector<arm::app::ClassificationResult> placeholderResult;
-        std::vector <int> tensorShape = {1, 1, 1, 13};
-        std::vector <int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(
-                tensorShape, 100, tensorVec);
-
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
-
-        REQUIRE(!post.DoPostProcess());
-    }
-
     SECTION("Post processing succeeds")
     {
-        const uint32_t outputCtxLen = 5;
-        arm::app::AsrClassifier classifier;
-        arm::app::Wav2LetterModel model;
-        model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                   arm::app::asr::GetModelPointer(),
-                   arm::app::asr::GetModelLen());
+        const uint32_t inputContexLen = 98;
+        arm::app::AsrClassifier classifier{
+            arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+            arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+            arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+            arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* classifier */
+
+        arm::app::fwk::tflm::Wav2LetterModel model;
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::asr::GetModelPointer(),
+                                                    arm::app::asr::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model.Init(computeMem, modelMem));
         std::vector<std::string> placeholderLabels = {"a", "b", "$"};
         const uint32_t blankTokenIdx = 2;
         std::vector<arm::app::ClassificationResult> placeholderResult;
-        std::vector<int> tensorShape = {1, 1, 13, 1};
-        std::vector<int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(
-                tensorShape, 100, tensorVec);
 
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
-
-        /* Copy elements to compare later. */
-        std::vector<int8_t> originalVec = tensorVec;
+        arm::app::AsrPostProcess post{model,
+                                      classifier,
+                                      placeholderLabels,
+                                      placeholderResult,
+                                      inputContexLen,
+                                      blankTokenIdx,
+                                      arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx};
 
         /* This step should not erase anything. */
         REQUIRE(post.DoPostProcess());
     }
 }
 
-
 TEST_CASE("Postprocessing - erasing required elements")
 {
-    constexpr uint32_t outputCtxLen = 5;
-    constexpr uint32_t innerLen = 3;
-    constexpr uint32_t nRows = 2*outputCtxLen + innerLen;
-    constexpr uint32_t nCols = 10;
-    constexpr uint32_t blankTokenIdx = nCols - 1;
-    std::vector<int> tensorShape = {1, 1, nRows, nCols};
-    arm::app::AsrClassifier classifier;
-    arm::app::Wav2LetterModel model;
-    model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::asr::GetModelPointer(),
-                    arm::app::asr::GetModelLen());
+    constexpr uint32_t inputCtxLen   = 98;
+    constexpr uint32_t outputCtxLen  = 49;
+    constexpr uint32_t innerLen      = 50;
+    constexpr uint32_t nCols         = 29;
+    constexpr uint32_t blankTokenIdx = arm::app::fwk::tflm::Wav2LetterModel::ms_blankTokenIdx;
+    arm::app::AsrClassifier classifier{
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* classifier */
+    arm::app::fwk::tflm::Wav2LetterModel model;
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::asr::GetModelPointer(),
+                                                arm::app::asr::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+    REQUIRE(model.Init(computeMem, modelMem));
     std::vector<std::string> placeholderLabels = {"a", "b", "$"};
     std::vector<arm::app::ClassificationResult> placeholderResult;
 
     SECTION("First and last iteration")
     {
-        std::vector<int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
+        std::vector<int8_t> tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
+        arm::app::AsrPostProcess post{model,
+                                      classifier,
+                                      placeholderLabels,
+                                      placeholderResult,
+                                      inputCtxLen,
+                                      blankTokenIdx,
+                                      arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
         std::vector<int8_t>originalVec = tensorVec;
@@ -144,16 +119,20 @@ TEST_CASE("Postprocessing - erasing required elements")
         /* This step should not erase anything. */
         post.m_lastIteration = true;
         REQUIRE(post.DoPostProcess());
+        tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
         REQUIRE(originalVec == tensorVec);
     }
 
     SECTION("Right context erase")
     {
-        std::vector <int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(
-                tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
+        std::vector<int8_t> tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
+        arm::app::AsrPostProcess post{model,
+                                      classifier,
+                                      placeholderLabels,
+                                      placeholderResult,
+                                      inputCtxLen,
+                                      blankTokenIdx,
+                                      arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
         std::vector<int8_t> originalVec = tensorVec;
@@ -161,9 +140,10 @@ TEST_CASE("Postprocessing - erasing required elements")
         /* This step should erase the right context only. */
         post.m_lastIteration = false;
         REQUIRE(post.DoPostProcess());
+        tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
         REQUIRE(originalVec != tensorVec);
 
-        /* The last ctxLen * 10 elements should be gone. */
+        /* The last ctxLen * nCols elements should be gone. */
         for (size_t i = 0; i < outputCtxLen; ++i) {
             for (size_t j = 0; j < nCols; ++j) {
                 /* Check right context elements are zeroed. Blank token idx should be set to 1 when erasing. */
@@ -186,11 +166,14 @@ TEST_CASE("Postprocessing - erasing required elements")
 
     SECTION("Left and right context erase")
     {
-        std::vector <int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(
-                tensorShape, 100, tensorVec);
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
+        std::vector<int8_t> tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
+        arm::app::AsrPostProcess post{model,
+                                      classifier,
+                                      placeholderLabels,
+                                      placeholderResult,
+                                      inputCtxLen,
+                                      blankTokenIdx,
+                                      arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
         std::vector <int8_t> originalVec = tensorVec;
@@ -202,9 +185,10 @@ TEST_CASE("Postprocessing - erasing required elements")
         /* Calling it the second time should erase the left context. */
         REQUIRE(post.DoPostProcess());
 
+        tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
         REQUIRE(originalVec != tensorVec);
 
-        /* The first and last ctxLen * 10 elements should be gone. */
+        /* The first and last ctxLen * nCols elements should be gone. */
         for (size_t i = 0; i < outputCtxLen; ++i) {
             for (size_t j = 0; j < nCols; ++j) {
                 /* Check left and right context elements are zeroed. */
@@ -227,13 +211,16 @@ TEST_CASE("Postprocessing - erasing required elements")
 
     SECTION("Try left context erase")
     {
-        std::vector <int8_t> tensorVec;
-        TfLiteTensor tensor = GetTestTensor<int8_t>(
-                tensorShape, 100, tensorVec);
+        std::vector<int8_t> tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
 
         /* Should not be able to erase the left context if it is the first iteration. */
-        arm::app::AsrPostProcess post{&tensor, classifier, placeholderLabels, placeholderResult, outputCtxLen,
-                                      blankTokenIdx, arm::app::Wav2LetterModel::ms_outputRowsIdx};
+        arm::app::AsrPostProcess post{model,
+                                      classifier,
+                                      placeholderLabels,
+                                      placeholderResult,
+                                      inputCtxLen,
+                                      blankTokenIdx,
+                                      arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx};
 
         /* Copy elements to compare later. */
         std::vector <int8_t> originalVec = tensorVec;
@@ -242,6 +229,7 @@ TEST_CASE("Postprocessing - erasing required elements")
         post.m_lastIteration = true;
         REQUIRE(post.DoPostProcess());
 
+        tensorVec = VectorFromTensor<int8_t>(model.GetOutputTensor(0));
         REQUIRE(originalVec == tensorVec);
     }
 }

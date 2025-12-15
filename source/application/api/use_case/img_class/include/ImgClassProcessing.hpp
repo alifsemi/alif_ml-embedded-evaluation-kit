@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 
 #include "BaseProcessing.hpp"
 #include "Classifier.hpp"
+#include <memory>
+#include <array>
 
 namespace arm {
 namespace app {
@@ -31,16 +33,25 @@ namespace app {
     class ImgClassPreProcess : public BasePreProcess {
 
     public:
+        static constexpr size_t kNumChannels = 3;
+
         /**
          * @brief       Constructor
-         * @param[in]   inputTensor     Pointer to the TFLite Micro input Tensor.
-         * @param[in]   convertToInt8   Should the image be converted to Int8 range.
+         * @param[in]   inputTensor     Shared pointer representing a tensor interface object.
+         * @param[in]   mean            Optional array representing per-channel mean value to be
+         *                              used for normalisation. Default is set to values expected
+         *                              by ImageNet dataset.
+         * @param[in]   stddev          Optional array representing per-channel standard deviation
+         *                              value to be used for normalisation. Default is set to values
+         *                              expected by ImageNet dataset.
          **/
-        explicit ImgClassPreProcess(TfLiteTensor* inputTensor, bool convertToInt8);
+        explicit ImgClassPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                    const std::array<float, kNumChannels> mean = {0.485, 0.456, 0.406},
+                                    const std::array<float, kNumChannels> stddev = {0.229, 0.224, 0.225});
 
         /**
          * @brief       Should perform pre-processing of 'raw' input image data and load it into
-         *              TFLite Micro input tensors ready for inference
+         *              input tensors ready for inference
          * @param[in]   input      Pointer to the data that pre-processing will work on.
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
@@ -48,8 +59,9 @@ namespace app {
         bool DoPreProcess(const void* input, size_t inputSize) override;
 
     private:
-        TfLiteTensor* m_inputTensor;
-        bool m_convertToInt8;
+        std::shared_ptr<fwk::iface::TensorIface> m_inputTensor;
+        std::array<float, kNumChannels> m_mean{0.f, 0.f, 0.f};
+        std::array<float, kNumChannels> m_stddev{1.f, 1.f, 1.f};
     };
 
     /**
@@ -62,12 +74,13 @@ namespace app {
     public:
         /**
          * @brief       Constructor
-         * @param[in]   outputTensor  Pointer to the TFLite Micro output Tensor.
+         * @param[in]   outputTensor  Shared pointer representing a tensor interface object
          * @param[in]   classifier    Classifier object used to get top N results from classification.
          * @param[in]   labels        Vector of string labels to identify each output of the model.
          * @param[in]   results       Vector of classification results to store decoded outputs.
          **/
-        ImgClassPostProcess(TfLiteTensor* outputTensor, Classifier& classifier,
+        ImgClassPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                            Classifier& classifier,
                             const std::vector<std::string>& labels,
                             std::vector<ClassificationResult>& results);
 
@@ -79,7 +92,7 @@ namespace app {
         bool DoPostProcess() override;
 
     private:
-        TfLiteTensor* m_outputTensor;
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor{nullptr};
         Classifier& m_imgClassifier;
         const std::vector<std::string>& m_labels;
         std::vector<ClassificationResult>& m_results;

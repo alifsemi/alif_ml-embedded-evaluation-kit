@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -61,30 +61,30 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 28;
 
-        hal_lcd_clear(COLOR_BLACK);
+        hal_display_clear(COLOR_BLACK);
 
-        auto& model = ctx.Get<Model&>("model");
+        auto& model = ctx.Get<fwk::iface::Model&>("model");
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
         }
 
-        TfLiteTensor* inputTensor   = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor0 = model.GetOutputTensor(0);
-        TfLiteTensor* outputTensor1 = model.GetOutputTensor(1);
+        auto inputTensor   = model.GetInputTensor(0);
+        auto outputTensor0 = model.GetOutputTensor(0);
+        auto outputTensor1 = model.GetOutputTensor(1);
 
-        if (!inputTensor->dims) {
+        const auto inputShape = inputTensor->Shape();
+
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 3) {
+        } else if (inputShape.size() < 3) {
             printf_err("Input tensor dimension should be >= 3\n");
             return false;
         }
 
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-
-        const int inputImgCols = inputShape->data[YoloFastestModel::ms_inputColsIdx];
-        const int inputImgRows = inputShape->data[YoloFastestModel::ms_inputRowsIdx];
+        const int inputImgCols = inputShape[fwk::tflm::YoloFastestModel::ms_inputColsIdx];
+        const int inputImgRows = inputShape[fwk::tflm::YoloFastestModel::ms_inputRowsIdx];
 
         /* Set up pre and post-processing. */
         DetectorPreProcess preProcess = DetectorPreProcess(inputTensor, true, model.IsDataSigned());
@@ -110,6 +110,10 @@ namespace app {
         }
 
         while (true) {
+#ifdef INTERACTIVE_MODE
+            AwaitUserInput(); // Wait for user input before moving forward.
+#endif /* INTERACTIVE_MODE */
+
             /* Ensure there are no results leftover from previous inference when running all. */
             results.clear();
             hal_camera_start();
@@ -123,9 +127,9 @@ namespace app {
                 break;
             }
 
-            auto dstPtr = static_cast<uint8_t*>(inputTensor->data.uint8);
+            auto* dstPtr = inputTensor->GetData<uint8_t>();
             const size_t copySz =
-                inputTensor->bytes < capturedFrameSize ? inputTensor->bytes : capturedFrameSize;
+                inputTensor->Bytes() < capturedFrameSize ? inputTensor->Bytes() : capturedFrameSize;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(currImage, copySz)) {
@@ -134,7 +138,7 @@ namespace app {
             }
 
             /* Display image on the LCD. */
-            hal_lcd_display_image(
+            hal_display_show_image(
                 (arm::app::object_detection::channelsImageDisplayed == 3) ? currImage : dstPtr,
                 inputImgCols,
                 inputImgRows,
@@ -144,7 +148,7 @@ namespace app {
                 dataPsnImgDownscaleFactor);
 
             /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             if (!RunInference(model, profiler)) {
@@ -159,7 +163,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             /* Draw boxes. */
@@ -184,7 +188,7 @@ namespace app {
     static bool
     PresentInferenceResult(const std::vector<object_detection::DetectionResult>& results)
     {
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* If profiling is enabled, and the time is valid. */
         info("Final results:\n");
@@ -213,32 +217,32 @@ namespace app {
 
         for (const auto& result : results) {
             /* Top line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                result.m_w / imgDownscaleFactor,
-                                lineThickness,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 result.m_w / imgDownscaleFactor,
+                                 lineThickness,
+                                 COLOR_GREEN);
             /* Bot line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + (result.m_y0 + result.m_h) / imgDownscaleFactor -
-                                    lineThickness,
-                                result.m_w / imgDownscaleFactor,
-                                lineThickness,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + (result.m_y0 + result.m_h) / imgDownscaleFactor -
+                                 lineThickness,
+                                 result.m_w / imgDownscaleFactor,
+                                 lineThickness,
+                                 COLOR_GREEN);
 
             /* Left line. */
-            hal_lcd_display_box(imgStartX + result.m_x0 / imgDownscaleFactor,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                lineThickness,
-                                result.m_h / imgDownscaleFactor,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + result.m_x0 / imgDownscaleFactor,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 lineThickness,
+                                 result.m_h / imgDownscaleFactor,
+                                 COLOR_GREEN);
             /* Right line. */
-            hal_lcd_display_box(imgStartX + (result.m_x0 + result.m_w) / imgDownscaleFactor -
-                                    lineThickness,
-                                imgStartY + result.m_y0 / imgDownscaleFactor,
-                                lineThickness,
-                                result.m_h / imgDownscaleFactor,
-                                COLOR_GREEN);
+            hal_display_show_box(imgStartX + (result.m_x0 + result.m_w) / imgDownscaleFactor -
+                                 lineThickness,
+                                 imgStartY + result.m_y0 / imgDownscaleFactor,
+                                 lineThickness,
+                                 result.m_h / imgDownscaleFactor,
+                                 COLOR_GREEN);
         }
     }
 

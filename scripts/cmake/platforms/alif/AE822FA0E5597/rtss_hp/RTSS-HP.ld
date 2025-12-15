@@ -82,9 +82,18 @@ SECTIONS
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s4.c.obj(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s16.c.obj(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
+
+#ifndef NDEBUG
+  .libcmsis_nn.at_mram : ALIGN(16)
+  {
+    *libcmsis-nn.a:arm_*_s8.c.obj(.text* .rodata*)
+  } > MRAM
+#endif
 
   .copy.table.at_mram : ALIGN(4)
   {

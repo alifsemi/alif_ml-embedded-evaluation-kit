@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -31,7 +31,7 @@ namespace app {
     bool ClassifyImageHandler(ApplicationContext& ctx)
     {
         auto& profiler = ctx.Get<Profiler&>("profiler");
-        auto& model    = ctx.Get<Model&>("model");
+        auto& model    = ctx.Get<fwk::iface::Model&>("model");
 
         constexpr uint32_t dataPsnImgDownscaleFactor = 1;
         constexpr uint32_t dataPsnImgStartX          = 10;
@@ -45,22 +45,24 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor      = model.GetInputTensor(0);
+        auto outputTensor     = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 4) {
+        } else if (inputShape.size() < 4) {
             printf_err("Input tensor dimension should be = 4\n");
             return false;
         }
 
         /* Get input shape for displaying the image. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols = inputShape->data[arm::app::VisualWakeWordModel::ms_inputColsIdx];
-        const uint32_t nRows = inputShape->data[arm::app::VisualWakeWordModel::ms_inputRowsIdx];
-        if (arm::app::VisualWakeWordModel::ms_inputChannelsIdx >=
-            static_cast<uint32_t>(inputShape->size)) {
+        const uint32_t nCols =
+            inputShape[arm::app::fwk::tflm::VisualWakeWordModel::ms_inputColsIdx];
+        const uint32_t nRows =
+            inputShape[arm::app::fwk::tflm::VisualWakeWordModel::ms_inputRowsIdx];
+        if (arm::app::fwk::tflm::VisualWakeWordModel::ms_inputChannelsIdx >=
+            static_cast<uint32_t>(inputShape.size())) {
             printf_err("Invalid channel index.\n");
             return false;
         }
@@ -88,7 +90,11 @@ namespace app {
         }
 
         while (true) {
-            hal_lcd_clear(COLOR_BLACK);
+#ifdef INTERACTIVE_MODE
+            AwaitUserInput(); // Wait for user input before moving forward.
+#endif /* INTERACTIVE_MODE */
+
+            hal_display_clear(COLOR_BLACK);
             hal_camera_start();
 
             /* Strings for presentation/logging. */
@@ -100,20 +106,20 @@ namespace app {
             }
 
             /* Display this image on the LCD. */
-            hal_lcd_display_image(imgSrc,
-                                  nCols,
-                                  nRows,
-                                  displayChannels,
-                                  dataPsnImgStartX,
-                                  dataPsnImgStartY,
-                                  dataPsnImgDownscaleFactor);
+            hal_display_show_image(imgSrc,
+                                   nCols,
+                                   nRows,
+                                   displayChannels,
+                                   dataPsnImgStartX,
+                                   dataPsnImgStartY,
+                                   dataPsnImgDownscaleFactor);
 
             /* Display message on the LCD - inference running. */
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             const size_t imgSz =
-                inputTensor->bytes < capturedFrameSize ? inputTensor->bytes : capturedFrameSize;
+                inputTensor->Bytes() < capturedFrameSize ? inputTensor->Bytes() : capturedFrameSize;
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
@@ -133,7 +139,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Add results to context for access outside handler. */
@@ -147,7 +153,6 @@ namespace app {
                 return false;
             }
             profiler.PrintProfilingResult();
-
         }
         return true;
     }

@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -53,11 +53,10 @@ if (NOT DEFINED COMPONENTS_DIR)
 endif()
 
 ## Platform component: stdout
-set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART")
 add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
-## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+## Platform component: display
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: audio
 add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
@@ -77,10 +76,9 @@ add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
-    log
+    mlek_log
     platform_pmu
-    stdout
-    lcd_stubs
+    hal_display_stubs
     hal_audio_static_streams
     hal_camera_static_images
     audio_stubs)

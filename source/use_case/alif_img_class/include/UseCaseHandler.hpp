@@ -35,7 +35,7 @@
 namespace alif {
 namespace app {
 
-    bool ClassifyImageInit(arm::app::MobileNetModel& model);
+    bool ClassifyImageInit(arm::app::fwk::tflm::MobileNetModel& model);
 
     /**
      * @brief       Handles the inference event.

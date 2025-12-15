@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,22 +33,30 @@ set(SOURCE_ROOT             ${CMAKE_CURRENT_LIST_DIR}/../../../source)
 set(LOGGING_PROJECT_DIR     ${SOURCE_ROOT}/log)
 set(ARM_MATH_PROJECT_DIR    ${SOURCE_ROOT}/math)
 set(API_COMMON_PROJECT_DIR  ${SOURCE_ROOT}/application/api/common)
+set(API_FWK_PROJECT_DIR     ${SOURCE_ROOT}/application/api/fwk)
 set(API_UC_PROJECT_DIR      ${SOURCE_ROOT}/application/api/use_case)
+
+# Include support for TensorFlow Lite Micro
+set(ML_FRAMEWORK "TensorFlowLiteMicro" CACHE STRING "Choice of ML framework")
+
+# Exclude TensorFlow Lite Micro itself from the MLEK CMSIS pack
+set(INCLUDE_TFLM    OFF)
 
 # Add dependencies first:
 if (NOT TARGET arm_math)
     add_subdirectory(${ARM_MATH_PROJECT_DIR} ${CMAKE_BINARY_DIR}/math)
 endif()
 
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     add_subdirectory(${LOGGING_PROJECT_DIR} ${CMAKE_BINARY_DIR}/log)
 endif()
 
 # Add common part and the APIs:
-add_subdirectory(${API_COMMON_PROJECT_DIR} ${CMAKE_BINARY_DIR}/common)
+add_subdirectory(${API_COMMON_PROJECT_DIR}  ${CMAKE_BINARY_DIR}/common)
+add_subdirectory(${API_FWK_PROJECT_DIR}     ${CMAKE_BINARY_DIR}/fwk)
 
 file(GLOB UC_API_LIST "${API_UC_PROJECT_DIR}/*")
-list(FILTER UC_API_LIST EXCLUDE REGEX ".md") # Remove .md files from UC_API_LIST
+list(FILTER UC_API_LIST EXCLUDE REGEX ".(md|txt)") # Remove files from UC_API_LIST
 
 foreach(API ${UC_API_LIST})
     add_subdirectory(${API} ${CMAKE_BINARY_DIR}/${API})

@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,6 @@
  */
 #include "Classifier.hpp"
 
-#include "TensorFlowLiteMicro.hpp"
 #include "PlatformMath.hpp"
 #include "log_macros.h"
 
@@ -62,7 +62,7 @@ namespace app {
         auto setFwdIter = sortedSet.begin();
 
         /* Scan through the rest of elements with compare operations. */
-        for (uint32_t i = topNCount; i < labels.size(); ++i) {
+        for (uint32_t i = topNCount; i < tensor.size(); ++i) {
             if (setFwdIter->first < tensor[i]) {
                 sortedSet.erase(*setFwdIter);
                 sortedSet.insert({tensor[i], i});
@@ -77,25 +77,25 @@ namespace app {
         return true;
     }
 
-    bool Classifier::GetClassificationResults(TfLiteTensor* outputTensor,
-            std::vector<ClassificationResult>& vecResults, const std::vector <std::string>& labels,
-            uint32_t topNCount, bool useSoftmax)
+    bool Classifier::GetClassificationResults(
+        const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        std::vector<ClassificationResult>& vecResults,
+        const std::vector<std::string>& labels,
+        uint32_t topNCount,
+        bool useSoftmax)
     {
         if (outputTensor == nullptr) {
             printf_err("Output vector is null pointer.\n");
             return false;
         }
 
-        uint32_t totalOutputSize = 1;
-        for (int inputDim = 0; inputDim < outputTensor->dims->size; inputDim++) {
-            totalOutputSize *= outputTensor->dims->data[inputDim];
-        }
+        const uint32_t nOutputElements = outputTensor->GetNumElements();
 
         /* Health check */
-        if (totalOutputSize < topNCount) {
+        if (nOutputElements < topNCount) {
             printf_err("Output vector is smaller than %" PRIu32 "\n", topNCount);
             return false;
-        } else if (totalOutputSize != labels.size()) {
+        } else if (nOutputElements != labels.size()) {
             printf_err("Output size doesn't match the labels' size\n");
             return false;
         } else if (topNCount == 0) {
@@ -103,61 +103,59 @@ namespace app {
             return false;
         }
 
-        bool resultState;
         vecResults.clear();
 
         /* De-Quantize Output Tensor */
-        QuantParams quantParams = GetTensorQuantParams(outputTensor);
+        auto quantParams = outputTensor->GetQuantParams();
 
         /* Floating point tensor data to be populated
          * NOTE: The assumption here is that the output tensor size isn't too
          * big and therefore, there's neglibible impact on heap usage. */
-        std::vector<float> tensorData(totalOutputSize);
+        std::vector<float> tensorData(nOutputElements);
 
         /* Populate the floating point buffer */
-        switch (outputTensor->type) {
-            case kTfLiteUInt8: {
-                uint8_t *tensor_buffer = tflite::GetTensorData<uint8_t>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = quantParams.scale *
-                        (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
-                }
-                break;
+        switch (outputTensor->Type()) {
+        case fwk::iface::TensorType::UINT8: {
+            uint8_t* tensor_buffer = outputTensor->GetData<uint8_t>();
+            for (size_t i = 0; i < nOutputElements; ++i) {
+                tensorData[i] =
+                    quantParams.scale * (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
             }
-            case kTfLiteInt8: {
-                int8_t *tensor_buffer = tflite::GetTensorData<int8_t>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = quantParams.scale *
-                        (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
-                }
-                break;
+            break;
+        }
+        case fwk::iface::TensorType::INT8: {
+            int8_t* tensor_buffer = outputTensor->GetData<int8_t>();
+            for (size_t i = 0; i < nOutputElements; ++i) {
+                tensorData[i] =
+                    quantParams.scale * (static_cast<float>(tensor_buffer[i]) - quantParams.offset);
             }
-            case kTfLiteFloat32: {
-                float *tensor_buffer = tflite::GetTensorData<float>(outputTensor);
-                for (size_t i = 0; i < totalOutputSize; ++i) {
-                    tensorData[i] = tensor_buffer[i];
-                }
-                break;
+            break;
+        }
+        case fwk::iface::TensorType::FP32: {
+            float* tensor_buffer = outputTensor->GetData<float>();
+            for (size_t i = 0; i < nOutputElements; ++i) {
+                tensorData[i] = tensor_buffer[i];
             }
+            break;
+        }
             default:
                 printf_err("Tensor type %s not supported by classifier\n",
-                    TfLiteTypeGetName(outputTensor->type));
+                           fwk::iface::GetTensorDataTypeName(outputTensor->Type()));
                 return false;
-        }
+            }
 
         if (useSoftmax) {
             math::MathUtils::SoftmaxF32(tensorData);
         }
 
         /* Get the top N results. */
-        resultState = GetTopNResults(tensorData, vecResults, topNCount, labels);
+        bool resultState = GetTopNResults(tensorData, vecResults, topNCount, labels);
 
         if (!resultState) {
             printf_err("Failed to get top N results set\n");
-            return false;
         }
 
-        return true;
+        return resultState;
     }
 } /* namespace app */
 } /* namespace arm */

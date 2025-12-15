@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +36,7 @@ namespace app {
 
         /**
          * @brief       Should perform pre-processing of 'raw' input data and load it into
-         *              TFLite Micro input tensors ready for inference
+         *              input tensors ready for inference
          * @param[in]   input      Pointer to the data that pre-processing will work on.
          * @param[in]   inputSize  Size of the input data.
          * @return      true if successful, false otherwise.
@@ -55,7 +56,7 @@ namespace app {
 
         /**
          * @brief       Should perform post-processing of the result of inference then populate
-         *              populate result data for any later use.
+         *              result data for any later use.
          * @return      true if successful, false otherwise.
          **/
         virtual bool DoPostProcess() = 0;
