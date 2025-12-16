@@ -82,8 +82,13 @@ target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
     arm_math
     platform_drivers_core)
 
-set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
-set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
+if ((TARGET_BOARD STREQUAL "AppKit-e8"))
+    set(TARGET_MICS "PDM" CACHE STRING "Microphone selection")
+    set_property(CACHE TARGET_MICS PROPERTY STRINGS "PDM")
+else()
+    set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
+    set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
+endif()
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

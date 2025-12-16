@@ -2738,6 +2738,32 @@
 #endif
 // </e> OSPI1 (Octal Serial Peripheral Interface 1) [Driver_OSPI]
 
+// <e> FLASH (MX66UW1G FLASH) [Driver_MX66UW1G_FLASH]
+// <i> Configuration settings for Driver_MX66UW1G_FLASH in component ::Drivers:Flash
+#define RTE_MX66UW1G_FLASH 1
+#if RTE_MX66UW1G_FLASH
+
+// <o> MX66UW1G FLASH SIZE
+// <i> MX66UW1G flash density in bytes
+// <i> Default: 0x4000000
+#define RTE_MX66UW1G_FLASH_SIZE           0x4000000
+
+// <o> MX66UW1G FLASH OSPI Instance
+// <i> Defines the OSPI controller instance the MX66UW1G flash is connected to
+// <i> Default: 1
+#define RTE_MX66UW1G_FLASH_OSPI_DRV_NUM   1
+
+// <o> MX66UW1G FLASH OSPI Bus speed
+// <i> Defines the OSPI Bus speed
+// <i> Default: 100000000
+#define RTE_MX66UW1G_FLASH_OSPI_BUS_SPEED 100000000
+
+// <o> MX66UW1G FLASH Wait cycles
+// <i> Defines the number of wait (dummy) cycles needed for fast read operations
+// <i> Default: 10
+#define RTE_MX66UW1G_FLASH_WAIT_CYCLES    10
+#endif
+
 //</h>
 // <e> FLASH (ISSI FLASH) [Driver_Flash]
 // <i> Configuration settings for Driver_Flash in component ::Drivers:Flash

@@ -707,7 +707,7 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8>`<br>
+`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8|AppKit-e8>`<br>
 Specifies the target board. (Default is AppKit-e7) In case of using DevKit-e1c, use "app-device-config-e1c.json" in the DEVICE section of the .json file. <br>
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
