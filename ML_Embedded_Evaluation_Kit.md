@@ -203,7 +203,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 3. Initialize and update the required submodules.
     ```
     cd alif_ml-embedded-evaluation-kit
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 4. Download and Setup required AI/ML resources.
     Using Tensorflow:
@@ -626,8 +626,8 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 
 ## Running a use-case with ML model data in external flash
 
-- For example use-cases asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
-- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for kws and kws_asr
+- For example use-cases alif_asr, asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
+- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for asr and kws_asr
   - You can enable it also for alif_object_detection use-case by setting `-Dalif_object_detection_MODEL_IN_EXT_FLASH=ON`
   - For other use-case examples you need to add the following to `usecase.cmake`
   ```
