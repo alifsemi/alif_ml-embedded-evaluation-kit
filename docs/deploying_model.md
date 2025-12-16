@@ -124,10 +124,20 @@ onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -kat in
 ## Vela compilation of the quantized TFLite model
 Now that we have an int8 quantized TFLite model we can use [Vela](https://developer.arm.com/documentation/109267/0101/Tool-support-for-the-Arm-Ethos-U-NPU/Ethos-U-Vela-compiler) to compile the model to an NPU optimised version.
 - In ML Embedded Evaluation Kit repository the example use-case models are automatically Vela compiled during the build process (in `set_up_default_resources.py`)
-- Here we call Vela manually from a cloned ML Embedded Evaluation Kit repository root
+- Activate the virtual environment bundled with the repo
 ```
-./resources_downloaded/env/bin/vela --output-dir vela_output --accelerator-config ethos-u55-256 --optimise Performance --config scripts/vela/ensemble_vela.ini --system-config RTSS_HP_SRAM_MRAM --memory-mode Shared_Sram model_input_full_integer_quant.tflite
+source resources_downloaded/env/bin/activate
 ```
+- Here we call Vela manually from a cloned ML Embedded Evaluation Kit repository root (Typical U55 deployment)
+```
+vela --output-dir vela_output --accelerator-config ethos-u55-256 --optimise Performance --config scripts/vela/ensemble_vela.ini --system-config RTSS_HP_SRAM_MRAM --memory-mode Shared_Sram model_input_full_integer_quant.tflite
+```
+
+- On Ensemble E8|E4 you typically want to deploy on the U-85 NPU (choose accelerator and system config accordingly)
+```
+vela --output-dir vela_output --accelerator-config ethos-u85-256 --optimise Performance --config scripts/vela/ensemble_vela.ini --system-config Ethos_U85_SRAM_MRAM --memory-mode Shared_Sram model_input_full_integer_quant.tflite
+```
+- When using U-85 remember to configure the cmake build with option: `-DETHOS_U_NPU_ID=U85`
 
 - In `scripts/vela` folder there is `ensemble_vela.ini` where you can find a few different system configurations for Alif device
 - Depending on the model (weights) size the model can be executed from TCM|SRAM|MRAM or from external OSPI flash
