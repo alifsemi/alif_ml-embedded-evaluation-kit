@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "UseCaseHandler.hpp"
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "ImageUtils.hpp"
 #include "RNNoiseFeatureProcessor.hpp"
 #include "RNNoiseModel.hpp"

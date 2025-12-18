@@ -21,7 +21,7 @@
 
 #include "AsrClassifier.hpp"
 #include "AsrResult.hpp"
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "ImageUtils.hpp"
 #include "OutputDecode.hpp"
 #include "UseCaseCommonUtils.hpp"

@@ -43,7 +43,8 @@ target_sources(${COMMON_UC_UTILS_TARGET} PRIVATE
     source/Classifier.cc
     source/ImageUtils.cc
     source/MelSpectrogram.cc
-    source/Mfcc.cc)
+    source/Mfcc.cc
+    source/AudioRenderUtils.cc)
 
 # Link time library targets:
 target_link_libraries(${COMMON_UC_UTILS_TARGET} PUBLIC

@@ -17,7 +17,7 @@
 #ifndef ASR_WAV2LETTER_PREPROCESS_HPP
 #define ASR_WAV2LETTER_PREPROCESS_HPP
 
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "BaseProcessing.hpp"
 #include "DataStructures.hpp"
 #include "Tensor.hpp"

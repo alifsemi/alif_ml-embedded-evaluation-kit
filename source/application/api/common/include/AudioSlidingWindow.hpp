@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef AUDIO_UTILS_HPP
-#define AUDIO_UTILS_HPP
+#ifndef AUDIO_SLIDING_WINDOW_HPP
+#define AUDIO_SLIDING_WINDOW_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -196,4 +196,4 @@ namespace audio {
 } /* namespace app */
 } /* namespace arm */
 
-#endif /* AUDIO_UTILS_HPP */
+#endif /* AUDIO_SLIDING_WINDOW_HPP */

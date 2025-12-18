@@ -19,7 +19,7 @@
 
 #include "AsrClassifier.hpp"
 #include "AsrResult.hpp"
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "Classifier.hpp"
 #include "ImageUtils.hpp"
 #include "KwsProcessing.hpp"

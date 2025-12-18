@@ -40,11 +40,10 @@ namespace audio {
                         m_melHiFreq(melHiFreq),
                         m_numMfccFeatures(numMfccFeats),
                         m_frameLen(frameLen),
-                        m_melEnergyMin(melEneryMin),
-
                         /* Smallest power of 2 >= frame length. */
                         m_frameLenPadded(pow(2, ceil((log(frameLen)/log(2))))),
-                        m_useHtkMethod(useHtkMethod)
+                        m_useHtkMethod(useHtkMethod),
+                        m_melEnergyMin(melEneryMin)
     {}
 
     void MfccParams::Log() const

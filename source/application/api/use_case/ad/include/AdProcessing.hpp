@@ -18,7 +18,7 @@
 #define AD_PROCESSING_HPP
 
 #include "AdMelSpectrogram.hpp"
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "BaseProcessing.hpp"
 #include "Tensor.hpp"
 #include "log_macros.h"
