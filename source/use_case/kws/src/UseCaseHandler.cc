@@ -17,7 +17,7 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "ImageUtils.hpp"
 #include "KwsClassifier.hpp"
 #include "KwsProcessing.hpp"

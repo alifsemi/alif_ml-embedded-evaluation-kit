@@ -17,7 +17,7 @@
 #ifndef KWS_PROCESSING_HPP
 #define KWS_PROCESSING_HPP
 
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "BaseProcessing.hpp"
 #include "KwsClassifier.hpp"
 #include "MicroNetKwsMfcc.hpp"

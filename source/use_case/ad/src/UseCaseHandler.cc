@@ -20,7 +20,7 @@
 #include "AdMelSpectrogram.hpp"
 #include "AdModel.hpp"
 #include "AdProcessing.hpp"
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"

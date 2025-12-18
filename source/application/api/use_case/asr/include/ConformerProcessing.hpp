@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "AudioUtils.hpp"
+#include "AudioSlidingWindow.hpp"
 #include "BaseProcessing.hpp"
 #include "ConformerMelSpectrogram.hpp"
 #include "Tensor.hpp"
