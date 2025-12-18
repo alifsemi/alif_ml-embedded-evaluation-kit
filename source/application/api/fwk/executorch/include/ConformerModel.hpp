@@ -27,7 +27,13 @@ extern const int g_chunkSize;
 
 namespace arm::app::fwk::et {
 
-class ConformerModel : public EtModel {};
+class ConformerModel : public EtModel {
+
+public:
+    /* Indices for the expected model - based on input tensor shape */
+    static constexpr uint32_t ms_inputMelRowsIdx = 1;
+    static constexpr uint32_t ms_inputMelColsIdx = 2;
+};
 
 } /* namespace arm::app::fwk::et */
 

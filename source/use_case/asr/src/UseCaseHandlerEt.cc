@@ -19,6 +19,9 @@
 
 #include "UseCaseHandler.hpp"
 
+#include "AudioRenderUtils.hpp"
+#include "BufAttributes.hpp"
+#include "ConformerModel.hpp"
 #include "ConformerProcessing.hpp"
 #include "ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
@@ -30,6 +33,20 @@
 
 namespace arm {
 namespace app {
+    /* LCD text position */
+    constexpr uint32_t dataPsnTxtInfStartX = 10;
+    constexpr uint32_t dataPsnTxtInfStartY = 15;
+    constexpr uint32_t fontYSpan           = 15;
+
+    /* For plotting MEL spectrogram on display */
+    constexpr uint32_t melImageWidth       = 300; /**< Expecting screen width to be 320 */
+    constexpr uint32_t melImageHeight      = 40;
+    constexpr uint32_t melImageNumChannels = 3;
+
+    /* Static image buffer to draw audio and MEL plots */
+    static uint8_t
+        melImageBuf[melImageHeight * melImageWidth * melImageNumChannels] IFM_BUF_ATTRIBUTE;
+
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
         auto& model            = ctx.Get<fwk::iface::Model&>("model");
@@ -38,10 +55,6 @@ namespace app {
         auto melSpecWindowSize = ctx.Get<uint32_t>("melSpecWindowSize");
         auto melSpecHopSize    = ctx.Get<uint32_t>("melSpecHopSize");
         auto chunkSize         = ctx.Get<uint32_t>("chunkSize");
-
-        // LCD text position
-        constexpr uint32_t dataPsnTxtInfStartX = 20;
-        constexpr uint32_t dataPsnTxtInfStartY = 40;
 
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
@@ -52,6 +65,16 @@ namespace app {
         auto inputTensorChunkSize = model.GetInputTensor(1);
         auto outputTensorLogits  = model.GetOutputTensor(0);
         auto outputTensorChunkSize = model.GetOutputTensor(1);
+
+        auto melShape = inputTensorMelSpec->Shape();
+
+        /* Every 1 second of audio is expected to produce these many vectors */
+        constexpr uint32_t melAudioSpanFactor = 100;
+        const uint32_t melRows = melShape[fwk::et::ConformerModel::ms_inputMelRowsIdx];
+        const uint32_t melCols = melShape[fwk::et::ConformerModel::ms_inputMelColsIdx];
+
+        const auto audioMode    = HAL_AUDIO_FORMAT_16KHZ_MONO_16BIT;
+        const auto samplingRate = GET_AUDIO_SAMPLING_RATE(audioMode);
 
         auto preProcess = ConformerPreProcess<int16_t>(
             inputTensorMelSpec,
@@ -94,22 +117,86 @@ namespace app {
                 break;
             }
 
-            /* Display message on the LCD - inference running. */
-            std::string str_inf{"Running inference... "};
-            hal_display_set_text_color(COLOR_WHITE);
-            hal_display_show_text(
-                str_inf.c_str(),
-                str_inf.size(),
-                dataPsnTxtInfStartX,
-                dataPsnTxtInfStartY,
-                false
-            );
-
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(audioArr, audioArrSize)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
+
+            info("Audio array size: %" PRIu32 "; sampling rate: %" PRIu32 "\n",
+                 audioArrSize,
+                 samplingRate);
+
+            auto melRowsToPlot = (audioArrSize / samplingRate) * melAudioSpanFactor;
+            if (melRowsToPlot < melImageWidth) {
+                melRowsToPlot = melImageWidth;
+            }
+            if (melRowsToPlot > melRows) {
+                printf_err("Invalid number of MEL rows to be plot\n");
+                return false;
+            }
+
+            info("Plotting audio signal\n");
+            auto audioRender =
+                audio::RenderAudioImg(audioArr,
+                                      audioArrSize,
+                                      melRowsToPlot * samplingRate / melAudioSpanFactor,
+                                      melImageBuf,
+                                      melImageWidth,
+                                      melImageHeight,
+                                      melImageNumChannels);
+
+            if (audioRender) {
+                hal_display_show_image(melImageBuf,
+                                       melImageWidth,
+                                       melImageHeight,
+                                       melImageNumChannels,
+                                       dataPsnTxtInfStartX,
+                                       dataPsnTxtInfStartY,
+                                       1);
+
+                /* Show the markers for number of seconds. */
+                auto audioPlotSpanSeconds = melRowsToPlot / melAudioSpanFactor;
+                auto strAudioPlotSeconds  = std::to_string(audioPlotSpanSeconds) + "s";
+
+                hal_display_show_text(
+                    "0s", 2, dataPsnTxtInfStartX, dataPsnTxtInfStartY + melImageHeight, false);
+                hal_display_show_text(strAudioPlotSeconds.c_str(),
+                                      strAudioPlotSeconds.size(),
+                                      dataPsnTxtInfStartX + melImageWidth - dataPsnTxtInfStartX,
+                                      dataPsnTxtInfStartY + melImageHeight,
+                                      false);
+            }
+
+            /* Plot the spectrogram on display */
+            info("Plotting %" PRIu32 " rows of MEL spec\n", melRowsToPlot);
+            auto melRender = audio::RenderMelSpec(inputTensorMelSpec,
+                                                  melCols,
+                                                  melRowsToPlot,
+                                                  melImageBuf,
+                                                  melImageWidth,
+                                                  melImageHeight,
+                                                  melImageNumChannels,
+                                                  true);
+
+            if (melRender) {
+                hal_display_show_image(melImageBuf,
+                                       melImageWidth,
+                                       melImageHeight,
+                                       melImageNumChannels,
+                                       dataPsnTxtInfStartX,
+                                       dataPsnTxtInfStartY + fontYSpan + melImageHeight,
+                                       1);
+            }
+
+            /* Display message on the LCD - inference running. */
+            std::string str_inf{"Running inference... "};
+            hal_display_set_text_color(COLOR_WHITE);
+            hal_display_show_text(str_inf.c_str(),
+                                  str_inf.size(),
+                                  dataPsnTxtInfStartX,
+                                  dataPsnTxtInfStartY + (melImageHeight + fontYSpan) * 2,
+                                  false);
 
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
@@ -123,29 +210,24 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_display_show_text(
-                str_inf.c_str(),
-                str_inf.size(),
-                dataPsnTxtInfStartX,
-                dataPsnTxtInfStartY,
-                false
-            );
+            hal_display_show_text(str_inf.c_str(),
+                                  str_inf.size(),
+                                  dataPsnTxtInfStartX,
+                                  dataPsnTxtInfStartY + (melImageHeight + fontYSpan) * 2,
+                                  false);
             str_inf = decodedResult;
             hal_display_set_text_color(COLOR_GREEN);
-            hal_display_show_text(
-                str_inf.c_str(),
-                str_inf.size(),
-                dataPsnTxtInfStartX,
-                dataPsnTxtInfStartY,
-                true
-            );
+            hal_display_show_text(str_inf.c_str(),
+                                  str_inf.size(),
+                                  dataPsnTxtInfStartX,
+                                  dataPsnTxtInfStartY + (melImageHeight + fontYSpan) * 2,
+                                  true);
 
             profiler.PrintProfilingResult();
             info("Decoded output: %s\n", decodedResult.c_str());
         }
         return true;
     }
-
 } /* namespace app */
 } /* namespace arm */
 
