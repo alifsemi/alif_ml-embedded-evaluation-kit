@@ -116,6 +116,7 @@ LOAD_REGION_1       0x70000000                  0x02000000
     {
         ; RO data (incl. unwinding tables for debugging)
         .ANY (+RO-DATA)
+        *s16*.o* (+RO +RW +ZI)
     }
 
     ;-----------------------------------------------------
