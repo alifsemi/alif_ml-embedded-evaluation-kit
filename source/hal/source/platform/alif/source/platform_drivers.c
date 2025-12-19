@@ -359,6 +359,12 @@ int platform_init(void)
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
         }
+#ifdef EAGLE_DEVICE
+        // Enable long bursts to SPI interfaces
+        *(uint32_t *) 0x831C202C = 1;
+        *(uint32_t *) 0x831C302C = 1;
+        *(uint32_t *) 0x831C402C = 1;
+#endif // EAGLE_DEVICE
 #endif
 
 #ifdef OSPI_RAM_SUPPORT

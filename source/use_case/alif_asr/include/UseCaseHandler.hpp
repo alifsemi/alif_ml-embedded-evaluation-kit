@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor devices. */
 
-/* Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2025 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -11,7 +11,8 @@
  */
 
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,32 +27,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ALIF_IMG_CLASS_EVT_HANDLER_HPP
-#define ALIF_IMG_CLASS_EVT_HANDLER_HPP
+#ifndef ASR_EVT_HANDLER_HPP
+#define ASR_EVT_HANDLER_HPP
 
 #include "AppContext.hpp"
-#include "MobileNetModel.hpp"
 
-/** Based on ML framework, set up the model namespace. */
-#if defined(MLEK_FWK_TFLM)
-using arm::app::fwk::tflm::MobileNetModel;
-#elif defined(MLEK_FWK_EXECUTORCH)
-using arm::app::fwk::et::MobileNetModel;
-#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
-
-namespace alif {
+namespace arm {
 namespace app {
-
-    bool ClassifyImageInit(MobileNetModel& model);
 
     /**
      * @brief       Handles the inference event.
-     * @param[in]   ctx        Pointer to the application context.
+     * @param[in]   ctx         Pointer to the application context.
      * @return      true or false based on execution success.
      **/
-    bool ClassifyImageHandler(arm::app::ApplicationContext& ctx);
+    bool ClassifyAudioHandler(ApplicationContext& ctx);
 
 } /* namespace app */
-} /* namespace alif */
+} /* namespace arm */
 
-#endif /* ALIF_IMG_CLASS_EVT_HANDLER_HPP */
+#endif /* ASR_EVT_HANDLER_HPP */

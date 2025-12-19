@@ -46,11 +46,18 @@ namespace app {
 
 using ImgClassClassifier = arm::app::Classifier;
 
+/** Based on ML framework, set up the model namespace. */
+#if defined(MLEK_FWK_TFLM)
+using arm::app::fwk::tflm::MobileNetModel;
+#elif defined(MLEK_FWK_EXECUTORCH)
+using arm::app::fwk::et::MobileNetModel;
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+
 void MainLoop()
 {
     init_trigger_rx();
 
-    arm::app::fwk::tflm::MobileNetModel model;  /* Model wrapper object. */
+    MobileNetModel model;  /* Model wrapper object. */
 
 #if !SKIP_MODEL
     arm::app::fwk::iface::MemoryRegion modelMem{arm::app::img_class::GetModelPointer(),

@@ -203,13 +203,20 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 3. Initialize and update the required submodules.
     ```
     cd alif_ml-embedded-evaluation-kit
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 4. Download and Setup required AI/ML resources.
+    Using Tensorflow:
     ```
     python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
     ```
-    The above python command will take some time, around a few minutes. Python command
+    Using Executorch:
+    ```
+    python3.10 set_up_default_resources.py --ml-frameworks executorch
+    ```
+
+    If you are testing both frameworks, both can be called.
+    The above python command will take some time, around a few minutes (executorch will take 30-40mins). Python command
     fetches and optimizes the needed Ethos models for all the use cases in the kit.
 
     Troubleshooting:
@@ -279,6 +286,7 @@ UART select jumpers set for UART2:
 **Using ARM Clang Toolchain**
 
 2. Configure the build using CMake
+    Tensorflow:
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
@@ -288,6 +296,18 @@ UART select jumpers set for UART2:
     -DCMAKE_BUILD_TYPE=Release \
     -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
     -DUSE_CASE_BUILD=alif_img_class ..
+    ```
+    Executorch (supported on E8 with U85 and model on OSPI RAM):
+    ```
+    cmake -DTARGET_PLATFORM=alif \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DTARGET_BOARD=AppKit-e8 \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DCONSOLE_UART=4 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
+    -DUSE_CASE_BUILD=alif_img_class \
+    -DETHOS_U_NPU_ID=U85 -DML_FRAMEWORK=ExecuTorch ..
     ```
 
 These cmake options permit the default use of LCD and SRAM, which is okay since the HE image has them disabled. The `CONSOLE_UART=4` option avoids the HE image’s use of UART and could be omitted to run standalone HP applications.
@@ -606,8 +626,8 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 
 ## Running a use-case with ML model data in external flash
 
-- For example use-cases asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
-- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for kws and kws_asr
+- For example use-cases alif_asr, asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
+- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for asr and kws_asr
   - You can enable it also for alif_object_detection use-case by setting `-Dalif_object_detection_MODEL_IN_EXT_FLASH=ON`
   - For other use-case examples you need to add the following to `usecase.cmake`
   ```

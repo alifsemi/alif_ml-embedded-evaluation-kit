@@ -75,4 +75,5 @@ target_compile_definitions(${ML_FWK_ET_TARGET} PRIVATE
 message(STATUS "*******************************************************")
 message(STATUS "Library: "                ${ML_FWK_ET_TARGET})
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "ML_FWK_TMP_MEM_SIZE:    " ${ML_FWK_TMP_MEM_SIZE})
 message(STATUS "*******************************************************")
