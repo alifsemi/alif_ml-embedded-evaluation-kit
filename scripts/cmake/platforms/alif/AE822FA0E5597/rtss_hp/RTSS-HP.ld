@@ -166,6 +166,7 @@ SECTIONS
 
   .bss.sram (NOLOAD) : ALIGN(8)
   {
+    * (.bss.large_ram)                     /* Large LVGL buffers */
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.NoInit.ethos_u_cache)
