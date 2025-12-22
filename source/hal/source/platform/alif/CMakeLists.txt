@@ -147,6 +147,8 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/retarget_alif.c
     source/delay.c
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/MX66UW1G.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/MX66UM2G.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66um2g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>

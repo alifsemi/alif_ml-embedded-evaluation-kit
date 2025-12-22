@@ -38,23 +38,23 @@ function(set_platform_global_defaults)
     set_property(CACHE ALIF_DEVICE_SKU PROPERTY STRINGS "AE1C1F4051920" "AE722F80F55D5" "AE822FA0E5597")
 
     set(TARGET_BOARD "AppKit-e7" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8" "AppKit-e8")
 
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM
-    if ((USE_STRIPED_SRAM) AND NOT ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")))
+    if ((USE_STRIPED_SRAM) AND NOT ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "AppKit-e8")))
         message(FATAL_ERROR "USE_STRIPED_SRAM possible only with TARGET_BOARD DevKit-e4 or DevKit-e8")
     endif()
 
     # Sanity check DevKit or AppKit
     if (NOT ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "DevKit-e7")
-        OR (TARGET_BOARD STREQUAL "DevKit-e8")))
-        message(FATAL_ERROR "Possible TARGET_BOARD values are: AppKit-e7, DevKit-e1c, DevKit-e4, DevKit-e7 and DevKit-e8 but given value was ${TARGET_BOARD}")
+        OR (TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "AppKit-e8") ))
+        message(FATAL_ERROR "Possible TARGET_BOARD values are: AppKit-e7, DevKit-e1c, DevKit-e4, DevKit-e7, DevKit-e8 and AppKit-e8 but given value was ${TARGET_BOARD}")
     endif()
 
 
-    if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4")) # Add other Devkits and AppKits which are Ensemble devices with Striping support
+    if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "AppKit-e8")) # Add other Devkits and AppKits which are Ensemble devices with Striping support
         set(ALIF_DEVICE_SKU "AE822FA0E5597" CACHE STRING "" FORCE)
         add_compile_definitions("EAGLE_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.
         set(IS_EAGLE_DEVICE ON)
