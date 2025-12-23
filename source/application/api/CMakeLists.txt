@@ -15,19 +15,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.21.0)
+
 project(MLEK_API
         DESCRIPTION "Generic platform agnostic API"
         LANGUAGES   CXX)
+
+# Default configuration - paths and other defaults
+include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
 
 # If this project is added independently by a third-party project, pull in required
 # targets by including out-of-hierarchy directories where these dependencies live.
 # Begs an argument for pulling `log` and `arm_math` into this directory.
 if (NOT TARGET mlek::log)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../log ${CMAKE_BINARY_DIR}/log)
+    add_subdirectory(${MLEK_ROOT}/source/log ${CMAKE_CURRENT_BINARY_DIR}/log)
 endif()
 
 if (NOT TARGET mlek::arm_math)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../math ${CMAKE_BINARY_DIR}/math)
+    add_subdirectory(${MLEK_ROOT}/source/math ${CMAKE_CURRENT_BINARY_DIR}/math)
 endif()
 
 add_subdirectory(fwk)
