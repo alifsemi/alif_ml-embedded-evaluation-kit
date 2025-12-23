@@ -37,14 +37,14 @@
 #
 build:
   - name: "build-dir"
-    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
+    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON -DML_FRAMEWORK=TensorFlowLiteMicro"
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
     description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/tree/main/resources/cmsis-packs"
+    url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/tree/main/resources/cmsis-packs/"
 
     requirements:
       packages:

@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.21.0)
 set(ML_FWK_TFLM_TARGET   ml_framework_tflm)
 project(${ML_FWK_TFLM_TARGET}
     DESCRIPTION     "TensorFlow Lite Micro framework module"
-    LANGUAGES       CXX)
+    LANGUAGES       C CXX)
 
 if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
