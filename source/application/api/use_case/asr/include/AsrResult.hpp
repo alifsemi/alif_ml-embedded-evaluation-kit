@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +49,7 @@ namespace asr {
 
             this->m_resultVec = ResultVec();
             for (auto& i : resultVec) {
-                if (i.m_normalisedVal >= this->m_threshold) {
+                if (static_cast<float>(i.m_normalisedVal) >= this->m_threshold) {
                     this->m_resultVec.emplace_back(i);
                 }
             }

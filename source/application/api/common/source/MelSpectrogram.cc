@@ -76,7 +76,7 @@ namespace audio {
 
         /* Create window function. */
         for (size_t i = 0; i < this->m_params.m_frameLen; ++i) {
-            this->m_windowFunc[i] = 0.5 - 0.5 *
+            this->m_windowFunc[i] = 0.5f - 0.5f *
                 math::MathUtils::CosineF32(static_cast<float>(i) * multiplier);
         }
 
@@ -203,7 +203,7 @@ namespace audio {
     template <>
     float MelSpectrogram::ToFloat(int16_t input)
     {
-        return static_cast<float>(input) * (1.0 / static_cast<float>(1 << 15));
+        return static_cast<float>(input) * (1.0f / static_cast<float>(1 << 15));
     }
 
     void MelSpectrogram::InitMelFilterBank()
@@ -229,7 +229,7 @@ namespace audio {
 
         if (audioData.size() != this->m_params.m_frameLen) {
             printf_err(
-                "Audio data length %lu does not match expected from length %u",
+                "Audio data length %zu does not match expected from length %u",
                 audioData.size(),
                 this->m_params.m_frameLen
             );

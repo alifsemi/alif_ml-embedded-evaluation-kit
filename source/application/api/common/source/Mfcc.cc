@@ -76,7 +76,7 @@ namespace audio {
 
         /* Create window function. */
         for (size_t i = 0; i < this->m_params.m_frameLen; i++) {
-            this->m_windowFunc[i] = (0.5 - (0.5 *
+            this->m_windowFunc[i] = (0.5f - (0.5f *
                 math::MathUtils::CosineF32(static_cast<float>(i) * multiplier)));
         }
 
