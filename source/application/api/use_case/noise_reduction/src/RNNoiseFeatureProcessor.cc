@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -188,31 +189,31 @@ void RNNoiseFeatureProcessor::ComputeFrameFeatures(vec1D32F& audioWindow,
         features.m_featuresVec[NB_BANDS + 2*NB_DELTA_CEPS + i] = dctVec[i];
     }
 
-    features.m_featuresVec[NB_BANDS + 2*NB_DELTA_CEPS] -= 1.3;
-    features.m_featuresVec[NB_BANDS + 2*NB_DELTA_CEPS + 1] -= 0.9;
-    features.m_featuresVec[NB_BANDS + 3*NB_DELTA_CEPS] = 0.01 * (static_cast<int>(pitchIdx) - 300);
+    features.m_featuresVec[NB_BANDS + 2*NB_DELTA_CEPS] -= 1.3f;
+    features.m_featuresVec[NB_BANDS + 2*NB_DELTA_CEPS + 1] -= 0.9f;
+    features.m_featuresVec[NB_BANDS + 3*NB_DELTA_CEPS] = 0.01f * (static_cast<int>(pitchIdx) - 300);
 
     float logMax = -2.f;
     float follow = -2.f;
     for (uint32_t i = 0; i < NB_BANDS; ++i) {
         Ly[i] = log10f(1e-2f + features.m_Ex[i]);
-        Ly[i] = std::max<float>(logMax - 7, std::max<float>(follow - 1.5, Ly[i]));
+        Ly[i] = std::max<float>(logMax - 7.f, std::max<float>(follow - 1.5f, Ly[i]));
         logMax = std::max<float>(logMax, Ly[i]);
-        follow = std::max<float>(follow - 1.5, Ly[i]);
+        follow = std::max<float>(follow - 1.5f, Ly[i]);
         energy += features.m_Ex[i];
     }
 
     /* If there's no audio avoid messing up the state. */
     features.m_silence = true;
-    if (energy < 0.04) {
+    if (energy < 0.04f) {
         return;
     } else {
         features.m_silence = false;
     }
 
     this->DCT(Ly, features.m_featuresVec);
-    features.m_featuresVec[0] -= 12.0;
-    features.m_featuresVec[1] -= 4.0;
+    features.m_featuresVec[0] -= 12.f;
+    features.m_featuresVec[1] -= 4.f;
 
     VERIFY(CEPS_MEM > 2);
     uint32_t stIdx1 = this->m_memId < 1 ? CEPS_MEM + this->m_memId - 1 : this->m_memId - 1;
@@ -261,7 +262,7 @@ void RNNoiseFeatureProcessor::ComputeFrameFeatures(vec1D32F& audioWindow,
     }
 
     VERIFY(features.m_featuresVec.size() >= NB_BANDS + 3 * NB_DELTA_CEPS + 1);
-    features.m_featuresVec[NB_BANDS + 3 * NB_DELTA_CEPS + 1] = specVariability / CEPS_MEM - 2.1;
+    features.m_featuresVec[NB_BANDS + 3 * NB_DELTA_CEPS + 1] = specVariability / CEPS_MEM - 2.1f;
 }
 
 void RNNoiseFeatureProcessor::FrameAnalysis(
@@ -389,12 +390,12 @@ void RNNoiseFeatureProcessor::DCT(vec1D32F& input, vec1D32F& output)
 
 void RNNoiseFeatureProcessor::PitchDownsample(vec1D32F& pitchBuf, size_t pitchBufSz) {
     for (size_t i = 1; i < (pitchBufSz >> 1); ++i) {
-        pitchBuf[i] = 0.5 * (
-                        0.5 * (this->m_pitchBuf[2 * i - 1] + this->m_pitchBuf[2 * i + 1])
+        pitchBuf[i] = 0.5f * (
+                        0.5f * (this->m_pitchBuf[2 * i - 1] + this->m_pitchBuf[2 * i + 1])
                             + this->m_pitchBuf[2 * i]);
     }
 
-    pitchBuf[0] = 0.5*(0.5*(this->m_pitchBuf[1]) + this->m_pitchBuf[0]);
+    pitchBuf[0] = 0.5f*(0.5f * (this->m_pitchBuf[1]) + this->m_pitchBuf[0]);
 
     vec1D32F ac(5, 0);
     size_t numLags = 4;
@@ -402,27 +403,27 @@ void RNNoiseFeatureProcessor::PitchDownsample(vec1D32F& pitchBuf, size_t pitchBu
     this->AutoCorr(pitchBuf, ac, numLags, pitchBufSz >> 1);
 
     /* Noise floor -40db */
-    ac[0] *= 1.0001;
+    ac[0] *= 1.0001f;
 
     /* Lag windowing. */
     for (size_t i = 1; i < numLags + 1; ++i) {
-        ac[i] -= ac[i] * (0.008 * i) * (0.008 * i);
+        ac[i] -= ac[i] * (0.008f * i) * (0.008f * i);
     }
 
     vec1D32F lpc(numLags, 0);
     this->LPC(ac, numLags, lpc);
 
-    float tmp = 1.0;
+    float tmp = 1.0f;
     for (size_t i = 0; i < numLags; ++i) {
         tmp = 0.9f * tmp;
         lpc[i] = lpc[i] * tmp;
     }
 
     vec1D32F lpc2(numLags + 1, 0);
-    float c1 = 0.8;
+    float c1 = 0.8f;
 
     /* Add a zero. */
-    lpc2[0] = lpc[0] + 0.8;
+    lpc2[0] = lpc[0] + 0.8f;
     lpc2[1] = lpc[1] + (c1 * lpc[0]);
     lpc2[2] = lpc[2] + (c1 * lpc[1]);
     lpc2[3] = lpc[3] + (c1 * lpc[2]);
@@ -453,11 +454,11 @@ int RNNoiseFeatureProcessor::PitchSearch(vec1D32F& xLp, vec1D32F& y, uint32_t le
     /* Finer search with 2x decimation. */
     const int maxIdx = (maxPitch >> 1);
     for (int i = 0; i < maxIdx; ++i) {
-        xCorr[i] = 0;
+        xCorr[i] = 0.f;
         if (std::abs(i - 2*bestPitch[0]) > 2 and std::abs(i - 2*bestPitch[1]) > 2) {
             continue;
         }
-        float sum = 0;
+        float sum = 0.f;
         for (size_t j = 0; j < len >> 1; ++j) {
             sum += xLp[j] * y[i+j];
         }
@@ -474,9 +475,9 @@ int RNNoiseFeatureProcessor::PitchSearch(vec1D32F& xLp, vec1D32F& y, uint32_t le
         float b = xCorr[bestPitch[0]];
         float c = xCorr[bestPitch[0] + 1];
 
-        if ( (c-a) > 0.7*(b-a) ) {
+        if ((c-a) > 0.7f * (b-a)) {
             offset = 1;
-        } else if ( (a-c) > 0.7*(b-c) ) {
+        } else if ((a-c) > 0.7f * (b-c)) {
             offset = -1;
         } else {
             offset = 0;
@@ -622,14 +623,14 @@ int RNNoiseFeatureProcessor::RemoveDoubling(
             cont = 0.0f;
         }
 
-        float thresh = std::max(0.3, 0.7*g0-cont);
+        float thresh = std::max(0.3f, 0.7f * g0 - cont);
 
         /* Bias against very high pitch (very short period) to avoid false-positives
          * due to short-term correlation */
         if (pitchIdx1 < 3*minPeriod) {
-            thresh = std::max(0.4, 0.85*g0-cont);
+            thresh = std::max(0.4f, 0.85f * g0 - cont);
         } else if (pitchIdx1 < 2*minPeriod) {
-            thresh = std::max(0.5, 0.9*g0-cont);
+            thresh = std::max(0.5f, 0.9f * g0 - cont);
         }
         if (g1 > thresh) {
             bestXy = xy;
@@ -642,9 +643,9 @@ int RNNoiseFeatureProcessor::RemoveDoubling(
     bestXy = std::max(0.0f, bestXy);
     float pg;
     if (bestYy <= bestXy) {
-        pg = 1.0;
+        pg = 1.0f;
     } else {
-        pg = bestXy/(bestYy+1);
+        pg = bestXy/(bestYy + 1);
     }
 
     std::array<float, 3> xCorr {0};
@@ -655,9 +656,9 @@ int RNNoiseFeatureProcessor::RemoveDoubling(
     }
 
     size_t offset;
-    if ((xCorr[2]-xCorr[0]) > 0.7*(xCorr[1]-xCorr[0])) {
+    if ((xCorr[2] - xCorr[0]) > 0.7f * (xCorr[1] - xCorr[0])) {
         offset = 1;
-    } else if ((xCorr[0]-xCorr[2]) > 0.7*(xCorr[1]-xCorr[2])) {
+    } else if ((xCorr[0] - xCorr[2]) > 0.7f * (xCorr[1] - xCorr[2])) {
         offset = -1;
     } else {
         offset = 0;
@@ -759,7 +760,7 @@ void RNNoiseFeatureProcessor::LPC(
             error = error - (r * r * error);
 
             /* Bail out once we get 30dB gain */
-            if (error < (0.001 * correlation[0])) {
+            if (error < (0.001f * correlation[0])) {
                 break;
             }
         }

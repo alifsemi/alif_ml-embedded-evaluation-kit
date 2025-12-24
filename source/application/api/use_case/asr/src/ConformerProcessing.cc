@@ -145,7 +145,7 @@ namespace arm::app
     }
 
     void ConformerPostProcess::Decode(
-        const float * logits,
+        const float* logits,
         const size_t logitsSize,
         const std::array<size_t, 2>& logitsShape,
         const std::vector<std::string>& labels,
@@ -158,9 +158,9 @@ namespace arm::app
         for (auto tokenId : tokenIds) {
             if (tokenId == 0) {
                 previous = -1;
-            } else if (tokenId != previous) {
+            } else if (static_cast<int32_t>(tokenId) != previous) {
                 pieces.emplace_back(tokenId - 1);
-                previous = tokenId;
+                previous = static_cast<int32_t>(tokenId);
             }
         }
 
