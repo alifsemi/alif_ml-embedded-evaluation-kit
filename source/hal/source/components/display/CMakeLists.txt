@@ -32,7 +32,7 @@ add_library(${DISPLAY_IFACE_TARGET} INTERFACE)
 target_include_directories(${DISPLAY_IFACE_TARGET} INTERFACE include)
 
 ## Logging utilities:
-if (NOT TARGET mlek_log)
+if (NOT TARGET hal_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -50,7 +50,7 @@ target_sources(${DISPLAY_STUBS_TARGET} PRIVATE
 ## Add dependencies
 target_link_libraries(${DISPLAY_STUBS_TARGET} PUBLIC
     ${DISPLAY_IFACE_TARGET}
-    mlek_log)
+    hal_log)
 
 # Add sub projects
 add_subdirectory(source/glcd_mps3 EXCLUDE_FROM_ALL)

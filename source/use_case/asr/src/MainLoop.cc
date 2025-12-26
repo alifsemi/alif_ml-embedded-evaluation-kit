@@ -17,18 +17,18 @@
  */
 #include "Labels.hpp"                /* For label strings. */
 #include "UseCaseHandler.hpp"        /* Handlers for different user options. */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 #include "UseCaseCommonUtils.hpp"    /* Utils functions. */
 
 /** Based on ML framework, set up the model namespace. */
 #if defined(MLEK_FWK_TFLM)
-#include "Wav2LetterModel.hpp"       /* Model class for running inference. */
-#include "AsrClassifier.hpp"         /* Classifier. */
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"       /* Model class for running inference. */
+#include "mlek/use_case/asr/AsrClassifier.hpp"         /* Classifier. */
 
 using AsrModel = arm::app::fwk::tflm::Wav2LetterModel;
 #elif defined(MLEK_FWK_EXECUTORCH)
-#include "ConformerModel.hpp"
+#include "mlek/fwk/executorch/ConformerModel.hpp"
 
 using AsrModel = arm::app::fwk::et::ConformerModel;
 #endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */

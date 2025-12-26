@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 #include "UseCaseHandler.hpp"
-#include "DetectorPostProcessing.hpp"
-#include "DetectorPreProcessing.hpp"
+#include "mlek/use_case/object_detection/DetectorPostProcessing.hpp"
+#include "mlek/use_case/object_detection/DetectorPreProcessing.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "YoloFastestModel.hpp"
+#include "mlek/fwk/tflm/YoloFastestModel.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #include <cinttypes>
 

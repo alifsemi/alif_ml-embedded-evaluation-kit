@@ -17,11 +17,16 @@
  */
 
 #include "BufAttributes.hpp"      /* Buffer attributes to be applied */
-#include "Classifier.hpp"         /* Classifier. */
+#include "mlek/common/Classifier.hpp"         /* Classifier. */
 #include "Labels.hpp"             /* For label strings. */
-#include "MobileNetModel.hpp"     /* Model class for running inference. */
 #include "UseCaseCommonUtils.hpp" /* Utils functions. */
 #include "UseCaseHandler.hpp"     /* Handlers for different user options. */
+
+#if defined(MLEK_FWK_TFLM)
+#include "mlek/fwk/tflm/MobileNetModel.hpp"   /* Model class for running inference. */
+#elif defined(MLEK_FWK_EXECUTORCH)
+#include "mlek/fwk/executorch/MobileNetModel.hpp"
+#endif
 
 namespace arm {
 namespace app {

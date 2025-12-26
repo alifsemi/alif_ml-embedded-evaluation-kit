@@ -23,8 +23,8 @@
 
 #include "ConformerLogitsFixtures.hpp"
 #include "ConformerMelSpecFixtures.hpp"
-#include "ConformerProcessing.hpp"
-#include "EtTensor.hpp"
+#include "mlek/use_case/asr/ConformerProcessing.hpp"
+#include "mlek/fwk/executorch/EtTensor.hpp"
 #include "executorch/runtime/core/exec_aten/exec_aten.h"
 #include "executorch/runtime/core/exec_aten/testing_util/tensor_factory.h"
 

@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AsrClassifier.hpp"
-#include "TflmTensor.hpp"
-#include "Wav2LetterModel.hpp"
+#include "mlek/use_case/asr/AsrClassifier.hpp"
+#include "mlek/fwk/tflm/TflmTensor.hpp"
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"
 
 #include <catch.hpp>
 

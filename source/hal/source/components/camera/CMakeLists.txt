@@ -34,7 +34,7 @@ target_sources(hal_camera_static_images PRIVATE
     source/hal_camera_static.c
     source/hal_camera_static_external.c)
 target_include_directories(hal_camera_static_images PRIVATE source)
-target_link_libraries(hal_camera_static_images PUBLIC hal_camera_interface mlek_log)
+target_link_libraries(hal_camera_static_images PUBLIC hal_camera_interface hal_log)
 target_compile_definitions(hal_camera_static_images PRIVATE
         $<$<BOOL:${HAL_CAMERA_LOOP}>:HAL_CAMERA_LOOP>)
 
@@ -50,7 +50,7 @@ if (${FVP_VSI_ENABLED})
     add_library(hal_camera_vsi STATIC EXCLUDE_FROM_ALL source/hal_camera_vsi.c)
     target_link_libraries(hal_camera_vsi PUBLIC
         hal_camera_interface
-        mlek_log
+        hal_log
         virtual_streaming_interface)
     target_compile_definitions(hal_camera_vsi PRIVATE
         DYNAMIC_IFM_BASE=${DYNAMIC_IFM_BASE}

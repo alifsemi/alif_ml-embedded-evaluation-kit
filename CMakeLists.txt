@@ -55,14 +55,11 @@ set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
-# We include log target
-add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log)
-
-# We include arm_math target
-add_subdirectory(${SRC_PATH}/math ${CMAKE_BINARY_DIR}/math)
-
-# We include the hal target
+# Include the hal target
 add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal)
+
+# Include API's for application
+add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api)
 
 # Add the profiler target
 if (NOT DEFINED PROFILER_DIR)
@@ -70,7 +67,6 @@ if (NOT DEFINED PROFILER_DIR)
 endif ()
 
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
-add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api)
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS

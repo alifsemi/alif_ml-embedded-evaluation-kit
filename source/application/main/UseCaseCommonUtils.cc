@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 #include "UseCaseCommonUtils.hpp"
-#include "ImageUtils.hpp"
-#include "log_macros.h"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/log/log_macros.h"
 
 #include <cinttypes>
 

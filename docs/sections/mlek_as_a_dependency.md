@@ -11,7 +11,7 @@
 ## Introduction
 
 It may be desirable to wrap ML-Embedded-Evaluation-Kit (MLEK) as a source dependency to use the example pipelines.
-The use cases have [platform-agnostic API](../../source/application/api/use_case/readme.md) that can be used as
+The use cases have [platform-agnostic API](../../source/application/api/mlek/use_case/readme.md) that can be used as
 a stand-alone CMake project or be consumed in CMSIS-Pack form. However, there may be scenarios where other parts of
 this project are required as dependencies. This guide provides some general recommendations on wrapping MLEK sources.
 
@@ -25,18 +25,18 @@ Other useful readings:
 
 The use case APIs consist of:
 - `common` component - required for all use cases. This is available as a
-  [CMake project](../../source/application/api/common/CMakeLists.txt) that depends on:
+  [CMake project](../../source/application/api/mlek/common/CMakeLists.txt) that depends on:
   - Following CMake target libraries:
-    - [log](../../source/log/readme.md)
-    - [arm_math](../../source/math/readme.md)
+    - [log](../../source/application/api/mlek/log/readme.md)
+    - [arm_math](../../source/application/api/mlek/math/readme.md)
 - `fwk` component - abstraction layer over the underlying ML framework - TensorFlow Lite Micro or ExecuTorch.
-  This is available as a [CMake project](../../source/application/api/fwk/CMakeLists.txt) that depends on *either*:
+  This is available as a [CMake project](../../source/application/api/mlek/fwk/CMakeLists.txt) that depends on *either*:
     - [tensorflow-lite-micro](../../scripts/cmake/tensorflow_lite_micro.cmake): this is a third-party dependency and the
       project wrapping MLEK could provide its own variant.
     - [executorch](../../scripts/cmake/executorch.cmake): this is a third-party dependency and the
       project wrapping MLEK could provide its own variant.
 - `use case specific APIs` are individual CMake projects in
-  [source/application/api/use_case](../../source/application/api/use_case) subdirectories. These will only depend on
+  [source/application/api/mlek/use_case](../../source/application/api/mlek/use_case) subdirectories. These will only depend on
   the `common` target, which also brings in its dependencies listed above.
 
 To use these components, developers can either use MLEK as a submodule or fetch the project at configuration stage.

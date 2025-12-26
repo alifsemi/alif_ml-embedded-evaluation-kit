@@ -51,15 +51,19 @@ if (NOT DEFINED PLATFORM_DRIVERS_DIR)
     message(FATAL_ERROR "PLATFORM_DRIVERS_DIR undefined")
 endif()
 
+# Include logging interface:
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/components/log)
+
 # Add platform_drivers target
 add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 
 # Link time library targets:
 target_link_libraries(${HAL_TARGET}
-    PUBLIC
-    mlek_log            # Logging functions
-    hal_display_iface   # Display interface
-    platform_drivers    # Platform drivers implementing the required interfaces
+    PRIVATE
+        hal_log             # Logging functions
+    PUBLIC 
+        hal_display_iface   # Display interface
+        platform_drivers    # Platform drivers implementing the required interfaces
 )
 
 # Add a simple test target to verify HAL boots. Exclude it

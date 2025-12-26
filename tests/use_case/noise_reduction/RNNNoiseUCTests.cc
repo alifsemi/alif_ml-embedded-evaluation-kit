@@ -17,7 +17,7 @@
  */
 #include "BufAttributes.hpp"
 #include "Profiler.hpp"
-#include "RNNoiseModel.hpp"
+#include "mlek/fwk/tflm/RNNoiseModel.hpp"
 #include "UseCaseHandler.hpp"
 #include "hal.h"
 

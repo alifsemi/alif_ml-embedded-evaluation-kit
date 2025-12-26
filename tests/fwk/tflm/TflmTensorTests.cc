@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "TflmTensor.hpp"
-#include "log_macros.h"
+#include "mlek/fwk/tflm/TflmTensor.hpp"
+#include "mlek/log/log_macros.h"
 
 #include <cstdint>
 #include <catch.hpp>

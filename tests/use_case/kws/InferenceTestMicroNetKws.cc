@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "MicroNetKwsModel.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_kws.hpp"
 
 #include <catch.hpp>

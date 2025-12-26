@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AdModel.hpp"              /* Model class for running inference */
+#include "mlek/fwk/tflm/AdModel.hpp"              /* Model class for running inference */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {

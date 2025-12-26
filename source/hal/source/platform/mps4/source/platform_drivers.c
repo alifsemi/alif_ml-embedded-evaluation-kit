@@ -18,7 +18,7 @@
 
 #include "platform_drivers.h"
 
-#include "log_macros.h"     /* Logging functions */
+#include "hal_log.h"     /* Logging functions */
 #include "smm_mps4.h"       /* Memory map for MPS4. */
 #include "hdlcd_drv.h"      /* HDLCD driver */
 #include "peripheral_irqs.h"    /* Interrupt numbers */

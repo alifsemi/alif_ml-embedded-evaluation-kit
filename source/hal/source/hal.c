@@ -18,7 +18,7 @@
 #include "hal.h"                /* API */
 
 #include "platform_drivers.h"   /* Platform drivers */
-#include "log_macros.h"         /* Logging macros */
+#include "hal_log.h"         /* Logging macros */
 #include <stdio.h>
 
 bool hal_platform_init(void)

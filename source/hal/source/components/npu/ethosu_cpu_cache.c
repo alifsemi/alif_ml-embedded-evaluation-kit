@@ -19,7 +19,7 @@
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
 #include "ethosu_driver.h"          /* Arm Ethos-U driver header */
-#include "log_macros.h"             /* Logging macros */
+#include "hal_log.h"             /* Logging macros */
 
 /** Structure to maintain data cache states. */
 typedef struct _cpu_cache_state {

@@ -17,13 +17,13 @@
  */
 #include "Labels_micronetkws.hpp"   /* For MicroNetKws label strings. */
 #include "Labels_wav2letter.hpp"    /* For Wav2Letter label strings. */
-#include "KwsClassifier.hpp"        /* KWS classifier. */
-#include "AsrClassifier.hpp"        /* ASR classifier. */
-#include "MicroNetKwsModel.hpp"     /* KWS model class for running inference. */
-#include "Wav2LetterModel.hpp"      /* ASR model class for running inference. */
+#include "mlek/use_case/kws/KwsClassifier.hpp"        /* KWS classifier. */
+#include "mlek/use_case/asr/AsrClassifier.hpp"        /* ASR classifier. */
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"     /* KWS model class for running inference. */
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"      /* ASR model class for running inference. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {

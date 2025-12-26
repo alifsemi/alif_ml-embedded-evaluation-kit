@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  */
 #include "timer_mps3.h"
 
-#include "log_macros.h"
+#include "hal_log.h"
 #include "smm_mps3.h"   /* Memory map for MPS3. */
 
 static uint64_t cpu_cycle_count = 0;    /* 64-bit cpu cycle counter */

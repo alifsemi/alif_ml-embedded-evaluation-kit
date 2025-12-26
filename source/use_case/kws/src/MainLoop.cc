@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "KwsClassifier.hpp"        /* Classifier. */
-#include "MicroNetKwsModel.hpp"     /* Model class for running inference. */
+#include "mlek/use_case/kws/KwsClassifier.hpp"        /* Classifier. */
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"     /* Model class for running inference. */
 #include "hal.h"                    /* Brings in platform definitions. */
 #include "Labels.hpp"               /* For label strings. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {

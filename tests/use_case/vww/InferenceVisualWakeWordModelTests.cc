@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-#include "ImageUtils.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_vww.hpp"
-#include "VisualWakeWordModel.hpp"
+#include "mlek/fwk/tflm/VisualWakeWordModel.hpp"
 
 #include <catch.hpp>
 
