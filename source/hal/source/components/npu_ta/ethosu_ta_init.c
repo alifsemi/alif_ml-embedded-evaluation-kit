@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 #include "ethosu_ta_init.h"
 
-#include "log_macros.h"                 /* Logging functions */
+#include "hal_log.h"                 /* Logging functions */
 
 #include "timing_adapter.h"             /* Arm Ethos-U timing adapter driver header */
 #include "timing_adapter_settings.h"    /* Arm Ethos-U timing adapter settings */

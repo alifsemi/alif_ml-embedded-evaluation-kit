@@ -18,9 +18,9 @@
 #ifndef USECASE_COMMON_UTILS_HPP
 #define USECASE_COMMON_UTILS_HPP
 
-#include "Model.hpp"
+#include "mlek/fwk/iface/Model.hpp"
 #include "Profiler.hpp"
-#include "Classifier.hpp"
+#include "mlek/common/Classifier.hpp"
 
 namespace arm {
 namespace app {

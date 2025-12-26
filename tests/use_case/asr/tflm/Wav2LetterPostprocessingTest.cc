@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "ClassificationResult.hpp"
-#include "TflmTensor.hpp"
-#include "Wav2LetterModel.hpp"
-#include "Wav2LetterPostprocess.hpp"
+#include "mlek/common/ClassificationResult.hpp"
+#include "mlek/fwk/tflm/TflmTensor.hpp"
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"
+#include "mlek/use_case/asr/Wav2LetterPostprocess.hpp"
 
 #include <algorithm>
 #include <catch.hpp>

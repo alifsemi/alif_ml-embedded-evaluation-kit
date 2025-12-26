@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AudioSlidingWindow.hpp"
+#include "mlek/common/AudioSlidingWindow.hpp"
 #include "catch.hpp"
 
 TEST_CASE("Common: Slide long data")

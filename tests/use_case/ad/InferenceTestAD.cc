@@ -18,11 +18,11 @@
 #include <catch.hpp>
 #include <random>
 
-#include "AdModel.hpp"
+#include "mlek/fwk/tflm/AdModel.hpp"
 #include "BufAttributes.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_ad.hpp"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #ifndef AD_FEATURE_VEC_DATA_SIZE
 #define AD_IN_FEATURE_VEC_DATA_SIZE (1024)

@@ -31,7 +31,7 @@
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
 #include "ethosu_driver.h"          /* Arm Ethos-U driver header */
-#include "log_macros.h"             /* Logging macros */
+#include "hal_log.h"             /* Logging macros */
 
 bool __attribute__((weak)) ethosu_area_needs_flush_dcache(const uint32_t *p, size_t bytes)
 {

@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 #include "hal.h"                    /* Brings in platform definitions. */
-#include "Classifier.hpp"           /* Classifier. */
+#include "mlek/common/Classifier.hpp"           /* Classifier. */
 #include "Labels.hpp"               /* For label strings. */
-#include "VisualWakeWordModel.hpp" /* Model class for running inference. */
+#include "mlek/fwk/tflm/VisualWakeWordModel.hpp" /* Model class for running inference. */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {

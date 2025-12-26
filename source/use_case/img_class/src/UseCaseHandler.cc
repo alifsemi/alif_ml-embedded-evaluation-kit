@@ -17,13 +17,18 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "Classifier.hpp"
-#include "ImageUtils.hpp"
-#include "ImgClassProcessing.hpp"
-#include "MobileNetModel.hpp"
+#include "mlek/common/Classifier.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/use_case/img_class/ImgClassProcessing.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
+
+#if defined(MLEK_FWK_TFLM)
+#include "mlek/fwk/tflm/MobileNetModel.hpp"
+#elif defined(MLEK_FWK_EXECUTORCH)
+#include "mlek/fwk/executorch/MobileNetModel.hpp"
+#endif
 
 #if defined(GPIO_PROFILING)
 #include "board_utils.h"

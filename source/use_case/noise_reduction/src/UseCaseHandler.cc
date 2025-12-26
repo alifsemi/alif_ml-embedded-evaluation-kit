@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 #include "UseCaseHandler.hpp"
-#include "AudioSlidingWindow.hpp"
-#include "ImageUtils.hpp"
-#include "RNNoiseFeatureProcessor.hpp"
-#include "RNNoiseModel.hpp"
-#include "RNNoiseProcessing.hpp"
+#include "mlek/common/AudioSlidingWindow.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/use_case/noise_reduction/RNNoiseFeatureProcessor.hpp"
+#include "mlek/fwk/tflm/RNNoiseModel.hpp"
+#include "mlek/use_case/noise_reduction/RNNoiseProcessing.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 namespace arm {
 namespace app {

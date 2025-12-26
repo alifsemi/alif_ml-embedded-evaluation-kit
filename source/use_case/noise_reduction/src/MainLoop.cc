@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2024-2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2024, 2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -17,8 +17,8 @@
  */
 #include "UseCaseHandler.hpp"       /* Handlers for different user options. */
 #include "UseCaseCommonUtils.hpp"   /* Utils functions. */
-#include "RNNoiseModel.hpp"         /* Model class for running inference. */
-#include "log_macros.h"             /* Logging functions */
+#include "mlek/fwk/tflm/RNNoiseModel.hpp"         /* Model class for running inference. */
+#include "mlek/log/log_macros.h"             /* Logging functions */
 #include "BufAttributes.hpp"        /* Buffer attributes to be applied */
 
 namespace arm {

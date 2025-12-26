@@ -17,15 +17,15 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "AudioSlidingWindow.hpp"
-#include "ImageUtils.hpp"
-#include "KwsClassifier.hpp"
-#include "KwsProcessing.hpp"
-#include "KwsResult.hpp"
-#include "MicroNetKwsModel.hpp"
+#include "mlek/common/AudioSlidingWindow.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/use_case/kws/KwsClassifier.hpp"
+#include "mlek/use_case/kws/KwsProcessing.hpp"
+#include "mlek/use_case/kws/KwsResult.hpp"
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #include <vector>
 

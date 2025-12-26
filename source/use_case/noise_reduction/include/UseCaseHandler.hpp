@@ -19,7 +19,7 @@
 #define NOISE_REDUCTION_EVT_HANDLER_HPP
 
 #include "AppContext.hpp"
-#include "Model.hpp"
+#include "mlek/fwk/iface/Model.hpp"
 
 namespace arm {
 namespace app {

@@ -19,15 +19,14 @@
 
 #include "UseCaseHandler.hpp"
 
-#include "AudioRenderUtils.hpp"
+#include "mlek/common/AudioRenderUtils.hpp"
 #include "BufAttributes.hpp"
-#include "ConformerModel.hpp"
-#include "ConformerProcessing.hpp"
-#include "ImageUtils.hpp"
+#include "mlek/fwk/executorch/ConformerModel.hpp"
+#include "mlek/use_case/asr/ConformerProcessing.hpp"
+#include "mlek/common/ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "Wav2LetterPreprocess.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #include <cstring>
 

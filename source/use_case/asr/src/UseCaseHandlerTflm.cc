@@ -19,17 +19,17 @@
 
 #include "UseCaseHandler.hpp"
 
-#include "AsrClassifier.hpp"
-#include "AsrResult.hpp"
-#include "AudioSlidingWindow.hpp"
-#include "ImageUtils.hpp"
-#include "OutputDecode.hpp"
+#include "mlek/use_case/asr/AsrClassifier.hpp"
+#include "mlek/use_case/asr/AsrResult.hpp"
+#include "mlek/common/AudioSlidingWindow.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/use_case/asr/OutputDecode.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "Wav2LetterModel.hpp"
-#include "Wav2LetterPostprocess.hpp"
-#include "Wav2LetterPreprocess.hpp"
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"
+#include "mlek/use_case/asr/Wav2LetterPostprocess.hpp"
+#include "mlek/use_case/asr/Wav2LetterPreprocess.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 namespace arm {
 namespace app {

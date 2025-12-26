@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 #include "UseCaseHandler.hpp"
-#include "Classifier.hpp"
-#include "ImageUtils.hpp"
+#include "mlek/common/Classifier.hpp"
+#include "mlek/common/ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
-#include "VisualWakeWordModel.hpp"
-#include "VisualWakeWordProcessing.hpp"
+#include "mlek/fwk/tflm/VisualWakeWordModel.hpp"
+#include "mlek/use_case/vww/VisualWakeWordProcessing.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 namespace arm {
 namespace app {

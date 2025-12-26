@@ -65,28 +65,18 @@ set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(TEST_SRCS  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 list(APPEND USE_CASES_TESTS_SEARCH_DIR_LIST ${TEST_SRCS}/use_case)
 
-# Add user case definition so it can be used to #ifdef in code
-if (NOT "${USE_CASE_BUILD}" STREQUAL "all")
-string(TOUPPER "${USE_CASE_BUILD}" use_case_upper)
-add_compile_definitions(${use_case_upper})
-endif()
+# Include the hal target
+add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal)
 
-# We include log target
-add_subdirectory(${SRC_PATH}/log ${CMAKE_BINARY_DIR}/log EXCLUDE_FROM_ALL)
-
-# We include arm_math target
-add_subdirectory(${SRC_PATH}/math ${CMAKE_BINARY_DIR}/math EXCLUDE_FROM_ALL)
-
-# We include the hal target
-add_subdirectory(${SRC_PATH}/hal ${CMAKE_BINARY_DIR}/hal EXCLUDE_FROM_ALL)
+# Include API's for application
+add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api)
 
 # Add the profiler target
 if (NOT DEFINED PROFILER_DIR)
     set(PROFILER_DIR ${SRC_PATH}/profiler)
 endif ()
 
-add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler EXCLUDE_FROM_ALL)
-add_subdirectory(${SRC_PATH}/application/api ${CMAKE_BINARY_DIR}/api EXCLUDE_FROM_ALL)
+add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
 
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS

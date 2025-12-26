@@ -21,23 +21,42 @@ project(MLEK_API
         DESCRIPTION "Generic platform agnostic API"
         LANGUAGES   CXX)
 
+include(GNUInstallDirs)
+
 # Default configuration - paths and other defaults
 include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
 
-# If this project is added independently by a third-party project, pull in required
-# targets by including out-of-hierarchy directories where these dependencies live.
-# Begs an argument for pulling `log` and `arm_math` into this directory.
-if (NOT TARGET mlek::log)
-    add_subdirectory(${MLEK_ROOT}/source/log ${CMAKE_CURRENT_BINARY_DIR}/log)
-endif()
+add_subdirectory(mlek/log)
+add_subdirectory(mlek/math)
+add_subdirectory(mlek/fwk)
+add_subdirectory(mlek/common)
+add_subdirectory(mlek/use_case)
 
-if (NOT TARGET mlek::arm_math)
-    add_subdirectory(${MLEK_ROOT}/source/math ${CMAKE_CURRENT_BINARY_DIR}/math)
-endif()
+###############################################################################
+# Function to add current directory to the targets includes. This ensures
+# that all the headers included refer to this base directory as the root.
+# It will be the same for installation target.
+# @param[in]    target_name     Name of the CMake target to add include
+#                               directories for.
+###############################################################################
+function(mlek_api_set_include_dirs target_name)
+    if (NOT TARGET ${target_name})
+        message(WARNING "${target_name} is not defined")
+        return()
+    endif()
 
-add_subdirectory(fwk)
-add_subdirectory(common)
-add_subdirectory(use_case)
+    get_target_property(_target_type ${target_name} TYPE)
+    if (_target_type STREQUAL "INTERFACE_LIBRARY")
+        set(_scope INTERFACE)
+    else()
+        set(_scope PUBLIC)
+    endif()
+
+    target_include_directories(${target_name} ${_scope}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+endfunction()
+
 
 ###############################################################################
 # Function to create an ML framework specific implementation interface library
@@ -54,7 +73,8 @@ function(create_mlek_impl_lib_target)
                           "${multiValueArgs}" ${ARGN})
     set(TARGET_LIB_NAME ${PARSED_API_NAME}_impl)
     if (NOT TARGET mlek::ml_framework_impl)
-        message(FATAL_ERROR "mlek::ml_framework_impl target must exist before creating ${TARGET_LIB_NAME}")
+        message(FATAL_ERROR "mlek::ml_framework_impl target must "
+                            "exist before creating ${TARGET_LIB_NAME}")
     endif()
     add_library(${TARGET_LIB_NAME} INTERFACE)
     target_link_libraries(${TARGET_LIB_NAME} INTERFACE
@@ -65,6 +85,14 @@ function(create_mlek_impl_lib_target)
     message(STATUS "Created interface target: mlek::${TARGET_LIB_NAME}")
 endfunction()
 
+# Set include directories for base targets. All other targets depend on at
+# least one of these targets.
+mlek_api_set_include_dirs(mlek_log)
+mlek_api_set_include_dirs(arm_math)
+mlek_api_set_include_dirs(common_api)
+mlek_api_set_include_dirs(ml_framework_iface)
+
+# Create alises and add namepaced targets for easier linking.
 create_mlek_impl_lib_target(API_NAME ad)
 create_mlek_impl_lib_target(API_NAME asr)
 create_mlek_impl_lib_target(API_NAME img_class)
@@ -73,3 +101,66 @@ create_mlek_impl_lib_target(API_NAME kws)
 create_mlek_impl_lib_target(API_NAME noise_reduction)
 create_mlek_impl_lib_target(API_NAME object_detection)
 create_mlek_impl_lib_target(API_NAME vww)
+
+set(MLEK_API_EXPORT_SET mlek-api-targets)
+
+set(MLEK_API_INSTALL_TARGETS
+    mlek_log
+    arm_math
+    common_api
+    ml_framework_iface
+    ad_api
+    asr_api
+    img_class_api
+    kws_api
+    noise_reduction_api
+    object_detection_api
+    vww_api
+    ad_impl
+    asr_impl
+    img_class_impl
+    inference_runner_impl
+    kws_impl
+    noise_reduction_impl
+    object_detection_impl
+    vww_impl)
+
+# Align exported target names with the existing mlek:: aliases.
+set_target_properties(mlek_log PROPERTIES EXPORT_NAME log)
+if (TARGET ml_framework_tflm)
+    list(APPEND MLEK_API_INSTALL_TARGETS ml_framework_tflm)
+    set_target_properties(ml_framework_tflm PROPERTIES EXPORT_NAME ml_framework_impl)
+endif()
+if (TARGET ml_framework_et)
+    list(APPEND MLEK_API_INSTALL_TARGETS ml_framework_et)
+    set_target_properties(ml_framework_et PROPERTIES EXPORT_NAME ml_framework_impl)
+endif()
+
+if (TARGET CMSISDSP)
+    list(APPEND MLEK_API_INSTALL_TARGETS CMSISDSP)
+endif()
+
+# Export targets for build-tree consumption.
+export(TARGETS ${MLEK_API_INSTALL_TARGETS}
+       NAMESPACE mlek::
+       FILE ${CMAKE_CURRENT_BINARY_DIR}/${MLEK_API_EXPORT_SET}.cmake)
+
+# Installation flow For native buids.
+if (NOT CMAKE_CROSSCOMPILING)
+    install(TARGETS ${MLEK_API_INSTALL_TARGETS}
+            EXPORT ${MLEK_API_EXPORT_SET}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+    install(EXPORT ${MLEK_API_EXPORT_SET}
+            NAMESPACE mlek::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mlek-api)
+
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mlek/
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlek
+            FILES_MATCHING
+                PATTERN "*.h"
+                PATTERN "*.hpp")
+endif()

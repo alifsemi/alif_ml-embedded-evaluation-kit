@@ -39,16 +39,14 @@ See [Repository structure](../documentation.md#repository-structure) section for
 > sources in a `src` directory. For example:
 >
 > ```tree
-> use_case
+> mlek/use_case
 >   └──img_class
->         ├── include
->         │   └── *.hpp
->         └── src
->             └── *.cc
+>         ├── *.hpp
+>         └── *.cc
 > ```
 >
 > It is important to note that each use case example has at least one associated API that it uses from
-> `source/application/api/use_case`. The API sources are **platform-agnostic** by design so the use cases example
+> `source/application/api/mlek/use_case`. The API sources are **platform-agnostic** by design so the use cases example
 > implementations can re-use one or more of these components, and they can be used on any target. However, it
 > is not mandatory to use an API, or to implement one if you are adding a use-case.
 
@@ -218,16 +216,11 @@ Additional member functions in the `TflmModel` subclass:
 > 
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >   ```commandline
->     source/application/api/fwk/tflm
+>     source/application/api/mlek/fwk/tflm
 >       ├── ...
->       ├── include
->       │   ├── ...
->       │   ├── MobileNetModel.hpp
->       │   ├── ...
->       └── source
->           ├── ...
->           ├── MobileNetModel.cc
->           ├── ...
+>       ├── MobileNetModel.hpp
+>       ├── ...
+>       └── MobileNetModel.cc
 
 ### ExecuTorch models
 
@@ -247,12 +240,10 @@ Additional member functions in the `EtModel` subclass:
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >
 >   ```commandline
->       source/application/api/fwk/executorch
+>       source/application/api/mlek/fwk/executorch
 >       ├── ...
->       ├── include
->       │   ├── ...
->       │   ├── MobileNetModel.hpp
->       │   ├── ...
+>       ├── MobileNetModel.hpp
+>       ├── ...
 >   ```
 
 ## Adding custom ML use-case
@@ -294,7 +285,7 @@ Now define the `MainLoop` function with the signature described in [Main loop fu
 
 ```C++
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 void MainLoop()
 {
@@ -351,13 +342,13 @@ class HelloWorldTflmModel: public TflmModel {
 #endif /* HELLOWORLDTFLMMODEL_HPP */
 ```
 
-Create the `HelloWorldTflmModel.cc` file in the `src` subdirectory and define the methods there. Include
+Place the `HelloWorldTflmModel.cc` file alongside the header and define the methods there. Include
 `HelloWorldTflmModel.hpp` created earlier.
 
 > **Note:** The `TflmModel.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
 
-Please refer to `source/application/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
-for example `include/MobileNetModel.hpp` and `src/MobileNetModel.cc`.
+Please refer to `source/application/api/mlek/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
+for example `MobileNetModel.hpp` and `MobileNetModel.cc`.
 
 If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U* operator to the
 operators list.
@@ -369,7 +360,7 @@ For example:
 
 ```C++
 #include "HelloWorldTflmModel.hpp"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 bool arm::app::HelloWorldTflmModel::EnlistOperations() {
 
@@ -412,7 +403,7 @@ class HelloWorldEtModel: public EtModel {} /* namespace arm::app::fwk::et */
 
 However, it can still be useful to define a class for your model to capture specific metadata,
 such as labels for input/output tensor indices.
-See `source/application/api/fwk/executorch/include/MobileNetModel.hpp` for an example of this.
+See `source/application/api/mlek/fwk/executorch/MobileNetModel.hpp` for an example of this.
 
 ### Using GetModelPointer and GetModelLen methods
 
@@ -444,8 +435,8 @@ For details on code generation flow in general, refer to: [Automatic file genera
 
 The model data is read during the `Model::Init` method execution.
 For implementation details, refer to the framework-specific `Model` subclasses:
- - `source/application/api/fwk/tflm/source/TflmModel.cc`
- - `source/application/api/fwk/executorch/source/EtModel.cc`
+ - `source/application/api/mlek/fwk/tflm/TflmModel.cc`
+ - `source/application/api/mlek/fwk/executorch/EtModel.cc`
 
 `Model::Init` requires references to the model and the compute buffer memory regions as well as their sizes.
 During the build, a source file will be generated at `<build>/generated/hello_world/src/<model_file_name>.cc`
@@ -499,7 +490,7 @@ The following code adds inference invocation to the main loop function:
 
 ```c++
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 #include "HelloWorldTflmModel.hpp"
 /* Or, if your model is ExecuTorch-based: */
 //#include "HelloWorldEtModel.hpp"
@@ -608,7 +599,7 @@ profiler.PrintProfilingResult();
 
 ## Printing to console
 
-The preceding examples used some function to print messages to the console. To use them, include `log_macros.h` header.
+The preceding examples used some function to print messages to the console. To use them, include `mlek/log/log_macros.h` header.
 
 However, for clarity, here is the full list of available functions:
 

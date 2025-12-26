@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 #include "UseCaseCommonUtils.hpp"
-#include "ImageUtils.hpp"
-#include "log_macros.h"
-#ifdef GPIO_PROFILING
-#include "board_utils.h"
-#endif
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/log/log_macros.h"
+
 #include <cinttypes>
 
 namespace arm {

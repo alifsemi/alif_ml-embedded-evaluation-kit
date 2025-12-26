@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MicroNetKwsModel.hpp"
-#include "Wav2LetterModel.hpp"
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"
 #include "BufAttributes.hpp"
 
 #include <catch.hpp>

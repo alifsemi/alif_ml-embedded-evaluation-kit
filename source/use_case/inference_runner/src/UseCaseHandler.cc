@@ -16,10 +16,10 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "TestModel.hpp"
+#include "mlek/fwk/tflm/TestModel.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #include <cstdlib>
 

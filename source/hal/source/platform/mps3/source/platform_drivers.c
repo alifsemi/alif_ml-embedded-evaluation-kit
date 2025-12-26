@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2022-2024, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 #include "platform_drivers.h"
 
-#include "log_macros.h"     /* Logging functions */
+#include "hal_log.h"     /* Logging functions */
 #include "smm_mps3.h"       /* Memory map for MPS3. */
 
 #if defined(ARM_NPU)

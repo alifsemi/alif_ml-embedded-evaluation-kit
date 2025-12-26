@@ -17,14 +17,14 @@
  */
 #include "UseCaseHandler.hpp"
 
-#include "AdMelSpectrogram.hpp"
-#include "AdModel.hpp"
-#include "AdProcessing.hpp"
-#include "AudioSlidingWindow.hpp"
-#include "ImageUtils.hpp"
+#include "mlek/use_case/ad/AdMelSpectrogram.hpp"
+#include "mlek/fwk/tflm/AdModel.hpp"
+#include "mlek/use_case/ad/AdProcessing.hpp"
+#include "mlek/common/AudioSlidingWindow.hpp"
+#include "mlek/common/ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 namespace arm {
 namespace app {

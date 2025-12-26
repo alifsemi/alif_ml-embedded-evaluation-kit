@@ -1,0 +1,96 @@
+/*
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef VWW_PROCESSING_HPP
+#define VWW_PROCESSING_HPP
+
+#include "mlek/common/BaseProcessing.hpp"
+#include "mlek/fwk/iface/Model.hpp"
+#include "mlek/common/Classifier.hpp"
+
+namespace arm {
+namespace app {
+
+    /**
+     * @brief   Pre-processing class for Visual Wake Word use case.
+     *          Implements methods declared by BasePreProcess and anything else needed
+     *          to populate input tensors ready for inference.
+     */
+    class VisualWakeWordPreProcess : public BasePreProcess {
+
+    public:
+        /**
+         * @brief       Constructor
+         * @param[in]   inputTensor   Shared pointer representing a tensor interface object.
+         * @param[in]   rgb2Gray      Convert image from 3 channel RGB to 1 channel grayscale.
+         **/
+        explicit VisualWakeWordPreProcess(
+            const std::shared_ptr<fwk::iface::TensorIface> inputTensor, bool rgb2Gray = true);
+
+        /**
+         * @brief       Should perform pre-processing of 'raw' input image data and load it into
+         *              input tensors ready for inference
+         * @param[in]   input      Pointer to the data that pre-processing will work on.
+         * @param[in]   inputSize  Size of the input data.
+         * @return      true if successful, false otherwise.
+         **/
+        bool DoPreProcess(const void* input, size_t inputSize) override;
+
+    private:
+        std::shared_ptr<fwk::iface::TensorIface> m_inputTensor;
+        bool m_rgb2Gray;
+    };
+
+    /**
+     * @brief   Post-processing class for Visual Wake Word use case.
+     *          Implements methods declared by BasePostProcess and anything else needed
+     *          to populate result vector.
+     */
+    class VisualWakeWordPostProcess : public BasePostProcess {
+
+    private:
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor;
+        Classifier& m_vwwClassifier;
+        const std::vector<std::string>& m_labels;
+        std::vector<ClassificationResult>& m_results;
+
+    public:
+        /**
+         * @brief       Constructor
+         * @param[in]   outputTensor   Shared pointer representing a tensor interface object
+         * @param[in]   classifier     Classifier object used to get top N results from classification.
+         * @param[in]   model          Pointer to the VWW classification Model object.
+         * @param[in]   labels         Vector of string labels to identify each output of the model.
+         * @param[out]  results        Vector of classification results to store decoded outputs.
+         **/
+        VisualWakeWordPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                                  Classifier& classifier,
+                                  const std::vector<std::string>& labels,
+                                  std::vector<ClassificationResult>& results);
+
+        /**
+         * @brief    Should perform post-processing of the result of inference then
+         *           populate classification result data for any later use.
+         * @return   true if successful, false otherwise.
+         **/
+        bool DoPostProcess() override;
+    };
+
+} /* namespace app */
+} /* namespace arm */
+
+#endif /* VWW_PROCESSING_HPP */

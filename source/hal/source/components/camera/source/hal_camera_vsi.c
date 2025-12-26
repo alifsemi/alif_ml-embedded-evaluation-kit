@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal_camera.h"
-#include "log_macros.h"
+#include "hal_log.h"
 #include "video_drv.h"
 #include "RTE_Components.h"
 
