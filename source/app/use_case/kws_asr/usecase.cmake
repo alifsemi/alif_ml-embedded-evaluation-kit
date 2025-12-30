@@ -56,12 +56,12 @@ USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples
 
 # Generate kws labels file:
 USER_OPTION(${use_case}_LABELS_TXT_FILE_KWS "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/micronet_kws_labels.txt
+    ${MLEK_ROOT}/resources/${use_case}/labels/micronet_kws_labels.txt
     FILEPATH)
 
 # Generate asr labels file:
 USER_OPTION(${use_case}_LABELS_TXT_FILE_ASR "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_wav2letter.txt
+    ${MLEK_ROOT}/resources/${use_case}/labels/labels_wav2letter.txt
     FILEPATH)
 
 

@@ -18,7 +18,7 @@
 This document describes the process of setting up and running the Arm® Ethos™-U NPU Visual Wake Word example.
 Visual Wake Words is a common vision use-case to detect if the provided image contains a person.
 
-Use case code could be found in [source/use_case/vww](../../source/use_case/vww) directory.
+Use case code could be found in [source/app/use_case/vww](../../source/app/use_case/vww) directory.
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -107,9 +107,9 @@ Results of the build will be placed under `build/bin` folder:
 
 ```tree
 bin
- ├── ethos-u-vww.axf
- ├── ethos-u-vww.htm
- ├── ethos-u-vww.map
+ ├── mlek_vww.axf
+ ├── mlek_vww.htm
+ ├── mlek_vww.map
  ├── images-vww.txt
  └── sectors
       └── vww
@@ -119,12 +119,12 @@ bin
 
 Where:
 
-- `ethos-u-vww.axf`: The built application binary for the Visual Wake Word use case.
+- `mlek_vww.axf`: The built application binary for the Visual Wake Word use case.
 
-- `ethos-u-vww.map`: Information from building the application (e.g. libraries used, what was optimized,
+- `mlek_vww.map`: Information from building the application (e.g. libraries used, what was optimized,
     location of objects)
 
-- `ethos-u-vww.htm`: Human readable file containing the call graph of application functions.
+- `mlek_vww.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/`: Folder containing the built application, split into files for loading into different FPGA memory regions.
 
@@ -247,11 +247,11 @@ $./FVP_Corstone_SSE-300.sh
 
 ### Starting Fast Model simulation
 
-Pre-built application binary ethos-u-vww.axf can be found in the bin/mps3-sse-300 folder of the delivery
+Pre-built application binary mlek_vww.axf can be found in the bin/mps3-sse-300 folder of the delivery
 package. Assuming the install location of the FVP was set to ~/FVP_install_location, the simulation can be started by:
 
 ```commandline
-$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-vww.axf
+$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_vww.axf
 ```
 
 A log output should appear on the terminal:

@@ -64,9 +64,9 @@ To get started quickly, please follow these steps:
 
     ```commandline
    From auto-generated (or custom) build directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
+   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_kws.axf
    From root directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
+   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/mlek_kws.axf
     ```
 
 6. A telnet window is launched through which you can interact with the application and obtain performance figures.

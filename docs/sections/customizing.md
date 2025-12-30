@@ -33,21 +33,21 @@ The following sign indicates the important conventions to apply:
 
 See [Repository structure](../documentation.md#repository-structure) section for the outline of the repo.
 
-> **Convention**: Separate use-cases must be organized in sub-folders under the `source/use-case` folder. The name of
+> **Convention**: Separate use-cases must be organized in sub-folders under the `source/app/use_case` folder. The name of
 > the directory is used as a name for this use-case and can be provided as a `USE_CASE_BUILD` parameter value. The build
 > system expects that sources for the use-case are structured as follows: Headers in an `include` directory and C/C++
 > sources in a `src` directory. For example:
 >
 > ```tree
-> mlek/use_case
->   └──img_class
->         ├── *.hpp
->         └── *.cc
+> source/app/use_case
+>   └── img_class
+>         ├── include
+>         └── src
 > ```
 >
 > It is important to note that each use case example has at least one associated API that it uses from
-> `source/application/api/mlek/use_case`. The API sources are **platform-agnostic** by design so the use cases example
-> implementations can re-use one or more of these components, and they can be used on any target. However, it
+> `source/lib/mlek/use_case`. These are reusable ML use-case libraries so the use case example
+> implementations can re-use one or more of these components across targets. However, it
 > is not mandatory to use an API, or to implement one if you are adding a use-case.
 
 ## Hardware Abstraction Layer API
@@ -216,7 +216,7 @@ Additional member functions in the `TflmModel` subclass:
 > 
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >   ```commandline
->     source/application/api/mlek/fwk/tflm
+>     source/lib/mlek/fwk/tflm
 >       ├── ...
 >       ├── MobileNetModel.hpp
 >       ├── ...
@@ -240,7 +240,7 @@ Additional member functions in the `EtModel` subclass:
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >
 >   ```commandline
->       source/application/api/mlek/fwk/executorch
+>       source/lib/mlek/fwk/executorch
 >       ├── ...
 >       ├── MobileNetModel.hpp
 >       ├── ...
@@ -259,13 +259,13 @@ In addition, some useful examples are provided: Printing into console, and drawi
 For example:
 
 ```tree
-use_case
-   └──hello_world
-      ├── include
-      └── src
+source/app/use_case
+   └── hello_world
+         ├── include
+         └── src
 ```
 
-Start with creation of a subdirectory under the `source/use_case` directory and two additional directories `src` and
+Start with creation of a subdirectory under the `source/app/use_case` directory and two additional directories `src` and
 `include` as described in the [Software project description](./customizing.md#software-project-description) section.
 
 ## Implementing main loop
@@ -308,7 +308,7 @@ Before inference could be run with a custom NN model, TensorFlow Lite Micro fram
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
 The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](./customizing.md#nn-model-api)).
-Create `HelloWorldTflmModel.hpp` in the use-case include `source/application/fwk/tflm/include` directory,
+Create `HelloWorldTflmModel.hpp` under `source/lib/mlek/fwk/tflm`,
 extend Model abstract class, and then declare the required methods.
 
 For example:
@@ -347,7 +347,7 @@ Place the `HelloWorldTflmModel.cc` file alongside the header and define the meth
 
 > **Note:** The `TflmModel.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
 
-Please refer to `source/application/api/mlek/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
+Please refer to `source/lib/mlek/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
 for example `MobileNetModel.hpp` and `MobileNetModel.cc`.
 
 If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U* operator to the
@@ -403,14 +403,14 @@ class HelloWorldEtModel: public EtModel {} /* namespace arm::app::fwk::et */
 
 However, it can still be useful to define a class for your model to capture specific metadata,
 such as labels for input/output tensor indices.
-See `source/application/api/mlek/fwk/executorch/MobileNetModel.hpp` for an example of this.
+See `source/lib/mlek/fwk/executorch/MobileNetModel.hpp` for an example of this.
 
 ### Using GetModelPointer and GetModelLen methods
 
 These functions are generated in the C++ file containing the neural network model as an array.
 This logic for generation of the C++ array from the `.tflite` or `.pte` file needs to be defined
 in the `usecase.cmake` file for this `HelloWorld` example.
-In the root of `source/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to it:
+In the root of `source/app/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to it:
 
 ```cmake
 # Generate model file
@@ -435,8 +435,8 @@ For details on code generation flow in general, refer to: [Automatic file genera
 
 The model data is read during the `Model::Init` method execution.
 For implementation details, refer to the framework-specific `Model` subclasses:
- - `source/application/api/mlek/fwk/tflm/TflmModel.cc`
- - `source/application/api/mlek/fwk/executorch/EtModel.cc`
+ - `source/lib/mlek/fwk/tflm/TflmModel.cc`
+ - `source/lib/mlek/fwk/executorch/EtModel.cc`
 
 `Model::Init` requires references to the model and the compute buffer memory regions as well as their sizes.
 During the build, a source file will be generated at `<build>/generated/hello_world/src/<model_file_name>.cc`
@@ -769,7 +769,7 @@ cmake .. \
 ```
 
 
-As a result, the file `ethos-u-hello_world.axf` is created. The MPS3 build also produces the `sectors/hello_world`
+As a result, the file `mlek_hello_world.axf` is created. The MPS3 build also produces the `sectors/hello_world`
 directory with binaries and the file `sectors/images.txt` to be copied to the MicroSD card on the board.
 
 The next section of the documentation covers: [Testing and benchmarking](testing_benchmarking.md).

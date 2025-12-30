@@ -31,7 +31,7 @@ The tensor arena memory region is reused between models to optimize application 
 
 The `Yes` keyword is used to trigger full command recognition following the keyword.
 
-Use-case code could be found in the following directory: [source/use_case/kws_asr](../../source/use_case/kws_asr).
+Use-case code could be found in the following directory: [source/app/use_case/kws_asr](../../source/app/use_case/kws_asr).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -55,7 +55,7 @@ First, the audio data is normalized to the range (`-1`, `1`).
 
 > **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
 > be used as input for machine learning tasks such as keyword spotting and speech recognition. For implementation
-> details, please refer to: `source/application/main/include/Mfcc.hpp`
+> details, please refer to: `source/lib/mlek/common/Mfcc.hpp`
 
 Next, a window of 640 audio samples is taken from the start of the audio clip. From these 640 samples, we calculate 10
 MFCC features.
@@ -91,7 +91,7 @@ First, the audio data is normalized to the range (`-1`, `1`).
 
 > **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
 > be used as input for machine learning tasks. Such as keyword spotting and speech recognition. For implementation
-> details, please refer to: `source/application/main/include/Mfcc.hpp`
+> details, please refer to: `source/lib/mlek/common/Mfcc.hpp`
 
 Next, a window of 512 audio samples is taken from the start of the audio clip. From these 512 samples, we calculate 13
 MFCC features.
@@ -260,9 +260,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-kws_asr.axf
- ├── ethos-u-kws_asr.htm
- ├── ethos-u-kws_asr.map
+ ├── mlek_kws_asr.axf
+ ├── mlek_kws_asr.htm
+ ├── mlek_kws_asr.map
  └── sectors
       ├── images.txt
       └── kws_asr
@@ -272,13 +272,13 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-kws_asr.axf`: The built application binary for the Keyword Spotting and Automatic Speech Recognition
+- `mlek_kws_asr.axf`: The built application binary for the Keyword Spotting and Automatic Speech Recognition
   use-case.
 
-- `ethos-u-kws_asr.map`: Information from building the application. For example: The libraries used, what was optimized,
+- `mlek_kws_asr.map`: Information from building the application. For example: The libraries used, what was optimized,
   and the location of objects.
 
-- `ethos-u-kws_asr.htm`: Human readable file containing the call graph of application functions.
+- `mlek_kws_asr.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/kws_asr`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -399,14 +399,14 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-Once the building has been completed, the application binary `ethos-u-kws_asr.axf` can be found in the `build/bin`
+Once the building has been completed, the application binary `mlek_kws_asr.axf` can be found in the `build/bin`
 folder.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-kws_asr.axf
+$ ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_kws_asr.axf
 ```
 
 A log output appears on the terminal:

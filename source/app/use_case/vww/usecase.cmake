@@ -35,7 +35,7 @@ USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be 
     STRING)
 
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model"
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/visual_wake_word_labels.txt
+    ${MLEK_ROOT}/resources/${use_case}/labels/visual_wake_word_labels.txt
     FILEPATH)
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"

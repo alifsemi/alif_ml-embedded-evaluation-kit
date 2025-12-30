@@ -37,7 +37,7 @@ USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be 
 
 if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
     set(DEFAULT_ACTIVATION_BUF_SZ  0x00200000)
-    set(LABELS_TXT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_mobilenet_v2_1.0_224.txt)
+    set(LABELS_TXT_FILE ${MLEK_ROOT}/resources/${use_case}/labels/labels_mobilenet_v2_1.0_224.txt)
 
     if (ETHOS_U_NPU_ENABLED)
         set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/mobilenet_v2_1.0_224_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
@@ -46,7 +46,7 @@ if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
     endif()
 elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
     set(LABELS_TXT_FILE
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_mobilenet_v2_1.IMAGENET1K_V2.txt)
+        ${MLEK_ROOT}/resources/${use_case}/labels/labels_mobilenet_v2_1.IMAGENET1K_V2.txt)
 
     if (ETHOS_U_NPU_ENABLED)
         string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)

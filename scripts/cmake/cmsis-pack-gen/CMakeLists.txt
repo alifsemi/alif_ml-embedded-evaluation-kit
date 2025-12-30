@@ -29,7 +29,7 @@ project(ml-embedded-eval-kit-api
         DESCRIPTION     "Platform agnostic API for all examples.")
 
 set(SOURCE_ROOT     ${CMAKE_CURRENT_LIST_DIR}/../../../source)
-set(API_PROJECT_DIR ${SOURCE_ROOT}/application/api)
+set(API_PROJECT_DIR ${SOURCE_ROOT}/lib)
 
 option(CMSIS_PACK_GEN_FLOW "Enable CMSIS-pack generation flow" ON)
 
@@ -37,7 +37,7 @@ option(CMSIS_PACK_GEN_FLOW "Enable CMSIS-pack generation flow" ON)
 set(ML_FRAMEWORK "TensorFlowLiteMicro" CACHE STRING "Choice of ML framework")
 
 # Add common part and the APIs:
-add_subdirectory(${API_PROJECT_DIR}  ${CMAKE_BINARY_DIR}/api)
+add_subdirectory(${API_PROJECT_DIR} ${CMAKE_BINARY_DIR}/mlek-lib)
 
 # Any custom steps that are required for the CMSIS pack generation flow
 # must be declared here:

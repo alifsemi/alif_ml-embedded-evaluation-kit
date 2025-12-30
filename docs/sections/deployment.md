@@ -126,13 +126,13 @@ After starting, the application outputs a menu and waits for the user-input from
 For example, the image classification use-case on *Ethos-U55* processor can be started by using:
 
 ```commandline
-~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-img_class.axf
+~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_img_class.axf
 ```
 
 Meanwhile, for *Ethos-U65*:
 
 ```commandline
-~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65 -a ./bin/ethos-u-img_class.axf
+~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65 -a ./bin/mlek_img_class.axf
 ```
 
 ![FVP](../media/fvp.png)
@@ -158,13 +158,13 @@ The FVP supports many command-line parameters, such as:
   To start the model in `128` mode for *Ethos-U55*:
 
     ```commandline
-    ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-img_class.axf -C ethosu.num_macs=128
+    ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_img_class.axf -C ethosu.num_macs=128
     ```
 
   To start the model in `512` mode for *Ethos-U65*:
 
     ```commandline
-    ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65 -a ./bin/ethos-u-img_class.axf -C ethosu.num_macs=512
+    ~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U65 -a ./bin/mlek_img_class.axf -C ethosu.num_macs=512
     ```
 
 - `-l`: shows the full list of supported parameters

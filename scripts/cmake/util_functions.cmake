@@ -216,12 +216,13 @@ function(check_update_public_resources resource_downloaded_dir)
 endfunction()
 
 function(set_input_file_path_user_option file_extension use_case)
+    assert_defined(MLEK_ROOT)
     if(NOT USE_SINGLE_INPUT)
         USER_OPTION(${use_case}_FILE_PATH "Directory with custom input files, or path to a single input file, to use in the evaluation application."
-                ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/
+                ${MLEK_ROOT}/resources/${use_case}/samples/
                 PATH_OR_FILE)
     else()
-        file(GLOB_RECURSE INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/samples/*${file_extension})
+        file(GLOB_RECURSE INPUTS ${MLEK_ROOT}/resources/${use_case}/samples/*${file_extension})
         list (GET INPUTS 0 FIRST_INPUT_FILE)
         USER_OPTION(${use_case}_FILE_PATH "Directory with custom input files, or path to a single input file, to use in the evaluation application."
                 ${FIRST_INPUT_FILE}

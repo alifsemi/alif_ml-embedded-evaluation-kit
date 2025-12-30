@@ -31,7 +31,7 @@ list(APPEND ${use_case}_API_LIST "kws")
 set_input_file_path_user_option(".wav" ${use_case})
 
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/micronet_kws_labels.txt
+    ${MLEK_ROOT}/resources/${use_case}/labels/micronet_kws_labels.txt
     FILEPATH)
 
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."

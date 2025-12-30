@@ -1093,7 +1093,7 @@ scripts
 Based on the type of use-case, the correct conversion is called in the use-case CMake file. Or, audio or image
 respectively, for voice, or vision use-cases.
 
-For example, the generations call for image classification, `source/use_case/img_class/usecase.cmake`, looks like:
+For example, the generations call for image classification, `source/app/use_case/img_class/usecase.cmake`, looks like:
 
 ```c++
 # Generate input files

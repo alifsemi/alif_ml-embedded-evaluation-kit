@@ -44,11 +44,11 @@ set_input_file_path_user_option(".wav" ${use_case})
 
 if (${ML_FRAMEWORK} STREQUAL "ExecuTorch")
     USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/librispeech_sp.pieces
+        ${MLEK_ROOT}/resources/${use_case}/labels/librispeech_sp.pieces
         FILEPATH)
 else ()
     USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/${use_case}/labels/labels_wav2letter.txt
+        ${MLEK_ROOT}/resources/${use_case}/labels/labels_wav2letter.txt
         FILEPATH)
 endif ()
 
