@@ -60,7 +60,7 @@ builtin opcode could not be found and the application failed to get registration
 *<model_name>Model.cc* source file to include any new operators that this model has.
 
 For example, if you changed the **img_class** model you would need to modify the **arm::app::MobileNetModel::EnlistOperations()**
-function in *source/application/api/mlek/fwk/tflm/MobileNetModel.cc* to enlist any new operators in the model.
+function in *source/lib/mlek/fwk/tflm/MobileNetModel.cc* to enlist any new operators in the model.
 
 Don't forget to also increment the **ms_maxOpCnt** variable in the corresponding header file
-(e.g. *source/application/api/mlek/fwk/tflm/MobileNetModel.hpp* if we are changing **img_class**).
+(e.g. *source/lib/mlek/fwk/tflm/MobileNetModel.hpp* if we are changing **img_class**).

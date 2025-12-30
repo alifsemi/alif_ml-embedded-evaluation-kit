@@ -102,65 +102,9 @@ create_mlek_impl_lib_target(API_NAME noise_reduction)
 create_mlek_impl_lib_target(API_NAME object_detection)
 create_mlek_impl_lib_target(API_NAME vww)
 
-set(MLEK_API_EXPORT_SET mlek-api-targets)
-
-set(MLEK_API_INSTALL_TARGETS
-    mlek_log
-    arm_math
-    common_api
-    ml_framework_iface
-    ad_api
-    asr_api
-    img_class_api
-    kws_api
-    noise_reduction_api
-    object_detection_api
-    vww_api
-    ad_impl
-    asr_impl
-    img_class_impl
-    inference_runner_impl
-    kws_impl
-    noise_reduction_impl
-    object_detection_impl
-    vww_impl)
-
-# Align exported target names with the existing mlek:: aliases.
-set_target_properties(mlek_log PROPERTIES EXPORT_NAME log)
-if (TARGET ml_framework_tflm)
-    list(APPEND MLEK_API_INSTALL_TARGETS ml_framework_tflm)
-    set_target_properties(ml_framework_tflm PROPERTIES EXPORT_NAME ml_framework_impl)
-endif()
-if (TARGET ml_framework_et)
-    list(APPEND MLEK_API_INSTALL_TARGETS ml_framework_et)
-    set_target_properties(ml_framework_et PROPERTIES EXPORT_NAME ml_framework_impl)
-endif()
-
-if (TARGET CMSISDSP)
-    list(APPEND MLEK_API_INSTALL_TARGETS CMSISDSP)
-endif()
-
-# Export targets for build-tree consumption.
-export(TARGETS ${MLEK_API_INSTALL_TARGETS}
-       NAMESPACE mlek::
-       FILE ${CMAKE_CURRENT_BINARY_DIR}/${MLEK_API_EXPORT_SET}.cmake)
-
-# Installation flow For native buids.
-if (NOT CMAKE_CROSSCOMPILING)
-    install(TARGETS ${MLEK_API_INSTALL_TARGETS}
-            EXPORT ${MLEK_API_EXPORT_SET}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-    install(EXPORT ${MLEK_API_EXPORT_SET}
-            NAMESPACE mlek::
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mlek-api)
-
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mlek/
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mlek
-            FILES_MATCHING
-                PATTERN "*.h"
-                PATTERN "*.hpp")
+# Only include export/install logic when building as part of the top-level MLEK
+# project. When this library is embedded in another project, defer export to
+# the parent to avoid clashing install/export settings.
+if (CMAKE_SOURCE_DIR STREQUAL MLEK_ROOT)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/export.cmake)
 endif()

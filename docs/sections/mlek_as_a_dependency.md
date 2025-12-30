@@ -11,13 +11,15 @@
 ## Introduction
 
 It may be desirable to wrap ML-Embedded-Evaluation-Kit (MLEK) as a source dependency to use the example pipelines.
-The use cases have [platform-agnostic API](../../source/application/api/mlek/use_case/readme.md) that can be used as
-a stand-alone CMake project or be consumed in CMSIS-Pack form. However, there may be scenarios where other parts of
-this project are required as dependencies. This guide provides some general recommendations on wrapping MLEK sources.
+The use cases have [reusable ML use-case libraries](../../source/lib/mlek/use_case/readme.md) that can be used as
+a stand-alone CMake project, be consumed in CMSIS-Pack form, or pulled in as a [Zephyr module](../../source/lib/ports/zephyr/zephyr.md).
+However, there may be scenarios where other parts of this project are required as dependencies. This guide provides
+some general recommendations on wrapping MLEK sources.
 
 Other useful readings:
 * [Repository Structure](../../docs/documentation.md#repository-structure)
 * [Reusable Software](../../Readme.md#reusable-software).
+* [Zephyr port](../../source/lib/ports/zephyr/zephyr.md) if you want to consume MLEK libraries as a Zephyr module.
 
 ## Guidelines
 
@@ -25,18 +27,18 @@ Other useful readings:
 
 The use case APIs consist of:
 - `common` component - required for all use cases. This is available as a
-  [CMake project](../../source/application/api/mlek/common/CMakeLists.txt) that depends on:
+  [CMake project](../../source/lib/mlek/common/CMakeLists.txt) that depends on:
   - Following CMake target libraries:
-    - [log](../../source/application/api/mlek/log/readme.md)
-    - [arm_math](../../source/application/api/mlek/math/readme.md)
+    - [log](../../source/lib/mlek/log/readme.md)
+    - [arm_math](../../source/lib/mlek/math/readme.md)
 - `fwk` component - abstraction layer over the underlying ML framework - TensorFlow Lite Micro or ExecuTorch.
-  This is available as a [CMake project](../../source/application/api/mlek/fwk/CMakeLists.txt) that depends on *either*:
+  This is available as a [CMake project](../../source/lib/mlek/fwk/CMakeLists.txt) that depends on *either*:
     - [tensorflow-lite-micro](../../scripts/cmake/tensorflow_lite_micro.cmake): this is a third-party dependency and the
       project wrapping MLEK could provide its own variant.
     - [executorch](../../scripts/cmake/executorch.cmake): this is a third-party dependency and the
       project wrapping MLEK could provide its own variant.
 - `use case specific APIs` are individual CMake projects in
-  [source/application/api/mlek/use_case](../../source/application/api/mlek/use_case) subdirectories. These will only depend on
+  [source/lib/mlek/use_case](../../source/lib/mlek/use_case) subdirectories. These will only depend on
   the `common` target, which also brings in its dependencies listed above.
 
 To use these components, developers can either use MLEK as a submodule or fetch the project at configuration stage.
@@ -55,8 +57,8 @@ set(ML_FRAMEWORK "TensorFlowLiteMicro")
 add_library(google::tensorflow-lite-micro ALIAS user_defined_tflite_micro_target)
 add_library(arm::cmsis-dsp ALIAS user_defined_cmsis_dsp_target)
 
-# Now, add the MLEK API project
-add_subdirectory(${MLEK_ROOT}/source/application/api ${CMAKE_BINARY_DIR}/mlek/api)
+# Now, add the MLEK library project
+add_subdirectory(${MLEK_ROOT}/source/lib ${CMAKE_BINARY_DIR}/mlek/lib)
 ```
 
 This will expose certain interface library targets that will bring all their dependencies with them when linked
@@ -80,8 +82,8 @@ set(ML_FRAMEWORK "ExecuTorch")
 add_library(meta::executorch ALIAS user_defined_executorch_target)
 add_library(arm::cmsis-dsp ALIAS user_defined_cmsis_dsp_target)
 
-# Now, add the MLEK API project
-add_subdirectory(${MLEK_ROOT}/source/application/api ${CMAKE_BINARY_DIR}/mlek/api)
+# Now, add the MLEK library project
+add_subdirectory(${MLEK_ROOT}/source/lib ${CMAKE_BINARY_DIR}/mlek/lib)
 
 target_link_libraries(my_custom_app PRIVATE
     mlek::img_class_impl

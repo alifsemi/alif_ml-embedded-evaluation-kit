@@ -28,7 +28,7 @@ if (NOT COMMAND assert_defined)
 endif()
 
 if (NOT DEFINED MLEK_ROOT)
-    set(MLEK_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
+    set(MLEK_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../)
 endif()
 
 if (NOT DEFINED MLEK_DEPENDENCIES_DIR)

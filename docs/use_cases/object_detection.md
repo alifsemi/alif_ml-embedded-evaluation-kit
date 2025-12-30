@@ -23,7 +23,7 @@ are monochrome images. The model was trained on the *Wider* dataset (after conve
 and on *Emza Visual-Sense* dataset <www.emza-vs.com>.
 The model makes detection faces in size of 20x20 pixels and above.
 
-Use-case code could be found in the following directory:[source/use_case/object_detection](../../source/use_case/object_detection).
+Use-case code could be found in the following directory: [source/app/use_case/object_detection](../../source/app/use_case/object_detection).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -119,9 +119,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-object_detection.axf
- ├── ethos-u-object_detection.htm
- ├── ethos-u-object_detection.map
+ ├── mlek_object_detection.axf
+ ├── mlek_object_detection.htm
+ ├── mlek_object_detection.map
  └── sectors
       ├── images.txt
       └── object_detection
@@ -131,12 +131,12 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-object_detection.axf`: The built application binary for the Object Detection use-case.
+- `mlek_object_detection.axf`: The built application binary for the Object Detection use-case.
 
-- `ethos-u-object_detection.map`: Information from building the application. For example: The libraries used, what was
+- `mlek_object_detection.map`: Information from building the application. For example: The libraries used, what was
   optimized, and the location of objects.
 
-- `ethos-u-object_detection.htm`: Human readable file containing the call graph of application functions.
+- `mlek_object_detection.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/object_detection`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -251,14 +251,14 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-The pre-built application binary `ethos-u-object_detection.axf` can be
+The pre-built application binary `mlek_object_detection.axf` can be
 found in the `bin/mps3-sse-300` folder of the delivery package.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-object_detection.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_object_detection.axf
 ```
 
 A log output appears on the terminal:

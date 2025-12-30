@@ -19,7 +19,7 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Keyword Spotting example.
 
-Use-case code could be found in the following directory: [source/use_case/kws](../../source/use_case/kws).
+Use-case code could be found in the following directory: [source/app/use_case/kws](../../source/app/use_case/kws).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -34,7 +34,7 @@ First, the audio data is normalized to the range (`-1`, `1`).
 
 > **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
 > be used as input for machine learning tasks such as keyword spotting and speech recognition. For implementation
-> details, please refer to: `source/application/main/include/Mfcc.hpp`
+> details, please refer to: `source/lib/mlek/common/Mfcc.hpp`
 
 Next, a window of 640 audio samples is taken from the start of the audio clip. From these 640 samples, we calculate 10
 MFCC features.
@@ -167,9 +167,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-kws.axf
- ├── ethos-u-kws.htm
- ├── ethos-u-kws.map
+ ├── mlek_kws.axf
+ ├── mlek_kws.htm
+ ├── mlek_kws.map
  └── sectors
       ├── images.txt
       └── kws
@@ -179,12 +179,12 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-kws.axf`: The built application binary for the Keyword Spotting use-case.
+- `mlek_kws.axf`: The built application binary for the Keyword Spotting use-case.
 
-- `ethos-u-kws.map`: Information from building the application. For example: The libraries used, what was optimized, and
+- `mlek_kws.map`: Information from building the application. For example: The libraries used, what was optimized, and
   the location of objects.
 
-- `ethos-u-kws.htm`: Human readable file containing the call graph of application functions.
+- `mlek_kws.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/kws`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -309,13 +309,13 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-Once the building has been completed, the application binary `ethos-u-kws.axf` can be found in the `build/bin` folder.
+Once the building has been completed, the application binary `mlek_kws.axf` can be found in the `build/bin` folder.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-kws.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_kws.axf
 ```
 
 A log output appears on the terminal:

@@ -222,6 +222,8 @@ could be used in all tools/IDEs (for example,
 [Arm® Development Studio](https://developer.arm.com/Tools%20and%20Software/Arm%20Development%20Studio) and
 [Keil® µVision®](https://www2.keil.com/mdk5/uvision/)) that support the use of CMSIS Packs.
 
+A Zephyr® module is available too (see [Zephyr module](source/lib/ports/zephyr/zephyr.md))
+if you want to integrate the MLEK libraries into a Zephyr build.
 
 ## Contributions
 The ML embedded eval kit welcomes contributions. For more details on contributing to the eval kit please see the
