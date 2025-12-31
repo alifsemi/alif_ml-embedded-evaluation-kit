@@ -21,8 +21,6 @@ project(MLEK_API
         DESCRIPTION "Generic platform agnostic API"
         LANGUAGES   CXX)
 
-include(GNUInstallDirs)
-
 # Default configuration - paths and other defaults
 include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
 
