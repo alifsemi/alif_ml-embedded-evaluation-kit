@@ -17,6 +17,8 @@
 #----------------------------------------------------------------------------
 include_guard(GLOBAL)
 
+include(GNUInstallDirs)
+
 set(MLEK_API_EXPORT_SET mlek-api-targets)
 
 set(MLEK_API_INSTALL_TARGETS
