@@ -111,11 +111,12 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/drivers/source/pinconf.c
     ${ALIF_CMSIS_PATH}/drivers/source/uart.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi.c
-    ${ALIF_CMSIS_PATH}/drivers/source/ospi_hyperram_xip.c
+    ${ALIF_CMSIS_PATH}/drivers/source/ospi_psram_xip.c
     ${ALIF_CMSIS_PATH}/components/Source/driver_phy.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
-    ${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/MX66UW1G.c>
     )
 
 # Alif DFP RTE_Components does not support yet building the module if it is disabled
