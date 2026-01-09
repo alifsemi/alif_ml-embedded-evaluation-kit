@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -65,7 +65,7 @@ set(RESOURCES_PATH ${MLEK_ROOT}/resources_downloaded
     CACHE PATH "Path for resources")
 
 # ExecuTorch set up requires Python virtual env set up.
-if (NOT COMMAND setup_source_geberator)
+if (NOT COMMAND setup_source_generator)
     include(source_gen_utils)
     setup_source_generator()
 endif()

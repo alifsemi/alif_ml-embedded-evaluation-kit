@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -17,11 +17,15 @@
 #----------------------------------------------------------------------------
 
 # Add individual use case APIs but don't include them in default build
-add_subdirectory(ad EXCLUDE_FROM_ALL)
-add_subdirectory(asr EXCLUDE_FROM_ALL)
-add_subdirectory(img_class EXCLUDE_FROM_ALL)
-add_subdirectory(inference_runner EXCLUDE_FROM_ALL)
-add_subdirectory(kws EXCLUDE_FROM_ALL)
-add_subdirectory(noise_reduction EXCLUDE_FROM_ALL)
-add_subdirectory(object_detection EXCLUDE_FROM_ALL)
-add_subdirectory(vww EXCLUDE_FROM_ALL)
+set(_MLEK_API_LIST
+    asr kws noise_reduction         # Voice/Audio pipelines
+    img_class object_detection vww  # Vision pipelines
+    ad                              # Vibration pipeline
+    inference_runner)               # Generic runner - minimal inference
+
+foreach(_api_name ${_MLEK_API_LIST})
+    add_subdirectory(${_api_name} EXCLUDE_FROM_ALL)
+endforeach()
+
+# Expose the list to parent CMake project
+set(MLEK_API_LIST ${_MLEK_API_LIST} PARENT_SCOPE)

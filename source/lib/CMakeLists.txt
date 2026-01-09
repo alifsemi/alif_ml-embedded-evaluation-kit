@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -91,14 +91,14 @@ mlek_api_set_include_dirs(common_api)
 mlek_api_set_include_dirs(ml_framework_iface)
 
 # Create alises and add namepaced targets for easier linking.
-create_mlek_impl_lib_target(API_NAME ad)
-create_mlek_impl_lib_target(API_NAME asr)
-create_mlek_impl_lib_target(API_NAME img_class)
-create_mlek_impl_lib_target(API_NAME inference_runner)
-create_mlek_impl_lib_target(API_NAME kws)
-create_mlek_impl_lib_target(API_NAME noise_reduction)
-create_mlek_impl_lib_target(API_NAME object_detection)
-create_mlek_impl_lib_target(API_NAME vww)
+if (NOT DEFINED MLEK_API_LIST)
+    message(FATAL_ERROR "MLEK_API_LIST variable should be exposed by "
+                        "${CMAKE_CURRENT_SOURCE_DIR}/mlek/use_case")
+endif()
+
+foreach(_api_name ${MLEK_API_LIST})
+    create_mlek_impl_lib_target(API_NAME ${_api_name})
+endforeach()
 
 # Only include export/install logic when building as part of the top-level MLEK
 # project. When this library is embedded in another project, defer export to
