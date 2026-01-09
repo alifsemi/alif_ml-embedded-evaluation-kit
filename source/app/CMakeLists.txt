@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -105,7 +105,7 @@ foreach(use_case ${USE_CASES})
         message(STATUS "${use_case} skipped")
         continue()
     endif ()
- 
+
     file(GLOB_RECURSE UC_SRC
         "${SRC_USE_CASE}/${use_case}/src/*.cpp"
         "${SRC_USE_CASE}/${use_case}/src/*.cc"

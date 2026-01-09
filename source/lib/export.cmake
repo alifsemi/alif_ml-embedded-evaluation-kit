@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -25,22 +25,27 @@ set(MLEK_API_INSTALL_TARGETS
     mlek_log
     arm_math
     common_api
-    ml_framework_iface
-    ad_api
-    asr_api
-    img_class_api
-    kws_api
-    noise_reduction_api
-    object_detection_api
-    vww_api
-    ad_impl
-    asr_impl
-    img_class_impl
-    inference_runner_impl
-    kws_impl
-    noise_reduction_impl
-    object_detection_impl
-    vww_impl)
+    ml_framework_iface)
+
+# Add the use case specific targets.
+foreach(_api_name ${MLEK_API_LIST})
+    set(_target_name ${_api_name}_api)
+    if (TARGET ${_target_name})
+        get_target_property(_aliased_target ${_target_name} ALIASED_TARGET)
+        if (NOT _aliased_target)
+            list(APPEND MLEK_API_INSTALL_TARGETS ${_target_name})
+        else()
+            list(APPEND MLEK_API_INSTALL_TARGETS ${_aliased_target})
+        endif()
+    endif()
+    if (TARGET ${_api_name}_impl)
+        list(APPEND MLEK_API_INSTALL_TARGETS ${_api_name}_impl)
+    endif()
+endforeach()
+
+list(REMOVE_DUPLICATES MLEK_API_INSTALL_TARGETS)
+set_target_properties(${MLEK_API_INSTALL_TARGETS}
+                      PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
 # Align exported target names with the existing mlek:: aliases.
 set_target_properties(mlek_log PROPERTIES EXPORT_NAME log)
