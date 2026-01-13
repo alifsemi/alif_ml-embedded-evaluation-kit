@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2024, 2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,7 +37,7 @@ static void PrintApplicationIntro()
     info("%s\n", PRJ_DES_STR);
     info("Version %s Build date: " __DATE__ " @ " __TIME__ "\n", PRJ_VER_STR);
     info("Compiler: %s\n", PRJ_COMPILER);
-    info("Copyright 2021-2024, 2025 Arm Limited and/or "
+    info("Copyright 2021-2026 Arm Limited and/or "
          "its affiliates <open-source-office@arm.com>\n\n");
 }
 
