@@ -160,7 +160,7 @@ static void PDM_fifo_callback(uint32_t event)
 }
 
 /* PDM driver instance */
-#if defined(BOARD_PDM_INSTANCE) && (BOARD_PDM_INSTANCE == LP)
+#if defined(RTE_LPPDM)
 extern ARM_DRIVER_PDM Driver_LPPDM;
 static ARM_DRIVER_PDM* const PDMdrv = &Driver_LPPDM;
 #else
