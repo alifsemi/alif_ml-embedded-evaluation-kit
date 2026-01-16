@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -179,7 +179,6 @@ add_library(meta::executorch ALIAS mlek_executorch)
 
 # Include code generation wrappers from ExecuTorch.
 set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
-include(${EXECUTORCH_SRC_PATH}/tools/cmake/Utils.cmake)
 include(${EXECUTORCH_SRC_PATH}/tools/cmake/Codegen.cmake)
 
 ##############################################################################
@@ -205,6 +204,7 @@ function(generate_pte_ops_lib)
 
     # Ensure Python virtual environment bin location is available.
     set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
+    set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
 
     # Override the Python executable set by ExecuTorch's Utils.cmake
     # It expects a conda environment and sets this. We set it here

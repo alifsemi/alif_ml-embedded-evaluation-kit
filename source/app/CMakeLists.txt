@@ -176,10 +176,8 @@ foreach(use_case ${USE_CASES})
             if (TARGET ${_LIB})
                 target_link_libraries(${UC_LIB_NAME} PUBLIC ${_LIB})
             else()
-                message(STATUS "${_LIB} will not be linked. "
-                               "Target does not exist.")
+                message(FATAL_ERROR "${_LIB} requested by ${use_case} not found. ")
             endif()
-
         endforeach()
     endif()
 
