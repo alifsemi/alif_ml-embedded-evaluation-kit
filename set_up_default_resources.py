@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2025 Arm Limited
+#  SPDX-FileCopyrightText:  Copyright 2021-2026 Arm Limited
 #  and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -417,8 +417,8 @@ def optimize_executorch_model(
                " --delegate --quantize")
         optimized_model_name = f"{model_name}_arm_delegate_{npu_config.config_name}.pte"
     else:
-        cfg = " --target TOSA-1.0+INT"
-        optimized_model_name = output_dir / f"{model_name}_arm_TOSA-1.0+INT.pte"
+        cfg = " --target TOSA-1.0+FP"
+        optimized_model_name = output_dir / f"{model_name}_arm_TOSA-1.0+FP.pte"
 
     optimized_model_path = output_dir / optimized_model_name
     logging.info('Looking for %s', optimized_model_path)

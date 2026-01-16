@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021, 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -123,7 +123,7 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
         set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_arm_delegate_${_NPU_CFG_ID}.pte)
         set(DEFAULT_ACT_BUF_SZ      0x00200000) # 2 MiB
     else()
-        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_arm_TOSA-1.0+INT.pte)
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_arm_TOSA-1.0+FP.pte)
         set(DEFAULT_ACT_BUF_SZ      0x03000000) # 48 MiB
     endif()
 
@@ -143,6 +143,18 @@ USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation 
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )
+
+if (COMMAND generate_pte_ops_lib)
+    generate_pte_ops_lib(
+        MODEL_PATH      "${${use_case}_MODEL_PATH}"     # Path to the model PTE
+        LIB_NAME        "${use_case}_portable_ops_lib"  # Library target name
+        SELECT_OPS_LIST "")                             # Always included ops list
+
+    # If the target is generated, request it to be linked for this use case.
+    if (TARGET ${use_case}_portable_ops_lib)
+        set(${use_case}_LINK_LIBS ${use_case}_portable_ops_lib)
+    endif()
+endif()
 
 # Generate model file
 generate_model_code(

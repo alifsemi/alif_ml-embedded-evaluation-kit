@@ -720,7 +720,7 @@ if (ETHOS_U_NPU_ENABLED)
     string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
     set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_delegate_${_NPU_CFG_ID}.pte)
 else()
-    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_TOSA-1.0+INT.pte)
+    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_TOSA-1.0+FP.pte)
 endif()
 ```
 
