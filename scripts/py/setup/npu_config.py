@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -149,3 +149,46 @@ class NpuConfigs:
             [f"{c.name_prefix}-{c.macs}" for c in config.values()]
             for config in self.configs.values()
         ]))
+
+
+u85_macs_to_system_configs = {
+    128: "Ethos_U85_SYS_DRAM_Low",
+    256: "Ethos_U85_SYS_DRAM_Low",
+    512: "Ethos_U85_SYS_DRAM_Mid_512",
+    1024: "Ethos_U85_SYS_DRAM_Mid_1024",
+    2048: "Ethos_U85_SYS_DRAM_High_2048",
+}
+
+#: Collection of supported NPU configurations used by setup scripts.
+valid_npu_configs = NpuConfigs.create(
+    *(
+        NpuConfig(
+            name_prefix="ethos-u55",
+            macs=macs,
+            processor_id="U55",
+            prefix_id="H",
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U55_High_End_Embedded",
+        ) for macs in (32, 64, 128, 256)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u65",
+            macs=macs,
+            processor_id="U65",
+            prefix_id="Y",
+            memory_mode="Dedicated_Sram",
+            system_config="Ethos_U65_High_End"
+        ) for macs in (256, 512)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u85",
+            macs=macs,
+            processor_id="U85",
+            prefix_id="Z",
+            memory_mode="Dedicated_Sram",
+            system_config=u85_macs_to_system_configs[macs]
+        ) for macs in (128, 256, 512, 1024, 2048)
+    )
+)

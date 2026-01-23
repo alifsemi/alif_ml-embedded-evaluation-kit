@@ -34,7 +34,7 @@ from enum import Enum
 from pathlib import Path
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
-from scripts.py.setup.npu_config import NpuConfigs, NpuConfig
+from scripts.py.setup.npu_config import NpuConfigs, NpuConfig, valid_npu_configs
 from scripts.py.setup.python_venv import install_pip_package_if_needed, set_up_python_venv
 from scripts.py.setup.python_venv import is_pip_package_installed, install_requirements
 from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext
@@ -49,59 +49,6 @@ py3_version_minimum = (3, 10)
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
 # If false, install Vela package from PyPi using VELA_VERSION as the version
 INSTALL_VELA_FROM_SOURCE = False
-
-u55_macs_to_system_configs = {
-    32: "RTSS_HE_SRAM_MRAM",
-    64: "RTSS_HE_SRAM_MRAM",
-    128: "RTSS_HE_SRAM_MRAM",
-    256: "RTSS_HP_SRAM_MRAM",
-#    32: "RTSS_HE_SRAM_Only",
-#    64: "RTSS_HE_SRAM_Only",
-#    128: "RTSS_HE_SRAM_Only",
-#    256: "RTSS_HP_SRAM_Only",
-}
-
-u85_macs_to_system_configs = {
-    128: "Ethos_U85_SYS_DRAM_Low",
-    256: "Ethos_U85_SYS_DRAM_Low",
-    512: "Ethos_U85_SYS_DRAM_Mid_512",
-    1024: "Ethos_U85_SYS_DRAM_Mid_1024",
-    2048: "Ethos_U85_SYS_DRAM_High_2048",
-}
-
-# Valid NPU configurations:
-valid_npu_configs = NpuConfigs.create(
-    *(
-        NpuConfig(
-            name_prefix="ethos-u55",
-            macs=macs,
-            processor_id="U55",
-            prefix_id="H",
-            memory_mode="Shared_Sram",
-            system_config=u55_macs_to_system_configs[macs],
-        ) for macs in (32, 64, 128, 256)
-    ),
-    *(
-        NpuConfig(
-            name_prefix="ethos-u65",
-            macs=macs,
-            processor_id="U65",
-            prefix_id="Y",
-            memory_mode="Dedicated_Sram",
-            system_config="Ethos_U65_High_End"
-        ) for macs in (256, 512)
-    ),
-    *(
-        NpuConfig(
-            name_prefix="ethos-u85",
-            macs=macs,
-            processor_id="U85",
-            prefix_id="Z",
-            memory_mode="Shared_Sram",
-            system_config="Ethos_U85_SRAM_MRAM"
-        ) for macs in (128, 256, 512, 1024, 2048)
-    )
-)
 
 # Default NPU configurations (these are always run when the models are optimised)
 default_npu_configs = NpuConfigs.create(
@@ -178,15 +125,19 @@ def initialize_use_case_resources_directory(
         if err.errno == errno.EEXIST:
             # The usecase_name download dir exist.
             if check_clean_folder and not setup_script_hash_verified:
-                for resources_info in metadata.get("resources_info", []):
-                    use_case_info = info[0] if len(info := [
-                        f for f in resources_info if f["name"] == use_case.name
-                    ]) > 0 else {}
-                    for i, url_prefix in enumerate(use_case_info.get("url_prefix", [])):
-                        if url_prefix != use_case.url_prefix[i]:
-                            logging.info("Removing %s resources.", use_case.name)
-                            remove_tree_dir(use_case_resources_dir)
-                            break
+                use_case_info = next(
+                    (
+                        info for info in metadata.get("resources_info", [])
+                        if isinstance(info, dict) and info.get("name") == use_case.name
+                    ),
+                    {},
+                )
+                url_prefixes = use_case_info.get("url_prefix", [])
+                for i, url_prefix in enumerate(url_prefixes):
+                    if i >= len(use_case.url_prefix) or url_prefix != use_case.url_prefix[i]:
+                        logging.info("Removing %s resources.", use_case.name)
+                        remove_tree_dir(use_case_resources_dir)
+                        break
         elif err.errno != errno.EEXIST:
             logging.error("Error creating %s directory.", use_case.name)
             raise

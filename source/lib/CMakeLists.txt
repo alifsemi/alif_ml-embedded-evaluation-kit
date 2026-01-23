@@ -17,6 +17,24 @@
 #----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.21.0)
 
+# Build in release mode by default
+if (NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(CMAKE_BUILD_TYPE Release CACHE INTERNAL "")
+endif()
+
+# Set language standards.
+set(CMAKE_C_STANDARD   11)
+set(CMAKE_CXX_STANDARD 17)
+
+# Make the standard a requirement => prevent fallback to previous
+# supported standard
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# We want to pass standard C/C++ flags, without gnu extensions
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 project(MLEK_API
         DESCRIPTION "Generic platform agnostic API"
         LANGUAGES   CXX)

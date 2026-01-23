@@ -48,6 +48,7 @@ function(build_tflite_micro_cmake)
     FetchContent_MakeAvailable(TensorFlow_Lite_Micro_CMake_Wrapper)
 
     set(CMSIS_NN_PATH                   ${CMSIS_NN_SRC_PATH})
+    set(CMSIS_PATH                      ${CMSIS_SRC_PATH})
     set(TENSORFLOW_PATH                 ${TENSORFLOW_SRC_PATH})
     set(TFLM_OPTIMIZATION_LEVEL         ${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}
                                         CACHE STRING "Optimization level")

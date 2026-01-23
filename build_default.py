@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2021-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig
+from scripts.py.setup.npu_config import valid_npu_configs
 from set_up_default_resources import default_downloads_path
 from set_up_default_resources import default_executorch_path
 from set_up_default_resources import default_npu_configs
@@ -37,7 +38,6 @@ from set_up_default_resources import default_requirements_path
 from set_up_default_resources import default_use_case_resources_path
 from set_up_default_resources import get_default_npu_config_from_name
 from set_up_default_resources import set_up_resources
-from set_up_default_resources import valid_npu_configs
 from set_up_default_resources import valid_ml_frameworks, MLFramework
 
 @dataclass(frozen=True)
