@@ -107,7 +107,7 @@ python3
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
-#### Arm GNU GCC Compiler (v12.3 is tested. Newer version may not work) Setup – Option 2
+#### Arm GNU GCC Compiler (v12.3 and v13.3.Rel1 are tested. Newer version may not work) Setup – Option 2
 
 1. Search on Google and download the GNU Arm Embedded Toolchain for the file shown.<br>
     https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads <br>
@@ -208,7 +208,7 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 4. Download and Setup required AI/ML resources.
     Using Tensorflow:
     ```
-    python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+    python3.10 set_up_default_resources.py
     ```
     Using Executorch:
     ```
@@ -283,10 +283,10 @@ UART select jumpers set for UART2:
     mkdir build_alif_img_class
     cd build_alif_img_class
     ```
-**Using ARM Clang Toolchain**
 
 2. Configure the build using CMake
-    Tensorflow:
+
+    **Using ARM Clang Toolchain with TFLM framework**
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
@@ -297,12 +297,14 @@ UART select jumpers set for UART2:
     -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
     -DUSE_CASE_BUILD=alif_img_class ..
     ```
-    Executorch (supported on E8 with U85 and model on OSPI RAM):
+
+    **Using ARM GNU Toolchain with ExecuTorch framework**
+    (DevKit-E8 with Ethos-U85)
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
-    -DTARGET_BOARD=AppKit-e8 \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
+    -DTARGET_BOARD=DevKit-e8 \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
     -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
@@ -623,7 +625,7 @@ Original sample stats: absmax = 0, mean = 0
 Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 ```
 
-
+<a name="externalflash"></a>
 ## Running a use-case with ML model data in external flash
 
 - For example use-cases alif_asr, asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
@@ -653,9 +655,11 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 
 The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
 The inference_runner use-case can be used for basic benchmarks.
-- [Deploying your own model](docs/deploying_model.md)
+- Deploying your own model using [TFLM framework](docs/deploying_model.md)
+- Deploying your own PyTorch model using [ExecuTorch framework](docs/deploying_model_executorch_export.md)
 
 
+<a name="memoryusage"></a>
 ## Memory usage and linker files
 
 Alif linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
@@ -665,6 +669,8 @@ So if you run only one core, you can take the full MRAM/SRAM0/SRAM1 into use.
 usecase.cmake files do have USER_OPTION `${use_case}_ACTIVATION_BUF_SZ` which defines the size of the Activation buffer.
 You need to check that size of this buffer aligns with your model size. In most cases`${use_case}_ACTIVATION_BUF_SZ` goes to SRAM1, for E1 (as there is no SRAM1) it goes to SRAM0.
 
+When using TFLM framework the ACTIVATION_BUF_SZ sets the size of the 'tensor arena' which is then all the RAM the model needs when executed.
+In ExecuTorch build the RAM usage is split to two allocation spaces. The first one is the so called method allocator pool and is set by the ACTIVATION_BUF_SZ and the other one is temporary allocation pool set by ML_FWK_TMP_MEM_SIZE.
 
 ## Further information
 

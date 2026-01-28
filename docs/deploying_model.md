@@ -2,19 +2,21 @@
 This guide briefly describes how to deploy your own ML model using the tools and framework in [Alif Semiconductor Ensemble ML Embedded Evaluation Kit](https://github.com/alifsemi/alif_ml-embedded-evaluation-kit).
 In this example we use Alif Ensemble DevKit with E7 device, but you may as well find this useful for other Alif devices with Ethos-U NPU.
 
+** NOTE: for Pytorch|ExecuTorch see [ExecuTorch export and deploy documentation](deploying_model_executorch_export.md)
+
 ## ML model format
-Alif Semiconductor Ensemble ML Embedded Evaluation Kit repository uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro) to run ML models.
-- Thus the most suitable format is TFLite quantized to int8
+Alif Semiconductor Ensemble ML Embedded Evaluation Kit repository supports [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro) and [ExecuTorch](https://docs.pytorch.org/executorch/stable/index.html) to run ML models.
+- When using TFLM:
+  - the most suitable format is TFLite quantized to int8
   - float32 will not be accelerated by the Ethos-U NPU
   - Vela compiler typically supports uint8, int8 and int16, but there are [operator specific constraints](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/main/SUPPORTED_OPS.md)
   - Experience has shown TFLM supports int8 the best. Some operators may lack uint8 or int16 implementation. If part of your model is accelerated and some operators are executed on CPU the safest bet compatibility-wise is to use int8 quantization.
   - For best performance the goal is to get as many operators as possible to be executed on NPU
   - int16 quantization (int8 quantization with int16 activations) may become useful if your model loses too much accuracy due to quantization error when quantizing to int8
-- In this example we use TFLM framework, but please note Ethos-U can also be used with other frameworks such as [TVM](https://tvm.apache.org) and [ExecuTorch](https://pytorch.org/executorch)
 
-## Model conversion
+## Model conversion to TFLite
 Converting from Tensorflow to TFLite is often easy, but model conversion can be challenging as there are multiple frameworks.
-- Converting between frameworks is not always straightforward because they have slighlty different sets of operators and the tensor data layout can differ (NHWC vs NCHW).
+- Converting between frameworks is not always straightforward because they have slightly different sets of operators and the tensor data layout can differ (NHWC vs NCHW).
 - ML frameworks are a fast-developing field and some versions can have better compatibility than others.
 - Even though conversion between frameworks would be successful the post-training quantization can be problematic for some model structures. In that case choosing a different model or a different approach like [quantization aware training](https://www.tensorflow.org/model_optimization/guide/quantization/training) should be considered.
 
@@ -114,6 +116,10 @@ onnx2tf -i model_input.onnx -o quantized_model -oiqt -iqd int8 -oqd int8 -kat in
 ```
 
 ### PyTorch to TFLite
+
+** NOTE: for Pytorch|ExecuTorch see [ExecuTorch export and deploy documentation](deploying_model_executorch_export.md)
+
+- In some cases it may still be useful to convert PyTorch to TFLite, but typically the ExecuTorch framework should be considered when deploying PyTorch models
 - To convert to TFLite you first need to export to ONNX and then convert the resulting ONNX to TFLite
   - Tutorial on PyTorch [website](https://pytorch.org/tutorials/beginner/onnx/export_simple_model_to_onnx_tutorial.html)
 - Other option would be to use [ExecuTorch](https://pytorch.org/executorch) instead of conversions (Not covered in this howto).
