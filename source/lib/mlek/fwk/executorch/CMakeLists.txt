@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -48,8 +48,8 @@ add_library(${ML_FWK_ET_TARGET} STATIC
     EtTensor.cc
     EtModel.cc)
 
-target_sources(${ML_FWK_ET_TARGET} PRIVATE
-    $<BUILD_INTERFACE:EtPal.cc>)
+target_sources(${ML_FWK_ET_TARGET} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/EtPal.cc>)
 
 # Link time library targets:
 target_link_libraries(${ML_FWK_ET_TARGET} PUBLIC

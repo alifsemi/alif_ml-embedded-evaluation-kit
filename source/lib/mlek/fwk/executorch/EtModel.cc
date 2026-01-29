@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +45,7 @@ EtModel::EtModel()
 
 EtModel::~EtModel()
 {
+    this->m_inited = false;
     this->LogMemoryUsage();
 }
 
@@ -110,6 +111,13 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
         /* Move to its own allocator when MemoryPlanner is in place. */
         uint8_t* buffer =
             reinterpret_cast<uint8_t*>(this->m_backendData.m_methodAllocPtr->allocate(bufferSize));
+
+        if (!buffer) {
+            printf_err("Failed to allocate %zu bytes. Allocator has %zu bytes left\n",
+                       bufferSize, this->m_backendData.m_methodAllocPtr->FreeSize());
+            return false;
+        }
+
         plannedSpans.push_back(executorch::runtime::Span{buffer, bufferSize});
     }
 
@@ -247,15 +255,18 @@ void EtModel::LogInterpreterInfo()
 
 void EtModel::LogMemoryUsage() const
 {
-    info("Total memory usage: \n");
-    info("\tMethod memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
-        this->m_backendData.m_methodAllocPtr->UsedSizeCurrent(),
-        this->m_backendData.m_methodAllocPtr->UsedSizePeak(),
-        this->m_backendData.m_methodAllocPtr->size());
-    info("\tTemp memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
-        this->m_backendData.m_tmpAllocPtr->UsedSizeCurrent(),
-        this->m_backendData.m_tmpAllocPtr->UsedSizePeak(),
-        this->m_backendData.m_tmpAllocPtr->size());
+    if (this->m_backendData.m_methodAllocPtr) {
+        info("\tMethod memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
+            this->m_backendData.m_methodAllocPtr->UsedSizeCurrent(),
+            this->m_backendData.m_methodAllocPtr->UsedSizePeak(),
+            this->m_backendData.m_methodAllocPtr->size());
+    }
+    if (this->m_backendData.m_tmpAllocPtr) {
+        info("\tTemp memory: Used: %zu; Peak: %zu; Available: %" PRId32 "\n",
+            this->m_backendData.m_tmpAllocPtr->UsedSizeCurrent(),
+            this->m_backendData.m_tmpAllocPtr->UsedSizePeak(),
+            this->m_backendData.m_tmpAllocPtr->size());
+    }
 }
 
 bool EtModel::IsInited() const
