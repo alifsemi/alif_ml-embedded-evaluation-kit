@@ -1,8 +1,15 @@
 NOTE! Update submodules before building:
-git submodule update --init
+git submodule update --init --recursive
 
 NOTE! Generate micronet/mobilenet models 1st with:
-python set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+python set_up_default_resources.py
+
+NOTE! Framework defaults to TFLM. For ExecuTorch do:
+python set_up_default_resources.py --ml-framework=executorch
+
+NOTE! Currently the ExecuTorch (1.0) has a hardcoded setting for Position Independent Code.
+Apply the following patch before building a use-case example
+git -C dependencies/executorch apply ../../executorch_1_0_runtime_patch.diff
 
 NOTE! All should normally build as Release for full-speed operation. In particular,
 this enables auto-vectorization for ARMCLANG. Images can still be debugged with
