@@ -89,11 +89,11 @@ as this was used for training the model.
 
 Unlike *wav2letter* where we run inference for a sliding window over the input audio data,
 for *Conformer* we consider the entire input audio clip at once up to a fixed length.
-In the case of the specific *Conformer* model provided, the audio input length is 15 seconds
+In the case of the specific *Conformer* model provided, the audio input length is 7 seconds
 (this duration is a configurable parameter when training, quantizing and exporting the model).
 For input audio clips shorter than this, we right-pad the Mel Spectrogram with a placeholder value of `-20.0`.
-In our case, the input tensor is of size 1500*80 where 80 is the number of mels
-and 1500 corresponds to each 100ms time interval for which spectrogram data has been calculated.
+In our case, the input tensor is of size 700*80 where 80 is the number of mels
+and 700 corresponds to each 100ms time interval for which spectrogram data has been calculated.
 
 At this point, no further preprocessing is needed; unlike *wav2letter*,
 we have no need to consider left/right contexts or compute first or second-order derivatives.
@@ -134,7 +134,7 @@ displayed to the console.
 
 #### Postprocessing for *Conformer*
 
-The output tensor for our *Conformer* model is of size 374*129, where 374 is the number of output tokens
+The output tensor for our *Conformer* model is of size 174*129, where 174 is the number of output tokens
 (related to the audio input length, which is 15 seconds for our specific trained *Conformer* model)
 and 129 is a probability distribution over the vocabulary range (the vocabulary size is a configurable
 parameter of the SentencePiece tokeniser used in the *Conformer* training process).

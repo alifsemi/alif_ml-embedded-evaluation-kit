@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -19,10 +19,13 @@ Use case domain object definitions
 """
 import itertools
 import json
+import re
 import typing
 from dataclasses import dataclass, field
 from enum import IntEnum
 from pathlib import Path
+
+model_file_extensions = re.compile(r'^.*\.pt2?$')
 
 
 class ExecutorchResourceType(IntEnum):
@@ -59,7 +62,8 @@ class ExecutorchResource:
     lowering: typing.Optional[Path] = None
 
     def __post_init__(self):
-        if self.path and not str(self.model).endswith('.pt2'):
+        is_model_file = model_file_extensions.match(self.model)
+        if self.path and not is_model_file:
             object.__setattr__(self, "type", ExecutorchResourceType.LOCAL_PROJECT)
             if self.resources_dir and not self.resources_dir.exists():
                 raise ValueError(f"Resources directory {self.resources_dir} does not exist")
@@ -75,7 +79,7 @@ class ExecutorchResource:
 
             if self.lowering_script and not self.lowering_script.is_file():
                 raise ValueError(f"Lowering script {self.lowering_script} does not exist")
-        elif str(self.model).endswith('.pt2'):
+        elif is_model_file:
             object.__setattr__(self, "type", ExecutorchResourceType.CHECKPOINT_DOWNLOAD)
         else:
             object.__setattr__(self, "type", ExecutorchResourceType.BUILT_IN)
@@ -100,7 +104,6 @@ class ExecutorchResource:
             return self.project_path / self.model if self.model else None
 
         return None
-
 
     @property
     def requirements_path(self) -> typing.Optional[Path]:
@@ -158,6 +161,12 @@ class ExecutorchResource:
         """
         return self.type == ExecutorchResourceType.CHECKPOINT_DOWNLOAD
 
+    def has_requirements(self) -> bool:
+        """
+        Convenience function to denote if this resource has requirements that need to be installed
+        :return:    True if this resource has requirements that need to be installed
+        """
+        return self.requirements is not None
 
 
 @dataclass(frozen=True)

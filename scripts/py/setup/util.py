@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -97,10 +97,9 @@ def download_file(
 
 def call_command(
         command: str,
-        verbose: bool = True,
-        cwd: typing.Optional[Path] = None,
         buffer_logs: bool = False,
-        capture_output: bool = True
+        capture_output: bool = True,
+        **kwargs
 ) -> typing.Optional[str]:
     """
     Helpers function that call subprocess and return the output.
@@ -108,24 +107,21 @@ def call_command(
     Parameters:
     ----------
     command (string):       Specifies the command to run.
-    verbose (bool):         When True, log the command before running.
-    cwd (Path):             Set the working directory in which to run the command.
     buffer_logs (bool):     When True, output will be buffered and written to the log
                             when the command has finished running.
                             When False, output will be written to the log
                             line-by-line with no buffering.
     capture_output (bool)   When True, capture the command output and return it.
     """
-    if verbose:
-        logging.debug(command)
+    logging.debug(command)
     log = ""
     with subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
-        cwd=cwd,
-        text=True
+        text=True,
+        **kwargs
     ) as proc:
         for line in proc.stdout:
             if capture_output:
