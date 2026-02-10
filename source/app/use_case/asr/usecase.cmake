@@ -124,10 +124,10 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
 
     if (ETHOS_U_NPU_ENABLED)
         string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
-        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_arm_delegate_${_NPU_CFG_ID}.pte)
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_fp32_cln_wer_6_47_arm_delegate_${_NPU_CFG_ID}.pte)
         set(DEFAULT_ACT_BUF_SZ      0x00200000) # 2 MiB
     else()
-        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_arm_TOSA-1.0+FP.pte)
+        set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/conformer_fp32_cln_wer_6_47_arm_TOSA-1.0+FP.pte)
         set(DEFAULT_ACT_BUF_SZ      0x03000000) # 48 MiB
     endif()
 

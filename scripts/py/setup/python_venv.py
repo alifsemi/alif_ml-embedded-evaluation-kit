@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -77,13 +77,23 @@ def is_pip_package_installed(package_name: str, env_activate_cmd: str) -> bool:
     return len([package for package in packages if package.startswith(package_name)]) > 0
 
 
-def install_requirements(env_activate_cmd: str, requirements_file: Path):
+def install_requirements(
+        env_activate_cmd: str,
+        requirements_file: Path,
+        no_deps: bool = False
+):
     """
     Install a requirements file for a specified Python environment
     :param env_activate_cmd:    Command to activate Python env
     :param requirements_file:   Path to the requirements file
+    :param no_deps:             Determine whether the `--no-deps` flag is passed to
+                                `pip -install`
     """
-    call_command(f"{env_activate_cmd} && python -m pip install -r {requirements_file}")
+    no_deps_token = "--no-deps" if no_deps else ""
+    call_command(
+        f"{env_activate_cmd} "
+        f"&& python -m pip install {no_deps_token} -r {requirements_file}"
+    )
 
 
 def install_pip_package_if_needed(
@@ -111,9 +121,9 @@ def install_pip_package_if_needed(
             installed_package_name if installed_package_name else package_name,
             env_activate_cmd
     ):
-        env_token = " ".join([f"{k}={v}" for k, v in environment.items()]) if environment else ""
         no_deps_token = "--no-deps" if no_deps else ""
         call_command(
-            f"{env_activate_cmd} && {env_token} "
-            f"python -m pip install {package_name} {no_deps_token}"
+            f"{env_activate_cmd} "
+            f"&& python -m pip install {package_name} {no_deps_token}",
+            env=environment
         )

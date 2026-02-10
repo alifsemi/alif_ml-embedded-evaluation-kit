@@ -121,16 +121,11 @@ else()
     # the BINARY_DIR for the target. This can be removed once fixed in ExecuTorch
     # source tree - backends/cortex_m/CMakeLists.txt.
     if (TARGET cmsis-nn)
-        get_target_property(CMSIS_NN_BIN_DIR cmsis-nn BINARY_DIR)
-
-        add_custom_target(cmsis_nn_workaround
-            COMMAND ${CMAKE_COMMAND} -E copy    # Copy file
-                $<TARGET_FILE:cmsis-nn>         # Source
-                ${CMSIS_NN_BIN_DIR}             # Destination
-            COMMENT "Copying the cmsis-nn lib to ${CMSIS_NN_BIN_DIR}"
-            DEPENDS cmsis-nn)
-
-        add_dependencies(cortex_m_ops_lib cmsis_nn_workaround)
+        set_property(TARGET cmsis-nn PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+          "$<BUILD_INTERFACE:${CMSIS_NN_SRC_PATH}/Include>"
+          "$<BUILD_INTERFACE:${CMSIS_SRC_PATH}/CMSIS/Core/Include>"
+          "$<INSTALL_INTERFACE:include/cmsis-nn>"
+          "$<INSTALL_INTERFACE:include/cmsis>")
     endif()
 
     # Issue with ExecuTorch 1.0.0 in cortex_m_kernels library

@@ -38,12 +38,13 @@ from scripts.py.setup.npu_config import NpuConfigs, NpuConfig, valid_npu_configs
 from scripts.py.setup.python_venv import install_pip_package_if_needed, set_up_python_venv
 from scripts.py.setup.python_venv import is_pip_package_installed, install_requirements
 from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext
-from scripts.py.setup.use_case import ExecutorchResourceType, ExecutorchResource
+from scripts.py.setup.use_case import ExecutorchResource
 from scripts.py.setup.use_case import UseCase, load_use_case_resources
 from scripts.py.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
-VELA_VERSION = "4.4.1"
+VELA_VERSION = "4.5.0"
+TOSA_TOOLS_VERSION = "0.0.3"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
@@ -328,7 +329,6 @@ def install_executorch(executorch_path: Path, env_activate_cmd: str) -> None:
 
     call_command(
         command=f'{env_activate_cmd} && {install_script} --clean && {install_script}',
-        verbose=True
     )
 
 
@@ -361,14 +361,14 @@ def optimize_executorch_model(
     if str(model_name).endswith('.py'):
         model_res = model_name
         model_name = Path(model_res).name.split('.')[0]
-    elif str(model_name).endswith('.pt2'):
+    elif str(model_name).endswith('.pt') or str(model_name).endswith('.pt2'):
         model_res = output_dir / model_name
         model_name = Path(model_res).name.split('.')[0]
 
     if npu_config is not None:
         # pylint: disable=fixme
         # TODO: Remove this once Arm Ethos-U55 NPU is supported.
-        if (str(model_name).find('conformer') >= 0 and npu_config.processor_id == "U55"):
+        if "conformer" in str(model_name) and npu_config.processor_id != "U85":
             logging.info('Conformer model is currently unsupported for %s', npu_config)
             return False
 
@@ -391,15 +391,14 @@ def optimize_executorch_model(
         )
         return True
 
-    optimize_arg = "-m examples.arm.aot_arm_compiler" if lowering_script is None\
-                      else lowering_script
+    optimize_arg = "-m examples.arm.aot_arm_compiler" if lowering_script is None \
+        else lowering_script
     call_command(
         command=(f"{setup_context.env_activate_cmd} && python3 {optimize_arg}"
                  f" --model_name={model_name if model_res is None else model_res}"
                  f" {cfg}"
                  f" --output {output_dir}"),
         cwd=setup_context.paths_config.executorch_path,
-        verbose=True,
         buffer_logs=False,
         capture_output=False
     )
@@ -422,10 +421,13 @@ def setup_executorch(setup_context: SetupContext):
         tosa_req_file = executorch_path / 'backends' / 'arm' / 'requirements-arm-tosa.txt'
         logging.info('Installing TOSA tools using version specified in %s',
                      tosa_req_file)
-        call_command(('CMAKE_POLICY_VERSION_MINIMUM=3.5 BUILD_PYBIND=1 '
-                      f'{setup_context.env_activate_cmd} && '
-                      f'pip install --no-dependencies -r{tosa_req_file}'),
-                     cwd=executorch_path)
+        call_command((
+            f'{setup_context.env_activate_cmd} && '
+            f'pip install'
+            f' --index-url https://test.pypi.org/simple/'
+            f' --extra-index-url https://pypi.org/simple'
+            f' tosa-tools=={TOSA_TOOLS_VERSION}'),
+        )
     else:
         logging.info('tosa-tools package is already installed.')
 
@@ -757,7 +759,7 @@ def set_up_resources(
         setup_executorch(context)
         for use_case in use_case_resources:
             for executorch_resource in use_case.executorch_resources:
-                if executorch_resource.type == ExecutorchResourceType.LOCAL_PROJECT:
+                if executorch_resource.has_requirements():
                     logging.info("Installing dependencies for %s", executorch_resource.model)
                     install_executorch_project(context.env_activate_cmd, executorch_resource)
 
