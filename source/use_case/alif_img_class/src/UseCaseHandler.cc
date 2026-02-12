@@ -47,7 +47,26 @@
 // Do we get LVGL to zoom the camera image, or do we double it up?
 #define USE_LVGL_ZOOM
 
+#define NORM_VAL_MULTIPLIER 100
+#define NORM_VAL_THRESHOLD_UPPER 0.7f
+#define NORM_VAL_THRESHOLD_LOWER 0.2f
+
 using ImgClassClassifier = arm::app::Classifier;
+using arm::app::fwk::iface::Model;
+
+
+/** Based on ML framework, set up the model namespace. */
+#if defined(MLEK_FWK_TFLM)
+    using arm::app::fwk::tflm::MobileNetModel;
+#elif defined(MLEK_FWK_EXECUTORCH)
+    using arm::app::fwk::et::MobileNetModel;
+    namespace arm::app::img_class {
+        extern const unsigned int g_numChannels;
+        extern const float g_normMean[];
+        extern const float g_normStddev[];
+    } /* namespace img_class */
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+
 
 #define MIMAGE_X 224
 #define MIMAGE_Y 224
@@ -83,7 +102,7 @@ namespace app {
         return s.substr(0, comma);
     }
 
-    bool ClassifyImageInit(arm::app::MobileNetModel& model)
+    bool ClassifyImageInit(MobileNetModel& model)
     {
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
@@ -91,9 +110,10 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
-        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
+        auto inputTensor = model.GetInputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        const uint32_t nCols  = inputShape[MobileNetModel::ms_inputColsIdx];
+        const uint32_t nRows  = inputShape[MobileNetModel::ms_inputRowsIdx];
 #else
         const uint32_t nCols       = MIMAGE_X;
         const uint32_t nRows       = MIMAGE_Y;
@@ -126,31 +146,56 @@ namespace app {
             return false;
         }
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 4) {
-            printf_err("Input tensor dimension should be = 4\n");
+        } else if (inputShape.size() < 4) {
+            printf_err("Input tensor dimension should be >= 4\n");
             return false;
         }
 
-        /* Get input shape for displaying the image. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t nCols       = inputShape->data[arm::app::MobileNetModel::ms_inputColsIdx];
-        const uint32_t nRows       = inputShape->data[arm::app::MobileNetModel::ms_inputRowsIdx];
+#if defined(MLEK_FWK_EXECUTORCH)
+        /**
+         * For ExecuTorch we typically have input tensors in floating point.
+         * In this case, normalisation parameters should be made available
+         * with the model. We try to use these here.
+         */
+        /* Set up pre- and post-processing. */
+        std::array<float, ImgClassPreProcess::kNumChannels> normMean{0.f, 0.f, 0.f};
+        std::array<float, ImgClassPreProcess::kNumChannels> normStddev{1.f, 1.f, 1.f};
 
-        /* Set up pre and post-processing. */
-        ImgClassPreProcess preProcess = ImgClassPreProcess(inputTensor, model.IsDataSigned());
+        if (inputTensor->Type() == fwk::iface::TensorType::FP32 ||
+            inputTensor->Type() == fwk::iface::TensorType::FP16) {
+
+            /* Check for mismatch in size of channels. */
+            if (ImgClassPreProcess::kNumChannels != img_class::g_numChannels) {
+                printf_err("Number of channels mismatch in norm parameters\n");
+                return false;
+            }
+
+            /* Assign values. */
+            for (size_t i = 0; i < ImgClassPreProcess::kNumChannels; ++i) {
+                normMean[i] = img_class::g_normMean[i];
+                normStddev[i] = img_class::g_normStddev[i];
+
+                if (0.f == normStddev[i]) {
+                    printf_err("Invalid std value: %f\n", normStddev[i]);
+                    return false;
+                }
+            }
+        }
+        auto preProcess = ImgClassPreProcess(inputTensor, normMean, normStddev);
+#else /* defined(MLEK_FWK_EXECUTORCH) */
+        auto preProcess = ImgClassPreProcess(inputTensor);
+#endif /* defined(MLEK_FWK_EXECUTORCH) */
 
         std::vector<ClassificationResult> results;
         ImgClassPostProcess postProcess = ImgClassPostProcess(outputTensor,
                 ctx.Get<ImgClassClassifier&>("classifier"), ctx.Get<std::vector<std::string>&>("labels"),
                 results);
-#else
-        const uint32_t nCols       = MIMAGE_X;
-        const uint32_t nRows       = MIMAGE_Y;
 #endif
 
         hal_camera_start();
@@ -197,7 +242,7 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-        const size_t imgSz = inputTensor->bytes;
+        const size_t imgSz = inputTensor->Bytes();
 
 #if SHOW_INF_TIME
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();
@@ -226,16 +271,22 @@ namespace app {
         /* Add results to context for access outside handler. */
         ctx.Set<std::vector<ClassificationResult>>("results", results);
 
+#if defined(MLEK_FWK_EXECUTORCH)
+        // convert results to be similar as with Tensorflow
+        for (uint32_t n = 0; n < results.size(); ++n) {
+            results[n].m_normalisedVal = results[n].m_normalisedVal/10;
+        }
+#endif
         lv_lock_state = lv_port_lock();
         for (int r = 0; r < 3; r++) {
             lv_obj_t *label = ScreenLayoutLabelObject(r);
-            lv_label_set_text_fmt(label, "%s (%d%%)", first_bit(results[r].m_label).c_str(), (int)(results[r].m_normalisedVal * 100));
-            if (results[r].m_normalisedVal >= 0.7) {
+            lv_label_set_text_fmt(label, "%s (%d%%)", first_bit(results[r].m_label).c_str(), (int)(results[r].m_normalisedVal * NORM_VAL_MULTIPLIER));
+            if (results[r].m_normalisedVal >= NORM_VAL_THRESHOLD_UPPER) {
                 lv_obj_add_state(label, LV_STATE_USER_1);
             } else {
                 lv_obj_remove_state(label, LV_STATE_USER_1);
             }
-            if (results[r].m_normalisedVal < 0.2) {
+            if (results[r].m_normalisedVal < NORM_VAL_THRESHOLD_LOWER) {
                 lv_obj_add_state(label, LV_STATE_USER_2);
             } else {
                 lv_obj_remove_state(label, LV_STATE_USER_2);

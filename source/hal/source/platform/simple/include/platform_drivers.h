@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +25,6 @@
 #include "RTE_Components.h"         /* For CPU related defintiions */
 #include "timer_simple_platform.h"  /* timer implementation */
 #include "platform_pmu.h"           /* PMU definitions and API */
-#include "user_input.h"             /* User input functions */
-#include "lcd_img.h"                /* LCD functions */
 
 /**
  * @brief   Initialises the platform components.

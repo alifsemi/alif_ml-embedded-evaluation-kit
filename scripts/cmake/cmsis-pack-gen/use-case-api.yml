@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,31 +44,35 @@ packs:
     description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/"
+    url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/tree/main/resources/cmsis-packs"
 
     requirements:
       packages:
-        - attributes: {vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.24.8"}
-        - attributes: {vendor: "ARM", name: "CMSIS", version: "6.0.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS-DSP", version: "1.16.0"}
-        - attributes: {vendor: "ARM", name: "CMSIS-NN", version: "6.0.0"}
+        - attributes: { vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.25.2" }
+        - attributes: { vendor: "ARM", name: "CMSIS", version: "6.2.0" }
+        - attributes: { vendor: "ARM", name: "CMSIS-DSP", version: "1.16.2" }
+        - attributes: { vendor: "ARM", name: "CMSIS-NN", version: "7.0.0" }
 
     releases:
+      - version: "25.12.0"
+        date: "2025-11-28"
+        description: "25.12.0 release package"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.0.pack"
       - version: "24.8.0"
         date: "2024-09-24"
         description: "24.08.0 release package"
-        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack?h=refs/heads/main"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack"
       - version: "23.2.0"
         date: "2024-05-21"
         description: "23.02.0 release package"
-        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.23.2.0.pack?h=refs/heads/main"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.23.2.0.pack"
       - version: "22.8.0-Beta"
         date: "2022-09-29"
         description: "Beta release package"
-        url: "https://git.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit.git/plain/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack?h=refs/heads/main"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack"
 
     taxonomy:
-      - attributes: {Cclass: "ML Eval Kit", doc: "https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ml-embedded-evaluation-kit/+/refs/heads/main/Readme.md"}
+      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/Readme.md" }
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:
@@ -78,67 +82,67 @@ packs:
         description: "Logging header-only utility"
         files:
           - name: "source/log/include/log_macros.h"
-            attributes: {category: header}
+            attributes: { category: header }
 
       - name: arm_math
         target: arm_math
         attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Math", Cversion: "1.0.0" }
         description: "Math function helpers dependent on CMSIS-DSP."
         conditions:
-          - require: { Cclass: "CMSIS", Cgroup: "DSP"}
+          - require: { Cclass: "CMSIS", Cgroup: "DSP" }
 
       - name: common_api
         target: common_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "API", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "API", Cversion: "1.0.0" }
         description: "Common API"
-        dependencies: ["arm_math", "log"]
+        dependencies: [ "arm_math", "log" ]
+
+      - name: ml_framework_tflm
+        target: ml_framework_tflm
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "ML Framework", Csub: "TFLM", Cversion: "1.0.0" }
+        description: "ML framework API for TensorFlow Lite Micro."
+        dependencies: common_api
         conditions:
           - require: { Cclass: "Machine Learning", Cgroup: "TensorFlow" }
 
       - name: ad_api
         target: ad_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vibration", Csub: "Anomaly detection", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vibration", Csub: "Anomaly detection", Cversion: "1.0.0" }
         description: "Anomaly detection use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: asr_api
         target: asr_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Automatic speech recognition", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Automatic speech recognition", Cversion: "1.0.0" }
         description: "ASR use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: img_class_api
         target: img_class_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Image classification", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Image classification", Cversion: "1.0.0" }
         description: "Image classification use case API."
-        dependencies: common_api
-
-      - name: inference_runner_api
-        target: inference_runner_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Generic", Csub: "Inference runner", Cversion: "1.0.0"}
-        description: "Generic inference runner use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: kws_api
         target: kws_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Keyword spotting", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Keyword spotting", Cversion: "1.0.0" }
         description: "KWS use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: noise_reduction_api
         target: noise_reduction_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Noise reduction", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Noise reduction", Cversion: "1.0.0" }
         description: "RNN Noise use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: object_detection_api
         target: object_detection_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Object detection", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Object detection", Cversion: "1.0.0" }
         description: "Object detection use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]
 
       - name: vww_api
         target: vww_api
-        attributes: {Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Person detection", Cversion: "1.0.0"}
+        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Person detection", Cversion: "1.0.0" }
         description: "Visual wake word use case API."
-        dependencies: common_api
+        dependencies: [ common_api, ml_framework_tflm ]

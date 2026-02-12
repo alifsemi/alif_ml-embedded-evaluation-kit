@@ -2,11 +2,9 @@
 
 ## Introduction
 
-This is a brief set of instructions to a select set of AI/ML use-case demos on a single Cortex-M55 core
-with Ethos-U55 NPU.
+This is a brief set of instructions to a select set of AI/ML use-case demos on a single Cortex-M55 core with Ethos-U55 or U85 NPU.
 
 We will show building three applications:
-
 1. Key Word Spotting (KWS) application which runs on the Cortex-M55 High-Efficiency core (H55-HE / M55_1)
 2. Image Classification application that runs on the CortexM55 High-Performance core (M55-HP / M55_0)
 3. generic “inference runner” application running on the M55-HP core
@@ -65,9 +63,9 @@ With Ubuntu running, run the below commands to get the environment ready for dev
 ```
 sudo apt update
 sudo apt upgrade -y
-sudo apt install libncurses5 libc6-i386 lib32gcc1 lib32stdc++6 lib32z
-sudo apt install curl dos2unix python-is-python
-snap install cmake –classic
+sudo apt install libncurses5 libc6-i386 lib32gcc-s1 lib32stdc++6 lib32z1
+sudo apt install curl dos2unix python-is-python3
+snap install cmake --classic
 ```
 
 At the time of writing, the following software versions were used:
@@ -109,11 +107,11 @@ python3
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
-#### Arm GNU GCC Compiler (v12.3 or above) Setup – Option 2
+#### Arm GNU GCC Compiler (v12.3 and v13.3.Rel1 are tested. Newer version may not work) Setup – Option 2
 
 1. Search on Google and download the GNU Arm Embedded Toolchain for the file shown.<br>
     https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads <br>
-2. Select the wanted version and download GCC for x86_64 Linux hosted cross toolchains / AArch32 bare-metal target (arm-none-eabi).
+2. Select the wanted version and download GCC for x86_64 Linux hosted cross toolchains / AArch32 bare-metal target (**arm-none-eabi**).
    ![alt text](docs/media/alif/gcc_download.png)
 3. Extract the downloaded file and use sudo to extract it to /usr/local/bin
     ```
@@ -121,8 +119,8 @@ python3
     ```
 4. Add it to the path, as shown
     ```
-    sudo sh -c "echo export PATH=/usr/local/bin/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin:$PATH >
-    /etc/profile.d/arm-compiler.sh"
+    sudo sh -c 'echo export PATH=/usr/local/bin/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin:\$PATH >
+    /etc/profile.d/arm-compiler.sh'
     ```
 5. Log out and then log in for the above environment changes to take effect.
 
@@ -205,13 +203,20 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 3. Initialize and update the required submodules.
     ```
     cd alif_ml-embedded-evaluation-kit
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 4. Download and Setup required AI/ML resources.
+    Using Tensorflow:
     ```
-    python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256
+    python3.10 set_up_default_resources.py
     ```
-    The above python command will take some time, around a few minutes. Python command
+    Using Executorch:
+    ```
+    python3.10 set_up_default_resources.py --ml-frameworks executorch
+    ```
+
+    If you are testing both frameworks, both can be called.
+    The above python command will take some time, around a few minutes (executorch will take 30-40mins). Python command
     fetches and optimizes the needed Ethos models for all the use cases in the kit.
 
     Troubleshooting:
@@ -230,13 +235,14 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
     In all these error cases, delete the folder “resources_downloaded” and rerun the commands from step 4.
 
+5. Please note that when specifying use cases, please use the following format: alif_use_case. "use_case" could be kws, img_class, object_detection, and etc. For all supported use cases, please refer to [Tested use cases](#tested-use-cases).
 
 ### Building The Key Word Spotting (KWS) Use-Case For The M55-HE Core.
 
-1. Create a build directory for M55-HE core based applications.
+1. Create a build directory for M55-HE core based applications. You can put this directory under alif_ml-embedded-evaluation-kit folder.
     ```
-    mkdir build_he
-    cd build_he
+    mkdir build_alif_kws
+    cd build_alif_kws
     ```
 
 **Using ARM Clang Toolchain**
@@ -250,7 +256,8 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
     -DGLCD_UI=OFF \
     -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \ ..
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
+    -DUSE_CASE_BUILD=alif_kws ..
     ```
 
 3. Build the Project using Make
@@ -273,12 +280,13 @@ UART select jumpers set for UART2:
 
 1. Create a build directory for M55-HP core-based applications.
     ```
-    mkdir build_hp
-    cd build_hp
+    mkdir build_alif_img_class
+    cd build_alif_img_class
     ```
-**Using ARM Clang Toolchain**
 
 2. Configure the build using CMake
+
+    **Using ARM Clang Toolchain with TFLM framework**
     ```
     cmake -DTARGET_PLATFORM=alif \
     -DTARGET_SUBSYSTEM=RTSS-HP \
@@ -286,7 +294,22 @@ UART select jumpers set for UART2:
     -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
     -DCONSOLE_UART=4 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLOG_LEVEL=LOG_LEVEL_DEBUG \ ..
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
+    -DUSE_CASE_BUILD=alif_img_class ..
+    ```
+
+    **Using ARM GNU Toolchain with ExecuTorch framework**
+    (DevKit-E8 with Ethos-U85)
+    ```
+    cmake -DTARGET_PLATFORM=alif \
+    -DTARGET_SUBSYSTEM=RTSS-HP \
+    -DTARGET_BOARD=DevKit-e8 \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DCONSOLE_UART=4 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
+    -DUSE_CASE_BUILD=alif_img_class \
+    -DETHOS_U_NPU_ID=U85 -DML_FRAMEWORK=ExecuTorch ..
     ```
 
 These cmake options permit the default use of LCD and SRAM, which is okay since the HE image has them disabled. The `CONSOLE_UART=4` option avoids the HE image’s use of UART and could be omitted to run standalone HP applications.
@@ -364,7 +387,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
       -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
       -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake \
       -DCMAKE_BUILD_TYPE=Release \
-      -DLOG_LEVEL=LOG_LEVEL_DEBUG \
+      -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_DEBUG \
       -DGLCD_UI=NO \
     ```
 
@@ -401,7 +424,9 @@ After building the applications above, these steps will prepare them to be store
 booted by the Secure Enclave automatically.<br>
 The SETOOLS make use of `.bin` files instead of `.axf` or `.elf` files.
 
-### Option-1
+### 1. Prepare the binary
+
+#### Option 1
 
 You can find the `mram.bin` file in the `build` folder under `.../bin/sectors/<use-case>/` folder.<br>
 Rename the `mram.bin` to appropriate use-case filename, found from the generated `.axf` filename.<br>
@@ -411,7 +436,7 @@ mv mram.bin ethos-u-alif_kws.bin
 cp ethos-u-alif_kws.bin /home/$USER/app-release-exec-linux/build/images
 ```
 
-### Option-2
+#### Option 2
 
 You will first need to convert the `.axf` file into a `.bin` file. Depending on the compiler option used to generate the binary `.axf or .elf` file, you will need to use different commands.<br>
 If you followed Option-1 to install Arm DS and Arm Clang Compiler for Embedded, then use the `fromelf` command. Or if you followed Option-2 to install the Arm GNU Compiler for Embedded, then use the `arm-none-eabi-objcopy` command.
@@ -443,33 +468,47 @@ If you followed Option-1 to install Arm DS and Arm Clang Compiler for Embedded, 
 Copy the converted binaries (`.bin` file) to the following directory: `/home/$USER/app-release-exec-linux/build/images`
 
 
-#### The next step is to generate the binary ATOC image for the applications.
+### 2. Generate the binary ATOC image for the applications
 
-1. Create a new JSON file called ```\build\config\kws_demo.json``` with the following content.
-    ```
-    {
-        "HE_Voice": {
-            "binary": "ethos-u-alif_kws.bin",
-            "version": "1.0.0",
-            "mramAddress": "0x80480000",
-            "cpu_id": "M55_HE",
-            "flags": ["boot"],
-            "signed": false
-        }
-    }
-    ```
+1. Create a new JSON file called ```\build\config\kws_demo.json``` with the following content. (You can find some example .json files from this repository.)
+	```
+	{
+		"HE_Voice": {
+			"binary": "ethos-u-alif_kws.bin",
+			"version": "1.0.0",
+			"mramAddress": "0x80480000",
+			"cpu_id": "M55_HE",
+			"flags": ["boot"],
+			"signed": false
+		},
+		"DEVICE": {
+			"disabled" : false,
+			"binary": "app-device-config.json",
+			"version" : "0.5.00",
+			"signed": true
+			}
+	}
+	```
+**NOTE:** When using **DevKit-e1c** board, please use "app-device-config-e1c.json" in the DEVICE section instead.
+
 2. Create a second new JSON file called `/home/$USER/app-release-exec-linux\build\config\img_class_demo.json` with the following content.
     ```
-    {
-        "HP_Image": {
-            "binary": "ethos-u-alif_img_class.bin",
-            "version" : "1.0.0",
-            "mramAddress": "0x80008000",
-            "cpu_id": "M55_HP",
-            "flags": ["boot"],
-            "signed": false
-        }
-    }
+	{
+		"HP_Image": {
+			"binary": "ethos-u-alif_img_class.bin",
+			"version" : "1.0.0",
+			"mramAddress": "0x80008000",
+			"cpu_id": "M55_HP",
+			"flags": ["boot"],
+			"signed": false
+		},
+		"DEVICE": {
+			"disabled" : false,
+			"binary": "app-device-config.json",
+			"version" : "0.5.00",
+			"signed": true
+		}
+	}
     ```
 3. Next, run `app-gen-toc`, from SETOOLS package in `/home/$USER/app-release-exec-linux`, to generate the package image, which will be written to the file `AppTocPackage.bin` in the build directory. We will use the `-f` option to specify the input filename (`kws_demo.json`) for the configuration file we just created. Execute this command:<br>
     Windows:
@@ -497,7 +536,7 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
 **NOTE:** Applications output debug messages to UART2 (M55-HE) and UART4 (M55-HP).
 
 
-### Running Keyword Spotting + Image Classification on dual-core (HE+HP) SoC
+### 3. Running Keyword Spotting + Image Classification on dual-core (HE+HP) SoC \[Optional\]
 
 Once we have built and verified the Keyword Spotting (KWS) and Image Classification (IC) use-cases
 individually on single-cores, we are now ready to program a dual-core demo, using the above generated
@@ -505,25 +544,30 @@ binaries.
 
 1. Create a new JSON file called `/home/$USER/app-release-exec-linux/build/config/kws_IC_demo.json` with the following content.
     ```
-    {
-        "IC": {
-            "binary": "ethos-u-alif_img_class.bin",
-            "version": "1.0.0",
-            "mramAddress": "0x80008000",
-            "cpu_id": "M55_HP",
-            "flags": ["boot"],
-            "signed": false
-        },
-
-        "KWS": {
-            "binary": "ethos-u-alif_kws.bin",
-            "version": "1.0.0",
-            "mramAddress": "0x80480000",
-            "cpu_id": "M55_HE",
-            "flags": ["boot"],
-            "signed": false
-        }
-    }
+	{
+		"IC": {
+			"binary": "ethos-u-alif_img_class.bin",
+			"version": "1.0.0",
+			"mramAddress": "0x80008000",
+			"cpu_id": "M55_HP",
+			"flags": ["boot"],
+			"signed": false
+		},
+		"KWS": {
+			"binary": "ethos-u-alif_kws.bin",
+			"version": "1.0.0",
+			"mramAddress": "0x80480000",
+			"cpu_id": "M55_HE",
+			"flags": ["boot"],
+			"signed": false
+		},
+		"DEVICE": {
+			"disabled" : false,
+			"binary": "app-device-config.json",
+			"version" : "0.5.00",
+			"signed": true
+		}
+	}
     ```
 2. Next, follow the steps from step #3 above to program the binaries to the AI/ML AppKit.
 
@@ -581,11 +625,11 @@ Original sample stats: absmax = 0, mean = 0
 Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 ```
 
-
+<a name="externalflash"></a>
 ## Running a use-case with ML model data in external flash
 
-- For example use-cases asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
-- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for kws and kws_asr
+- For example use-cases alif_asr, asr and kws_asr have model which does not fit to Alif device MRAM. On Alif DevKit and AppKit board there is an external OSPI flash and the model can be executed from there.
+- There is a use-case specific compile time flag ${use_case}_MODEL_IN_EXT_FLASH which is enabled by default for asr and kws_asr
   - You can enable it also for alif_object_detection use-case by setting `-Dalif_object_detection_MODEL_IN_EXT_FLASH=ON`
   - For other use-case examples you need to add the following to `usecase.cmake`
   ```
@@ -611,9 +655,11 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
 
 The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
 The inference_runner use-case can be used for basic benchmarks.
-- [Deploying your own model](docs/deploying_model.md)
+- Deploying your own model using [TFLM framework](docs/deploying_model.md)
+- Deploying your own PyTorch model using [ExecuTorch framework](docs/deploying_model_executorch_export.md)
 
 
+<a name="memoryusage"></a>
 ## Memory usage and linker files
 
 Alif linker configuration files introduced in this project are our example files and you may need to adjust them to better suite your application(s) with different model sizes and memory requirements.
@@ -623,6 +669,8 @@ So if you run only one core, you can take the full MRAM/SRAM0/SRAM1 into use.
 usecase.cmake files do have USER_OPTION `${use_case}_ACTIVATION_BUF_SZ` which defines the size of the Activation buffer.
 You need to check that size of this buffer aligns with your model size. In most cases`${use_case}_ACTIVATION_BUF_SZ` goes to SRAM1, for E1 (as there is no SRAM1) it goes to SRAM0.
 
+When using TFLM framework the ACTIVATION_BUF_SZ sets the size of the 'tensor arena' which is then all the RAM the model needs when executed.
+In ExecuTorch build the RAM usage is split to two allocation spaces. The first one is the so called method allocator pool and is set by the ACTIVATION_BUF_SZ and the other one is temporary allocation pool set by ML_FWK_TMP_MEM_SIZE.
 
 ## Further information
 
@@ -685,8 +733,8 @@ the two pairs of pins as shown on J15 selects UART4.
 
 There are several build options – these determine the behavior of the porting layer. Once these are set, you can build multiple use cases in one build directory using these options. See original ARM documentation for details of the upstream options. Alif has added extra options:
 
-`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8>`<br>
-Specifies the target board. (Default is AppKit-e7)<br>
+`-DTARGET_BOARD=<AppKit-e7|DevKit-e1c|DevKit-e4|DevKit-e7|DevKit-e8|AppKit-e8>`<br>
+Specifies the target board. (Default is AppKit-e7) In case of using DevKit-e1c, use "app-device-config-e1c.json" in the DEVICE section of the .json file. <br>
 
 `-DROTATE_DISPLAY=<0|90|180|270>`<br>
 Rotates the display by the specified amount and reorganizes the UI if necessary. 90 and 270 will be appreciably slower. (Default is 0)

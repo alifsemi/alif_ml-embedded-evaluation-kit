@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,8 +19,11 @@
 #include "platform_drivers.h"
 
 #include "log_macros.h"     /* Logging functions */
-#include "uart_stdout.h"    /* stdout over UART. */
 #include "smm_mps4.h"       /* Memory map for MPS4. */
+#include "hdlcd_drv.h"      /* HDLCD driver */
+#include "peripheral_irqs.h"    /* Interrupt numbers */
+
+#include <string.h>
 
 #if defined(ARM_NPU)
 #include "ethosu_npu_init.h"
@@ -31,6 +34,10 @@
 
 #endif /* ARM_NPU */
 
+#if !defined(USE_SEMIHOSTING)
+#include "uart_stdout.h"    /* stdout over UART. */
+#endif /* !defined(USE_SEMIHOSTING) */
+
 /**
  * @brief   Checks if the platform is valid by checking
  *          the CPU ID for the FPGA implementation against
@@ -38,6 +45,12 @@
  * @return  0 if successful, 1 otherwise
  */
 static int verify_platform(void);
+
+/**
+ * @brief   Initialises the HDLCD for MPS4 platform
+ * @return  0 if successful, error code otherwise.
+ */
+static int platform_hdlcd_init(void);
 
 /** Platform name */
 static const char* s_platform_name = DESIGN_NAME;
@@ -48,9 +61,11 @@ int platform_init(void)
 
     SystemCoreClockUpdate();    /* From start up code */
 
+#if !defined(USE_SEMIHOSTING)
     /* UART init - will enable valid use of printf (stdout
      * re-directed at this UART (UART0) */
     UartStdOutInit();
+#endif /* !defined(USE_SEMIHOSTING) */
 
     if (0 != (err = verify_platform())) {
         return err;
@@ -84,6 +99,11 @@ int platform_init(void)
     }
 
 #endif /* ARM_NPU */
+
+    /* Initialise HDLCD device. */
+    if (0 != (state = platform_hdlcd_init())) {
+        return state;
+    }
 
     /* Print target design info */
     info("Target system design: %s\n", s_platform_name);
@@ -177,4 +197,117 @@ static int verify_platform(void)
      * Arm Cortex-M85, we return 1 */
     printf_err("CPU mismatch!\n");
     return 1;
+}
+
+static const struct hdlcd_dev_cfg_t HDLCD_DEV_CFG_S = {
+    .base = HDLCD_BASE_S,
+    .polarities = (POLARITIES_DATA_POLARITY_Msk |
+                   POLARITIES_DATAEN_POLARITY_Msk |
+                   POLARITIES_HSYNC_POLARITY_Pos),
+    .bus_options = ((4 << BUS_OPTIONS_MAX_OUTSTANDING_Pos) |
+                    BUS_OPTIONS_BURST_16_Msk)};
+
+static struct hdlcd_dev_data_t HDLCD_DEV_DATA_S = {.is_initialized = false};
+
+static struct hdlcd_dev_t HDLCD_DEV_S = {
+    &(HDLCD_DEV_CFG_S),
+    &(HDLCD_DEV_DATA_S)};
+
+static struct hdlcd_dev_t* platform_get_hdlcd_dev()
+{
+    return &HDLCD_DEV_S;
+}
+
+static void HDLCD_Handler(void)
+{
+    /* Clear IRQ */
+    hdlcd_clear_irq(platform_get_hdlcd_dev(), INT_DMA_END_Msk);
+    __NVIC_ClearPendingIRQ(HDLCD_IRQn);
+}
+
+static void enable_hdlcd_irq(void)
+{
+    NVIC_ClearPendingIRQ(HDLCD_IRQn);
+    NVIC_SetVector(HDLCD_IRQn, (uint32_t)HDLCD_Handler);
+    NVIC_EnableIRQ(HDLCD_IRQn);
+    hdlcd_enable_irq(platform_get_hdlcd_dev(), INT_DMA_END_Msk);
+}
+
+static int platform_hdlcd_init(void)
+{
+    /* Initialise HDLCD */
+    struct hdlcd_dev_t* hdlcd_dev = platform_get_hdlcd_dev();
+    enum hdlcd_error_t hdlcd_err = hdlcd_init(hdlcd_dev);
+
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("HDLCD initialization failed.\n");
+        return hdlcd_err;
+    }
+    debug("HDLCD device init\n");
+
+    hdlcd_err = hdlcd_static_config(hdlcd_dev);
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("Failed to set HDLCD resolution.\n");
+        return hdlcd_err;
+    }
+
+#if (HDLCD_RES_HEIGHT == 240) && (HDLCD_RES_WIDTH == 320)
+    const enum hdlcd_resolution_t res = HDLCD_RES_320x240;
+    hdlcd_err = hdlcd_set_resolution(hdlcd_dev, res);
+#elif (HDLCD_RES_HEIGHT == 480) && (HDLCD_RES_WIDTH == 640)
+    const enum hdlcd_resolution_t res = HDLCD_RES_VGA;
+    hdlcd_err = hdlcd_set_resolution(hdlcd_dev, res);
+#else  /* resolutions */
+    #error "Resolution not supported!"
+#endif /* resolutions */
+
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("Failed to set HDLCD resolution.\n");
+        return hdlcd_err;
+    }
+    info("HDLCD resolution id: %d\n", res);
+    enable_hdlcd_irq();
+
+    struct hdlcd_buffer_cfg_t cfg = {
+        .base_address = HDLCD_FRAME_BUFFER_BASE_ADDRESS,
+        .line_length = HDLCD_RES_WIDTH * HDLCD_BYTES_PER_PIXEL,
+        .line_count = HDLCD_RES_HEIGHT - 1,
+        .line_pitch = HDLCD_RES_WIDTH * HDLCD_BYTES_PER_PIXEL,
+        .pixel_format = ((HDLCD_BYTES_PER_PIXEL - 1) << PIXEL_FORMAT_BYTES_PER_PIXEL_Pos)
+    };
+
+    hdlcd_err = hdlcd_buffer_config(hdlcd_dev, &cfg);
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("Failed to set HDLCD config.\n");
+        return hdlcd_err;
+    }
+    trace("HDLCD base address set\n");
+
+    const struct hdlcd_pixel_cfg_t hdlcd_pixel_cfg_rgb888 = {
+        .red.default_color = 0x00,
+        .red.bit_size = 0x8,
+        .red.offset = 0x10,
+        .green.default_color = 0x00,
+        .green.bit_size = 0x8,
+        .green.offset = 0x8,
+        .blue.default_color = 0x00,
+        .blue.bit_size = 0x8,
+        .blue.offset = 0x0};
+
+    hdlcd_err = hdlcd_pixel_config(hdlcd_dev, &hdlcd_pixel_cfg_rgb888);
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("Failed to set HDLCD pixel config.\n");
+        return hdlcd_err;
+    }
+
+    memset((uint8_t*)HDLCD_FRAME_BUFFER_BASE_ADDRESS, 0, cfg.line_pitch * cfg.line_count + 1);
+
+    hdlcd_enable(hdlcd_dev);
+    hdlcd_err = hdlcd_enable(hdlcd_dev);
+    if (hdlcd_err != HDLCD_ERR_NONE) {
+        printf_err("Failed to enable HDLCD.\n");
+    }
+
+    debug("HDLCD device initialised.\n");
+    return 0;
 }

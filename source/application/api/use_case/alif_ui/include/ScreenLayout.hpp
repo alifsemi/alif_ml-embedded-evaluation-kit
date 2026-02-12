@@ -24,7 +24,9 @@ lv_obj_t *ScreenLayoutHeaderObject();
 lv_obj_t *ScreenLayoutLabelObject(int);
 lv_obj_t *ScreenLayoutTimeObject();
 lv_obj_t *ScreenLayoutLEDObject();
-
+#ifdef ALIF_ASR
+lv_obj_t* ScreenLayoutBarObject();
+#endif // ALIF_ASR
 } /* namespace app */
 } /* namespace alif */
 

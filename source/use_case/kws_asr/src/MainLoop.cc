@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,35 +38,35 @@ namespace app {
         extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
     } /* namespace kws */
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
 
 /** @brief   Verify input and output tensor are of certain min dimensions. */
-static bool VerifyTensorDimensions(const arm::app::Model& model);
+static bool VerifyTensorDimensions(const arm::app::fwk::iface::Model& model);
 
 void MainLoop()
 {
     /* Model wrapper objects. */
-    arm::app::MicroNetKwsModel kwsModel;
-    arm::app::Wav2LetterModel asrModel;
+    arm::app::fwk::tflm::MicroNetKwsModel kwsModel;
+    arm::app::fwk::tflm::Wav2LetterModel asrModel;
 
-    /* Load the models. */
-    if (!kwsModel.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::kws::GetModelPointer(),
-                       arm::app::kws::GetModelLen())) {
+    arm::app::fwk::iface::MemoryRegion kwsModelMem{arm::app::kws::GetModelPointer(),
+                                                   arm::app::kws::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion asrModelMem{arm::app::asr::GetModelPointer(),
+                                                   arm::app::asr::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
+
+    /* Load the model. */
+    if (!kwsModel.Init(computeMem, kwsModelMem)) {
         printf_err("Failed to initialise KWS model\n");
         return;
     }
 
     /* Initialise the asr model using the same allocator from KWS
      * to re-use the tensor arena. */
-    if (!asrModel.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::asr::GetModelPointer(),
-                       arm::app::asr::GetModelLen(),
-                       kwsModel.GetAllocator())) {
+    if (!asrModel.Init(computeMem, asrModelMem, &kwsModel.GetBackendData())) {
         printf_err("Failed to initialise ASR model\n");
         return;
     } else if (!VerifyTensorDimensions(asrModel)) {
@@ -79,8 +79,8 @@ void MainLoop()
 
     arm::app::Profiler profiler{"kws_asr"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("kwsModel", kwsModel);
-    caseContext.Set<arm::app::Model&>("asrModel", asrModel);
+    caseContext.Set<arm::app::fwk::iface::Model&>("kwsModel", kwsModel);
+    caseContext.Set<arm::app::fwk::iface::Model&>("asrModel", asrModel);
     caseContext.Set<uint32_t>("ctxLen", arm::app::asr::g_ctxLen);  /* Left and right context length (MFCC feat vectors). */
     caseContext.Set<int>("kwsFrameLength", arm::app::kws::g_FrameLength);
     caseContext.Set<int>("kwsFrameStride", arm::app::kws::g_FrameStride);
@@ -93,7 +93,11 @@ void MainLoop()
     caseContext.Set<float>("asrScoreThreshold", arm::app::asr::g_ScoreThreshold);  /* Normalised score threshold. */
 
     arm::app::KwsClassifier kwsClassifier;  /* Classifier wrapper object. */
-    arm::app::AsrClassifier asrClassifier;  /* Classifier wrapper object. */
+    arm::app::AsrClassifier asrClassifier{
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_inputColsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputRowsIdx,
+        arm::app::fwk::tflm::Wav2LetterModel::ms_outputColsIdx}; /* Classifier wrapper object. */
     caseContext.Set<arm::app::KwsClassifier&>("kwsClassifier", kwsClassifier);
     caseContext.Set<arm::app::AsrClassifier&>("asrClassifier", asrClassifier);
 
@@ -120,23 +124,26 @@ void MainLoop()
         executionSuccessful ? "successfully" : "with failure");
 }
 
-static bool VerifyTensorDimensions(const arm::app::Model& model)
+static bool VerifyTensorDimensions(const arm::app::fwk::iface::Model& model)
 {
     /* Populate tensor related parameters. */
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
-    if (!inputTensor->dims) {
+    auto inputTensor = model.GetInputTensor(0);
+    if (inputTensor->Shape().empty()) {
         printf_err("Invalid input tensor dims\n");
         return false;
-    } else if (inputTensor->dims->size < 3) {
+    }
+    if (inputTensor->Shape().size() < 3) {
         printf_err("Input tensor dimension should be >= 3\n");
         return false;
     }
 
-    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-    if (!outputTensor->dims) {
+    auto outputTensor = model.GetOutputTensor(0);
+    if (outputTensor->Shape().empty()) {
         printf_err("Invalid output tensor dims\n");
         return false;
-    } else if (outputTensor->dims->size < 3) {
+    }
+
+    if (outputTensor->Shape().size() < 3) {
         printf_err("Output tensor dimension should be >= 3\n");
         return false;
     }

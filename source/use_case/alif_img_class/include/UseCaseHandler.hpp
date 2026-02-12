@@ -32,10 +32,17 @@
 #include "AppContext.hpp"
 #include "MobileNetModel.hpp"
 
+/** Based on ML framework, set up the model namespace. */
+#if defined(MLEK_FWK_TFLM)
+using arm::app::fwk::tflm::MobileNetModel;
+#elif defined(MLEK_FWK_EXECUTORCH)
+using arm::app::fwk::et::MobileNetModel;
+#endif /** MLEK_FWK_TFLM or MLEK_FWK_EXECUTORCH */
+
 namespace alif {
 namespace app {
 
-    bool ClassifyImageInit(arm::app::MobileNetModel& model);
+    bool ClassifyImageInit(MobileNetModel& model);
 
     /**
      * @brief       Handles the inference event.

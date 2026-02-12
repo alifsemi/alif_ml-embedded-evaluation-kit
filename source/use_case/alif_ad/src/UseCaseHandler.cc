@@ -35,10 +35,10 @@
 using arm::app::Profiler;
 using arm::app::ClassificationResult;
 using arm::app::ApplicationContext;
-using arm::app::Model;
+using arm::app::fwk::iface::Model;
 using arm::app::AdPreProcess;
 using arm::app::AdPostProcess;
-using arm::app::AdModel;
+using arm::app::fwk::tflm::AdModel;
 
 
 #define AUDIO_SAMPLES 33280
@@ -47,6 +47,7 @@ using arm::app::AdModel;
 #define RESULTS_MEMORY 8
 
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
+
 
 namespace alif {
 namespace app {
@@ -71,9 +72,6 @@ using namespace arm::app::ad;
     /* Anomaly Detection inference handler */
     bool ClassifyVibrationHandler(ApplicationContext& ctx)
     {
-        constexpr uint32_t dataPsnTxtInfStartX = 20;
-        constexpr uint32_t dataPsnTxtInfStartY = 40;
-
         auto& model = ctx.Get<Model&>("model");
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
@@ -89,19 +87,20 @@ using namespace arm::app::ad;
         const auto trainingMean = ctx.Get<float>("trainingMean");
         const auto machineGain = ctx.Get<float>("machineGain");
 
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        auto inputTensor  = model.GetInputTensor(0);
 
-        if (!inputTensor->dims) {
+        if (inputTensor->Shape().empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
         }
 
-        AdPreProcess preProcess{
-            inputTensor,
-            melSpecFrameLength,
-            melSpecFrameStride,
-            trainingMean};
+        AdPreProcess preProcess{inputTensor,
+                        AdModel::ms_inputRowsIdx,
+                        AdModel::ms_inputColsIdx,
+                        melSpecFrameLength,
+                        melSpecFrameStride,
+                        trainingMean};
 
         AdPostProcess postProcess{outputTensor};
 
@@ -181,7 +180,7 @@ using namespace arm::app::ad;
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -198,13 +197,13 @@ using namespace arm::app::ad;
             anomalyResult += std::string("Everything fine, no anomaly!");
         }
 
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyThreshold.c_str(), anomalyThreshold.size(),
                 dataPsnTxtStartX1, rowIdx1, false);
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyScore.c_str(), anomalyScore.size(),
                 dataPsnTxtStartX1, rowIdx2, false);
-        hal_lcd_display_text(
+        hal_display_show_text(
                 anomalyResult.c_str(), anomalyResult.size(),
                 dataPsnTxtStartX1, rowIdx3, false);
 

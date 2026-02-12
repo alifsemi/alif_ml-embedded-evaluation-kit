@@ -54,8 +54,8 @@ todo #define FLASH_DEVICE_FAST_READ_WAIT_CYCLES
 #define WAIT_TIMEOUT                            1024
 
 
-extern ARM_DRIVER_FLASH ARM_Driver_Flash_(2);
-static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(2);
+extern ARM_DRIVER_FLASH ARM_Driver_Flash_(3);
+static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(3);
 
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);

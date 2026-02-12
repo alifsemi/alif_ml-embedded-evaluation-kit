@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,7 +24,7 @@
 
 namespace arm {
 namespace app {
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
     namespace inference_runner {
 #if defined(DYNAMIC_MODEL_BASE) && defined(DYNAMIC_MODEL_SIZE)
 
@@ -54,13 +54,14 @@ extern size_t GetModelLen();
 
 void MainLoop()
 {
-    arm::app::TestModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::TestModel model; /* Model wrapper object. */
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::inference_runner::GetModelPointer(),
+                                                arm::app::inference_runner::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::inference_runner::GetModelPointer(),
-                    arm::app::inference_runner::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -70,7 +71,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"inference_runner"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     /* Loop. */
     if (RunInferenceHandler(caseContext)) {

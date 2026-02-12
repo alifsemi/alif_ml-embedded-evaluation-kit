@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,20 +74,24 @@ target_sources(${CMSIS_DEVICE_TARGET}
 target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
 
 # Tell linker that reset interrupt handler is our entry point
-target_link_options(
-    ${CMSIS_DEVICE_TARGET}
-    INTERFACE
-    --entry Reset_Handler)
+if (CMAKE_C_COMPILER_ID STREQUAL Clang)
+    target_compile_definitions(${CMSIS_DEVICE_TARGET} PRIVATE
+        __VECTOR_TABLE=__interrupt_vector)
+    target_link_options(
+        ${CMSIS_DEVICE_TARGET}
+        INTERFACE
+        "SHELL:-Xlinker --entry=Reset_Handler")
+else()
+    target_link_options(
+        ${CMSIS_DEVICE_TARGET}
+        INTERFACE
+        --entry Reset_Handler)
+endif()
 
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${CPU_HEADER_TARGET})
-
-# Check if semihosting configuration is available
-if (COMMAND configure_semihosting)
-    configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
-endif()
 
 # 4 Display status:
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

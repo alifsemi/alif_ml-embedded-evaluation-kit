@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,10 @@ namespace app {
 
     class AsrClassifier : public Classifier {
     public:
+        explicit AsrClassifier(uint32_t inputRowsIdx,
+                               uint32_t inputColsIdx,
+                               uint32_t outputRowsIdx,
+                               uint32_t outputColsIdx);
         /**
          * @brief       Gets the top N classification results from the
          *              output vector.
@@ -35,10 +40,16 @@ namespace app {
          * @param[in]   use_softmax    Whether softmax scaling should be applied to model output.
          * @return      true if successful, false otherwise.
          **/
-        bool GetClassificationResults(TfLiteTensor* outputTensor,
+        bool GetClassificationResults(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
                                       std::vector<ClassificationResult>& vecResults,
                                       const std::vector<std::string>& labels,
-                                      uint32_t topNCount, bool use_softmax = false) override;
+                                      uint32_t topNCount,
+                                      bool use_softmax = false) override;
+
+        const uint32_t m_inputTensorRowsIdx;
+        const uint32_t m_inputTensorColsIdx;
+        const uint32_t m_outputTensorRowsIdx;
+        const uint32_t m_outputTensorColsIdx;
 
     private:
         /**
@@ -51,10 +62,12 @@ namespace app {
          * @param[in]   zeroPoint    Quantization zero point.
          * @return      true if successful, false otherwise.
          **/
-        template<typename T>
-        bool GetTopResults(TfLiteTensor* tensor,
+        template <typename T>
+        bool GetTopResults(const std::shared_ptr<fwk::iface::TensorIface> tensor,
                            std::vector<ClassificationResult>& vecResults,
-                           const std::vector<std::string>& labels, double scale, double zeroPoint);
+                           const std::vector<std::string>& labels,
+                           double scale,
+                           double zeroPoint);
     };
 
 } /* namespace app */

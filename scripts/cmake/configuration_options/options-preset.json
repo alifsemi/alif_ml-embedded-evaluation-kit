@@ -10,9 +10,9 @@
             "name": "log-trace",
             "hidden": true,
             "cacheVariables": {
-                "LOG_LEVEL": {
+                "MLEK_LOG_LEVEL": {
                     "type": "STRING",
-                    "value": "LOG_LEVEL_TRACE"
+                    "value": "MLEK_LOG_LEVEL_TRACE"
                 }
             }
         },
@@ -20,9 +20,9 @@
             "name": "log-debug",
             "hidden": true,
             "cacheVariables": {
-                "LOG_LEVEL": {
+                "MLEK_LOG_LEVEL": {
                     "type": "STRING",
-                    "value": "LOG_LEVEL_DEBUG"
+                    "value": "MLEK_LOG_LEVEL_DEBUG"
                 }
             }
         },
@@ -30,9 +30,9 @@
             "name": "log-info",
             "hidden": true,
             "cacheVariables": {
-                "LOG_LEVEL": {
+                "MLEK_LOG_LEVEL": {
                     "type": "STRING",
-                    "value": "LOG_LEVEL_INFO"
+                    "value": "MLEK_LOG_LEVEL_INFO"
                 }
             }
         },
@@ -40,9 +40,9 @@
             "name": "log-warning",
             "hidden": true,
             "cacheVariables": {
-                "LOG_LEVEL": {
+                "MLEK_LOG_LEVEL": {
                     "type": "STRING",
-                    "value": "LOG_LEVEL_WARN"
+                    "value": "MLEK_LOG_LEVEL_WARN"
                 }
             }
         },
@@ -50,9 +50,9 @@
             "name": "log-error",
             "hidden": true,
             "cacheVariables": {
-                "LOG_LEVEL": {
+                "MLEK_LOG_LEVEL": {
                     "type": "STRING",
-                    "value": "LOG_LEVEL_ERROR"
+                    "value": "MLEK_LOG_LEVEL_ERROR"
                 }
             }
         },

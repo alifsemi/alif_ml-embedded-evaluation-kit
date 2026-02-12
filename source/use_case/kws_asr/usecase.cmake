@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -15,6 +15,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+
+# Specify the ML frameworks the use case supports
+set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
+if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+    set(${use_case}_supports_${ML_FRAMEWORK} OFF)
+    return()
+endif ()
+
+set(${use_case}_supports_${ML_FRAMEWORK} ON)
+
 # Append the APIs to use for this use case
 list(APPEND ${use_case}_API_LIST "kws" "asr")
 
@@ -79,12 +89,12 @@ else()
     set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)
 endif()
 
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH_KWS "NN models file to be used for KWS in the evaluation application. Model files must be in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH_KWS "NN models file to be used for KWS in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH_KWS}
     FILEPATH
     )
 
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH_ASR "NN models file to be used for ASR in the evaluation application. Model files must be in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH_ASR "NN models file to be used for ASR in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH_ASR}
     FILEPATH
     )
@@ -112,16 +122,16 @@ set(EXTRA_MODEL_CODE_ASR
         )
 
 # Generate model file for KWS
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH_KWS}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH_KWS}
     DESTINATION ${SRC_GEN_DIR}
     EXPRESSIONS ${EXTRA_MODEL_CODE_KWS}
     NAMESPACE   "arm" "app" "kws"
 )
 
 # and for ASR
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH_ASR}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH_ASR}
     DESTINATION ${SRC_GEN_DIR}
     EXPRESSIONS ${EXTRA_MODEL_CODE_ASR}
     NAMESPACE   "arm" "app" "asr"

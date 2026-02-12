@@ -54,7 +54,7 @@
 
 
 #ifndef DRIVER_FLASH_NUM
-#define DRIVER_FLASH_NUM                                         2         /* Default driver number */
+#define DRIVER_FLASH_NUM                                         3         /* Default driver number */
 #endif
 
 #ifndef DRIVER_OSPI_NUM

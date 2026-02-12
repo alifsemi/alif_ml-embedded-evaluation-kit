@@ -128,16 +128,6 @@
 // <i> default: 640
 #define RTE_MT9M114_CAMERA_SENSOR_LPCPI_FRAME_WIDTH           640
 
-// <o RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE> Select camera sensor MT9M114 i2c instance
-// <i> Defines camera sensor MT9M114 i2c instance
-//     <0=>   I2C0
-//     <1=>   I2C1
-//     <2=>   I2C2
-//     <3=>   I2C3
-//     <4=>   I2C OVER I3C
-// <i> Default: 1
-#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_I2C_INSTANCE          1
-
 #endif
 // </e> MT9M114 [Driver_MT9M114]
 
@@ -146,7 +136,9 @@
 
 // <e> MIPI_DSI (mipi dsi) [Driver_MIPI_DSI]
 // <i> Configuration settings for Driver_MIPI_DSI in component ::Drivers:MIPI_DSI
+#ifndef RTE_MIPI_DSI
 #define RTE_MIPI_DSI 1
+#endif  // RTE_MIPI_DSI
 
 #if RTE_MIPI_DSI
 
@@ -464,35 +456,12 @@
 // <i> default: 5
 #define RTE_ACTIVE_TOUCH_POINTS          5
 
-// <o> GT911 Touch screen reset pin GPIO port number range <0-15>
-// <i> Defines GT911 Touch screen reset pin GPIO port number.
-// <i> Default: 4
-#define RTE_GT911_TOUCH_RESET_GPIO_PORT   BOARD_TOUCH_RESET_GPIO_PORT
-
-// <o> GT911 Touch screen reset pin number range <0-7>
-// <i> Defines GT911 Touch screen reset pin number.
-// <i> Default: 0
-#define RTE_GT911_TOUCH_RESET_PIN_NO      BOARD_TOUCH_RESET_PIN_NO
-
-// <o> GT911 Touch screen INT pin GPIO port number range <0-15>
-// <i> Defines GT911 Touch screen INT pin GPIO port number.
-// <i> Default: 9
-#define RTE_GT911_TOUCH_INT_GPIO_PORT     BOARD_TOUCH_INT_GPIO_PORT
-
-// <o> GT911 Touch screen INT pin number range <0-7>
-// <i> Defines GT911 Touch screen INT pin number.
-// <i> Default: 4
-#define RTE_GT911_TOUCH_INT_PIN_NO        BOARD_TOUCH_INT_PIN_NO
-
-// <o RTE_GT911_TOUCH_I2C_INSTANCE> Select GT911 Touchscreen i2c instance
-// <i> Defines GT911 Touchscreen i2c instance
-//     <0=>   I2C0
-//     <1=>   I2C1
-//     <2=>   I2C2
-//     <3=>   I2C3
-//     <I3C=> I2C OVER I3C
-// <i> Default: 1
-#define RTE_GT911_TOUCH_I2C_INSTANCE     BOARD_TOUCH_I2C_INSTANCE
+// <o> RTE_GT911_TOUCH_I2C_SLAVE_ADDRESS_SEL
+// <i> Defines GT911 Touchscreen i2c slave address selection
+//     <0x14=>   I2C_SLAVE_ADDRESS_HEX_14
+//     <0x5D=>   I2C_SLAVE_ADDRESS_HEX_5D
+// <i> Default: 0x14
+#define RTE_GT911_TOUCH_I2C_SLAVE_ADDRESS_SEL     0x14
 #endif
 
 #endif
@@ -564,7 +533,9 @@
 //     <1=> ENABLE
 // <i> Defines Parallel ILI6122 LCD PANEL
 // <i> Default: ENABLE
-#define RTE_ILI6122_PANEL  0
+#ifndef RTE_ILI6122_PANEL
+#define RTE_ILI6122_PANEL 0
+#endif  // RTE_ILI6122_PANEL
 
 #if RTE_ILI6122_PANEL
 
@@ -686,6 +657,62 @@
 #endif
 // </e> I3C (Improved Inter-Integrated Circuit) [Driver_I3C]
 
+// <e> IMU (Initial Measurement Unit) [Driver_IMU]
+// <i> Configuration settings for Driver_IMU in component ::Drivers:IMU
+#define RTE_IMU 1
+
+#if RTE_IMU
+
+// <e> ICM42670 (Initial Measurement Unit) [Driver_ICM42670]
+// <i> Configuration settings for Driver_ICM42670 in component ::Drivers:IMU
+#define RTE_ICM42670 1
+
+#if RTE_ICM42670
+
+// <o> ICM42670 IMU enable In-band_interrupt
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines whether In-band-interrupt to be enabled
+// <i> If disabled, then Normal-GPIO interrupt will be enabled
+// <i> Default: DISABLE
+#define RTE_ICM42670_IBI_ENABLE 0
+
+#if !RTE_ICM42670_IBI_ENABLE
+
+// <o> ICM42670 IMU INT pin GPIO port number range <0-15>
+// <i> Defines ICM42670 IMU INT pin GPIO port number.
+// <i> Default: 5
+#define RTE_ICM42670_INT_IO_PORT 5
+
+// <o> ICM42670 IMU INT pin number range <0-7>
+// <i> Defines ICM42670 IMU INT pin number.
+// <i> Default: 1
+#define RTE_ICM42670_INT_PIN_NO  1
+#endif
+
+#endif
+//</e> ICM42670 (Initial Measurement Unit) [Driver_ICM42670]
+
+// <e> BMI323 (Initial Measurement Unit) [Driver_BMI323]
+// <i> Configuration settings for Driver_BMI323 in component ::Drivers:IMU
+#define RTE_BMI323 1
+
+#if RTE_BMI323
+
+// <o> BMI323 IMU INT pin GPIO port number range <0-15>
+// <i> Defines BMI323 IMU INT pin GPIO port number.
+// <i> Default: 8
+#define RTE_BMI323_INT_IO_PORT 8
+
+// <o> BMI323 IMU INT pin number range <0-7>
+// <i> Defines BMI323 IMU INT pin number.
+// <i> Default: 4
+#define RTE_BMI323_INT_PIN_NO  4
+
+#endif
+//</e> BMI323 (Initial Measurement Unit) [Driver_BMI323]
+#endif
+// </e> IMU (Initial Measurement Unit) [Driver_IMU]
 
 // <h> SPI (Serial Peripheral Interface)
 // <e> SPI0 (Serial Peripheral Interface 0) [Driver_SPI0]
@@ -1209,8 +1236,15 @@
 // <o> LPSPI DMA IRQ priority <0-255>
 // <i> Defines LPSPI DMA Interrupt priority
 // <i> Default: 0
-#define RTE_LPSPI_DMA_IRQ_PRI                    0
-#endif  //RTE_LPSPI
+#define RTE_LPSPI_DMA_IRQ_PRI          0
+
+// <o> LPSPI blocking mode enable
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines Blocking mode support for LPSPI
+// <i> Default: DISABLE
+#define RTE_LPSPI_BLOCKING_MODE_ENABLE 0
+#endif  // RTE_LPSPI
 
 // </e> LPSPI (Low Power Serial Peripheral Interface) [Driver_LPSPI]
 // </h> SPI (Serial Peripheral Interface)
@@ -1227,13 +1261,29 @@
 #define RTE_OSPI0_IRQ_PRIORITY                    0
 
 // <o> OSPI0 Frame format
-//    <0=> Standard
-//    <1=> Dual
-//    <2=> Quad
-//    <3=> Octal
+//    <0=> Standard SPI FRF
+//    <1=> Dual SPI FRF
+//    <2=> Quad SPI FRF
+//    <3=> Octal SPI FRF
+//    <3=> Dual Octal SPI FRF
 // <i> Defines OSPI0 Frame format
-// <i> Default: Octal
+// <i> Default: Octal SPI FRF
 #define RTE_OSPI0_SPI_FRAME_FORMAT                3
+
+// <o> OSPI0 Bus speed
+// <i> Defines the OSPI0 Bus speed
+// <i> Default: 100000000
+#define RTE_OSPI0_BUS_SPEED                       80000000
+
+// <o> OSPI0 Wait Cycles
+// <i> Defines the OSPI0 Wait Cycles for connected device
+// <i> Default: 6
+#define RTE_OSPI0_WAIT_CYCLES                     6
+
+// <o> OSPI0 DFS
+// <i> Defines OSPI0 Data Frame Size
+// <i> Default: 32
+#define RTE_OSPI0_DFS                             32
 
 // <o> OSPI0 TX FIFO Start level <0-255>
 // <i> Defines TX FIFO transfer start level for OSPI0
@@ -2195,7 +2245,7 @@
 //    <1=> ENABLED
 // <i> Defines DMA feature control for UT channel 0.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL0_DMA_CONTROL            0
+#define RTE_UTIMER_CHANNEL0_DMA_CLEAR_ENABLE        0
 
 // <o> CHANNEL0 FAULT TYPE
 //    <0=> LOW_UNTIL_CYCLE_END
@@ -2407,7 +2457,7 @@
 //    <1=> ENABLED
 // <i> Defines DMA feature control for UT channel 1.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL1_DMA_CONTROL            0
+#define RTE_UTIMER_CHANNEL1_DMA_CLEAR_ENABLE        0
 
 // <o> CHANNEL1 FAULT TYPE
 //    <0=> LOW_UNTIL_CYCLE_END
@@ -2619,7 +2669,7 @@
 //    <1=> ENABLED
 // <i> Defines DMA feature control for UT channel 2.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL2_DMA_CONTROL            0
+#define RTE_UTIMER_CHANNEL2_DMA_CLEAR_ENABLE        0
 
 // <o> CHANNEL2 FAULT TYPE
 //    <0=> LOW_UNTIL_CYCLE_END
@@ -2831,7 +2881,7 @@
 //    <1=> ENABLED
 // <i> Defines DMA feature control for UT channel 0.
 // <i> Default: DISABLED
-#define RTE_UTIMER_CHANNEL3_DMA_CONTROL            0
+#define RTE_UTIMER_CHANNEL3_DMA_CLEAR_ENABLE        0
 
 // <o> CHANNEL3 FAULT TYPE
 //    <0=> LOW_UNTIL_CYCLE_END
@@ -3030,15 +3080,6 @@
 // </e> UTIMER (Universal timer) [Driver_UTIMER]
 // </h> UTIMER (Universal Timer)
 
-
-// <e> Analog configuration [vbat analog register2 and comparator register2]
-#define RTE_ANALOG_CONFIG          1
-#if RTE_ANALOG_CONFIG
-#define RTE_VBAT_ANA_REG2_VAL      (0x388C4230)
-#define RTE_COMP_REG2_VAL          (0x10200000 | 0x1C240100)
-#endif
-// </e> Analog configuration [vbat analog register2 and comparator register2]
-
 // <h> DAC (Digital to analog converter )
 // <e> DAC0 (Digital to analog converter ) [Driver_DAC0]
 // <i> Configuration settings for Driver_DAC0 in component ::Drivers:DAC
@@ -3121,7 +3162,7 @@
 // <o> Number of bits to shift <0-8>
 // <i> Defines How much bit to shift before storing in sample register.
 // <i> Default: 8
-#define RTE_ADC120_SHIFT_N_BIT             (0)
+#define RTE_ADC120_SHIFT_N_BIT         (8)
 
 // <o> Left or Right shift
 //     <0=> LEFT SHIFT

@@ -16,9 +16,11 @@
 ## Introduction
 
 This document describes the process of setting up and running the Arm® Ethos™-U NPU Visual Wake Word example.
-Visual Wake Words is a common vision use-case to detect if a the provided image contains a person.
+Visual Wake Words is a common vision use-case to detect if the provided image contains a person.
 
 Use case code could be found in [source/use_case/vww](../../source/use_case/vww) directory.
+
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
 ### Prerequisites
 
@@ -30,7 +32,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 
 In addition to the already specified build option in the main reference manual, Visual Wake Word use case specifies:
 
-- `vww_MODEL_TFLITE_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
+- `vww_MODEL_PATH` - Path to the NN model file in the `TFLite` format. The model is then processed and included in
   the application `axf` file. The default value points to one of the delivered set of models.
   Note that the parameters `vww_LABELS_TXT_FILE`, `TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the
   chosen model. In other words:
@@ -180,7 +182,7 @@ After compiling, your custom images will have now replaced the default ones in t
 ### Add custom model
 
 The application performs inference using the model pointed to by the CMake parameter
-`vww_MODEL_TFLITE_PATH`.
+`vww_MODEL_PATH`.
 
 > **Note:** If you want to run the model using Ethos-U, ensure your custom model has been run through the Vela compiler
 > successfully before continuing.
@@ -189,28 +191,28 @@ To run the application with a custom model you will need to provide a labels_<mo
 with the model. Each line of the file should correspond to one of the outputs in your model. See the provided
 visual_wake_word_labels.txt file for an example.
 
-Then, you must set `vww_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
+Then, you must set `vww_MODEL_PATH` to the location of the Vela processed model file and
 `vww_LABELS_TXT_FILE` to the location of the associated labels file.
 
 An example:
 
 ```commandline
 cmake \
-    -Dvww_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dvww_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
     -Dvww_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=vww ..
 ```
 
 > **Note:** Clean the build directory before re-running the cmake command.
 
-The TFLite model pointed to by `vww_MODEL_TFLITE_PATH` and labels text file pointed to by
+The TFLite model pointed to by `vww_MODEL_PATH` and labels text file pointed to by
 `vww_LABELS_TXT_FILE` will be converted to C++ files during the CMake configuration stage and then compiled
 into the application for performing inference with.
 
 The log from the configuration stage should tell you what model path and labels file have been used:
 
 ```log
--- User option vww_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option vww_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- User option vww_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
 ...
@@ -265,92 +267,9 @@ This will also launch a telnet window with the sample application's standard out
 information about the pre-built application version, TensorFlow Lite Micro library version used, data type as well as
 the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started if `vww_FILE_PATH` pointed to a single file (or a folder containing a
-single image) the inference starts immediately. In case of multiple inputs choice, it outputs a menu and waits for the
-user input from telnet terminal:
-
-```log
-User input required
-Enter option number from:
-
-  1. Classify next ifm
-  2. Classify ifm at chosen index
-  3. Run classification on all ifm
-  4. Show NN model info
-  5. List ifm
-
-Choice:
-
-```
-
-1. “Classify next image” menu option will run single inference on the next in line image from the collection of the
-    compiled images.
-
-2. “Classify image at chosen index” menu option will run single inference on the chosen image.
-
-    > **Note:** Please make sure to select image index in the range of supplied images during application build. By
-    default, pre-built application has 2 images, index should 0 or 1.
-
-3. “Run classification on all images” menu option triggers sequential inference executions on all built-in images.
-
-4. “Show NN model info” menu option prints information about model data type, input and output tensor sizes:
-
-    ```log
-    INFO - Added ethos-u support to op resolver
-    INFO - Creating allocator using tensor arena in SRAM
-    INFO - Allocating tensors
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 16384 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1: 128
-    INFO -          2: 128
-    INFO -          3:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.008138
-    INFO - ZeroPoint[0] = -70
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 2 bytes with dimensions
-    INFO -          0:   1
-    INFO -          1:   2
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.022299
-    INFO - ZeroPoint[0] = -17
-    INFO - Activation buffer (a.k.a tensor arena) size used: 133716
-    INFO - Number of operators: 19
-    INFO -  Operator 0: ethos-u
-    INFO -  Operator 1: PAD
-    INFO -  Operator 2: ethos-u
-    INFO -  Operator 3: PAD
-    INFO -  Operator 4: ethos-u
-    INFO -  Operator 5: PAD
-    INFO -  Operator 6: ethos-u
-    INFO -  Operator 7: PAD
-    INFO -  Operator 8: ethos-u
-    INFO -  Operator 9: PAD
-    INFO -  Operator 10: ethos-u
-    INFO -  Operator 11: PAD
-    INFO -  Operator 12: ethos-u
-    INFO -  Operator 13: PAD
-    INFO -  Operator 14: ethos-u
-    INFO -  Operator 15: PAD
-    INFO -  Operator 16: ethos-u
-    INFO -  Operator 17: AVERAGE_POOL_2D
-    INFO -  Operator 18: ethos-u
-    ```
-
-5. “List Images” menu option prints a list of pair image indexes - the original filenames embedded in the application:
-
-    ```log
-    INFO - List of Files:
-    INFO -  0 => man_in_red_jacket.png
-    INFO -  1 => st_paul_s_cathedral.png
-    ```
+After the application has started, inferences are executed on inputs from `vww_FILE_PATH`.
 
 ### Running Visual Wake Word
-
-Please select the first menu option to execute Visual Wake Word.
 
 The following example illustrates application output for classification:
 

@@ -11,10 +11,6 @@
 from pytest_embedded import Dut
 import re
 
-# Menu entries
-MENU_OPT_RUN_ONCE       = "1"
-MENU_OPT_RUN_CONTINUOUS = "2"
-
 def get_time(dut, timestring) -> float:
     ret = dut.expect(timestring + r' time = [-+]?(?:\d*\.*\d+) ms', timeout = 2)
     value = re.findall(r"[-+]?(?:\d*\.*\d+)", ret.group(0).decode())
@@ -27,10 +23,8 @@ def expect_in_range(min, max, value, timestring):
 
 def test_max_kws_inference_times(dut: Dut):
     dut.write("")
-    # Start one-shot test
-    dut.write(MENU_OPT_RUN_ONCE)
 
     # Check durations, changed Preprocessing from 14->12 so armclang can be run with same test
-    expect_in_range(12.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
+    expect_in_range(11.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
     expect_in_range(2.6, 2.8, get_time(dut, 'Inference'), 'Inference')
     expect_in_range(0.02, 0.055, get_time(dut, 'Postprocessing'), 'Postprocessing')

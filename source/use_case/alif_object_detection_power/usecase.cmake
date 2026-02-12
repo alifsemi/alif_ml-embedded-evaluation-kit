@@ -24,8 +24,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #----------------------------------------------------------------------------
+
+# Specify the ML frameworks the use case supports
+set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
+if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+    set(${use_case}_supports_${ML_FRAMEWORK} OFF)
+    return()
+endif ()
+
+set(${use_case}_supports_${ML_FRAMEWORK} ON)
+
 # Append the API to use for this use case
-list(APPEND ${use_case}_API_LIST "object_detection" "alif_ui")
+list(APPEND ${use_case}_API_LIST "object_detection")
 
 USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
     OFF
@@ -59,6 +69,11 @@ set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Neede
 
 message(STATUS "alif_object_detection_power: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
 
+if (SHOW_UI)
+    list(APPEND ${use_case}_API_LIST "alif_ui")
+    set(GLCD_UI ON CACHE BOOL "" FORCE)
+endif()
+
 set(${use_case}_COMPILE_DEFS
     SHOW_INF_TIME=$<BOOL:${${use_case}_SHOW_INF_TIME}>
     $<$<BOOL:${SHOW_UI}>:SHOW_UI>
@@ -83,14 +98,14 @@ set(EXTRA_MODEL_CODE
     "extern const float anchor2[] = ${${use_case}_ANCHOR_2};"
     )
 
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH "NN models file to be used in the evaluation application. Model files must be in tflite format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )
 
 # Generate model file
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
     EXPRESSIONS ${EXTRA_MODEL_CODE}
     NAMESPACE   "arm" "app" "object_detection")

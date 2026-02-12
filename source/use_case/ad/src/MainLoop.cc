@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,19 +27,20 @@ namespace app {
         extern uint8_t* GetModelPointer();
         extern size_t GetModelLen();
     } /* namespace ad */
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
 
 void MainLoop()
 {
-    arm::app::AdModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::AdModel model; /* Model wrapper object. */
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::ad::GetModelPointer(),
+                                                arm::app::ad::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::ad::GetModelPointer(),
-                    arm::app::ad::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("failed to initialise model\n");
         return;
     }
@@ -49,7 +50,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"ad"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<uint32_t>("frameLength", arm::app::ad::g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", arm::app::ad::g_FrameStride);
     caseContext.Set<float>("scoreThreshold", arm::app::ad::g_ScoreThreshold);

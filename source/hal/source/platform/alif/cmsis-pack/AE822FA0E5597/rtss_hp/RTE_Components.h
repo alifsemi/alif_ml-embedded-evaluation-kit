@@ -36,6 +36,7 @@
 #define RTE_Drivers_DMA
 #define RTE_Drivers_MIPI_DSI_ILI9806E_PANEL
 #define RTE_Drivers_ISSI_FLASH
+#define RTE_Drivers_MX66UW1G_FLASH
 #define RTE_Drivers_OSPI
 #define RTE_Drivers_HWSEM
 

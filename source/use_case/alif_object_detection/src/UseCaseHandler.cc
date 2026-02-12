@@ -53,8 +53,8 @@ lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_ima
 
 using arm::app::Profiler;
 using arm::app::ApplicationContext;
-using arm::app::Model;
-using arm::app::YoloFastestModel;
+using arm::app::fwk::iface::Model;
+using arm::app::fwk::tflm::YoloFastestModel;
 using arm::app::DetectorPreProcess;
 using arm::app::DetectorPostProcess;
 
@@ -90,10 +90,10 @@ using namespace arm::app::object_detection;
             return false;
         }
 
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-
-        const int inputImgCols = inputShape->data[YoloFastestModel::ms_inputColsIdx];
-        const int inputImgRows = inputShape->data[YoloFastestModel::ms_inputRowsIdx];
+        auto inputTensor = model.GetInputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        const uint32_t inputImgCols = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputColsIdx];
+        const uint32_t inputImgRows   = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputRowsIdx];
 
         auto bCamera = hal_camera_configure(inputImgCols, inputImgRows, HAL_CAMERA_MODE_SINGLE_FRAME, HAL_CAMERA_COLOUR_FORMAT_RGB888);
         if (!bCamera) {
@@ -132,22 +132,20 @@ using namespace arm::app::object_detection;
             return false;
         }
 
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor0 = model.GetOutputTensor(0);
-        TfLiteTensor* outputTensor1 = model.GetOutputTensor(1);
-
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor0 = model.GetOutputTensor(0);
+        auto outputTensor1 = model.GetOutputTensor(1);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < 3) {
+        } else if (inputShape.size() < 3) {
             printf_err("Input tensor dimension should be >= 3\n");
             return false;
         }
 
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-
-        const int inputImgCols = inputShape->data[YoloFastestModel::ms_inputColsIdx];
-        const int inputImgRows = inputShape->data[YoloFastestModel::ms_inputRowsIdx];
+        const int inputImgCols = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputColsIdx];
+        const int inputImgRows   = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputRowsIdx];
 
         /* Set up pre and post-processing. */
         DetectorPreProcess preProcess = DetectorPreProcess(inputTensor, true, model.IsDataSigned());
@@ -187,7 +185,7 @@ using namespace arm::app::object_detection;
 
             lv_led_on(ScreenLayoutLEDObject());
 
-            const size_t copySz = inputTensor->bytes;
+            const size_t copySz = inputTensor->Bytes();
 
 #if SHOW_INF_TIME
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -62,24 +62,24 @@ void GetExpectedResults(
                                 arm::app::object_detection::DetectionResult(0.99, 63, 60, 38, 45)});
 }
 
-bool RunInference(arm::app::Model& model, const uint8_t imageData[])
+bool RunInference(arm::app::fwk::iface::Model& model, const uint8_t imageData[])
 {
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
+    auto inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes;
+    const size_t copySz = inputTensor->Bytes();
 
-    arm::app::image::RgbToGrayscale(imageData, inputTensor->data.uint8, copySz);
+    arm::app::image::RgbToGrayscale(imageData, inputTensor->GetData<uint8_t>(), copySz);
 
     if (model.IsDataSigned()) {
-        arm::app::image::ConvertImgToInt8(inputTensor->data.data, copySz);
+        arm::app::image::ConvertUint8ToInt8(inputTensor->GetData(), copySz);
     }
 
     return model.RunInference();
 }
 
 template <typename T>
-bool TestInferenceDetectionResults(size_t imageIdx, arm::app::Model& model, T tolerance)
+bool TestInferenceDetectionResults(size_t imageIdx, arm::app::fwk::iface::Model& model, T tolerance)
 {
     std::vector<arm::app::object_detection::DetectionResult> results;
     uint32_t capturedFrameSize = 0;
@@ -89,21 +89,21 @@ bool TestInferenceDetectionResults(size_t imageIdx, arm::app::Model& model, T to
         return false;
     }
 
-    TfLiteIntArray* inputShape = model.GetInputShape(0);
-    auto nCols                 = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
-    auto nRows                 = inputShape->data[arm::app::YoloFastestModel::ms_inputRowsIdx];
+    auto inputShape = model.GetInputShape(0);
+    auto nCols      = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputColsIdx];
+    auto nRows      = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputRowsIdx];
 
     REQUIRE(RunInference(model, image));
 
-    std::vector<TfLiteTensor*> output_arr{model.GetOutputTensor(0), model.GetOutputTensor(1)};
+    std::vector output_arr{model.GetOutputTensor(0), model.GetOutputTensor(1)};
     for (size_t i = 0; i < output_arr.size(); i++) {
         REQUIRE(output_arr[i]);
-        REQUIRE(tflite::GetTensorData<T>(output_arr[i]));
+        REQUIRE(output_arr[i]->GetData<T>());
     }
 
     const arm::app::object_detection::PostProcessParams postProcessParams{
-        nRows,
-        nCols,
+        static_cast<int>(nRows),
+        static_cast<int>(nCols),
         arm::app::object_detection::originalImageSize,
         arm::app::object_detection::anchor1,
         arm::app::object_detection::anchor2};
@@ -137,19 +137,22 @@ TEST_CASE("Running inference with TensorFlow Lite Micro and YoloFastest", "[Yolo
 {
     SECTION("Executing inferences sequentially")
     {
-        arm::app::YoloFastestModel model{};
+        arm::app::fwk::tflm::YoloFastestModel model{};
 
         REQUIRE_FALSE(model.IsInited());
-        REQUIRE(model.Init(arm::app::tensorArena,
-                           sizeof(arm::app::tensorArena),
-                           arm::app::object_detection::GetModelPointer(),
-                           arm::app::object_detection::GetModelLen()));
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                    arm::app::object_detection::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+
+        /* Load the model. */
+        REQUIRE(model.Init(computeMem, modelMem));
         REQUIRE(model.IsInited());
 
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
+        auto inputShape = model.GetInputShape(0);
 
-        const int inputImgCols = inputShape->data[arm::app::YoloFastestModel::ms_inputColsIdx];
-        const int inputImgRows = inputShape->data[arm::app::YoloFastestModel::ms_inputRowsIdx];
+        const int inputImgCols = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputColsIdx];
+        const int inputImgRows = inputShape[arm::app::fwk::tflm::YoloFastestModel::ms_inputRowsIdx];
 
         hal_camera_init();
         auto bCamera = hal_camera_configure(inputImgCols,

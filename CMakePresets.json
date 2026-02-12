@@ -22,7 +22,16 @@
             ]
         },
         {
-            "name": "simple-clang",
+            "name": "simple-llvm",
+            "displayName": "simple-llvm",
+            "description": "Target simple platform build with bare-metal llvm toolchain.",
+            "inherits": [
+                "simple-platform",
+                "llvm-toolchain"
+            ]
+        },
+        {
+            "name": "simple-armclang",
             "displayName": "simple-armclang",
             "description": "Target simple platform build with bare-metal armclang toolchain.",
             "inherits": [
@@ -40,12 +49,21 @@
             ]
         },
         {
-            "name": "mps3-300-clang",
+            "name": "mps3-300-armclang",
             "displayName": "mps3-300-armclang",
             "description": "Target MPS3 board, SSE-300 subsystem with bare-metal armclang toolchain.",
             "inherits": [
                 "mps3-300-platform",
                 "armclang-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-300-llvm",
+            "displayName": "mps3-300-llvm",
+            "description": "Target MPS3 board, SSE-300 subsystem with bare-metal llvm toolchain.",
+            "inherits": [
+                "mps3-300-platform",
+                "llvm-toolchain"
             ]
         },
         {
@@ -58,7 +76,16 @@
             ]
         },
         {
-            "name": "mps3-310-clang",
+            "name": "mps3-310-llvm",
+            "displayName": "mps3-310-llvm",
+            "description": "Target MPS3 board, SSE-310 subsystem with bare-metal llvm toolchain.",
+            "inherits": [
+                "mps3-310-platform",
+                "llvm-toolchain"
+            ]
+        },
+        {
+            "name": "mps3-310-armclang",
             "displayName": "mps3-310-armclang",
             "description": "Target MPS3 board, SSE-310 subsystem with bare-metal armclang toolchain.",
             "inherits": [
@@ -76,7 +103,16 @@
             ]
         },
         {
-            "name": "mps4-315-clang",
+            "name": "mps4-315-llvm",
+            "displayName": "mps4-315-llvm",
+            "description": "Target MPS4 board, SSE-315 subsystem with bare-metal llvm toolchain.",
+            "inherits": [
+                "mps4-315-platform",
+                "llvm-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-315-armclang",
             "displayName": "mps4-315-armclang",
             "description": "Target MPS4 board, SSE-315 subsystem with bare-metal armclang toolchain.",
             "inherits": [
@@ -94,7 +130,16 @@
             ]
         },
         {
-            "name": "mps4-320-clang",
+            "name": "mps4-320-llvm",
+            "displayName": "mps4-320-llvm",
+            "description": "Target MPS4 board, SSE-320 subsystem with bare-metal llvm toolchain.",
+            "inherits": [
+                "mps4-320-platform",
+                "llvm-toolchain"
+            ]
+        },
+        {
+            "name": "mps4-320-armclang",
             "displayName": "mps4-320-armclang",
             "description": "Target MPS4 board, SSE-320 subsystem with bare-metal armclang toolchain.",
             "inherits": [
@@ -139,8 +184,13 @@
             "inherits": "usecase-targets"
         },
         {
-            "name": "mps3-300-clang",
-            "configurePreset": "mps3-300-clang",
+            "name": "mps3-300-llvm",
+            "configurePreset": "mps3-300-llvm",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-300-armclang",
+            "configurePreset": "mps3-300-armclang",
             "inherits": "usecase-targets"
         },
         {
@@ -149,8 +199,43 @@
             "inherits": "usecase-targets"
         },
         {
-            "name": "mps3-310-clang",
-            "configurePreset": "mps3-310-clang",
+            "name": "mps3-310-llvm",
+            "configurePreset": "mps3-310-llvm",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps3-310-armclang",
+            "configurePreset": "mps3-310-armclang",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-315-gcc",
+            "configurePreset": "mps4-315-gcc",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-315-llvm",
+            "configurePreset": "mps4-315-llvm",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-315-armclang",
+            "configurePreset": "mps4-315-armclang",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-320-gcc",
+            "configurePreset": "mps4-320-gcc",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-320-llvm",
+            "configurePreset": "mps4-320-llvm",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "mps4-320-armclang",
+            "configurePreset": "mps4-320-armclang",
             "inherits": "usecase-targets"
         },
         {
@@ -159,8 +244,13 @@
             "inherits": "usecase-targets"
         },
         {
-            "name": "simple-clang",
-            "configurePreset": "simple-clang",
+            "name": "simple-llvm",
+            "configurePreset": "simple-llvm",
+            "inherits": "usecase-targets"
+        },
+        {
+            "name": "simple-armclang",
+            "configurePreset": "simple-armclang",
             "inherits": "usecase-targets"
         }
     ],

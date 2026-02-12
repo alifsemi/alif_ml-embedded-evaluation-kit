@@ -29,7 +29,9 @@ lv_obj_t *labelTime;
 lv_obj_t *imageObj;
 lv_obj_t *imageHolder;
 lv_obj_t *ledObj;
-
+#ifdef ALIF_ASR
+lv_obj_t* barObj;
+#endif // ALIF_ASR
 };
 
 static lv_style_t confident;
@@ -94,21 +96,23 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
 
     lv_obj_add_style(screen, &screenPadding, LV_PART_MAIN);
 
-    /* Make a holder with a border for the camera image */
-    /* (Serves to determine screen layout, as layout can get weird for zoomed image widgets) */
-    imageHolder = lv_obj_create(screen);
-    lv_obj_move_to_index(imageHolder, 0);
+    if (imgData != nullptr) {
+        /* Make a holder with a border for the camera image */
+        /* (Serves to determine screen layout, as layout can get weird for zoomed image widgets) */
+        imageHolder = lv_obj_create(screen);
+        lv_obj_move_to_index(imageHolder, 0);
 #if LV_THEME_DEFAULT_DARK == 0
-    lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x666666), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x666666), LV_PART_MAIN);
 #else
-    lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x444444), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(imageHolder, lv_color_hex(0x444444), LV_PART_MAIN);
 #endif
 
-    lv_obj_set_style_radius(imageHolder, 4 * DISP_SCALE, LV_PART_MAIN);
-    lv_obj_add_style(imageHolder, &noBorder, LV_PART_MAIN);
-    lv_obj_add_style(imageHolder, &imageHolderPadding, LV_PART_MAIN);
-    lv_obj_set_content_width(imageHolder, ((int32_t)imgWidth * imgZoom) >> 8 );
-    lv_obj_set_content_height(imageHolder, ((int32_t)imgHeight * imgZoom) >> 8);
+        lv_obj_set_style_radius(imageHolder, 4 * DISP_SCALE, LV_PART_MAIN);
+        lv_obj_add_style(imageHolder, &noBorder, LV_PART_MAIN);
+        lv_obj_add_style(imageHolder, &imageHolderPadding, LV_PART_MAIN);
+        lv_obj_set_content_width(imageHolder, ((int32_t)imgWidth * imgZoom) >> 8 );
+        lv_obj_set_content_height(imageHolder, ((int32_t)imgHeight * imgZoom) >> 8);
+    }
 
     /* Make a holder for the results (allows easy re-layout for portrait/landscape) */
     lv_obj_t *resultHolder = lv_obj_create(screen);
@@ -151,8 +155,18 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_led_off(ledObj);
     lv_obj_set_size(ledObj, 5 * DISP_SCALE, 5 * DISP_SCALE);
 
+    int y  = 25 * DISP_SCALE;
+#ifdef ALIF_ASR
+    barObj = lv_bar_create(resultHolder);
+    //lv_obj_set_size(barObj, 200, 20);
+    lv_obj_set_width(barObj, LV_PCT(90));
+    lv_obj_set_height(barObj, 20 * DISP_SCALE);
+    lv_obj_align(barObj, LV_ALIGN_TOP_MID, 0, y);
+    lv_bar_set_value(barObj, 0, LV_ANIM_OFF);
+    y += 25 * DISP_SCALE;
+#endif // ALIF_ASR
+
     /* And labels for results */
-    int y = 25 * DISP_SCALE;
     for (auto &lbl : labelResult) {
         lbl = lv_label_create(resultHolder);
         lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
@@ -174,21 +188,24 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_set_align(labelTime, LV_ALIGN_BOTTOM_RIGHT);
     lv_obj_add_style(labelTime, &tiny, LV_PART_MAIN);
 
-    /* Centre the image in its holder */
-    imageObj = lv_image_create(imageHolder);
-    static lv_image_dsc_t imageDesc;
-    imageDesc.data = (const uint8_t *)imgData;
-    imageDesc.data_size = imgSize;
-    imageDesc.header.magic = LV_IMAGE_HEADER_MAGIC;
-    imageDesc.header.cf = LV_COLOR_FORMAT_NATIVE;
-    imageDesc.header.w = imgWidth;
-    imageDesc.header.h = imgHeight;
-    imageDesc.header.stride = imgWidth * LV_COLOR_DEPTH/8;
-    imageDesc.header.flags = 0;
-    lv_image_set_scale(imageObj, imgZoom);
-    lv_image_set_antialias(imageObj, false);
-    lv_image_set_src(imageObj, &imageDesc);
-    lv_obj_center(imageObj);
+    imageObj = nullptr;
+    if (imgData != nullptr) {
+        /* Centre the image in its holder */
+        imageObj = lv_image_create(imageHolder);
+        static lv_image_dsc_t imageDesc;
+        imageDesc.data = (const uint8_t *)imgData;
+        imageDesc.data_size = imgSize;
+        imageDesc.header.magic = LV_IMAGE_HEADER_MAGIC;
+        imageDesc.header.cf = LV_COLOR_FORMAT_NATIVE;
+        imageDesc.header.w = imgWidth;
+        imageDesc.header.h = imgHeight;
+        imageDesc.header.stride = imgWidth * LV_COLOR_DEPTH/8;
+        imageDesc.header.flags = 0;
+        lv_image_set_scale(imageObj, imgZoom);
+        lv_image_set_antialias(imageObj, false);
+        lv_image_set_src(imageObj, &imageDesc);
+        lv_obj_center(imageObj);
+    }
 
     /* Add a logo */
     lv_obj_t *alifObj = lv_image_create(resultHolder);
@@ -232,6 +249,13 @@ lv_obj_t *ScreenLayoutLEDObject()
 {
     return ledObj;
 }
+
+#ifdef ALIF_ASR
+lv_obj_t* ScreenLayoutBarObject()
+{
+    return barObj;
+}
+#endif // ALIF_ASR
 
 } /* namespace app */
 } /* namespace alif */

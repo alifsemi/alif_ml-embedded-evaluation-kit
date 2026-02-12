@@ -324,8 +324,7 @@ int fgetc(FILE *f)
 {
     UNUSED(f);
 
-    //return UartPutc(UartGetc());
-    return -1;
+    return UartPutc(UartGetc());
 }
 
 #ifndef ferror

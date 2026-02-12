@@ -9,9 +9,9 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
-
+ 
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,25 +55,28 @@ bool ethosu_area_needs_flush_dcache(const uint32_t *p, size_t bytes);
 bool ethosu_area_needs_invalidate_dcache(const uint32_t *p, size_t bytes);
 
 /**
- * Flush/clean the data cache
- *
- * Addresses passed to this function must be aligned to cache line size.
- *
- * @param base_addr         Array of 32 byte aligned base addresses
- * @param base_addr_size    Array with size per each base addr entry
- * @param num_base_addr     Number of base addr entries
+ * @brief   Clears all the cache state members.
+ */
+void ethosu_clear_cache_states(void);
+
+/**
+ * @brief   Flush/clean the data cache by address and size. Passing NULL as base_addr argument
+ *          expects the whole cache to be flushed.
+ * @param[in]   base_addr        Array of 32 byte aligned base addresses.
+ * @param[in]   base_addr_size   Array with size per each base addr entry.
+ * @param[in]   num_base_addr    Number of base addr entries.
  */
 void ethosu_flush_dcache(const uint64_t *base_addr, const size_t *base_addr_size, int num_base_addr);
 
+
 /**
- * Invalidate the data cache
- *
- * Addresses passed to this function must be aligned to cache line size.
- *
- * @param base_addr         Array of 32 byte aligned base addresses
- * @param base_addr_size    Array with size per each base addr entry
- * @param num_base_addr     Number of base addr entries
+ * @brief   Invalidate the data cache by address and size. Passing NULL as base_addr argument
+ *          expects the whole cache to be invalidated.
+ * @param[in]   base_addr        Array of 32 byte aligned base addresses.
+ * @param[in]   base_addr_size   Array with size per each base addr entry.
+ * @param[in]   num_base_addr    Number of base addr entries.
  */
 void ethosu_invalidate_dcache(const uint64_t *base_addr, const size_t *base_addr_size, int num_base_addr);
+
 
 #endif /* ETHOSU_CPU_CACHE */

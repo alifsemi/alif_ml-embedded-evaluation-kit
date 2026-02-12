@@ -1,6 +1,7 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+ * affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(USE_SEMIHOSTING)
+#if defined(USE_SEMIHOSTING)
+#error "This file should not be used if semihosting is disabled."
+#endif /* defined(USE_SEMIHOSTING) */
 
 #include "uart_stdout.h"
 
@@ -41,7 +44,12 @@
 #define TMPNAM_FUNCTION RETARGET(_tmpnam)
 #endif
 
-#else
+#elif defined(__clang__)
+
+/* Clang/LLVM toolchain support */
+#define RETARGET(fun) fun
+
+#elif defined (__GNUC__)
 /* GNU compiler re-targeting */
 
 /*
@@ -64,20 +72,40 @@ extern FILEHANDLE _open(const char* /*name*/, int /*openmode*/);
 
 #define TMPNAM_FUNCTION RETARGET(_tmpnam)
 
-#endif
+#endif /* __GNUC__ */
 
+/*
+ ********************************************************************
+ *             Common functions for all toolchains                  *
+ ********************************************************************
+ */
+static void UartEndSimulation(int code)
+{
+    UartPutc((char)0x4);  // End of simulation
+    UartPutc((char)code); // Exit code
+}
+
+void __attribute__((noreturn)) RETARGET(_exit)(int return_code)
+{
+    UartEndSimulation(return_code);
+    while (1) {}
+}
+
+void __attribute__((constructor(101))) _retarget_init(void)
+{
+    UartStdOutInit();
+}
+
+/*
+ ********************************************************************
+ *        Functions for Arm Compiler and GNU toolchains             *
+ ********************************************************************
+ */
+#if (defined(__GNUC__) && !defined(__clang__)) || defined(__ARMCC_VERSION)
 /* Standard IO device name defines. */
 const char __stdin_name[] __attribute__((aligned(4)))  = "STDIN";
 const char __stdout_name[] __attribute__((aligned(4))) = "STDOUT";
 const char __stderr_name[] __attribute__((aligned(4))) = "STDERR";
-
-__attribute__((noreturn)) static void UartEndSimulation(int code)
-{
-    UartPutc((char)0x4);  // End of simulation
-    UartPutc((char)code); // Exit code
-    while (1)
-        ;
-}
 
 void _ttywrch(int ch)
 {
@@ -211,12 +239,6 @@ char* RETARGET(_command_string)(char* cmd, int len)
     return cmd;
 }
 
-void RETARGET(_exit)(int return_code)
-{
-    UartEndSimulation(return_code);
-    while (1)
-        ;
-}
 
 int system(const char* cmd)
 {
@@ -274,6 +296,8 @@ int fgetc(FILE* f)
     return UartPutc(UartGetc());
 }
 
+#endif /* defined(__GNUC__) || defined(__ARMCC_VERSION) */
+
 #ifndef ferror
 
 /* arm-none-eabi-gcc with newlib uses a define for ferror */
@@ -286,8 +310,11 @@ int ferror(FILE* f)
 
 #endif /* #ifndef ferror */
 
-#endif /* !defined(USE_SEMIHOSTING) */
-
+/*
+ ********************************************************************
+ *        Functions for GNU toolchains                              *
+ ********************************************************************
+ */
 /* If using GNU compiler */
 #if defined(__GNUC__)
 
@@ -335,3 +362,41 @@ _off_t _lseek_r(struct _reent* r, int fdes, _off_t offset, int w)
 
 #endif /* GNU  toolchain version > 11.3.0 */
 #endif /* If using GNU toolchain */
+
+/*
+ ********************************************************************
+ *        Functions for Clang toolchain                             *
+ ********************************************************************
+ */
+#if defined (__clang__) && !defined(__ARMCC_VERSION)
+
+/** Write a character over UART */
+static int llvm_picolib_putc(char c, FILE *file)
+{
+    (void) file;
+    UartPutc(c);
+    return c;
+}
+
+/* Read a character over UART */
+static int llvm_picolib_getc(FILE *file)
+{
+    unsigned char c = 0;
+    (void) file;
+    c = UartGetc();
+    return c;
+}
+
+/* Initialise the stream for picolib */
+static FILE __stdio = FDEV_SETUP_STREAM(
+                       llvm_picolib_putc,
+                       llvm_picolib_getc,
+                       NULL,
+                       _FDEV_SETUP_RW);
+
+/* Wire the stdout and stderr streams to the same file */
+FILE *const stdin = &__stdio;
+__strong_reference(stdin, stdout);
+__strong_reference(stdin, stderr);
+
+#endif /* defined(__clang__) */

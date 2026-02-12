@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 #ifndef AD_PROCESSING_HPP
 #define AD_PROCESSING_HPP
 
-#include "BaseProcessing.hpp"
-#include "TensorFlowLiteMicro.hpp"
-#include "AudioUtils.hpp"
 #include "AdMelSpectrogram.hpp"
+#include "AudioUtils.hpp"
+#include "BaseProcessing.hpp"
+#include "Tensor.hpp"
 #include "log_macros.h"
+
+#include <cstring>
+#include <functional>
+#include <memory>
 
 namespace arm {
 namespace app {
@@ -37,11 +41,15 @@ namespace app {
         /**
          * @brief Constructor for AdPreProcess class objects
          * @param[in] inputTensor  input tensor pointer from the tensor arena.
+         * @param[in] numRowsIdx   index in tensor shape to get number of rows.
+         * @param[in] numColsIdx   index in tensor shape to get number of columns.
          * @param[in] melSpectrogramFrameLen MEL spectrogram's frame length
          * @param[in] melSpectrogramFrameStride MEL spectrogram's frame stride
          * @param[in] adModelTrainingMean Training mean for the Anomaly detection model being used.
          */
-        explicit AdPreProcess(TfLiteTensor* inputTensor,
+        explicit AdPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                              uint32_t numRowsIdx,
+                              uint32_t numColsIdx,
                               uint32_t melSpectrogramFrameLen,
                               uint32_t melSpectrogramFrameStride,
                               float adModelTrainingMean);
@@ -100,7 +108,7 @@ namespace app {
          * @brief Constructor for AdPostProcess object.
          * @param[in] outputTensor Output tensor pointer.
          */
-        explicit AdPostProcess(TfLiteTensor* outputTensor);
+        explicit AdPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor);
 
         ~AdPostProcess() = default;
 
@@ -118,7 +126,7 @@ namespace app {
         float GetOutputValue(uint32_t index);
 
     private:
-        TfLiteTensor* m_outputTensor{}; /**< Output tensor pointer */
+        std::shared_ptr<fwk::iface::TensorIface> m_outputTensor{}; /**< Output tensor pointer */
         std::vector<float> m_dequantizedOutputVec{}; /**< Internal output vector */
 
         /**
@@ -129,20 +137,17 @@ namespace app {
         template<typename T>
         bool Dequantize()
         {
-            TfLiteTensor* tensor = this->m_outputTensor;
+            const std::shared_ptr<fwk::iface::TensorIface> tensor = this->m_outputTensor;
             if (tensor == nullptr) {
                 printf_err("Invalid output tensor.\n");
                 return false;
             }
-            T* tensorData = tflite::GetTensorData<T>(tensor);
+            T* tensorData = tensor->GetData<T>();
 
-            uint32_t totalOutputSize = 1;
-            for (int inputDim = 0; inputDim < tensor->dims->size; inputDim++){
-                totalOutputSize *= tensor->dims->data[inputDim];
-            }
+            const uint32_t totalOutputSize = tensor->GetNumElements();
 
             /* For getting the floating point values, we need quantization parameters */
-            QuantParams quantParams = GetTensorQuantParams(tensor);
+            auto quantParams = tensor->GetQuantParams();
 
             this->m_dequantizedOutputVec = std::vector<float>(totalOutputSize, 0);
 
@@ -170,10 +175,11 @@ namespace app {
      * @param compute       features calculator function.
      * @return              lambda function to compute features.
      */
-    template<class T>
-    std::function<void (std::vector<int16_t>&, size_t, bool, size_t, size_t)>
-    FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
-                std::function<std::vector<T> (std::vector<int16_t>& )> compute)
+    template <class T>
+    std::function<void(std::vector<int16_t>&, size_t, bool, size_t, size_t)>
+    FeatureCalc(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                size_t cacheSize,
+                std::function<std::vector<T>(std::vector<int16_t>&)> compute)
     {
         /* Feature cache to be captured by lambda function*/
         static std::vector<std::vector<T>> featureCache = std::vector<std::vector<T>>(cacheSize);
@@ -182,9 +188,8 @@ namespace app {
                    size_t index,
                    bool useCache,
                    size_t featuresOverlapIndex,
-                   size_t resizeScale)
-        {
-            T* tensorData = tflite::GetTensorData<T>(inputTensor);
+                   size_t resizeScale) {
+            T* tensorData = inputTensor->GetData<T>();
             std::vector<T> features;
 
             /* Reuse features from cache if cache is ready and sliding windows overlap.
@@ -209,19 +214,19 @@ namespace app {
         };
     }
 
-    template std::function<void (std::vector<int16_t>&, size_t , bool, size_t, size_t)>
-    FeatureCalc<int8_t>(TfLiteTensor* inputTensor,
+    template std::function<void(std::vector<int16_t>&, size_t, bool, size_t, size_t)>
+    FeatureCalc<int8_t>(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
                         size_t cacheSize,
-                        std::function<std::vector<int8_t> (std::vector<int16_t>&)> compute);
+                        std::function<std::vector<int8_t>(std::vector<int16_t>&)> compute);
 
     template std::function<void(std::vector<int16_t>&, size_t, bool, size_t, size_t)>
-    FeatureCalc<float>(TfLiteTensor *inputTensor,
+    FeatureCalc<float>(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
                        size_t cacheSize,
                        std::function<std::vector<float>(std::vector<int16_t>&)> compute);
 
-    std::function<void (std::vector<int16_t>&, int, bool, size_t, size_t)>
+    std::function<void(std::vector<int16_t>&, int, bool, size_t, size_t)>
     GetFeatureCalculator(audio::AdMelSpectrogram& melSpec,
-                         TfLiteTensor* inputTensor,
+                         const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
                          size_t cacheSize,
                          float trainingMean);
 

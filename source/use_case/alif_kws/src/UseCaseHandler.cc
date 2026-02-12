@@ -59,10 +59,11 @@ using arm::app::KwsClassifier;
 using arm::app::Profiler;
 using arm::app::ClassificationResult;
 using arm::app::ApplicationContext;
-using arm::app::Model;
+using arm::app::fwk::iface::Model;
 using arm::app::KwsPreProcess;
 using arm::app::KwsPostProcess;
-using arm::app::MicroNetKwsModel;
+using arm::app::fwk::tflm::MicroNetKwsModel;
+
 
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
@@ -137,20 +138,20 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         }
 
         /* Get Input and Output tensors for pre/post processing. */
-        TfLiteTensor* inputTensor = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < minTensorDims) {
+        } else if (inputShape.size() < minTensorDims) {
             printf_err("Input tensor dimension should be >= %d\n", minTensorDims);
             return false;
         }
 
         /* Get input shape for feature extraction. */
-        TfLiteIntArray* inputShape = model.GetInputShape(0);
-        const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
-        const uint32_t numMfccFrames = inputShape->data[arm::app::MicroNetKwsModel::ms_inputRowsIdx];
+        const uint32_t numMfccFeatures = inputShape[arm::app::fwk::tflm::MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFrames   = inputShape[arm::app::fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx];
 
         /* We expect to be sampling 1 second worth of data at a time.
         *  NOTE: This is only used for time stamp calculation. */
@@ -235,7 +236,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             DumpTensor(outputTensor);
 #endif /* VERIFY_TEST_OUTPUT */
 
-            hal_lcd_clear(COLOR_BLACK);
+            hal_display_clear(COLOR_BLACK);
 
             if (!PresentInferenceResult(infResults)) {
                 return false;
@@ -254,7 +255,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
 
@@ -275,7 +276,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                     std::string{"s: "} + topKeyword + std::string{" ("} +
                     std::to_string(static_cast<int>(score * 100)) + std::string{"%)"};
 
-            hal_lcd_display_text(resultStr.c_str(), resultStr.size(),
+            hal_display_show_text(resultStr.c_str(), resultStr.size(),
                     dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 

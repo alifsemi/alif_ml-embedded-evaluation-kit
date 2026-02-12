@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +18,15 @@
 #include "VisualWakeWordProcessing.hpp"
 
 #include "ImageUtils.hpp"
-#include "VisualWakeWordModel.hpp"
 #include "log_macros.h"
+#include <cstring>
 
 namespace arm {
 namespace app {
 
-    VisualWakeWordPreProcess::VisualWakeWordPreProcess(TfLiteTensor* inputTensor, bool rgb2Gray)
-    :m_inputTensor{inputTensor},
-     m_rgb2Gray{rgb2Gray}
+    VisualWakeWordPreProcess::VisualWakeWordPreProcess(
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor, bool rgb2Gray) :
+        m_inputTensor{inputTensor}, m_rgb2Gray{rgb2Gray}
     {}
 
     bool VisualWakeWordPreProcess::DoPreProcess(const void* data, size_t inputSize)
@@ -36,7 +37,7 @@ namespace app {
 
         auto input = static_cast<const uint8_t*>(data);
 
-        uint8_t* unsignedDstPtr = this->m_inputTensor->data.uint8;
+        auto* unsignedDstPtr = this->m_inputTensor->GetData<uint8_t>();
 
         if (this->m_rgb2Gray) {
             image::RgbToGrayscale(input, unsignedDstPtr, inputSize);
@@ -46,10 +47,10 @@ namespace app {
 
         /* VWW model pre-processing is image conversion from uint8 to [0,1] float values,
          * then quantize them with input quantization info. */
-        QuantParams inQuantParams = GetTensorQuantParams(this->m_inputTensor);
+        auto inQuantParams = this->m_inputTensor->GetQuantParams();
 
-        int8_t* signedDstPtr = this->m_inputTensor->data.int8;
-        for (size_t i = 0; i < this->m_inputTensor->bytes; i++) {
+        int8_t* signedDstPtr = this->m_inputTensor->GetData<int8_t>();
+        for (size_t i = 0; i < this->m_inputTensor->Bytes(); i++) {
             auto i_data_int8 = static_cast<int8_t>(
                     ((static_cast<float>(unsignedDstPtr[i]) / 255.0f) / inQuantParams.scale) + inQuantParams.offset
                     );
@@ -61,12 +62,13 @@ namespace app {
         return true;
     }
 
-    VisualWakeWordPostProcess::VisualWakeWordPostProcess(TfLiteTensor* outputTensor, Classifier& classifier,
-            const std::vector<std::string>& labels, std::vector<ClassificationResult>& results)
-            :m_outputTensor{outputTensor},
-             m_vwwClassifier{classifier},
-             m_labels{labels},
-             m_results{results}
+    VisualWakeWordPostProcess::VisualWakeWordPostProcess(
+        std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        Classifier& classifier,
+        const std::vector<std::string>& labels,
+        std::vector<ClassificationResult>& results) :
+        m_outputTensor{outputTensor}, m_vwwClassifier{classifier}, m_labels{labels},
+        m_results{results}
     {}
 
     bool VisualWakeWordPostProcess::DoPostProcess()

@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,7 @@
 
 #include "platform_drivers.h"   /* Platform drivers */
 #include "log_macros.h"         /* Logging macros */
+#include <stdio.h>
 
 bool hal_platform_init(void)
 {
@@ -27,15 +29,15 @@ bool hal_platform_init(void)
         return false;
     }
 
-    /* Initialise LCD */
-    if (0 != hal_lcd_init()) {
-        printf_err("hal_lcd_init failed\n");
-        return false;
-    }
-
     /* Initialise PMU */
     // Commented out, called in Profiler.cc so that it is also uninitialized. This is need for Alif chip to go power STOP mode.
     //hal_pmu_init();
+
+    /* Initialise LCD */
+    if (0 != hal_display_init()) {
+        printf_err("hal_display_init failed\n");
+        return false;
+    }
 
     return true;
 }
@@ -45,10 +47,7 @@ void hal_platform_release(void)
     platform_release();
 }
 
-bool hal_get_user_input(char* user_input, int size)
+void hal_await_user_input()
 {
-    if (1 != GetLine(user_input, size - 1)) {
-        return true;
-    }
-    return false;
+    fgetc(stdin);
 }

@@ -17,10 +17,11 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Image Classification example.
 
-This use-case example solves the classical computer vision problem of image classification. The ML sample was developed
-using the *MobileNet v2* model that was trained on the *ImageNet* dataset.
+This use-case example solves the classical computer vision problem of image classification. The ML sample works with
+the *MobileNet v2* model with TensorFlow Lite Micro, or either the *MobileNet v2* or *DeiT tiny* model with ExecuTorch.
+These models were both trained with the *ImageNet* dataset, and the overall pipeline is the same for both models.
 
-Use-case code could be found in the following directory:[source/use_case/img_class](../../source/use_case/img_class).
+Use-case code could be found in the following directory: [source/use_case/img_class](../../source/use_case/img_class).
 
 ### Prerequisites
 
@@ -33,8 +34,13 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Image Classification use-case
 specifies:
 
-- `img_class_MODEL_TFLITE_PATH` - The path to the NN model file in the `TFLite` format. The model is then processed and
-  included in the application `axf` file. The default value points to one of the delivered set of models.
+- `img_class_MODEL_PATH` - The path to the NN model file in `TFLite` (for TensorFlow Lite Micro) or
+  `PTE` (for ExecuTorch) format. The model is then processed and included in the application `axf` file.
+  The default value points to one of the delivered set of models.
+
+  When using ExecuTorch, there are two included models: *MobileNet V2* (default) and *DeiT tiny*.
+  To use *DeiT tiny*, use this argument to reference the generated `PTE` model for your target platform
+  under the `resources_downloaded/img_class/` directory.
 
     Note that the parameters `img_class_LABELS_TXT_FILE`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with
     the chosen model. In other words:
@@ -43,6 +49,21 @@ specifies:
     falls back to the Arm® *Cortex®-M* CPU if an unoptimized model is supplied.
   - if `ETHOS_U_NPU_ENABLED` is set to `Off` or `0`, the NN model is assumed to be unoptimized. Supplying an optimized
     model in this case results in a runtime error.
+
+- `img_class_NORM_MEAN` and `img_class_NORM_STD` - These options are available
+  when [building with ExecuTorch](../sections/building.md#build-options) and should be used together.
+  They specify the normalisation mean and standard deviation values for each of the three input channels,
+  and are used for converting uint8 image data to float32 which is the input type for the ExecuTorch models
+  provided with this use case.
+
+  The default values correspond to the *MobileNet V2* ExecuTorch model.
+  To use *DeiT tiny*, these options must be provided with values specific to that model:
+    - *MobileNet V2* (default):
+      - `-Dimg_class_NORM_MEAN="0.485, 0.456, 0.406"`
+      - `-Dimg_class_NORM_STD="0.229, 0.224, 0.225"`
+    - *DeiT tiny*:
+      - `-Dimg_class_NORM_MEAN="0.5, 0.5, 0.5"`
+      - `-Dimg_class_NORM_STD="0.5, 0.5, 0.5"`
 
 - `img_class_FILE_PATH`: The path to the directory containing the images, or a path to a single image file, that is to
    be used in the application. The default value points to the `resources/img_class/samples` folder containing the
@@ -57,6 +78,10 @@ specifies:
 - `img_class_LABELS_TXT_FILE`: The path to the text file for the label. The file is used to map a classified class index
   to the text label. The default value points to the delivered `labels.txt` file inside the delivery package. Change
   this parameter to point to the custom labels file to map custom NN model output correctly.
+
+  For the included `TFlite` version of *MobileNet V2*, this argument should reference the `labels_mobilenet_v2_1.0_224.txt` file.
+  For either of the included ExecuTorch models (*MobileNet V2* or *DeiT tiny*), this argument should reference
+  the `labels_mobilenet_v2_1.IMAGENET1K_V2.txt` file.
 
 - `img_class_ACTIVATION_BUF_SZ`: The intermediate, or activation, buffer size reserved for the NN model. By default, it
   is set to 2MiB and is enough for most models.
@@ -191,7 +216,7 @@ of any image does not match `IMAGE_SIZE`, then it is rescaled and padded so that
 
 ### Add custom model
 
-The application performs inference using the model pointed to by the CMake parameter `MODEL_TFLITE_PATH`.
+The application performs inference using the model pointed to by the CMake parameter `MODEL_PATH`.
 
 > **Note:** If you want to run the model using an *Ethos-U*, ensure that your custom model has been successfully run
 > through the Vela compiler *before* continuing.
@@ -201,30 +226,40 @@ For further information: [Optimize model with Vela compiler](../sections/buildin
 To run the application with a custom model, you must provide a `labels_<model_name>.txt` file of labels that are
 associated with the model. Each line of the file must correspond to one of the outputs in your model.
 
-Refer to the provided `labels_mobilenet_v2_1.0_224.txt` file for an example.
+Refer to the provided `labels_mobilenet_v2_1.0_224.txt` and `labels_mobilenet_v2_1.IMAGENET1K_V2.txt` files for examples.
 
-Then, you must set `img_class_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
+Then, you must set `img_class_MODEL_PATH` to the location of the Vela processed model file and
 `img_class_LABELS_TXT_FILE` to the location of the associated labels file.
 
-For example:
+For example, a TensorFlow Lite Micro based build tree can be generated by:
 
 ```commandline
 cmake .. \
-    -Dimg_class_MODEL_TFLITE_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dimg_class_MODEL_PATH=<path/to/custom_model_after_vela.tflite> \
+    -Dimg_class_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
+    -DUSE_CASE_BUILD=img_class
+```
+
+Or for ExecuTorch, it should be:
+
+```commandline
+cmake .. \
+    -DML_FRAMEWORK=ExecuTorch \
+    -Dimg_class_MODEL_PATH=<path/to/custom_model_from_arm_aot_compiler.pte> \
     -Dimg_class_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=img_class
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model file pointed to by `img_class_MODEL_TFLITE_PATH`, and the labels text file pointed to by
+The `.tflite` or `.pte` model file pointed to by `img_class_MODEL_PATH`, and the labels text file pointed to by
 `img_class_LABELS_TXT_FILE` are converted to C++ files during the CMake configuration stage. They are then compiled into
 the application for performing inference with.
 
 The log from the configuration stage tells you what model path and labels file have been used, for example:
 
 ```log
--- User option img_class_MODEL_TFLITE_PATH is set to <path/to/custom_model_after_vela.tflite>
+-- User option img_class_MODEL_PATH is set to <path/to/custom_model_after_vela.tflite>
 ...
 -- User option img_class_LABELS_TXT_FILE is set to <path/to/labels_custom_model.txt>
 ...
@@ -285,73 +320,6 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `img_class_FILE_PATH` points to a single file, or even a folder that contains a
-single image, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits for
-input from the user:
-
-```log
-User input required
-Enter option number from:
-
-  1. Classify next ifm
-  2. Classify ifm at chosen index
-  3. Run classification on all ifm
-  4. Show NN model info
-  5. List ifm
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next image: Runs a single inference on the next in line image from the collection of the compiled images.
-
-2. Classify image at chosen index: Runs inference on the chosen image.
-
-    > **Note:** Please make sure to select image index from within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four images, with indexes from `0` to `3`.
-
-3. Run classification on all images: Triggers sequential inference executions on all built-in images.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-    ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 150528 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 224
-    INFO -    2: 224
-    INFO -    3:   3
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.007843
-    INFO - ZeroPoint[0] = -1
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 1001 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 1001
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.03906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 1510004
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-
-    ```
-
-5. List Images: Prints a list of pair image indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    INFO - List of Files:
-    INFO - 0 => cat.bmp
-    INFO - 1 => dog.bmp
-    INFO - 2 => kimono.bmp
-    INFO - 3 => tiger.bmp
-    ```
-
 ### Running Image Classification
 
 Please select the first menu option to execute Image Classification.
@@ -403,4 +371,4 @@ The profiling section of the log shows that for this inference:
   model is not cycle-approximate or cycle-accurate
 
 The application prints the top five classes with indexes, a confidence score, and labels from the associated
-*labels_mobilenet_v2_1.0_224.txt* file. The FVP window also shows the output on its LCD section.
+labels file (e.g. `labels_mobilenet_v2_1.0_224.txt`). The FVP window also shows the output on its LCD section.

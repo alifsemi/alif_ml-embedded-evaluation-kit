@@ -1,5 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +19,15 @@
 #include "ImageUtils.hpp"
 #include "log_macros.h"
 
+#include <cstring>
+
 namespace arm {
 namespace app {
 
-    DetectorPreProcess::DetectorPreProcess(TfLiteTensor* inputTensor, bool rgb2Gray, bool convertToInt8)
-    :   m_inputTensor{inputTensor},
-        m_rgb2Gray{rgb2Gray},
-        m_convertToInt8{convertToInt8}
+    DetectorPreProcess::DetectorPreProcess(std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                           bool rgb2Gray,
+                                           bool convertToInt8) :
+        m_inputTensor{inputTensor}, m_rgb2Gray{rgb2Gray}, m_convertToInt8{convertToInt8}
     {}
 
     bool DetectorPreProcess::DoPreProcess(const void* data, size_t inputSize) {
@@ -35,14 +38,15 @@ namespace app {
         auto input = static_cast<const uint8_t*>(data);
 
         if (this->m_rgb2Gray) {
-            image::RgbToGrayscale(input, this->m_inputTensor->data.uint8, this->m_inputTensor->bytes);
+            image::RgbToGrayscale(
+                input, this->m_inputTensor->GetData<uint8_t>(), this->m_inputTensor->Bytes());
         } else {
-            std::memcpy(this->m_inputTensor->data.data, input, inputSize);
+            std::memcpy(this->m_inputTensor->GetData(), input, inputSize);
         }
         debug("Input tensor populated \n");
 
         if (this->m_convertToInt8) {
-            image::ConvertImgToInt8(this->m_inputTensor->data.data, this->m_inputTensor->bytes);
+            image::ConvertUint8ToInt8(this->m_inputTensor->GetData(), this->m_inputTensor->Bytes());
         }
 
         return true;

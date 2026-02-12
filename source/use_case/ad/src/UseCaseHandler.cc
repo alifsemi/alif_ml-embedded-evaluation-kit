@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,10 +18,11 @@
 #include "UseCaseHandler.hpp"
 
 #include "AdMelSpectrogram.hpp"
+#include "AdModel.hpp"
 #include "AdProcessing.hpp"
 #include "AudioUtils.hpp"
-#include "UseCaseCommonUtils.hpp"
 #include "ImageUtils.hpp"
+#include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "log_macros.h"
 
@@ -43,7 +44,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
 
-        auto& model = ctx.Get<Model&>("model");
+        auto& model = ctx.Get<fwk::iface::Model&>("model");
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
             return false;
@@ -55,15 +56,20 @@ namespace app {
         const auto scoreThreshold     = ctx.Get<float>("scoreThreshold");
         const auto trainingMean       = ctx.Get<float>("trainingMean");
 
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+        auto inputTensor  = model.GetInputTensor(0);
 
-        if (!inputTensor->dims) {
+        if (inputTensor->Shape().empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
         }
 
-        AdPreProcess preProcess{inputTensor, melSpecFrameLength, melSpecFrameStride, trainingMean};
+        AdPreProcess preProcess{inputTensor,
+                                fwk::tflm::AdModel::ms_inputRowsIdx,
+                                fwk::tflm::AdModel::ms_inputColsIdx,
+                                melSpecFrameLength,
+                                melSpecFrameStride,
+                                trainingMean};
         AdPostProcess postProcess{outputTensor};
         uint32_t machineOutputIndex = 0; /* default sample */
 
@@ -75,7 +81,11 @@ namespace app {
         }
 
         while (true) {
-            hal_lcd_clear(COLOR_BLACK);
+#ifdef INTERACTIVE_MODE
+            AwaitUserInput(); // Wait for user input before moving forward.
+#endif /* INTERACTIVE_MODE */
+
+            hal_display_clear(COLOR_BLACK);
             uint32_t nElements = 0;
             hal_audio_start();
             auto audioData = hal_audio_get_captured_frame(&nElements);
@@ -96,7 +106,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Start sliding through audio clip. */
@@ -128,7 +138,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             ctx.Set<float>("result", result);
@@ -148,7 +158,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
 
         /* Display each result */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
@@ -165,7 +175,7 @@ namespace app {
             anomalyResult += std::string("Everything fine, no anomaly detected!");
         }
 
-        hal_lcd_display_text(
+        hal_display_show_text(
             anomalyScore.c_str(), anomalyScore.size(), dataPsnTxtStartX1, rowIdx1, false);
 
         info("%s\n", anomalyScore.c_str());
