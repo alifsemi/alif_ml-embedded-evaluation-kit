@@ -1,9 +1,9 @@
 
-# Arm® ML embedded evaluation kit
+# Arm® ML Embedded Evaluation Kit
 
 ## Overview
 
-The ML embedded evaluation kit provides a range of ready to use machine learning (ML) applications for users to develop ML workloads running on the Arm® Ethos-U NPU and
+The ML Embedded Evaluation Kit provides a range of ready-to-use machine learning (ML) applications for users to develop ML workloads running on the Arm® Ethos-U NPU and
 Arm® Cortex-M CPUs. You can also access metrics such as inference cycle count to estimate performance.
 
 >*The Arm® Ethos-U NPU is a new class of ML processor, specifically designed
@@ -13,17 +13,19 @@ to accelerate ML computation in constrained embedded and IoT devices.*
 
 Experiment with the included end-to-end software use cases and create your own ML applications for Cortex-M CPU and Ethos-U NPU.
 
-|                          ML application                          |                                         Description                                         |                                                                                                                                           Neural Network Model                                                                                                                                            |
-|:----------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|      [Image classification](./docs/use_cases/img_class.md)       |                     Recognize the presence of objects in a given image                      |                                                                     [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)                                                                     |
-|         [Keyword spotting(KWS)](./docs/use_cases/kws.md)         |                     Recognize the presence of a key word in a recording                     |                                                                           [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)                                                                            |
-|   [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md)   |                               Transcribe words in a recording                               |                                                                            [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8)                                                                            |
-|            [KWS and ASR](./docs/use_cases/kws_asr.md)            | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8) |
-|           [Anomaly Detection](./docs/use_cases/ad.md)            |             Detecting abnormal behavior based on a sound recording of a machine             |                                                                          [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/)                                                                           |
-|     [Visual Wake Word](./docs/use_cases/visual_wake_word.md)     |                       Recognize if person is present in a given image                       |                                                               [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)                                                                |
-|      [Noise Reduction](./docs/use_cases/noise_reduction.md)      |                     Remove noise from audio while keeping speech intact                     |                                                                                [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8)                                                                                |
-|     [Object detection](./docs/use_cases/object_detection.md)     |                    Detects and draws face bounding box in a given image                     |                                                                                             [Yolo Fastest](https://github.com/emza-vs/ModelZoo/blob/master/object_detection/yolo-fastest_192_face_v4.tflite)                                                                                              
-| [Generic inference runner](./docs/use_cases/inference_runner.md) |            Code block allowing you to develop your own use case for Ethos-U NPU             |                                                                                                                                             Your custom model                                                                                                                                             |
+The ML Embedded Evaluation Kit supports both TensorFlow™ Lite for Microcontrollers and ExecuTorch frameworks.
+
+|                          ML application                          |                                         Description                                         |                                                                                                                     Neural Network Models<br/>(TensorFlow™ Lite for Microcontrollers)                                                                                                                     |                                                                       Neural Network Models<br/>(ExecuTorch)                                                                        |
+|:----------------------------------------------------------------:|:-------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|      [Image classification](./docs/use_cases/img_class.md)       |                     Recognize the presence of objects in a given image                      |                                                                     [Mobilenet V2](https://github.com/ARM-software/ML-zoo/tree/e0aa361b03c738047b9147d1a50e3f2dcb13dbcb/models/image_classification/mobilenet_v2_1.0_224/tflite_int8)                                                                     | [Mobilenet V2](https://docs.pytorch.org/vision/0.24/models/generated/torchvision.models.mobilenet_v2.html) / [DeiT tiny](https://huggingface.co/timm/deit_tiny_patch16_224.fb_in1k) |
+|         [Keyword spotting(KWS)](./docs/use_cases/kws.md)         |                     Recognize the presence of a key word in a recording                     |                                                                           [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)                                                                            |                                                                                                                                                                                     |
+|   [Automated Speech Recognition(ASR)](./docs/use_cases/asr.md)   |                               Transcribe words in a recording                               |                                                                            [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8)                                                                            |                                                      [Conformer](https://huggingface.co/Arm/stt_en_conformer_executorch_small)                                                      |
+|            [KWS and ASR](./docs/use_cases/kws_asr.md)            | Utilise Cortex-M and Ethos-U to transcribe words in a recording after a keyword was spotted | [MicroNet](https://github.com/ARM-software/ML-zoo/tree/9f506fe52b39df545f0e6c5ff9223f671bc5ae00/models/keyword_spotting/micronet_medium/tflite_int8)  [Wav2Letter](https://github.com/ARM-software/ML-zoo/tree/1a92aa08c0de49a7304e0a7f3f59df6f4fd33ac8/models/speech_recognition/wav2letter/tflite_int8) |                                                                                                                                                                                     |
+|           [Anomaly Detection](./docs/use_cases/ad.md)            |             Detecting abnormal behavior based on a sound recording of a machine             |                                                                          [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/)                                                                           |                                                                                                                                                                                     |
+|     [Visual Wake Word](./docs/use_cases/visual_wake_word.md)     |                       Recognize if person is present in a given image                       |                                                               [MicroNet](https://github.com/ARM-software/ML-zoo/tree/7dd3b16bb84007daf88be8648983c07f3eb21140/models/visual_wake_words/micronet_vww4/tflite_int8/vww4_128_128_INT8.tflite)                                                                |                                                                                                                                                                                     |
+|      [Noise Reduction](./docs/use_cases/noise_reduction.md)      |                     Remove noise from audio while keeping speech intact                     |                                                                                [RNNoise](https://github.com/ARM-software/ML-zoo/raw/a061600058097a2785d6f1f7785e5a2d2a142955/models/noise_suppression/RNNoise/tflite_int8)                                                                                |                                                                                                                                                                                     |
+|     [Object detection](./docs/use_cases/object_detection.md)     |                    Detects and draws face bounding box in a given image                     |                                                                                             [Yolo Fastest](https://github.com/emza-vs/ModelZoo/blob/master/object_detection/yolo-fastest_192_face_v4.tflite)                                                                                              |                                                                                                                                                                                     |
+| [Generic inference runner](./docs/use_cases/inference_runner.md) |            Code block allowing you to develop your own use case for Ethos-U NPU             |                                                                                                                                             Your custom model                                                                                                                                             |                                                                                                                                                                                     |
 
 ## Recommended build targets
 
@@ -46,52 +48,60 @@ To run evaluations using this software, we suggest using:
   the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55)
   - [Arm® Corstone™-310 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers a choice of the [Arm® Ethos™-U55 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u55)
   or [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination with
-  the [Arm® Cortex™-M55 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m55)
+  the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85)
   - [Arm® Corstone™-315 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers the [Arm® Ethos™-U65 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u65) software fast model in combination with
   the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85)
   - [Arm® Corstone™-320 MPS3 based Fixed Virtual Platform (FVP)](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps) offers the [Arm® Ethos™-U85 NPU](https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u85) software fast model in combination with
   the [Arm® Cortex™-M85 processor](https://www.arm.com/products/silicon-ip-cpu/cortex-m/cortex-m85)
-  - You can also take advantage of
-    [Arm Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware) (AVH) and [run the Fixed Virtual Platform
-    in the cloud](./docs/sections/arm_virtual_hardware.md).
 
->Arm® Corstone™-300 and Corstone™-310 design implementations are publicly available on [Download FPGA Images](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images) page,
-or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
+> Arm® Corstone™-300 and Corstone™-310 design implementations are publicly available on [Download FPGA Images](https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images) page,
+> or as a [Fixed Virtual Platform of the MPS3 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 >
 > Arm® Corstone™-315 and Corstone™-320 design implementations are publicly available as a [Fixed Virtual Platform of the MPS4 development board](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps).
 
-### Quick Start
+## Quick Start
 
 To run ML applications on the Cortex-M and Ethos-U NPU:
 
 1. First, verify that you have installed all of [the required prerequisites](docs/sections/building.md#build-prerequisites).
-   > **NOTE**: `Dockerfile` is also available if you would like to build a Docker image.
+   > **NOTE**: `Dockerfile` is also available if you would like to create a build environment using Docker.
 
-2. Clone the *Ethos-U* evaluation kit repository:
+2. Clone the ML Embedded Evaluation Kit (MLEK) repository:
 
     ```commandline
-    git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit"
+    git clone "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git"
     cd ml-embedded-evaluation-kit
     ```
 
 3. Pull all the external dependencies with the following command:
 
     ```commandline
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 
 4. Next, run the `build_default` Python script. It handles the downloading of the neural network models, compiling using 
-[Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela), and building the project using CMake.
+[Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela), and building the project using CMake.
 
-###### Arm compiler
-````commandline
-python3.10 ./build_default.py --toolchain arm
-````
+    ##### Arm Compiler for Embedded
+    ````commandline
+    python3.10 ./build_default.py --toolchain arm
+    ````
 
-###### GNU Arm Embedded toolchain
-```commandline
-python3.10 ./build_default.py
-```
+   ##### Arm Toolchain for Embedded
+    ```commandline
+    python3.10 ./build_default.py --toolchain llvm
+    ```
+
+    ##### Arm GNU Toolchain
+    ```commandline
+    python3.10 ./build_default.py
+    ```
+
+    ##### Build with ExecuTorch framework
+    ML framework defaults to TensorFlow™ Lite for Microcontrollers. To build with ExecuTorch:
+    ```commandline
+    python3.10 ./build_default.py --ml-framework executorch
+    ```
 
 5. Change directory to the generated cmake build folder which contains the `.axf` file output in the `bin`
    subdirectory. Launch the application by passing the `.axf` to the FVP you downloaded when installing the prerequisites.
@@ -99,11 +109,11 @@ python3.10 ./build_default.py
    following commands:
 
     ```commandline
-   From auto-generated (or custom) build directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
-   
-   From root directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
+    # From auto-generated (or custom) build directory:
+    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
+
+    # From root directory:
+    <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
     ```
 
 6. A telnet window is launched through which you can interact with the application and obtain performance figures.
@@ -114,7 +124,7 @@ python3.10 ./build_default.py
 > **Note:** The default flow assumes Arm® *Ethos™-U55* NPU usage, configured to use 128 Multiply-Accumulate units
 > and is sharing SRAM with the Arm® *Cortex®-M55*.
 >
-> Ml embedded evaluation kit supports:
+> ML Embedded Evaluation Kit supports:
 >
 > | *Ethos™-U* NPU | Default MACs/cc | Other MACs/cc supported | Default Memory Mode | Other Memory Modes supported |
 > |----------------|-----------------|-------------------------|---------------------|------------------------------|
@@ -143,20 +153,48 @@ python3.10 ./build_default.py
   - [Contributions](./docs/documentation.md#contributing)
   - **[FAQ](./docs/documentation.md#faq)**
 
+## ML framework compatibility
+
+The ML Embedded Evaluation Kit provides use cases implemented with both TensorFlow™ Lite for Microcontrollers and ExecuTorch.
+The current level of support for these frameworks against Arm NPUs and toolchains is indicated here.
+
+
+| Platform           | NPU             | TensorFlow™ Lite for Microcontrollers | ExecuTorch              |
+|--------------------|-----------------|---------------------------------------|-------------------------|
+| Arm® Corstone™-300 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
+| Arm® Corstone™-300 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-310 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
+| Arm® Corstone™-310 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-315 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
+| Arm® Corstone™-320 | Arm® Ethos™-U85 | ✅ Supported                           | ✅ Supported             |
+| Simple platform    | n/a             | ✅ Supported                           | ❌ Not yet supported     |
+| Native             | n/a             | ✅ Supported                           | ⚠️ Partially supported* |
+
+*The *Conformer* model for the ASR use case currently works only on Arm® Corstone™-320 with Arm® Ethos™-U85.
+
+| Toolchain                  | TensorFlow™ Lite for Microcontrollers | ExecuTorch          |
+|----------------------------|---------------------------------------|---------------------|
+| Arm Compiler for Embedded  | ✅ Supported                           | ❌ Not yet supported |
+| Arm Toolchain for Embedded | ✅ Supported                           | ❌ Not yet supported |
+| Arm GNU Toolchain          | ✅ Supported                           | ✅ Supported         |
+
 ## Software and hardware overview
 
 * The ML use cases have common code such as initializing the Hardware Abstraction Layer (HAL)
 
-* The common application code can be run on native host machine (x86_64 or aarch64) or Arm
-   Cortex-M architecture because of the HAL
+* The common application code can be run on native host machine (x86_64 or aarch64) or Arm® Cortex®-M architecture because of the HAL
 
-* Google® TensorFlow™ Lite for Microcontrollers inference engine is used to schedule
-  the execution of neural network models
-
-*  The [Ethos-U NPU driver](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-core-driver) is integrated TensorFlow Lite for Microcontrollers
-   *  ML operators are delegated to the NPU with CPU fall-back for unsupported operators
-   * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
-   * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
+* The ML framework abstraction layer wraps one of two inference engines supported by the project:
+    * Google® TensorFlow™ Lite for Microcontrollers
+      * The [Ethos-U NPU driver](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver)
+        is integrated into TensorFlow™ Lite for Microcontrollers
+      * ML operators are delegated to the NPU with CPU fall-back for unsupported operators
+      * [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git) is used to optimise CPU workload execution with int8 data type
+      * Final ML operator fall-back is TensorFlow™ Lite for Microcontrollers' reference kernels
+    * PyTorch® ExecuTorch
+      * The [Ethos-U NPU driver](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver) is invoked
+        via the ExecuTorch Ethos™-U delegate
+      * ML operators unsupported by the NPU fall back to CPU via the ExecuTorch Portable Operator Library
 
 * The provided set of common ML use-case functions will assist in implementing your application logic
    * When modifying use-case code, there is no requirement to modify other components of the eval kit
@@ -165,7 +203,7 @@ python3.10 ./build_default.py
 A high level overview of the different components in the software, and the platforms supported out-of-the-box, is shown
 in the diagram below.
 
-![APIs](docs/media/APIs_description.png)
+![APIs](docs/media/apis-description.png)
 >Note: The Ethos-U NPU software stack is described [here](https://developer.arm.com/documentation/101888/0500/NPU-software-overview/NPU-software-components?lang=en).
 
 For a more detailed description of the build graph with all major components, see [Building](./docs/documentation.md#building).
@@ -191,9 +229,9 @@ the [contributors guide](./docs/sections/contributing.md#contributions).
 
 ## Communication
 
-Please, if you want to start public discussion, raise any issues or questions related to this repository, use
-[https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit](https://discuss.mlplatform.org/c/ml-embedded-evaluation-kit/)
-forum.
+Please, if you want to start public discussion, raise any issues or questions related to this repository,
+please create a new GitLab issue here:
+[https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/issues](https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/issues).
 
 ## Inclusive language commitment
 
@@ -202,16 +240,16 @@ does not contain any non-inclusive language. If you find something that concerns
 
 ## Licenses
 
-The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](../LICENSE_APACHE_2.0.txt).
+The ML Embedded applications samples are provided under the Apache 2.0 license, see [License Apache 2.0](LICENSE_APACHE_2.0.txt).
 
 Application input data sample files are provided under their original license:
 
-|  | Licence | Provenience |
-|---------------|---------|---------|
-| [Automatic Speech Recognition Samples](./resources/asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/> |
-| [Image Classification Samples](./resources/img_class/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
-| [Keyword Spotting Samples](./resources/kws/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
+|                                                                                                   | Licence                                                                                         | Provenience                                                        |
+|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| [Automatic Speech Recognition Samples](./resources/asr/samples/files.md)                          | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://www.openslr.org/12/>                                       |
+| [Image Classification Samples](./resources/img_class/samples/files.md)                            | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |
+| [Keyword Spotting Samples](./resources/kws/samples/files.md)                                      | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
 | [Keyword Spotting and Automatic Speech Recognition Samples](./resources/kws_asr/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz> |
-| [Visual Wake Word Samples](./resources/vww/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
-| [Noise Reduction Samples](./resources/noise_reduction/samples/files.md) | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <https://datashare.ed.ac.uk/handle/10283/2791/> |
-| [Object Detection Samples](./resources/object_detection/samples/files.md) | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt) | <https://www.pexels.com> |
+| [Visual Wake Word Samples](./resources/vww/samples/files.md)                                      | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |
+| [Noise Reduction Samples](./resources/noise_reduction/samples/files.md)                           | [Creative Commons Attribution 4.0 International Public License](./resources/LICENSE_CC_4.0.txt) | <https://datashare.ed.ac.uk/handle/10283/2791/>                    |
+| [Object Detection Samples](./resources/object_detection/samples/files.md)                         | [Creative Commons Attribution 1.0](./resources/LICENSE_CC_1.0.txt)                              | <https://www.pexels.com>                                           |
