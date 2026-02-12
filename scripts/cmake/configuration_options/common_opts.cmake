@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
-#  affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,26 +27,47 @@ message(STATUS "Assessing common user options...")
 
 include(util_functions)
 
-USER_OPTION(LOG_LEVEL "Log level for the application"
-    LOG_LEVEL_INFO
-    STRING)
-
-## TensorFlow options
-USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources."
-    "${MLEK_DEPENDENCY_ROOT_DIR}/tensorflow"
-    PATH)
-
-USER_OPTION(TENSORFLOW_LITE_MICRO_BUILD_TYPE "TensorFlow Lite Mirco build type (release/debug etc.)"
-    $<IF:$<CONFIG:RELEASE>,release_with_logs,debug>
-    STRING)
-
-USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS "Select if TPIP downloads should be cleaned before each build."
-    OFF
-    BOOL)
-
-USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be added to a list of targets."
+USER_OPTION(MLEK_LOG_ENABLE "Enable MLEK logging functions."
     ON
     BOOL)
+
+USER_OPTION(MLEK_LOG_LEVEL "Log level for the application"
+    MLEK_LOG_LEVEL_INFO
+    STRING)
+
+USER_OPTION(ML_FRAMEWORK "Select the ML inference framework to be used."
+    "TensorFlowLiteMicro"
+    STRING
+)
+
+set_property(CACHE ML_FRAMEWORK PROPERTY STRINGS
+    TensorFlowLiteMicro
+    ExecuTorch)
+
+## TensorFlow options
+if (${ML_FRAMEWORK} STREQUAL TensorFlowLiteMicro)
+    USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources."
+            "${MLEK_DEPENDENCY_ROOT_DIR}/tensorflow"
+            PATH)
+
+    USER_OPTION(TENSORFLOW_LITE_MICRO_BUILD_TYPE "TensorFlow Lite Mirco build type (release/debug etc.)"
+            $<IF:$<CONFIG:RELEASE>,release_with_logs,debug>
+            STRING)
+
+    USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS "Select if TPIP downloads should be cleaned before each build."
+            OFF
+            BOOL)
+
+    USER_OPTION(TENSORFLOW_LITE_MICRO_CLEAN_BUILD "Select if clean target should be added to a list of targets."
+            ON
+            BOOL)
+elseif (${ML_FRAMEWORK} STREQUAL ExecuTorch)
+    USER_OPTION(EXECUTORCH_SRC_PATH "Root directory for ExecuTorch source tree."
+            "${MLEK_DEPENDENCY_ROOT_DIR}/executorch"
+            PATH)
+else ()
+    message(FATAL_ERROR "Invalid ML_FRAMEWORK: ${ML_FRAMEWORK}")
+endif ()
 
 USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, alif, simple_platform and native."
     mps3

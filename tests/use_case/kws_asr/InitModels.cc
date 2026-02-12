@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,36 +38,23 @@ namespace arm {
 /* Skip this test, Wav2LetterModel if not Vela optimized but only from ML-zoo will fail. */
 TEST_CASE("Init two Models", "[.]")
 {
-    arm::app::MicroNetKwsModel model1;
-    arm::app::MicroNetKwsModel model2;
+    arm::app::fwk::tflm::MicroNetKwsModel model1;
+    arm::app::fwk::tflm::Wav2LetterModel model2;
+    {
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),
+                                                    arm::app::kws::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model1.Init(computeMem, modelMem));
+    }
 
-    /* Ideally we should load the wav2letter model here, but there is
-     * none available to run on native (ops not supported on unoptimised
-     * version). However, we can certainly create two instances of the
-     * same type of model to see if our tensor arena re-use works as
-     * intended.
-     *
-     * @TODO: uncomment this when this model can run on native pipeline. */
-    //arm::app::Wav2LetterModel model2;     /* model2. */
-
-    /* Load/initialise the first model. */
-    REQUIRE(model1.Init(arm::app::tensorArena,
-                        sizeof(arm::app::tensorArena),
-                        arm::app::kws::GetModelPointer(),
-                        arm::app::kws::GetModelLen()));
-
-    /* Allocator instance should have been created. */
-    REQUIRE(nullptr != model1.GetAllocator());
-
-    /* Load the second model using the same allocator as model 1. */
-    REQUIRE(model2.Init(arm::app::tensorArena,
-                        sizeof(arm::app::tensorArena),
-                        arm::app::asr::GetModelPointer(),
-                        arm::app::asr::GetModelLen(),
-                        model1.GetAllocator()));
-
-    /* Make sure they point to the same allocator object. */
-    REQUIRE(model1.GetAllocator() == model2.GetAllocator());
+    {
+        arm::app::fwk::iface::MemoryRegion modelMem{arm::app::asr::GetModelPointer(),
+                                                    arm::app::asr::GetModelLen()};
+        arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                      sizeof(arm::app::tensorArena)};
+        REQUIRE(model2.Init(computeMem, modelMem, &model1.GetBackendData()));
+    }
 
     /* Both models should report being initialised. */
     REQUIRE(true == model1.IsInited());

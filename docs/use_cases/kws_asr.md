@@ -33,6 +33,8 @@ The `Yes` keyword is used to trigger full command recognition following the keyw
 
 Use-case code could be found in the following directory: [source/use_case/kws_asr](../../source/use_case/kws_asr).
 
+> **NOTE**: This use case only supports `TensorFlow Lite Micro`.
+
 ### Preprocessing and feature extraction
 
 In this use-case, there are two different models being used with different requirements for preprocessing. As such, each
@@ -163,7 +165,7 @@ See [Prerequisites](../documentation.md#prerequisites)
 In addition to the already specified build option in the main documentation, the Keyword Spotting and Automatic Speech
 Recognition use-case adds:
 
-- `kws_asr_MODEL_TFLITE_PATH_ASR` and `kws_asr_MODEL_TFLITE_PATH_KWS`: The path to the NN model file in `TFLite` format.
+- `kws_asr_MODEL_PATH_ASR` and `kws_asr_MODEL_PATH_KWS`: The path to the NN model file in `TFLite` format.
     The model is processed and then included into the application `axf` file. The default value points to one of the
     delivered set of models. Note that the parameters `kws_asr_LABELS_TXT_FILE_KWS`,
     `kws_asr_LABELS_TXT_FILE_ASR`,`TARGET_PLATFORM`, and `ETHOS_U_NPU_ENABLED` must be aligned with the chosen model. In
@@ -322,8 +324,8 @@ After compiling, your custom inputs have now replaced the default ones in the ap
 ### Add custom model
 
 The application performs KWS inference using the model pointed to by the CMake parameter
-`kws_asr_MODEL_TFLITE_PATH_KWS`. ASR inference is performed using the model pointed to by the CMake parameter
-`kws_asr_MODEL_TFLITE_PATH_ASR`.
+`kws_asr_MODEL_PATH_KWS`. ASR inference is performed using the model pointed to by the CMake parameter
+`kws_asr_MODEL_PATH_ASR`.
 
 This section assumes you want to change the existing ASR model to a custom one. If, instead, you want to change the KWS
 model, then the instructions are the same. Except ASR changes to KWS.
@@ -338,21 +340,21 @@ To run the application with a custom model, you must provide a `labels_<model_na
 associated with the model. Each line of the file must correspond to one of the outputs in your model. Refer to the
 provided `labels_wav2letter.txt` file for an example.
 
-Then, you must set `kws_asr_MODEL_TFLITE_PATH` to the location of the Vela processed model file and
+Then, you must set `kws_asr_MODEL_PATH` to the location of the Vela processed model file and
 `kws_asr_LABELS_TXT_FILE`to the location of the associated labels file.
 
 For example:
 
 ```commandline
 cmake .. \
-    -Dkws_asr_MODEL_TFLITE_PATH_ASR=<path/to/custom_asr_model_after_vela.tflite> \
+    -Dkws_asr_MODEL_PATH_ASR=<path/to/custom_asr_model_after_vela.tflite> \
     -Dkws_asr_LABELS_TXT_FILE_ASR=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=kws_asr
 ```
 
 > **Note:** Clean the build directory before re-running the CMake command.
 
-The `.tflite` model files pointed to by `kws_asr_MODEL_TFLITE_PATH_KWS` and `kws_asr_MODEL_TFLITE_PATH_ASR`, and the
+The `.tflite` model files pointed to by `kws_asr_MODEL_PATH_KWS` and `kws_asr_MODEL_PATH_ASR`, and the
 labels text files pointed to by `kws_asr_LABELS_TXT_FILE_KWS` and `kws_asr_LABELS_TXT_FILE_ASR` are converted to C++
 files during the CMake configuration stage. They are then compiled into the application for performing inference with.
 
@@ -360,7 +362,7 @@ The log from the configuration stage tells you what model path and labels file h
 
 ```log
 -- User option TARGET_PLATFORM is set to mps3
--- User option kws_asr_MODEL_TFLITE_PATH_ASR is set to <path/to/custom_asr_model_after_vela.tflite>
+-- User option kws_asr_MODEL_PATH_ASR is set to <path/to/custom_asr_model_after_vela.tflite>
 ...
 -- User option kws_asr_LABELS_TXT_FILE_ASR is set to <path/to/labels_custom_model.txt>
 ...
@@ -420,97 +422,9 @@ This also launches a telnet window with the standard output of the sample applic
 entries containing information about the pre-built application version, TensorFlow Lite Micro library version used, and
 data types. The log also includes the input and output tensor sizes of the model compiled into the executable binary.
 
-After the application has started, if `kws_asr_FILE_PATH` points to a single file, or even a folder that contains a
-single input file, then the inference starts immediately. If there are multiple inputs, it outputs a menu and then waits
-for input from the user.
-
-For example:
-
-```log
-User input required
-Enter option number from:
-
-1. Classify next audio clip
-2. Classify audio clip at chosen index
-3. Run classification on all audio clips
-4. Show NN model info
-5. List audio clips
-
-Choice:
-
-```
-
-What the preceding choices do:
-
-1. Classify next audio clip: Runs a single inference on the next in line.
-
-2. Classify audio clip at chosen index: Runs inference on the chosen audio clip.
-
-    > **Note:** Please make sure to select audio clip index within the range of supplied audio clips during application
-    > build. By default, a pre-built application has four files, with indexes from `0` to `3`.
-
-3. Run ... on all: Triggers sequential inference executions on all built-in applications.
-
-4. Show NN model info: Prints information about the model data type, input, and output, tensor sizes:
-
-   ```log
-    INFO - Model info:
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 490 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  49
-    INFO - 		2:  10
-    INFO - 		3:   1
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.201095
-    INFO - ZeroPoint[0] = -5
-    INFO - Model OUTPUT tensors:
-    INFO - 	tensor type is INT8
-    INFO - 	tensor occupies 12 bytes with dimensions
-    INFO - 		0:   1
-    INFO - 		1:  12
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.056054
-    INFO - ZeroPoint[0] = -54
-    INFO - Activation buffer (a.k.a tensor arena) size used: 127068
-    INFO - Number of operators: 1
-    INFO -  Operator 0: ethos-u
-
-    INFO - Model INPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 11544 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1: 296
-    INFO -    2:  39
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.110316
-    INFO - ZeroPoint[0] = -11
-    INFO - Model OUTPUT tensors:
-    INFO -  tensor type is INT8
-    INFO -  tensor occupies 4292 bytes with dimensions
-    INFO -    0:   1
-    INFO -    1:   1
-    INFO -    2: 148
-    INFO -    3:  29
-    INFO - Quant dimension: 0
-    INFO - Scale[0] = 0.003906
-    INFO - ZeroPoint[0] = -128
-    INFO - Activation buffer (a.k.a tensor arena) size used: 4184332
-    INFO - Number of operators: 1
-    INFO - Operator 0: ethos-u
-    ```
-
-5. List audio clips: Prints a list of pair ... indexes. The original filenames are embedded in the application, like so:
-
-    ```log
-    [INFO] List of Files:
-    [INFO] 0 => yes_no_go_stop.wav
-    ```
+After the application has started inferences are executed on inputs from `kws_asr_FILE_PATH` .
 
 ### Running Keyword Spotting and Automatic Speech Recognition
-
-Please select the first menu option to execute Keyword Spotting and Automatic Speech Recognition.
 
 The following example illustrates the output of an application:
 

@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +27,14 @@ project(${ASR_API_TARGET}
 
 # Create static library
 add_library(${ASR_API_TARGET} STATIC
+        src/AsrClassifier.cc
+        src/ConformerMelSpectrogram.cc
+        src/ConformerProcessing.cc
+        src/OutputDecode.cc
+        src/Wav2LetterMfcc.cc
         src/Wav2LetterPreprocess.cc
         src/Wav2LetterPostprocess.cc
-        src/Wav2LetterMfcc.cc
-        src/AsrClassifier.cc
-        src/OutputDecode.cc
-        src/Wav2LetterModel.cc)
+)
 
 target_include_directories(${ASR_API_TARGET} PUBLIC include)
 

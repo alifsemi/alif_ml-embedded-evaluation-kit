@@ -34,13 +34,15 @@ namespace app {
 void MainLoop()
 {
 
-    arm::app::AdModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::AdModel model; /* Model wrapper object. */
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::ad::GetModelPointer(),
+                                                arm::app::ad::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::ad::GetModelPointer(),
-                    arm::app::ad::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
+
         printf_err("failed to initialise model\n");
         return;
     }
@@ -50,7 +52,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"ad"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
     caseContext.Set<uint32_t>("index", 0);
     caseContext.Set<uint32_t>("result", 0);
     caseContext.Set<uint32_t>("frameLength", arm::app::ad::g_FrameLength);

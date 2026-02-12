@@ -41,7 +41,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     LANGUAGES       C CXX ASM)
 
 set(ALIF_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Alif kits")
-set_property(CACHE ALIF_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0")
+set_property(CACHE ALIF_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0" "OV5675")
 
 message(STATUS "Camera: ${ALIF_CAMERA_MODULE}")
 
@@ -91,6 +91,9 @@ set(DYNAMIC_IFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved fo
 math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
+
+# override the default 16 MiB of temporary allocation size with smaller one. Used with Executorch.
+set(ML_FWK_TMP_MEM_SIZE "0x00200000" CACHE STRING "Buffer size for ML framework's temporary allocations")
 
 #set(CMAKE_ASM_COMPILE_OBJECT    ${CMAKE_CXX_FLAGS})
 
@@ -144,6 +147,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/retarget_alif.c
     source/delay.c
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/MX66UM2G.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66um2g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>
@@ -168,11 +172,10 @@ endif()
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 
 ## Platform component: stdout
-set(STDOUT_RETARGET OFF CACHE BOOL "Retarget stdout/err to UART" FORCE)
-add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
+#add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
 ## Platform component: lcd
-add_subdirectory(${COMPONENTS_DIR}/lcd ${CMAKE_BINARY_DIR}/lcd)
+add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 
 ## Platform component: lvgl port
 add_subdirectory(${COMPONENTS_DIR}/lvgl_port ${CMAKE_BINARY_DIR}/lvgl_port)
@@ -190,7 +193,7 @@ add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -199,7 +202,7 @@ endif()
 
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
-    log
+    mlek_log
     platform_pmu
     cmsis_device
     rte_components
@@ -207,7 +210,7 @@ target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
 
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     ${PLATFORM_DRIVERS_CORE}
-    $<IF:$<BOOL:${GLCD_UI}>,lcd_lvgl,lcd_stubs>
+    $<IF:$<BOOL:${GLCD_UI}>,hal_display_lvgl,hal_display_stubs>
     audio_alif
     hal_audio_static_streams
     $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_alif,hal_camera_static_images>

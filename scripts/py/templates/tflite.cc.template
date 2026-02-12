@@ -33,7 +33,7 @@ namespace {{namespace}} {
 {{expression}};
 {% endfor %}
 
-static const uint8_t nn_model[] MODEL_TFLITE_ATTRIBUTE =
+static const uint8_t nn_model[] MODEL_SECTION_ATTRIBUTE =
 {% for model_hex_line in model_data %}
 {{model_hex_line}}
 {% endfor %}

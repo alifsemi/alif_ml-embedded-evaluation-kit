@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -34,6 +34,10 @@ if (BUILD_FVP_TESTS)
             ""
             FILEPATH)
 else()
+    USER_OPTION(INTERACTIVE_MODE "Enable interactive mode for use cases. Default - OFF"
+        OFF
+        BOOL)
+
     USER_OPTION(FVP_VSI_ENABLED "Indicates if Virtual Streaming Interface is enabled"
         OFF
         BOOL)
@@ -45,6 +49,12 @@ else()
     endif()
 endif()
 
+# Note that if semihosting enabled application is deployed on FVP, additional command-line
+# arguments are needed to enable it.
+USER_OPTION(SEMIHOSTING_ENABLED "Enable semihosting instead of UART retarget"
+    OFF
+    BOOL)
+
 # Assuming USE_SINGLE_INPUT (from common options) is included before these options
 # warn the developer that FVP tests may run using multiple sample files (depending on
 # the use case)
@@ -55,6 +65,11 @@ endif()
 # Warn if path to sources are set but VSI is not enabled.
 if (FVP_VSI_SRC_PATH AND (NOT FVP_VSI_ENABLED))
     message(WARNING "FVP_VSI_SRC_PATH provided but FVP_VSI_ENABLED is not set.")
+endif()
+
+# Fail if FVP tests and interactive mode are enabled - these modes are incompatible.
+if (BUILD_FVP_TESTS AND INTERACTIVE_MODE)
+    message(FATAL_ERROR "FVP tests cannot be enabled with INTERACTIVE_MODE enabled too.")
 endif()
 
 # Fail if FVP tests and VSI are enabled - the tests won't ever finish executing

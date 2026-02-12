@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,8 +24,6 @@
 /* Platform components */
 #include "RTE_Components.h" /* For CPU related defintiions */
 #include "timer_mps4.h"     /* Timer functions. */
-#include "user_input.h"     /* User input function */
-#include "lcd_img.h"        /* LCD functions. */
 
 /**
  * @brief   Initialises the platform components.

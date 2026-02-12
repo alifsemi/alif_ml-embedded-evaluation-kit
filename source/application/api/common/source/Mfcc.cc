@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,13 +32,15 @@ namespace audio {
                     const float melHiFreq,
                     const uint32_t numMfccFeats,
                     const uint32_t frameLen,
-                    const bool useHtkMethod):
+                    const bool useHtkMethod,
+                    const float melEneryMin):
                         m_samplingFreq(samplingFreq),
                         m_numFbankBins(numFbankBins),
                         m_melLoFreq(melLoFreq),
                         m_melHiFreq(melHiFreq),
                         m_numMfccFeatures(numMfccFeats),
                         m_frameLen(frameLen),
+                        m_melEnergyMin(melEneryMin),
 
                         /* Smallest power of 2 >= frame length. */
                         m_frameLenPadded(pow(2, ceil((log(frameLen)/log(2))))),
@@ -56,6 +58,7 @@ namespace audio {
         debug("\t Frame length:               %" PRIu32 "\n", this->m_frameLen);
         debug("\t Padded frame length:        %" PRIu32 "\n", this->m_frameLenPadded);
         debug("\t Using HTK for Mel scale:    %s\n", this->m_useHtkMethod ? "yes" : "no");
+        debug("\t Mel energy minimum value:   %f\n", this->m_melEnergyMin);
     }
 
     MFCC::MFCC(const MfccParams& params):
@@ -137,7 +140,7 @@ namespace audio {
         for (size_t bin = 0; bin < numBanks; ++bin) {
             auto filterBankIter = melFilterBank[bin].begin();
             auto end = melFilterBank[bin].end();
-            float melEnergy = FLT_MIN;  /* Avoid log of zero at later stages */
+            float melEnergy = this->m_params.m_melEnergyMin;  /* Avoid log of zero at later stages */
             const uint32_t firstIndex = filterBankFilterFirst[bin];
             const uint32_t lastIndex = std::min<uint32_t>(filterBankFilterLast[bin], fftVec.size() - 1);
 

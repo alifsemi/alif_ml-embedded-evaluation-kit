@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,25 +20,36 @@
 #  Wrapper for enabling stdout and stderr facility      #
 #########################################################
 # This is a wrapper around the UART module for CMSDK    #
-# and PL011 UART drivers with retarget functions.       #
+# and PL011 UART drivers with retarget functions for    #
+# bare-metal targets if semihosting is disabled.        #
 #########################################################
 
 cmake_minimum_required(VERSION 3.21.0)
 
 project(stdout
-    DESCRIPTION     "Standard output and err redirection over UART"
-    LANGUAGES       C CXX)
+        DESCRIPTION     "Standard output and err redirection over UART if available"
+        LANGUAGES       C CXX)
 
+# By default semihosting is disabled. Read more here:
+# https://developer.arm.com/documentation/dui0203/j/semihosting/about-semihosting/what-is-semihosting-
+if (CMAKE_CROSSCOMPILING)
+    set(SEMIHOSTING_ENABLED     OFF CACHE BOOL "Enable semihosting instead of UART retarget.")
+else()
+    # For native targets, we don't need to do anything.
+    return()
+endif()
 
-set(STDOUT_RETARGET     OFF CACHE BOOL "Retarget stdout/err to UART")
-
-# Interface library for standard output:
-set(STDOUT_IFACE_TARGET stdout_iface)
-add_library(${STDOUT_IFACE_TARGET} INTERFACE)
-target_include_directories(${STDOUT_IFACE_TARGET} INTERFACE include)
-
-if (STDOUT_RETARGET)
-
+if (SEMIHOSTING_ENABLED)
+    # Enable semihosting support
+    if (COMMAND configure_semihosting)
+        if (NOT TARGET cmsis_device)
+            message(FATAL_ERROR "cmsis_device target should be available to enable semihosting")
+        endif()
+        message(STATUS "Enabling semihosting")
+        configure_semihosting(cmsis_device ON)
+    endif()
+else()
+    # Retarget stdout to UART
     set(STDOUT_COMPONENT_CMSDK stdout_retarget_cmsdk)
     set(STDOUT_COMPONENT_PL011 stdout_retarget_pl011)
 
@@ -72,39 +84,22 @@ if (STDOUT_RETARGET)
     # Link
     target_link_libraries(${STDOUT_COMPONENT_CMSDK}
         PUBLIC
-        ${STDOUT_IFACE_TARGET}
         ethosu_uart_cmsdk_apb)
 
     target_link_libraries(${STDOUT_COMPONENT_PL011}
         PUBLIC
-        ${STDOUT_IFACE_TARGET}
         ethosu_uart_pl011)
+
+    # Check if semihosting configuration is available
+    if (COMMAND configure_semihosting)
+        configure_semihosting(${STDOUT_COMPONENT_CMSDK} OFF)
+        configure_semihosting(${STDOUT_COMPONENT_PL011} OFF)
+    endif()
 
     # Display status
     message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
     message(STATUS "*******************************************************")
     message(STATUS "Library:                  " ${STDOUT_COMPONENT_CMSDK})
     message(STATUS "Library:                  " ${STDOUT_COMPONENT_PL011})
-    message(STATUS "*******************************************************")
-
-else()
-
-    # Create static library for retarget (stdout/err over UART)
-    set(STDOUT_COMPONENT stdout)
-    add_library(${STDOUT_COMPONENT} STATIC)
-
-    ## Component sources - public
-    target_sources(${STDOUT_COMPONENT}
-        PUBLIC
-        source/user_input.c)
-
-    target_link_libraries(${STDOUT_COMPONENT}
-        PUBLIC
-        ${STDOUT_IFACE_TARGET})
-
-    # Display status
-    message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
-    message(STATUS "*******************************************************")
-    message(STATUS "Library:                  " ${STDOUT_COMPONENT})
     message(STATUS "*******************************************************")
 endif()

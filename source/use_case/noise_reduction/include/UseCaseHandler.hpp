@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -45,16 +45,15 @@ namespace app {
      *
      * @return  number of bytes written to memory.
      */
-    size_t DumpOutputTensorsToMemory(Model& model, uint8_t* memAddress,
-                                    size_t memSize);
+    size_t DumpOutputTensorsToMemory(fwk::iface::Model& model, uint8_t* memAddress, size_t memSize);
 
     /**
      * @brief Dumps the audio file header.
      * This functionality is required for RNNoise use case as we want to
      * save the inference output to a file. Dumping out the header to a
      * memory location will allow the Arm FVP or MPS3 to extract the
-     * contents of this memory location to a file. 
-     * The header contains the following information 
+     * contents of this memory location to a file.
+     * The header contains the following information
      * int32_t filenameLength: filename length
      * uint8_t[] filename: the string containing the file name (without trailing \0)
      * int32_t dumpSizeByte: audiofile buffer size in bytes

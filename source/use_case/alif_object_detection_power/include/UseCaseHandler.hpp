@@ -35,7 +35,7 @@
 namespace alif {
 namespace app {
 
-    bool ObjectDetectionInit(arm::app::YoloFastestModel& model);
+    bool ObjectDetectionInit(arm::app::fwk::tflm::YoloFastestModel& model);
 
     /**
      * @brief       Handles the inference event.

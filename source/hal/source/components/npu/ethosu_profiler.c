@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its affiliates
- * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
+ * <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -161,7 +161,7 @@ meaning that the memory saving affects of both can be combined. Quantization the
 Arm® Ethos-U NPU.
 
 If you are targetting an Arm® Ethos-U NPU then the output TensorFlow Lite file will also need to be passed through the Vela
-compiler for further optimizations before it can be used (see [Optimize model with Vela compiler](./building.md#optimize-custom-model-with-vela-compiler)).
+compiler for further optimizations before it can be used (see [Optimize model with Vela compiler](../docs/sections/building.md#optimize-custom-model-with-vela-compiler)).
 
 ## References
 
@@ -170,4 +170,4 @@ compiler for further optimizations before it can be used (see [Optimize model wi
 - [Quantization aware training](https://www.tensorflow.org/model_optimization/guide/quantization/training)
 - [Weight pruning](https://www.tensorflow.org/model_optimization/guide/pruning)
 - [Weight clustering](https://www.tensorflow.org/model_optimization/guide/clustering)
-- [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela)
+- [Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela)

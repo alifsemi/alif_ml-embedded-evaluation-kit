@@ -27,6 +27,18 @@
             }
         },
         {
+            "name": "llvm-toolchain",
+            "description": "Use clang/llvm toolchain.",
+            "hidden": true,
+            "inherits": ["source-dir"],
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "STRING",
+                    "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-llvm.cmake"
+                }
+            }
+        },
+        {
             "name": "armclang-toolchain",
             "description": "Use armclang toolchain.",
             "hidden": true,
@@ -35,6 +47,10 @@
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "STRING",
                     "value": "$env{MLEK_BASE_DIR}scripts/cmake/toolchains/bare-metal-armclang.cmake"
+                },
+                "ML_FRAMEWORK": {
+                    "type": "STRING",
+                    "value": "TensorFlowLiteMicro"
                 }
             }
         },

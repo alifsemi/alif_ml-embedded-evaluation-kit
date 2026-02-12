@@ -42,27 +42,25 @@ Contributions are only accepted under the following conditions:
 This repository follows a set of guidelines, best practices, programming styles and conventions,
 see:
 
-- [Coding standards and guidelines](./docs/sections/coding_guidelines.md#Coding-standards-and-guidelines)
-    - [Introduction](./docs/sections/coding_guidelines.md#introduction)
-    - [Language version](./docs/sections/coding_guidelines.md#language-version)
-    - [File naming](./docs/sections/coding_guidelines.md#file-naming)
-    - [File layout](./docs/sections/coding_guidelines.md#file-layout)
-    - [Block Management](./docs/sections/coding_guidelines.md#block-management)
-    - [Naming Conventions](./docs/sections/coding_guidelines.md#naming-conventions)
-        - [C++ language naming conventions](./docs/sections/coding_guidelines.md#c_language-naming-conventions)
-        - [C language naming conventions](./docs/sections/coding_guidelines.md#c-language-naming-conventions)
-    - [Layout and formatting conventions](./docs/sections/coding_guidelines.md#layout-and-formatting-conventions)
-    - [Language usage](./docs/sections/coding_guidelines.md#language-usage)
+- [Coding standards and guidelines](./coding_guidelines.md#Coding-standards-and-guidelines)
+    - [Introduction](./coding_guidelines.md#introduction)
+    - [Language version](./coding_guidelines.md#language-version)
+    - [File naming](./coding_guidelines.md#file-naming)
+    - [File layout](./coding_guidelines.md#file-layout)
+    - [Block Management](./coding_guidelines.md#block-management)
+    - [Naming Conventions](./coding_guidelines.md#naming-conventions)
+        - [C++ language naming conventions](./coding_guidelines.md#cpp-language-naming-conventions)
+        - [C language naming conventions](./coding_guidelines.md#c-language-naming-conventions)
+    - [Layout and formatting conventions](./coding_guidelines.md#layout-and-formatting-conventions)
+    - [Language usage](./coding_guidelines.md#language-usage)
 
 ### Code Reviews
 
-Contributions must go through code review. Code reviews are performed through the
-[mlplatform.org Gerrit server](https://review.mlplatform.org). Contributors need to sign up to this
-Gerrit server with their GitHub account credentials.
-In order to be merged a patch needs to:
+Contributions must go through code review. Code reviews are performed through
+[Arm's GitLab server](https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git). Contributors need to sign up to this
+GitLab server with their GitHub account credentials, and request permission to create a project fork.
 
-- get a "+1 Verified" from the pre-commit job.
-- get a "+2 Code-review" from a reviewer, it means the patch has the final approval.
+A project maintainer will review the patch and ensure it passes necessary CI checks before it can be merged.
 
 ### Testing
 

@@ -1,0 +1,62 @@
+#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited
+#  and/or its affiliates <open-source-office@arm.com>
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+variables:
+  BUILD_LOG_LEVEL: "LOG_LEVEL_INFO"
+  EVAL_KIT_DIR: "$CI_PROJECT_DIR"
+  IMAGE: "$CI_REGISTRY_IMAGE:latest"
+
+build_and_test:
+  stage: build_and_test
+  tags: [$RUNNER_TAG]
+  image: $IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"
+  parallel:
+    matrix:
+      - TARGET_PLATFORM: native
+        CMAKE_BUILD_TYPE: [Debug, Release]
+        TOOLCHAIN_FILE: native-gcc
+        RUNNER_TAG: [arm64-shared, amd64-shared]
+  before_script:
+    - git submodule update --init --recursive
+    - python3 ./set_up_default_resources.py
+  script:
+    - echo "Building with PLATFORM=$TARGET_PLATFORM, TYPE=$CMAKE_BUILD_TYPE, TOOLCHAIN=$TOOLCHAIN_FILE"
+    - mkdir -p build-${TARGET_PLATFORM}-${CMAKE_BUILD_TYPE}-${TOOLCHAIN_FILE}
+    - cd build-${TARGET_PLATFORM}-${CMAKE_BUILD_TYPE}-${TOOLCHAIN_FILE}
+    - export PATH="$EVAL_KIT_DIR/resources_downloaded/env/bin:$PATH"
+    - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DTARGET_PLATFORM=${TARGET_PLATFORM} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/${TOOLCHAIN_FILE}.cmake -DLOG_LEVEL=$BUILD_LOG_LEVEL ..
+    - make VERBOSE=1 -j1
+    # Run tests
+    - |
+      fail=0
+      for TEST in ./bin/*tests; do
+        TEST_NAME=$(basename $TEST)
+        RESULT_XML=${TEST_NAME}-result.xml
+        $TEST -r junit -o $RESULT_XML || fail=1
+      done
+      if [ $fail = 1 ]; then
+        echo "One or more tests have failed to run. Check console log"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - build-${TARGET_PLATFORM}-${CMAKE_BUILD_TYPE}-${TOOLCHAIN_FILE}/*.xml
+    reports:
+      junit:
+        - build-${TARGET_PLATFORM}-${CMAKE_BUILD_TYPE}-${TOOLCHAIN_FILE}/*.xml
+    expire_in: 2h

@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -56,7 +56,7 @@ endif()
 add_subdirectory(${ETHOS_U_NPU_TIMING_ADAPTER_SRC_PATH} ${CMAKE_BINARY_DIR}/timing_adapter)
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -85,7 +85,7 @@ target_compile_definitions(${ETHOS_U_NPU_TA_COMPONENT}
 ## Add dependencies
 target_link_libraries(${ETHOS_U_NPU_TA_COMPONENT} PUBLIC
     timing_adapter
-    log)
+    mlek_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

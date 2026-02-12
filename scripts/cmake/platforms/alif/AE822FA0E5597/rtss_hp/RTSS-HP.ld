@@ -82,9 +82,21 @@ SECTIONS
     *libstdc++.a:cp-demangle.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s4.o(.text* .rodata*)
     *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s4.c.obj(.text* .rodata*)
+    *libcmsis-nn.a:arm_*_s16.c.obj(.text* .rodata*)
+    *libquantized_kernels.a:*(.text* .rodata*)
+    *libexecutorch.a:*(.text* .rodata*)
+    *libexecutorch_core.a:*(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM
+
+#ifndef NDEBUG
+  .libcmsis_nn.at_mram : ALIGN(16)
+  {
+    *libcmsis-nn.a:arm_*_s8.c.obj(.text* .rodata*)
+  } > MRAM
+#endif
 
   .copy.table.at_mram : ALIGN(4)
   {
@@ -154,10 +166,12 @@ SECTIONS
 
   .bss.sram (NOLOAD) : ALIGN(8)
   {
+    * (.bss.large_ram)                     /* Large LVGL buffers */
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.NoInit.ethos_u_cache)
     * (.bss.NoInit.activation_buf_sram) /* 2MB */
+    * (.bss.NoInit.temp_buf_sram)
   } > SRAM
 
   .bss.unstriped (NOLOAD) :

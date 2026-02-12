@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,23 +40,23 @@ namespace app {
 
 using namespace test;
 
-bool RunInference(arm::app::Model& model, const int8_t vec[])
+bool RunInference(arm::app::fwk::iface::Model& model, const int8_t vec[])
 {
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
+    auto inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
-    const size_t copySz = inputTensor->bytes < AD_IN_FEATURE_VEC_DATA_SIZE
-                              ? inputTensor->bytes
+    const size_t copySz = inputTensor->Bytes() < AD_IN_FEATURE_VEC_DATA_SIZE
+                              ? inputTensor->Bytes()
                               : AD_IN_FEATURE_VEC_DATA_SIZE;
 
-    memcpy(inputTensor->data.data, vec, copySz);
+    memcpy(inputTensor->GetData(), vec, copySz);
 
     return model.RunInference();
 }
 
-bool RunInferenceRandom(arm::app::Model& model)
+bool RunInferenceRandom(arm::app::fwk::iface::Model& model)
 {
-    TfLiteTensor* inputTensor = model.GetInputTensor(0);
+    auto inputTensor = model.GetInputTensor(0);
     REQUIRE(inputTensor);
 
     std::random_device rndDevice;
@@ -65,7 +65,7 @@ bool RunInferenceRandom(arm::app::Model& model)
 
     auto gen = [&dist, &mersenneGen]() { return dist(mersenneGen); };
 
-    std::vector<int8_t> randomInput(inputTensor->bytes);
+    std::vector<int8_t> randomInput(inputTensor->Bytes());
     std::generate(std::begin(randomInput), std::end(randomInput), gen);
 
     REQUIRE(RunInference(model, randomInput.data()));
@@ -73,33 +73,36 @@ bool RunInferenceRandom(arm::app::Model& model)
 }
 
 template <typename T>
-void TestInference(const T* input_goldenFV, const T* output_goldenFV, arm::app::Model& model)
+void TestInference(const T* input_goldenFV,
+                   const T* output_goldenFV,
+                   arm::app::fwk::iface::Model& model)
 {
     REQUIRE(RunInference(model, static_cast<const T*>(input_goldenFV)));
 
-    TfLiteTensor* outputTensor = model.GetOutputTensor(0);
+    auto outputTensor = model.GetOutputTensor(0);
 
     REQUIRE(outputTensor);
-    REQUIRE(outputTensor->bytes == OFM_0_DATA_SIZE);
-    auto tensorData = tflite::GetTensorData<T>(outputTensor);
+    REQUIRE(outputTensor->Bytes() == OFM_0_DATA_SIZE);
+    auto tensorData = outputTensor->GetData<T>();
     REQUIRE(tensorData);
 
-    for (size_t i = 0; i < outputTensor->bytes; i++) {
+    for (size_t i = 0; i < outputTensor->Bytes(); i++) {
         REQUIRE(static_cast<int>(tensorData[i]) == static_cast<int>(((T)output_goldenFV[i])));
     }
 }
 
 TEST_CASE("Running random inference with TensorFlow Lite Micro and AdModel Int8", "[AD]")
 {
-    arm::app::AdModel model{};
-
+    arm::app::fwk::tflm::AdModel model{};
     REQUIRE_FALSE(model.IsInited());
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::ad::GetModelPointer(),
-                       arm::app::ad::GetModelLen()));
-    REQUIRE(model.IsInited());
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::ad::GetModelPointer(),
+                                                arm::app::ad::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
+    /* Load the model. */
+    REQUIRE(model.Init(computeMem, modelMem));
+    REQUIRE(model.IsInited());
     REQUIRE(RunInferenceRandom(model));
 }
 
@@ -114,13 +117,15 @@ TEST_CASE("Running golden vector inference with TensorFlow Lite Micro and AdMode
 
         DYNAMIC_SECTION("Executing inference with re-init")
         {
-            arm::app::AdModel model{};
-
+            arm::app::fwk::tflm::AdModel model{};
             REQUIRE_FALSE(model.IsInited());
-            REQUIRE(model.Init(arm::app::tensorArena,
-                               sizeof(arm::app::tensorArena),
-                               arm::app::ad::GetModelPointer(),
-                               arm::app::ad::GetModelLen()));
+            arm::app::fwk::iface::MemoryRegion modelMem{arm::app::ad::GetModelPointer(),
+                                                        arm::app::ad::GetModelLen()};
+            arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                          sizeof(arm::app::tensorArena)};
+
+            /* Load the model. */
+            REQUIRE(model.Init(computeMem, modelMem));
             REQUIRE(model.IsInited());
 
             TestInference<int8_t>(input_goldenFV, output_goldenFV, model);

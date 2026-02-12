@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,27 +17,26 @@
 #include "Wav2LetterPreprocess.hpp"
 
 #include "PlatformMath.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "Tensor.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 namespace arm {
 namespace app {
 
-    AsrPreProcess::AsrPreProcess(TfLiteTensor* inputTensor, const uint32_t numMfccFeatures,
-                                 const uint32_t numFeatureFrames, const uint32_t mfccWindowLen,
-                                 const uint32_t mfccWindowStride
-            ):
-            m_mfcc(numMfccFeatures, mfccWindowLen),
-            m_inputTensor(inputTensor),
-            m_mfccBuf(numMfccFeatures, numFeatureFrames),
-            m_delta1Buf(numMfccFeatures, numFeatureFrames),
-            m_delta2Buf(numMfccFeatures, numFeatureFrames),
-            m_mfccWindowLen(mfccWindowLen),
-            m_mfccWindowStride(mfccWindowStride),
-            m_numMfccFeats(numMfccFeatures),
-            m_numFeatureFrames(numFeatureFrames)
+    AsrPreProcess::AsrPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                 const uint32_t numMfccFeatures,
+                                 const uint32_t numFeatureFrames,
+                                 const uint32_t mfccWindowLen,
+                                 const uint32_t mfccWindowStride) :
+        m_mfcc(numMfccFeatures, mfccWindowLen), m_inputTensor(inputTensor),
+        m_mfccBuf(numMfccFeatures, numFeatureFrames),
+        m_delta1Buf(numMfccFeatures, numFeatureFrames),
+        m_delta2Buf(numMfccFeatures, numFeatureFrames), m_mfccWindowLen(mfccWindowLen),
+        m_mfccWindowStride(mfccWindowStride), m_numMfccFeats(numMfccFeatures),
+        m_numFeatureFrames(numFeatureFrames)
     {
         if (numMfccFeatures > 0 && mfccWindowLen > 0) {
             this->m_mfcc.Init();
@@ -88,25 +87,27 @@ namespace app {
         this->Standarize();
 
         /* Quantise. */
-        QuantParams quantParams = GetTensorQuantParams(this->m_inputTensor);
+        auto quantParams = this->m_inputTensor->GetQuantParams();
 
         if (0 == quantParams.scale) {
             printf_err("Quantisation scale can't be 0\n");
             return false;
         }
 
-        switch(this->m_inputTensor->type) {
-            case kTfLiteUInt8:
-                return this->Quantise<uint8_t>(
-                        tflite::GetTensorData<uint8_t>(this->m_inputTensor), this->m_inputTensor->bytes,
-                        quantParams.scale, quantParams.offset);
-            case kTfLiteInt8:
-                return this->Quantise<int8_t>(
-                        tflite::GetTensorData<int8_t>(this->m_inputTensor), this->m_inputTensor->bytes,
-                        quantParams.scale, quantParams.offset);
-            default:
-                printf_err("Unsupported tensor type %s\n",
-                    TfLiteTypeGetName(this->m_inputTensor->type));
+        switch (this->m_inputTensor->Type()) {
+        case fwk::iface::TensorType::UINT8:
+            return this->Quantise<uint8_t>(this->m_inputTensor->GetData<uint8_t>(),
+                                           this->m_inputTensor->Bytes(),
+                                           quantParams.scale,
+                                           quantParams.offset);
+        case fwk::iface::TensorType::INT8:
+            return this->Quantise<int8_t>(this->m_inputTensor->GetData<int8_t>(),
+                                          this->m_inputTensor->Bytes(),
+                                          quantParams.scale,
+                                          quantParams.offset);
+        default:
+            printf_err("Unsupported tensor type %s\n",
+                       fwk::iface::GetTensorDataTypeName(this->m_inputTensor->Type()));
         }
 
         return false;

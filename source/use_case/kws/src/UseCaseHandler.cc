@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -43,7 +43,7 @@ namespace app {
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
         auto& profiler             = ctx.Get<Profiler&>("profiler");
-        auto& model                = ctx.Get<Model&>("model");
+        auto& model                = ctx.Get<fwk::iface::Model&>("model");
         const auto mfccFrameLength = ctx.Get<int>("frameLength");
         const auto mfccFrameStride = ctx.Get<int>("frameStride");
         const auto scoreThreshold  = ctx.Get<float>("scoreThreshold");
@@ -51,9 +51,10 @@ namespace app {
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
         constexpr int minTensorDims =
-            static_cast<int>((MicroNetKwsModel::ms_inputRowsIdx > MicroNetKwsModel::ms_inputColsIdx)
-                                 ? MicroNetKwsModel::ms_inputRowsIdx
-                                 : MicroNetKwsModel::ms_inputColsIdx);
+            static_cast<int>((fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx >
+                              fwk::tflm::MicroNetKwsModel::ms_inputColsIdx)
+                                 ? fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx
+                                 : fwk::tflm::MicroNetKwsModel::ms_inputColsIdx);
 
         if (!model.IsInited()) {
             printf_err("Model is not initialised! Terminating processing.\n");
@@ -61,21 +62,21 @@ namespace app {
         }
 
         /* Get Input and Output tensors for pre/post processing. */
-        TfLiteTensor* inputTensor  = model.GetInputTensor(0);
-        TfLiteTensor* outputTensor = model.GetOutputTensor(0);
-        if (!inputTensor->dims) {
+        auto inputTensor  = model.GetInputTensor(0);
+        auto outputTensor = model.GetOutputTensor(0);
+
+        const auto inputShape = inputTensor->Shape();
+        if (inputShape.empty()) {
             printf_err("Invalid input tensor dims\n");
             return false;
-        } else if (inputTensor->dims->size < minTensorDims) {
+        } else if (inputShape.size() < minTensorDims) {
             printf_err("Input tensor dimension should be >= %d\n", minTensorDims);
             return false;
         }
 
         /* Get input shape for feature extraction. */
-        TfLiteIntArray* inputShape     = model.GetInputShape(0);
-        const uint32_t numMfccFeatures = inputShape->data[MicroNetKwsModel::ms_inputColsIdx];
-        const uint32_t numMfccFrames =
-            inputShape->data[arm::app::MicroNetKwsModel::ms_inputRowsIdx];
+        const uint32_t numMfccFeatures = inputShape[fwk::tflm::MicroNetKwsModel::ms_inputColsIdx];
+        const uint32_t numMfccFrames   = inputShape[fwk::tflm::MicroNetKwsModel::ms_inputRowsIdx];
 
         /* We expect to be sampling 1 second worth of data at a time.
          * NOTE: This is only used for time stamp calculation. */
@@ -100,7 +101,11 @@ namespace app {
 
         /* Loop to process audio clips. */
         while (true) {
-            hal_lcd_clear(COLOR_BLACK);
+#ifdef INTERACTIVE_MODE
+            AwaitUserInput(); // Wait for user input before moving forward.
+#endif /* INTERACTIVE_MODE */
+
+            hal_display_clear(COLOR_BLACK);
 
             uint32_t nElements = 0;
             hal_audio_start();
@@ -122,7 +127,7 @@ namespace app {
 
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
 
             /* Start sliding through audio clip. */
@@ -163,7 +168,7 @@ namespace app {
 
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
-            hal_lcd_display_text(
+            hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, false);
 
             ctx.Set<std::vector<kws::KwsResult>>("results", finalResults);
@@ -184,7 +189,7 @@ namespace app {
         constexpr uint32_t dataPsnTxtStartY1 = 30;
         constexpr uint32_t dataPsnTxtYIncr   = 16; /* Row index increment. */
 
-        hal_lcd_set_text_color(COLOR_GREEN);
+        hal_display_set_text_color(COLOR_GREEN);
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
 
@@ -205,7 +210,7 @@ namespace app {
                                     std::to_string(static_cast<int>(score * 100)) +
                                     std::string{"%)"};
 
-            hal_lcd_display_text(
+            hal_display_show_text(
                 resultStr.c_str(), resultStr.size(), dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 

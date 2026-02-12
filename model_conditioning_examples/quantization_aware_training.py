@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +42,7 @@ TensorFlow Lite file will also need to be passed through the Vela
 compiler for further optimizations before it can be used.
 
 For more information on using vela see:
-    https://git.mlplatform.org/ml/ethos-u/ethos-u-vela.git/about/
+    https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/main/README.md
 For more information on quantization aware training see:
     https://www.tensorflow.org/model_optimization/guide/quantization/training
 """

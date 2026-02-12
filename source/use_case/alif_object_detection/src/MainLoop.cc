@@ -47,13 +47,15 @@ void MainLoop()
 {
     init_trigger_rx();
 
-    arm::app::YoloFastestModel model;  /* Model wrapper object. */
+    arm::app::fwk::tflm::YoloFastestModel model;  /* Model wrapper object. */
+
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::object_detection::GetModelPointer(),
+                                                arm::app::object_detection::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::object_detection::GetModelPointer(),
-                    arm::app::object_detection::GetModelLen())) {
+    if (!model.Init(computeMem, modelMem)) {
         printf_err("Failed to initialise model\n");
         return;
     }
@@ -68,7 +70,7 @@ void MainLoop()
 
     arm::app::Profiler profiler{"object_detection"};
     caseContext.Set<arm::app::Profiler&>("profiler", profiler);
-    caseContext.Set<arm::app::Model&>("model", model);
+    caseContext.Set<arm::app::fwk::iface::Model&>("model", model);
 
     /* Loop. */
     do {

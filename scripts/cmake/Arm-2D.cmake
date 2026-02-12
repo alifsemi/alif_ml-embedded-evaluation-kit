@@ -73,7 +73,7 @@ target_compile_definitions(${ARM_2D_TARGET} PUBLIC
 
 ## Add dependencies
 target_link_libraries(${ARM_2D_TARGET} PUBLIC
-    cmsis-dsp
+    arm::cmsis-dsp
     rte_components
 )
 

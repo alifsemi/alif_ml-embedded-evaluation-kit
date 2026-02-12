@@ -111,11 +111,12 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/drivers/source/pinconf.c
     ${ALIF_CMSIS_PATH}/drivers/source/uart.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi.c
-    ${ALIF_CMSIS_PATH}/drivers/source/ospi_hyperram_xip.c
+    ${ALIF_CMSIS_PATH}/drivers/source/ospi_psram_xip.c
     ${ALIF_CMSIS_PATH}/components/Source/driver_phy.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
-    ${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/MX66UW1G.c>
     )
 
 # Alif DFP RTE_Components does not support yet building the module if it is disabled
@@ -126,6 +127,7 @@ if (NOT IS_BALLETTO_DEVICE)
     ${ALIF_CMSIS_PATH}/drivers/source/csi.c
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},MT9M114>:${ALIF_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},ARX3A0>:${ALIF_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},OV5675>:${ALIF_CMSIS_PATH}/components/Source/OV5675_camera_sensor.c>
     )
 endif() # not DevKit_E1C
 

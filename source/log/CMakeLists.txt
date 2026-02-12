@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,24 +21,42 @@
 #######################################################
 cmake_minimum_required(VERSION 3.21.0)
 
-set(BSP_LOGGING_TARGET log)
+set(MLEK_LOG_TARGET mlek_log)
 
-project(${BSP_LOGGING_TARGET}
+project(${MLEK_LOG_TARGET}
     DESCRIPTION     "Generic logging formatting header-only interface lib."
     LANGUAGES       C)
 
-add_library(${BSP_LOGGING_TARGET} INTERFACE)
+set(MLEK_LOG_ENABLE ON
+    CACHE BOOL "Enable MLEK logging functions. Set this to off to disable all logging.")
 
-if (DEFINED LOG_LEVEL)
-    message(STATUS "Setting log level to ${LOG_LEVEL}")
-    target_compile_definitions(${BSP_LOGGING_TARGET}
-        INTERFACE
-        LOG_LEVEL=${LOG_LEVEL})
+set(MLEK_LOG_LEVEL  MLEK_LOG_LEVEL_INFO
+    CACHE STRING "Log level.")
+
+set_property(CACHE MLEK_LOG_LEVEL PROPERTY STRINGS
+    MLEK_LOG_LEVEL_TRACE
+    MLEK_LOG_LEVEL_DEBUG
+    MLEK_LOG_LEVEL_INFO
+    MLEK_LOG_LEVEL_WARN
+    MLEK_LOG_LEVEL_ERROR)
+
+add_library(${MLEK_LOG_TARGET} INTERFACE)
+
+if (MLEK_LOG_ENABLE)
+    target_compile_definitions(${MLEK_LOG_TARGET} INTERFACE
+        MLEK_LOG_ENABLE)
+    if (DEFINED MLEK_LOG_LEVEL)
+        message(STATUS "Setting log level to ${MLEK_LOG_LEVEL}")
+        target_compile_definitions(${MLEK_LOG_TARGET} INTERFACE
+            MLEK_LOG_LEVEL=${MLEK_LOG_LEVEL})
+    endif()
+else()
+    message(STATUS "MLEK log is disabled")
 endif()
 
-target_include_directories(${BSP_LOGGING_TARGET} INTERFACE include)
+target_include_directories(${MLEK_LOG_TARGET} INTERFACE include)
 
-message(STATUS "*******************************************************")
-message(STATUS "Library                                : " ${BSP_LOGGING_TARGET})
-message(STATUS "CMAKE_SYSTEM_PROCESSOR                 : " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "*******************************************************")
+message(STATUS "**************************************************")
+message(STATUS "Library:                " ${MLEK_LOG_TARGET})
+message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
+message(STATUS "**************************************************")

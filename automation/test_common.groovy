@@ -36,7 +36,7 @@ def build_hp(String build_type, String toolchain, String board) {
 def build_he_tcm(String build_type, String toolchain, String board) {
 
     build_path = "build_${toolchain}_he_tcm_${build_type}_${board}".toLowerCase()
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_BOARD=${board} -Dalif_kws_USE_APP_MENU=1"
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DLOG_LEVEL=LOG_LEVEL_DEBUG -DTARGET_BOARD=${board} -DINTERACTIVE_MODE=1"
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin

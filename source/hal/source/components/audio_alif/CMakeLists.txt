@@ -63,7 +63,7 @@ target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
     TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 ## Logging utilities:
-if (NOT TARGET log)
+if (NOT TARGET mlek_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -73,7 +73,7 @@ endif()
 ## Add dependencies
 target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
-    log
+    mlek_log
     cmsis_device
     rte_components)
 
@@ -82,8 +82,13 @@ target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
     arm_math
     platform_drivers_core)
 
-set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
-set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
+if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e1c"))
+    set(TARGET_MICS "PDM" CACHE STRING "Microphone selection")
+    set_property(CACHE TARGET_MICS PROPERTY STRINGS "PDM")
+else()
+    set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
+    set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM")
+endif()
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

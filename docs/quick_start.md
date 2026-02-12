@@ -6,9 +6,6 @@ The aim of this quick start guide is to enable you to run an application quickly
 This documentation assumes that you are using an Arm® *Ethos™-U55* NPU, it is configured to use 128 Multiply-Accumulate units, and is
 sharing SRAM with the Arm® *Cortex®-M55*.
 
-The FVP is also available via Arm Virtual Hardware (AVH) hosted on AWS. This quick start guide can also be executed on an AVH instance
-but requires creation of an AWS account and basic configuration outlined [here](./sections/arm_virtual_hardware.md#getting-started).
-
 To get started quickly, please follow these steps:
 
 1. First, verify that you have installed all of [the required prerequisites](sections/building.md#build-prerequisites).
@@ -16,7 +13,7 @@ To get started quickly, please follow these steps:
 2. Clone the *Ethos-U* evaluation kit repository:
 
     ```commandline
-    git clone "https://review.mlplatform.org/ml/ethos-u/ml-embedded-evaluation-kit"
+    git clone "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit.git"
     cd ml-embedded-evaluation-kit
     ```
 
@@ -29,12 +26,12 @@ To get started quickly, please follow these steps:
 4. Next, you can use the `build_default` Python script to get the default neural network models, compile them with Vela,
     and then build the project.
 
-    [Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela) is an open-source Python tool. Vela
+    [Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela) is an open-source Python tool. Vela
     converts a TensorFlow Lite for Microcontrollers neural network model into an optimized model that can run on an
     embedded system that contains an *Ethos-U* NPU.
 
     It is worth noting that to take full advantage of the capabilities of the NPU, the neural network operators must be
-    [supported by Vela](https://review.mlplatform.org/plugins/gitiles/ml/ethos-u/ethos-u-vela/+/HEAD/SUPPORTED_OPS.md).
+    [supported by Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/4.2.0/SUPPORTED_OPS.md).
 
     ```commandline
     python3 ./build_default.py
@@ -46,6 +43,16 @@ To get started quickly, please follow these steps:
     ```commandline
     python3 ./build_default.py --toolchain arm
     ```
+
+    Similarly, for using LLVM based toolchain like the Arm Toolchain for Embedded:
+    ```commandline
+    python3 ./build_default.py --toolchain llvm
+    ```
+
+    > By default, the ML framework used is TensorFlow Lite Micro. To build with ExecuTorch instead, use:
+    > ```commandline
+    > python3 ./build_default.py --ml-framework executorch
+    > ```
 
 5. Launch the project as explained in the following section: [Deployments](sections/deployment.md#deployment). In quick
    start guide, we use the keyword spotting application and the FVP.
@@ -71,7 +78,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==4.1.0
+env/bin/python3 -m pip install ethos-u-vela==4.4.1
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \
@@ -379,4 +386,3 @@ cmake .. \
 > **Note:** The performance summary produced by Vela compiler for any model are **estimates only**. Vela computes
 > these figures from a very simplistic approximation. To get accurate performance numbers for the Arm Ethos-U NPU,
 > please use the FVP or the FPGA platforms.
-

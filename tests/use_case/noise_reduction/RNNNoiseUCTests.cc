@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -39,48 +39,51 @@ namespace app {
     arm::app::ApplicationContext caseContext;                   \
     arm::app::Profiler profiler{"noise_reduction"};             \
     caseContext.Set<arm::app::Profiler&>("profiler", profiler); \
-    caseContext.Set<arm::app::RNNoiseModel&>("model", model);
+    caseContext.Set<arm::app::fwk::tflm::RNNoiseModel&>("model", model);
 
 TEST_CASE("Verify output tensor memory dump")
 {
     constexpr size_t maxMemDumpSz = 0x100000;   /* 1 MiB worth of space */
     std::vector<uint8_t> memPool(maxMemDumpSz); /* Memory pool */
-    arm::app::RNNoiseModel model{};
+    arm::app::fwk::tflm::RNNoiseModel model;    /* Model wrapper object. */
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                arm::app::rnn::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
 
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::rnn::GetModelPointer(),
-                       arm::app::rnn::GetModelLen()));
+    /* Load the model. */
+    REQUIRE(model.Init(computeMem, modelMem));
     REQUIRE(model.IsInited());
 
     /* Populate the output tensors */
     const size_t numOutputs = model.GetNumOutputs();
     size_t sizeToWrite      = 0;
-    size_t lastTensorSize   = model.GetOutputTensor(numOutputs - 1)->bytes;
+    size_t lastTensorSize   = model.GetOutputTensor(numOutputs - 1)->Bytes();
 
     for (size_t i = 0; i < numOutputs; ++i) {
-        TfLiteTensor* tensor = model.GetOutputTensor(i);
-        auto* tData          = tflite::GetTensorData<uint8_t>(tensor);
+        auto tensor = model.GetOutputTensor(i);
+        auto* tData = tensor->GetData<uint8_t>();
 
-        if (tensor->bytes > 0) {
-            memset(tData, static_cast<uint8_t>(i), tensor->bytes);
-            sizeToWrite += tensor->bytes;
+        if (tensor->Bytes() > 0) {
+            memset(tData, static_cast<uint8_t>(i), tensor->Bytes());
+            sizeToWrite += tensor->Bytes();
         }
     }
 
     SECTION("Positive use case")
     {
         /* Run the memory dump */
-        auto bytesWritten = DumpOutputTensorsToMemory(model, memPool.data(), memPool.size());
+        auto bytesWritten =
+            arm::app::DumpOutputTensorsToMemory(model, memPool.data(), memPool.size());
         REQUIRE(sizeToWrite == bytesWritten);
 
         /* Verify the dump */
         size_t k = 0;
         for (size_t i = 0; i < numOutputs && k < memPool.size(); ++i) {
-            TfLiteTensor* tensor = model.GetOutputTensor(i);
-            auto* tData          = tflite::GetTensorData<uint8_t>(tensor);
+            auto tensor = model.GetOutputTensor(i);
+            auto* tData = tensor->GetData<uint8_t>();
 
-            for (size_t j = 0; j < tensor->bytes && k < memPool.size(); ++j) {
+            for (size_t j = 0; j < tensor->Bytes() && k < memPool.size(); ++j) {
                 REQUIRE(tData[j] == memPool[k++]);
             }
         }
@@ -89,7 +92,8 @@ TEST_CASE("Verify output tensor memory dump")
     SECTION("Limited memory - skipping last tensor")
     {
         /* Run the memory dump */
-        auto bytesWritten = DumpOutputTensorsToMemory(model, memPool.data(), sizeToWrite - 1);
+        auto bytesWritten =
+            arm::app::DumpOutputTensorsToMemory(model, memPool.data(), sizeToWrite - 1);
         REQUIRE(lastTensorSize > 0);
         REQUIRE(bytesWritten == sizeToWrite - lastTensorSize);
     }
@@ -97,7 +101,7 @@ TEST_CASE("Verify output tensor memory dump")
     SECTION("Zero memory")
     {
         /* Run the memory dump */
-        auto bytesWritten = DumpOutputTensorsToMemory(model, memPool.data(), 0);
+        auto bytesWritten = arm::app::DumpOutputTensorsToMemory(model, memPool.data(), 0);
         REQUIRE(bytesWritten == 0);
     }
 }
@@ -106,7 +110,7 @@ TEST_CASE("Inference run all clips", "[RNNoise]")
 {
     PLATFORM
 
-    arm::app::RNNoiseModel model;
+    arm::app::fwk::tflm::RNNoiseModel model; /* Model wrapper object. */
 
     CONTEXT
 
@@ -114,11 +118,14 @@ TEST_CASE("Inference run all clips", "[RNNoise]")
     caseContext.Set<uint32_t>("frameLength", arm::app::rnn::g_FrameLength);
     caseContext.Set<uint32_t>("frameStride", arm::app::rnn::g_FrameStride);
 
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::rnn::GetModelPointer(),
+                                                arm::app::rnn::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::tensorArena,
+                                                  sizeof(arm::app::tensorArena)};
+
     /* Load the model. */
-    REQUIRE(model.Init(arm::app::tensorArena,
-                       sizeof(arm::app::tensorArena),
-                       arm::app::rnn::GetModelPointer(),
-                       arm::app::rnn::GetModelLen()));
+    REQUIRE(model.Init(computeMem, modelMem));
+    REQUIRE(model.IsInited());
 
     REQUIRE(arm::app::NoiseReductionHandler(caseContext));
 }

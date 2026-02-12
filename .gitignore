@@ -1,6 +1,7 @@
 # IDE related
 .vscode
 .idea
+*.swp
 
 # Downloaded files
 resources_downloaded

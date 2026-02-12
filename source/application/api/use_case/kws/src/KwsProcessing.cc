@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
  */
 #include "KwsProcessing.hpp"
 #include "log_macros.h"
-#include "MicroNetKwsModel.hpp"
+
+#include <cstring>
 
 namespace arm {
 namespace app {
 
-    KwsPreProcess::KwsPreProcess(TfLiteTensor* inputTensor, size_t numFeatures, size_t numMfccFrames,
-            int mfccFrameLength, int mfccFrameStride
-        ):
-        m_inputTensor{inputTensor},
-        m_mfccFrameLength{mfccFrameLength},
-        m_mfccFrameStride{mfccFrameStride},
-        m_numMfccFrames{numMfccFrames},
+    KwsPreProcess::KwsPreProcess(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                 size_t numFeatures,
+                                 size_t numMfccFrames,
+                                 int mfccFrameLength,
+                                 int mfccFrameStride) :
+        m_inputTensor{inputTensor}, m_mfccFrameLength{mfccFrameLength},
+        m_mfccFrameStride{mfccFrameStride}, m_numMfccFrames{numMfccFrames},
         m_mfcc{audio::MicroNetKwsMFCC(numFeatures, mfccFrameLength)}
     {
         this->m_mfcc.Init();
@@ -37,7 +38,7 @@ namespace app {
                 (this->m_mfccFrameLength - this->m_mfccFrameStride);
 
         /* Creating an MFCC feature sliding window for the data required for 1 inference. */
-        this->m_mfccSlidingWindow = audio::SlidingWindow<const int16_t>(nullptr, this->m_audioDataWindowSize,
+        this->m_mfccSlidingWindow = audio::SlidingWindow<const int16_t>(this->m_audioDataWindowSize,
                 this->m_mfccFrameLength, this->m_mfccFrameStride);
 
         /* For longer audio clips we choose to move by half the audio window size
@@ -109,10 +110,11 @@ namespace app {
      * @param[in] compute       Features calculator function.
      * @return                  Lambda function to compute features.
      */
-    template<class T>
-    std::function<void (std::vector<int16_t>&, size_t, bool, size_t)>
-    KwsPreProcess::FeatureCalc(TfLiteTensor* inputTensor, size_t cacheSize,
-                               std::function<std::vector<T> (std::vector<int16_t>& )> compute)
+    template <class T>
+    std::function<void(std::vector<int16_t>&, size_t, bool, size_t)>
+    KwsPreProcess::FeatureCalc(const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                               size_t cacheSize,
+                               std::function<std::vector<T>(std::vector<int16_t>&)> compute)
     {
         /* Feature cache to be captured by lambda function. */
         static std::vector<std::vector<T>> featureCache = std::vector<std::vector<T>>(cacheSize);
@@ -120,9 +122,8 @@ namespace app {
         return [=](std::vector<int16_t>& audioDataWindow,
                    size_t index,
                    bool useCache,
-                   size_t featuresOverlapIndex)
-        {
-            T* tensorData = tflite::GetTensorData<T>(inputTensor);
+                   size_t featuresOverlapIndex) {
+            T* tensorData = inputTensor->GetData<T>();
             std::vector<T> features;
 
             /* Reuse features from cache if cache is ready and sliding windows overlap.
@@ -143,43 +144,40 @@ namespace app {
         };
     }
 
-    template std::function<void (std::vector<int16_t>&, size_t , bool, size_t)>
-    KwsPreProcess::FeatureCalc<int8_t>(TfLiteTensor* inputTensor,
-                                       size_t cacheSize,
-                                       std::function<std::vector<int8_t> (std::vector<int16_t>&)> compute);
+    template std::function<void(std::vector<int16_t>&, size_t, bool, size_t)>
+    KwsPreProcess::FeatureCalc<int8_t>(
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+        size_t cacheSize,
+        std::function<std::vector<int8_t>(std::vector<int16_t>&)> compute);
 
     template std::function<void(std::vector<int16_t>&, size_t, bool, size_t)>
-    KwsPreProcess::FeatureCalc<float>(TfLiteTensor* inputTensor,
-                                      size_t cacheSize,
-                                      std::function<std::vector<float>(std::vector<int16_t>&)> compute);
+    KwsPreProcess::FeatureCalc<float>(
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+        size_t cacheSize,
+        std::function<std::vector<float>(std::vector<int16_t>&)> compute);
 
-
-    std::function<void (std::vector<int16_t>&, int, bool, size_t)>
-    KwsPreProcess::GetFeatureCalculator(audio::MicroNetKwsMFCC& mfcc, TfLiteTensor* inputTensor, size_t cacheSize)
+    std::function<void(std::vector<int16_t>&, int, bool, size_t)>
+    KwsPreProcess::GetFeatureCalculator(audio::MicroNetKwsMFCC& mfcc,
+                                        std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+                                        size_t cacheSize)
     {
         std::function<void (std::vector<int16_t>&, size_t, bool, size_t)> mfccFeatureCalc = nullptr;
 
-        TfLiteQuantization quant = inputTensor->quantization;
+        auto quant = inputTensor->GetQuantParams();
 
-        if (kTfLiteAffineQuantization == quant.type) {
-            auto* quantParams = (TfLiteAffineQuantization*) quant.params;
-            const float quantScale = quantParams->scale->data[0];
-            const int quantOffset = quantParams->zero_point->data[0];
-
-            switch (inputTensor->type) {
-                case kTfLiteInt8: {
-                    mfccFeatureCalc = this->FeatureCalc<int8_t>(inputTensor,
-                                                          cacheSize,
-                                                          [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
-                                                              return mfcc.MfccComputeQuant<int8_t>(audioDataWindow,
-                                                                                                   quantScale,
-                                                                                                   quantOffset);
-                                                          }
-                    );
-                    break;
-                }
-                default:
-                printf_err("Tensor type %s not supported\n", TfLiteTypeGetName(inputTensor->type));
+        if (quant.scale) {
+            switch (inputTensor->Type()) {
+            case fwk::iface::TensorType::INT8: {
+                mfccFeatureCalc = this->FeatureCalc<int8_t>(
+                    inputTensor, cacheSize, [=, &mfcc](std::vector<int16_t>& audioDataWindow) {
+                        return mfcc.MfccComputeQuant<int8_t>(
+                            audioDataWindow, quant.scale, quant.offset);
+                    });
+                break;
+            }
+            default:
+                printf_err("Tensor type %s not supported\n",
+                           fwk::iface::GetTensorDataTypeName(inputTensor->Type()));
             }
         } else {
             mfccFeatureCalc = this->FeatureCalc<float>(inputTensor, cacheSize,
@@ -190,13 +188,13 @@ namespace app {
         return mfccFeatureCalc;
     }
 
-    KwsPostProcess::KwsPostProcess(TfLiteTensor* outputTensor, KwsClassifier& classifier,
+    KwsPostProcess::KwsPostProcess(const std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+                                   KwsClassifier& classifier,
                                    const std::vector<std::string>& labels,
-                                   std::vector<ClassificationResult>& results, size_t averagingWindowLen)
-            :m_outputTensor{outputTensor},
-             m_kwsClassifier{classifier},
-             m_labels{labels},
-             m_results{results}
+                                   std::vector<ClassificationResult>& results,
+                                   size_t averagingWindowLen) :
+        m_outputTensor{outputTensor}, m_kwsClassifier{classifier}, m_labels{labels},
+        m_results{results}
     {
         this->m_resultHistory = {averagingWindowLen, std::vector<float>(labels.size())};
     }

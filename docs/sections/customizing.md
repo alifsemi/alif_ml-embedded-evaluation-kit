@@ -7,15 +7,14 @@
   - [Application context](./customizing.md#application-context)
   - [Profiler](./customizing.md#profiler)
   - [NN Model API](./customizing.md#nn-model-api)
-  - [Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)
+  - [Adding custom ML use-case](./customizing.md#adding-custom-ml-use-case)
   - [Implementing main loop](./customizing.md#implementing-main-loop)
   - [Implementing custom NN model](./customizing.md#implementing-custom-nn-model)
     - [Using GetModelPointer and GetModelLen methods](./customizing.md#using-getmodelpointer-and-getmodellen-methods)
   - [Executing inference](./customizing.md#executing-inference)
   - [Printing to console](./customizing.md#printing-to-console)
-  - [Reading user input from console](./customizing.md#reading-user-input-from-console)
   - [Output to MPS3 LCD](./customizing.md#output-to-mps3-lcd)
-  - [Building custom use-case](./customizing.md#building-custom-use_case)
+  - [Building custom use-case](./customizing.md#building-custom-use-case)
   - [Adding custom platform support](./customizing.md#adding-custom-platform-support)
 
 This section describes how to implement a custom Machine Learning application running on Arm® *Corstone™-300* based FVP
@@ -161,51 +160,100 @@ profiler.PrintProfilingResult();
 
 ## NN Model API
 
-The Model, which refers to neural network model, is an abstract class wrapping the underlying TensorFlow Lite Micro API.
-It provides methods to perform common operations such as TensorFlow Lite Micro framework initialization, inference
+The Model, which refers to neural network model, is an abstract class wrapping the underlying ML framework API.
+
+The `Model` class has two subclasses which are themselves abstract: `TflmModel` and `EtModel`.
+These subclasses implement the Model API methods for TensorFlow Lite Micro and ExecuTorch frameworks respectively.
+
+The Model API provides methods to perform common operations such as framework initialization, inference
 execution, accessing input, and output tensor objects.
 
-To use this abstraction, import the `Model.hpp` header.
+To use this abstraction, import the `Model.hpp` header or either `TflmModel.hpp` or `EtModel.hpp` if you prefer.
 
-| Method name               | Description                                                                                                                                                            |
-|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GetInputTensor`          | Returns the pointer to the model's input tensor.                                                                                                                       |
-| `GetOutputTensor`         | Returns the pointer to the model's output tensor                                                                                                                       |
-| `GetType`                 | Returns the model's data type                                                                                                                                          |
-| `GetInputShape`           | Return the pointer to the model's input shape                                                                                                                          |
-| `GetOutputShape`          | Return the pointer to the model's output shape.                                                                                                                        |
-| `GetNumInputs`            | Return the number of input tensors the model has.                                                                                                                      |
-| `GetNumOutputs`           | Return the number of output tensors the model has.                                                                                                                     |
-| `LogTensorInfo`           | Logs the tensor information to `stdout` for the given tensor pointer. Includes: Tensor name, tensor address, tensor type, tensor memory size, and quantization params. |
-| `LogInterpreterInfo`      | Logs the interpreter information to stdout.                                                                                                                            |
-| `Init`                    | Initializes the TensorFlow Lite Micro framework, allocates require memory for the model.                                                                               |
-| `GetAllocator`            | Gets the allocator pointer for the instance.                                                                                                                           |
-| `IsInited`                | Checks if this model object has been initialized.                                                                                                                      |
-| `IsDataSigned`            | Checks if the model uses signed data type.                                                                                                                             |
-| `RunInference`            | Runs the inference, so invokes the interpreter.                                                                                                                        |
-| `ShowModelInfoHandler`    | Model information handler common to all models.                                                                                                                        |
-| `GetTensorArena`          | Returns pointer to memory region to be used for tensors allocations.                                                                                                   |
-| `ModelPointer`            | Returns the pointer to the NN model data array.                                                                                                                        |
-| `ModelSize`               | Returns the model size.                                                                                                                                                |
-| `GetOpResolver`           | Returns the reference to the TensorFlow Lite Micro operator resolver.                                                                                                  |
-| `EnlistOperations`        | Registers required operators with TensorFlow Lite Micro operator resolver.                                                                                             |
-| `GetActivationBufferSize` | Returns the size of the tensor arena memory region.                                                                                                                    |
+> **Convention:**  Each ML use-case must have an extension of the `TflmModel` or `EtModel` class depending on the framework that model uses.
 
-> **Convention:**  Each ML use-case must have an extension of this class and an implementation of the protected virtual
+### Common API functions
+
+Member functions defined in the `Model` base class:
+
+| Method name              | Visibility | Description                                                                                                                                                            |
+|--------------------------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `GetInputTensor`         | Public     | Returns the pointer to the model's input tensor.                                                                                                                       |
+| `GetOutputTensor`        | Public     | Returns the pointer to the model's output tensor                                                                                                                       |
+| `GetType`                | Public     | Returns the model's data type                                                                                                                                          |
+| `GetInputShape`          | Public     | Return the pointer to the model's input shape                                                                                                                          |
+| `GetOutputShape`         | Public     | Return the pointer to the model's output shape.                                                                                                                        |
+| `GetNumInputs`           | Public     | Return the number of input tensors the model has.                                                                                                                      |
+| `GetNumOutputs`          | Public     | Return the number of output tensors the model has.                                                                                                                     |
+| `LogTensorInfo`          | Public     | Logs the tensor information to `stdout` for the given tensor pointer. Includes: Tensor name, tensor address, tensor type, tensor memory size, and quantization params. |
+| `LogInterpreterInfo`     | Public     | Logs the interpreter information to stdout.                                                                                                                            |
+| `Init`                   | Public     | Initializes the TensorFlow Lite Micro framework, allocates require memory for the model.                                                                               |
+| `IsInited`               | Public     | Checks if this model object has been initialized.                                                                                                                      |
+| `IsDataSigned`           | Public     | Checks if the model uses signed data type.                                                                                                                             |
+| `ContainsEthosUOperator` | Public     | Checks if the model contains an operator delegated to Ethos-U (TensorFlow Lite Micro only - always returns false for ExecuTorch)                                       |
+| `RunInference`           | Public     | Runs the inference, so invokes the interpreter.                                                                                                                        |
+| `GetComputeBuffer`       | Public     | Returns pointer to memory region to be used for tensors allocations.                                                                                                   |
+| `GetModelBuffer`         | Public     | Returns the pointer to the NN model data array.                                                                                                                        |
+| `GetBackendData`         | Public     | Returns backend data specific to the underlying ML Framework.                                                                                                          |
+
+### TensorFlow Lite Micro models
+
+Additional member functions in the `TflmModel` subclass:
+
+| Method name        | Visibility | Description                                   |
+|--------------------|------------|-----------------------------------------------|
+| `GetOpResolver`    | Protected  | Get the ops resolver.                         |
+| `EnlistOperations` | Protected  | Add all the operators required for the model. |
+
+> For models using TensorFlow Lite Micro implementation of the protected virtual
 > methods:
 >
 > ```C++
 > virtual const tflite::MicroOpResolver& GetOpResolver() = 0;
 > virtual bool EnlistOperations() = 0;
-> virtual size_t GetActivationBufferSize() = 0;
 > ```
 >
-> Network models have different set of operators that must be registered with `tflite::MicroMutableOpResolver` object in
-> the `EnlistOperations` method. Network models can require different size of activation buffer that is returned as
-> tensor arena memory for TensorFlow Lite Micro framework by the `GetTensorArena` and `GetActivationBufferSize` methods.
+> Network models have different sets of operators.  For TensorFlow Lite models, these operators must be registered
+> at runtime with the `tflite::MicroMutableOpResolver` object in the `EnlistOperations` method.
+> 
+> **Note:** Please see the image classification use case for examples of model file implementations:
+>   ```commandline
+>     source/application/api/fwk/tflm
+>       ├── ...
+>       ├── include
+>       │   ├── ...
+>       │   ├── MobileNetModel.hpp
+>       │   ├── ...
+>       └── source
+>           ├── ...
+>           ├── MobileNetModel.cc
+>           ├── ...
+
+### ExecuTorch models
+
+Additional member functions in the `EtModel` subclass:
+
+| Method name           | Visibility | Description                                                |
+|-----------------------|------------|------------------------------------------------------------|
+| `LogMemoryUsage`      | Public     | Print current memory usage to the output.                  |
+| `PrepareInputTensors` | Protected  | Prepared model input tensors. Called by the `Init` method. |
+
+> For ExecuTorch models, any operators that fall back to CPU must be included at build time by using the CMake
+> `generate_pte_ops_lib` function, and these ops must exist in the ATen Core Operator Set.
+> 
+> Network models can require different size of activation buffer that is returned as
+> tensor arena memory by the `GetComputeBuffer` method.
 >
-> **Note:** Please see `MobileNetModel.hpp` and `MobileNetModel.cc` files from the image classification ML application
-> API as an example of the model base class extension.
+> **Note:** Please see the image classification use case for examples of model file implementations:
+>
+>   ```commandline
+>       source/application/api/fwk/executorch
+>       ├── ...
+>       ├── include
+>       │   ├── ...
+>       │   ├── MobileNetModel.hpp
+>       │   ├── ...
+>   ```
 
 ## Adding custom ML use-case
 
@@ -215,8 +263,7 @@ Fast Model or MPS3 FPGA board.
 It covers common major steps: The application main loop creation, a description of the NN model, and inference
 execution.
 
-In addition, few useful examples are provided: Reading user input, printing into console, and drawing images into MPS3
-LCD.
+In addition, some useful examples are provided: Printing into console, and drawing images into MPS3 LCD.
 
 For example:
 
@@ -232,7 +279,7 @@ Start with creation of a subdirectory under the `source/use_case` directory and 
 
 ## Implementing main loop
 
-The use-case main loop is the place to put use-case main logic. It is an infinite loop that reacts on user input,
+The use-case main loop is the place to put use-case main logic. It is an infinite loop that
 triggers use-case conditional logic based on the input and present results back to the user.
 
 However, it could also be a simple logic that runs a single inference and then exits.
@@ -241,7 +288,7 @@ Main loop has knowledge about the platform and has access to the platform compon
 Layer (HAL).
 
 Start by creating a `MainLoop.cc` file in the `src` directory (the one created under
-[Adding custom ML use-case](./customizing.md#adding-custom-ml-use_case)).  The name used is not important.
+[Adding custom ML use-case](./customizing.md#adding-custom-ml-use-case)).  The name used is not important.
 
 Now define the `MainLoop` function with the signature described in [Main loop function](./customizing.md#main-loop-function):
 
@@ -262,25 +309,28 @@ You can now start filling this function with logic.
 
 ## Implementing custom NN model
 
+The two supported ML frameworks, TensorFlow Lite Micro and ExecuTorch, have different requirements when defining models.
+
+### TensorFlow Lite Micro models
+
 Before inference could be run with a custom NN model, TensorFlow Lite Micro framework must learn about the operators, or
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
 The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](./customizing.md#nn-model-api)).
-Create `HelloWorldModel.hpp` in the use-case include subdirectory, extend Model abstract class,
-and then declare the required methods.
+Create `HelloWorldTflmModel.hpp` in the use-case include `source/application/fwk/tflm/include` directory,
+extend Model abstract class, and then declare the required methods.
 
 For example:
 
 ```C++
-#ifndef HELLOWORLDMODEL_HPP
-#define HELLOWORLDMODEL_HPP
+#ifndef HELLOWORLDTFLMMODEL_HPP
+#define HELLOWORLDTFLMMODEL_HPP
 
-#include "Model.hpp"
+#include "TflmModel.hpp"
 
-namespace arm {
-namespace app {
+namespace arm::app::fwk::tflm {
 
-class HelloWorldModel: public Model {
+class HelloWorldTflmModel: public TflmModel {
   protected:
     /** @brief   Gets the reference to op resolver interface class. */
     const tflite::MicroOpResolver& GetOpResolver() override;
@@ -295,32 +345,33 @@ class HelloWorldModel: public Model {
     /* A mutable op resolver instance. */
     tflite::MicroMutableOpResolver<ms_maxOpCnt> m_opResolver;
   };
-} /* namespace app */
-} /* namespace arm */
 
-#endif /* HELLOWORLDMODEL_HPP */
+} /* namespace arm::app::fwk::tflm */
+
+#endif /* HELLOWORLDTFLMMODEL_HPP */
 ```
 
-Create the `HelloWorldModel.cc` file in the `src` subdirectory and define the methods there. Include
-`HelloWorldModel.hpp` created earlier.
+Create the `HelloWorldTflmModel.cc` file in the `src` subdirectory and define the methods there. Include
+`HelloWorldTflmModel.hpp` created earlier.
 
-> **Note:** The `Model.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
+> **Note:** The `TflmModel.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
 
-Please refer to `use_case/img_class/src/MobileNetModel.cc` for code examples.
+Please refer to `source/application/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
+for example `include/MobileNetModel.hpp` and `src/MobileNetModel.cc`.
 
 If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U* operator to the
 operators list.
 
-The following example shows how to add the custom *Ethos-U* operator with the TensorFlow Lite Micro framework. when
-defined, `ARM_NPU` excludes the code if the application was built without NPU support.
+The following example shows how to add the custom *Ethos-U* operator with the TensorFlow Lite Micro framework.
+When defined, `ARM_NPU` excludes the code if the application was built without NPU support.
 
 For example:
 
 ```C++
-#include "HelloWorldModel.hpp"
+#include "HelloWorldTflmModel.hpp"
 #include "log_macros.h"
 
-bool arm::app::HelloWorldModel::EnlistOperations() {
+bool arm::app::HelloWorldTflmModel::EnlistOperations() {
 
 #if defined(ARM_NPU)
     if (kTfLiteOk == this->m_opResolver.AddEthosU()) {
@@ -339,42 +390,71 @@ bool arm::app::HelloWorldModel::EnlistOperations() {
 To minimize the memory footprint of the application, we advise you to only register operators that are used by the NN
 model.
 
+### ExecuTorch models
+
+Unlike TensorFlowLiteMicro, the ExecuTorch framework does not require runtime registration of operators.
+
+As a result, a class representing an ExecuTorch model can be minimal, or if preferred it is possible to
+use an instance of the `EtModel` class in your use case instead:
+
+```C++
+#ifndef HELLOWORLDETMODEL_HPP
+#define HELLOWORLDETMODEL_HPP
+
+#include "EtModel.hpp"
+
+namespace arm::app::fwk::et {
+
+class HelloWorldEtModel: public EtModel {} /* namespace arm::app::fwk::et */
+
+#endif /* HELLOWORLDETMODEL_HPP */
+```
+
+However, it can still be useful to define a class for your model to capture specific metadata,
+such as labels for input/output tensor indices.
+See `source/application/api/fwk/executorch/include/MobileNetModel.hpp` for an example of this.
+
 ### Using GetModelPointer and GetModelLen methods
 
-These functions generated in the C++ file containing the neural network model as an array. This logic for generation of
-the C++ array from the `.tflite` file needs to be defined in the `usecase.cmake` file for this `HelloWorld` example.
-In the root of the `source/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to
-it:
+These functions are generated in the C++ file containing the neural network model as an array.
+This logic for generation of the C++ array from the `.tflite` or `.pte` file needs to be defined
+in the `usecase.cmake` file for this `HelloWorld` example.
+In the root of `source/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to it:
 
 ```cmake
 # Generate model file
-USER_OPTION(${${use_case}_MODEL_TFLITE_PATH}
+USER_OPTION(${${use_case}_MODEL_PATH}
             "NN model tflite path"
-            "Path-to-your-model.tflite"
+            "Path-to-your-model"
             FILEPATH)
 
-generate_tflite_code(
-        MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+        MODEL_PATH ${${use_case}_MODEL_PATH}
         DESTINATION ${SRC_GEN_DIR}
         EXPRESSIONS ${EXTRA_MODEL_CODE}
         NAMESPACE   "arm" "app" "hello_world")
 ```
 
-Use the `${use-case}_MODEL_TFLITE_PATH` CMake configuration parameter to include custom model in the generation or
+Use the `${use-case}_MODEL_PATH` CMake configuration parameter to include custom model in the generation or
 compilation process. Please refer to: [Build options](./building.md#build-options) for further information.
 
 For more details on `usecase.cmake`, refer to: [Building options](./building.md#build-options).
 
 For details on code generation flow in general, refer to: [Automatic file generation](./building.md#automatic-file-generation).
 
-The TensorFlow Lite model data is read during the `Model::Init` method execution. Please refer to
-`source/application/api/common/source/Model.cc` for more details.
+The model data is read during the `Model::Init` method execution.
+For implementation details, refer to the framework-specific `Model` subclasses:
+ - `source/application/api/fwk/tflm/source/TflmModel.cc`
+ - `source/application/api/fwk/executorch/source/EtModel.cc`
 
-`Model::Init` will need the pointer to the model. The `arm::app::hello_world::GetModelPointer()` function is generated
-during the build and can be found in the file `<build>/generated/hello_world/src/<model_file_name>.cc`. The file
-generated is automatically added to the compilation.
+`Model::Init` requires references to the model and the compute buffer memory regions as well as their sizes.
+During the build, a source file will be generated at `<build>/generated/hello_world/src/<model_file_name>.cc`
+which contains the model data represented as an array.
+It also provides two methods, `arm::app::hello_world::GetModelPointer()` and `arm::app::hello_world::GetModelLen()`
+that return a pointer to the model as well as its size in memory.
+The file generated is automatically added to the compilation.
 
-At the top of `MainLoop.cc`, add:
+We must also define a compute buffer for inference to use.  At the top of `MainLoop.cc`, add:
 
 ```c++
 namespace arm {
@@ -385,18 +465,18 @@ namespace app {
         extern size_t GetModelLen();
     } /* namespace hello_world */
 
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
 ```
 
-These functions can now be used in the `Model.Init` call.
+These functions and compute buffer can now be used in the `Model.Init` call.
 
 ## Executing inference
 
 To run an inference successfully, you must use:
 
-- A TensorFlow Lite model file,
+- A TensorFlow Lite or the PTE (for ExecuTorch) model file,
 - An extended Model class,
 - A place to add the code to invoke inference,
 - A main loop function,
@@ -413,14 +493,16 @@ images with `generate_images_code` CMake function.
 > generated C++ sources for images store image data as a `uint8` array. For models that were quantized to an `int8` data
 > type, convert the image data to `int8` correctly *before* inference execution. Converting asymmetric data to symmetric
 > data involves positioning the zero value. In other words, subtracting an offset for `uint8` values. Please check the
-> image classification application source for the code example, such as the `ConvertImgToInt8` function.
+> image classification application source for the code example, such as the `ConvertUint8ToInt8` function.
 
 The following code adds inference invocation to the main loop function:
 
 ```c++
 #include "hal.h"
 #include "log_macros.h"
-#include "HelloWorldModel.hpp"
+#include "HelloWorldTflmModel.hpp"
+/* Or, if your model is ExecuTorch-based: */
+//#include "HelloWorldEtModel.hpp"
 
 namespace arm {
 namespace app {
@@ -430,7 +512,7 @@ namespace app {
         extern size_t GetModelLen();
     } /* namespace hello_world */
 
-    static uint8_t tensorArena[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
+    static uint8_t activationBuf[ACTIVATION_BUF_SZ] ACTIVATION_BUF_ATTRIBUTE;
 } /* namespace app */
 } /* namespace arm */
 
@@ -438,14 +520,19 @@ void MainLoop()
 {
     printf("Hello world!");
 
-    arm::app::HelloWorldModel model;
+    arm::app::fwk::tflm::HelloWorldTflmModel model;
+    /* Or, if your model is ExecuTorch-based: */
+    // arm::app::fwk::et::HelloWorldEtModel model;
+
+    /* Define memory regions */
+    arm::app::fwk::iface::MemoryRegion modelMem{arm::app::hello_world::GetModelPointer(),
+                                                arm::app::hello_world::GetModelLen()};
+    arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                  sizeof(arm::app::activationBuf)};
 
     /* Load the model. */
-    if (!model.Init(arm::app::tensorArena,
-                    sizeof(arm::app::tensorArena),
-                    arm::app::hello_world::GetModelPointer(),
-                    arm::app::hello_world::GetModelLen())) {
-        printf_err("failed to initialise model\n");
+    if (!model.Init(computeMem, modelMem)) {
+        printf_err("Failed to initialise model\n");
         return;
     }
 
@@ -456,25 +543,30 @@ void MainLoop()
     model.RunInference();
 
     /* Read or post-process output here */
-    const uint32_t tensorSz = outputTensor->bytes;
-    const uint8_t * outputData = tflite::GetTensorData<uint8>(outputTensor);
+    const size_t tensorSz = outputTensor->Bytes();
+    const uint8_t * outputData = outputTensor->GetData<uint8>();
     // Your-custom-code;
 }
 ```
 
 The code snippet has several important blocks:
 
-- Creating HelloWorldModel object and initializing it.
+- Creating `HelloWorldTflmModel` (or `HelloWorldEtModel`) object and initializing it.
 
 ```C++
-  arm::app::HelloWorldModel model;
+  arm::app::fwk::tflm::HelloWorldTflmModel model;
+  /* Or, if your model is ExecuTorch-based: */
+  // arm::app::fwk::et::HelloWorldEtModel model;
 
-  /* Load the model */
-  if (!model.Init(arm::app::tensorArena,
-                  sizeof(arm::app::tensorArena),
-                  arm::app::hello_world::GetModelPointer(),
-                  arm::app::hello_world::GetModelLen())) {
-      printf_err("failed to initialise model\n");
+  /* Define memory regions */
+  arm::app::fwk::iface::MemoryRegion modelMem{arm::app::hello_world::GetModelPointer(),
+                                              arm::app::hello_world::GetModelLen()};
+  arm::app::fwk::iface::MemoryRegion computeMem{arm::app::activationBuf,
+                                                sizeof(arm::app::activationBuf)};
+
+  /* Load the model. */
+  if (!model.Init(computeMem, modelMem)) {
+      printf_err("Failed to initialise model\n");
       return;
   }
 ```
@@ -482,8 +574,8 @@ The code snippet has several important blocks:
 - Getting pointers to allocated input and output tensors.
 
   ```C++
-  TfLiteTensor *outputTensor = model.GetOutputTensor();
-  TfLiteTensor *inputTensor = model.GetInputTensor();
+  auto outputTensor = model.GetOutputTensor();
+  auto inputTensor = model.GetInputTensor();
   ```
 - Running inference
 
@@ -491,13 +583,12 @@ The code snippet has several important blocks:
   model.RunInference();
   ```
 
-- Reading inference results: Data and data size from the output tensor. We assume that the output layer has a `uint8`
-  data type.
+- Reading inference results: Data and data size from the output tensor.
+  We assume that the output layer has a `uint8` data type.
 
   ```C++
-  Const uint32_t tensorSz = outputTensor->bytes;
-
-  const uint8_t *outputData = tflite::GetTensorData<uint8>(outputTensor);
+  const size_t tensorSz = outputTensor->Bytes();
+  const uint8_t * outputData = outputTensor->GetData<uint8>();
   ```
 
 To add profiling for the *Ethos-U*, include a `Profiler.hpp` header and invoke both `StartProfiling` and
@@ -528,31 +619,18 @@ However, for clarity, here is the full list of available functions:
 - `warn` - printf wrapper for warning messages.
 - `printf_err` - printf wrapper for error messages.
 
-`printf` wrappers can be switched off with `LOG_LEVEL` define:
+`printf` wrappers can be switched off with `MLEK_LOG_LEVEL` define:
 
 `trace (0) < debug (1) < info (2) < warn (3) < error (4)`.
 
 > **Note:** The default output level is `info = level 2`.
 
-## Reading user input from console
-
-The platform package under HAL must provide an implementation for a function `GetLine`. This is then wrapped by HAL to
-expose a function called `hal_get_user_input`.
-
-```C++
-char ch_input[128];
-hal_get_user_input(ch_input, sizeof(ch_input));
-```
-
-The function intends to block until a line has been provided. For embedded targets, this call might be redirected to get
-input from a UART block. For the host targets, this will just be a call to the C standard library instead.
-
 ## Output to MPS3 LCD
 
 The HAL exposes LCD functions to print text or an image to the board LCD. For example:
 
-- `hal_lcd_display_text`
-- `hal_lcd_display_image`
+- `hal_display_show_text`
+- `hal_display_show_image`
 
 Text presentation function has the following signature:
 
@@ -569,7 +647,7 @@ Here is an example that prints "Hello world" on the LCD screen:
 
 ```C++
 std::string hello("Hello world");
-hal_lcd_display_text(hello.c_str(), hello.size(), 10, 35, 0);
+hal_display_show_text(hello.c_str(), hello.size(), 10, 35, 0);
 ```
 
 The image presentation function has the following signature:
@@ -586,7 +664,7 @@ For example, the following code snippet visualizes an input tensor data for `Mob
 by a factor of two:
 
 ```C++
-hal_lcd_display_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
+hal_display_show_image((uint8_t *) inputTensor->data.data, 224, 224, 3, 10, 35, 2);
 ```
 
 Please refer to the [Hardware Abstraction Layer API](./customizing.md#hardware-abstraction-layer-api) section for more
@@ -603,7 +681,7 @@ in the root of your use-case. However, the name of the file is not important.
 > the variable name with `${use_case}`, the use-case name, to avoid names collisions with other CMake variables. Here
 > are some useful variable names visible in use-case CMake file:
 >
-> - `DEFAULT_MODEL_PATH` – The default model path to use if use-case specific `${use_case}_MODEL_TFLITE_PATH` is not set
+> - `DEFAULT_MODEL_PATH` – The default model path to use if use-case specific `${use_case}_MODEL_PATH` is not set
 >  in the build arguments.
 >- `TARGET_NAME` – The name of the executable.
 > - `use_case` – The name of the current use-case.
@@ -616,7 +694,25 @@ in the root of your use-case. However, the name of the file is not important.
 >   - `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` – The compilation flags.
 >   - `CMAKE_EXE_LINKER_FLAGS` – The linker flags.
 
-For the hello world use-case, it is enough to create a `helloworld.cmake` file and set the `DEFAULT_MODEL_PATH`, like:
+For the hello world use-case, create a `helloworld.cmake` file and add the following:
+
+```cmake
+# Specify the ML frameworks the use case supports
+set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
+if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+    set(${use_case}_supports_${ML_FRAMEWORK} OFF)
+    return()
+endif ()
+
+set(${use_case}_supports_${ML_FRAMEWORK} ON)
+```
+
+If your use case uses ExecuTorch instead of TensorFlow Lite Micro,
+set the value of `${use_case}_ML_FRAMEWORK` to `ExecuTorch`.
+
+Next, set the `DEFAULT_MODEL_PATH`:
+
+**TensorFlow Lite Micro**
 
 ```cmake
 if (ETHOS_U_NPU_ENABLED)
@@ -626,34 +722,61 @@ else()
 endif()
 ```
 
+**ExecuTorch**
+
+```cmake
+if (ETHOS_U_NPU_ENABLED)
+    string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
+    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_delegate_${_NPU_CFG_ID}.pte)
+else()
+    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_TOSA-1.0+INT.pte)
+endif()
+```
+
 This can be used in subsequent section, for example:
 
 ```cmake
-USER_OPTION(${use_case}_MODEL_TFLITE_PATH "Neural network model in tflite format."
+USER_OPTION(${use_case}_MODEL_PATH "Neural network model in tflite or pte format."
     ${DEFAULT_MODEL_PATH}
     FILEPATH
     )
 
-generate_tflite_code(
-    MODEL_PATH ${${use_case}_MODEL_TFLITE_PATH}
+generate_model_code(
+    MODEL_PATH ${${use_case}_MODEL_PATH}
     DESTINATION ${SRC_GEN_DIR}
+    NAMESPACE   "arm" "app" "hello_world"
     )
 ```
 
-This ensures that the model path pointed to by `${use_case}_MODEL_TFLITE_PATH` is converted to a C++ array and is picked
+This ensures that the model path pointed to by `${use_case}_MODEL_PATH` is converted to a C++ array and is picked
 up by the build system. More information on auto-generations is available under section:
 [Automatic file generation](./building.md#automatic-file-generation).
 
 To build you application, follow the general instructions from [Add Custom inputs](./building.md#add-custom-inputs) and
 then specify the name of the use-case in the build command, like so:
 
+**TensorFlow Lite Micro**
+
 ```commandline
 cmake .. \
   -DTARGET_PLATFORM=mps3 \
   -DTARGET_SUBSYSTEM=sse-300 \
   -DUSE_CASE_BUILD=hello_world \
+  -DML_FRAMEWORK="TensorFlowLiteMicro" \
   -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
+
+**ExecuTorch**
+
+```commandline
+cmake .. \
+  -DTARGET_PLATFORM=mps3 \
+  -DTARGET_SUBSYSTEM=sse-300 \
+  -DUSE_CASE_BUILD=hello_world \
+  -DML_FRAMEWORK="ExecuTorch" \
+  -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
+```
+
 
 As a result, the file `ethos-u-hello_world.axf` is created. The MPS3 build also produces the `sectors/hello_world`
 directory with binaries and the file `sectors/images.txt` to be copied to the MicroSD card on the board.
@@ -726,31 +849,25 @@ the MPS3 platform implementation has:
 ```cmake
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
-    lcd_mps3)
+    hal_display_mps3)
 ```
 The implementation for simple platform on the other hand has:
 ```cmake
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
-    lcd_stubs)
+    hal_display_stubs)
 ```
 
 The standard output (stdout) component follows the same convention. It can expose three targets:
 
 - `stdout_retarget_cmsdk`
 - `stdout_retarget_pl011`
-- `stdout`
 
-The first two targets use the UART (pulling in `CMSDK UART` and `PL011 UART` drivers respectively). The third
-implementation relies on standard C or overridden implementation of `fgets` function and can be thought of as stubs
-for platforms that do not need to use UART driven stdout (and stderr) streams. It is also possible to run applications
-with semi-hosting enabled - `printf` statements will be shown in the host machine console, typically via a debugger.
-To facilitate this, the CMake toolchain files expose a function called `configure_semihosting`.  For supported targets
-semi-hosting is disabled by default, as mentioned in the `cmsis_device` target CMake file.
-
-```cmake
-configure_semihosting(${CMSIS_DEVICE_TARGET} OFF)
-```
+The two targets use the UART, pulling in `CMSDK UART` and `PL011 UART` drivers respectively. It is also possible to run
+applications with semihosting enabled where stardard output and error streams should use the host machine console,
+typically via a debugger. To enable this, the CMake toolchain files implement a function called `configure_semihosting`.
+For supported targets semihosting is disabled by default, but can be enabled using CMake configuration option
+`SEMIHOSTING_ENABLED`.
 
 Other re-usable component is the NPU. It wraps the Arm Ethos-U NPU driver sources with functions that can be called
 from the platform initialisation routine. In addition to general utility functions, this component also provides
@@ -768,9 +885,8 @@ The driver will call these functions for invalidating data cache (memory regions
 
 Examples of the standard output, LCD and NPU components can be found here: `source/hal/source/components`.
 
-Linker scripts for Arm Compiler and GNU embedded toolchain should be added. The location of the files is
-on your discretion. The new platform build configuration script must add it in the `platform_custom_post_build`
-function like this:
+Linker scripts for all supported toolchains should be added. The location of the files is on your discretion.
+The new platform build configuration script must add it in the `platform_custom_post_build` function like this:
 
 ```cmake
     add_linker_script(

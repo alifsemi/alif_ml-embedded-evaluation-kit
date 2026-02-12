@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024 Arm Limited and/or
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or
  * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,9 +18,12 @@
 #ifndef IMAGE_UTILS_HPP
 #define IMAGE_UTILS_HPP
 
+#include "Tensor.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <forward_list>
+#include <array>
 #include <vector>
 
 /* Helper macro to convert RGB888 to RGB565 format. */
@@ -102,10 +105,71 @@ namespace image {
 
     /**
      * @brief           Helper function to convert a UINT8 image to INT8 format.
-     * @param[in,out]   data            Pointer to the data start.
-     * @param[in]       kMaxImageSize   Total number of pixels in the image.
+     * @param[in,out]   data    Pointer to the data start.
+     * @param[in]       nElem   Total number of pixels in the image.
+     * @note            Performance in-place transformation.
+     *
      **/
-    void ConvertImgToInt8(void* data, size_t kMaxImageSize);
+    void ConvertUint8ToInt8(void* data, size_t nElem);
+
+    /**
+     * @brief           Helper function to convert a UINT8 image to INT8 format.
+     * @param[out] dst      Destination buffer.
+     * @param[in]  src      Source pointer.
+     * @param[in]  nElem    Number of elements to be copied over.
+     * @param[in]  layout   Data layout for destination.
+     **/
+    void ConvertUint8ToInt8(int8_t* dst,
+                            const uint8_t* const src,
+                            size_t nElem,
+                            fwk::iface::TensorLayout layout);
+
+
+    /**
+     * @brief           Function to convert unsigned 8-bit src image to
+     *                  floating point.
+     * @tparam     numChannels  Number of channels in the image
+     * @param[out] dst          Destination buffer.
+     * @param[in]  src          Source pointer.
+     * @param[in]  nElem        Number of elements to be copied over.
+     * @param[in]  layout       Data layout for destination.
+     * @param[in]  mean         Normalisation mean for each channel.
+     * @param[in]  stdDev       Normalisation standard deviation for each channel.
+     * @return     true if conversion succeeds, false otherwise.
+     */
+    template <std::size_t numChannels>
+    bool ConvertUint8ToFp32(float* dst,
+                            const uint8_t* src,
+                            const size_t nElem,
+                            fwk::iface::TensorLayout layout,
+                            const std::array<float, numChannels>& mean,
+                            const std::array<float, numChannels>& stdDev)
+    {
+        const size_t imgArraySz = nElem / numChannels;
+
+        auto Normalise = [](const uint8_t val, float meanVal, float stdVal) {
+            return ((static_cast<float>(val) / 255.f) - meanVal) / stdVal;
+        };
+
+        if (layout == fwk::iface::TensorLayout::NCHW) {
+            for (size_t i = 0; i < imgArraySz; i++) {
+                for (size_t j = 0; j < numChannels; ++j) {
+                    dst[(j * imgArraySz) + i] =
+                        Normalise(src[i * numChannels + j], mean[j], stdDev[j]);
+                }
+            }
+        } else if (layout == fwk::iface::TensorLayout::NHWC) {
+            for (size_t i = 0; i < nElem; i += numChannels) {
+                for (size_t n = 0; n < numChannels; ++n) {
+                    dst[i + n] = Normalise(src[i + n], mean[n], stdDev[n]);
+                }
+            }
+        } else {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * @brief       Converts RGB image to grayscale.
