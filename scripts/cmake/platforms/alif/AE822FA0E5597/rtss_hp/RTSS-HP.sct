@@ -13,6 +13,7 @@
 ; */
 
 #include "alif_mem_config.h"
+#include "board_defs.h"
 
 /*On chip RAM Regions */
 #define SRAM_BASE                 ALIF_SRAM_BASE
@@ -23,8 +24,15 @@
 #define MRAM_SIZE                 0x00580000		/* 5.5M */
 
 /* External OSPI flash */
-#define OSPI_FLASH_BASE           0xC0000000
-#define OSPI_FLASH_SIZE           0x02000000        /* 32M */
+#ifdef BOARD_OSPI_FLASH_BASE
+#define OSPI_FLASH_BASE   BOARD_OSPI_FLASH_BASE
+#define OSPI_FLASH_SIZE   BOARD_OSPI_FLASH_SIZE
+#endif
+
+#ifdef BOARD_OSPI_RAM_BASE
+#define OSPI_RAM_BASE     BOARD_OSPI_RAM_BASE
+#define OSPI_RAM_SIZE     BOARD_OSPI_RAM_SIZE
+#endif
 
 /*--------------------- ITCM Configuration ----------------------------------*/
 /* SRAM2 is mapped as ITCM */
@@ -128,10 +136,18 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
   }
 
   PADDING SRAM_BASE+SRAM_SIZE-16 ALIGN 16 FILL 0 16  {  }
+
+#ifdef BOARD_OSPI_RAM_BASE
+  RW_OSPI_RAM OSPI_RAM_BASE OSPI_RAM_SIZE {
+
+  }
+#endif
 }
 
+#ifdef BOARD_OSPI_FLASH_BASE
 LR_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE  {
   ER_OSPI_FLASH OSPI_FLASH_BASE OSPI_FLASH_SIZE {
     *(nn_model_ext_flash)
   }
 }
+#endif

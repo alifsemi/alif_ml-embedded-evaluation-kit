@@ -259,9 +259,9 @@ make -j8 ethos-u-alif_img_class
 
 If the on chip SRAM is not enough the DevKit-E8 and AppKit-E8 have external OSPI | HEXSPI RAM on board which can be used for model execution.
 The external RAM can be enabled in build time using CMAKE variable `-DOSPI_RAM_SUPPORT=ON`.
-In Addition to setting the CMAKE variable some linker file changes are needed. To optimize performance when using external RAM the model needs to be
-exported using corresponding system configuration where Ethos-U has a scratch buffer in internal SRAM.
+- In Addition to setting the CMAKE variable some linker file changes are needed.
+- To optimize performance when using external RAM the model needs to be exported using corresponding system configuration where Ethos-U has a scratch buffer in internal SRAM.
 
 By default the example use-case puts the serialized model graph and weights to MRAM (NVM)
 
-- For larger models you may want to check [Running a use-case with ML model data in external flash](../ML_Embedded_Evaluation_Kit.md#externalflash)
+- For larger models you may want to enable `-DOSPI_FLASH_SUPPORT=ON`. Please check [Running a use-case with ML model data in external flash](../ML_Embedded_Evaluation_Kit.md#externalflash)

@@ -28,13 +28,22 @@
  */
 
 #include "alif_mem_config.h"
+#include "board_defs.h"
 
 __STACK_SIZE = 0x00001800;
 __HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
-__OSPI_FLASH_BASE = 0xC0000000;
-__OSPI_FLASH_SIZE = 0x02000000;
+
+#ifdef BOARD_OSPI_FLASH_BASE
+__OSPI_FLASH_BASE = BOARD_OSPI_FLASH_BASE;
+__OSPI_FLASH_SIZE = BOARD_OSPI_FLASH_SIZE;
+#endif
+
+#ifdef BOARD_OSPI_RAM_BASE
+__OSPI_RAM_BASE = BOARD_OSPI_RAM_BASE;
+__OSPI_RAM_SIZE = BOARD_OSPI_RAM_SIZE;
+#endif
 
 MEMORY
 {
@@ -42,8 +51,15 @@ MEMORY
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00040000
   SRAM  (rwx)     : ORIGIN = ALIF_SRAM_BASE, LENGTH = ALIF_SRAM_SIZE
   UNSTRIPED (rwx) : ORIGIN = UNSTRIPED_BASE, LENGTH = UNSTRIPED_SIZE
-  MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  MRAM  (rx)      : ORIGIN = __ROM_BASE,     LENGTH = __ROM_SIZE
+
+#ifdef BOARD_OSPI_FLASH_BASE
   OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
+#endif
+
+#ifdef BOARD_OSPI_RAM_BASE
+  OSPI_RAM (rwx)  : ORIGIN = __OSPI_RAM_BASE, LENGTH = __OSPI_RAM_SIZE
+#endif
 }
 
 ENTRY(Reset_Handler)
@@ -158,7 +174,8 @@ SECTIONS
     * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
     * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
     * (.bss.NoInit.ethos_u_cache)
-    * (.bss.NoInit.activation_buf_sram) /* 2MB */
+    * (.bss.NoInit.activation_buf_sram)
+    * (.bss.NoInit.temp_buf_sram)
   } > SRAM
 
   .bss.unstriped (NOLOAD) :
@@ -169,6 +186,12 @@ SECTIONS
   .bss.itcm (NOLOAD) : ALIGN(8)
   {
   } > ITCM
+
+#ifdef BOARD_OSPI_RAM_BASE
+  .bss.ext_ram (NOLOAD) : ALIGN(8)
+  {
+  } > OSPI_RAM
+#endif
 
   .bss (NOLOAD) : ALIGN(8)
   {
@@ -246,8 +269,10 @@ SECTIONS
     KEEP(*(.eh_frame*))
   } > MRAM
 
+#ifdef BOARD_OSPI_FLASH_BASE
   .readonly.at_ext_flash : ALIGN(8)
   {
     *(nn_model_ext_flash)
   } > OSPI_FLASH
+#endif
 }
