@@ -672,6 +672,43 @@ You need to check that size of this buffer aligns with your model size. In most 
 When using TFLM framework the ACTIVATION_BUF_SZ sets the size of the 'tensor arena' which is then all the RAM the model needs when executed.
 In ExecuTorch build the RAM usage is split to two allocation spaces. The first one is the so called method allocator pool and is set by the ACTIVATION_BUF_SZ and the other one is temporary allocation pool set by ML_FWK_TMP_MEM_SIZE.
 
+In default linker file these sections are put to internal SRAM
+```
+  .bss.sram (NOLOAD) : ALIGN(8)
+  {
+    * (.bss.large_ram)                     /* Large LVGL buffers */
+    * (.bss.camera_frame_buf)              /* Camera Frame Buffer */
+    * (.bss.camera_frame_bayer_to_rgb_buf) /* (Optional) Camera Frame Buffer for Bayer to RGB Convertion.*/
+    * (.bss.NoInit.ethos_u_cache)
+    * (.bss.NoInit.activation_buf_sram)
+    * (.bss.NoInit.temp_buf_sram)
+  } > SRAM
+```
+
+With DevKit or AppKit E4|E8 you can use external RAM also for ML frameworks and Ethos-U. In addition to enabling CMAKE variable `-DOSPI_RAM_SUPPORT=ON` move corresponding section(s) to OSPI_RAM.
+```
+  .bss.ext_ram (NOLOAD) : ALIGN(8)
+  {
+    * (.bss.NoInit.activation_buf_sram)
+  } > OSPI_RAM
+
+```
+
+When the model execution needs external RAM it should be noted the default Ethos-U memory mode (Shared SRAM) is not optimal. In this case the performance can benefit from using part of SRAM as Ethos-U cache while the bulk of RAM allocation is kept in external RAM (`-DETHOS_U_NPU_ID=U85 -DETHOS_U_NPU_MEMORY_MODE=Dedicated_Sram`).
+
+**Note:** For this configuration to work it is not enough to just rebuild with the above CMAKE parameters. The model needs to be compiled/optimized for this memory and system configuration using Vela.
+
+For example:
+```
+source resources_downloaded/env/bin/activate
+vela --output-dir vela_output --accelerator-config ethos-u85-256 --optimise Performance --config scripts/vela/ensemble_vela.ini --system-config Ethos_U85_SRAM_OSPI --memory-mode Dedicated_Sram model.tflite
+
+mkdir build
+cd build
+cmake -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HP -DCONSOLE_UART=4 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=DevKit-e8 -DETHOS_U_NPU_ID=U85 -DETHOS_U_NPU_MEMORY_MODE=Dedicated_Sram -DOSPI_RAM_SUPPORT=ON -Duse_case_MODEL_PATH=vela_output/model_vela.tflite ..
+```
+
+
 ## Further information
 
 Beyond the demo build described above, many other use cases and options of the upstream Arm ML Embedded Evaluation kit should work on Alif hardware.<br>
