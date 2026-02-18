@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021, 2024, 2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -108,9 +108,20 @@ function(generate_model_code)
         set(py_arg_exp ${py_arg_exp} --namespaces=${name})
     endforeach()
 
+    # Pass optional Arm Ethos-U NPU validation args if NPU is enabled.
+    if (ETHOS_U_NPU_ENABLED)
+        if (DEFINED ETHOS_U_NPU_MEMORY_MODE)
+            set(py_arg_exp ${py_arg_exp} --ethos_u_memory_mode=${ETHOS_U_NPU_MEMORY_MODE})
+        endif()
+        if (DEFINED ETHOS_U_NPU_CONFIG_ID)
+            # gen_model_cpp.py accepts short forms like H128/Y256/Z256 directly.
+            set(py_arg_exp ${py_arg_exp} --ethos_u_config=${ETHOS_U_NPU_CONFIG_ID})
+        endif()
+    endif()
+
     execute_process(
         COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_model_cpp.py
-        --tflite_path ${ABS_MODEL_PATH}
+        --model_path ${ABS_MODEL_PATH}
         --output_dir ${ABS_DESTINATION} ${py_arg_exp}
         RESULT_VARIABLE return_code
     )
