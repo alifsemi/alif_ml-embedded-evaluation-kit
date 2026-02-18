@@ -27,16 +27,24 @@
  * limitations under the License.
  */
 
+#include "board_defs.h"
+
 __STACK_SIZE = 0x00001000;
 __HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80000000;
 __ROM_SIZE = 0x00180000;
+
+#ifdef BOARD_OSPI_FLASH_BASE
+__OSPI_FLASH_BASE = BOARD_OSPI_FLASH_BASE;
+__OSPI_FLASH_SIZE = BOARD_OSPI_FLASH_SIZE;
+#endif
 
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00080000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00180000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+  OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
 }
 
 ENTRY(Reset_Handler)
@@ -212,4 +220,11 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > MRAM
+
+#ifdef BOARD_OSPI_FLASH_BASE
+  .readonly.at_ext_flash : ALIGN(8)
+  {
+    *(nn_model_ext_flash)
+  } > OSPI_FLASH
+#endif
 }

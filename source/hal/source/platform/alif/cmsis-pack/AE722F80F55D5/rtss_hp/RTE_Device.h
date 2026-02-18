@@ -2436,7 +2436,7 @@
 // <o> OSPI0 DFS
 // <i> Defines OSPI0 Data Frame Size
 // <i> Default: 32
-#define RTE_OSPI0_DFS                             32
+#define RTE_OSPI0_DFS                             16
 
 // <o> OSPI0 TX FIFO Start level <0-255>
 // <i> Defines TX FIFO transfer start level for OSPI0
@@ -2504,7 +2504,7 @@
 // <o> OSPI0 RXDS Delay <0-16>
 // <i> Defines the delay applied to the RXDS signal of OSPI0
 // <i> Default: 0
-#define RTE_OSPI0_RXDS_DELAY                      0
+#define RTE_OSPI0_RXDS_DELAY         11
 
 // <o> OSPI0 Signal Delay <0-23>
 // <i> Defines the delay applied to signals of OSPI0

@@ -9,7 +9,7 @@
  */
 /**************************************************************************//**
  * @brief Methods for initializing OSPI flash in XIP mode for executing ML model
- *        from flash device. Defaults to E7 devkit gen2 pinconfig and flash device
+ *        from flash device.
  ******************************************************************************/
 
 #include <string.h>
@@ -39,7 +39,7 @@
 #endif
 
 #define OSPI_RESET_PORT     BOARD_OSPI_FLASH_RESET_GPIO_PORT
-#define OSPI_RESET_PIN      BOARD_OSPI_FLASH_RESET_PIN_NO
+#define OSPI_RESET_PIN      BOARD_OSPI_FLASH_RESET_GPIO_PIN
 
 /* NOTE: According to IS25WX256 flash device datasheet fast read wait cycles
          can be set to 9 at 100MHz bus clock.
@@ -47,8 +47,8 @@
          See RTE_Device.h */
 #define FLASH_DEVICE_FAST_READ_WAIT_CYCLES (RTE_ISSI_FLASH_WAIT_CYCLES)
 
-extern ARM_DRIVER_FLASH ARM_Driver_Flash_(1);
-static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(1);
+extern ARM_DRIVER_FLASH ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
+static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
 
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
@@ -66,7 +66,7 @@ int32_t ospi_flash_set_wrap32(void)
 
 static void ospi_flash_enable_xip()
 {
-#if BOARD_FLASH_OSPI_INSTANCE == 0
+#if RTE_ISSI_FLASH_OSPI_DRV_NUM == 0
     OSPI_Type *ospi = (OSPI_Type *) OSPI0_BASE;
     AES_Type *aes = (AES_Type *)AES0_BASE;
 #else
