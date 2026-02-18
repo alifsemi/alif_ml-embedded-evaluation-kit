@@ -1,4 +1,5 @@
-#  SPDX-FileCopyrightText:  Copyright 2021, 2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021, 2023, 2026 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +16,11 @@
 
 """
 Utility script to generate model c file that can be included in the
-project directly. This should be called as part of cmake framework
+project directly. This should be called as part of CMake framework
 should the models need to be generated at configuration stage.
+
+This script is intentionally thin: it delegates validation to
+format-specific modules and focuses on producing the .cc output.
 """
 import binascii
 from argparse import ArgumentParser
@@ -25,13 +29,16 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from gen_utils import GenUtils
+from npu_validation import NpuValidationArgs
+from pte_validator import validate_pte_model
+from tflite_validator import validate_tflite_model
 
 # pylint: disable=duplicate-code
 parser = ArgumentParser()
 
 parser.add_argument(
-    "--tflite_path",
-    help="Model (.tflite) path",
+    "--model_path",
+    help="Model path (.tflite or .pte)",
     required=True
 )
 
@@ -71,6 +78,22 @@ parser.add_argument(
     default="header_template.txt"
 )
 
+parser.add_argument(
+    "--ethos_u_memory_mode",
+    type=str,
+    help="Arm Ethos-U NPU Vela memory mode (Shared_Sram, Sram_Only, Dedicated_Sram). "
+         "If provided, model must be Arm Ethos-U NPU optimized.",
+    default=None
+)
+
+parser.add_argument(
+    "--ethos_u_config",
+    type=str,
+    help="Arm Ethos-U NPU accelerator config (e.g. ethos-u55-128). "
+         "If provided, model must be Arm Ethos-U NPU optimized.",
+    default=None
+)
+
 parsed_args = parser.parse_args()
 
 env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
@@ -79,19 +102,20 @@ env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
 
 
 # pylint: enable=duplicate-code
-def get_tflite_data(tflite_path: str) -> list:
+def get_model_data(model_path: str) -> list:
     """
     Reads a binary file and returns a C style array as a
     list of strings.
 
     Argument:
-        tflite_path:    path to the tflite model.
+        model_path:    path to the model.
 
     Returns:
         list of strings
     """
-    with open(tflite_path, 'rb') as tflite_model:
-        data = tflite_model.read()
+    # Read raw bytes so we can emit a C array initializer.
+    with open(model_path, 'rb') as model_file:
+        data = model_file.read()
 
     bytes_per_line = 32
     hex_digits_per_line = bytes_per_line * 2
@@ -112,22 +136,42 @@ def main(args):
     Generate models .cpp
     @param args:    Parsed args
     """
-    if not Path(args.tflite_path).is_file():
-        raise ValueError(f"{args.tflite_path} not found")
+    # Resolve and validate input path early to fail fast.
+    model_path = Path(args.model_path)
+    if not model_path.is_file():
+        raise ValueError(f"{model_path} not found")
 
-    # Cpp filename:
-    cpp_filename = (Path(args.output_dir) / (Path(args.tflite_path).name + ".cc")).resolve()
-    print(f"++ Converting {Path(args.tflite_path).name} to\
+    suffix = model_path.suffix.lower()
+
+    # Only validate Arm Ethos-U NPU metadata when those args are explicitly provided.
+    validation_args = NpuValidationArgs(
+        memory_mode=args.ethos_u_memory_mode,
+        config=args.ethos_u_config,
+    )
+    if suffix == ".tflite":
+        # TFLite validation runs only when args are set (it will early-return otherwise).
+        validate_tflite_model(model_path, validation_args)
+    elif suffix == ".pte":
+        # PTE validation runs only when args are set (it will early-return otherwise).
+        validate_pte_model(model_path, validation_args)
+    else:
+        raise ValueError(
+            f"Unsupported model type for {model_path}. Expected .tflite or .pte."
+        )
+
+    # Output filename mirrors the input model name with a .cc suffix.
+    cpp_filename = (Path(args.output_dir) / (model_path.name + ".cc")).resolve()
+    print(f"++ Converting {model_path.name} to\
     {cpp_filename.name}")
 
     cpp_filename.parent.mkdir(exist_ok=True)
 
-    hdr = GenUtils.gen_header(env, args.license_template, Path(args.tflite_path).name)
+    hdr = GenUtils.gen_header(env, args.license_template, model_path.name)
 
     env \
         .get_template('tflite.cc.template') \
         .stream(common_template_header=hdr,
-                model_data=get_tflite_data(args.tflite_path),
+                model_data=get_model_data(str(model_path)),
                 expressions=args.expr,
                 additional_headers=args.headers,
                 namespaces=args.namespaces).dump(str(cpp_filename))
