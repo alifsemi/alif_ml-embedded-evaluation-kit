@@ -284,8 +284,8 @@ def run(build_config: BuildConfig):
         # a clean build for the framework.
         framework_arg = '-DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
     elif build_config.ml_framework == MLFramework.EXECUTORCH:
-        # Current ExecuTorch rev doesn't support `Dedicated Sram`
-        framework_arg = '-DML_FRAMEWORK=ExecuTorch -DETHOS_U_NPU_MEMORY_MODE=Shared_Sram'
+        # Set framework to ExecuTorch.
+        framework_arg = '-DML_FRAMEWORK=ExecuTorch'
     else:
         raise NotImplementedError(f'Unsupported ML Framework {build_config.ml_framework}')
 
