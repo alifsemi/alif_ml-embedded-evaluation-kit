@@ -20,7 +20,11 @@
 #include "mlek/fwk/iface/Model.hpp"
 #include "mlek/log/log_macros.h"
 
+#include <executorch/schema/program_generated.h>
+#include <cctype>
+#include <cstring>
 #include <memory>
+#include <string>
 
 #if !(defined(ML_FWK_TMP_MEM_SIZE))
 #error "ML_FWK_TMP_MEM_SIZE should be defined."
@@ -36,6 +40,64 @@ static uint8_t* sTmpAllocationPool = reinterpret_cast<uint8_t *>(ML_FWK_TMP_MEM_
 #endif /* !(defined(ML_FWK_TMP_MEM_BASE)) */
 
 namespace arm::app::fwk::et {
+
+/* Internal helper functions for pte models. */
+namespace {
+/**
+ * @brief   Return true if a substring exists in the input string.
+ * @param[in] str       Input string.
+ * @param[in] substr    String to look for.
+ * @return true if substr is found, false otherwise.
+ */
+bool ContainsSubstring(const char* str, const char* substr)
+{
+    if (!str || !substr) {
+        return false;
+    }
+    return std::strstr(str, substr) != nullptr;
+}
+
+/**
+ * @brief   Parse the Arm Ethos-U NPU memory mode embedded in a PTE buffer.
+ * @param[in] data  Pointer to the PTE buffer.
+ * @param[in] size  Size of the PTE buffer in bytes.
+ * @return Memory mode string if found, or empty string otherwise.
+ */
+std::string ParsePteMemoryMode(const uint8_t* data, size_t size)
+{
+    if (!data || size == 0) {
+        return {};
+    }
+
+    constexpr const char kFlag[] = "--memory-mode=";
+    constexpr size_t kFlagLen = sizeof(kFlag) - 1;
+    constexpr size_t kMaxValueLen = 32;
+
+    if (size < kFlagLen) {
+        return {};
+    }
+
+    for (size_t i = 0; i + kFlagLen < size; ++i) {
+        if (std::memcmp(data + i, kFlag, kFlagLen) != 0) {
+            continue;
+        }
+        std::string value;
+        value.reserve(kMaxValueLen);
+        size_t j = i + kFlagLen;
+        while (j < size && value.size() + 1 < kMaxValueLen) {
+            const char c = static_cast<char>(data[j]);
+            if (!(std::isalpha(static_cast<unsigned char>(c)) || c == '_')) {
+                break;
+            }
+            value.push_back(c);
+            ++j;
+        }
+        return value;
+    }
+
+    return {};
+}
+} /* anonymous namespace */
 
 EtModel::EtModel()
 {
@@ -56,6 +118,9 @@ bool EtModel::Init(iface::MemoryRegion& computeBuffer,
 {
     debug("loading model from @ 0x%p\n", nnModel.data);
     debug("model size: %" PRIu32 " bytes.\n", nnModel.size);
+
+    this->m_computeBuffer = computeBuffer;
+    this->m_modelBuffer = nnModel;
 
     if (backendData) {
         this->m_backendData = *static_cast<const EtBackendData*>(backendData);
@@ -250,6 +315,7 @@ void EtModel::LogInterpreterInfo()
         this->LogTensorInfo(o);
     }
 
+    this->LogOperatorInfo();
     this->LogMemoryUsage();
 }
 
@@ -266,6 +332,97 @@ void EtModel::LogMemoryUsage() const
             this->m_backendData.m_tmpAllocPtr->UsedSizeCurrent(),
             this->m_backendData.m_tmpAllocPtr->UsedSizePeak(),
             this->m_backendData.m_tmpAllocPtr->size());
+    }
+}
+
+void EtModel::LogOperatorInfo()
+{
+    this->m_hasEthosUDelegate = false;
+
+    if (!this->m_modelBuffer.data || this->m_modelBuffer.size == 0) {
+        info("No model buffer available for operator inspection.\n");
+        return;
+    }
+
+    auto* data = static_cast<const uint8_t*>(this->m_modelBuffer.data);
+    if (!executorch_flatbuffer::ProgramBufferHasIdentifier(data)) {
+        info("Model buffer is not an ExecuTorch program.\n");
+        return;
+    }
+
+    const auto* program = executorch_flatbuffer::GetProgram(data);
+    const auto* plans = program->execution_plan();
+    if (!plans || plans->size() == 0) {
+        info("No execution plans found in ExecuTorch program.\n");
+        return;
+    }
+
+    const auto* plan = plans->Get(0);
+    const auto* ops = plan->operators();
+    if (!ops) {
+        info("No operators found in ExecuTorch execution plan.\n");
+        return;
+    }
+
+    info("Number of operators: %" PRIu32 "\n", ops->size());
+    for (uint32_t i = 0; i < ops->size(); ++i) {
+        const auto* op = ops->Get(i);
+        const auto* name = op->name();
+        const auto* overload = op->overload();
+        if (name == nullptr) {
+            info("\tOperator %" PRIu32 ": <unknown>\n", i);
+        } else if (overload == nullptr) {
+            info("\tOperator %" PRIu32 ": %s\n", i, name->c_str());
+        } else {
+            info("\tOperator %" PRIu32 ": %s.%s\n", i, name->c_str(), overload->c_str());
+        }
+    }
+
+    const auto* chains = plan->chains();
+    if (!chains || chains->size() == 0) {
+        return;
+    }
+
+    const auto* instructions = chains->Get(0)->instructions();
+    if (!instructions) {
+        return;
+    }
+
+    info("Delegate calls:\n");
+    uint32_t delegateCalls = 0;
+    for (uint32_t i = 0; i < instructions->size(); ++i) {
+        const auto* instr = instructions->Get(i);
+        const auto* delegateCall = instr->instr_args_as_DelegateCall();
+        if (!delegateCall) {
+            continue;
+        }
+        const auto* delegates = plan->delegates();
+        if (!delegates) {
+            continue;
+        }
+        const auto* backend = delegates->Get(delegateCall->delegate_index());
+        if (!backend || backend->id() == nullptr) {
+            info("\tInst %" PRIu32 ": <unknown>\n", i);
+        } else {
+            info("\tInst %" PRIu32 ": %s\n", i, backend->id()->c_str());
+            if (ContainsSubstring(backend->id()->c_str(), "EthosU")) {
+                this->m_hasEthosUDelegate = true;
+            }
+        }
+        ++delegateCalls;
+    }
+    if (delegateCalls == 0) {
+        info("\t(none)\n");
+    }
+
+    if (this->m_hasEthosUDelegate) {
+        const auto* data = static_cast<const uint8_t*>(this->m_modelBuffer.data);
+        const std::string mode = ParsePteMemoryMode(data, this->m_modelBuffer.size);
+        if (!mode.empty()) {
+            info("NPU memory mode: %s\n", mode.c_str());
+        } else {
+            warn("Unable to infer NPU memory mode.\n");
+        }
     }
 }
 
@@ -290,7 +447,11 @@ bool EtModel::IsDataSigned() const
 
 bool EtModel::ContainsEthosUOperator() const
 {
-    return false;
+    if (!this->IsInited()) {
+        printf_err("Model uninitialised\n");
+        return false;
+    }
+    return this->m_hasEthosUDelegate;
 }
 
 bool EtModel::RunInference()

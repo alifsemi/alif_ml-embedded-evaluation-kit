@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,85 @@
 #include "mlek/log/log_macros.h"
 
 #include <cinttypes>
+#include <cstring>
 #include <memory>
+#include <string>
 
 namespace arm::app::fwk::tflm {
+namespace {
+/**
+ * @brief   Infer Arm Ethos-U NPU memory mode from Ethos-U operator inputs.
+ * @param[in] model     Pointer the the model object.
+ * @return  Memory mode string if detected, or empty string otherwise.
+ */
+std::string InferNpuMemoryModeFromEthosUOp(const tflite::Model* model)
+{
+    if (!model || !model->subgraphs() || model->subgraphs()->size() == 0 ||
+        !model->operator_codes()) {
+        return {};
+    }
+
+    const tflite::SubGraph* subgraph = model->subgraphs()->Get(0);
+    if (!subgraph || !subgraph->operators()) {
+        return {};
+    }
+
+    int ethos_u_opcode = -1;
+    for (uint32_t i = 0; i < model->operator_codes()->size(); ++i) {
+        const tflite::OperatorCode* opcode = model->operator_codes()->Get(i);
+        if (!opcode || opcode->builtin_code() != tflite::BuiltinOperator_CUSTOM) {
+            continue;
+        }
+        const auto* custom = opcode->custom_code();
+        if (custom && (std::strcmp(custom->c_str(), "ethos-u") == 0)) {
+            ethos_u_opcode = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (ethos_u_opcode < 0) {
+        return {};
+    }
+
+    for (uint32_t i = 0; i < subgraph->operators()->size(); ++i) {
+        const tflite::Operator* op = subgraph->operators()->Get(i);
+        if (!op || op->opcode_index() != ethos_u_opcode) {
+            continue;
+        }
+        const auto* inputs = op->inputs();
+        if (!inputs || inputs->size() <= 3) {
+            continue;
+        }
+
+        /* Vela places tensor arena at index 2 and fast scratch buffer at index 3. */
+        const int32_t arena_idx = inputs->Get(2);
+        const int32_t scratch_idx = inputs->Get(3);
+        if (arena_idx < 0 || scratch_idx < 0) {
+            continue;
+        }
+
+        const tflite::Tensor* arena = subgraph->tensors()->Get(arena_idx);
+        const tflite::Tensor* scratch = subgraph->tensors()->Get(scratch_idx);
+        if (!arena || !scratch) {
+            continue;
+        }
+
+        const auto arena_shape = arena->shape();
+        const auto scratch_shape = scratch->shape();
+        if (!arena_shape || !scratch_shape || arena_shape->size() < 1 ||
+            scratch_shape->size() < 1 || arena_shape->Get(0) < 1) {
+            continue;
+        }
+
+        if (arena_shape->Get(0) == scratch_shape->Get(0)) {
+            return "Sram_Only/Shared_Sram";
+        }
+        return "Dedicated_Sram";
+    }
+
+    return {};
+}
+} /* anonymous namespace */
 
 TflmModel::TflmModel() {}
 
@@ -143,7 +219,7 @@ std::shared_ptr<iface::TensorIface> TflmModel::GetInputTensor(size_t index) cons
     if (index < this->GetNumInputs()) {
         return this->m_input.at(index);
     }
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<iface::TensorIface> TflmModel::GetOutputTensor(size_t index) const
@@ -221,6 +297,15 @@ void TflmModel::LogInterpreterInfo()
             }
         }
         info("\tOperator %zu: %s\n", i, opName.c_str());
+    }
+
+    if (this->ContainsEthosUOperator()) {
+        const std::string mode = InferNpuMemoryModeFromEthosUOp(this->m_backendData.m_pModel);
+        if (!mode.empty()) {
+            info("NPU memory mode likely to be: %s\n", mode.c_str());
+        } else {
+            warn("Unable to infer NPU memory mode.\n");
+        }
     }
 }
 

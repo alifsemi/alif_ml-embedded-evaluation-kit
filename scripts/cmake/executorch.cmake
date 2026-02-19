@@ -105,6 +105,7 @@ endblock()
 add_library(mlek_executorch INTERFACE)
 
 target_link_libraries(mlek_executorch INTERFACE
+    program_schema
     extension_runner_util
     quantized_ops_lib)
 

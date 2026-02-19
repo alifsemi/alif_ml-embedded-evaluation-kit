@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,9 @@ public:
     /** @brief Logs overall runtime memory usage to stdout. */
     void LogMemoryUsage() const;
 
+    /** @brief Logs operators from the ExecuTorch program to stdout. */
+    void LogOperatorInfo();
+
     /** @brief      Initialise the model class object.
      *  @return     true if initialisation succeeds, false otherwise.
      **/
@@ -128,6 +131,7 @@ private:
                                                                       method. */
     EtBackendData m_backendData{}; /**< Backend data object */
     bool m_inited{false}; /**< Indicates whether this object has been initialised. */
+    bool m_hasEthosUDelegate{false}; /**< Indicates whether the model has NPU delegate. */
     iface::MemoryRegion m_computeBuffer{}; /**< Compute buffer region */
     iface::MemoryRegion m_modelBuffer{};   /**< Buffer where model is hosted */
 
