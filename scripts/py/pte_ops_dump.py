@@ -130,6 +130,31 @@ def _print_delegate_payloads(plan) -> None:
         )
 
 
+def _print_non_const_buffers(plan) -> None:
+    """
+    Print non-constant buffer sizes (memory planner output) if present.
+    """
+    print("++ == Non-const buffer sizes ==")
+    sizes_attr = getattr(plan, "non_const_buffer_sizes", None)
+    sizes = sizes_attr() if callable(sizes_attr) else sizes_attr
+    if sizes is None:
+        print("++ (none)")
+        return
+
+    total = 0
+    if hasattr(sizes, "size") and hasattr(sizes, "Get"):
+        for i in range(sizes.size()):
+            size = int(sizes.Get(i))
+            total += size
+            print(f"++   {i}: {size} bytes")
+    else:
+        for i, size in enumerate(sizes):
+            size = int(size)
+            total += size
+            print(f"++   {i}: {size} bytes")
+    print(f"++   total: {total} bytes")
+
+
 def print_vela_flags(mem_mode: Optional[str], config: Optional[str]) -> None:
     """
     Print Vela flags if available.
@@ -172,6 +197,7 @@ def dump_pte_ops(pte_path: Path) -> int:
     _print_ops(plan)
     _print_delegate_calls(plan, delegate_call_cls)
     _print_delegate_payloads(plan)
+    _print_non_const_buffers(plan)
 
     return 0
 
