@@ -29,9 +29,7 @@ lv_obj_t *labelTime;
 lv_obj_t *imageObj;
 lv_obj_t *imageHolder;
 lv_obj_t *ledObj;
-#ifdef ALIF_ASR
 lv_obj_t* barObj;
-#endif // ALIF_ASR
 };
 
 static lv_style_t confident;
@@ -39,7 +37,12 @@ static lv_style_t weak;
 static lv_style_t tiny;
 
 #define DISP_SCALE 2
-void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int imgHeight, unsigned short imgZoom)
+void ScreenLayoutInit(const void *imgData,
+                      size_t imgSize,
+                      int imgWidth,
+                      int imgHeight,
+                      unsigned short imgZoom,
+                      bool hasProgressBar)
 {
     lv_port_disp_init();
 
@@ -156,15 +159,17 @@ void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int img
     lv_obj_set_size(ledObj, 5 * DISP_SCALE, 5 * DISP_SCALE);
 
     int y  = 25 * DISP_SCALE;
-#ifdef ALIF_ASR
-    barObj = lv_bar_create(resultHolder);
-    //lv_obj_set_size(barObj, 200, 20);
-    lv_obj_set_width(barObj, LV_PCT(90));
-    lv_obj_set_height(barObj, 20 * DISP_SCALE);
-    lv_obj_align(barObj, LV_ALIGN_TOP_MID, 0, y);
-    lv_bar_set_value(barObj, 0, LV_ANIM_OFF);
-    y += 25 * DISP_SCALE;
-#endif // ALIF_ASR
+
+    // Add progress bar if enabled
+    if (hasProgressBar) {
+        barObj = lv_bar_create(resultHolder);
+        //lv_obj_set_size(barObj, 200, 20);
+        lv_obj_set_width(barObj, LV_PCT(90));
+        lv_obj_set_height(barObj, 20 * DISP_SCALE);
+        lv_obj_align(barObj, LV_ALIGN_TOP_MID, 0, y);
+        lv_bar_set_value(barObj, 0, LV_ANIM_OFF);
+        y += 25 * DISP_SCALE;
+    }
 
     /* And labels for results */
     for (auto &lbl : labelResult) {
@@ -250,12 +255,10 @@ lv_obj_t *ScreenLayoutLEDObject()
     return ledObj;
 }
 
-#ifdef ALIF_ASR
 lv_obj_t* ScreenLayoutBarObject()
 {
     return barObj;
 }
-#endif // ALIF_ASR
 
 } /* namespace app */
 } /* namespace alif */
