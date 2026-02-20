@@ -19,15 +19,14 @@ Arm Ethos-U NPU validation utilities for TFLite models.
 This module parses TFLite flatbuffers directly using the Vela schema.
 The validation logic is purely offline and does not require running the model.
 """
-import re
 import struct
 from pathlib import Path
 from typing import Optional, Tuple
 
-from npu_validation import (
+from tools.validation.npu_validation import (
     NpuValidationArgs,
-    normalize_ethos_u_config,
     normalize_memory_mode,
+    parse_accelerator_config,
 )
 
 
@@ -50,20 +49,6 @@ def _load_tflite_schema():
             "Ensure the Python virtual environment includes ethos-u-vela."
         ) from exc
 
-
-def _parse_expected_config(config: str) -> Tuple[Optional[str], Optional[int]]:
-    """
-    Parse an Arm Ethos-U NPU config string into (NPU ID, MACs).
-
-    Example:
-        ethos-u55-128 -> ("U55", 128)
-    """
-    # Normalization enables matching both ethos-uXX-YYY and H/Y/Z forms.
-    normalized = normalize_ethos_u_config(config)
-    match = re.fullmatch(r"ethos-u(55|65|85)-([0-9]+)", normalized)
-    if match:
-        return f"U{match.group(1)}", int(match.group(2))
-    return None, None
 
 
 def _tflite_has_ethos_u_op(model) -> bool:
@@ -215,7 +200,7 @@ def validate_tflite_model(model_path: Path, args: NpuValidationArgs) -> None:
 
     if args.config:
         # Config is validated from COP1 product + MACs.
-        expected_npu_id, expected_macs = _parse_expected_config(args.config)
+        expected_npu_id, expected_macs = parse_accelerator_config(args.config)
         if expected_npu_id is None or expected_macs is None:
             raise ValueError(
                 f"Unsupported Arm Ethos-U NPU config '{args.config}'. "

@@ -29,8 +29,8 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig
-from scripts.py.setup.npu_config import valid_npu_configs
+from scripts.py.tools.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig
+from scripts.py.tools.setup.npu_config import valid_npu_configs
 from set_up_default_resources import default_downloads_path
 from set_up_default_resources import default_executorch_path
 from set_up_default_resources import default_npu_configs

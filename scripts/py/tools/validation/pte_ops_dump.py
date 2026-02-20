@@ -31,6 +31,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Optional, Tuple
 
+from tools.validation.npu_validation import parse_accelerator_config
 
 def _ensure_flatc_on_path() -> None:
     """
@@ -160,7 +161,7 @@ def print_vela_flags(mem_mode: Optional[str], config: Optional[str]) -> None:
     Print Vela flags if available.
     """
     if mem_mode or config:
-        npu_id, macs = _parse_accelerator_config(config)
+        npu_id, macs = parse_accelerator_config(config)
         print(
             "++ PTE Vela flags: "
             f"memory_mode={mem_mode or 'unknown'}, "
@@ -245,18 +246,6 @@ def has_ethos_u_delegate(buf: bytes) -> bool:
         if marker in buf:
             return True
     return False
-
-
-def _parse_accelerator_config(config: Optional[str]) -> Tuple[Optional[str], Optional[int]]:
-    """
-    Parse an accelerator config string like ethos-u55-128 into (NPU ID, MACs).
-    """
-    if not config:
-        return None, None
-    match = re.fullmatch(r"ethos-u(55|65|85)-([0-9]+)", config.strip().lower())
-    if not match:
-        return None, None
-    return f"U{match.group(1)}", int(match.group(2))
 
 
 def main() -> int:

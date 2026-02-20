@@ -28,10 +28,10 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from gen_utils import GenUtils
-from npu_validation import NpuValidationArgs
-from pte_validator import validate_pte_model
-from tflite_validator import validate_tflite_model
+from tools.gen.gen_utils import GenUtils
+from tools.validation.npu_validation import NpuValidationArgs
+from tools.validation.pte_validator import validate_pte_model
+from tools.validation.tflite_validator import validate_tflite_model
 
 # pylint: disable=duplicate-code
 parser = ArgumentParser()

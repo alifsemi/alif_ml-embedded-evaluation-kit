@@ -34,13 +34,22 @@ from enum import Enum
 from pathlib import Path
 
 from scripts.py.check_update_resources_downloaded import get_md5sum_for_file
-from scripts.py.setup.npu_config import NpuConfigs, NpuConfig, valid_npu_configs
-from scripts.py.setup.python_venv import install_pip_package_if_needed, set_up_python_venv
-from scripts.py.setup.python_venv import is_pip_package_installed, install_requirements
-from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext
-from scripts.py.setup.use_case import ExecutorchResource
-from scripts.py.setup.use_case import UseCase, load_use_case_resources
-from scripts.py.setup.util import download_file, call_command, remove_tree_dir
+from scripts.py.tools.setup.npu_config import NpuConfigs, NpuConfig, valid_npu_configs
+from scripts.py.tools.setup.python_venv import (
+    install_pip_package_if_needed,
+    is_pip_package_installed,
+    install_requirements,
+    set_up_python_venv,
+)
+from scripts.py.tools.setup.setup_config import (
+    SetupConfig,
+    PathsConfig,
+    OptimizationConfig,
+    SetupContext,
+)
+from scripts.py.tools.setup.use_case import ExecutorchResource
+from scripts.py.tools.setup.use_case import UseCase, load_use_case_resources
+from scripts.py.tools.setup.util import download_file, call_command, remove_tree_dir
 
 # Supported version of Python and Vela
 VELA_VERSION = "4.5.0"

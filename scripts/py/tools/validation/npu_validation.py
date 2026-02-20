@@ -21,7 +21,7 @@ validators can import it without pulling in Vela or ExecuTorch.
 """
 from dataclasses import dataclass
 import re
-from typing import Optional
+from typing import Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -71,3 +71,19 @@ def normalize_ethos_u_config(value: str) -> str:
         prefix_map = {"h": "ethos-u55", "y": "ethos-u65", "z": "ethos-u85"}
         return f"{prefix_map[match.group(1)]}-{match.group(2)}"
     return lowered
+
+
+def parse_accelerator_config(value: Optional[str]) -> Tuple[Optional[str], Optional[int]]:
+    """
+    Parse an Arm Ethos-U NPU config string into (NPU ID, MACs).
+
+    Example:
+        ethos-u55-128 -> ("U55", 128)
+    """
+    if not value:
+        return None, None
+    normalized = normalize_ethos_u_config(value)
+    match = re.fullmatch(r"ethos-u(55|65|85)-([0-9]+)", normalized)
+    if match:
+        return f"U{match.group(1)}", int(match.group(2))
+    return None, None

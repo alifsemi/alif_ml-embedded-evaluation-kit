@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText:  Copyright 2021-2024 Arm Limited and/or
+#  SPDX-FileCopyrightText:  Copyright 2021-2024, 2026 Arm Limited and/or
 #  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -31,7 +31,7 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 from jinja2 import Environment, FileSystemLoader
 
-from gen_utils import GenUtils
+from tools.gen.gen_utils import GenUtils
 
 # pylint: disable=duplicate-code
 parser = ArgumentParser()
