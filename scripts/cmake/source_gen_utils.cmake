@@ -31,10 +31,12 @@ function(generate_images_code input_dir gen_dir img_size)
 
     message(STATUS "Generating image files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_rgb_cpp.py
-        --image_path ${input_dir_abs}
-        --package_gen_dir ${gen_out_abs}
-        --image_size ${img_size} ${img_size}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m tools.gen.gen_rgb_cpp
+            --image_path ${input_dir_abs}
+            --package_gen_dir ${gen_out_abs}
+            --image_size ${img_size} ${img_size}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -57,15 +59,17 @@ function(generate_audio_code input_dir gen_dir s_rate_opt mono_opt off_opt durat
 
     message(STATUS "Generating audio files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_audio_cpp.py
-        --audio_path ${input_dir_abs}
-        --package_gen_dir ${gen_dir_abs}
-        --sampling_rate ${s_rate_opt}
-        --mono ${mono_opt_py}
-        --offset ${off_opt}
-        --duration ${duration_opt}
-        --res_type ${res_type_opt}
-        --min_samples ${min_sample_opt}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m tools.gen.gen_audio_cpp
+            --audio_path ${input_dir_abs}
+            --package_gen_dir ${gen_dir_abs}
+            --sampling_rate ${s_rate_opt}
+            --mono ${mono_opt_py}
+            --offset ${off_opt}
+            --duration ${duration_opt}
+            --res_type ${res_type_opt}
+            --min_samples ${min_sample_opt}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -120,9 +124,11 @@ function(generate_model_code)
     endif()
 
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_model_cpp.py
-        --model_path ${ABS_MODEL_PATH}
-        --output_dir ${ABS_DESTINATION} ${py_arg_exp}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m tools.gen.gen_model_cpp
+            --model_path ${ABS_MODEL_PATH}
+            --output_dir ${ABS_DESTINATION} ${py_arg_exp}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -163,11 +169,13 @@ function(generate_labels_code)
 
     message(STATUS "writing to ${hdr_out_abs}/${PARSED_OUTPUT_FILENAME}.hpp and ${src_out_abs}/${PARSED_OUTPUT_FILENAME}.cc")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_labels_cpp.py
-        --labels_file ${input_abs}
-        --source_folder_path ${src_out_abs}
-        --header_folder_path ${hdr_out_abs}
-        --output_file_name ${PARSED_OUTPUT_FILENAME} ${py_arg_exp}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m tools.gen.gen_labels_cpp
+            --labels_file ${input_abs}
+            --source_folder_path ${src_out_abs}
+            --header_folder_path ${hdr_out_abs}
+            --output_file_name ${PARSED_OUTPUT_FILENAME} ${py_arg_exp}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -228,12 +236,14 @@ function(generate_test_data_code)
 
         message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
         execute_process(
-            COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_test_data_cpp.py
-            --data_folder_path ${input_dir_abs}
-            --source_folder_path ${src_out_abs}
-            --header_folder_path ${hdr_out_abs}
-            --usecase ${input_dir_name}
-            ${py_arg_exp}
+            COMMAND ${CMAKE_COMMAND} -E env
+                PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+                ${PYTHON} -m tools.gen.gen_test_data_cpp
+                --data_folder_path ${input_dir_abs}
+                --source_folder_path ${src_out_abs}
+                --header_folder_path ${hdr_out_abs}
+                --usecase ${input_dir_name}
+                ${py_arg_exp}
             RESULT_VARIABLE return_code
         )
         if (NOT return_code EQUAL "0")

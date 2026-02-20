@@ -21,12 +21,16 @@ delegate metadata and serialized Vela command-line flags.
 """
 from pathlib import Path
 
-from npu_validation import (
+from tools.validation.npu_validation import (
     NpuValidationArgs,
     normalize_ethos_u_config,
     normalize_memory_mode,
 )
-from pte_ops_dump import dump_pte_ops, extract_vela_args, has_ethos_u_delegate
+from tools.validation.pte_ops_dump import (
+    dump_pte_ops,
+    extract_vela_args,
+    has_ethos_u_delegate,
+)
 
 
 def validate_pte_model(model_path: Path, args: NpuValidationArgs) -> None:
