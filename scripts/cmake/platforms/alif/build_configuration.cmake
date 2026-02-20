@@ -40,6 +40,12 @@ function(set_platform_global_defaults)
     set(TARGET_BOARD "AppKit-e7" CACHE STRING "Board type")
     set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8" "AppKit-e8")
 
+    set(GPIO_PROFILING OFF CACHE BOOL "Enable GPIO profiling and LED0_B toggle for preprocess, inference and postprocess.")
+    if (GPIO_PROFILING)
+        add_compile_definitions(GPIO_PROFILING)
+        message(STATUS "Alif GPIO profiling enabled!")
+    endif()
+
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM

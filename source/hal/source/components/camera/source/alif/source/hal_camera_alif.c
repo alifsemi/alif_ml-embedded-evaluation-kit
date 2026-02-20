@@ -104,7 +104,7 @@ bool hal_camera_init(void)
 		}
 	}
 	DEBUG_PRINTF("Camera initialized... \n");
-    BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
+    BOARD_LED1_Control(BOARD_LED_STATE_LOW);
 #endif
     return true;
 }

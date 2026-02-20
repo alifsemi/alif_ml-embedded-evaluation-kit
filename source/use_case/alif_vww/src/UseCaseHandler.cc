@@ -35,7 +35,11 @@
 #include "log_macros.h"
 #include "VisualWakeWordProcessing.hpp"
 
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 #include <cinttypes>
+
 
 #include "lvgl.h"
 #include "lv_port.h"
@@ -169,23 +173,28 @@ namespace app {
         lv_port_unlock(lv_lock_state);
 
 #if !SKIP_MODEL
-            const size_t imgSz = inputTensor->Bytes();
+        const size_t imgSz = inputTensor->Bytes();
+#if defined(GPIO_PROFILING)
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
+        /* Run the pre-processing, inference and post-processing. */
+        if (!preProcess.DoPreProcess(image_data, imgSz)) {
+            printf_err("Pre-processing failed.");
+            return false;
+        }
 
-            /* Run the pre-processing, inference and post-processing. */
-            if (!preProcess.DoPreProcess(image_data, imgSz)) {
-                printf_err("Pre-processing failed.");
-                return false;
-            }
+        if (!RunInference(model, profiler)) {
+            printf_err("Inference failed.");
+            return false;
+        }
 
-            if (!RunInference(model, profiler)) {
-                printf_err("Inference failed.");
-                return false;
-            }
-
-            if (!postProcess.DoPostProcess()) {
-                printf_err("Post-processing failed.");
-                return false;
-            }
+        if (!postProcess.DoPostProcess()) {
+            printf_err("Post-processing failed.");
+            return false;
+        }
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
 
         /* Add results to context for access outside handler. */
         ctx.Set<std::vector<ClassificationResult>>("results", results);

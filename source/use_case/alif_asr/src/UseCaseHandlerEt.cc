@@ -331,27 +331,36 @@ namespace app {
             }
 
             /* Run the pre-processing, inference and post-processing. */
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#else
             const uint32_t ts_start_pre = Get_SysTick_Cycle_Count32();
+#endif
             if (!preProcess.DoPreProcess(audioArr, audioArrSize)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
+#ifndef GPIO_PROFILING
             const uint32_t ts_done_pre = Get_SysTick_Cycle_Count32();
-
             drawMelSpec(*inputTensorMelSpec);
-
             const uint32_t ts_start_inference = Get_SysTick_Cycle_Count32();
+#endif
 
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
                 return false;
             }
 
+#ifndef GPIO_PROFILING
             const uint32_t ts_start_post = Get_SysTick_Cycle_Count32();
+#endif
             if (!postProcess.DoPostProcess()) {
                 printf_err("Post-processing failed.");
                 return false;
             }
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#else
             const uint32_t ts_done = Get_SysTick_Cycle_Count32();
 
             {
@@ -371,7 +380,10 @@ namespace app {
                     "Pre: %.2fms Post: %.2fms",
                     (double)(ts_done_pre - ts_start_pre) / SystemCoreClock * 1000,
                     (double)(ts_done - ts_start_post) / SystemCoreClock * 1000);
-
+            }
+#endif
+            {
+                ScopedLVGLLock lv_lock;
                 lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(3), "Output:");
                 lv_label_set_text(alif::app::ScreenLayoutLabelObject(result_label_idx), decodedResult.c_str());
                 lv_obj_invalidate(alif::app::ScreenLayoutLabelObject(result_label_idx));
@@ -379,6 +391,7 @@ namespace app {
 
             profiler.PrintProfilingResult();
             info("Decoded output: %s\n", decodedResult.c_str());
+
         }
         return true;
     }

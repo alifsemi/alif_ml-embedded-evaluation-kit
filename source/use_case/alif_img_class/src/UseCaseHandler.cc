@@ -37,6 +37,9 @@
 #include "log_macros.h"
 #include "ImgClassProcessing.hpp"
 
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 
 #include <cinttypes>
 
@@ -249,6 +252,9 @@ namespace app {
 #endif
 
         /* Run the pre-processing, inference and post-processing. */
+#if defined(GPIO_PROFILING)
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
         if (!preProcess.DoPreProcess(image_data, imgSz)) {
             printf_err("Pre-processing failed.");
             return false;
@@ -263,7 +269,9 @@ namespace app {
             printf_err("Post-processing failed.");
             return false;
         }
-
+#if defined(GPIO_PROFILING)
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
 #if SHOW_INF_TIME
         inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
 #endif

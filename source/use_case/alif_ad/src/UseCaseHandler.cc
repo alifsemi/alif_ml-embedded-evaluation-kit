@@ -27,6 +27,11 @@
 #include "AdProcessing.hpp"
 #include "services_lib_api.h"
 #include "services_main.h"
+#include "timer_alif.h"
+
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 
 #include <atomic>
 #include <vector>
@@ -114,7 +119,6 @@ using namespace arm::app::ad;
             }
             // Start first fill of final stride section of buffer
             hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
-
         }
 
         // Wait until stride buffer is full - initiated above or by previous call to ClassifyAudioHandler
@@ -134,26 +138,41 @@ using namespace arm::app::ad;
 
         const int16_t* inferenceWindow = audio_inf;
 
+#if defined(GPIO_PROFILING)
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#else
         uint32_t start = Get_SysTick_Cycle_Count32();
+#endif
+
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(inferenceWindow, preProcess.GetAudioWindowSize())) {
             printf_err("Pre-processing failed.");
             return false;
         }
+#ifndef GPIO_PROFILING
         printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
         start = Get_SysTick_Cycle_Count32();
+#endif
+
         if (!RunInference(model, profiler)) {
             printf_err("Inference failed.");
             return false;
         }
-        printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
+#ifndef GPIO_PROFILING
+        printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
         start = Get_SysTick_Cycle_Count32();
+#endif
+
         if (!postProcess.DoPostProcess()) {
             printf_err("Post-processing failed.");
             return false;
         }
+
+#if defined(GPIO_PROFILING)
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        ctx.Set<int>("index", index + 1); /* Increment the audio window index for the next inference call so that audio is not initialized again */
+#else
         printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
         /* Add results from this window to our final results vector. */
@@ -170,7 +189,7 @@ using namespace arm::app::ad;
         ctx.Set<float>("result", result);
 
         profiler.PrintProfilingResult();
-
+#endif
         return true;
    }
 
