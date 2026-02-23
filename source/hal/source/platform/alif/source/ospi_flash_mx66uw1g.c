@@ -9,7 +9,7 @@
  */
 /**************************************************************************//**
  * @brief Methods for initializing OSPI flash in XIP mode for executing ML model
- *        from flash device. Defaults to E7 devkit gen2 pinconfig and flash device
+ *        from flash device.
  ******************************************************************************/
 
 #include <string.h>
@@ -39,14 +39,14 @@
 #define DDR_OPTION 1
 
 #define OSPI_RESET_PORT     BOARD_OSPI_FLASH_RESET_GPIO_PORT
-#define OSPI_RESET_PIN      BOARD_OSPI_FLASH_RESET_PIN_NO
+#define OSPI_RESET_PIN      BOARD_OSPI_FLASH_RESET_GPIO_PIN
 
 #define FLASH_DEVICE_FAST_READ_WAIT_CYCLES RTE_MX66UW1G_FLASH_WAIT_CYCLES
 
 #define WAIT_TIMEOUT                            1024
 
-extern ARM_DRIVER_FLASH ARM_Driver_Flash_(2);
-static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(2);
+extern ARM_DRIVER_FLASH ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
+static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
 
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
@@ -141,7 +141,7 @@ static int32_t ospi_flash_toggle_reset(void)
 
 int32_t ospi_flash_init(void)
 {
-    printf("Attempting MX66UW1G flash initialisation\n");
+    printf("MX66UW1G flash initialisation... ");
     int32_t ret = ospi_flash_toggle_reset();
     if (ret != ARM_DRIVER_OK) {
         printf_err("OSPI reset failed\n");
@@ -163,6 +163,7 @@ int32_t ospi_flash_init(void)
 
     ospi_flash_enable_xip();
 
+    printf("OK\n");
     return ARM_DRIVER_OK;
 }
 

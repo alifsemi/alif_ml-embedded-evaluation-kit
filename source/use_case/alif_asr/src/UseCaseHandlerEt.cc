@@ -81,7 +81,7 @@ namespace arm {
 namespace app {
      bool ClassifyAudioInit()
     {
-        alif::app::ScreenLayoutInit(lvgl_image, sizeof(lvgl_image), LIMAGE_X, LIMAGE_Y, LV_ZOOM);
+        alif::app::ScreenLayoutInit(lvgl_image, sizeof(lvgl_image), LIMAGE_X, LIMAGE_Y, LV_ZOOM, true);
         std::memset(lvgl_image, 0, sizeof(lvgl_image));
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(alif::app::ScreenLayoutHeaderObject(), "Conformer ASR (ExecuTorch)");

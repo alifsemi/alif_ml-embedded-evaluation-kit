@@ -2706,7 +2706,7 @@
 //    <3=> Dual Octal SPI FRF
 // <i> Defines OSPI0 Frame format
 // <i> Default: Octal
-#define RTE_OSPI0_SPI_FRAME_FORMAT                3
+#define RTE_OSPI0_SPI_FRAME_FORMAT                  BOARD_OSPI0_SPI_FRAME_FORMAT
 
 // <o> OSPI0 Bus speed
 // <i> Defines the OSPI0 Bus speed
@@ -2716,12 +2716,12 @@
 // <o> OSPI0 Wait Cycles
 // <i> Defines the OSPI0 Wait Cycles for connected device
 // <i> Default: 6
-#define RTE_OSPI0_WAIT_CYCLES                     6
+#define RTE_OSPI0_WAIT_CYCLES                       BOARD_OSPI0_WAIT_CYCLES
 
 // <o> OSPI0 DFS
 // <i> Defines OSPI0 Data Frame Size
 // <i> Default: 32
-#define RTE_OSPI0_DFS                             32
+#define RTE_OSPI0_DFS                               BOARD_OSPI0_DFS
 
 // <o> OSPI0 TX FIFO Start level <0-255>
 // <i> Defines TX FIFO transfer start level for OSPI0
@@ -2784,12 +2784,12 @@
 // <o> OSPI0 DDR DRIVE EDGE
 // <i> Defines DDR DRIVE EDGE for OSPI0
 // <i> Default: 0
-#define RTE_OSPI0_DDR_DRIVE_EDGE     0
+#define RTE_OSPI0_DDR_DRIVE_EDGE     1
 
 // <o> OSPI0 RXDS Delay <0-23>
 // <i> Defines the delay applied to the RXDS signal of OSPI0
 // <i> Default: 0
-#define RTE_OSPI0_RXDS_DELAY         0
+#define RTE_OSPI0_RXDS_DELAY         11
 
 // <o> OSPI0 Signal Delay <0-23>
 // <i> Defines the delay applied to signals of OSPI0
@@ -10574,7 +10574,7 @@
 //    <1=> ENABLED
 // <i> Defines Bit Manipulation Control for GPIO13.
 // <i> Default: DISABLED
-#define RTE_GPIO13_BIT_MANIPULATION  1
+#define RTE_GPIO13_BIT_MANIPULATION  0
 
 // <o> GPIO13_PIN1 IRQ Priority
 // <i> Defines Interrupt priority for GPIO13_PIN1.

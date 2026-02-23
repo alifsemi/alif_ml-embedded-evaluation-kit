@@ -47,9 +47,6 @@ endif()
 
 set(${use_case}_supports_${ML_FRAMEWORK} ON)
 
-# Add define to be used in code
-add_compile_definitions(ALIF_ASR)
-
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "asr" "alif_ui")
 
