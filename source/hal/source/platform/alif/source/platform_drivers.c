@@ -53,6 +53,10 @@
 
 #include CMSIS_device_header
 
+#ifdef OSPI_RAM_TEST
+#include "ram_test.h"
+#endif
+
 #define HW_REG32(base,offset) *((volatile uint32_t *)(base + offset))
 
 #if defined(ARM_NPU)
@@ -372,7 +376,16 @@ int platform_init(void)
         if (err) {
             printf_err("Failed initializing OSPI RAM. err=%d\n", err);
         }
-#endif
+#ifdef OSPI_RAM_TEST
+        if (!err) {
+            printf("Linear test PSRAM\n");
+            ram_linear_test((uint8_t *) BOARD_OSPI_RAM_BASE);
+
+            printf("Random test PSRAM\n");
+            ram_random_test((uint8_t *) BOARD_OSPI_RAM_BASE + (BOARD_OSPI_RAM_SIZE / 4));
+        }
+#endif // OSPI_RAM_TEST
+#endif // OSPI_RAM_SUPPORT
 
 #if !defined(BALLETTO_DEVICE)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */
@@ -679,7 +692,11 @@ void MPU_Load_Regions(void)
      },
      {   /* OSPI0 XIP(eg:hyperram) - 512MB : RO-0, NP-1, XN-0  */
          .RBAR = ARM_MPU_RBAR(0xA0000000, ARM_MPU_SH_NON, 0, 1, 0),
-         .RLAR = ARM_MPU_RLAR(0xBFFFFFFF, MEMATTRIDX_NORMAL_WB_RA_WA)
+         .RLAR = ARM_MPU_RLAR(0xAFFFFFFF, MEMATTRIDX_NORMAL_WB_RA_WA)
+     },
+     {
+         .RBAR = ARM_MPU_RBAR(BOARD_OSPI_FLASH_BASE, ARM_MPU_SH_NON, 1, 1, 0),
+         .RLAR = ARM_MPU_RLAR(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - 1, MEMATTRIDX_FLASH_SWITCHABLE)
      },
  #endif
      { // System PPB

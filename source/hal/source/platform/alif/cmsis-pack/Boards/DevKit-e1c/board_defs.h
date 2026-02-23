@@ -152,9 +152,6 @@
 #define BOARD_MISC_ENABLED                              1
 // </e>
 
-// <o> "ISSI RAM" OSPI instance number <0>
-#define BOARD_ISSI_RAM_OSPI_INSTANCE                    0
-
 // <o> "ISSI Flash" OSPI instance number <1>
 #define BOARD_ISSI_FLASH_OSPI_INSTANCE                  1
 
@@ -1684,12 +1681,19 @@
 // PIN5 <6=> PIN6 <7=> PIN7
 #define BOARD_IS66_HYPERRAM_RESET_GPIO_PIN              1
 
-// <o> "ISSI_FLASH_RESET" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4
-// <5=> GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <15=> LPGPIO
-#define BOARD_ISSI_FLASH_RESET_GPIO_PORT                15
-// <o> "ISSI_FLASH_RESET" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=>
+// <o> "PSRAM" OSPI instance number <0> (Do Not Modify!)
+#define BOARD_PSRAM_OSPI_INSTANCE                       0
+
+// OSPI Flash instance number (Do Not Modify!)
+#define BOARD_OSPI_FLASH_INSTANCE                       1
+
+// <o> "OSPI_FLASH_RESET" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4
+// <5=> GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12
+// <13=> GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_OSPI_FLASH_RESET_GPIO_PORT                15
+// <o> "OSPI_FLASH_RESET" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=>
 // PIN5 <6=> PIN6 <7=> PIN7
-#define BOARD_ISSI_FLASH_RESET_GPIO_PIN                 1
+#define BOARD_OSPI_FLASH_RESET_GPIO_PIN                 1
 
 // P0_0 ADC12 instance number (Do Not Modify!)
 #define BOARD_P0_0_ADC12_INSTANCE                       0
@@ -1970,23 +1974,17 @@
 #define BOARD_MIC_INPUT_SCLK_ALTERNATE_FUNCTION         2
 
 // OSPI Defines
-#define BOARD_HAS_IS66_RAM                      1
-#define BOARD_HAS_IS25WX_FLASH                  1
+#define BOARD_ISSI_HYPERRAM_PRESENT                     1
 
-#define BOARD_RAM_OSPI_INSTANCE                 0
-#define BOARD_RAM_OSPI_SS                       0
-#define BOARD_FLASH_OSPI_INSTANCE               0
-#define BOARD_FLASH_OSPI_SS                     1
+// <e> "APS512XXN PSRAM" connected to HSPI presence flag
+#define BOARD_APS512XXN_PSRAM_PRESENT                   0
+#define BOARD_FLASH_OSPI_SS                             1
+#define BOARD_HAS_IS25WX_FLASH                          1
 
 #define BOARD_OSPI_RAM_BASE                     0xA0000000
 #define BOARD_OSPI_RAM_SIZE                     0x04000000
 #define BOARD_OSPI_FLASH_BASE                   0xB0000000
-#define BOARD_OSPI_FLASH_SIZE                   0x08000000
+#define BOARD_OSPI_FLASH_SIZE                   0x04000000
 
-#define BOARD_OSPI_RAM_RESET_GPIO_PORT          LP
-#define BOARD_OSPI_RAM_RESET_PIN_NO             1
-
-#define BOARD_OSPI_FLASH_RESET_GPIO_PORT        LP
-#define BOARD_OSPI_FLASH_RESET_PIN_NO           1
 
 // </h>
