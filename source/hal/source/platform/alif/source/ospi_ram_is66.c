@@ -7,77 +7,29 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
-/**************************************************************************//**
- * @brief Methods for initializing OSPI flash in XIP mode for executing ML model
- *        from flash device. Defaults to E7 devkit gen2 pinconfig and flash device
- ******************************************************************************/
 
-#include <stdatomic.h>
-#include <stdbool.h>
+#include "board_defs.h"
+
+#if BOARD_ISSI_HYPERRAM_PRESENT
 
 #include <RTE_Device.h>
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-#include "board_defs.h"
 #include "pinconf.h"
 #include "Driver_IO.h"
-#include "Driver_OSPI.h"
 #include "ospi.h"
-#include "ospi_hyperram_xip.h"
-#include "sys_ctrl_aes.h"
-
-#include "timer_alif.h"
+#include "ospi_psram_xip.h"
 #include "ospi_ram.h"
-#include "ram_test.h"
 #include "log_macros.h"
 
-#ifdef BOARD_HAS_IS66_RAM
-
-#define DRIVER_OSPI_NUM 0
-#define DRIVER_OSPI_BUS_SPEED 50000000
-//#define DRIVER_OSPI_BUS_SPEED 10000000 // 20MHz FPGA
-//#define DRIVER_OSPI_BUS_SPEED 5000000 // 20MHz FPGA
-//#define DRIVER_OSPI_BUS_SPEED 500000 // 20MHz FPGA
-#define DDR_DRIVE_EDGE 1
-#define RXDS_DELAY 11
-//#define SET_VARIABLE_LATENCY
-#define ISSI_WAIT_CYCLES    6
-
-#define OSPI_RESET_PORT     BOARD_OSPI_RAM_RESET_GPIO_PORT
-#define OSPI_RESET_PIN      BOARD_OSPI_RAM_RESET_PIN_NO
+#define ISSI_WAIT_CYCLES    6 // 166MHz max
+#define OSPI_RESET_PORT     BOARD_IS66_HYPERRAM_RESET_GPIO_PORT
+#define OSPI_RESET_PIN      BOARD_IS66_HYPERRAM_RESET_GPIO_PIN
 
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
-static void hyperram_init(OSPI_Type *o, uint8_t wait_cycles);
-
-
-static const ospi_hyperram_xip_config issi_config = {
-    .instance       = DRIVER_OSPI_NUM,
-    .bus_speed      = DRIVER_OSPI_BUS_SPEED,
-    .hyperram_init  = hyperram_init,
-    .ddr_drive_edge = DDR_DRIVE_EDGE,
-    .rxds_delay     = RXDS_DELAY,
-    .wait_cycles    = ISSI_WAIT_CYCLES,
-    .slave_select   = 0,
-    .dfs            = 16,
-    .spi_mode       = OSPI_SPI_MODE_OCTAL
-};
-
-extern ARM_DRIVER_OSPI ARM_Driver_OSPI_(DRIVER_OSPI_NUM);
-static ARM_DRIVER_OSPI * const ptrOSPI = &ARM_Driver_OSPI_(DRIVER_OSPI_NUM);
-
-#if DRIVER_OSPI_NUM == 0
-static OSPI_Type * const ospi = (OSPI_Type *) OSPI0_BASE;
-static AES_Type * const aes = (AES_Type *)AES0_BASE;
-#else
-static OSPI_Type * const ospi = (OSPI_Type *) OSPI1_BASE;
-static AES_Type * const aes = (AES_Type *)AES1_BASE;
-#endif
-
-
-#define WAIT_TIMEOUT                            128
 
 static int32_t ospi_toggle_reset(void)
 {
@@ -99,94 +51,69 @@ static int32_t ospi_toggle_reset(void)
     return ret;
 }
 
-#ifdef SET_VARIABLE_LATENCY
-static void hyperram_write_register(uint32_t addr, uint16_t value)
+
+int32_t is66_psram_init(OSPI_Type *ospi, AES_Type *aes)
 {
-    ospi_disable(ospi);
-    ospi->OSPI_CTRLR0 = SPI_CTRLR0_SSI_IS_MST_MASTER
-                      | SPI_CTRLR0_SPI_HYPERBUS_ENABLE
-                      | SPI_CTRLR0_SPI_FRF_OCTAL
-                      | SPI_CTRLR0_TMOD_SEND_ONLY
-                      | SPI_CTRLR0_DFS_16bit;
+    (void)aes;
+    ospi_transfer_t ospi_config;
+    uint32_t        buff[3];
 
-    ospi->OSPI_SPI_CTRLR0 = (0 << SPI_CTRLR0_SPI_RXDS_SIG_EN_OFFSET)
-                          | (0 << SPI_CTRLR0_SPI_DM_EN_OFFSET)
-                          | (SPI_CTRLR0_SPI_RXDS_ENABLE << SPI_CTRLR0_SPI_RXDS_EN_OFFSET)
-                          | (1 << SPI_CTRLR0_SPI_DDR_EN_OFFSET)
-                          | (0 << SPI_CTRLR0_WAIT_CYCLES_OFFSET)
-                          | (SPI_CTRLR0_INST_L_0bit << SPI_CTRLR0_INST_L_OFFSET)
-                          | (12 << SPI_CTRLR0_ADDR_L_OFFSET)
-                          | (SPI_TRANS_TYPE_FRF_DEFINED << SPI_CTRLR0_TRANS_TYPE_OFFSET);
+    /*
+     * CA bit assignment for Configuration Register 0 write operation
+     * bit[47] - bit[40] -> 60h
+     * bit[39] - bit[32] -> 00h
+     * bit[31] - bit[24] -> 01h
+     * bit[23] - bit[16] -> 00h
+     * bit[15] - bit[8]  -> 00h
+     * bit[7]  - bit[0]  -> 00h
+     */
+    const uint16_t cr0 = (1 << 15)  // Normal operation
+                | (0 << 12)  // 34 ohm output drive strength
+                | (7 << 8)   // reserved
+                | (((ISSI_WAIT_CYCLES - 5) & 0xF) << 4)
+                | (0 << 3)   // variable latency
+                | (1 << 2)   // standard wrapped operation
+                | (3 << 0);  // 32-byte wrap
 
-    ospi->OSPI_TXFTLR = 2 << SPI_TXFTLR_TXFTHR_SHIFT;
+    buff[0]                    = 0x60000100;                         /* bit[8] - bit[47] */
+    buff[1]                    = 0x0;                                /* bit[0] - bit[7] */
+    buff[2]                    = cr0;
 
-    ospi_enable(ospi);
+    ospi_config.spi_frf        = SPI_FRF_OCTAL;
+    ospi_config.ddr            = 1;
+    ospi_config.inst_len       = SPI_INST_L_0_BIT;
+    ospi_config.addr_len       = SPI_ADDR_L_48_BIT;
+    ospi_config.dummy_cycle    = 0;
+    ospi_config.tx_total_cnt   = 3;
+    ospi_config.tx_current_cnt = 0;
+    ospi_config.tx_buff        = buff;
 
-    ospi->OSPI_DR0 = 0x60000000 | (addr >> 16);
-    ospi->OSPI_DR0 = addr & 0xFFFF;
-    ospi->OSPI_DR0 = value;
+    ospi_set_dfs(ospi, 16);
+    ospi_hyperbus_send(ospi, &ospi_config);
 
-    while (!(ospi->OSPI_SR & SPI_SR_TX_FIFO_EMPTY)) {
-
-    }
+    return 0;
 }
-#endif
 
-static void hyperram_init(OSPI_Type *o, uint8_t wait_cycles)
+static ospi_psram_xip_config ram_config = {
+    .instance       = BOARD_PSRAM_OSPI_INSTANCE,
+    .ram_init       = is66_psram_init,
+    .ram_type       = RAM_TYPE_HYPERRAM
+};
+
+int32_t ospi_ram_init(void)
 {
     int32_t ret = ospi_toggle_reset();
     if (ret != ARM_DRIVER_OK) {
         printf_err("OSPI reset failed\n");
     }
 
-#ifdef SET_VARIABLE_LATENCY
-    // 32M parts default to fixed latency - this could poke it to variable
-    // But 64M (stacked) parts don't support variable. This seems to be ignored,
-    // but manual suggests we shouldn't do it.
-    ospi_disable(ospi);
-
-    ospi->OSPI_SER = 1;
-
-#if ISSI_WAIT_CYCLES < 3 || ISSI_WAIT_CYCLES > 8
-#error "Invalid wait cycles"
-#endif
-
-    uint16_t cr = (1 << 15) // Normal operation
-                | (0 << 12) // 34 ohm output drive strength (default)
-                | (((ISSI_WAIT_CYCLES - 5) & 0xF) << 4) // initial latency
-                | (0 << 3) // variable latency
-                | (1 << 2) // standard wrapped operation
-                | (3 << 0); // 32-byte wrap
-
-    hyperram_write_register(0x01000000, cr);
-#endif
-}
-
-int32_t ospi_ram_init(void)
-{
-#ifdef DEVICE_FEATURE_OSPI_CTRL_CLK_ENABLE
-    CLKCTL_PER_SLV->OSPI_CTRL |= 1 << DRIVER_OSPI_NUM;
-#endif
-
-    if (ospi_hyperram_xip_init(&issi_config) < 0)
+    if (ospi_psram_xip_init(&ram_config) < 0)
     {
-        printf("Hyperram XIP init failed\n");
+        printf_err("PSRAM XIP init failed\n");
         return ARM_DRIVER_ERROR;
     }
-
-#if 0
-    printf("XIP test RAM - may lock up\n");
-    (void)*(volatile uint32_t *) 0xA0000000;
-    printf("XIP test RAM OK\n");
-#endif
-
-    printf("Linear test HyperRAM\n");
-    ram_linear_test((uint8_t *) 0xA0000000);
-
-    printf("Random test HyperRAM\n");
-    ram_random_test((uint8_t *) 0xA0800000);
 
     return ARM_DRIVER_OK;
 }
 
-#endif // BOARD_HAS_IS66_RAM
+#endif // BOARD_ISSI_HYPERRAM_PRESENT

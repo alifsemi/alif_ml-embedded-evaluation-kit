@@ -52,6 +52,7 @@ set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (ca
 set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
 
 set(OSPI_RAM_SUPPORT OFF CACHE BOOL "Enables OSPI RAM driver initialization")
+set(OSPI_RAM_TEST OFF CACHE BOOL "Enables built in memory test for external RAM")
 
 set_property(CACHE CONSOLE_UART PROPERTY STRINGS "None" "0" "1" "2" "3" "4" "5" "6" "7" "LP")
 
@@ -125,6 +126,7 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     $<$<BOOL:${CONSOLE_ITM}>:USE_ITM>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:OSPI_FLASH_SUPPORT>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:OSPI_RAM_SUPPORT>
+    $<$<BOOL:${OSPI_RAM_TEST}>:OSPI_RAM_TEST>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
     $<$<BOOL:${USE_FAKE_CAMERA}>:USE_FAKE_CAMERA>
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
@@ -148,15 +150,17 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/delay.c
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
-    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/MX66UM2G.c>
-    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66um2g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66.c>
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66_o8.c>
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66_o16.c>
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_hyper16.c>
     source/ram_test.c
     )
+
+if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "AppKit-e4"))
+    target_sources(${PLATFORM_DRIVERS_CORE}
+    PRIVATE
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/APS512XXN_PSRAM.c>
+    )
+endif()
 
 ## Directory for additional components required by MPS3:
 if (NOT DEFINED COMPONENTS_DIR)

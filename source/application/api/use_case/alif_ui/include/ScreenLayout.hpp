@@ -16,7 +16,8 @@
 namespace alif {
 namespace app {
 
-void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int imgHeight, unsigned short imgZoom);
+void ScreenLayoutInit(const void *imgData, size_t imgSize, int imgWidth, int imgHeight, unsigned short imgZoom,
+                      bool hasProgressBar = false);
 
 lv_obj_t *ScreenLayoutImageObject();
 lv_obj_t *ScreenLayoutImageHolderObject();
@@ -24,9 +25,8 @@ lv_obj_t *ScreenLayoutHeaderObject();
 lv_obj_t *ScreenLayoutLabelObject(int);
 lv_obj_t *ScreenLayoutTimeObject();
 lv_obj_t *ScreenLayoutLEDObject();
-#ifdef ALIF_ASR
 lv_obj_t* ScreenLayoutBarObject();
-#endif // ALIF_ASR
+
 } /* namespace app */
 } /* namespace alif */
 
