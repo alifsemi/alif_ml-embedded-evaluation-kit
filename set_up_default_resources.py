@@ -53,7 +53,6 @@ from scripts.py.tools.setup.util import download_file, call_command, remove_tree
 
 # Supported version of Python and Vela
 VELA_VERSION = "4.5.0"
-TOSA_TOOLS_VERSION = "0.0.3"
 py3_version_minimum = (3, 10)
 
 # If true, install Vela from source using VELA_VERSION as a git branch/tag name
@@ -424,25 +423,10 @@ def setup_executorch(setup_context: SetupContext):
     if sys.platform not in ['linux', 'darwin']:
         raise EnvironmentError(f'{sys.platform} does not support ExecuTorch set up.')
 
-    # Install TOSA tools:
-    executorch_path = setup_context.paths_config.executorch_path
-    if not is_pip_package_installed('tosa-tools', setup_context.env_activate_cmd):
-        tosa_req_file = executorch_path / 'backends' / 'arm' / 'requirements-arm-tosa.txt'
-        logging.info('Installing TOSA tools using version specified in %s',
-                     tosa_req_file)
-        call_command((
-            f'{setup_context.env_activate_cmd} && '
-            f'pip install'
-            f' --index-url https://test.pypi.org/simple/'
-            f' --extra-index-url https://pypi.org/simple'
-            f' tosa-tools=={TOSA_TOOLS_VERSION}'),
-        )
-    else:
-        logging.info('tosa-tools package is already installed.')
-
     # Install ExecuTorch package
     if not is_pip_package_installed("executorch", setup_context.env_activate_cmd):
-        install_executorch(executorch_path, setup_context.env_activate_cmd)
+        install_executorch(setup_context.paths_config.executorch_path,
+                           setup_context.env_activate_cmd)
 
 
 def setup_vela(
