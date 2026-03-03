@@ -221,7 +221,7 @@ static void voice_data_cb(uint32_t event)
     if (new_total < user_length) {
         audio_start_next_rx(user_length - new_total);
     } else if (new_total > user_length) {
-        samples = new_total - user_length;
+        samples = user_length - audio_received;
         new_total = user_length;
     }
 #ifdef STORE_AUDIO
