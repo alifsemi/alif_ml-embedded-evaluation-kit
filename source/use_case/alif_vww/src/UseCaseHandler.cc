@@ -175,6 +175,7 @@ namespace app {
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->Bytes();
 #if defined(GPIO_PROFILING)
+        lv_lock_state = lv_port_lock();
         BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
 #endif
         /* Run the pre-processing, inference and post-processing. */
@@ -194,6 +195,7 @@ namespace app {
         }
 #if defined(GPIO_PROFILING)
             BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            lv_port_unlock(lv_lock_state);
 #endif
 
         /* Add results to context for access outside handler. */

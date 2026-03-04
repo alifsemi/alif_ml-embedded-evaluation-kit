@@ -332,6 +332,7 @@ namespace app {
 
             /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
+            uint32_t lv_lock_state = lv_port_lock();
             BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
 #else
             const uint32_t ts_start_pre = Get_SysTick_Cycle_Count32();
@@ -360,6 +361,7 @@ namespace app {
             }
 #if defined(GPIO_PROFILING)
             BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            lv_port_unlock(lv_lock_state);
 #else
             const uint32_t ts_done = Get_SysTick_Cycle_Count32();
 

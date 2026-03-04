@@ -792,3 +792,6 @@ Also noise_reduction use-case needs activation area reduced using `-Dnoise_reduc
 
 `-DETHOS_U_NPU_ID=<U55|U85>`<br>
 Specifies which NPU to use for interference. (Default is U55)
+
+`-DGPIO_PROFILING=<ON|OFF>`<br>
+Enables or disables GPIO profiling. When enabled, certain GPIO pins are configured to toggle at specific stages of the benchmark (preprocessing, inference, postprocessing) to correlate power measurements with these stages. (Default is OFF). See more details in the [Alif Benchmark User Guide](Alif_benchmark.md).
