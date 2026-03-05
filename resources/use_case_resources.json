@@ -48,7 +48,8 @@
         "model": "conformer_fp32_cln_wer_6_47.pt",
         "path": "asr/models",
         "lowering": "conformer_pte_gen.py",
-        "requirements": "requirements.txt"
+        "requirements": "requirements.txt",
+        "excluded_npu_processor_ids": ["U55"]
       }
     ]
   },

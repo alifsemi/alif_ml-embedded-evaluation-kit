@@ -31,45 +31,9 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 from jinja2 import Environment, FileSystemLoader
 
-from tools.gen.gen_utils import GenUtils
-
-# pylint: disable=duplicate-code
-parser = ArgumentParser()
-
-parser.add_argument(
-    "--image_path",
-    type=str,
-    help="path to images folder or image file to convert."
-)
-
-parser.add_argument(
-    "--package_gen_dir",
-    type=str,
-    help="path to directory to be generated."
-)
-
-parser.add_argument(
-    "--image_size",
-    type=int,
-    nargs=2,
-    help="Size (width and height) of the converted images."
-)
-
-parser.add_argument(
-    "--license_template",
-    type=str,
-    help="Header template file",
-    default="header_template.txt"
-)
-
-parsed_args = parser.parse_args()
-
-env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
-                  trim_blocks=True,
-                  lstrip_blocks=True)
+from mlek_tools.gen.gen_utils import gen_header
 
 
-# pylint: enable=duplicate-code
 @dataclass
 class ImagesParams:
     """
@@ -86,6 +50,7 @@ def write_hpp_file(
         header_file_path: Path,
         cc_file_path: Path,
         header_template_file: str,
+        env
 ):
     """
     Write Images.hpp and Images.cc
@@ -94,9 +59,10 @@ def write_hpp_file(
     @param header_file_path:        Images.hpp path
     @param cc_file_path:            Images.cc path
     @param header_template_file:    Header template file name
+    @param env:                     Jinja2 environment
     """
     print(f"++ Generating {header_file_path}")
-    hdr = GenUtils.gen_header(env, header_template_file)
+    hdr = gen_header(env, header_template_file)
 
     img_w, img_h = images_params.image_size
     image_size = str(img_w * img_h * 3)
@@ -160,7 +126,8 @@ def write_individual_img_cc_file(
         image_filename: str,
         cc_filename: Path,
         header_template_file: str,
-        array_name: str
+        array_name: str,
+        env
 ):
     """
     Write image.cc
@@ -170,10 +137,12 @@ def write_individual_img_cc_file(
     @param cc_filename:             image.cc path
     @param header_template_file:    Header template file name
     @param array_name:              C++ array name
+    @param env:                     Jinja2 environment
     """
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     print(f"++ Converting {image_filename} to {cc_filename.name}")
 
-    hdr = GenUtils.gen_header(env, header_template_file, image_filename)
+    hdr = gen_header(env, header_template_file, image_filename)
 
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(rgb_data, math.ceil(len(rgb_data) / 20)))
@@ -185,11 +154,47 @@ def write_individual_img_cc_file(
         .dump(str(cc_filename))
 
 
-def main(args):
+def main():
     """
     Convert images
-    @param args:    Parsed args
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=duplicate-code
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--image_path",
+        type=str,
+        help="path to images folder or image file to convert."
+    )
+
+    parser.add_argument(
+        "--package_gen_dir",
+        type=str,
+        help="path to directory to be generated."
+    )
+
+    parser.add_argument(
+        "--image_size",
+        type=int,
+        nargs=2,
+        help="Size (width and height) of the converted images."
+    )
+
+    parser.add_argument(
+        "--license_template",
+        type=str,
+        help="Header template file",
+        default="header_template.txt"
+    )
+
+    args = parser.parse_args()
+    # pylint: enable=duplicate-code
+
+    env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
+                      trim_blocks=True,
+                      lstrip_blocks=True)
+
     # Keep the count of the images converted
     image_idx = 0
     image_filenames = []
@@ -226,7 +231,8 @@ def main(args):
                                      filename,
                                      cc_filename,
                                      args.license_template,
-                                     array_name)
+                                     array_name,
+                                     env)
 
         # Increment image index
         image_idx = image_idx + 1
@@ -237,10 +243,16 @@ def main(args):
     images_params = ImagesParams(image_idx, args.image_size, image_array_names, image_filenames)
 
     if len(image_filenames) > 0:
-        write_hpp_file(images_params, header_filepath, common_cc_filepath, args.license_template)
+        write_hpp_file(
+            images_params,
+            header_filepath,
+            common_cc_filepath,
+            args.license_template,
+            env,
+        )
     else:
         raise FileNotFoundError("No valid images found.")
 
 
 if __name__ == '__main__':
-    main(parsed_args)
+    main()

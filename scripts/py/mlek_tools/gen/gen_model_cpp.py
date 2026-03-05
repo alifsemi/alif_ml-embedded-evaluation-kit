@@ -28,80 +28,12 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from tools.gen.gen_utils import GenUtils
-from tools.validation.npu_validation import NpuValidationArgs
-from tools.validation.pte_validator import validate_pte_model
-from tools.validation.tflite_validator import validate_tflite_model
-
-# pylint: disable=duplicate-code
-parser = ArgumentParser()
-
-parser.add_argument(
-    "--model_path",
-    help="Model path (.tflite or .pte)",
-    required=True
-)
-
-parser.add_argument(
-    "--output_dir",
-    help="Output directory",
-    required=True
-)
-
-parser.add_argument(
-    '-e',
-    '--expression',
-    action='append',
-    default=[],
-    dest="expr"
-)
-
-parser.add_argument(
-    '--header',
-    action='append',
-    default=[],
-    dest="headers"
-)
-
-parser.add_argument(
-    '-ns',
-    '--namespaces',
-    action='append',
-    default=[],
-    dest="namespaces"
-)
-
-parser.add_argument(
-    "--license_template",
-    type=str,
-    help="Header template file",
-    default="header_template.txt"
-)
-
-parser.add_argument(
-    "--ethos_u_memory_mode",
-    type=str,
-    help="Arm Ethos-U NPU Vela memory mode (Shared_Sram, Sram_Only, Dedicated_Sram). "
-         "If provided, model must be Arm Ethos-U NPU optimized.",
-    default=None
-)
-
-parser.add_argument(
-    "--ethos_u_config",
-    type=str,
-    help="Arm Ethos-U NPU accelerator config (e.g. ethos-u55-128). "
-         "If provided, model must be Arm Ethos-U NPU optimized.",
-    default=None
-)
-
-parsed_args = parser.parse_args()
-
-env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
-                  trim_blocks=True,
-                  lstrip_blocks=True)
+from mlek_tools.gen.gen_utils import gen_header
+from mlek_tools.validation.npu_validation import NpuValidationArgs
+from mlek_tools.validation.pte_validator import validate_pte_model
+from mlek_tools.validation.tflite_validator import validate_tflite_model
 
 
-# pylint: enable=duplicate-code
 def get_model_data(model_path: str) -> list:
     """
     Reads a binary file and returns a C style array as a
@@ -131,11 +63,78 @@ def get_model_data(model_path: str) -> list:
     return [hexstring]
 
 
-def main(args):
+def main():
     """
     Generate models .cpp
-    @param args:    Parsed args
     """
+    # pylint: disable=duplicate-code
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--model_path",
+        help="Model path (.tflite or .pte)",
+        required=True
+    )
+
+    parser.add_argument(
+        "--output_dir",
+        help="Output directory",
+        required=True
+    )
+
+    parser.add_argument(
+        '-e',
+        '--expression',
+        action='append',
+        default=[],
+        dest="expr"
+    )
+
+    parser.add_argument(
+        '--header',
+        action='append',
+        default=[],
+        dest="headers"
+    )
+
+    parser.add_argument(
+        '-ns',
+        '--namespaces',
+        action='append',
+        default=[],
+        dest="namespaces"
+    )
+
+    parser.add_argument(
+        "--license_template",
+        type=str,
+        help="Header template file",
+        default="header_template.txt"
+    )
+
+    parser.add_argument(
+        "--ethos_u_memory_mode",
+        type=str,
+        help="Arm Ethos-U NPU Vela memory mode (Shared_Sram, Sram_Only, Dedicated_Sram). "
+             "If provided, model must be Arm Ethos-U NPU optimized.",
+        default=None
+    )
+
+    parser.add_argument(
+        "--ethos_u_config",
+        type=str,
+        help="Arm Ethos-U NPU accelerator config (e.g. ethos-u55-128). "
+             "If provided, model must be Arm Ethos-U NPU optimized.",
+        default=None
+    )
+
+    args = parser.parse_args()
+    # pylint: enable=duplicate-code
+
+    env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
+                      trim_blocks=True,
+                      lstrip_blocks=True)
+
     # Resolve and validate input path early to fail fast.
     model_path = Path(args.model_path)
     if not model_path.is_file():
@@ -166,7 +165,7 @@ def main(args):
 
     cpp_filename.parent.mkdir(exist_ok=True)
 
-    hdr = GenUtils.gen_header(env, args.license_template, model_path.name)
+    hdr = gen_header(env, args.license_template, model_path.name)
 
     env \
         .get_template('tflite.cc.template') \
@@ -178,4 +177,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(parsed_args)
+    main()

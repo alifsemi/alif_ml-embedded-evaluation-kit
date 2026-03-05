@@ -141,7 +141,7 @@ The repository has the following structure:
 What these folders contain:
 
 - `dependencies`: All the third-party dependencies for this project. These are either populated by `git submodule` or by
-    downloading packages in the required hierarchy. See `download_dependencies.py`.
+    downloading packages in the required hierarchy. See `scripts/py/download_dependencies.py`.
 
 - `docs`: Detailed documentation for this repository.
 

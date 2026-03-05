@@ -31,7 +31,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Optional, Tuple
 
-from tools.validation.npu_validation import parse_accelerator_config
+from mlek_tools.validation.npu_validation import parse_accelerator_config
 
 def _ensure_flatc_on_path() -> None:
     """

@@ -386,7 +386,7 @@ repository to link against.
 7. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 8. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)
 
-> **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
+> **Note:** If you are using non git project sources, run `python3 ./scripts/py/download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
 
 To pull the submodules:
@@ -1027,7 +1027,7 @@ For example, the generated utility functions for image classification are:
   - Snippet from `build/generated/img_class/generated/samples/sample_files.c`
 
       ```C++
-    
+
       #include "sample_files.h"
       #include <stddef.h>
 
@@ -1062,32 +1062,34 @@ For example, the generated utility functions for image classification are:
       }
       ```
 
-These are generated using Python templates located in `scripts/py/templates`.
+These are generated using Python templates located in `scripts/py/mlek_tools/gen/templates`.
 
 ```tree
 scripts
 └── py
-    ├── <generation scripts>
     ├── requirements.txt
-    └── templates
-          ├── header_template.txt
-          ├── labels
-          │   ├── Labels.cc.template
-          │   └── Labels.hpp.template
-          ├── sample-data
-          │   ├── audio
-          │   │   ├── audio_clips.c.template
-          │   │   ├── audio_clips.h.template
-          │   │   └── audio.c.template
-          │   └── images
-          │       ├── image.c.template
-          │       ├── images.c.template
-          │       └── images.h.template
-          ├── tests
-          │   ├── iofmdata.cc.template
-          │   ├── TestData.cc.template
-          │   └── TestData.hpp.template
-          └── tflite.cc.template
+    └── mlek_tools
+        └── gen
+            ├── <generation scripts>
+            └── templates
+                  ├── header_template.txt
+                  ├── labels
+                  │   ├── Labels.cc.template
+                  │   └── Labels.hpp.template
+                  ├── sample-data
+                  │   ├── audio
+                  │   │   ├── audio_clips.c.template
+                  │   │   ├── audio_clips.h.template
+                  │   │   └── audio.c.template
+                  │   └── images
+                  │       ├── image.c.template
+                  │       ├── images.c.template
+                  │       └── images.h.template
+                  ├── tests
+                  │   ├── iofmdata.cc.template
+                  │   ├── TestData.cc.template
+                  │   └── TestData.hpp.template
+                  └── tflite.cc.template
 ```
 
 Based on the type of use-case, the correct conversion is called in the use-case CMake file. Or, audio or image

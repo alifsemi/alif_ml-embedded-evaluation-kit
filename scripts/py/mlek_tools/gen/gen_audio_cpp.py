@@ -30,85 +30,15 @@ import typing
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
 
-from tools.gen.gen_utils import GenUtils
-
-# pylint: disable=duplicate-code
-parser = ArgumentParser()
-
-parser.add_argument(
-    "--audio_path",
-    type=str,
-    help="path to audio folder to convert."
+from mlek_tools.gen.gen_utils import (
+    gen_header,
+    read_audio_file,
+    resample_audio_clip,
+    res_data_type,
+    res_type_list,
 )
 
-parser.add_argument(
-    "--package_gen_dir",
-    type=str,
-    help="path to directory to be generated."
-)
 
-parser.add_argument(
-    "--sampling_rate",
-    type=int,
-    help="target sampling rate.",
-    default=16000
-)
-
-parser.add_argument(
-    "--mono",
-    type=bool,
-    help="convert signal to mono.",
-    default=True
-)
-
-parser.add_argument(
-    "--offset",
-    type=float,
-    help="start reading after this time (in seconds).",
-    default=0
-)
-
-parser.add_argument(
-    "--duration",
-    type=float,
-    help="only load up to this much audio (in seconds).",
-    default=0
-)
-
-parser.add_argument(
-    "--res_type",
-    type=GenUtils.res_data_type,
-    help=f"Resample type: {GenUtils.res_type_list()}.",
-    default='kaiser_best'
-)
-
-parser.add_argument(
-    "--min_samples",
-    type=int,
-    help="Minimum sample number.",
-    default=16000
-)
-
-parser.add_argument(
-    "--license_template",
-    type=str,
-    help="Header template file",
-    default="header_template.txt"
-)
-
-parser.add_argument(
-    "-v",
-    "--verbosity",
-    action="store_true"
-)
-
-parsed_args = parser.parse_args()
-
-env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
-                  trim_blocks=True,
-                  lstrip_blocks=True)
-
-# pylint: enable=duplicate-code
 @dataclass
 class AudioParams:
     """
@@ -123,7 +53,8 @@ class AudioParams:
 def write_hpp_file(
         header_filepath: Path,
         header: str,
-        audio_params: AudioParams
+        audio_params: AudioParams,
+        env
 ):
     """
     Write audio hpp file
@@ -131,6 +62,7 @@ def write_hpp_file(
     @param header_filepath:         .hpp filepath
     @param header:                  Rendered header
     @param audio_params:            Audio parameters
+    @param env:                     Jinja2 environment
     """
     print(f"++ Generating {header_filepath}")
 
@@ -148,7 +80,8 @@ def write_cc_file(
         cc_filepath: Path,
         header: str,
         audio_params: AudioParams,
-        header_filename: str
+        header_filename: str,
+        env
 ):
     """
     Write cc file
@@ -157,6 +90,7 @@ def write_cc_file(
     @param header:                  Rendered header
     @param audio_params:            Audio parameters
     @param header_filename:         Name of the common header file to be included
+    @param env:                     Jinja2 environment
     """
     print(f"++ Generating {cc_filepath}")
 
@@ -171,7 +105,7 @@ def write_cc_file(
         .dump(str(cc_filepath))
 
 
-def create_audio_cc_file(args, filename, array_name, clip_dirpath):
+def create_audio_cc_file(args, filename, array_name, clip_dirpath, env):
     """
     Create an individual audio cpp file
 
@@ -179,13 +113,14 @@ def create_audio_cc_file(args, filename, array_name, clip_dirpath):
     @param filename:        Audio filename
     @param array_name:      Name of the array in the audio .cc file
     @param clip_dirpath:    Audio file directory path
+    @param env:             Jinja2 environment
     @return:                Array length of the audio data written
     """
     cc_filename = (Path(args.package_gen_dir) /
                    (Path(filename).stem.replace(" ", "_") + ".c"))
     audio_filepath = Path(clip_dirpath) / filename
-    audio_sample = GenUtils.read_audio_file(audio_filepath, args.offset, args.duration)
-    resampled_audio = GenUtils.resample_audio_clip(
+    audio_sample = read_audio_file(audio_filepath, args.offset, args.duration)
+    resampled_audio = resample_audio_clip(
         audio_sample, args.sampling_rate, args.mono, args.res_type, args.min_samples
     )
 
@@ -196,7 +131,7 @@ def create_audio_cc_file(args, filename, array_name, clip_dirpath):
                         np.iinfo(np.int16).min,
                         np.iinfo(np.int16).max).flatten().astype(np.int16)
 
-    hdr = GenUtils.gen_header(env, args.license_template, filename)
+    hdr = gen_header(env, args.license_template, filename)
     hex_line_generator = (', '.join(map(hex, sub_arr))
                           for sub_arr in np.array_split(clip_data, math.ceil(len(clip_data) / 20)))
 
@@ -211,11 +146,88 @@ def create_audio_cc_file(args, filename, array_name, clip_dirpath):
     return len(clip_data)
 
 
-def main(args):
+def main():
     """
     Convert audio files to .cc + .hpp files
-    @param args:    Parsed args
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=duplicate-code
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--audio_path",
+        type=str,
+        help="path to audio folder to convert."
+    )
+
+    parser.add_argument(
+        "--package_gen_dir",
+        type=str,
+        help="path to directory to be generated."
+    )
+
+    parser.add_argument(
+        "--sampling_rate",
+        type=int,
+        help="target sampling rate.",
+        default=16000
+    )
+
+    parser.add_argument(
+        "--mono",
+        type=bool,
+        help="convert signal to mono.",
+        default=True
+    )
+
+    parser.add_argument(
+        "--offset",
+        type=float,
+        help="start reading after this time (in seconds).",
+        default=0
+    )
+
+    parser.add_argument(
+        "--duration",
+        type=float,
+        help="only load up to this much audio (in seconds).",
+        default=0
+    )
+
+    parser.add_argument(
+        "--res_type",
+        type=res_data_type,
+        help=f"Resample type: {res_type_list()}.",
+        default='kaiser_best'
+    )
+
+    parser.add_argument(
+        "--min_samples",
+        type=int,
+        help="Minimum sample number.",
+        default=16000
+    )
+
+    parser.add_argument(
+        "--license_template",
+        type=str,
+        help="Header template file",
+        default="header_template.txt"
+    )
+
+    parser.add_argument(
+        "-v",
+        "--verbosity",
+        action="store_true"
+    )
+
+    args = parser.parse_args()
+    # pylint: enable=duplicate-code
+
+    env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
+                      trim_blocks=True,
+                      lstrip_blocks=True)
+
     # Keep the count of the audio files converted
     audioclip_idx = 0
     audioclip_filenames = []
@@ -242,7 +254,8 @@ def main(args):
             array_size = create_audio_cc_file(args,
                                               filename,
                                               array_name,
-                                              clip_dirpath)
+                                              clip_dirpath,
+                                              env)
 
             audioclip_array_names.append((array_name, array_size))
             # Increment audio index
@@ -266,14 +279,16 @@ def main(args):
         write_hpp_file(
             header_filepath,
             header,
-            audio_params
+            audio_params,
+            env
         )
 
         write_cc_file(
             common_cc_filepath,
             header,
             audio_params,
-            header_filename
+            header_filename,
+            env
         )
 
     else:
@@ -281,4 +296,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(parsed_args)
+    main()

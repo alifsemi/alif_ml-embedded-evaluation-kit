@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2021-2023, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,7 +95,7 @@ def main(dependencies_path: Path):
     @param dependencies_path:   The path to which the dependencies will be downloaded
     """
     dependency_urls_path = (
-            Path(__file__).parent.resolve() / "scripts" / "py" / "dependency_urls.json")
+            Path(__file__).parent.resolve() / "dependency_urls.json")
     with open(dependency_urls_path, encoding="utf8") as f:
         dependency_urls = json.load(f)
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='download_dependencies.log', level=logging.DEBUG, filemode='w')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
-    download_dir = Path(__file__).parent.resolve() / "dependencies"
+    download_dir = Path(__file__).parent.resolve().parents[1] / "dependencies"
 
     if download_dir.is_dir():
         logging.info('%s exists. Skipping download.', download_dir)

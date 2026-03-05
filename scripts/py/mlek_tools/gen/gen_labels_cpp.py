@@ -26,69 +26,68 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from tools.gen.gen_utils import GenUtils
-
-# pylint: disable=duplicate-code
-parser = ArgumentParser()
-
-# Label file path
-parser.add_argument(
-    "--labels_file",
-    type=str,
-    help="Path to the label text file",
-    required=True
-)
-
-# Output file to be generated
-parser.add_argument(
-    "--source_folder_path",
-    type=str,
-    help="path to source folder to be generated.",
-    required=True
-)
-
-parser.add_argument(
-    "--header_folder_path",
-    type=str,
-    help="path to header folder to be generated.",
-    required=True
-)
-
-parser.add_argument(
-    "--output_file_name",
-    type=str,
-    help="Required output file name",
-    required=True
-)
-
-# Namespaces
-parser.add_argument(
-    "--namespaces",
-    action='append',
-    default=[]
-)
-
-# License template
-parser.add_argument(
-    "--license_template",
-    type=str,
-    help="Header template file",
-    default="header_template.txt"
-)
-
-parsed_args = parser.parse_args()
-
-env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
-                  trim_blocks=True,
-                  lstrip_blocks=True)
+from mlek_tools.gen.gen_utils import gen_header
 
 
-# pylint: enable=duplicate-code
-def main(args):
+def main():
     """
     Generate labels .cpp
-    @param args:    Parsed args
     """
+    # pylint: disable=duplicate-code
+    parser = ArgumentParser()
+
+    # Label file path
+    parser.add_argument(
+        "--labels_file",
+        type=str,
+        help="Path to the label text file",
+        required=True
+    )
+
+    # Output file to be generated
+    parser.add_argument(
+        "--source_folder_path",
+        type=str,
+        help="path to source folder to be generated.",
+        required=True
+    )
+
+    parser.add_argument(
+        "--header_folder_path",
+        type=str,
+        help="path to header folder to be generated.",
+        required=True
+    )
+
+    parser.add_argument(
+        "--output_file_name",
+        type=str,
+        help="Required output file name",
+        required=True
+    )
+
+    # Namespaces
+    parser.add_argument(
+        "--namespaces",
+        action='append',
+        default=[]
+    )
+
+    # License template
+    parser.add_argument(
+        "--license_template",
+        type=str,
+        help="Header template file",
+        default="header_template.txt"
+    )
+
+    args = parser.parse_args()
+    # pylint: enable=duplicate-code
+
+    env = Environment(loader=FileSystemLoader(Path(__file__).parent / 'templates'),
+                      trim_blocks=True,
+                      lstrip_blocks=True)
+
     # Get the labels from text file
     with open(args.labels_file, "r", encoding="utf8") as f:
         labels = f.read().splitlines()
@@ -97,7 +96,7 @@ def main(args):
     if len(labels) == 0:
         raise ValueError(f"no labels found in {args.label_file}")
 
-    hdr = GenUtils.gen_header(env, args.license_template, Path(args.labels_file).name)
+    hdr = gen_header(env, args.license_template, Path(args.labels_file).name)
 
     hpp_filename = Path(args.header_folder_path) / (args.output_file_name + ".hpp")
     env.get_template('labels/Labels.hpp.template').stream(common_template_header=hdr,
@@ -114,4 +113,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(parsed_args)
+    main()

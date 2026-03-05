@@ -23,7 +23,7 @@ import struct
 from pathlib import Path
 from typing import Optional, Tuple
 
-from tools.validation.npu_validation import (
+from mlek_tools.validation.npu_validation import (
     NpuValidationArgs,
     normalize_memory_mode,
     parse_accelerator_config,

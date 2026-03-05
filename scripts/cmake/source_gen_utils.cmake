@@ -33,7 +33,7 @@ function(generate_images_code input_dir gen_dir img_size)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E env
             PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
-            ${PYTHON} -m tools.gen.gen_rgb_cpp
+            ${PYTHON} -m mlek_tools.gen.gen_rgb_cpp
             --image_path ${input_dir_abs}
             --package_gen_dir ${gen_out_abs}
             --image_size ${img_size} ${img_size}
@@ -61,7 +61,7 @@ function(generate_audio_code input_dir gen_dir s_rate_opt mono_opt off_opt durat
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E env
             PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
-            ${PYTHON} -m tools.gen.gen_audio_cpp
+            ${PYTHON} -m mlek_tools.gen.gen_audio_cpp
             --audio_path ${input_dir_abs}
             --package_gen_dir ${gen_dir_abs}
             --sampling_rate ${s_rate_opt}
@@ -126,7 +126,7 @@ function(generate_model_code)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E env
             PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
-            ${PYTHON} -m tools.gen.gen_model_cpp
+            ${PYTHON} -m mlek_tools.gen.gen_model_cpp
             --model_path ${ABS_MODEL_PATH}
             --output_dir ${ABS_DESTINATION} ${py_arg_exp}
         RESULT_VARIABLE return_code
@@ -171,7 +171,7 @@ function(generate_labels_code)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E env
             PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
-            ${PYTHON} -m tools.gen.gen_labels_cpp
+            ${PYTHON} -m mlek_tools.gen.gen_labels_cpp
             --labels_file ${input_abs}
             --source_folder_path ${src_out_abs}
             --header_folder_path ${hdr_out_abs}
@@ -238,7 +238,7 @@ function(generate_test_data_code)
         execute_process(
             COMMAND ${CMAKE_COMMAND} -E env
                 PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
-                ${PYTHON} -m tools.gen.gen_test_data_cpp
+                ${PYTHON} -m mlek_tools.gen.gen_test_data_cpp
                 --data_folder_path ${input_dir_abs}
                 --source_folder_path ${src_out_abs}
                 --header_folder_path ${hdr_out_abs}

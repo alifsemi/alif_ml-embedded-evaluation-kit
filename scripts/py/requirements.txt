@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2021-2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-License-Identifier: Apache-2.0
+
 cffi==1.17.1
 cmake==3.30.5
 executorch==1.1.0
