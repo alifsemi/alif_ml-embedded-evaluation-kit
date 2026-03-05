@@ -78,12 +78,12 @@ Other than the obvious link between the linker script and the target profile des
 CMake files, there are other parameters linked to what the reserved space for activation
 buffers is. These are:
 
-- The file [vela_configs.py](../../scripts/py/vela_configs.py) contains a
-  parameter called `mps3_max_sram_sz`:
+- The file [npu_config.py](../../scripts/py/mlek_tools/setup/npu_config.py) contains a
+  parameter called `_DEFAULT_SHARED_SRAM_ARENA_SIZE`:
 
   ```python
-  # The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
-  mps3_max_sram_sz = 2 * 1024 * 1024 # 2 MiB (2 banks of 1 MiB each)
+  # 2 MiB default shared SRAM arena size (2 banks of 1 MiB each)
+  _DEFAULT_SHARED_SRAM_ARENA_SIZE = 2 * 1024 * 1024  # 2 MiB
   ```
 
   This size of **2 MiB** here is provided here to allow the default vela optimisation process to

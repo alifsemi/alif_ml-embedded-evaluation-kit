@@ -21,10 +21,9 @@ import itertools
 import typing
 from dataclasses import dataclass
 
-# The internal SRAM size for Corstone-300 implementation on MPS3 specified by AN552
-# The internal SRAM size for Corstone-310 implementation on MPS3 specified by AN555
-# is 4MB, but we are content with the 2MB specified below.
-MPS3_MAX_SRAM_SZ = 2 * 1024 * 1024  # 2 MiB (2 banks of 1 MiB each)
+# Default arena cache size applied when memory_mode is Shared_Sram and no explicit
+# arena_cache_size is requested.
+_DEFAULT_SHARED_SRAM_ARENA_SIZE = 2 * 1024 * 1024  # 2 MiB
 
 
 @dataclass(frozen=True)
@@ -79,7 +78,7 @@ class NpuConfig:
         value = arena_cache_size
 
         if value == 0:
-            value = MPS3_MAX_SRAM_SZ if self.memory_mode == "Shared_Sram" else None
+            value = _DEFAULT_SHARED_SRAM_ARENA_SIZE if self.memory_mode == "Shared_Sram" else None
 
         return NpuConfig(
             **{**self.__dict__, **{"arena_cache_size": value}}
@@ -192,3 +191,24 @@ valid_npu_configs = NpuConfigs.create(
         ) for macs in (128, 256, 512, 1024, 2048)
     )
 )
+
+
+def get_default_npu_config_from_name(
+        config_name: str, arena_cache_size: int = 0
+) -> typing.Optional[NpuConfig]:
+    """
+    Get an NpuConfig for the given configuration name, with optional arena cache size override.
+
+    :param config_name:         Ethos-U NPU configuration name from valid_npu_configs.
+    :param arena_cache_size:    Arena cache size in bytes. If 0, defaults from the NPU
+                                config are used.
+    :return:                    An NpuConfig populated with defaults for the given config name.
+    :raises ValueError:         If config_name is not a recognised NPU configuration.
+    """
+    npu_config = valid_npu_configs.get_by_name(config_name)
+    if not npu_config:
+        raise ValueError(
+            f"Invalid Ethos-U NPU configuration '{config_name}'. "
+            f"Select one from {valid_npu_configs.names}."
+        )
+    return npu_config.overwrite_arena_cache_size(arena_cache_size)

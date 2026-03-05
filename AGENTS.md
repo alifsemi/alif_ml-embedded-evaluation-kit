@@ -21,6 +21,7 @@ dependencies/    # Git submodules: tensorflow, executorch, cmsis-*, core-driver,
 scripts/
   cmake/         # CMake toolchain files and helper modules
   py/            # Python tooling
+    mlek_tools/  # Installable package: resource setup, code generation, model validation
   vela/          # Vela NPU compiler configuration files
 resources/       # Input samples and labels for each use case
 docs/            # Full documentation: building, deployment, use cases, coding guidelines
@@ -30,6 +31,37 @@ docs/            # Full documentation: building, deployment, use cases, coding g
 
 - Keep `source/lib/` fully platform agnostic as designed.
 - Do not introduce direct usage or dependencies on `source/hal/` from `source/lib/`.
+
+### Python tooling (`scripts/py/mlek_tools`)
+
+`mlek_tools` is the project's Python support package. It can be installed directly with:
+
+```sh
+pip install scripts/py/
+```
+
+The `set_up_default_resources.py` script installs it as an editable package into the shared venv at `resources_downloaded/env/`, making the following entry-point scripts available after activation:
+
+| Command | Description |
+|---------|-------------|
+| `gen-audio` | Generate audio C arrays from WAV files |
+| `gen-audio-cpp` | Generate audio C++ source files |
+| `gen-rgb-cpp` | Generate RGB image C++ source files |
+| `gen-model-cpp` | Generate model weight C++ source files |
+| `gen-labels-cpp` | Generate labels C++ source files |
+| `gen-test-data-cpp` | Generate test data C++ source files |
+| `pte-ops-dump` | Dump operator list from an ExecuTorch `.pte` file |
+
+Optional extras for model validation:
+
+```sh
+pip install "scripts/py/[tflite]"     # adds ethos-u-vela
+pip install "scripts/py/[executorch]" # adds executorch
+```
+
+### `pyproject.toml` files
+
+`scripts/py/pyproject.toml` defines the `mlek-tools` pip package.
 
 ## Languages and Standards
 
@@ -138,7 +170,7 @@ Full guidelines: [coding_guidelines.md](docs/sections/coding_guidelines.md). Key
 ### Static Analysis
 - **clang-format**: Configuration in `.clang-format` (LLVM-based style). Run: `clang-format -style=file -i <file>`
 - **cppcheck**: Used via pre-push git hook. Setup: `python scripts/py/setup_hooks.py <hooks-dir>`
-- **PyLint**: Python code must satisfy PyLint `3.3.7`.
+- **PyLint**: Python code must satisfy PyLint `3.3.8`.
 - Avoid PyLint `disable` statements where practical; prefer refactoring to satisfy checks.
 
 ## Licensing and Copyright
@@ -155,6 +187,8 @@ current year using these rules:
 
 - Do not rewrite or compress historical years/ranges; only extend by adding the
   new year to the existing sequence.
+- If a file is moved/renamed without content changes (for example, `git` rename
+  score `R100`), do not update copyright years.
 - If the latest listed year is not the immediately previous year, append the
   current year as a comma-separated year.
   Example: `2021-2023` -> `2021-2023, 2026`

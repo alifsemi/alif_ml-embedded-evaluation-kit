@@ -60,6 +60,7 @@ class ExecutorchResource:
     path: typing.Optional[Path] = None
     requirements: typing.Optional[str] = None
     lowering: typing.Optional[Path] = None
+    excluded_npu_processor_ids: typing.Tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
         is_model_file = model_file_extensions.match(self.model)
@@ -206,7 +207,15 @@ def to_use_case(
     ]
 
     executorch_resources = [
-        ExecutorchResource(resources_dir, **resource)
+        ExecutorchResource(
+            resources_dir,
+            **{
+                **resource,
+                "excluded_npu_processor_ids": tuple(
+                    resource.get("excluded_npu_processor_ids", [])
+                ),
+            }
+        )
         for resource in use_case_data.get("executorch_resources", [])
     ]
 

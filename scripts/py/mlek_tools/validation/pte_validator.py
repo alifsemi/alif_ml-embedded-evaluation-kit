@@ -21,12 +21,12 @@ delegate metadata and serialized Vela command-line flags.
 """
 from pathlib import Path
 
-from tools.validation.npu_validation import (
+from mlek_tools.validation.npu_validation import (
     NpuValidationArgs,
     normalize_ethos_u_config,
     normalize_memory_mode,
 )
-from tools.validation.pte_ops_dump import (
+from mlek_tools.validation.pte_ops_dump import (
     dump_pte_ops,
     extract_vela_args,
     has_ethos_u_delegate,

@@ -17,6 +17,7 @@
 """
 Utility functions for setup
 """
+import hashlib
 import logging
 import os
 import shutil
@@ -29,7 +30,7 @@ from netrc import netrc
 from pathlib import Path
 from urllib.error import URLError
 
-default_netrc_path = Path(os.environ["HOME"]) / ".netrc"
+default_netrc_path = Path.home() / ".netrc"
 HttpHeadersType = typing.Dict[str, typing.List[typing.Tuple[str, str]]]
 
 
@@ -134,6 +135,21 @@ def call_command(
         raise subprocess.CalledProcessError(proc.returncode, proc.args,
                                  output=proc.stdout, stderr=proc.stderr)
     return log if capture_output else None
+
+
+def get_md5sum_for_file(filepath: Path) -> str:
+    """
+    Compute the MD5 hex digest of a file's contents.
+
+    :param filepath:    Path to the file.
+    :return:            Hex string of the MD5 digest.
+    """
+    md5 = hashlib.md5()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
+
 
 
 def remove_tree_dir(dir_path: Path):

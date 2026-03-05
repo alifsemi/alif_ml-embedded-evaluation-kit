@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited and/or its
-#  affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2026 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,3 +13,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+"""C++ source file generation utilities."""
+from .gen_utils import (
+    AudioSample,
+    gen_header,
+    read_audio_file,
+    resample_audio_clip,
+    res_data_type,
+    res_type_list,
+)
+
+__all__ = [
+    "AudioSample", "gen_header", "read_audio_file",
+    "resample_audio_clip", "res_data_type", "res_type_list",
+]
