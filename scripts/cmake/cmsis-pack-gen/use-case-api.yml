@@ -76,7 +76,7 @@ packs:
         url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack"
 
     taxonomy:
-      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/Readme.md" }
+      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/README.md" }
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:

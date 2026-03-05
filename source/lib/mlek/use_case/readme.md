@@ -63,5 +63,5 @@ contains a person.
 
 ## Useful links
 
-- [Project ReadMe](../../../../Readme.md)
-- [Reusable Software](../../../../Readme.md#reusable-software)
+- [Project ReadMe](../../../../README.md)
+- [Reusable Software](../../../../README.md#reusable-software)

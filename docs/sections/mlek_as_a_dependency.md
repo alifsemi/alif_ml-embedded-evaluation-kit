@@ -18,7 +18,7 @@ some general recommendations on wrapping MLEK sources.
 
 Other useful readings:
 * [Repository Structure](../../docs/documentation.md#repository-structure)
-* [Reusable Software](../../Readme.md#reusable-software).
+* [Reusable Software](../../README.md#reusable-software).
 * [Zephyr port](../../source/lib/ports/zephyr/zephyr.md) if you want to consume MLEK libraries as a Zephyr module.
 
 ## Guidelines

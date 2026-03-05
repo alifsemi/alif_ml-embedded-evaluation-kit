@@ -12,4 +12,4 @@ This module contains utilities that can be re-used by all ML use case API. These
 ## Useful links
 
 * [Repository Structure](../../../../docs/documentation.md#repository-structure)
-* [Reusable Software](../../../../Readme.md#reusable-software).
+* [Reusable Software](../../../../README.md#reusable-software).
