@@ -249,7 +249,7 @@
 #endif
 
 /* Use Renesas Dave2D on RA  platforms. */
-#define LV_USE_DRAW_DAVE2D 0
+#define LV_USE_DRAW_DAVE2D 1
 
 /* Draw using cached SDL textures*/
 #define LV_USE_DRAW_SDL 0
@@ -491,7 +491,7 @@
 #define LV_USE_MATRIX           0
 
 /*Include `lvgl_private.h` in `lvgl.h` to access internal data and functions by default*/
-#define LV_USE_PRIVATE_API		0
+#define LV_USE_PRIVATE_API		1
 
 /*==================
  *   FONT USAGE

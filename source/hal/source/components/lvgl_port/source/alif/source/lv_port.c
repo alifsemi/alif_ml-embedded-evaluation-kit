@@ -19,6 +19,17 @@
 #include "Driver_CDC200.h"
 #include "lv_port.h"
 
+#include "dave_cfg.h"
+#include "dave_d0lib.h"
+#include "dave_driver.h"
+#include "lv_draw_dave2d_utils.h"
+
+#if (D1_MEM_ALLOC == D1_MALLOC_D0LIB)
+// D/AVE D0 heap address and size
+#define D1_HEAP_SIZE	0x100000
+static uint8_t d0_heap[D1_HEAP_SIZE] __attribute__((section(".bss.disp_buff")));
+#endif
+
 #define MY_DISP_HOR_RES RTE_PANEL_HACTIVE_TIME
 #define MY_DISP_VER_RES RTE_PANEL_VACTIVE_LINE
 #define MY_DISP_BUFFER  (MY_DISP_VER_RES * 32)
@@ -27,12 +38,12 @@
 #if RTE_CDC200_PIXEL_FORMAT != 1
 #error "LCD framebuffer must be set to RGB888 for 32-bit LVGL color depth"
 #endif
-static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][3] __attribute__((section(".bss.lcd_image_buf")));             // 480x800x3 = 1,152,000
+static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][3] __attribute__((section(".bss.lcd_image_buf"))) = {0};             // 480x800x3 = 1,152,000
 #elif LV_COLOR_DEPTH == 16
 #if RTE_CDC200_PIXEL_FORMAT != 2
 #error "LCD framebuffer must be set to RGB565 for 16-bit LVGL color depth"
 #endif
-static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][2] __attribute__((section(".bss.lcd_image_buf")));             // 480x800x3 = 1,152,000
+static uint8_t lcd_image[MY_DISP_VER_RES][MY_DISP_HOR_RES][2] __attribute__((section(".bss.lcd_image_buf"))) = {0};             // 480x800x3 = 1,152,000
 #else
 #error "Unsupported LVGL color depth"
 #endif
@@ -145,6 +156,9 @@ static void lv_display_flush_async(lv_display_t * restrict disp, const lv_area_t
         }
     }
 
+    // Render to buffer
+    d2_finish_rendering();
+
     /* Prepare the flush info */
     pending_flush_disp = disp;
     pending_flush_area = *area;
@@ -202,6 +216,18 @@ void lv_port_disp_init(void)
 
     /* This drawing buffer should be in DCTM for speed. */
     static lvgl_pixel_t buf_1[MY_DISP_BUFFER];
+
+#if (D1_MEM_ALLOC == D1_MALLOC_D0LIB)
+    /*-------------------------
+     * Initialize D/AVE D0 heap
+     * -----------------------*/
+    if (!d0_initheapmanager(d0_heap, sizeof(d0_heap), d0_mm_fixed_range,
+                            NULL, 0, 0, 0, d0_ma_unified))
+    {
+        printf("\r\nError: Heap manager initialization failed\n");
+        return 0xFFFF;
+    }
+#endif
 
     lv_init();
     lv_tick_set_cb(lv_port_get_ticks);

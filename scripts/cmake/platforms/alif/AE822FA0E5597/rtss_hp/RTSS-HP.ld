@@ -192,6 +192,7 @@ SECTIONS
   .bss.unstriped (NOLOAD) :
   {
     * (.bss.lcd_image_buf)
+    * (.bss.disp_buff)
   } > UNSTRIPED
 
   .bss.itcm (NOLOAD) : ALIGN(8)
