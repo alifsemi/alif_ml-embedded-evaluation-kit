@@ -213,7 +213,7 @@ Additional member functions in the `TflmModel` subclass:
 >
 > Network models have different sets of operators.  For TensorFlow Lite models, these operators must be registered
 > at runtime with the `tflite::MicroMutableOpResolver` object in the `EnlistOperations` method.
-> 
+>
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >   ```commandline
 >     source/lib/mlek/fwk/tflm
@@ -233,7 +233,7 @@ Additional member functions in the `EtModel` subclass:
 
 > For ExecuTorch models, any operators that fall back to CPU must be included at build time by using the CMake
 > `generate_pte_ops_lib` function, and these ops must exist in the ATen Core Operator Set.
-> 
+>
 > Network models can require different size of activation buffer that is returned as
 > tensor arena memory by the `GetComputeBuffer` method.
 >
@@ -880,10 +880,19 @@ Linker scripts for all supported toolchains should be added. The location of the
 The new platform build configuration script must add it in the `platform_custom_post_build` function like this:
 
 ```cmake
+    get_target_property(target_linker_script_override
+            ${PARSED_TARGET_NAME}
+            MLEK_LINKER_SCRIPT_OVERRIDE_PATH)
+    set(default_linker_script_path
+            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}/${LINKER_SCRIPT_NAME}${LINKER_SCRIPT_SUFFIX}")
+    resolve_linker_script_path(
+            linker_script_path
+            "${default_linker_script_path}"
+            "${target_linker_script_override}")
+
     add_linker_script(
-            ${PARSED_TARGET_NAME}                                   # Target
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}  # Linker scripts directory path
-            ${LINKER_SCRIPT_NAME})                                  # Name of the file without suffix
+            ${PARSED_TARGET_NAME}  # Target
+            ${linker_script_path}) # Full linker control file path
 ```
 
 Please see existing platforms sources and build scripts for more details.

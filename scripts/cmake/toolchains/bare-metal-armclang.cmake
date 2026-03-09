@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021 - 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021 - 2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -18,6 +18,7 @@
 # specify the cross compiler
 set(CMAKE_C_COMPILER                armclang)
 set(CMAKE_CXX_COMPILER              armclang)
+set(LINKER_SCRIPT_SUFFIX            ".armclang.sct")
 set(CMAKE_C_LINKER_PREFERENCE       armlink)
 set(CMAKE_ASM_LINKER_PREFERENCE     armlink)
 set(CMAKE_ASM_COMPILER              armasm)
@@ -134,17 +135,17 @@ function(add_target_map_file TARGET_NAME MAP_FILE_PATH)
 endfunction()
 
 # Function to add linker option to use the chosen linker script (scatter file).
-function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
-    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.armclang.sct)
-    if (NOT EXISTS ${LINKER_SCRIPT_PATH})
+function(add_linker_script TARGET_NAME LINKER_SCRIPT_PATH)
+    if (NOT EXISTS "${LINKER_SCRIPT_PATH}")
         message(FATAL_ERROR "Scatter file not found: ${LINKER_SCRIPT_PATH}")
     endif()
+
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         --scatter=${LINKER_SCRIPT_PATH})
     set_target_properties(${TARGET_NAME}
         PROPERTIES
-        LINK_DEPENDS ${LINKER_SCRIPT_PATH})
+        LINK_DEPENDS "${LINKER_SCRIPT_PATH}")
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

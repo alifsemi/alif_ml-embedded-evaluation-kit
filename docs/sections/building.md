@@ -201,6 +201,14 @@ The build parameters are:
   build. All the valid toolchain files are located in the scripts directory. For example, see:
   [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
 
+- `LINKER_SCRIPT_OVERRIDE_PATH`: Optional path to a custom linker control file that overrides the platform default.
+  When left unset, the build uses the standard linker script or scatter file selected by the target platform and
+  toolchain. When set, the file must be compatible with the selected toolchain. Use case specific linker script
+  overrides take precedence over this global setting.
+
+- `<use_case>_LINKER_SCRIPT_OVERRIDE_PATH`: Optional linker control file override for a specific use case. This is set
+  in the use case CMake logic and takes precedence over `LINKER_SCRIPT_OVERRIDE_PATH` for that application target.
+
 - `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Valid options are `TensorFlowLiteMicro` and
   `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
   include them in the binary tree. All use case examples should advertise which framework they support and only

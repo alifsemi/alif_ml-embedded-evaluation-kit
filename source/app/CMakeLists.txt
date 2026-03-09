@@ -188,6 +188,13 @@ foreach(use_case ${USE_CASES})
 
     add_executable(${TARGET_NAME} ${SRC_MAIN} ${SRC_SAMPLES})
     target_link_libraries(${TARGET_NAME} PUBLIC ${UC_LIB_NAME})
+
+    if (DEFINED ${use_case}_LINKER_SCRIPT_OVERRIDE_PATH
+            AND NOT "${${use_case}_LINKER_SCRIPT_OVERRIDE_PATH}" STREQUAL "")
+        set_property(TARGET ${TARGET_NAME} PROPERTY
+            MLEK_LINKER_SCRIPT_OVERRIDE_PATH
+            "${${use_case}_LINKER_SCRIPT_OVERRIDE_PATH}")
+    endif()
+
     platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
 endforeach()
-
