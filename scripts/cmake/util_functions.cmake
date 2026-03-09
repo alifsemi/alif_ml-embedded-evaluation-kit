@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024, 2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -131,6 +131,37 @@ function(print_useroptions)
         message(STATUS "    ${opt}=${${opt}}")
     endforeach()
     message(STATUS "--------------------------------------------------------------------------------------------------")
+endfunction()
+
+# Function to resolve the linker control file path from the platform default,
+# optional per-target override, and optional global override.
+function(resolve_linker_script_path output_var default_path target_override_path)
+    if (DEFINED target_override_path
+            AND NOT "${target_override_path}" STREQUAL ""
+            AND NOT "${target_override_path}" MATCHES "-NOTFOUND$")
+        get_filename_component(linker_script_path
+            "${target_override_path}"
+            ABSOLUTE
+            BASE_DIR ${CMAKE_SOURCE_DIR})
+    elseif (LINKER_SCRIPT_OVERRIDE_PATH)
+        get_filename_component(linker_script_path
+            "${LINKER_SCRIPT_OVERRIDE_PATH}"
+            ABSOLUTE
+            BASE_DIR ${CMAKE_SOURCE_DIR})
+    else()
+        get_filename_component(linker_script_path
+            "${default_path}"
+            ABSOLUTE
+            BASE_DIR ${CMAKE_SOURCE_DIR})
+    endif()
+
+    if (NOT EXISTS "${linker_script_path}")
+        message(FATAL_ERROR
+            "Invalid file path. Description: custom linker control file override; "
+            "Path: ${linker_script_path}")
+    endif()
+
+    set(${output_var} "${linker_script_path}" PARENT_SCOPE)
 endfunction()
 
 function (SUBDIRLIST result curdir)
