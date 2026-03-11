@@ -147,7 +147,7 @@
 // </e>
 
 // <e> LPPDM module enabled flag
-#define BOARD_LPPDM_ENABLED                             1
+#define BOARD_LPPDM_ENABLED                             0
 // </e>
 
 // <e> MISC module enabled flag
