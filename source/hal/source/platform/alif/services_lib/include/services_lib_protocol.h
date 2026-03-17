@@ -58,10 +58,10 @@ extern "C" {
  *  M A C R O   D E F I N E S
  ******************************************************************************/
 /* See SERVICES documentation for change log */
-#define SE_SERVICES_VERSION_STRING                 "0.50.9"
+#define SE_SERVICES_VERSION_STRING                 "0.50.10"
 #define SE_SERVICES_VERSION_MAJOR                  0
 #define SE_SERVICES_VERSION_MINOR                  50
-#define SE_SERVICES_VERSION_PATCH                  9
+#define SE_SERVICES_VERSION_PATCH                  10
 
 #define IMAGE_NAME_LENGTH                          8
 #define VERSION_RESPONSE_LENGTH                    80
@@ -85,6 +85,7 @@ extern "C" {
 #define SERVICES_REQ_NOT_ACKNOWLEDGE               0xFF
 #define SERVICES_REQ_TIMEOUT                       0xFD
 #define SERVICES_RESP_UNKNOWN_COMMAND              0xFC
+#define SERVICES_RESP_INVALID_PARAMETER            0xFB
 
 /**
  * Extsys0 configuration field.

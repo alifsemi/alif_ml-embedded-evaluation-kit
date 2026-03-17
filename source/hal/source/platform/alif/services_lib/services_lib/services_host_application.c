@@ -167,3 +167,26 @@ uint32_t SERVICES_application_verify_image(uint32_t services_handle,
   return ret;
 }
 
+/**
+ * @brief Run the DMPU function, which processes an OEM assets package
+ * @param services_handle
+ * @param assets address
+ * @param error_code
+ * @return
+ */
+uint32_t SERVICES_application_dmpu(uint32_t services_handle,
+               uint32_t assets_address,
+               uint32_t *error_code)
+{
+  dmpu_svc_t * p_svc = (dmpu_svc_t *)
+      SERVICES_prepare_packet_buffer(sizeof(dmpu_svc_t));
+
+  p_svc->send_assets_addr = assets_address;
+
+  uint32_t ret = SERVICES_send_request(services_handle,
+                                       SERVICE_APPLICATION_DMPU_ID,
+                                       DEFAULT_TIMEOUT);
+
+  *error_code = p_svc->resp_error_code;
+  return ret;
+}
