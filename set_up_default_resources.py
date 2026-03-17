@@ -51,7 +51,7 @@ class MLFramework(Enum):
 
 valid_ml_frameworks: typing.Set[str] = {f.value for f in MLFramework}
 
-VELA_VERSION = "4.5.0"
+VELA_VERSION = "5.0.0"
 INSTALL_VELA_FROM_SOURCE = False
 VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
 MIN_PYTHON_VERSION = (3, 10)

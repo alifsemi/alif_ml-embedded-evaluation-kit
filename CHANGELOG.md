@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [26.03]
+
+### Added
+- MLEK Zephyr module to allow platform-agnostic library to be used in Zephyr-based projects
+- Linker script override options at global and use-case level
+- Configure-time and runtime detection of the model's intended target to highlight any mismatches with build parameters
+- Improved visual output for the ExecuTorch Conformer ASR use case
+- AGENTS.md to support coding agents
+- Pre-commit configuration
+
+### Changed
+- Updated to 26.02 NPU components and dependencies (core-driver, core-platform, Vela 5.0.0, CMSIS-6, CMSIS-DSP, CMSIS-NN, TensorFlow Lite Micro and ExecuTorch 1.1.0)
+- Refactored the source and CMake layout to separate application and library code to better-support inclusion in external projects
+- Refactored Python tooling into an installable `mlek_tools` package
+- Improved detection and reporting of ExecuTorch model memory mode, memory use and ops
+- Improved error handling when ExecuTorch model memory requirements exceed limits
+
+### Fixed
+- Replaced the Yolo-Fastest model download URL with a more suitable alternative
+
 ## [25.12]
 
 ### Added

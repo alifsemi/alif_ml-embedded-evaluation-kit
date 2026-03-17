@@ -82,25 +82,27 @@ To run ML applications on the Cortex-M and Ethos-U NPU:
 4. Next, run the `build_default` Python script. It handles the downloading of the neural network models, compiling using 
 [Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela), and building the project using CMake.
 
+    Ensure that `python3` resolves to a supported version of Python (3.10, 3.11 or 3.12).
+
     ##### Arm Compiler for Embedded
     ````commandline
-    python3.10 ./build_default.py --toolchain arm
+    python3 ./build_default.py --toolchain arm
     ````
 
    ##### Arm Toolchain for Embedded
     ```commandline
-    python3.10 ./build_default.py --toolchain llvm
+    python3 ./build_default.py --toolchain llvm
     ```
 
     ##### Arm GNU Toolchain
     ```commandline
-    python3.10 ./build_default.py
+    python3 ./build_default.py
     ```
 
     ##### Build with ExecuTorch framework
     ML framework defaults to TensorFlow™ Lite for Microcontrollers. To build with ExecuTorch:
     ```commandline
-    python3.10 ./build_default.py --ml-framework executorch
+    python3 ./build_default.py --ml-framework executorch
     ```
 
 5. Change directory to the generated cmake build folder which contains the `.axf` file output in the `bin`

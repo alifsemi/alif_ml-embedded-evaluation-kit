@@ -103,7 +103,7 @@ For ATfE/LLVM:
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
-- Python 3.10 or above is installed. Check your current installed version of Python by running:
+- Python 3.10, 3.11 or 3.12 is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
@@ -113,9 +113,9 @@ For ATfE/LLVM:
     Python 3.10.12
     ```
 
-  > **Note:** If you have an older version of Python installed (< 3.10) see the
-  > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  > for instruction on how to install and use it.
+  > **Note:** If you do not have a supported version of Python installed, see the
+  > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-a-supported-version)
+  > section for instructions on how to install and use one.
 
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
   environment module is installed by running:
@@ -435,9 +435,10 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU, the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU and the 256 MACs configuration of the Arm® *Ethos™-U85* NPU.
 
-> **Note:** This script requires Python version 3.10 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
-> are satisfied. If your environment points to system installed Python3 that is an older version than 3.10, choose the
-> required version explicitly after installing it:
+> **Note:** This script requires Python 3.10 to 3.12 inclusive. Please make sure all
+> [build prerequisites](./building.md#build-prerequisites) are satisfied. If your
+> environment points to a different system-installed Python3 version, choose a supported
+> version explicitly after installing it:
 > ```sh
 > python3.10 ./set_up_default_resources.py
 > ```
