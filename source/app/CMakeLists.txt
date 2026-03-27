@@ -24,6 +24,12 @@ endif()
 
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
 
+# Add user case definition so it can be used to #ifdef in code
+if (NOT "${USE_CASE_BUILD}" STREQUAL "all")
+string(TOUPPER "${USE_CASE_BUILD}" use_case_upper)
+add_compile_definitions(${use_case_upper})
+endif()
+
 # Include directories for application module:
 set(APPLICATION_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/main/include)
@@ -150,6 +156,12 @@ foreach(use_case ${USE_CASES})
     target_compile_definitions(${UC_LIB_NAME} PUBLIC
         "ACTIVATION_BUF_SZ=${${use_case}_ACTIVATION_BUF_SZ}")
 
+    # Set model in external flash
+    if (${use_case}_MODEL_IN_EXT_FLASH)
+        target_compile_definitions(${UC_LIB_NAME} PUBLIC
+            MODEL_IN_EXT_FLASH=1)
+    endif()
+
     target_link_libraries(${UC_LIB_NAME} PUBLIC
         hal
         profiler)
@@ -157,11 +169,26 @@ foreach(use_case ${USE_CASES})
     # If an API exists for this use case, include the projects here and add to
     # the library list.
     foreach(API_TO_USE ${${use_case}_API_LIST})
-        # Check if the target now exists
-        if (TARGET ${API_TO_USE}_impl)
-            target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_impl)
+        # Special hack to include alif_ui_api if the API is requested
+        if (API_TO_USE STREQUAL "alif_ui")
+            if (NOT TARGET ${API_TO_USE}_api)
+                add_subdirectory(
+                    ${MLEK_ROOT}/source/lib/mlek/use_case/${API_TO_USE}  # Source path
+                    ${CMAKE_BINARY_DIR}/mlek/use_case/${API_TO_USE})     # Binary path
+                if (ETHOS_U_NPU_ASSUMED)
+                    target_compile_definitions(${API_TO_USE}_api PRIVATE
+                        ETHOS_U_NPU_ASSUMED=1)
+                endif()
+            endif()
+            message(STATUS "Using ${API_TO_USE}_api for ${use_case}")
+            target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_api)
         else()
-            message(FATAL_ERROR "${API_TO_USE}_impl target not found!")
+            # Check if the target now exists
+            if (TARGET ${API_TO_USE}_impl)
+                target_link_libraries(${UC_LIB_NAME} PUBLIC ${API_TO_USE}_impl)
+            else()
+                message(FATAL_ERROR "${API_TO_USE}_impl target not found!")
+            endif()
         endif()
     endforeach()
 
@@ -196,5 +223,6 @@ foreach(use_case ${USE_CASES})
             "${${use_case}_LINKER_SCRIPT_OVERRIDE_PATH}")
     endif()
 
-    platform_custom_post_build(TARGET_NAME ${TARGET_NAME})
+    platform_custom_post_build(TARGET_NAME ${TARGET_NAME}
+                            MODEL_IN_EXT_FLASH ${${use_case}_MODEL_IN_EXT_FLASH})
 endforeach()

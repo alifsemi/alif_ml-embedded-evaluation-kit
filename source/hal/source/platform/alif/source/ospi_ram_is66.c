@@ -21,7 +21,7 @@
 #include "ospi.h"
 #include "ospi_psram_xip.h"
 #include "ospi_ram.h"
-#include "log_macros.h"
+#include "hal_log.h"
 
 #define ISSI_WAIT_CYCLES    6 // 166MHz max
 #define OSPI_RESET_PORT     BOARD_IS66_HYPERRAM_RESET_GPIO_PORT

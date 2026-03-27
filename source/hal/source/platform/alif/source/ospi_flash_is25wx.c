@@ -26,7 +26,7 @@
 #include "ospi_private.h"
 
 #include "ospi_flash.h"
-#include "log_macros.h"
+#include "hal_log.h"
 
 #ifdef BOARD_HAS_IS25WX_FLASH
 

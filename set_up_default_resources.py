@@ -70,7 +70,7 @@ default_use_case_resources_path = _current_file_dir / "resources" / "use_case_re
 default_requirements_path = _current_file_dir / "scripts" / "py" / "requirements.txt"
 default_downloads_path = _current_file_dir / "resources_downloaded"
 default_executorch_path = _current_file_dir / "dependencies" / "executorch"
-_default_vela_config_file = _current_file_dir / "scripts" / "vela" / "default_vela.ini"
+_default_vela_config_file = _current_file_dir / "scripts" / "vela" / "ensemble_vela.ini"
 
 _vela_config = VelaConfig(
     version=VELA_VERSION,

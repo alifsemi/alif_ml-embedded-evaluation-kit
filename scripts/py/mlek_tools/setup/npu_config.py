@@ -158,6 +158,17 @@ u85_macs_to_system_configs = {
     2048: "Ethos_U85_SYS_DRAM_High_2048",
 }
 
+u55_macs_to_system_configs = {
+    32: "RTSS_HE_SRAM_MRAM",
+    64: "RTSS_HE_SRAM_MRAM",
+    128: "RTSS_HE_SRAM_MRAM",
+    256: "RTSS_HP_SRAM_MRAM",
+#    32: "RTSS_HE_SRAM_Only",
+#    64: "RTSS_HE_SRAM_Only",
+#    128: "RTSS_HE_SRAM_Only",
+#    256: "RTSS_HP_SRAM_Only",
+}
+
 #: Collection of supported NPU configurations used by setup scripts.
 valid_npu_configs = NpuConfigs.create(
     *(
@@ -167,7 +178,7 @@ valid_npu_configs = NpuConfigs.create(
             processor_id="U55",
             prefix_id="H",
             memory_mode="Shared_Sram",
-            system_config="Ethos_U55_High_End_Embedded",
+            system_config=u55_macs_to_system_configs[macs],
         ) for macs in (32, 64, 128, 256)
     ),
     *(
@@ -186,8 +197,8 @@ valid_npu_configs = NpuConfigs.create(
             macs=macs,
             processor_id="U85",
             prefix_id="Z",
-            memory_mode="Dedicated_Sram",
-            system_config=u85_macs_to_system_configs[macs]
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U85_SRAM_MRAM"
         ) for macs in (128, 256, 512, 1024, 2048)
     )
 )

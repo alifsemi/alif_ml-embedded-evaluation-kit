@@ -34,7 +34,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "log_macros.h"
+#include "hal_log.h"
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 

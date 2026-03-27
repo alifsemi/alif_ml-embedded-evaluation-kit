@@ -29,7 +29,6 @@
 
 #include "platform_drivers.h"
 
-#include "log_macros.h"     /* Logging functions */
 #include "peripheral_memmap.h"
 #include "fault_handler.h"
 #include <string.h>         /* For strncpy */
@@ -38,7 +37,6 @@
 #include <stdatomic.h>
 
 #include "RTE_Device.h"
-#include "RTE_Components.h"
 #include "Driver_HWSEM.h"
 #include "board_utils.h"
 #include "board_config.h"
