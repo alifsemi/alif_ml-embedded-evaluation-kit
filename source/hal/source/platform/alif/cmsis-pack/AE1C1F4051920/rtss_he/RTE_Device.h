@@ -509,7 +509,7 @@
 //Â Â Â Â  <7=> ARGB4444
 // <i> Defines CDC200 pixel format
 // <i> Default: RGB888
-#define RTE_CDC200_PIXEL_FORMAT              1
+#define RTE_CDC200_PIXEL_FORMAT              2
 
 // <o> CDC200 Constant alpha <0-255>
 // <i> Defines CDC200 constant alpha range from 0 (fully transparent) to 255 or 1.0 (fully opaque).

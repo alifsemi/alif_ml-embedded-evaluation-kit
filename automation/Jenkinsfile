@@ -226,7 +226,7 @@ pipeline {
                         unstash name: "test_build_gnu_inf_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("inference_runner_hp.json", "build_gcc_hp_release_devkit-e7_inf_runner/bin/sectors/inference_runner", "mram.bin", "ethos-u-inference_runner.bin", "test_inference_runner");
+                            common_funcs.flash_and_run_pytest("inference_runner_hp.json", "build_gcc_hp_release_devkit-e7_inf_runner/bin/sectors/inference_runner", "mram.bin", "mlek_inference_runner.bin", "test_inference_runner");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -238,8 +238,8 @@ pipeline {
                             archiveArtifacts artifacts: 'inference_runner_hp.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-inference_runner.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-inference_runner.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_inference_runner.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_inference_runner.bin.xml'
                         }
                         cleanup {
                             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
@@ -252,7 +252,7 @@ pipeline {
                         unstash name: "test_build_gnu_kws_he_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "mram.bin", "ethos-u-alif_kws.bin", "test_kws");
+                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_gcc_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "mram.bin", "mlek_alif_kws.bin", "test_kws");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -264,8 +264,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_kws.bin.xml'
                         }
                         cleanup {
                             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
@@ -278,7 +278,7 @@ pipeline {
                         unstash name: "test_build_armclang_kws_he_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "ER_ROM", "ethos-u-alif_kws.bin", "test_kws");
+                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_armclang_he_tcm_release_devkit-e7/bin/sectors/alif_kws", "ER_ROM", "mlek_alif_kws.bin", "test_kws");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -290,8 +290,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_kws.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_kws.bin.xml'
                         }
                         cleanup {
                             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
@@ -305,7 +305,7 @@ pipeline {
                         unstash name: "test_build_gnu_img_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class", "mram.bin", "ethos-u-alif_img_class.bin", "test_img_class");
+                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_img_class", "mram.bin", "mlek_alif_img_class.bin", "test_img_class");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -320,8 +320,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_img_class_hp.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_img_class.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_img_class.bin.xml'
                             archiveArtifacts artifacts: 'img_class_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
@@ -336,7 +336,7 @@ pipeline {
                         unstash name: "test_build_armclang_img_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class", "ER_ROM", "ethos-u-alif_img_class.bin", "test_img_class");
+                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class", "ER_ROM", "mlek_alif_img_class.bin", "test_img_class");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -351,8 +351,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_img_class_hp.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_img_class.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_img_class.bin.xml'
                             archiveArtifacts artifacts: 'img_class_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
@@ -367,7 +367,7 @@ pipeline {
                         unstash name: "test_build_gnu_obj_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection", "mram.bin", "ethos-u-alif_object_detection.bin", "test_object_detection");
+                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_object_detection", "mram.bin", "mlek_alif_object_detection.bin", "test_object_detection");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -382,8 +382,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_obj_detect_hp.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_object_detection.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_object_detection.bin.xml'
                             archiveArtifacts artifacts: 'obj_det_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
@@ -398,7 +398,7 @@ pipeline {
                         unstash name: "test_build_armclang_obj_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection", "ER_ROM", "ethos-u-alif_object_detection.bin", "test_object_detection");
+                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_object_detection", "ER_ROM", "mlek_alif_object_detection.bin", "test_object_detection");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -413,8 +413,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_obj_detect_hp.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_object_detection.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_object_detection.bin.xml'
                             archiveArtifacts artifacts: 'obj_det_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
@@ -429,7 +429,7 @@ pipeline {
                         unstash name: "test_build_gnu_vww_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww", "mram.bin", "ethos-u-alif_vww.bin", "test_vww");
+                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_gcc_hp_release_devkit-e7/bin/sectors/alif_vww", "mram.bin", "mlek_alif_vww.bin", "test_vww");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -444,8 +444,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_vww.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_vww.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_vww.bin.xml'
                             archiveArtifacts artifacts: 'vww_gcc_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
@@ -460,7 +460,7 @@ pipeline {
                         unstash name: "test_build_armclang_vww_hp_release_devkit_e7"
                         script {
                             try {
-                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww", "ER_ROM", "ethos-u-alif_vww.bin", "test_vww");
+                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_armclang_hp_release_devkit-e7/bin/sectors/alif_vww", "ER_ROM", "mlek_alif_vww.bin", "test_vww");
                             } catch (Exception e) {
                                 echo 'Exception occurred: ' + e.toString()
                                 stageResult: 'UNSTABLE'
@@ -475,8 +475,8 @@ pipeline {
                             archiveArtifacts artifacts: 'alif_vww.json', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
-                            archiveArtifacts artifacts: 'pytest/html-report-ethos-u-alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
-                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-ethos-u-alif_vww.bin.xml'
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_vww.bin.xml'
                             archiveArtifacts artifacts: 'vww_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
                         }
                         cleanup {
