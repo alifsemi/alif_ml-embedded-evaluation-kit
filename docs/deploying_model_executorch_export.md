@@ -265,3 +265,8 @@ The external RAM can be enabled in build time using CMAKE variable `-DOSPI_RAM_S
 By default the example use-case puts the serialized model graph and weights to MRAM (NVM)
 
 - For larger models you may want to enable `-DOSPI_FLASH_SUPPORT=ON`. Please check [Running a use-case with ML model data in external flash](../ML_Embedded_Evaluation_Kit.md#externalflash)
+
+
+# See also
+
+For generic Pre- and Post processing tips [see](custom_model_pre_post_processing.md)
