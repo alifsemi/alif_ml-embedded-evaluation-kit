@@ -68,7 +68,7 @@ pip install "scripts/py/[executorch]" # adds executorch
 - **C++17** (`.cc`, `.cpp` files, `.hpp` headers)
 - **C11** (`.c` files, `.h` headers)
 - **CMake** (build system, minimum 3.21)
-- **Python 3.10+** (build helpers, resource setup, code generation)
+- **Python 3.10 - 3.12** (build helpers, resource setup, code generation)
 
 ## Build System
 
@@ -76,8 +76,8 @@ CMake-based. The quickest way to build:
 
 ```sh
 git submodule update --init --recursive -j $(nproc)
-python3.10 ./set_up_default_resources.py --parallel $(nproc)
-python3.10 ./build_default.py --make-jobs $(nproc)
+python3 ./set_up_default_resources.py --parallel $(nproc)
+python3 ./build_default.py --make-jobs $(nproc)
 ```
 
 Manual CMake configuration:
