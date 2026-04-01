@@ -7,6 +7,12 @@ pipeline {
     }
     stages {
         stage('Init') {
+            when {
+                anyOf {
+                    branch 'PR-*'
+                    branch 'alif_main'
+                }
+            }
             agent { label 'ml_build' }
             steps {
                 script {
@@ -23,6 +29,12 @@ pipeline {
         // First build can end up doing some patching of Tensorflow
         // so run one build sequentially to start with
         stage('Initial Builds') {
+            when {
+                anyOf {
+                    branch 'PR-*'
+                    branch 'alif_main'
+                }
+            }
             parallel {
                 stage('Build HP GCC Release DevKit-e7') {
                     agent { label 'docker_build2' }
@@ -66,6 +78,12 @@ pipeline {
         }
         // Remaining builds can be parallel. Different Devkits could be run in same stage->stapes->script but then it would not be paraller so copy-paste stages to save build time.
         stage('More builds') {
+            when {
+                anyOf {
+                    branch 'PR-*'
+                    branch 'alif_main'
+                }
+            }
             parallel {
                 stage('Build inference runner GCC Release DevKit-e7') {
                     agent { label 'docker_build2' }
@@ -219,6 +237,12 @@ pipeline {
             }
         }
         stage('Test phase') {
+            when {
+                anyOf {
+                    branch 'PR-*'
+                    branch 'alif_main'
+                }
+            }
             parallel {
                 stage('Test Inference runner HP GCC Release DevKit-E7') {
                     agent { label 'E7' }
