@@ -226,3 +226,4 @@ netron vela_output/model_input_full_integer_quant_vela.tflite
 
 - After initial model conversion and evaluation, model typically needs model-specific pre-processing and post-processing steps done on CPU
   - You can find some examples in the repository. For example YOLO [post processing in](../source/application/api/use_case/object_detection/src/DetectorPostProcessing.cc)
+  - For generic Pre- and Post processing tips [see](custom_model_pre_post_processing.md)

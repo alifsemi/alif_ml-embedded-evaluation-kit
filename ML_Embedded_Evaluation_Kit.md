@@ -657,6 +657,7 @@ The first steps to test your own model in ML Embedded Evaluation Kit are convert
 The inference_runner use-case can be used for basic benchmarks.
 - Deploying your own model using [TFLM framework](docs/deploying_model.md)
 - Deploying your own PyTorch model using [ExecuTorch framework](docs/deploying_model_executorch_export.md)
+- For generic Pre- and Post processing tips [see](docs/custom_model_pre_post_processing.md)
 
 
 <a name="memoryusage"></a>
