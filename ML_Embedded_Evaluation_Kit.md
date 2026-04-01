@@ -208,11 +208,11 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 4. Download and Setup required AI/ML resources.
     Using Tensorflow:
     ```
-    python3.10 set_up_default_resources.py
+    python3 set_up_default_resources.py
     ```
     Using Executorch:
     ```
-    python3.10 set_up_default_resources.py --ml-frameworks executorch
+    python3 set_up_default_resources.py --ml-frameworks executorch
     ```
 
     If you are testing both frameworks, both can be called.
