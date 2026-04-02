@@ -18,7 +18,9 @@
 #include "UseCaseCommonUtils.hpp"
 #include "mlek/common/ImageUtils.hpp"
 #include "mlek/log/log_macros.h"
-
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 #include <cinttypes>
 
 namespace arm {

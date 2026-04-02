@@ -32,6 +32,9 @@
 #include "UseCaseCommonUtils.hpp"
 #include "mlek/fwk/tflm/YoloFastestModel.hpp"
 #include "mlek/log/log_macros.h"
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 #include "ScreenLayout.hpp"
 #include "hal.h"
 
