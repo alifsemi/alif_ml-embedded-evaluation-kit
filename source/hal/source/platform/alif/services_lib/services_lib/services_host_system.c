@@ -592,11 +592,11 @@ uint32_t SERVICES_system_get_eui_extension(uint32_t services_handle,
     return return_code;
   }
 
-  mfg_data_t *p_mfg_data = (mfg_data_t *)device_data.MfgData;
-  TEST_print(services_handle, "******* x-loc:%d y-loc:%d fab:%d, wafer:%d\n",
-      p_mfg_data->x_loc, p_mfg_data->y_loc, p_mfg_data->fab_id, p_mfg_data->wfr_id);
-  TEST_print(services_handle, "******* year:%d, week:%d, lot:%d\n",
-      p_mfg_data->year, p_mfg_data->week, p_mfg_data->lot_no);
+  // mfg_data_t *p_mfg_data = (mfg_data_t *)device_data.MfgData;
+  // TEST_print(services_handle, "******* x-loc:%d y-loc:%d fab:%d, wafer:%d\n",
+  //     p_mfg_data->x_loc, p_mfg_data->y_loc, p_mfg_data->fab_id, p_mfg_data->wfr_id);
+  // TEST_print(services_handle, "******* year:%d, week:%d, lot:%d\n",
+  //     p_mfg_data->year, p_mfg_data->week, p_mfg_data->lot_no);
 
   //init_test_mgf_data(device_data.MfgData);
 

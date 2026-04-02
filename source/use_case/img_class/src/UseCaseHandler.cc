@@ -25,6 +25,10 @@
 #include "hal.h"
 #include "log_macros.h"
 
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
+
 #include <cinttypes>
 
 using ImgClassClassifier = arm::app::Classifier;
@@ -163,7 +167,9 @@ namespace app {
 
             const size_t imgSz =
                 inputTensor->Bytes() < capturedFrameSize ? inputTensor->Bytes() : capturedFrameSize;
-
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(imgSrc, imgSz)) {
                 printf_err("Pre-processing failed.");
@@ -179,7 +185,9 @@ namespace app {
                 printf_err("Post-processing failed.\n");
                 return false;
             }
-
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             hal_display_show_text(

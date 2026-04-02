@@ -174,9 +174,9 @@ const struct pinconf board_pinconf[] = {
     /* Selected: OSPI0_SCLK_A */
     {PORT_4, PIN_2, PINMUX_ALTERNATE_FUNCTION_2, PADCTRL_SLEW_RATE_FAST | PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
 
-    /* P4_3 on pin F6. Functions: [0]: GPIO4_3, [1]: >>>JTAG0_TRACECLK<<<, [2]: LPI2S_SDI_B, [3]: UT1_T1_A, [4]: LPCAM_D3_A, [5]: SD_D3_A, [6]: CMP0_OUT_B, [7]: CS_MWS_ID0 */
-    /* Selected: JTAG0_TRACECLK */
-    {PORT_4, PIN_3, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+    /* P4_3 on pin F6. Functions: [0]: >>>GPIO4_3<<<,, [1]: JTAG0_TRACECLK [2]: LPI2S_SDI_B, [3]: UT1_T1_A, [4]: LPCAM_D3_A, [5]: SD_D3_A, [6]: CMP0_OUT_B, [7]: CS_MWS_ID0 */
+    /* Selected: GPIO4_3 for "LEDRGB0_B" */
+    {PORT_4, PIN_3, PINMUX_ALTERNATE_FUNCTION_0, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P4_4 on pin A6. Functions: [0]: GPIO4_4, [1]: >>>JTAG0_TDATA0<<<, [2]: LPI2S_SDO_B, [3]: LPSPI_SCLK_B, [4]: UT2_T0_A, [5]: LPCAM_D4_A, [6]: SD_D4_A, [7]: CS_MWS_ID1 */
     /* Selected:  JTAG0_TDATA0 */

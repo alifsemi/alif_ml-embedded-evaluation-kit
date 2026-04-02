@@ -7,6 +7,12 @@
  * contact@alifsemi.com, or visit: https://alifsemi.com/license
  *
  */
+/**
+ * @file  services_lib_interface.c
+ * @brief Public interface for Services library
+ * @note  Unique for each platform
+ * @par
+ */
 
 /******************************************************************************
  *  I N C L U D E   F I L E S

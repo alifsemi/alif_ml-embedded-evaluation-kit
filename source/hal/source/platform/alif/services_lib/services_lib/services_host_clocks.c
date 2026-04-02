@@ -509,6 +509,16 @@ uint32_t SERVICES_clocks_setting_get(uint32_t services_handle,
   *error_code = p_svc->resp_error_code;
   return ret;
 }
+
+/**
+ * @brief Function to set aclk entry delay and force enable/disable
+ *
+ * @param services_handle
+ * @param aclk_entry_delay
+ * @param aclk_force_en
+ * @param error_code
+ * @return
+ */
 uint32_t SERVICES_clocks_set_aclk(uint32_t services_handle,
                                   uint32_t *aclk_entry_delay,
                                   uint32_t *aclk_force_en,
@@ -527,3 +537,4 @@ uint32_t SERVICES_clocks_set_aclk(uint32_t services_handle,
   *error_code = p_svc->resp_error_code;
   return ret;
 }
+

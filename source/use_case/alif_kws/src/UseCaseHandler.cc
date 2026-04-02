@@ -40,6 +40,10 @@
 #include "KwsProcessing.hpp"
 #include "sys_utils.h"
 
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
+
 #include <vector>
 
 #ifdef SE_SERVICES_SUPPORT
@@ -199,26 +203,36 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
             const int16_t* inferenceWindow = audio_inf;
 
+
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#else
             uint32_t start = Get_SysTick_Cycle_Count32();
+#endif
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
+#ifndef GPIO_PROFILING
             printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
             start = Get_SysTick_Cycle_Count32();
+#endif
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
                 return false;
             }
+#ifndef GPIO_PROFILING
             printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
-
             start = Get_SysTick_Cycle_Count32();
+#endif
             if (!postProcess.DoPostProcess()) {
                 printf_err("Post-processing failed.");
                 return false;
             }
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#else
             printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
             /* Add results from this window to our final results vector. */
@@ -243,7 +257,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             }
 
             profiler.PrintProfilingResult();
-
+#endif
             ++index;
         } while (!oneshot);
         return true;

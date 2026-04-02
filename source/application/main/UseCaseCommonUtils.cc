@@ -18,7 +18,9 @@
 #include "UseCaseCommonUtils.hpp"
 #include "ImageUtils.hpp"
 #include "log_macros.h"
-
+#ifdef GPIO_PROFILING
+#include "board_utils.h"
+#endif
 #include <cinttypes>
 
 namespace arm {
@@ -69,7 +71,13 @@ namespace app {
     bool RunInference(fwk::iface::Model& model, Profiler& profiler)
     {
         profiler.StartProfiling("Inference");
+#ifdef GPIO_PROFILING
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
         bool runInf = model.RunInference();
+#ifdef GPIO_PROFILING
+        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
         profiler.StopProfiling();
 
         return runInf;

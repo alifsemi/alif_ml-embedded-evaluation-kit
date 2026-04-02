@@ -34,7 +34,9 @@
 #include "ScreenLayout.hpp"
 #include "hal.h"
 #include "log_macros.h"
-
+#if defined(GPIO_PROFILING)
+#include "board_utils.h"
+#endif
 #include <cinttypes>
 #include <cmath>
 
@@ -191,6 +193,10 @@ using namespace arm::app::object_detection;
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();
 #endif
 
+#if defined(GPIO_PROFILING)
+            uint32_t lv_lock_state = lv_port_lock();
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(currImage, copySz)) {
                 printf_err("Pre-processing failed.");
@@ -208,6 +214,11 @@ using namespace arm::app::object_detection;
                 printf_err("Post-processing failed.");
                 return false;
             }
+
+#if defined(GPIO_PROFILING)
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            lv_port_unlock(lv_lock_state);
+#endif
 
 #if SHOW_INF_TIME
             inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
