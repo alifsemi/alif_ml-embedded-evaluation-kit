@@ -8,7 +8,7 @@
 
   <license>LICENSE_APACHE_2.0.txt</license>
 
-  <url>https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/tree/main/resources/cmsis-packs</url>
+  <url>https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs</url>
 
   <requirements>
     <packages>
@@ -20,6 +20,7 @@
   </requirements>
 
   <releases>
+    <release date="2026-02-11" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.1.pack" version="25.12.1">25.12.1 release package</release>
     <release date="2025-11-28" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.0.pack" version="25.12.0">25.12.0 release package</release>
     <release date="2024-09-24" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack" version="24.8.0">24.08.0 release package</release>
     <release date="2024-05-21" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.23.2.0.pack" version="23.2.0">23.02.0 release package</release>

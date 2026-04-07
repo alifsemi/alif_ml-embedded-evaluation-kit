@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2026 Arm Limited and/or
 #  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -71,6 +71,10 @@ endif ()
 
 USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, alif, simple_platform and native."
     mps3
+    STRING)
+
+USER_OPTION(LINKER_SCRIPT_OVERRIDE_PATH "Optional path to a custom linker control file that overrides the platform default."
+    ""
     STRING)
 
 USER_OPTION(USE_CASE_BUILD "Optional. Defines the use-case to build from the available sources. By default, all use-cases are built."

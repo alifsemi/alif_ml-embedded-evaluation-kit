@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -18,6 +18,7 @@
 # specify the cross compiler
 set(CMAKE_C_COMPILER                clang)
 set(CMAKE_CXX_COMPILER              clang)
+set(LINKER_SCRIPT_SUFFIX            ".llvm.ld")
 set(CMAKE_C_LINKER_PREFERENCE       clang)
 set(CMAKE_ASM_LINKER_PREFERENCE     clang)
 set(CMAKE_ASM_COMPILER              clang)
@@ -134,18 +135,17 @@ function(add_target_map_file TARGET_NAME MAP_FILE_PATH)
 endfunction()
 
 # Function to add linker option to use the chosen linker script.
-function(add_linker_script TARGET_NAME SCRIPT_DIR SCRIPT_NAME)
-    set(LINKER_SCRIPT_PATH ${SCRIPT_DIR}/${SCRIPT_NAME}.llvm.ld
-            CACHE STRING "Linker script path")
-    if (NOT EXISTS ${LINKER_SCRIPT_PATH})
+function(add_linker_script TARGET_NAME LINKER_SCRIPT_PATH)
+    if (NOT EXISTS "${LINKER_SCRIPT_PATH}")
         message(FATAL_ERROR "Linker script not found: ${LINKER_SCRIPT_PATH}")
     endif()
+
     message(STATUS "Using linker script: ${LINKER_SCRIPT_PATH}")
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-T ${LINKER_SCRIPT_PATH}")
     set_target_properties(${TARGET_NAME}
         PROPERTIES
-        LINK_DEPENDS ${LINKER_SCRIPT_PATH})
+        LINK_DEPENDS "${LINKER_SCRIPT_PATH}")
 endfunction()
 
 # Function to set the command to copy/extract contents from an elf

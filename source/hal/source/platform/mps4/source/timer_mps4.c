@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -17,7 +17,7 @@
  */
 #include "timer_mps4.h"
 
-#include "log_macros.h"
+#include "hal_log.h"
 #include "smm_mps4.h"   /* Memory map for MPS4. */
 
 static uint64_t cpu_cycle_count = 0;    /* 64-bit cpu cycle counter */

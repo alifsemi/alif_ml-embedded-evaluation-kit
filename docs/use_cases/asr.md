@@ -20,7 +20,7 @@
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Automatic Speech Recognition
 example.
 
-Use-case code could be found in the following directory: [source/use_case/asr](../../source/use_case/asr).
+Use-case code could be found in the following directory: [source/app/use_case/asr](../../source/app/use_case/asr).
 
 ### Preprocessing and feature extraction
 
@@ -36,7 +36,7 @@ First, the audio data is normalized to the range (`-1`, `1`).
 
 > **Note:** Mel-Frequency Cepstral Coefficients (MFCCs) are a common feature that is extracted from audio data and can
 > be used as input for machine learning tasks such as keyword spotting and speech recognition. For implementation
-> details, please refer to: `source/application/main/include/Mfcc.hpp`
+> details, please refer to: `source/lib/mlek/common/Mfcc.hpp`
 
 Next, a window of 512 audio samples is taken from the start of the audio clip. From these 512 samples, we calculate 13
 MFCC features.
@@ -89,11 +89,11 @@ as this was used for training the model.
 
 Unlike *wav2letter* where we run inference for a sliding window over the input audio data,
 for *Conformer* we consider the entire input audio clip at once up to a fixed length.
-In the case of the specific *Conformer* model provided, the audio input length is 15 seconds
+In the case of the specific *Conformer* model provided, the audio input length is 7 seconds
 (this duration is a configurable parameter when training, quantizing and exporting the model).
 For input audio clips shorter than this, we right-pad the Mel Spectrogram with a placeholder value of `-20.0`.
-In our case, the input tensor is of size 1500*80 where 80 is the number of mels
-and 1500 corresponds to each 100ms time interval for which spectrogram data has been calculated.
+In our case, the input tensor is of size 700*80 where 80 is the number of mels
+and 700 corresponds to each 100ms time interval for which spectrogram data has been calculated.
 
 At this point, no further preprocessing is needed; unlike *wav2letter*,
 we have no need to consider left/right contexts or compute first or second-order derivatives.
@@ -134,7 +134,7 @@ displayed to the console.
 
 #### Postprocessing for *Conformer*
 
-The output tensor for our *Conformer* model is of size 374*129, where 374 is the number of output tokens
+The output tensor for our *Conformer* model is of size 174*129, where 174 is the number of output tokens
 (related to the audio input length, which is 15 seconds for our specific trained *Conformer* model)
 and 129 is a probability distribution over the vocabulary range (the vocabulary size is a configurable
 parameter of the SentencePiece tokeniser used in the *Conformer* training process).
@@ -247,9 +247,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-asr.axf
- ├── ethos-u-asr.htm
- ├── ethos-u-asr.map
+ ├── mlek_asr.axf
+ ├── mlek_asr.htm
+ ├── mlek_asr.map
  └── sectors
       ├── images.txt
       └── asr
@@ -259,12 +259,12 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-asr.axf`: The built application binary for the Automatic Speech Recognition use-case.
+- `mlek_asr.axf`: The built application binary for the Automatic Speech Recognition use-case.
 
-- `ethos-u-asr.map`: Information from building the application. For example: The libraries used, what was optimized, and
+- `mlek_asr.map`: Information from building the application. For example: The libraries used, what was optimized, and
   the location of objects.
 
-- `ethos-u-asr.htm`: Human readable file containing the call graph of application functions.
+- `mlek_asr.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/asr`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -388,13 +388,13 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-Once the building has been completed, the application binary `ethos-u-asr.axf` can be found in the `build/bin` folder.
+Once the building has been completed, the application binary `mlek_asr.axf` can be found in the `build/bin` folder.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-asr.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_asr.axf
 ```
 
 A log output appears on the terminal:

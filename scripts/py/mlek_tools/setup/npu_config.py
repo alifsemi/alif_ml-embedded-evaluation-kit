@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited and/or its
+#  affiliates <open-source-office@arm.com>
+#  SPDX-License-Identifier: Apache-2.0
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+"""
+Classes to represent NPU configurations for Vela
+"""
+import itertools
+import typing
+from dataclasses import dataclass
+
+# Default arena cache size applied when memory_mode is Shared_Sram and no explicit
+# arena_cache_size is requested.
+_DEFAULT_SHARED_SRAM_ARENA_SIZE = 2 * 1024 * 1024  # 2 MiB
+
+
+@dataclass(frozen=True)
+class NpuConfig:
+    """
+    Represents a Vela configuration for an NPU
+    """
+    name_prefix: str
+    macs: int
+    processor_id: str
+    prefix_id: str
+    memory_mode: str
+    system_config: str
+    arena_cache_size: int = 0
+
+    @property
+    def config_name(self) -> str:
+        """
+        Get the name of the configuration
+
+        For example: "ethos-u55-128" would represent the Ethos-U55 NPU
+        with a 128 MAC configuration.
+
+        :return:    The NPU configuration name.
+        """
+        return f"{self.name_prefix}-{self.macs}"
+
+    @property
+    def config_id(self) -> str:
+        """
+        Get the configuration id as a string
+
+        For example: "Y256" would represent the Ethos-U65 NPU
+        with a 256 MAC configuration.
+
+        :return:    The NPU configuration id.
+        """
+        return f"{self.prefix_id}{self.macs}"
+
+    def overwrite_arena_cache_size(self, arena_cache_size):
+        """
+        Get a new NPU configuration with the specified
+        arena cache size.
+
+        By default, we use the `arena_cache_size` value in the
+        `default_vela.ini` configuration file.
+
+        :param  arena_cache_size:   The new arena cache size value.
+        :return:                    A new NPU configuration with the new
+                                    arena cache size value.
+        """
+        value = arena_cache_size
+
+        if value == 0:
+            value = _DEFAULT_SHARED_SRAM_ARENA_SIZE if self.memory_mode == "Shared_Sram" else None
+
+        return NpuConfig(
+            **{**self.__dict__, **{"arena_cache_size": value}}
+        )
+
+
+@dataclass(frozen=True)
+class NpuConfigs:
+    """
+    Represents a collection of NPU configurations.
+    """
+    configs: typing.Dict[str, typing.Dict[int, NpuConfig]]
+
+    @staticmethod
+    def create(*configs: NpuConfig):
+        """
+        Create a new collection with the specified NPU configurations.
+
+        :param configs: NPU configuration objects to add to the collection.
+        :return:        A new collection of NPU configurations.
+        """
+        _configs = {}
+
+        # Internal data structure of nested dictionaries based on
+        # NPU name and MAC configuration, e.g.:
+        #   _configs["ethos-u55"][128]
+
+        for c in configs:
+            if c.name_prefix not in _configs:
+                _configs[c.name_prefix] = {}
+            _configs[c.name_prefix][c.macs] = c
+        return NpuConfigs(configs=_configs)
+
+    def get(self, name_prefix: str, macs: typing.Union[int, str]) -> typing.Optional[NpuConfig]:
+        """
+        Get an NPU configuration by name prefix and MAC configuration.
+
+        :param name_prefix: The name prefix, e.g. "ethos-u55".
+        :param macs:        The MAC configuration, e.g. 128.
+        :return:            The matching NPU configuration, or None if no such configuration
+                            exists in the collection.
+        """
+        configs_for_name = self.configs.get(name_prefix)
+        if not configs_for_name:
+            return None
+        return configs_for_name.get(int(macs))
+
+    def get_by_name(self, name: str) -> typing.Optional[NpuConfig]:
+        """
+        Get an NPU configuration by name.
+
+        :param name:    The NPU configuration name, e.g. "ethos-u55-128".
+        :return:        The matching NPU configuration, or None if no such configuration
+                        exists in the collection.
+        """
+        name_prefix, macs = name.rsplit("-", 1)
+        return self.get(name_prefix, macs)
+
+    @property
+    def names(self):
+        """
+        Return a list of all NPU configuration names in the collection.
+
+        :return:    The list of NPU configuration names.
+        """
+        return list(itertools.chain.from_iterable([
+            [f"{c.name_prefix}-{c.macs}" for c in config.values()]
+            for config in self.configs.values()
+        ]))
+
+
+u85_macs_to_system_configs = {
+    128: "Ethos_U85_SYS_DRAM_Low",
+    256: "Ethos_U85_SYS_DRAM_Low",
+    512: "Ethos_U85_SYS_DRAM_Mid_512",
+    1024: "Ethos_U85_SYS_DRAM_Mid_1024",
+    2048: "Ethos_U85_SYS_DRAM_High_2048",
+}
+
+u55_macs_to_system_configs = {
+    32: "RTSS_HE_SRAM_MRAM",
+    64: "RTSS_HE_SRAM_MRAM",
+    128: "RTSS_HE_SRAM_MRAM",
+    256: "RTSS_HP_SRAM_MRAM",
+#    32: "RTSS_HE_SRAM_Only",
+#    64: "RTSS_HE_SRAM_Only",
+#    128: "RTSS_HE_SRAM_Only",
+#    256: "RTSS_HP_SRAM_Only",
+}
+
+#: Collection of supported NPU configurations used by setup scripts.
+valid_npu_configs = NpuConfigs.create(
+    *(
+        NpuConfig(
+            name_prefix="ethos-u55",
+            macs=macs,
+            processor_id="U55",
+            prefix_id="H",
+            memory_mode="Shared_Sram",
+            system_config=u55_macs_to_system_configs[macs],
+        ) for macs in (32, 64, 128, 256)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u65",
+            macs=macs,
+            processor_id="U65",
+            prefix_id="Y",
+            memory_mode="Dedicated_Sram",
+            system_config="Ethos_U65_High_End"
+        ) for macs in (256, 512)
+    ),
+    *(
+        NpuConfig(
+            name_prefix="ethos-u85",
+            macs=macs,
+            processor_id="U85",
+            prefix_id="Z",
+            memory_mode="Shared_Sram",
+            system_config="Ethos_U85_SRAM_MRAM"
+        ) for macs in (128, 256, 512, 1024, 2048)
+    )
+)
+
+
+def get_default_npu_config_from_name(
+        config_name: str, arena_cache_size: int = 0
+) -> typing.Optional[NpuConfig]:
+    """
+    Get an NpuConfig for the given configuration name, with optional arena cache size override.
+
+    :param config_name:         Ethos-U NPU configuration name from valid_npu_configs.
+    :param arena_cache_size:    Arena cache size in bytes. If 0, defaults from the NPU
+                                config are used.
+    :return:                    An NpuConfig populated with defaults for the given config name.
+    :raises ValueError:         If config_name is not a recognised NPU configuration.
+    """
+    npu_config = valid_npu_configs.get_by_name(config_name)
+    if not npu_config:
+        raise ValueError(
+            f"Invalid Ethos-U NPU configuration '{config_name}'. "
+            f"Select one from {valid_npu_configs.names}."
+        )
+    return npu_config.overwrite_arena_cache_size(arena_cache_size)

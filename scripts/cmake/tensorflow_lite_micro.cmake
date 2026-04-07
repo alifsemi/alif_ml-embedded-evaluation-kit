@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -29,13 +29,14 @@ elseif (CMAKE_BUILD_TYPE STREQUAL Release)
 endif()
 
 assert_defined(TENSORFLOW_LITE_MICRO_BUILD_TYPE)
+assert_defined(TENSORFLOW_SRC_PATH)
 
 function(build_tflite_micro_cmake)
     include(FetchContent)
     set(CORE_SOFTWARE_REPO_URL "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-software")
-    set(CORE_SOFTWARE_GIT_REF  "25.02")
+    set(CORE_SOFTWARE_GIT_REF  "26.02")
     set(TFLM_CMAKE_URL "${CORE_SOFTWARE_REPO_URL}/-/raw/${CORE_SOFTWARE_GIT_REF}/tflite_micro.cmake?ref_type=tags&inline=false")
-    set(TFLM_CMAKE_MD5 "7ee273b9d993d8552f7d1fc129f276fd")
+    set(TFLM_CMAKE_MD5 "52985fb8910dbaf034a17f9c6140b9d2")
 
     FetchContent_Declare(TensorFlow_Lite_Micro_CMake_Wrapper
         URL                 ${TFLM_CMAKE_URL}
@@ -47,6 +48,7 @@ function(build_tflite_micro_cmake)
     FetchContent_MakeAvailable(TensorFlow_Lite_Micro_CMake_Wrapper)
 
     set(CMSIS_NN_PATH                   ${CMSIS_NN_SRC_PATH})
+    set(CMSIS_PATH                      ${CMSIS_SRC_PATH})
     set(TENSORFLOW_PATH                 ${TENSORFLOW_SRC_PATH})
     set(TFLM_OPTIMIZATION_LEVEL         ${TENSORFLOW_LITE_MICRO_CORE_OPTIMIZATION_LEVEL}
                                         CACHE STRING "Optimization level")
@@ -58,6 +60,13 @@ function(build_tflite_micro_cmake)
         set(DEFAULT_ACCELERATOR         "CPU")
     else()
         set(CMSIS_OPTIMIZATION_LEVEL    ${TENSORFLOW_LITE_MICRO_KERNEL_OPTIMIZATION_LEVEL})
+        assert_defined(CMSIS_NN_SRC_PATH)
+        if (NOT TARGET cmsis_device)
+            message(STATUS "cmsis_device target not available. Adding it now.")
+            add_subdirectory(
+                ${CMAKE_CURRENT_LIST_DIR}/../../source/hal/source/components/cmsis_device
+                ${CMAKE_CURRENT_BINARY_DIR}/tflm_cmsis_device)
+        endif()
         if (ETHOS_U_NPU_ENABLED)
             set(DEFAULT_ACCELERATOR     "NPU")
         else()
@@ -133,6 +142,7 @@ function(build_tflite_micro_makefile)
         set(TENSORFLOW_LITE_MICRO_TARGET "linux")
         set(TENSORFLOW_LITE_MICRO_TARGET_ARCH x86_64)
     else()
+        assert_defined(CMSIS_NN_SRC_PATH)
         set(TENSORFLOW_LITE_MICRO_TARGET "cortex_m_generic")
 
         if ("${CMAKE_SYSTEM_ARCH}" STREQUAL "armv8.1-m.main")

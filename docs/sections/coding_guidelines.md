@@ -28,35 +28,80 @@ conventions, the intended outcome could be different for every case.
 
 ## Static Analysis
 
-To help with the adherence of the coding guidelines, we have provided a setup script to add a static analysis, 
-pre-push Git hook. This will use the clang-format tool along with the clang-format file in the root of the directory to 
-check for formatting errors. It will also us the Cppcheck static analysis tool to minimize the risk of bugs 
-appearing in your code.
+This repository uses [pre-commit](https://pre-commit.com/) to run static-analysis
+and file-hygiene checks before each commit. The configured hooks currently cover:
 
-Before starting any work in the repo, please ensure that you have the static analysis Git hook, 
-clang-format tool and cppcheck tool installed by running the following commands:
+- general file hygiene checks such as trailing whitespace, end-of-file, YAML, JSON,
+  and merge-conflict validation
+- `clang-format` for C and C++ formatting
+- `cppcheck` for C and C++ static analysis
+- `pylint` for Python linting
 
- ```
-  sudo apt install cppcheck
-  sudo apt install clang-format
-  python scripts/py/setup_hooks.py /path/to/git/hooks/directory
-  ```
+### Installing the pre-commit hook
 
-This will ensure that the modified files in your commit adhere to the coding guidelines and minimizes the risk of 
-inefficient/problematic code. 
+Install `pre-commit` and register the repository hook:
 
-If the Git hook finds formatting errors, the ```git push``` command will fail. 
-You can run the following command on the problematic file:
+```sh
+python3 -m pip install pre-commit
+pre-commit install
+```
 
-  ```
-  clang-format -style=file -i path/to/file
-  ```
+You can also install `pre-commit` using your system package manager
+(for example `apt`, `dnf`, or `brew`) if you prefer.
 
-This will modify the problematic file to adhere to the guidelines as described in the 
-.clang-format file in the root of the repo. 
+This installs a Git `pre-commit` hook in `.git/hooks/`. Once installed, the checks
+run automatically on the files staged for every `git commit`.
 
-If the Cppcheck tool finds issues, what needs to be addressed will be 
-described in the failed ```git push``` output. 
+The first run may take longer because `pre-commit` creates isolated environments
+for the configured tools and installs the hook dependencies automatically.
+
+### Running the checks manually
+
+You can run the checks independently of `git commit` at any time.
+
+To run all configured hooks on all tracked files:
+
+```sh
+pre-commit run --all-files
+```
+
+To run the hooks only on the files currently staged for commit:
+
+```sh
+pre-commit run
+```
+
+To run a specific hook:
+
+```sh
+pre-commit run clang-format --all-files
+pre-commit run cppcheck --all-files
+pre-commit run pylint --all-files
+```
+
+To run hooks on a specific file:
+
+```sh
+pre-commit run --files path/to/file
+```
+
+### Working with hook failures
+
+If a hook fails during `git commit`, the commit is aborted and the hook output
+describes what needs to be fixed.
+
+Some hooks may modify files automatically. For example, `clang-format` applies the
+format defined in the repository's `.clang-format` file. If a hook updates a file,
+review the changes, stage them, and rerun the commit.
+
+You can still run `clang-format` directly if needed:
+
+```sh
+clang-format -style=file -i path/to/file
+```
+
+For `cppcheck` and `pylint`, address the reported issues and rerun `pre-commit`
+until the checks pass cleanly.
 
 ## Language version
 
@@ -97,7 +142,7 @@ Software components written in C/C++ may use the language features allowed and i
   */
   ```
 
-- Source lines must be no longer than 120 characters. You can spread the code out vertically, rather than horizontally,
+- Source lines must be no longer than 100 characters. You can spread the code out vertically, rather than horizontally,
   if required. For example:
 
   ```C++
@@ -135,8 +180,9 @@ Software components written in C/C++ may use the language features allowed and i
     compactness, if the class, or function, body is empty, then braces on the same line are acceptable.
 
   - Conditional statements and loops, even if they are just single-statement body, must be surrounded by braces. The
-    opening brace is at the same line, the closing brace is at the next line, and on the same indentation level as its
-    header. The same rule is applied to classes.
+    opening brace is at the same line. For non-empty blocks, the closing brace is on the next line and on the same
+    indentation level as its header. Empty or short blocks may be kept on a single line where permitted by the
+    formatter. The same rule is applied to classes.
 
     ```C++
     class Class1 {

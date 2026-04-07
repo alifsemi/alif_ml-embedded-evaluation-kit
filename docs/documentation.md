@@ -28,6 +28,7 @@
 - Microsoft® and Windows® are proprietary registered trademarks of Microsoft and its group of companies.
 - TensorFlow™, the TensorFlow logo, and any related marks are trademarks of Google Inc.
 - PyTorch®, the PyTorch logo and any related marks are trademarks of The Linux Foundation®.
+- Zephyr® is a trademark of the Linux Foundation.
 
 ## Prerequisites
 
@@ -116,36 +117,31 @@ The repository has the following structure:
 │     │    └── ...
 │     └── ...
 ├── source
-│     ├── application
-│     │    ├── api
-│     │    │    ├── common
-│     │    │    ├──  fwk
-│     │    │    │    ├── executorch
-│     │    │    │    ├── iface
-│     │    │    │    └── tflm
-│     │    │    └── use_case
-│     │    └── main
+│     ├── app
+│     │    ├── main
+│     │    ├── profiler
+│     │    └── use_case
 │     ├── hal
 │     │    ├── include
 │     │    └── source
-│     ├── log
-│     │    └── include
-│     ├── math
-│     │    └── include
-│     ├── profiler
-│     │    └── include
-│     use_case
-│       └── <usecase_name>
-│           ├── include
-│           ├── src
-│           └── usecase.cmake
+│     ├── lib
+│     │    └── mlek
+│     │         ├── common
+│     │         ├── fwk
+│     │         │    ├── executorch
+│     │         │    ├── iface
+│     │         │    └── tflm
+│     │         ├── log
+│     │         ├── math
+│     │         └── use_case
+│     └── readme.md
 └── tests
 ```
 
 What these folders contain:
 
 - `dependencies`: All the third-party dependencies for this project. These are either populated by `git submodule` or by
-    downloading packages in the required hierarchy. See `download_dependencies.py`.
+    downloading packages in the required hierarchy. See `scripts/py/download_dependencies.py`.
 
 - `docs`: Detailed documentation for this repository.
 
@@ -169,54 +165,51 @@ What these folders contain:
 
 - `source`: C/C++ sources for the platform and ML applications.
 
-  The contents of the *application* sub-folder is as follows:
-
-  - `application`: All sources that form the *core* of the application. The `use-case` part of the sources depend on the
-    sources themselves, such as:
+  - `app`: Application entry points and platform-aware use-case implementations that orchestrate the reusable
+    libraries.
 
     - `main`: Contains the main function and calls to platform initialization logic to set up things before launching
       the main loop. Also contains sources common to all use-case implementations.
 
-    - `api`: Contains **platform-agnostic** API that all the use case examples can use.
+    - `profiler`: Profiling utilities used by the applications, built as a static library.
 
-      - `common`: Contains functionality that is common across ML use cases, including pre- and post-processing
-          methods for image and audio data, as well as some data structures for conveniently handling intermediate
-          data and results.
-          It depends on the math functionality exposed by the `math` and the ML framework abstraction layer.
+    - `use_case`: Contains the ML use-case specific logic. Stored as a separate subfolder, it helps isolate the
+      ML-specific application logic. With the assumption that the `app` layer performs the required setup for logic to
+      run. It also makes it easier to add a new use-case block.
 
-      - `fwk`: ML framework abstraction layer.  This library contains generic classes representing models and tensors
-        that are independent of the underlying ML framework used (TensorFlow Lite Micro or ExecuTorch).
-        This allows use case application logic to work with either framework with no changes.
+  - `lib`: Platform-agnostic MLEK libraries that can be reused independently of the provided applications.
 
-        This library contains implementations of the abstraction layer for TensorFlow Lite Micro and ExecuTorch,
-        and one of these implementations will be used at build time depending on the ML framework selected (see [available build options](./sections/building.md#build-options) for details).
+    - `mlek/common`: Contains functionality that is common across ML use cases, including pre- and post-processing
+        methods for image and audio data, as well as some data structures for conveniently handling intermediate
+        data and results.
+        It depends on the math functionality exposed by the `math` and the ML framework abstraction layer.
 
-      - `use_case`: This contains "model" and "processing" APIs for each individual use case. For example, KWS use case
-        contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
-        the MFCC calculations.
+    - `mlek/fwk`: ML framework abstraction layer.  This library contains generic classes representing models and tensors
+      that are independent of the underlying ML framework used (TensorFlow Lite Micro or ExecuTorch).
+      This allows use case application logic to work with either framework with no changes.
 
-     > **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
-     > that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
-     > reuse components from this repository for your application level logic, this directory should be the prime candidate.
+      This library contains implementations of the abstraction layer for TensorFlow Lite Micro and ExecuTorch,
+      and one of these implementations will be used at build time depending on the ML framework selected (see [available build options](./sections/building.md#build-options) for details).
+
+    - `mlek/log`: Common to all code logging macros managing log levels.
+
+    - `mlek/math`: Math functions to be used in ML pipelines. Some of them use CMSIS DSP for optimized execution on Arm CPUs.
+      It is a separate CMake project that is built into a static library `libarm_math.a`.
+
+    - `mlek/use_case`: This contains "model" and "processing" APIs for each individual use case. For example, KWS use case
+      contains a class for a generic KWS neural network model and the "processing" API give user an easier way to drive
+      the MFCC calculations.
+
+    > **NOTE:** The API here is also used to export a CMSIS-pack from this repository and therefore, it is imperative to
+    > that the sources here do not depend on any HAL component or drive any platform dependent logic. If you are looking to
+    > reuse components from this repository for your application level logic, this directory should be the prime candidate.
 
   - `hal`: Contains Hardware Abstraction Layer (HAL) sources, providing a platform-agnostic API to access hardware
     platform-specific functions.
 
     > **Note:** Common code related to the `Arm Ethos-U NPU` software framework resides in *hal/components* sub-folder.
 
-  - `log`: Common to all code logging macros managing log levels.
-
-  - `math`: Math functions to be used in ML pipelines. Some of them use CMSIS DSP for optimized execution on Arm CPUs.
-     It is a separate CMake project that is built into a static library `libarm_math.a`.
-
-  - `profiler`: profiling utilities code to collect and output cycle counts and PMU information.
-    It is a separate CMake project that is built into a static library `libprofiler.a`.
-
-  - `use_case`: Contains the ML use-case specific logic. Stored as a separate subfolder, it helps isolate the
-    ML-specific application logic. With the assumption that the `application` performs the required setup for logic to
-    run. It also makes it easier to add a new use-case block.
-
-  - `tests`: Contains the x86 tests for the use-case applications.
+- `tests`: Contains the x86 tests for the use-case applications.
 
 The HAL has the following structure:
 
@@ -429,7 +422,7 @@ For further information, please see:
   - [Errors when cloning the repository](./sections/troubleshooting.md#errors-when-cloning-the-repository)
   - [Problem installing Vela](./sections/troubleshooting.md#problem-installing-vela)
   - [No matching distribution found for Vela](./sections/troubleshooting.md#no-matching-distribution-found-for-vela)
-    - [How to update Python3 package to 3.10 version](./sections/troubleshooting.md#how-to-update-python3-package-to-newer-version)
+    - [How to update Python3 package to a supported version](./sections/troubleshooting.md#how-to-update-python3-package-to-a-supported-version)
   - [Error with Python environment](./sections/troubleshooting.md#error-with-python-environment)
   - [Internal Compiler Error](./sections/troubleshooting.md#internal-compiler-error)
   - [Build issues with WSL2](./sections/troubleshooting.md#build-issues-with-wsl2)

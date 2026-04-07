@@ -51,7 +51,7 @@ target_compile_definitions(${DISPLAY_MPS3_TARGET}
 ## Add dependencies
 target_link_libraries(${DISPLAY_MPS3_TARGET} PUBLIC
     hal_display_iface
-    mlek_log)
+    hal_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

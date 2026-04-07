@@ -63,7 +63,7 @@ target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
     TARGET_BOARD=BOARD_${TARGET_BOARD})
 
 ## Logging utilities:
-if (NOT TARGET mlek_log)
+if (NOT TARGET hal_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -73,7 +73,7 @@ endif()
 ## Add dependencies
 target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
-    mlek_log
+    hal_log
     cmsis_device
     rte_components)
 
@@ -118,7 +118,7 @@ target_sources(${AUDIO_STUBS_COMPONENT_TARGET}
 ## Add dependencies
 target_link_libraries(${AUDIO_STUBS_COMPONENT_TARGET} PUBLIC
     ${AUDIO_IFACE_TARGET}
-    log)
+    hal_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

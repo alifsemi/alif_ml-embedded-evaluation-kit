@@ -228,10 +228,6 @@ model-explorer --extensions=pte_adapter_model_explorer model.pte
 
 For generic MLEK example use-case build instructions [see](../ML_Embedded_Evaluation_Kit.md)
 
-**NOTE: Currently the ExecuTorch (1.0) has a hardcoded setting for Position Independent Code. Edit the dependencies/executorch/CMakeLists or apply the following patch at MLEK root**
-```
-git -C dependencies/executorch apply ../../executorch_1_0_runtime_patch.diff
-```
 
 Here is an example CMAKE configuration for using the `model.pte` exported earlier in this guide (`model.pte` in MLEK root).
 

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal.h"                /* API */
-#include "log_macros.h"         /* Logging macros */
+#include "hal_log.h"         /* Logging macros */
 
 /* Simple test to check if platform initialises correctly */
 int main()

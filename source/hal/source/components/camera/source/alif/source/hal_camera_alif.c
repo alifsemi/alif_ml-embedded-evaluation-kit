@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal_camera.h"
-#include "log_macros.h"
+#include "hal_log.h"
 #include "RTE_Components.h"
 #include "RTE_Device.h"
 #include "image_processing.h"

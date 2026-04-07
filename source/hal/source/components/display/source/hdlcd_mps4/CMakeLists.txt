@@ -50,7 +50,7 @@ target_sources(${DISPLAY_MPS4_TARGET} PRIVATE
 ## Add dependencies
 target_link_libraries(${DISPLAY_MPS4_TARGET} PUBLIC
     hal_display_iface
-    mlek_log)
+    hal_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

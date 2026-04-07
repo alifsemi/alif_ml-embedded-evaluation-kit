@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "TflmTensor.hpp"
-#include "Wav2LetterPreprocess.hpp"
+#include "mlek/fwk/tflm/TflmTensor.hpp"
+#include "mlek/use_case/asr/Wav2LetterPreprocess.hpp"
 
 #include <catch.hpp>
 #include <cstdint>

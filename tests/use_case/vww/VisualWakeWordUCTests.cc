@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 #include <catch.hpp>
-#include "VisualWakeWordModel.hpp"
+#include "mlek/fwk/tflm/VisualWakeWordModel.hpp"
 #include "hal.h"
 
-#include "ClassificationResult.hpp"
+#include "mlek/common/ClassificationResult.hpp"
 #include "Labels.hpp"
 #include "UseCaseHandler.hpp"
-#include "Classifier.hpp"
+#include "mlek/common/Classifier.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "BufAttributes.hpp"
 

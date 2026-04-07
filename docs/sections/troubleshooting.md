@@ -8,7 +8,7 @@
   * [Errors when cloning the repository](#errors-when-cloning-the-repository)
   * [Problem installing Vela](#problem-installing-vela)
   * [No matching distribution found for Vela](#no-matching-distribution-found-for-vela)
-    * [How to update Python3 package to newer version](#how-to-update-python3-package-to-newer-version)
+    * [How to update Python3 package to a supported version](#how-to-update-python3-package-to-a-supported-version)
   * [Error with Python environment](#error-with-python-environment)
   * [Internal Compiler Error](#internal-compiler-error)
   * [Build issues with WSL2](#build-issues-with-wsl2)
@@ -147,14 +147,14 @@ ERROR: Could not find a version that satisfies the requirement ethos-u-vela==3.9
 ERROR: No matching distribution found for ethos-u-vela==3.9.0
 ```
 
-We recommend using Python 3.10 at minimum.  Ensure that Python 3.10 is installed,
-and it's the default version. Check your current installed version of Python by running:
+This project supports Python 3.10 to 3.12 inclusive. Ensure that one of these
+versions is installed, and check your current installed version of Python by running:
 
 ```commandline
 python3 --version
 ```
 
-### How to update Python3 package to newer version
+### How to update Python3 package to a supported version
 
 1. Check your current installed version of Python by running:
 
@@ -163,12 +163,13 @@ python3 --version
    ```
 
    For example:
-b
    ```log
    Python 3.8.0
    ```
 
-2. Install the Python 3.10 packages necessary on the system:
+2. Install one of the supported Python versions (3.10, 3.11, or 3.12) together
+   with the matching virtual environment and development packages. For example,
+   to install Python 3.10:
 
    ```commandline
    sudo apt update
@@ -272,7 +273,7 @@ You can fix this error by installing Python virtual environment and removing the
 rm -r resources_downloaded
 ```
 
-Follow the instructions to [update Python3 package to 3.10 version](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
+Follow the instructions to [update Python3 package to a supported version](./troubleshooting.md#how-to-update-python3-package-to-a-supported-version)
 before attempting a rebuild with:
 
 ```commandline

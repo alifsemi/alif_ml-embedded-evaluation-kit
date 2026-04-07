@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Classifier.hpp"
-#include "TensorFlowLiteMicro.hpp"
-#include "TflmTensor.hpp"
+#include "mlek/common/Classifier.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/TflmTensor.hpp"
 
 #include <catch.hpp>
 

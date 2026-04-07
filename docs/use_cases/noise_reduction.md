@@ -22,7 +22,7 @@
 This document describes the process of setting up and running the Arm® Ethos™-U NPU Noise Reduction
 example.
 
-Use case code is stored in the following directory: [source/use_case/noise_reduction](../../source/use_case/noise_reduction).
+Use case code is stored in the following directory: [source/app/use_case/noise_reduction](../../source/app/use_case/noise_reduction).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -88,7 +88,7 @@ The fixed virtual platform supports dumping of memory contents to a file. This c
 specifying command-line arguments when starting the FVP executable. For example, the argument:
 
 ```commandline
-$ FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-noise_reduction.axf \
+$ FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_noise_reduction.axf \
     --dump cpu0=output.bin@Memory:0x80000000,0x100000
 ```
 
@@ -227,9 +227,9 @@ The build results are placed under the `build/bin` folder. For example:
 
 ```tree
 bin
- ├── ethos-u-noise_reduction.axf
- ├── ethos-u-noise_reduction.htm
- ├── ethos-u-noise_reduction.map
+ ├── mlek_noise_reduction.axf
+ ├── mlek_noise_reduction.htm
+ ├── mlek_noise_reduction.map
  ├── images-noise_reduction.txt
  └── sectors
       └── noise_reduction
@@ -239,12 +239,12 @@ bin
 
 Based on the preceding output, the files contain the following information:
 
-- `ethos-u-noise_reduction.axf`: The built application binary for the noise reduction use case.
+- `mlek_noise_reduction.axf`: The built application binary for the noise reduction use case.
 
-- `ethos-u-noise_reduction.map`: Information from building the application (for example. The
+- `mlek_noise_reduction.map`: Information from building the application (for example. The
   libraries used, what was optimized, and location of objects).
 
-- `ethos-u-noise_reduction.htm`: A human readable file containing the call graph of application
+- `mlek_noise_reduction.htm`: A human readable file containing the call graph of application
   functions.
 
 - `sectors/`: This folder contains the built application, which is split into files for loading into
@@ -330,12 +330,12 @@ $./FVP_Corstone_SSE-300.sh
 
 ### Starting Fast Model simulation
 
-Once the building step has completed, the application binary `ethos-u-noise_reduction.axf` can be
+Once the building step has completed, the application binary `mlek_noise_reduction.axf` can be
 found in the `build/bin` folder. Assuming the install location of the FVP was set to
 `~/FVP_install_location`, start the simulation with the following command:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-noise_reduction.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_noise_reduction.axf
 ```
 
 A log output then appears on the terminal:
