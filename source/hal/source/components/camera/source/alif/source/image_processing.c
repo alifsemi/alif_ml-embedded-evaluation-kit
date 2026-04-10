@@ -39,7 +39,7 @@
 #include <inttypes.h>
 #include "image_processing.h"
 #include "bayer.h"
-#include "log_macros.h"
+#include "hal_log.h"
 
 #include "timer_alif.h"
 #include "RTE_Components.h"

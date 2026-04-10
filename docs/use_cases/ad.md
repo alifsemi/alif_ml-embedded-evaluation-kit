@@ -19,7 +19,7 @@
 
 This document describes the process of setting up and running the Arm® *Ethos™-U* NPU Anomaly Detection example.
 
-Use-case code could be found in the following directory: [source/use_case/ad](../../source/use_case/ad).
+Use-case code could be found in the following directory: [source/app/use_case/ad](../../source/app/use_case/ad).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -152,9 +152,9 @@ Results of the build are placed under `build/bin` folder. For example:
 
 ```tree
 bin
- ├── ethos-u-.axf
- ├── ethos-u-ad.htm
- ├── ethos-u-.map
+ ├── mlek_ad.axf
+ ├── mlek_ad.htm
+ ├── mlek_ad.map
  └── sectors
       ├── images.txt
       └── ad
@@ -164,12 +164,12 @@ bin
 
 The bin folder contains the following files and folders:
 
-- `ethos-u-ad.axf`: The built application binary for the Anomaly Detection use-case.
+- `mlek_ad.axf`: The built application binary for the Anomaly Detection use-case.
 
-- `ethos-u-ad.map`: Information from building the application. For example, the libraries used, what was optimized, and
+- `mlek_ad.map`: Information from building the application. For example, the libraries used, what was optimized, and
   the location of objects.
 
-- `ethos-u-ad.htm`: Human readable file containing the call graph of application functions.
+- `mlek_ad.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/ad`: Folder containing the built application. is split into files for loading into different FPGA memory
   regions.
@@ -288,7 +288,7 @@ After building, and assuming the install location of the FVP was set to the `~/F
 be started by running:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/ethos-u-ad.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mlek_ad.axf
 ```
 
 A log output now appears on the terminal:

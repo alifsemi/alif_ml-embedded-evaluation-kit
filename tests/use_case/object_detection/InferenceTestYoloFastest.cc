@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "DetectorPostProcessing.hpp"
-#include "ImageUtils.hpp"
-#include "TensorFlowLiteMicro.hpp"
-#include "YoloFastestModel.hpp"
+#include "mlek/use_case/object_detection/DetectorPostProcessing.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/YoloFastestModel.hpp"
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 namespace arm {
 namespace app {

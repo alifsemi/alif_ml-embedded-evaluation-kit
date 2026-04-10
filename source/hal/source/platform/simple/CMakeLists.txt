@@ -94,7 +94,7 @@ target_include_directories(cmsis_device PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
 
 ## Logging utilities:
-if (NOT TARGET mlek_log)
+if (NOT TARGET hal_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -104,7 +104,7 @@ endif()
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}  PUBLIC
         cmsis_device
-        mlek_log
+        hal_log
         platform_pmu
         hal_display_stubs
         hal_audio_static_streams

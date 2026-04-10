@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,14 +37,14 @@
 #
 build:
   - name: "build-dir"
-    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
+    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON -DML_FRAMEWORK=TensorFlowLiteMicro"
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
     description: "ML sample use case APIs derived from ml-embedded-eval-kit"
     vendor: "ARM"
     license: "LICENSE_APACHE_2.0.txt"
-    url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/tree/main/resources/cmsis-packs"
+    url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs"
 
     requirements:
       packages:
@@ -54,6 +54,10 @@ packs:
         - attributes: { vendor: "ARM", name: "CMSIS-NN", version: "7.0.0" }
 
     releases:
+      - version: "25.12.1"
+        date: "2026-02-11"
+        description: "25.12.1 release package"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.1.pack"
       - version: "25.12.0"
         date: "2025-11-28"
         description: "25.12.0 release package"
@@ -72,7 +76,7 @@ packs:
         url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack"
 
     taxonomy:
-      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/Readme.md" }
+      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/README.md" }
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:

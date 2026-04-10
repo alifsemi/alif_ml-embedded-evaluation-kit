@@ -34,7 +34,7 @@ target_sources(hal_audio_static_streams PRIVATE
     source/hal_audio_static.c
     source/hal_audio_static_external.c)
 target_include_directories(hal_audio_static_streams PRIVATE source)
-target_link_libraries(hal_audio_static_streams PUBLIC hal_audio_interface mlek_log)
+target_link_libraries(hal_audio_static_streams PUBLIC hal_audio_interface hal_log)
 target_compile_definitions(hal_audio_static_streams PRIVATE
         $<$<BOOL:${HAL_AUDIO_LOOP}>:HAL_AUDIO_LOOP>)
 

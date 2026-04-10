@@ -33,23 +33,21 @@ The following sign indicates the important conventions to apply:
 
 See [Repository structure](../documentation.md#repository-structure) section for the outline of the repo.
 
-> **Convention**: Separate use-cases must be organized in sub-folders under the `source/use-case` folder. The name of
+> **Convention**: Separate use-cases must be organized in sub-folders under the `source/app/use_case` folder. The name of
 > the directory is used as a name for this use-case and can be provided as a `USE_CASE_BUILD` parameter value. The build
 > system expects that sources for the use-case are structured as follows: Headers in an `include` directory and C/C++
 > sources in a `src` directory. For example:
 >
 > ```tree
-> use_case
->   └──img_class
+> source/app/use_case
+>   └── img_class
 >         ├── include
->         │   └── *.hpp
 >         └── src
->             └── *.cc
 > ```
 >
 > It is important to note that each use case example has at least one associated API that it uses from
-> `source/application/api/use_case`. The API sources are **platform-agnostic** by design so the use cases example
-> implementations can re-use one or more of these components, and they can be used on any target. However, it
+> `source/lib/mlek/use_case`. These are reusable ML use-case libraries so the use case example
+> implementations can re-use one or more of these components across targets. However, it
 > is not mandatory to use an API, or to implement one if you are adding a use-case.
 
 ## Hardware Abstraction Layer API
@@ -215,19 +213,14 @@ Additional member functions in the `TflmModel` subclass:
 >
 > Network models have different sets of operators.  For TensorFlow Lite models, these operators must be registered
 > at runtime with the `tflite::MicroMutableOpResolver` object in the `EnlistOperations` method.
-> 
+>
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >   ```commandline
->     source/application/api/fwk/tflm
+>     source/lib/mlek/fwk/tflm
 >       ├── ...
->       ├── include
->       │   ├── ...
->       │   ├── MobileNetModel.hpp
->       │   ├── ...
->       └── source
->           ├── ...
->           ├── MobileNetModel.cc
->           ├── ...
+>       ├── MobileNetModel.hpp
+>       ├── ...
+>       └── MobileNetModel.cc
 
 ### ExecuTorch models
 
@@ -240,19 +233,17 @@ Additional member functions in the `EtModel` subclass:
 
 > For ExecuTorch models, any operators that fall back to CPU must be included at build time by using the CMake
 > `generate_pte_ops_lib` function, and these ops must exist in the ATen Core Operator Set.
-> 
+>
 > Network models can require different size of activation buffer that is returned as
 > tensor arena memory by the `GetComputeBuffer` method.
 >
 > **Note:** Please see the image classification use case for examples of model file implementations:
 >
 >   ```commandline
->       source/application/api/fwk/executorch
+>       source/lib/mlek/fwk/executorch
 >       ├── ...
->       ├── include
->       │   ├── ...
->       │   ├── MobileNetModel.hpp
->       │   ├── ...
+>       ├── MobileNetModel.hpp
+>       ├── ...
 >   ```
 
 ## Adding custom ML use-case
@@ -268,13 +259,13 @@ In addition, some useful examples are provided: Printing into console, and drawi
 For example:
 
 ```tree
-use_case
-   └──hello_world
-      ├── include
-      └── src
+source/app/use_case
+   └── hello_world
+         ├── include
+         └── src
 ```
 
-Start with creation of a subdirectory under the `source/use_case` directory and two additional directories `src` and
+Start with creation of a subdirectory under the `source/app/use_case` directory and two additional directories `src` and
 `include` as described in the [Software project description](./customizing.md#software-project-description) section.
 
 ## Implementing main loop
@@ -294,7 +285,7 @@ Now define the `MainLoop` function with the signature described in [Main loop fu
 
 ```C++
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 void MainLoop()
 {
@@ -317,7 +308,7 @@ Before inference could be run with a custom NN model, TensorFlow Lite Micro fram
 layers, included in the model. You must register operators using the `MicroMutableOpResolver` API.
 
 The *Ethos-U* code samples project has an abstraction around TensorFlow Lite Micro API (see [NN model API](./customizing.md#nn-model-api)).
-Create `HelloWorldTflmModel.hpp` in the use-case include `source/application/fwk/tflm/include` directory,
+Create `HelloWorldTflmModel.hpp` under `source/lib/mlek/fwk/tflm`,
 extend Model abstract class, and then declare the required methods.
 
 For example:
@@ -351,13 +342,13 @@ class HelloWorldTflmModel: public TflmModel {
 #endif /* HELLOWORLDTFLMMODEL_HPP */
 ```
 
-Create the `HelloWorldTflmModel.cc` file in the `src` subdirectory and define the methods there. Include
+Place the `HelloWorldTflmModel.cc` file alongside the header and define the methods there. Include
 `HelloWorldTflmModel.hpp` created earlier.
 
 > **Note:** The `TflmModel.hpp` included in the header provides access to TensorFlow Lite Micro's operation resolver API.
 
-Please refer to `source/application/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
-for example `include/MobileNetModel.hpp` and `src/MobileNetModel.cc`.
+Please refer to `source/lib/mlek/fwk/tflm` for examples of classes that have been defined for TensorFlow Lite Micro models,
+for example `MobileNetModel.hpp` and `MobileNetModel.cc`.
 
 If you are using a TensorFlow Lite model compiled with Vela, it is important to add a custom *Ethos-U* operator to the
 operators list.
@@ -369,7 +360,7 @@ For example:
 
 ```C++
 #include "HelloWorldTflmModel.hpp"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 bool arm::app::HelloWorldTflmModel::EnlistOperations() {
 
@@ -412,14 +403,14 @@ class HelloWorldEtModel: public EtModel {} /* namespace arm::app::fwk::et */
 
 However, it can still be useful to define a class for your model to capture specific metadata,
 such as labels for input/output tensor indices.
-See `source/application/api/fwk/executorch/include/MobileNetModel.hpp` for an example of this.
+See `source/lib/mlek/fwk/executorch/MobileNetModel.hpp` for an example of this.
 
 ### Using GetModelPointer and GetModelLen methods
 
 These functions are generated in the C++ file containing the neural network model as an array.
 This logic for generation of the C++ array from the `.tflite` or `.pte` file needs to be defined
 in the `usecase.cmake` file for this `HelloWorld` example.
-In the root of `source/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to it:
+In the root of `source/app/use_case/hello_world`, create a file called `usecase.cmake` and add the following lines to it:
 
 ```cmake
 # Generate model file
@@ -444,8 +435,8 @@ For details on code generation flow in general, refer to: [Automatic file genera
 
 The model data is read during the `Model::Init` method execution.
 For implementation details, refer to the framework-specific `Model` subclasses:
- - `source/application/api/fwk/tflm/source/TflmModel.cc`
- - `source/application/api/fwk/executorch/source/EtModel.cc`
+ - `source/lib/mlek/fwk/tflm/TflmModel.cc`
+ - `source/lib/mlek/fwk/executorch/EtModel.cc`
 
 `Model::Init` requires references to the model and the compute buffer memory regions as well as their sizes.
 During the build, a source file will be generated at `<build>/generated/hello_world/src/<model_file_name>.cc`
@@ -499,7 +490,7 @@ The following code adds inference invocation to the main loop function:
 
 ```c++
 #include "hal.h"
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 #include "HelloWorldTflmModel.hpp"
 /* Or, if your model is ExecuTorch-based: */
 //#include "HelloWorldEtModel.hpp"
@@ -608,7 +599,7 @@ profiler.PrintProfilingResult();
 
 ## Printing to console
 
-The preceding examples used some function to print messages to the console. To use them, include `log_macros.h` header.
+The preceding examples used some function to print messages to the console. To use them, include `mlek/log/log_macros.h` header.
 
 However, for clarity, here is the full list of available functions:
 
@@ -729,7 +720,7 @@ if (ETHOS_U_NPU_ENABLED)
     string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
     set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_delegate_${_NPU_CFG_ID}.pte)
 else()
-    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_TOSA-1.0+INT.pte)
+    set(DEFAULT_MODEL_PATH  ${DEFAULT_MODEL_DIR}/helloworldmodel_arm_TOSA-1.0+FP.pte)
 endif()
 ```
 
@@ -778,7 +769,7 @@ cmake .. \
 ```
 
 
-As a result, the file `ethos-u-hello_world.axf` is created. The MPS3 build also produces the `sectors/hello_world`
+As a result, the file `mlek_hello_world.axf` is created. The MPS3 build also produces the `sectors/hello_world`
 directory with binaries and the file `sectors/images.txt` to be copied to the MicroSD card on the board.
 
 The next section of the documentation covers: [Testing and benchmarking](testing_benchmarking.md).
@@ -889,10 +880,19 @@ Linker scripts for all supported toolchains should be added. The location of the
 The new platform build configuration script must add it in the `platform_custom_post_build` function like this:
 
 ```cmake
+    get_target_property(target_linker_script_override
+            ${PARSED_TARGET_NAME}
+            MLEK_LINKER_SCRIPT_OVERRIDE_PATH)
+    set(default_linker_script_path
+            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}/${LINKER_SCRIPT_NAME}${LINKER_SCRIPT_SUFFIX}")
+    resolve_linker_script_path(
+            linker_script_path
+            "${default_linker_script_path}"
+            "${target_linker_script_override}")
+
     add_linker_script(
-            ${PARSED_TARGET_NAME}                                   # Target
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${TARGET_SUBSYSTEM}  # Linker scripts directory path
-            ${LINKER_SCRIPT_NAME})                                  # Name of the file without suffix
+            ${PARSED_TARGET_NAME}  # Target
+            ${linker_script_path}) # Full linker control file path
 ```
 
 Please see existing platforms sources and build scripts for more details.

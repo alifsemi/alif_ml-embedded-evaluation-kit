@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText:  Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlek-tools"
+version = "0.1.0"
+description = "ML Embedded Evaluation Kit build and generation tools"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "Jinja2",
+    "numpy",
+    "pillow",
+    "resampy",
+    "soundfile",
+]
+
+[project.optional-dependencies]
+# Install these for TFLite model validation
+tflite = ["ethos-u-vela"]
+# Install these for ExecuTorch PTE model validation and ops dumping
+executorch = ["executorch"]
+
+[project.scripts]
+gen-audio          = "mlek_tools.gen.gen_audio:main"
+gen-audio-cpp      = "mlek_tools.gen.gen_audio_cpp:main"
+gen-rgb-cpp        = "mlek_tools.gen.gen_rgb_cpp:main"
+gen-model-cpp      = "mlek_tools.gen.gen_model_cpp:main"
+gen-labels-cpp     = "mlek_tools.gen.gen_labels_cpp:main"
+gen-test-data-cpp  = "mlek_tools.gen.gen_test_data_cpp:main"
+pte-ops-dump       = "mlek_tools.validation.pte_ops_dump:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mlek_tools*"]
+
+[tool.setuptools.package-data]
+"mlek_tools.gen" = [
+    "templates/*.txt",
+    "templates/**/*.template",
+]

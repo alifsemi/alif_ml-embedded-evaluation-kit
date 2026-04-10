@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "TensorFlowLiteMicro.hpp"
-#include "TestModel.hpp" /* Model class for running inference. */
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/TestModel.hpp" /* Model class for running inference. */
 
 #include <catch.hpp>
 #include <random>

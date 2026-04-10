@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022-2024, 2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -37,19 +37,20 @@ function(platform_custom_post_build)
     cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN} )
 
     set_target_properties(${PARSED_TARGET_NAME} PROPERTIES SUFFIX ".axf")
-
-    # For GNU toolchain, we have different linker scripts for Debug and Release
-    # as the code footprint difference between the two is quite big.
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        string(TOLOWER ${CMAKE_BUILD_TYPE} LINKER_SCRIPT_SUFFIX)
-        set(LINKER_SCRIPT_NAME "${LINKER_SCRIPT_NAME}_${LINKER_SCRIPT_SUFFIX}" PARENT_SCOPE FORCE)
-    endif()
+    get_target_property(target_linker_script_override
+        ${PARSED_TARGET_NAME}
+        MLEK_LINKER_SCRIPT_OVERRIDE_PATH)
+    set(default_linker_script_path
+        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${LINKER_SCRIPT_NAME}${LINKER_SCRIPT_SUFFIX}")
+    resolve_linker_script_path(
+        linker_script_path
+        "${default_linker_script_path}"
+        "${target_linker_script_override}")
 
     # Add link options for the linker script to be used:
     add_linker_script(
-        ${PARSED_TARGET_NAME}               # Target
-        ${CMAKE_CURRENT_FUNCTION_LIST_DIR}  # Directory path
-        ${LINKER_SCRIPT_NAME})              # Name of the file without suffix
+        ${PARSED_TARGET_NAME}  # Target
+        ${linker_script_path}) # Full linker control file path
 
     add_target_map_file(
         ${PARSED_TARGET_NAME}

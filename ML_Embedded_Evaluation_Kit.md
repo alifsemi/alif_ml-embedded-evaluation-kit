@@ -208,11 +208,11 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 4. Download and Setup required AI/ML resources.
     Using Tensorflow:
     ```
-    python3.10 set_up_default_resources.py
+    python3 set_up_default_resources.py
     ```
     Using Executorch:
     ```
-    python3.10 set_up_default_resources.py --ml-frameworks executorch
+    python3 set_up_default_resources.py --ml-frameworks executorch
     ```
 
     If you are testing both frameworks, both can be called.
@@ -657,6 +657,7 @@ The first steps to test your own model in ML Embedded Evaluation Kit are convert
 The inference_runner use-case can be used for basic benchmarks.
 - Deploying your own model using [TFLM framework](docs/deploying_model.md)
 - Deploying your own PyTorch model using [ExecuTorch framework](docs/deploying_model_executorch_export.md)
+- For generic Pre- and Post processing tips [see](docs/custom_model_pre_post_processing.md)
 
 
 <a name="memoryusage"></a>
@@ -792,3 +793,6 @@ Also noise_reduction use-case needs activation area reduced using `-Dnoise_reduc
 
 `-DETHOS_U_NPU_ID=<U55|U85>`<br>
 Specifies which NPU to use for interference. (Default is U55)
+
+`-DGPIO_PROFILING=<ON|OFF>`<br>
+Enables or disables GPIO profiling. When enabled, certain GPIO pins are configured to toggle at specific stages of the benchmark (preprocessing, inference, postprocessing) to correlate power measurements with these stages. (Default is OFF). See more details in the [Alif Benchmark User Guide](Alif_benchmark.md).

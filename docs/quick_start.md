@@ -64,9 +64,9 @@ To get started quickly, please follow these steps:
 
     ```commandline
    From auto-generated (or custom) build directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-kws.axf
+   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_kws.axf
    From root directory:
-   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/ethos-u-kws.axf
+   <path_to_FVP>/FVP_Corstone_SSE-300_Ethos-U55 -a <cmake-build-your_config>/bin/mlek_kws.axf
     ```
 
 6. A telnet window is launched through which you can interact with the application and obtain performance figures.
@@ -78,7 +78,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==4.4.1
+env/bin/python3 -m pip install ethos-u-vela==5.0.0
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \

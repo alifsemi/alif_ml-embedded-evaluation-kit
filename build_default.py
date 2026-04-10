@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2021-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText:  Copyright 2021-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -29,16 +29,68 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.py.setup.setup_config import SetupConfig, PathsConfig, OptimizationConfig
+from scripts.py.mlek_tools.setup.npu_config import (
+    get_default_npu_config_from_name,
+    valid_npu_configs,
+)
+from scripts.py.mlek_tools.setup.setup_config import (
+    SetupConfig, PathsConfig, OptimizationConfig,
+)
+from set_up_default_resources import MLFramework, valid_ml_frameworks
 from set_up_default_resources import default_downloads_path
 from set_up_default_resources import default_executorch_path
 from set_up_default_resources import default_npu_configs
 from set_up_default_resources import default_requirements_path
 from set_up_default_resources import default_use_case_resources_path
-from set_up_default_resources import get_default_npu_config_from_name
-from set_up_default_resources import set_up_resources
-from set_up_default_resources import valid_npu_configs
-from set_up_default_resources import valid_ml_frameworks, MLFramework
+from set_up_default_resources import EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS
+from set_up_default_resources import set_up_resources_with_defaults as set_up_resources
+
+class PipeLogging(threading.Thread):
+    """
+    Thread that forwards lines from a pipe to the Python logging system.
+    """
+
+    def __init__(self, log_level):
+        threading.Thread.__init__(self)
+        self.log_level = log_level
+        self.file_read, self.file_write = os.pipe()
+        self.pipe_in = os.fdopen(self.file_read)
+        self.daemon = False
+        self.start()
+
+    def fileno(self):
+        """Return the writable file descriptor used by subprocess stdout."""
+        return self.file_write
+
+    def run(self):
+        """Forward each line from the pipe into the Python logger."""
+        for line in iter(self.pipe_in.readline, ""):
+            logging.log(self.log_level, line.strip("\n"))
+        self.pipe_in.close()
+
+    def close(self):
+        """Close the write end of the pipe used by the subprocess."""
+        os.close(self.file_write)
+
+
+def run_command(command: str, logpipe: PipeLogging, fail_message: str) -> None:
+    """
+    Run a shell command, routing stdout through a PipeLogging thread, and exit on failure.
+
+    :param command:         The command to run.
+    :param logpipe:         The PipeLogging object to capture stdout.
+    :param fail_message:    The message to log upon a non-zero exit code.
+    """
+    logging.info("\n\n\n%s\n\n\n", command)
+    try:
+        subprocess.run(
+            command, check=True, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
+        )
+    except subprocess.CalledProcessError as err:
+        logging.error(fail_message)
+        logpipe.close()
+        sys.exit(err.returncode)
+
 
 @dataclass(frozen=True)
 class BuildConfig:
@@ -62,45 +114,6 @@ class BuildConfig:
     make_jobs: int
     make_verbose: bool
     ml_framework: MLFramework
-
-
-class PipeLogging(threading.Thread):
-    """
-    Class used to log stdout from subprocesses
-    """
-
-    def __init__(self, log_level):
-        threading.Thread.__init__(self)
-        self.log_level = log_level
-        self.file_read, self.file_write = os.pipe()
-        self.pipe_in = os.fdopen(self.file_read)
-        self.daemon = False
-        self.start()
-
-    def fileno(self):
-        """
-        Get self.file_write
-
-        Returns
-        -------
-        self.file_write
-        """
-        return self.file_write
-
-    def run(self):
-        """
-        Log the contents of self.pipe_in
-        """
-        for line in iter(self.pipe_in.readline, ""):
-            logging.log(self.log_level, line.strip("\n"))
-
-        self.pipe_in.close()
-
-    def close(self):
-        """
-        Close the pipe
-        """
-        os.close(self.file_write)
 
 
 def get_toolchain_file_name(toolchain: str) -> str:
@@ -172,32 +185,6 @@ def prep_build_dir(
     return build_dir
 
 
-def run_command(
-        command: str,
-        logpipe: PipeLogging,
-        fail_message: str
-):
-    """
-    Run a command and exit upon failure.
-
-    Parameters
-    ----------
-    command         : The command to run
-    logpipe         : The PipeLogging object to capture stdout
-    fail_message    : The message to log upon a non-zero exit code
-    """
-    logging.info("\n\n\n%s\n\n\n", command)
-
-    try:
-        subprocess.run(
-            command, check=True, shell=True, stdout=logpipe, stderr=subprocess.STDOUT
-        )
-    except subprocess.CalledProcessError as err:
-        logging.error(fail_message)
-        logpipe.close()
-        sys.exit(err.returncode)
-
-
 def download_resources(build_config: BuildConfig) -> Path:
     """
     Download resources for MLEK use cases
@@ -213,7 +200,8 @@ def download_resources(build_config: BuildConfig) -> Path:
     setup_config = SetupConfig(
         run_vela_on_models=build_config.run_vela_on_models,
         set_up_tensorflow=(build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO),
-        set_up_executorch=(build_config.ml_framework == MLFramework.EXECUTORCH)
+        set_up_executorch=(build_config.ml_framework == MLFramework.EXECUTORCH),
+        executorch_excluded_npu_processor_ids=EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS,
     )
     optimization_config = OptimizationConfig(
         additional_npu_config_names=[build_config.npu_config_name]
@@ -284,8 +272,8 @@ def run(build_config: BuildConfig):
         # a clean build for the framework.
         framework_arg = '-DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
     elif build_config.ml_framework == MLFramework.EXECUTORCH:
-        # Current ExecuTorch rev doesn't support `Dedicated Sram`
-        framework_arg = '-DML_FRAMEWORK=ExecuTorch -DETHOS_U_NPU_MEMORY_MODE=Shared_Sram'
+        # Set framework to ExecuTorch.
+        framework_arg = '-DML_FRAMEWORK=ExecuTorch'
     else:
         raise NotImplementedError(f'Unsupported ML Framework {build_config.ml_framework}')
 

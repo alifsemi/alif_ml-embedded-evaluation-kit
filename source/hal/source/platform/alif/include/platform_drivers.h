@@ -30,7 +30,7 @@
 #ifndef PLATFORM_DRIVERS_H
 #define PLATFORM_DRIVERS_H
 
-#include "log_macros.h"     /* Logging related helpers. */
+#include "hal_log.h"     /* Logging related helpers. */
 
 /* Platform components */
 #include "RTE_Components.h" /* For CPU related defintiions */

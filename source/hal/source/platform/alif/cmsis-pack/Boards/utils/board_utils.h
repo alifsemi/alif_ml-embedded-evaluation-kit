@@ -44,6 +44,9 @@ void BOARD_BUTTON1_GetState(BOARD_BUTTON_STATE *state);
 void BOARD_BUTTON2_GetState(BOARD_BUTTON_STATE *state);
 void BOARD_LED1_Control(BOARD_LED_STATE state);
 void BOARD_LED2_Control(BOARD_LED_STATE state);
+#ifdef GPIO_PROFILING
+void BOARD_LED1_BLUE_Control(BOARD_LED_STATE state);
+#endif
 #ifdef __cplusplus
 }
 #endif

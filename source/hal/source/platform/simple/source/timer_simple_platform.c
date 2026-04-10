@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  */
 #include "timer_simple_platform.h"
 
-#include "log_macros.h"     /* Logging macros. */
+#include "hal_log.h"     /* Logging macros. */
 #include "RTE_Components.h" /* CPU definitions and functions. */
 
 #include <inttypes.h>

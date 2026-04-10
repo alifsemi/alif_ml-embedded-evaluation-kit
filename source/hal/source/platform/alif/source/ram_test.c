@@ -17,9 +17,8 @@
 #include <RTE_Components.h>
 #include CMSIS_device_header
 
-#include "log_macros.h"
-
 #include "ram_test.h"
+#include "hal_log.h"
 
 // Address bit test - primarily to check the address shim for parts that need it
 void ram_address_test(volatile uint8_t *ram, uint32_t size)

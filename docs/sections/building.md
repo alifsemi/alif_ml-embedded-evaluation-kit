@@ -103,7 +103,7 @@ For ATfE/LLVM:
 >
 > `export PATH=$(readlink -e resources_downloaded/env/bin):${PATH}`
 
-- Python 3.10 or above is installed. Check your current installed version of Python by running:
+- Python 3.10, 3.11 or 3.12 is installed. Check your current installed version of Python by running:
 
     ```commandline
     python3 --version
@@ -113,9 +113,9 @@ For ATfE/LLVM:
     Python 3.10.12
     ```
 
-  > **Note:** If you have an older version of Python installed (< 3.10) see the
-  > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-newer-version)
-  > for instruction on how to install and use it.
+  > **Note:** If you do not have a supported version of Python installed, see the
+  > [Troubleshooting](./troubleshooting.md#how-to-update-python3-package-to-a-supported-version)
+  > section for instructions on how to install and use one.
 
 - The build system creates a Python virtual environment during the build process. Please make sure that Python virtual
   environment module is installed by running:
@@ -200,6 +200,14 @@ The build parameters are:
 - `CMAKE_TOOLCHAIN_FILE`: This built-in CMake parameter can be used to override the default toolchain file used for the
   build. All the valid toolchain files are located in the scripts directory. For example, see:
   [bare-metal-gcc.cmake](../../scripts/cmake/toolchains/bare-metal-gcc.cmake).
+
+- `LINKER_SCRIPT_OVERRIDE_PATH`: Optional path to a custom linker control file that overrides the platform default.
+  When left unset, the build uses the standard linker script or scatter file selected by the target platform and
+  toolchain. When set, the file must be compatible with the selected toolchain. Use case specific linker script
+  overrides take precedence over this global setting.
+
+- `<use_case>_LINKER_SCRIPT_OVERRIDE_PATH`: Optional linker control file override for a specific use case. This is set
+  in the use case CMake logic and takes precedence over `LINKER_SCRIPT_OVERRIDE_PATH` for that application target.
 
 - `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Valid options are `TensorFlowLiteMicro` and
   `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
@@ -386,7 +394,7 @@ repository to link against.
 7. [CMSIS-NN](https://github.com/ARM-software/CMSIS-NN.git)
 8. [CMSIS-DFP](https://github.com/ARM-software/Cortex_DFP.git)
 
-> **Note:** If you are using non git project sources, run `python3 ./download_dependencies.py` and ignore further git
+> **Note:** If you are using non git project sources, run `python3 ./scripts/py/download_dependencies.py` and ignore further git
 > instructions. Proceed to [Fetching resource files](./building.md#fetching-resource-files) section.
 
 To pull the submodules:
@@ -427,9 +435,10 @@ This fetches every model into the `resources_downloaded` directory. It also opti
 for the default 128 MACs configuration of the Arm® *Ethos™-U55* NPU, the default 256 MACs configuration of the
 Arm® *Ethos™-U65* NPU and the 256 MACs configuration of the Arm® *Ethos™-U85* NPU.
 
-> **Note:** This script requires Python version 3.10 or higher. Please make sure all [build prerequisites](./building.md#build-prerequisites)
-> are satisfied. If your environment points to system installed Python3 that is an older version than 3.10, choose the
-> required version explicitly after installing it:
+> **Note:** This script requires Python 3.10 to 3.12 inclusive. Please make sure all
+> [build prerequisites](./building.md#build-prerequisites) are satisfied. If your
+> environment points to a different system-installed Python3 version, choose a supported
+> version explicitly after installing it:
 > ```sh
 > python3.10 ./set_up_default_resources.py
 > ```
@@ -1027,7 +1036,7 @@ For example, the generated utility functions for image classification are:
   - Snippet from `build/generated/img_class/generated/samples/sample_files.c`
 
       ```C++
-    
+
       #include "sample_files.h"
       #include <stddef.h>
 
@@ -1062,38 +1071,40 @@ For example, the generated utility functions for image classification are:
       }
       ```
 
-These are generated using Python templates located in `scripts/py/templates`.
+These are generated using Python templates located in `scripts/py/mlek_tools/gen/templates`.
 
 ```tree
 scripts
 └── py
-    ├── <generation scripts>
     ├── requirements.txt
-    └── templates
-          ├── header_template.txt
-          ├── labels
-          │   ├── Labels.cc.template
-          │   └── Labels.hpp.template
-          ├── sample-data
-          │   ├── audio
-          │   │   ├── audio_clips.c.template
-          │   │   ├── audio_clips.h.template
-          │   │   └── audio.c.template
-          │   └── images
-          │       ├── image.c.template
-          │       ├── images.c.template
-          │       └── images.h.template
-          ├── tests
-          │   ├── iofmdata.cc.template
-          │   ├── TestData.cc.template
-          │   └── TestData.hpp.template
-          └── tflite.cc.template
+    └── mlek_tools
+        └── gen
+            ├── <generation scripts>
+            └── templates
+                  ├── header_template.txt
+                  ├── labels
+                  │   ├── Labels.cc.template
+                  │   └── Labels.hpp.template
+                  ├── sample-data
+                  │   ├── audio
+                  │   │   ├── audio_clips.c.template
+                  │   │   ├── audio_clips.h.template
+                  │   │   └── audio.c.template
+                  │   └── images
+                  │       ├── image.c.template
+                  │       ├── images.c.template
+                  │       └── images.h.template
+                  ├── tests
+                  │   ├── iofmdata.cc.template
+                  │   ├── TestData.cc.template
+                  │   └── TestData.hpp.template
+                  └── tflite.cc.template
 ```
 
 Based on the type of use-case, the correct conversion is called in the use-case CMake file. Or, audio or image
 respectively, for voice, or vision use-cases.
 
-For example, the generations call for image classification, `source/use_case/img_class/usecase.cmake`, looks like:
+For example, the generations call for image classification, `source/app/use_case/img_class/usecase.cmake`, looks like:
 
 ```c++
 # Generate input files

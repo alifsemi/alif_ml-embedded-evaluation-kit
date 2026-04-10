@@ -228,10 +228,6 @@ model-explorer --extensions=pte_adapter_model_explorer model.pte
 
 For generic MLEK example use-case build instructions [see](../ML_Embedded_Evaluation_Kit.md)
 
-**NOTE: Currently the ExecuTorch (1.0) has a hardcoded setting for Position Independent Code. Edit the dependencies/executorch/CMakeLists or apply the following patch at MLEK root**
-```
-git -C dependencies/executorch apply ../../executorch_1_0_runtime_patch.diff
-```
 
 Here is an example CMAKE configuration for using the `model.pte` exported earlier in this guide (`model.pte` in MLEK root).
 
@@ -265,3 +261,8 @@ The external RAM can be enabled in build time using CMAKE variable `-DOSPI_RAM_S
 By default the example use-case puts the serialized model graph and weights to MRAM (NVM)
 
 - For larger models you may want to enable `-DOSPI_FLASH_SUPPORT=ON`. Please check [Running a use-case with ML model data in external flash](../ML_Embedded_Evaluation_Kit.md#externalflash)
+
+
+# See also
+
+For generic Pre- and Post processing tips [see](custom_model_pre_post_processing.md)

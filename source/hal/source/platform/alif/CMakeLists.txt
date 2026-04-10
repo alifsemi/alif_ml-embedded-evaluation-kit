@@ -197,7 +197,7 @@ add_subdirectory(${COMPONENTS_DIR}/camera ${CMAKE_BINARY_DIR}/camera)
 add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 
 ## Logging utilities:
-if (NOT TARGET mlek_log)
+if (NOT TARGET hal_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -206,7 +206,7 @@ endif()
 
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_CORE} PUBLIC
-    mlek_log
+    hal_log
     platform_pmu
     cmsis_device
     rte_components

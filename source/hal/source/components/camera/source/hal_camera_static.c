@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal_camera.h"
-#include "log_macros.h"
+#include "hal_log.h"
 #include "hal_camera_static_external.h"
 #include <inttypes.h>
 #include <string.h>

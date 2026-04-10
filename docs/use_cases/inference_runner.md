@@ -30,7 +30,7 @@ The inference runner populates all input tensors for the provided model with ran
 then performed. Profiling results are then displayed in the console.
 
 The example use-case code can be found in the following directory:
-[source/use_case/inference_runner](../../source/use_case/inference_runner).
+[source/app/use_case/inference_runner](../../source/app/use_case/inference_runner).
 
 > **NOTE**: This use case only supports `TensorFlow Lite Micro`.
 
@@ -114,9 +114,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-inference_runner.axf
- ├── ethos-u-inference_runner.htm
- ├── ethos-u-inference_runner.map
+ ├── mlek_inference_runner.axf
+ ├── mlek_inference_runner.htm
+ ├── mlek_inference_runner.map
  └── sectors
       └── inference_runner
         ├── ddr.bin
@@ -125,12 +125,12 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-inference_runner.axf`: The built application binary for the Inference Runner use-case.
+- `mlek_inference_runner.axf`: The built application binary for the Inference Runner use-case.
 
-- `ethos-u-inference_runner.map`: Information from building the application. For example: The libraries used, what was
+- `mlek_inference_runner.map`: Information from building the application. For example: The libraries used, what was
   optimized, and the location of objects.
 
-- `ethos-u-inference_runner.htm`: Human readable file containing the call graph of application functions.
+- `mlek_inference_runner.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/inference_runner`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -200,14 +200,14 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-Once completed the building step, the application binary `ethos-u-inference_runner.axf` can be found in the `build/bin`
+Once completed the building step, the application binary `mlek_inference_runner.axf` can be found in the `build/bin`
 folder.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mps3-sse-300/ethos-u-inference_runner.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mps3-sse-300/mlek_inference_runner.axf
 ```
 
 A log output appears on the terminal:
@@ -309,7 +309,7 @@ binary blob.
 
 ```commandline
 ~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
-  -a ./bin/ethos-u-inference_runner.axf \
+  -a ./bin/mlek_inference_runner.axf \
   --data /path/to/custom-model.tflite@0x90000000 \
   --data /path/to/custom-ifm.bin@0x92000000 \
   --dump cpu0=/path/to/output.bin@Memory:0x93000000,1024

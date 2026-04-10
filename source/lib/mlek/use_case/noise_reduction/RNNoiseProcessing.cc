@@ -1,0 +1,103 @@
+/*
+ * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * its affiliates <open-source-office@arm.com>
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "mlek/use_case/noise_reduction/RNNoiseProcessing.hpp"
+#include "mlek/log/log_macros.h"
+
+namespace arm {
+namespace app {
+
+    RNNoisePreProcess::RNNoisePreProcess(
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor,
+        std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
+        std::shared_ptr<rnn::FrameFeatures> frameFeatures) :
+        m_inputTensor{inputTensor}, m_featureProcessor{featureProcessor},
+        m_frameFeatures{frameFeatures}
+    {}
+
+    bool RNNoisePreProcess::DoPreProcess(const void* data, size_t inputSize)
+    {
+        if (data == nullptr) {
+            printf_err("Data pointer is null");
+            return false;
+        }
+
+        auto input = static_cast<const int16_t*>(data);
+        this->m_audioFrame = rnn::vec1D32F(input, input + inputSize);
+        m_featureProcessor->PreprocessFrame(this->m_audioFrame.data(), inputSize, *this->m_frameFeatures);
+        const auto quant = this->m_inputTensor->GetQuantParams();
+
+        QuantizeAndPopulateInput(
+            this->m_frameFeatures->m_featuresVec, quant.scale, quant.offset, this->m_inputTensor);
+
+        debug("Input tensor populated \n");
+
+        return true;
+    }
+
+    void RNNoisePreProcess::QuantizeAndPopulateInput(
+        rnn::vec1D32F& inputFeatures,
+        const float quantScale,
+        const int quantOffset,
+        std::shared_ptr<fwk::iface::TensorIface> inputTensor)
+    {
+        const float minVal = std::numeric_limits<int8_t>::min();
+        const float maxVal = std::numeric_limits<int8_t>::max();
+
+        auto* inputTensorData = inputTensor->GetData<int8_t>();
+
+        for (size_t i=0; i < inputFeatures.size(); ++i) {
+            float quantValue = ((inputFeatures[i] / quantScale) + quantOffset);
+            inputTensorData[i] = static_cast<int8_t>(std::min<float>(std::max<float>(quantValue, minVal), maxVal));
+        }
+    }
+
+    RNNoisePostProcess::RNNoisePostProcess(
+        std::shared_ptr<fwk::iface::TensorIface> outputTensor,
+        std::vector<int16_t>& denoisedAudioFrame,
+        std::shared_ptr<rnn::RNNoiseFeatureProcessor> featureProcessor,
+        std::shared_ptr<rnn::FrameFeatures> frameFeatures) :
+        m_outputTensor{outputTensor}, m_denoisedAudioFrame{denoisedAudioFrame},
+        m_featureProcessor{featureProcessor}, m_frameFeatures{frameFeatures}
+    {
+        this->m_denoisedAudioFrameFloat.reserve(denoisedAudioFrame.size());
+        this->m_modelOutputFloat.resize(outputTensor->Bytes());
+    }
+
+    bool RNNoisePostProcess::DoPostProcess()
+    {
+        const auto* outputData       = this->m_outputTensor->GetData<int8_t>();
+        const auto outputQuantParams = this->m_outputTensor->GetQuantParams();
+
+        for (size_t i = 0; i < this->m_outputTensor->Bytes(); ++i) {
+            this->m_modelOutputFloat[i] = (static_cast<float>(outputData[i]) - outputQuantParams.offset)
+                                  * outputQuantParams.scale;
+        }
+
+        this->m_featureProcessor->PostProcessFrame(this->m_modelOutputFloat,
+                *this->m_frameFeatures, this->m_denoisedAudioFrameFloat);
+
+        for (size_t i = 0; i < this->m_denoisedAudioFrame.size(); ++i) {
+            this->m_denoisedAudioFrame[i] = static_cast<int16_t>(
+                    std::roundf(this->m_denoisedAudioFrameFloat[i]));
+        }
+
+        return true;
+    }
+
+} /* namespace app */
+} /* namespace arm */

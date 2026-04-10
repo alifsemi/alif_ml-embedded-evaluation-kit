@@ -39,19 +39,17 @@
         "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
       },
       {
-        "name": "conformer.pt2",
-        "url": "{url_prefix:1}Conformer_ArmQuantizer_quant_exported_program.pt2?download=true"
-      },
-      {
-        "name": "conformer_tokenizer.model",
-        "url": "{url_prefix:1}tokenizer.model?download=true"
+        "name": "conformer_fp32_cln_wer_6_47.pt",
+        "url": "{url_prefix:1}conformer_fp32_cln_wer_6_47.pt?download=true"
       }
     ],
     "executorch_resources": [
       {
-        "model": "conformer.pt2",
+        "model": "conformer_fp32_cln_wer_6_47.pt",
         "path": "asr/models",
-        "lowering": "conformer_pte_gen.py"
+        "lowering": "conformer_pte_gen.py",
+        "requirements": "requirements.txt",
+        "excluded_npu_processor_ids": ["U55"]
       }
     ]
   },
