@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DetectionResult.hpp"
-#include "DetectorPostProcessing.hpp"
+#include "mlek/use_case/object_detection/DetectionResult.hpp"
+#include "mlek/use_case/object_detection/DetectorPostProcessing.hpp"
 #include "hal.h"
-#include "YoloFastestModel.hpp"
+#include "mlek/fwk/tflm/YoloFastestModel.hpp"
 #include "UseCaseHandler.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "BufAttributes.hpp"

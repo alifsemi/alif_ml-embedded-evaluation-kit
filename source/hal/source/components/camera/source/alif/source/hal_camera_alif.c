@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal_camera.h"
-#include "log_macros.h"
+#include "hal_log.h"
 #include "RTE_Components.h"
 #include "RTE_Device.h"
 #include "image_processing.h"
@@ -104,7 +104,7 @@ bool hal_camera_init(void)
 		}
 	}
 	DEBUG_PRINTF("Camera initialized... \n");
-    BOARD_LED1_Control(BOARD_LED_STATE_HIGH);
+    BOARD_LED1_Control(BOARD_LED_STATE_LOW);
 #endif
     return true;
 }

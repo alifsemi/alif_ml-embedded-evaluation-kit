@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_asr.hpp"
-#include "Wav2LetterModel.hpp"
+#include "mlek/fwk/tflm/Wav2LetterModel.hpp"
 
 #include <catch.hpp>
 #include <random>

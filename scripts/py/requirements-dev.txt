@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# Lint/tooling-only dependencies (not runtime requirements).
+-r requirements-common.txt
+pylint==3.3.8

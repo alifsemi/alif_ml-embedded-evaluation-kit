@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "RNNoiseModel.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/fwk/tflm/RNNoiseModel.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_noise_reduction.hpp"
 
 #include <catch.hpp>

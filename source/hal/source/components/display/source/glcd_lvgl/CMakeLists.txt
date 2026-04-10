@@ -63,7 +63,7 @@ target_compile_definitions(${DISPLAY_LVGL_TARGET}
 target_link_libraries(${DISPLAY_LVGL_TARGET} PUBLIC
     hal_display_iface
     lvgl
-    mlek_log)
+    hal_log)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

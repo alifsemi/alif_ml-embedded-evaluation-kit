@@ -21,7 +21,7 @@ This use-case example solves the classical computer vision problem of image clas
 the *MobileNet v2* model with TensorFlow Lite Micro, or either the *MobileNet v2* or *DeiT tiny* model with ExecuTorch.
 These models were both trained with the *ImageNet* dataset, and the overall pipeline is the same for both models.
 
-Use-case code could be found in the following directory: [source/use_case/img_class](../../source/use_case/img_class).
+Use-case code could be found in the following directory: [source/app/use_case/img_class](../../source/app/use_case/img_class).
 
 ### Prerequisites
 
@@ -141,9 +141,9 @@ Results of the build are placed under the `build/bin` folder, like so:
 
 ```tree
 bin
- ├── ethos-u-img_class.axf
- ├── ethos-u-img_class.htm
- ├── ethos-u-img_class.map
+ ├── mlek_img_class.axf
+ ├── mlek_img_class.htm
+ ├── mlek_img_class.map
  └── sectors
       ├── images.txt
       └── img_class
@@ -153,12 +153,12 @@ bin
 
 The `bin` folder contains the following files:
 
-- `ethos-u-img_class.axf`: The built application binary for the Image Classification use-case.
+- `mlek_img_class.axf`: The built application binary for the Image Classification use-case.
 
-- `ethos-u-img_class.map`: Information from building the application. For example: The libraries used, what was
+- `mlek_img_class.map`: Information from building the application. For example: The libraries used, what was
   optimized, and the location of objects.
 
-- `ethos-u-img_class.htm`: Human readable file containing the call graph of application functions.
+- `mlek_img_class.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/img_class`: Folder containing the built application. It is split into files for loading into different FPGA memory
   regions.
@@ -297,14 +297,14 @@ To install the FVP:
 
 ### Starting Fast Model simulation
 
-The pre-built application binary `ethos-u-img_class.axf` can be found in the `bin/mps3-sse-300` folder of the delivery
+The pre-built application binary `mlek_img_class.axf` can be found in the `bin/mps3-sse-300` folder of the delivery
 package.
 
 Assuming that the install location of the FVP was set to `~/FVP_install_location`, then the simulation can be started by
 using:
 
 ```commandline
-~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/ethos-u-img_class.axf
+~/FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 ./bin/mps3-sse-300/mlek_img_class.axf
 ```
 
 A log output appears on the terminal:

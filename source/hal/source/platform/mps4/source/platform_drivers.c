@@ -18,7 +18,7 @@
 
 #include "platform_drivers.h"
 
-#include "log_macros.h"     /* Logging functions */
+#include "hal_log.h"     /* Logging functions */
 #include "smm_mps4.h"       /* Memory map for MPS4. */
 #include "hdlcd_drv.h"      /* HDLCD driver */
 #include "peripheral_irqs.h"    /* Interrupt numbers */
@@ -283,16 +283,15 @@ static int platform_hdlcd_init(void)
     }
     trace("HDLCD base address set\n");
 
-    const struct hdlcd_pixel_cfg_t hdlcd_pixel_cfg_rgb888 = {
-        .red.default_color = 0x00,
-        .red.bit_size = 0x8,
-        .red.offset = 0x10,
-        .green.default_color = 0x00,
-        .green.bit_size = 0x8,
-        .green.offset = 0x8,
-        .blue.default_color = 0x00,
-        .blue.bit_size = 0x8,
-        .blue.offset = 0x0};
+    const struct hdlcd_pixel_cfg_t hdlcd_pixel_cfg_rgb888 = {.red.default_color   = 0x00,
+                                                             .red.bit_size        = 0x8,
+                                                             .red.offset          = 0x00,
+                                                             .green.default_color = 0x00,
+                                                             .green.bit_size      = 0x8,
+                                                             .green.offset        = 0x8,
+                                                             .blue.default_color  = 0x00,
+                                                             .blue.bit_size       = 0x8,
+                                                             .blue.offset         = 0x10};
 
     hdlcd_err = hdlcd_pixel_config(hdlcd_dev, &hdlcd_pixel_cfg_rgb888);
     if (hdlcd_err != HDLCD_ERR_NONE) {

@@ -20,7 +20,7 @@
 #include "ospi_psram_xip.h"
 #include "APS512XXN_PSRAM.h"
 #include "ospi_ram.h"
-#include "log_macros.h"
+#include "hal_log.h"
 
 static ospi_psram_xip_config ram_config = {
     .instance       = BOARD_PSRAM_OSPI_INSTANCE,

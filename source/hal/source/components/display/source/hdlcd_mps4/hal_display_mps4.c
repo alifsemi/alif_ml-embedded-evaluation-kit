@@ -18,7 +18,7 @@
 #include "hal_display.h"
 #include "font_9x15_h.h"
 
-#include "log_macros.h"
+#include "hal_log.h"
 
 #include <inttypes.h>
 #include <string.h>

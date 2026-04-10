@@ -76,7 +76,7 @@ add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 # Add dependencies:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET}
     PUBLIC
-    mlek_log
+    hal_log
     platform_pmu
     hal_display_stubs
     hal_audio_static_streams

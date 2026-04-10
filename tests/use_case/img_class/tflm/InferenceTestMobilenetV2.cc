@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 #include "BufAttributes.hpp"
-#include "ImageUtils.hpp"
-#include "MobileNetModel.hpp"
-#include "TensorFlowLiteMicro.hpp"
+#include "mlek/common/ImageUtils.hpp"
+#include "mlek/fwk/tflm/MobileNetModel.hpp"
+#include "mlek/fwk/tflm/TensorFlowLiteMicro.hpp"
 #include "TestData_img_class.hpp"
 
 #include <catch.hpp>

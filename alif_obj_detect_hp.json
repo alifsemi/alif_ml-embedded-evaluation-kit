@@ -1,6 +1,6 @@
 {
     "HP_Image": {
-        "binary": "ethos-u-alif_object_detection.bin",
+        "binary": "mlek_alif_object_detection.bin",
         "version" : "1.0.0",
         "mramAddress": "0x80008000",
         "cpu_id": "M55_HP",

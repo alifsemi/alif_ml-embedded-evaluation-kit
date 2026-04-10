@@ -360,7 +360,7 @@ typedef struct {
 	uint32_t trng_dst_addr;
 	uint32_t trng_len;
 	uint32_t es0_clock_select;
-	uint32_t configuration;	
+	uint32_t configuration;
 } net_proc_boot_args_t;
 
 /**
@@ -449,8 +449,9 @@ typedef enum {
  * @brief Power setting selectors
  */
 typedef enum {
-	POWER_SETTING_BOR_EN,        /**< POWER_SETTING_BOR_EN */
-	POWER_SETTING_SCALED_CLK_FREQ/**< POWER_SETTING_SCALED_CLK_FREQ */
+	POWER_SETTING_BOR_EN,         /**< POWER_SETTING_BOR_EN */
+	POWER_SETTING_SCALED_CLK_FREQ,/**< POWER_SETTING_SCALED_CLK_FREQ */
+	POWER_SETTING_ANA_PERIPH_EN   /**< POWER_SETTING_ANA_PERIPH_EN */
 } power_setting_t;
 
 /**
@@ -502,6 +503,9 @@ uint32_t SERVICES_application_ospi_write_key(uint32_t services_handle,
 uint32_t SERVICES_application_verify_image(uint32_t services_handle,
                uint32_t image_address,
                uint32_t cert_chain_address,
+               uint32_t *error_code);
+uint32_t SERVICES_application_dmpu(uint32_t services_handle,
+               uint32_t assets_address,
                uint32_t *error_code);
 
 

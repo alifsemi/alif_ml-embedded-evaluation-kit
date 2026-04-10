@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -48,6 +48,7 @@ set(EXECUTORCH_ENABLE_LOGGING                   ON)
 set(EXECUTORCH_BUILD_DEVTOOLS                   OFF)
 set(EXECUTORCH_ENABLE_EVENT_TRACER              OFF)
 set(GFLAGS_INTTYPES_FORMAT                      C99)
+set(CMAKE_POSITION_INDEPENDENT_CODE             OFF)
 
 if(TARGET_PLATFORM STREQUAL native)
     set(EXECUTORCH_BUILD_ARM_BAREMETAL          OFF)
@@ -105,6 +106,7 @@ endblock()
 add_library(mlek_executorch INTERFACE)
 
 target_link_libraries(mlek_executorch INTERFACE
+    program_schema
     extension_runner_util
     quantized_ops_lib)
 
@@ -121,16 +123,11 @@ else()
     # the BINARY_DIR for the target. This can be removed once fixed in ExecuTorch
     # source tree - backends/cortex_m/CMakeLists.txt.
     if (TARGET cmsis-nn)
-        get_target_property(CMSIS_NN_BIN_DIR cmsis-nn BINARY_DIR)
-
-        add_custom_target(cmsis_nn_workaround
-            COMMAND ${CMAKE_COMMAND} -E copy    # Copy file
-                $<TARGET_FILE:cmsis-nn>         # Source
-                ${CMSIS_NN_BIN_DIR}             # Destination
-            COMMENT "Copying the cmsis-nn lib to ${CMSIS_NN_BIN_DIR}"
-            DEPENDS cmsis-nn)
-
-        add_dependencies(cortex_m_ops_lib cmsis_nn_workaround)
+        set_property(TARGET cmsis-nn PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+          "$<BUILD_INTERFACE:${CMSIS_NN_SRC_PATH}/Include>"
+          "$<BUILD_INTERFACE:${CMSIS_SRC_PATH}/CMSIS/Core/Include>"
+          "$<INSTALL_INTERFACE:include/cmsis-nn>"
+          "$<INSTALL_INTERFACE:include/cmsis>")
     endif()
 
     # Issue with ExecuTorch 1.0.0 in cortex_m_kernels library
@@ -179,7 +176,6 @@ add_library(meta::executorch ALIAS mlek_executorch)
 
 # Include code generation wrappers from ExecuTorch.
 set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
-include(${EXECUTORCH_SRC_PATH}/tools/cmake/Utils.cmake)
 include(${EXECUTORCH_SRC_PATH}/tools/cmake/Codegen.cmake)
 
 ##############################################################################
@@ -205,6 +201,7 @@ function(generate_pte_ops_lib)
 
     # Ensure Python virtual environment bin location is available.
     set(ENV_PATH "${PYTHON_VENV}/bin:$ENV{PATH}")
+    set(EXECUTORCH_ROOT ${EXECUTORCH_SRC_PATH})
 
     # Override the Python executable set by ExecuTorch's Utils.cmake
     # It expects a conda environment and sets this. We set it here

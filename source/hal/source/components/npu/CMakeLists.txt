@@ -88,7 +88,7 @@ endif ()
 add_subdirectory(${ETHOS_U_NPU_DRIVER_SRC_PATH} ${CMAKE_BINARY_DIR}/ethos-u-driver)
 
 ## Logging utilities:
-if (NOT TARGET mlek_log)
+if (NOT TARGET hal_log)
     if (NOT DEFINED LOG_PROJECT_DIR)
         message(FATAL_ERROR "LOG_PROJECT_DIR needs to be defined.")
     endif()
@@ -193,7 +193,7 @@ target_sources(${ETHOS_U_NPU_COMPONENT}
 ## Add dependencies:
 target_link_libraries(${ETHOS_U_NPU_COMPONENT} PUBLIC
     ethosu_core_driver
-    mlek_log)
+    hal_log)
 
 ## If the rte_components target has been defined, include it as a dependency here. This component
 ## gives access to certain CPU related functions and definitions that should come from the CMSIS

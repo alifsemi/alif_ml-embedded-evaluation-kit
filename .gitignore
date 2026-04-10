@@ -3,10 +3,13 @@
 .idea
 *.swp
 
+# OS files
+.DS_Store
+
 # Downloaded files
 resources_downloaded
 
-#Logs
+# Logs
 *.log
 
 # Build files
@@ -15,9 +18,14 @@ CMakeUserPresets.json
 build*/
 cmake-build-*/
 
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
 # Virtual environments
 scripts/py/env*
 scripts/py/venv*
 env
 venv
-__pycache__*

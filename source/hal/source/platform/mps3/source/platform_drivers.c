@@ -17,7 +17,7 @@
 
 #include "platform_drivers.h"
 
-#include "log_macros.h"     /* Logging functions */
+#include "hal_log.h"     /* Logging functions */
 #include "smm_mps3.h"       /* Memory map for MPS3. */
 
 #if defined(ARM_NPU)

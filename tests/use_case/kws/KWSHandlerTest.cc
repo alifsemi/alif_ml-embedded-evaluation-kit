@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 #include <catch.hpp>
-#include "MicroNetKwsModel.hpp"
+#include "mlek/fwk/tflm/MicroNetKwsModel.hpp"
 #include "hal.h"
 
-#include "KwsResult.hpp"
+#include "mlek/use_case/kws/KwsResult.hpp"
 #include "Labels.hpp"
 #include "UseCaseHandler.hpp"
-#include "Classifier.hpp"
+#include "mlek/common/Classifier.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "BufAttributes.hpp"
 

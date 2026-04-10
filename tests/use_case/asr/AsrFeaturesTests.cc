@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2023 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2021-2023, 2025 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DataStructures.hpp"
+#include "mlek/common/DataStructures.hpp"
 #include "AsrGoldenFeatures.hpp"
-#include "Wav2LetterPreprocess.hpp"
+#include "mlek/use_case/asr/Wav2LetterPreprocess.hpp"
 
-#include "log_macros.h"
+#include "mlek/log/log_macros.h"
 
 #include <catch.hpp>
 #include <random>

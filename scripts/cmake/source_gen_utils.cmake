@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021, 2024, 2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -31,10 +31,12 @@ function(generate_images_code input_dir gen_dir img_size)
 
     message(STATUS "Generating image files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_rgb_cpp.py
-        --image_path ${input_dir_abs}
-        --package_gen_dir ${gen_out_abs}
-        --image_size ${img_size} ${img_size}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m mlek_tools.gen.gen_rgb_cpp
+            --image_path ${input_dir_abs}
+            --package_gen_dir ${gen_out_abs}
+            --image_size ${img_size} ${img_size}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -57,15 +59,17 @@ function(generate_audio_code input_dir gen_dir s_rate_opt mono_opt off_opt durat
 
     message(STATUS "Generating audio files from ${input_dir_abs}")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_audio_cpp.py
-        --audio_path ${input_dir_abs}
-        --package_gen_dir ${gen_dir_abs}
-        --sampling_rate ${s_rate_opt}
-        --mono ${mono_opt_py}
-        --offset ${off_opt}
-        --duration ${duration_opt}
-        --res_type ${res_type_opt}
-        --min_samples ${min_sample_opt}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m mlek_tools.gen.gen_audio_cpp
+            --audio_path ${input_dir_abs}
+            --package_gen_dir ${gen_dir_abs}
+            --sampling_rate ${s_rate_opt}
+            --mono ${mono_opt_py}
+            --offset ${off_opt}
+            --duration ${duration_opt}
+            --res_type ${res_type_opt}
+            --min_samples ${min_sample_opt}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -108,10 +112,23 @@ function(generate_model_code)
         set(py_arg_exp ${py_arg_exp} --namespaces=${name})
     endforeach()
 
+    # Pass optional Arm Ethos-U NPU validation args if NPU is enabled.
+    if (ETHOS_U_NPU_ENABLED)
+        if (DEFINED ETHOS_U_NPU_MEMORY_MODE)
+            set(py_arg_exp ${py_arg_exp} --ethos_u_memory_mode=${ETHOS_U_NPU_MEMORY_MODE})
+        endif()
+        if (DEFINED ETHOS_U_NPU_CONFIG_ID)
+            # gen_model_cpp.py accepts short forms like H128/Y256/Z256 directly.
+            set(py_arg_exp ${py_arg_exp} --ethos_u_config=${ETHOS_U_NPU_CONFIG_ID})
+        endif()
+    endif()
+
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_model_cpp.py
-        --tflite_path ${ABS_MODEL_PATH}
-        --output_dir ${ABS_DESTINATION} ${py_arg_exp}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m mlek_tools.gen.gen_model_cpp
+            --model_path ${ABS_MODEL_PATH}
+            --output_dir ${ABS_DESTINATION} ${py_arg_exp}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -152,11 +169,13 @@ function(generate_labels_code)
 
     message(STATUS "writing to ${hdr_out_abs}/${PARSED_OUTPUT_FILENAME}.hpp and ${src_out_abs}/${PARSED_OUTPUT_FILENAME}.cc")
     execute_process(
-        COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_labels_cpp.py
-        --labels_file ${input_abs}
-        --source_folder_path ${src_out_abs}
-        --header_folder_path ${hdr_out_abs}
-        --output_file_name ${PARSED_OUTPUT_FILENAME} ${py_arg_exp}
+        COMMAND ${CMAKE_COMMAND} -E env
+            PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+            ${PYTHON} -m mlek_tools.gen.gen_labels_cpp
+            --labels_file ${input_abs}
+            --source_folder_path ${src_out_abs}
+            --header_folder_path ${hdr_out_abs}
+            --output_file_name ${PARSED_OUTPUT_FILENAME} ${py_arg_exp}
         RESULT_VARIABLE return_code
     )
     if (NOT return_code EQUAL "0")
@@ -217,12 +236,14 @@ function(generate_test_data_code)
 
         message(STATUS "Generating test ifm and ofm files from ${input_dir_abs}")
         execute_process(
-            COMMAND ${PYTHON} ${MLEK_SCRIPTS_DIR}/py/gen_test_data_cpp.py
-            --data_folder_path ${input_dir_abs}
-            --source_folder_path ${src_out_abs}
-            --header_folder_path ${hdr_out_abs}
-            --usecase ${input_dir_name}
-            ${py_arg_exp}
+            COMMAND ${CMAKE_COMMAND} -E env
+                PYTHONPATH=${MLEK_SCRIPTS_DIR}/py:$ENV{PYTHONPATH}
+                ${PYTHON} -m mlek_tools.gen.gen_test_data_cpp
+                --data_folder_path ${input_dir_abs}
+                --source_folder_path ${src_out_abs}
+                --header_folder_path ${hdr_out_abs}
+                --usecase ${input_dir_name}
+                ${py_arg_exp}
             RESULT_VARIABLE return_code
         )
         if (NOT return_code EQUAL "0")
@@ -263,9 +284,9 @@ function(setup_source_generator)
         return()
     endif ()
 
-    # If environment is not found, find the required Python version
+    # If environment is not found, find a supported Python version
     # and create it.
-    find_package(Python3 3.10
+    find_package(Python3 3.10...<3.13
             COMPONENTS Interpreter
             REQUIRED)
 

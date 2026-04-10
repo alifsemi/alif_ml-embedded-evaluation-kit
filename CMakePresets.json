@@ -9,7 +9,7 @@
         "scripts/cmake/configuration_options/options-preset.json",
         "scripts/cmake/platforms/platforms-preset.json",
         "scripts/cmake/toolchains/toolchain-preset.json",
-        "source/use_case/usecase-preset.json"
+        "source/app/use_case/usecase-preset.json"
     ],
     "configurePresets": [
         {

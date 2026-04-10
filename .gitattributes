@@ -1,0 +1,13 @@
+# Auto-detect text files and normalise line endings to LF on commit.
+* text=auto eol=lf
+
+# Binary files — do not normalise
+*.png binary
+*.jpg binary
+*.bmp binary
+*.tflite binary
+*.pte binary
+*.axf binary
+*.bin binary
+*.tar.gz binary
+*.zip binary

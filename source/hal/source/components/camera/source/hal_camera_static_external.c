@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "log_macros.h"
+#include "hal_log.h"
 #include <stddef.h>
 #include <inttypes.h>
 

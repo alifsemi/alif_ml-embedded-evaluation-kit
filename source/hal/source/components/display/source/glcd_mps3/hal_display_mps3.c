@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "hal_display.h"
-#include "log_macros.h"
+#include "hal_log.h"
 #include "glcd.h"
 
 #include <string.h>

@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ClassificationResult.hpp"
-#include "Classifier.hpp"
+#include "mlek/common/ClassificationResult.hpp"
+#include "mlek/common/Classifier.hpp"
 #include "hal.h"
 #include "Labels.hpp"
-#include "MobileNetModel.hpp"
+#include "mlek/fwk/tflm/MobileNetModel.hpp"
 #include "UseCaseHandler.hpp"
 #include "UseCaseCommonUtils.hpp"
 #include "BufAttributes.hpp"

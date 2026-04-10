@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022-2024 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2022-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #include "ethosu_npu_init.h"
 
 #include "RTE_Components.h"         /* For CPU related defintiions */
-#include "log_macros.h"             /* Logging functions */
+#include "hal_log.h"             /* Logging functions */
 
 #include "ethosu_mem_config.h"      /* Arm Ethos-U memory config */
 #include "ethosu_driver.h"          /* Arm Ethos-U driver header */
@@ -100,6 +100,13 @@ int arm_ethosu_npu_init(void)
     /* Initialise Ethos-U device */
     void* const ethosu_base_address = (void *)(ETHOS_U_BASE_ADDR);
     info("Initialising Ethos-U device@0x%" PRIx32 "\n", (uint32_t)(ETHOS_U_BASE_ADDR));
+
+    if (get_cache_arena_size() > 0) {
+        info("Using Dedicated_Sram memory mode; fast cache size: %zu\n",
+             get_cache_arena_size());
+    } else {
+        info("Using Sram_Only/Shared_Sram memory mode\n");
+    }
 
     if (0 != (err = ethosu_init(&ethosu_drv,         /* Ethos-U driver device pointer */
                                 ethosu_base_address, /* Ethos-U NPU's base address. */
