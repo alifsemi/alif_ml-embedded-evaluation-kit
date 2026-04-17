@@ -248,7 +248,7 @@ Here is an example CMAKE configuration for using the `model.pte` exported earlie
 ```
 
 ```
-make -j8 ethos-u-alif_img_class
+make -j8 mlek_alif_img_class
 ```
 
 - Please see also the [Memory usage and linker files](../ML_Embedded_Evaluation_Kit.md#memoryusage)

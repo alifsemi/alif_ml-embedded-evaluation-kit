@@ -66,7 +66,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_BOARD=AppKit-e8 \
 -DETHOS_U_NPU_ID=U85 -DML_FRAMEWORK=ExecuTorch ..
 
-make ethos-u-alif_img_class -j
+make mlek_alif_img_class -j
 
 
 
@@ -103,7 +103,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=DevKit-e8 ..
 
-make ethos-u-alif_kws -j4
+make mlek_alif_kws -j4
 
 
 
@@ -115,4 +115,4 @@ cmake -DML_FWK_TMP_MEM_SIZE=0x00590000 -DTARGET_PLATFORM=alif \
 -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DETHOS_U_NPU_ID=U85 -DCONSOLE_UART=4 \
 -DTARGET_MICS=PDM -DML_FRAMEWORK=ExecuTorch ..
 
-make ethos-u-alif_asr -j4
+make mlek_alif_asr -j4
