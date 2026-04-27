@@ -69,6 +69,8 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    fault_handler.o (+RO)
    *(InRoot$$Sections)
    *(.init_array)
+   *libalif_dave2d-driver.a(+RO)
+   *libalif_lvgl-dave2d.a(+RO)
    *liblvgl.a(+RO)
    *libArm-2D.a(+RO)
    *libcmsis_device.a(+RO)

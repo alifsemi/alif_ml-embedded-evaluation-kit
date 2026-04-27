@@ -10,6 +10,7 @@
 
 #include <stdatomic.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
@@ -26,8 +27,8 @@
 
 #if (D1_MEM_ALLOC == D1_MALLOC_D0LIB)
 // D/AVE D0 heap address and size
-#define D1_HEAP_SIZE	0x100000
-static uint8_t d0_heap[D1_HEAP_SIZE] __attribute__((section(".bss.disp_buff")));
+#define D1_HEAP_SIZE	0x10000
+static uint8_t d0_heap[D1_HEAP_SIZE] __attribute__((section(".bss.d0_heap")));
 #endif
 
 #define MY_DISP_HOR_RES RTE_PANEL_HACTIVE_TIME
@@ -156,8 +157,10 @@ static void lv_display_flush_async(lv_display_t * restrict disp, const lv_area_t
         }
     }
 
+#if LV_USE_DRAW_DAVE2D
     // Render to buffer
     d2_finish_rendering();
+#endif
 
     /* Prepare the flush info */
     pending_flush_disp = disp;
@@ -215,7 +218,7 @@ void lv_port_disp_init(void)
     LCD_Panel_init(&lcd_image[0][0][0]);
 
     /* This drawing buffer should be in DCTM for speed. */
-    static lvgl_pixel_t buf_1[MY_DISP_BUFFER];
+    static lvgl_pixel_t buf_1[MY_DISP_BUFFER] __attribute__((section(".bss.lvgl_buf")));
 
 #if (D1_MEM_ALLOC == D1_MALLOC_D0LIB)
     /*-------------------------
@@ -225,7 +228,7 @@ void lv_port_disp_init(void)
                             NULL, 0, 0, 0, d0_ma_unified))
     {
         printf("\r\nError: Heap manager initialization failed\n");
-        return 0xFFFF;
+        return;
     }
 #endif
 
