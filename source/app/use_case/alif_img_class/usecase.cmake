@@ -127,7 +127,10 @@ if (COMMAND generate_pte_ops_lib)
         LIB_NAME        "${use_case}_portable_ops_lib"  # Library target name
         SELECT_OPS_LIST "")                             # Always included ops list
 
-    set(${use_case}_LINK_LIBS ${use_case}_portable_ops_lib)
+    # If the target is generated, request it to be linked for this use case.
+    if (TARGET ${use_case}_portable_ops_lib)
+        set(${use_case}_LINK_LIBS ${use_case}_portable_ops_lib)
+    endif()
 endif()
 
 # Generate model file
