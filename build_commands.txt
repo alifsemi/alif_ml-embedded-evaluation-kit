@@ -7,10 +7,6 @@ python set_up_default_resources.py
 NOTE! Framework defaults to TFLM. For ExecuTorch do:
 python set_up_default_resources.py --ml-framework=executorch
 
-NOTE! Currently the ExecuTorch (1.0) has a hardcoded setting for Position Independent Code.
-Apply the following patch before building a use-case example
-git -C dependencies/executorch apply ../../executorch_1_0_runtime_patch.diff
-
 NOTE! All should normally build as Release for full-speed operation. In particular,
 this enables auto-vectorization for ARMCLANG. Images can still be debugged with
 reasonable success, but CMAKE_BUILD_TYPE can be changed to Debug if necessary.
@@ -108,7 +104,7 @@ make mlek_alif_kws -j4
 
 
 ; ------------ASR on CM55-HP GCC E8 ----------------
-cmake -DML_FWK_TMP_MEM_SIZE=0x00590000 -DTARGET_PLATFORM=alif \
+cmake -DML_FWK_TMP_MEM_SIZE=0x002C0000 -DTARGET_PLATFORM=alif \
 -DUSE_CASE_BUILD=alif_asr -DTARGET_SUBSYSTEM=RTSS-HP -DTARGET_BOARD=DevKit-e8 \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DGLCD_UI=OFF -DLINKER_SCRIPT_NAME=RTSS-HP -DCMAKE_BUILD_TYPE=Release \
