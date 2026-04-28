@@ -12,6 +12,8 @@
 ; *
 ; */
 
+#include "app_mem_regions.h"
+
 /*On chip RAM Regions */
 #define SRAM0_BASE                0x02000000
 #define SRAM0_SIZE                0x00400000		/* 4M */
@@ -69,6 +71,8 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
    fault_handler.o (+RO)
    *(InRoot$$Sections)
    *(.init_array)
+   *libalif_dave2d-driver.a(+RO)
+   *libalif_lvgl-dave2d.a(+RO)
    *liblvgl.a(+RO)
    *libArm-2D.a(+RO)
    *libcmsis_device.a(+RO)
@@ -103,6 +107,15 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
       ; DTCM has all read-write data, except image and NPU buffers
       *(+RW +ZI)
   }
+
+  NS_REGION_0  (AlignExpr(+0, TGU_BLOCK_SIZE)) { ; Non secure region 0
+    * (.bss.lvgl_buf)
+    * (.bss.d0_heap)
+  }
+
+  NS_REGION_0_PAD  (AlignExpr(ImageLimit(NS_REGION_0), TGU_BLOCK_SIZE)) { ; Non secure region 0 Padding
+  }
+  ScatterAssert((ImageBase(NS_REGION_0_PAD) - ImageBase(NS_REGION_0) + ImageLength(DTCM)) < __RW_SIZE)
 
   ARM_LIB_HEAP  __HEAP_BASE EMPTY  __HEAP_SIZE  {  }
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {  }
