@@ -84,7 +84,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_BOARD=AppKit-e7 ..
 
 ; ------------Keyword spotting on CM55-HE GCC E1C ----------------
- cmake -DTARGET_PLATFORM=alif \
+cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
@@ -92,7 +92,7 @@ cmake -DTARGET_PLATFORM=alif \
 -DTARGET_BOARD=DevKit-e1c ..
 
 ; ------------Keyword spotting on CM55-HE GCC E8 ----------------
- cmake -DTARGET_PLATFORM=alif \
+cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
