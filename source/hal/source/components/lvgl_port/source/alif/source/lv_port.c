@@ -157,11 +157,6 @@ static void lv_display_flush_async(lv_display_t * restrict disp, const lv_area_t
         }
     }
 
-#if LV_USE_DRAW_DAVE2D
-    // Render to buffer
-    d2_finish_rendering();
-#endif
-
     /* Prepare the flush info */
     pending_flush_disp = disp;
     pending_flush_area = *area;

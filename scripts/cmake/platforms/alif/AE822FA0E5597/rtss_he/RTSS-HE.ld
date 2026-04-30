@@ -31,7 +31,7 @@
 #include "alif_mem_config.h"
 #include "board_defs.h"
 
-__STACK_SIZE = 0x00001800;
+__STACK_SIZE = 0x00002000;
 __HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;

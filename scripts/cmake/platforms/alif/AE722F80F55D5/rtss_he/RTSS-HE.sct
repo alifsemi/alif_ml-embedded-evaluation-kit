@@ -37,7 +37,7 @@
 #define DTCM_SIZE                 0x00040000        /* 256K */
 
 #define __VECTORS_SIZE  (496 * 4)
-#define __STACK_SIZE    0x00001800
+#define __STACK_SIZE    0x00002000
 #define __HEAP_SIZE     0x00008000
 
 ;----------------------------------------------------------------------------
