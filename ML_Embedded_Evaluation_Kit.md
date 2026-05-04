@@ -88,14 +88,14 @@ Verify Python
 python3
 ```
 
-#### Arm Clang Compiler (v6.19 or above) setup – Option 1
+#### Arm Clang Compiler (v6.22 or above) setup – Option 1
 
 1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE) and then extract it.<br>
 ![alt text](docs/media/alif/armclang_download.png)
 2. Within the extracted folder is a shell script. Open a terminal window, navigate to the extracted folder, and run the shell script.
 3. Download the tar.gz file for Arm Clang Compiler and use sudo to extract it to `/usr/local/bin/`
     ```
-    sudo tar xf ARMCompiler6.19_standalone_linux-x86_64.tar.gz -C /usr/local/bin
+    sudo tar xf ARMCompiler6.22_standalone_linux-x86_64.tar.gz -C /usr/local/bin
     ```
 4. Add the ARM license server to your environment (if applicable), example shown:
     ```
@@ -103,7 +103,7 @@ python3
     ```
 5. After extracting Arm Clang compiler, we will need to add it to the path, as example shown below
     ```
-    sudo sh -c "echo export PATH=/usr/local/bin/ArmCompiler6.19/bin:$PATH > /etc/profile.d/arm-compiler.sh"
+    sudo sh -c "echo export PATH=/usr/local/bin/ArmCompiler6.22/bin:$PATH > /etc/profile.d/arm-compiler.sh"
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
@@ -141,7 +141,7 @@ python3 get-pip.py
 #### Install the latest CMake
 From https://cmake.org/download/ choose the correct .dmg file and install it.
 
-#### Arm Clang Compiler (v6.19 or above) setup – Option 1
+#### Arm Clang Compiler (v6.22 or above) setup – Option 1
 macOS is not supported at the moment.
 
 #### Arm GNU GCC Compiler (v12.3 or above) Setup – Option 2
