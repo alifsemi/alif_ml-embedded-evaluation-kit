@@ -6,6 +6,9 @@ def download_dependencies() {
 def setup_resources() {
 
     sh "python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256"
+
+    /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters */
+    sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
 }
 
 /**@
