@@ -177,7 +177,7 @@
  *  rendering performance but might cause other tasks to starve. */
 #define LV_DRAW_THREAD_PRIO LV_THREAD_PRIO_HIGH
 
-#define LV_USE_DRAW_SW 0
+#define LV_USE_DRAW_SW 1
 #if LV_USE_DRAW_SW == 1
     /*
      * Selectively disable color format support in order to reduce code size.
