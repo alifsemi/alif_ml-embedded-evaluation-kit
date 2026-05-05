@@ -114,7 +114,8 @@ generate_labels_code(
 
 if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
     USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-        0x00108000 STRING) # ~1 MiB
+        0x00200000
+        STRING)
 
     if (ETHOS_U_NPU_ENABLED)
         set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
