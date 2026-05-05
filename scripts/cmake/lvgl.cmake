@@ -33,7 +33,8 @@ if (NOT DEFINED LVGL_SRC_PATH)
 endif()
 
 # 4. Create static library
-set(LVGL_TARGET       lvgl)
+set(LVGL_TARGET     lvgl)
+set(LVGL_ROOT_DIR   ${MLEK_DEPENDENCY_ROOT_DIR}/lvgl)
 
 # It's left to the person including this (a platform?) to set LV_CONF_PATH
 # appropriately, or add it to our CMake include paths eg:
@@ -42,7 +43,10 @@ set(LVGL_TARGET       lvgl)
 # target_include_directories(${LVGL_TARGET} PUBLIC include)
 
 # Include the subdirectory - we can use LVGL's own CMake set-up
-add_subdirectory(${LVGL_SRC_PATH} ${CMAKE_BINARY_DIR}/lvgl)
+#add_subdirectory(${LVGL_SRC_PATH} ${CMAKE_BINARY_DIR}/lvgl)
+
+# Use custom cmake so we can use D/AVE 2D library ( We need to remove renesas DAV/E 2D integration from build)
+include(${MLEK_SCRIPTS_DIR}/cmake/lvgl.custom.cmake)
 
 # If LVGL is configured to use Arm-2D, it's up to the caller to
 # include Arm-2D.make and make it a link dependency for LVGL, eg:

@@ -29,6 +29,21 @@ include(lvgl)
 target_include_directories(${LVGL_TARGET} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Add LVGL config as library so that LVGL DAVE integration can read it
+set(LVGL_SRC_PATH ${MLEK_DEPENDENCY_ROOT_DIR}/lvgl)
+add_library(lvgl_config_interface INTERFACE)
+target_include_directories(lvgl_config_interface INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${LVGL_SRC_PATH}
+)
+
+# Include DAVE driver
+include(${MLEK_SCRIPTS_DIR}/cmake/alif_dave2d-driver.cmake)
+
+# Include LVGL DAVE integration
+include(${MLEK_SCRIPTS_DIR}/cmake/alif_lvgl-dave2d.cmake)
+
+
 # We configured LVGL to use Arm-2D and it needs to reach lv_port.h
 target_link_libraries(${LVGL_TARGET} PRIVATE ${ARM_2D_TARGET})
 target_link_libraries(${LVGL_TARGET} PUBLIC lvgl_port_iface)
@@ -54,4 +69,5 @@ target_compile_definitions(${LVGL_TARGET}
 
 target_link_libraries(${LVGL_TARGET} PRIVATE
     cmsis_device
-    platform_drivers_core)
+    platform_drivers_core
+    alif_lvgl-dave2d) # alif_lvgl-dave2d links alif_dave2d-driver so no need to add it here

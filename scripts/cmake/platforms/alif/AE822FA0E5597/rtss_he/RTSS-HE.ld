@@ -27,10 +27,11 @@
  * limitations under the License.
  */
 
+#include "app_mem_regions.h"
 #include "alif_mem_config.h"
 #include "board_defs.h"
 
-__STACK_SIZE = 0x00001800;
+__STACK_SIZE = 0x00002000;
 __HEAP_SIZE  = 0x00008000;
 __ROM_BASE = 0x80008000;
 __ROM_SIZE = 0x0047F000;
@@ -85,6 +86,8 @@ SECTIONS
     *platform_drivers.c.obj(.text .rodata*)
     *fault_handler.c.obj(.text* .rodata*)
 
+    *libalif_dave2d-driver.a:*(.text* .rodata*)
+    *libalif_lvgl-dave2d.a:*(.text* .rodata*)
     *liblvgl.a:*(.text .rodata*)
     *libArm-2D.a:*(.text* .rodata*)
     *libcmsis_device.a:*(.text* .rodata*)
@@ -192,6 +195,16 @@ SECTIONS
   {
   } > OSPI_RAM
 #endif
+
+  .nonsecure0_region (NOLOAD) :
+  {
+    . = ALIGN(TGU_BLOCK_SIZE);
+    __ns_region_0_start = .;
+    * (.bss.lvgl_buf)
+    * (.bss.d0_heap)
+    . = ALIGN(TGU_BLOCK_SIZE);
+    __ns_region_0_end = .;
+  } > DTCM
 
   .bss (NOLOAD) : ALIGN(8)
   {
