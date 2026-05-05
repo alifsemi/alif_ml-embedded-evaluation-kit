@@ -12,7 +12,7 @@
 ; *
 ; */
 
-#include "alif_mem_config.h"
+#include "app_mem_regions.h"
 
 /* On Chip NVM */
 #define MRAM_BASE                 0x80000000
