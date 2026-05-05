@@ -85,6 +85,28 @@ pipeline {
                 }
             }
             parallel {
+                stage('Build HP ROTATE_DISPLAY=180 Release for DevKit-e8') {
+                    agent { label 'docker_build2' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        script {
+                            unstash name: "ml_base_stash"
+                            common_funcs.build_hp("Release", "gcc", "DevKit-e8", "-DROTATE_DISPLAY=180");
+                            common_funcs.build_hp("Release", "armclang", "DevKit-e8", "-DROTATE_DISPLAY=180");
+                        }
+                    }
+                }
+                stage('Build HP ROTATE_DISPLAY=180 Release for AppKit-e7') {
+                    agent { label 'docker_build2' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        script {
+                            unstash name: "ml_base_stash"
+                            common_funcs.build_hp("Release", "gcc", "AppKit-e7", "-DROTATE_DISPLAY=180");
+                            common_funcs.build_hp("Release", "armclang", "AppKit-e7", "-DROTATE_DISPLAY=180");
+                        }
+                    }
+                }
                 stage('Build inference runner GCC Release DevKit-e7') {
                     agent { label 'docker_build2' }
                     options { skipDefaultCheckout() }
