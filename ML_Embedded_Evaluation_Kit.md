@@ -88,14 +88,14 @@ Verify Python
 python3
 ```
 
-#### Arm Clang Compiler (v6.19 or above) setup – Option 1
+#### Arm Clang Compiler (v6.22 or above) setup – Option 1
 
 1. Start with downloading the .tgz file for Arm Compiler for Embedded (https://developer.arm.com/downloads/view/ACOMPE) and then extract it.<br>
 ![alt text](docs/media/alif/armclang_download.png)
 2. Within the extracted folder is a shell script. Open a terminal window, navigate to the extracted folder, and run the shell script.
 3. Download the tar.gz file for Arm Clang Compiler and use sudo to extract it to `/usr/local/bin/`
     ```
-    sudo tar xf ARMCompiler6.19_standalone_linux-x86_64.tar.gz -C /usr/local/bin
+    sudo tar xf ARMCompiler6.22_standalone_linux-x86_64.tar.gz -C /usr/local/bin
     ```
 4. Add the ARM license server to your environment (if applicable), example shown:
     ```
@@ -103,7 +103,7 @@ python3
     ```
 5. After extracting Arm Clang compiler, we will need to add it to the path, as example shown below
     ```
-    sudo sh -c "echo export PATH=/usr/local/bin/ArmCompiler6.19/bin:$PATH > /etc/profile.d/arm-compiler.sh"
+    sudo sh -c "echo export PATH=/usr/local/bin/ArmCompiler6.22/bin:$PATH > /etc/profile.d/arm-compiler.sh"
     ```
 6. Log out and then log in for the above environment changes to take effect.
 
@@ -141,7 +141,7 @@ python3 get-pip.py
 #### Install the latest CMake
 From https://cmake.org/download/ choose the correct .dmg file and install it.
 
-#### Arm Clang Compiler (v6.19 or above) setup – Option 1
+#### Arm Clang Compiler (v6.22 or above) setup – Option 1
 macOS is not supported at the moment.
 
 #### Arm GNU GCC Compiler (v12.3 or above) Setup – Option 2
@@ -262,9 +262,9 @@ Select the wanted version -> `macOS (Apple silicon) hosted cross toolchains` -> 
 
 3. Build the Project using Make
     ```
-    make ethos-u-alif_kws -j4
+    make mlek_alif_kws -j4
     ```
-4. The output should be in `/build_he/bin/ethos-u-alif_kws.axf`
+4. The output should be in `bin/mlek_alif_kws.axf`
 
 *NOTE: The debug console for this use-case will be UART2, and the jumper on the AI/ML AppKit needs to be set accordingly as noted in the Gen 2 AI/ML AppKit Quick Start Guide.*
 
@@ -316,9 +316,9 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 3. Build the Project using Make.
     ```
-    make ethos-u-alif_img_class -j4
+    make mlek_alif_img_class -j4
     ```
-4. The output should be produced in `build_hp/bin/ethos-u-alif_img_class.axf`
+4. The output should be produced in `bin/mlek_alif_img_class.axf`
 
 **Using GNU GCC Toolchain**
 
@@ -349,7 +349,7 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
     c. Run vela compiler on it, for the HP:
     ```
-    resources_downloaded/env/bin/activate
+    source ../resources_downloaded/env/bin/activate
     cd <ml_demo_root>/models
     vela --accelerator-config=ethos-u55-256 \
       --optimise Performance \
@@ -404,11 +404,10 @@ These cmake options permit the default use of LCD and SRAM, which is okay since 
 
 1. Follow the same steps as above, except in step 4. Change the following in CMake command,
     ```
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
-    -DLINKER_SCRIPT_NAME=RTSS-HP-infrun \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake
     ```
 
-The output should be produced in `build_hp_infrun/bin/ethos-u-inference_runner.axf`
+The output should be produced in `build_hp_infrun/bin/mlek_inference_runner.axf`
 
 ## Running the Applications Standalone without Debuggers
 
@@ -432,8 +431,8 @@ You can find the `mram.bin` file in the `build` folder under `.../bin/sectors/<u
 Rename the `mram.bin` to appropriate use-case filename, found from the generated `.axf` filename.<br>
 Example:
 ```
-mv mram.bin ethos-u-alif_kws.bin
-cp ethos-u-alif_kws.bin /home/$USER/app-release-exec-linux/build/images
+mv mram.bin mlek_alif_kws.bin
+cp mlek_alif_kws.bin /home/$USER/app-release-exec-linux/build/images
 ```
 
 #### Option 2
@@ -443,26 +442,26 @@ If you followed Option-1 to install Arm DS and Arm Clang Compiler for Embedded, 
 
 1. For **KWS** use-case:
     ```
-    cd build_he/bin
+    cd bin
     ```
     ```
-    fromelf --bin –output=ethos-u-alif_kws.bin ethos-u-alif_kws.axf
+    fromelf --bin –output=mlek_alif_kws.bin mlek_alif_kws.axf
     ```
     or
     ```
-    arm-none-eabi-objcopy -O binary ethos-u-alif_kws.axf ethos-u-alif_kws.bin
+    arm-none-eabi-objcopy -O binary mlek_alif_kws.axf mlek_alif_kws.bin
     ```
 
 2. For **Image Classification** use-case:
     ```
-    cd build_hp/bin
+    cd bin
     ```
     ```
-    fromelf --bin –output=ethos-u-alif_img_class.bin ethos-u-alif_img_class.axf
+    fromelf --bin –output=mlek_alif_img_class.bin mlek_alif_img_class.axf
     ```
     or
     ```
-    arm-none-eabi-objcopy -O binary ethos-u-alif_img_class.axf ethos-u-alif_img_class.bin
+    arm-none-eabi-objcopy -O binary mlek_alif_img_class.axf mlek_alif_img_class.bin
     ```
 
 Copy the converted binaries (`.bin` file) to the following directory: `/home/$USER/app-release-exec-linux/build/images`
@@ -474,7 +473,7 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
 	```
 	{
 		"HE_Voice": {
-			"binary": "ethos-u-alif_kws.bin",
+			"binary": "mlek_alif_kws.bin",
 			"version": "1.0.0",
 			"mramAddress": "0x80480000",
 			"cpu_id": "M55_HE",
@@ -495,7 +494,7 @@ Copy the converted binaries (`.bin` file) to the following directory: `/home/$US
     ```
 	{
 		"HP_Image": {
-			"binary": "ethos-u-alif_img_class.bin",
+			"binary": "mlek_alif_img_class.bin",
 			"version" : "1.0.0",
 			"mramAddress": "0x80008000",
 			"cpu_id": "M55_HP",
@@ -546,7 +545,7 @@ binaries.
     ```
 	{
 		"IC": {
-			"binary": "ethos-u-alif_img_class.bin",
+			"binary": "mlek_alif_img_class.bin",
 			"version": "1.0.0",
 			"mramAddress": "0x80008000",
 			"cpu_id": "M55_HP",
@@ -554,7 +553,7 @@ binaries.
 			"signed": false
 		},
 		"KWS": {
-			"binary": "ethos-u-alif_kws.bin",
+			"binary": "mlek_alif_kws.bin",
 			"version": "1.0.0",
 			"mramAddress": "0x80480000",
 			"cpu_id": "M55_HE",
@@ -690,7 +689,8 @@ With DevKit or AppKit E4|E8 you can use external RAM also for ML frameworks and 
 ```
   .bss.ext_ram (NOLOAD) : ALIGN(8)
   {
-    * (.bss.NoInit.activation_buf_sram)
+    * (.bss.NoInit.activation_buf_sram) /* Shared_Sram mode */
+    * (.bss.NoInit.activation_buf_dram) /* Dedicated_Sram mode */
   } > OSPI_RAM
 
 ```
