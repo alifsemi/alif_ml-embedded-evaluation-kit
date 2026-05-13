@@ -150,6 +150,7 @@ LR_ROM __RO_BASE __RO_SIZE  {                       ; load region size_region
 #ifdef BOARD_OSPI_RAM_BASE
   RW_OSPI_RAM OSPI_RAM_BASE OSPI_RAM_SIZE {
 
+    * (.bss.NoInit.activation_buf_dram)
   }
 #endif
 }
