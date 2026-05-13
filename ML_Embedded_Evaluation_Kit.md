@@ -689,7 +689,8 @@ With DevKit or AppKit E4|E8 you can use external RAM also for ML frameworks and 
 ```
   .bss.ext_ram (NOLOAD) : ALIGN(8)
   {
-    * (.bss.NoInit.activation_buf_sram)
+    * (.bss.NoInit.activation_buf_sram) /* Shared_Sram mode */
+    * (.bss.NoInit.activation_buf_dram) /* Dedicated_Sram mode */
   } > OSPI_RAM
 
 ```
