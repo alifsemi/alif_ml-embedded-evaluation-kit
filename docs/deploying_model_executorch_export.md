@@ -224,6 +224,30 @@ model-explorer --extensions=pte_adapter_model_explorer model.pte
 ![Visualize with Model Explorer](media/alif/model_explorer.png)
 
 
+## Optimizing the input and output tensor type
+
+The default ExecuTorch export behaviour is to keep input and output tensors of the model graph as floats. In some cases you may want to skip the float conversions.
+For example converting camera frame from typical 8-bit integer to float input tensor needs 4x memory and consumes CPU resources. Then the first step of the model graph would convert it back from normalized floats to int8 quantized.
+Here is an example how to skip the float conversions in such a case. See [Ethos-U porting guide](https://github.com/pytorch/executorch/blob/main/examples/arm/ethos-u-porting-guide.md) for reference.
+
+```
+edge_prog = to_edge_transform_and_lower(...)
+from executorch.exir.passes.quantize_io_pass import QuantizeInputs
+
+# Apply the QuantizeInputs to input tensor 0
+edge_prog.transform(passes=[QuantizeInputs(edge_prog, [0])])
+
+# Convert edge program to executorch
+et_prog = edge_prog.to_executorch(config=ExecutorchBackendConfig(extract_delegate_segments=False))
+```
+
+If desired, the output tensor conversion can be handled in similar manner.
+
+Now the exported program should look like this.
+
+![Exported model](media/alif/model_integer_input.png)
+
+
 # Building the ExecuTorch runtime in MLEK
 
 For generic MLEK example use-case build instructions [see](../ML_Embedded_Evaluation_Kit.md)
@@ -248,7 +272,7 @@ Here is an example CMAKE configuration for using the `model.pte` exported earlie
 ```
 
 ```
-make -j8 ethos-u-alif_img_class
+make -j8 mlek_alif_img_class
 ```
 
 - Please see also the [Memory usage and linker files](../ML_Embedded_Evaluation_Kit.md#memoryusage)

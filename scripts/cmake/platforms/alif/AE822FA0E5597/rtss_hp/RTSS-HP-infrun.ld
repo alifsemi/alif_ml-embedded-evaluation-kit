@@ -158,6 +158,7 @@ SECTIONS
 #ifdef BOARD_OSPI_RAM_BASE
   .bss.ext_ram (NOLOAD) : ALIGN(8)
   {
+    * (.bss.NoInit.activation_buf_dram)
   } > OSPI_RAM
 #endif
 

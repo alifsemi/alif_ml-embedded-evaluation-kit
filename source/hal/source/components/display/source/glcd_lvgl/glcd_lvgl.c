@@ -154,6 +154,7 @@ void GLCD_DisplayString(
 
         extern const lv_font_t lv_font_9x15;
         text_dsc.font = &lv_font_9x15;
+        text_dsc.color = txt_color;
         // Use selection to draw the background
         text_dsc.sel_start = 0;
         text_dsc.sel_end = 0x7fff;
