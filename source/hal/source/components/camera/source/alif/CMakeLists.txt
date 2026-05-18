@@ -35,9 +35,9 @@ add_library(${CAMERA_ALIF_COMPONENT_TARGET} STATIC)
 ## Component sources
 target_sources(${CAMERA_ALIF_COMPONENT_TARGET}
     PRIVATE
-    source/bayer2rgb.c
     source/camera.c
     source/color_correction.c
+    source/exposure_count.c
     source/hal_camera_alif.c
     source/image_processing.c
     source/tiff.c
@@ -69,7 +69,8 @@ target_link_libraries(${CAMERA_ALIF_COMPONENT_TARGET} PUBLIC
     hal_log
     cmsis_device
     platform_drivers_core
-    rte_components)
+    rte_components
+    aipl)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

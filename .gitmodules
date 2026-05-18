@@ -40,3 +40,6 @@
 [submodule "dependencies/alif_dave2d-driver"]
 	path = dependencies/alif_dave2d-driver
 	url = git@github.com:alifsemi/alif_dave2d-driver.git
+[submodule "dependencies/aipl"]
+	path = dependencies/aipl
+	url = https://github.com/alifsemi/alif_image-processing-lib.git

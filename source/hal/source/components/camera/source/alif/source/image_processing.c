@@ -38,7 +38,8 @@
 #include <tgmath.h>
 #include <inttypes.h>
 #include "image_processing.h"
-#include "bayer.h"
+#include "aipl_demosaic.h"
+#include "exposure_count.h"
 #include "hal_log.h"
 
 #include "timer_alif.h"
@@ -57,7 +58,7 @@
 #include "camera.h"
 #endif
 
-#define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
+#define BAYER_FORMAT AIPL_BAYER_GRBG
 
 int frame_crop(const void *input_fb,
 		       uint32_t ip_row_size,
@@ -587,10 +588,10 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
     		float r = barr * intensity + 0.5f;
     		float g = barg * intensity + 0.5f;
     		float b = barb * intensity + 0.5f;
-            if (BAYER_FORMAT == DC1394_COLOR_FILTER_BGGR) {
+            if (BAYER_FORMAT == AIPL_BAYER_BGGR) {
                 p[0]        = b; p[1]            = g;
                 p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
-            } else if (BAYER_FORMAT == DC1394_COLOR_FILTER_GRBG) {
+            } else if (BAYER_FORMAT == AIPL_BAYER_GRBG) {
                 p[0]        = g; p[1]            = r;
                 p[CIMAGE_X] = b; p[CIMAGE_X + 1] = g;
             }
@@ -627,13 +628,14 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
     write_tiff_header(&tiff_header, CIMAGE_X, CIMAGE_Y);
     tprof1 = Get_SysTick_Cycle_Count32();
     // RGB conversion and frame resize
-    dc1394_bayer_Simple(raw_image, image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
+    aipl_demosaic(raw_image, image_data, CIMAGE_X, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT, AIPL_COLOR_RGB888);
     tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
 #endif
 
 #ifndef USE_FAKE_CAMERA
 #if CIMAGE_SW_GAIN_CONTROL
-    // Use pixel analysis from bayer_to_RGB to adjust gain
+    // Analyse raw bayer data for exposure statistics
+    exposure_count_bayer(raw_image, CIMAGE_X, CIMAGE_Y);
     process_autogain();
 #endif
 #endif

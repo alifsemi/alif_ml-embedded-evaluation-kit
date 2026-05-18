@@ -175,6 +175,9 @@ endif()
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
 
+## Platform component: aipl (Alif Image Processing Library)
+include(${MLEK_SCRIPTS_DIR}/cmake/alif_image_processing.cmake)
+
 ## Platform component: stdout
 #add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
 
@@ -219,6 +222,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     hal_audio_static_streams
     $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_alif,hal_camera_static_images>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:alif_se_services>
+    $<$<BOOL:${ALIF_CAMERA_ENABLED}>:aipl>
 )
 
 add_compile_options(-Werror-implicit-function-declaration)
