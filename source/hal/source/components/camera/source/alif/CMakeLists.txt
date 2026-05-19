@@ -41,11 +41,14 @@ target_sources(${CAMERA_ALIF_COMPONENT_TARGET}
     source/hal_camera_alif.c
     source/image_processing.c
     source/tiff.c
+    source/isp_param.c
+    source/isp_buffer.c
     )
 
 target_compile_definitions(${CAMERA_ALIF_COMPONENT_TARGET}
     PUBLIC
     ALIF_CAMERA_MODULE_${ALIF_CAMERA_MODULE}=1
+    ALIF_ISP_ENABLED=$<BOOL:${ALIF_ISP_ENABLED}>
     $<$<BOOL:${USE_FAKE_CAMERA}>:USE_FAKE_CAMERA>)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")

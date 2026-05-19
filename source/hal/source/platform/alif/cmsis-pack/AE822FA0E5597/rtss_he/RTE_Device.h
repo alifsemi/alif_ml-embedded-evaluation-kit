@@ -45,14 +45,14 @@
 //     <1=> enable
 // <i> Defines CPI AXI port
 // <i> Default: AXI port enable
-#define RTE_CPI_AXI_PORT                                      1
+#define RTE_CPI_AXI_PORT                                      (ALIF_ISP_ENABLED == 0)
 
 // <o> Select CPI ISP port
 //     <0=> disable
 //     <1=> enable
 // <i> Defines CPI ISP port
 // <i> Default: ISP port disable
-#define RTE_CPI_ISP_PORT                                      0
+#define RTE_CPI_ISP_PORT                                      ALIF_ISP_ENABLED
 
 // <o> CPI Row roundup
 //     <0=> disable
@@ -360,7 +360,7 @@
 
 // <e> ISP (ISP) [Driver_ISP]
 // <i> Configuration settings for Driver_ISP in component ::Drivers:ISP
-#define RTE_ISP 0
+#define RTE_ISP ALIF_ISP_ENABLED
 #if RTE_ISP
 
 // <o> ISP IRQ priority <0-255>
@@ -373,14 +373,14 @@
 //     <1=> enable
 // <i> defines if AE Module is enabled or not
 // <i> default: false
-#define RTE_ISP_AE_MODULE 0
+#define RTE_ISP_AE_MODULE 1
 
 // <o> ISP Enable BLS Module
 //     <0=> disable
 //     <1=> enable
 // <i> defines if Black Level Subtraction Module is enabled or not
 // <i> default: false
-#define RTE_ISP_BLS_MODULE 0
+#define RTE_ISP_BLS_MODULE 1
 
 // <o> ISP Enable DMSC Module
 //     <0=> disable
@@ -394,7 +394,7 @@
 //     <1=> enable
 // <i> defines if Noise/Sharpening-Filter Module is enabled or not
 // <i> default: false
-#define RTE_ISP_FLT_MODULE 0
+#define RTE_ISP_FLT_MODULE 1
 
 // <o> ISP Enable CCM Module
 //     <0=> disable
@@ -408,7 +408,7 @@
 //     <1=> enable
 // <i> defines if Color Space Conversion Module is enabled or not
 // <i> default: false
-#define RTE_ISP_CSM_MODULE 0
+#define RTE_ISP_CSM_MODULE 1
 
 // <o> ISP Enable WB Module
 //     <0=> disable
@@ -422,14 +422,14 @@
 //     <1=> enable
 // <i> defines if Auto-Exposure Statistics Module is enabled or not
 // <i> default: false
-#define RTE_ISP_EXPM_MODULE 0
+#define RTE_ISP_EXPM_MODULE 1
 
 // <o> ISP Enable Gamma-out Module
 //     <0=> disable
 //     <1=> enable
 // <i> defines if Gamma-out Module is enabled or not
 // <i> default: false
-#define RTE_ISP_GAMMAOUT_MODULE 0
+#define RTE_ISP_GAMMAOUT_MODULE 1
 
 // <o> ISP Enable WBM Module
 //     <0=> disable
@@ -443,7 +443,7 @@
 //     <1=> enable
 // <i> defines if Binning Module is enabled or not
 // <i> default: false
-#define RTE_ISP_BINNING_MODULE 0
+#define RTE_ISP_BINNING_MODULE 1
 
 // <o> ISP Enable Scaling Module
 //     <0=> disable
@@ -482,11 +482,43 @@
 //    <41=> RAW422SP (RAW422 semi-planar)
 // <i> Defines ISP output pixel format for memory dump
 // <i> Default: RGB888
-#define RTE_ISP_OUTPUT_FORMAT 32
+#define RTE_ISP_OUTPUT_FORMAT 39
 
-#define RTE_ISP_OUTPUT_WIDTH 480
+// <o> ISP Scaler Output Width
+// <i> Width in pixels of the ISP scaler output (after scaling from sensor dimensions).
+#define RTE_ISP_OUTPUT_WIDTH        480
 
-#define RTE_ISP_OUTPUT_HEIGHT 480
+// <o> ISP Scaler Output Height
+// <i> Height in pixels of the ISP scaler output (after scaling from sensor dimensions).
+#define RTE_ISP_OUTPUT_HEIGHT       480
+
+// <o> ISP Sensor Input Width
+// <i> Width in pixels of the sensor input to the ISP pipeline.
+// <i> Default: MT9M114 sensor resolution (1280). Change for different sensors.
+#define RTE_ISP_SENSOR_INPUT_WIDTH  RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH
+
+// <o> ISP Sensor Input Height
+// <i> Height in pixels of the sensor input to the ISP pipeline.
+// <i> Default: MT9M114 sensor resolution (720). Change for different sensors.
+#define RTE_ISP_SENSOR_INPUT_HEIGHT RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT
+
+// <o> ISP Crop Top offset <0-4095>
+// <i> Top offset in pixels for the cropped output window
+#define RTE_ISP_CROP_TOP    0
+
+// <o> ISP Crop Left offset <0-4095>
+// <i> Left offset in pixels for the cropped output window
+#define RTE_ISP_CROP_LEFT   0
+
+// <o> ISP Crop Width <1-4095>
+// <i> Width in pixels of the cropped output window.
+// <i> Default: full sensor input (no crop). Override with smaller value to crop.
+#define RTE_ISP_CROP_WIDTH  RTE_ISP_SENSOR_INPUT_WIDTH
+
+// <o> ISP Crop Height <1-4095>
+// <i> Height in pixels of the cropped output window.
+// <i> Default: full sensor input (no crop). Override with smaller value to crop.
+#define RTE_ISP_CROP_HEIGHT RTE_ISP_SENSOR_INPUT_HEIGHT
 
 #endif
 // </e> ISP (ISP) [Driver_ISP]
@@ -496,9 +528,16 @@
 #define RTE_MIPI_CSI2 1
 #if RTE_MIPI_CSI2
 
+// <o> Select CSI2 DPHY backend
+//     <0=> CSI2 RX DPHY
+//     <1=> DSI TX DPHY used as RX
+// <i> Selects which DPHY hardware is used by Driver_MIPI_CSI2.
+// <i> Default: CSI2 RX DPHY
+#define RTE_MIPI_CSI2_DPHY_BACKEND          0
+
 // <o> CSI pixel clock select
-//     <0=>  400 MHz clock source (PLL_CLK1/2)
-//     <1=>  480 MHz clock source (PLL_CLK3)
+//     <0=>  Select AXI clock source
+//     <1=>  Select PLL clock source
 // <i> Defines CSI pixel clock select
 // <i> Default: 400 MHz clock source (PLL_CLK1/2)
 #define RTE_CSI2_PIX_CLK_SEL                0
@@ -1032,8 +1071,12 @@
 //     <3=>   640x480_RGB565
 //     <4=>   320x240_RGB565
 //     <5=>   320x320_RGB565
-// <i> Default: 0
+// Use RAW bayer configuration if ISP is enabled, otherwise use RGB565
+#if ALIF_ISP_ENABLED
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            1
+#else
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            2
+#endif
 
 // <o> select MT9M114 MIPI number of lanes in DPHY
 // <i> defines select MT9M114 MIPI number of lanes in DPHY.
@@ -1089,6 +1132,14 @@
 //     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
+
+// <o> MT9M114 sensor frame width for ISP / CSI2 pipeline
+// <i> Width in pixels of the MT9M114 MIPI sensor frame
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1280
+
+// <o> MT9M114 sensor frame height for ISP / CSI2 pipeline
+// <i> Height in pixels of the MT9M114 MIPI sensor frame
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 720
 
 #endif
 // </e> MT9M114_MIPI [Driver_MT9M114_MIPI]
@@ -1364,6 +1415,11 @@
 //     <I3C=> I2C OVER I3C
 // <i> Default: 1
 #define RTE_OV5675_CAMERA_SENSOR_I2C_INSTANCE            1
+
+// <o> Select camera sensor OV5675 CSI clock source division [Divisor] <2-511>
+// <i> Defines camera sensor OV5675 CSI clock source division
+// <i> Default: 20
+#define RTE_OV5675_CAMERA_SENSOR_MIPI_CSI_CLK_SCR_DIV    20
 
 #endif
 // </e> OV5675_MIPI [Driver_OV5675_MIPI]
@@ -9400,6 +9456,15 @@
 // <i> Defines CH201 sensor's internal RTC calculation pulse in millisec
 // <i> Default: 100
 #define RTE_CH201_RTC_CAL_PULSE_MS 100
+
+// <o> CH201 LPTIMER channel for Timeout trigger
+// <i> Defines LPTIMER's channel number for CH201 Timeout trigger
+//     <0=>   LPTIMER_CHANNEL_0
+//     <1=>   LPTIMER_CHANNEL_1
+//     <2=>   LPTIMER_CHANNEL_2
+//     <3=>   LPTIMER_CHANNEL_3
+// <i> Default: 1
+#define RTE_CH201_LPTIMER_CHANNEL  1
 
 #endif
 //</e> CH201 (Time of Flight Sensor) [Driver_CH201]

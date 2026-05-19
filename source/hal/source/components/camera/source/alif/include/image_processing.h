@@ -20,9 +20,22 @@
 #define RGB565_BYTES	2
 #define PIXEL_BYTES 	1
 
+
+#if RTE_ISP
+// Do not use CIMAGE_X, CIMAGE_Y as these dimensions are dynamically set at runtime for ISP mode (see hal_camera_configure() and camera_set_isp_resolution())
+// ISP output buffer is allocated according to RTE_ISP_OUTPUT_WIDTH and RTE_ISP_OUTPUT_HEIGHT setting the maximum supported dimensions for hal_camera_configure().
+// ISP output can be RGB planar or YUV depending on configuration, but will be converted to RGB888 in get_image_data() before ML inference
+// The RGB buffer is allocated according to CIMAGE_RGB_WIDTH_MAX and CIMAGE_RGB_HEIGHT_MAX
+#define CIMAGE_COLOR_CORRECTION (0) // Only apply SW color correction in SW pipeline
+#define CIMAGE_SW_GAIN_CONTROL  (0)
+#define CIMAGE_USE_RGB565       (0)
+#define CIMAGE_RGB_WIDTH_MAX    (RTE_ISP_OUTPUT_WIDTH)
+#define CIMAGE_RGB_HEIGHT_MAX   (RTE_ISP_OUTPUT_HEIGHT)
+
+#else // Non-ISP SW pipeline dimensions, capture at full resolution and crop/rescale in software to desired dimensions
+
 // Camera dimensions
 #if RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE
-
 #if RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 2
     #define CIMAGE_X            (1280)
     #define CIMAGE_Y            (720)
@@ -58,14 +71,6 @@
 #define CIMAGE_USE_RGB565       (0)
 #define CIMAGE_RGB_WIDTH_MAX    CIMAGE_X
 #define CIMAGE_RGB_HEIGHT_MAX   CIMAGE_Y
-#elif RTE_ARX3A0_CAMERA_SENSOR_ENABLE // REV A RTE
-#define CIMAGE_X                (560)
-#define CIMAGE_Y                (560)
-#define CIMAGE_COLOR_CORRECTION (1)
-#define CIMAGE_SW_GAIN_CONTROL  (1)
-#define CIMAGE_USE_RGB565       (0)
-#define CIMAGE_RGB_WIDTH_MAX    CIMAGE_X
-#define CIMAGE_RGB_HEIGHT_MAX   CIMAGE_Y
 #elif !defined(RTE_Device_CPI)
 #define CIMAGE_X                (0)
 #define CIMAGE_Y                (0)
@@ -78,6 +83,7 @@
 #error "Unsupported camera"
 #endif
 
+#endif 
 /*error status*/
 #define FRAME_FORMAT_NOT_SUPPORTED   -1
 #define FRAME_OUT_OF_RANGE           -2

@@ -30,6 +30,7 @@
 
 
 int32_t camera_init(uint8_t *buffer);
+int32_t camera_configure(uint32_t width, uint32_t height);
 void camera_uninit();
 void camera_start(uint32_t mode);
 int32_t camera_gain(uint32_t gain);
