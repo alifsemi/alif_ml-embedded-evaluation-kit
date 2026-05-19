@@ -8,6 +8,7 @@
 
 set(AIPL_DIR ${MLEK_DEPENDENCY_ROOT_DIR}/aipl)
 set(AIPL_SRC_DIR ${AIPL_DIR}/source)
+set(MLEK_AIPL_CONFIG_DIR ${MLEK_HAL_PLATFORM_DIR}/alif/include)
 
 add_library(aipl STATIC)
 
@@ -20,14 +21,8 @@ target_include_directories(aipl PUBLIC
 
 target_include_directories(aipl PRIVATE
     ${AIPL_DIR}/external/include
-    ${AIPL_DIR}/config
+    ${MLEK_AIPL_CONFIG_DIR}
 )
-
-# Directly use config template if no config was provided
-if (NOT EXISTS ${AIPL_DIR}/config/aipl_config.h)
-    file(COPY ${AIPL_DIR}/aipl_config_template.h DESTINATION ${AIPL_DIR}/config)
-    file(RENAME ${AIPL_DIR}/config/aipl_config_template.h ${AIPL_DIR}/config/aipl_config.h)
-endif()
 
 target_sources(aipl PRIVATE
     ${AIPL_SRC_DIR}/aipl_color_formats.c
