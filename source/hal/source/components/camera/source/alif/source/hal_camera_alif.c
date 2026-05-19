@@ -20,7 +20,6 @@
 #include "RTE_Components.h"
 #include "RTE_Device.h"
 #include "image_processing.h"
-#include "bayer.h"
 #include "camera.h"
 #include "board_defs.h"
 #include "board_utils.h"
