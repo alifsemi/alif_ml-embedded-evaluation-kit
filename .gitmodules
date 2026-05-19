@@ -36,7 +36,7 @@
 	url = https://github.com/alifsemi/alif_ensemble-cmsis-dfp.git
 [submodule "dependencies/alif_lvgl-dave2d"]
 	path = dependencies/alif_lvgl-dave2d
-	url = git@github.com:alifsemi/alif_lvgl-dave2d.git
+	url = https://github.com/alifsemi/alif_lvgl-dave2d.git
 [submodule "dependencies/alif_dave2d-driver"]
 	path = dependencies/alif_dave2d-driver
-	url = git@github.com:alifsemi/alif_dave2d-driver.git
+	url = https://github.com/alifsemi/alif_dave2d-driver.git
