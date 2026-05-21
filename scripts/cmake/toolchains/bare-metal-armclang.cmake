@@ -94,6 +94,11 @@ add_compile_options(
     -fdata-sections
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-unwind-tables;-fno-rtti;-fno-exceptions>")
 
+# Alif libisp has been compiled with -fshort-enums, so we must match it.
+if (TARGET_PLATFORM STREQUAL alif)
+    add_compile_options(-fshort-enums)
+endif()
+
 # Arch compile options:
 add_compile_options(
     -mthumb

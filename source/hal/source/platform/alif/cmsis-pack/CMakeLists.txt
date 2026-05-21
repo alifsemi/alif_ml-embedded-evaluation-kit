@@ -73,6 +73,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/Device/core/common/config
     ${ALIF_CMSIS_PATH}/ospi_xip/source/ospi # hopyfully this wont'd be needed and ospi_private.h will be moved (also change the name)
     ${ALIF_CMSIS_PATH}/libs/board_config
+    ${ALIF_CMSIS_PATH}/libs/isp/inc
     ${ALIF_CMSIS_PATH}/se_services/port/include
     Boards/${TARGET_BOARD}
     Boards/utils
@@ -124,6 +125,7 @@ if (NOT IS_BALLETTO_DEVICE)
     target_sources(${CMSIS_DEVICE_TARGET}
     PRIVATE
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_ISP.c
     ${ALIF_CMSIS_PATH}/drivers/source/csi.c
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},MT9M114>:${ALIF_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
     $<$<STREQUAL:${ALIF_CAMERA_MODULE},ARX3A0>:${ALIF_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
@@ -171,7 +173,8 @@ target_compile_definitions(${CMSIS_DEVICE_TARGET}
     ${ARM_CPU}
     ${ALIF_CORE}
     TARGET_BOARD=BOARD_${TARGET_BOARD}
-    ALIF_CAMERA_MODULE_${ALIF_CAMERA_MODULE}=1)
+    ALIF_CAMERA_MODULE_${ALIF_CAMERA_MODULE}=1
+    ALIF_ISP_ENABLED=$<BOOL:${ALIF_ISP_ENABLED}>)
 
 # Tell linker that reset interrupt handler is our entry point
 target_link_options(
@@ -181,11 +184,19 @@ target_link_options(
 
 message(STATUS "Alif cmsis-pack, SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
 
+# Select ISP prebuilt library based on toolchain
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(ALIF_ISP_LIB ${ALIF_CMSIS_PATH}/libs/isp/libisp_gcc.a)
+else()
+    set(ALIF_ISP_LIB ${ALIF_CMSIS_PATH}/libs/isp/libisp.a)
+endif()
+
 # Link libraries
 target_link_libraries(${CMSIS_DEVICE_TARGET}
     PUBLIC
     ${CPU_HEADER_TARGET}
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:alif_se_services>
+    $<$<BOOL:${ALIF_ISP_ENABLED}>:${ALIF_ISP_LIB}>
 )
 
 # Check if semihosting configuration is available
