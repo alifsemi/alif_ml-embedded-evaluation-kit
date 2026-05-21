@@ -82,7 +82,7 @@ target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
     arm_math
     platform_drivers_core)
 
-if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e1c"))
+if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "StartKit-e1c") OR (TARGET_BOARD STREQUAL "StartKit-b1"))
     set(TARGET_MICS "PDM" CACHE STRING "Microphone selection")
     set_property(CACHE TARGET_MICS PROPERTY STRINGS "PDM")
 else()
