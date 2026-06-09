@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor devices. */
 
-/* Copyright (C) 2025 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2025-2026 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -328,6 +328,20 @@ namespace app {
                 lv_bar_set_value(alif::app::ScreenLayoutBarObject(), 0,
                                  LV_ANIM_OFF);
                 lv_obj_invalidate(alif::app::ScreenLayoutLabelObject(result_label_idx));
+            }
+
+            /* Clamp the captured audio to what the mel-spectrogram input tensor
+             * can hold. A long button press can capture more audio than the
+             * model's fixed-size input tensor; passing it unclamped would overflow
+             * the tensor during pre-processing and crash. */
+            const size_t melBins        = inputTensorMelSpec->Shape()[2];
+            const size_t maxMelFrames   = inputTensorMelSpec->GetNumElements() / melBins;
+            const uint32_t maxAudioSamples =
+                melSpecWindowSize + (maxMelFrames - 1) * melSpecHopSize;
+            if (audioArrSize > maxAudioSamples) {
+                warn("Captured audio exceeds model capacity; truncating to %u samples\n",
+                     static_cast<unsigned>(maxAudioSamples));
+                audioArrSize = maxAudioSamples;
             }
 
             /* Run the pre-processing, inference and post-processing. */
