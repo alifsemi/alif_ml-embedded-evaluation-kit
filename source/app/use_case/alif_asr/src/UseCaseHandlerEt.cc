@@ -97,6 +97,16 @@ namespace app {
         lv_style_set_radius(&boxStyle, 4);
 
         lv_obj_add_flag(alif::app::ScreenLayoutBarObject(), LV_OBJ_FLAG_HIDDEN);
+
+        /* Square the progress bar's corners. The default theme gives the
+         * indicator pill-shaped (rounded) ends with a radius of half the bar
+         * height. At the start of a capture the value is tiny, so the indicator
+         * is narrower than that radius and the two rounded ends overlap, drawing
+         * a distorted blob until the value grows past the bar height. A zero
+         * radius makes the indicator render cleanly at every value. */
+        lv_obj_set_style_radius(alif::app::ScreenLayoutBarObject(), 0, LV_PART_MAIN);
+        lv_obj_set_style_radius(alif::app::ScreenLayoutBarObject(), 0, LV_PART_INDICATOR);
+
         lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(0), "");
         lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(result_label_idx), "");
         lv_obj_set_width(alif::app::ScreenLayoutLabelObject(result_label_idx), 460);
@@ -145,6 +155,15 @@ namespace app {
         const int input_channels       = inputMelSpec.Shape()[2];
         const int input_visualize_step = 3; // limited image space for spectroram, draw every third
         float* mel_input               = (float*)inputMelSpec.GetData();
+
+        /* Hold the LVGL lock for the whole buffer fill (not just the invalidate).
+         * lvgl_image is the source bitmap for the (scaled) spectrogram image widget,
+         * which the GPU-backed renderer reads from the PendSV-driven lv_timer_handler.
+         * Writing it unlocked while a previous invalidate is being rendered lets the
+         * GPU read the buffer as it changes, corrupting the in-flight Dave2D dlist and
+         * stalling the GPU. Filling under the lock keeps the update atomic with respect
+         * to rendering, matching the object-detection use case. */
+        ScopedLVGLLock lv_lock;
         for (int xx = 0; xx < LIMAGE_X; xx++) {
             for (int yy = 0; yy < LIMAGE_Y; yy++) {
                 float mel_value =
@@ -159,10 +178,7 @@ namespace app {
                 lvgl_image[yy][xx] = rgb;
             }
         }
-        {
-            lv_obj_invalidate(alif::app::ScreenLayoutImageObject());
-            ScopedLVGLLock lv_lock;
-        }
+        lv_obj_invalidate(alif::app::ScreenLayoutImageObject());
     }
 
     bool ClassifyAudioHandler(ApplicationContext& ctx)
