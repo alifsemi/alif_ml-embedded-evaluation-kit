@@ -150,11 +150,19 @@ namespace app {
         *blue  = (color[idx2][2] - color[idx1][2]) * fractBetween + color[idx1][2];
     }
 
-    void drawMelSpec(fwk::iface::TensorIface &inputMelSpec)
+    void drawMelSpec(fwk::iface::TensorIface &inputMelSpec, size_t numValidFrames)
     {
         const int input_channels       = inputMelSpec.Shape()[2];
-        const int input_visualize_step = 3; // limited image space for spectroram, draw every third
+        const size_t maxFrames         = inputMelSpec.GetNumElements() / input_channels;
         float* mel_input               = (float*)inputMelSpec.GetData();
+
+        /* Only the frames generated from the captured audio hold valid data; the
+         * remainder of the input tensor is silence padding. Scale the spectrogram
+         * across the valid frames so the captured audio fills the image width
+         * instead of rendering the padding tail (which shows up as garbage). */
+        if (numValidFrames == 0 || numValidFrames > maxFrames) {
+            numValidFrames = maxFrames;
+        }
 
         /* Hold the LVGL lock for the whole buffer fill (not just the invalidate).
          * lvgl_image is the source bitmap for the (scaled) spectrogram image widget,
@@ -165,9 +173,15 @@ namespace app {
          * to rendering, matching the object-detection use case. */
         ScopedLVGLLock lv_lock;
         for (int xx = 0; xx < LIMAGE_X; xx++) {
+            /* Map each image column onto a frame within the valid region so the
+             * spectrogram stretches to fill the width regardless of audio length. */
+            const int frame =
+                (LIMAGE_X > 1) ? static_cast<int>((static_cast<size_t>(xx) * (numValidFrames - 1)) /
+                                                  (LIMAGE_X - 1))
+                               : 0;
             for (int yy = 0; yy < LIMAGE_Y; yy++) {
                 float mel_value =
-                    (mel_input[(xx * input_visualize_step * input_channels) + yy] + 1.0f) / 2;
+                    (mel_input[(frame * input_channels) + yy] + 1.0f) / 2;
 
                 float fr,fg,fb;
                 getHeatMapColor(mel_value, &fr, &fg, &fb);
@@ -373,7 +387,13 @@ namespace app {
             }
 #ifndef GPIO_PROFILING
             const uint32_t ts_done_pre = Get_SysTick_Cycle_Count32();
-            drawMelSpec(*inputTensorMelSpec);
+            /* Number of mel-spectrogram frames produced from the captured audio,
+             * matching the sliding-window count used during pre-processing. */
+            const size_t numValidMelFrames =
+                (audioArrSize >= melSpecWindowSize)
+                    ? (1 + (audioArrSize - melSpecWindowSize) / melSpecHopSize)
+                    : 0;
+            drawMelSpec(*inputTensorMelSpec, numValidMelFrames);
             const uint32_t ts_start_inference = Get_SysTick_Cycle_Count32();
 #endif
 
