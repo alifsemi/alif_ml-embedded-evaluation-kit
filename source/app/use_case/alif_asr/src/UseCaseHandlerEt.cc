@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor devices. */
 
-/* Copyright (C) 2025 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2025-2026 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -97,6 +97,16 @@ namespace app {
         lv_style_set_radius(&boxStyle, 4);
 
         lv_obj_add_flag(alif::app::ScreenLayoutBarObject(), LV_OBJ_FLAG_HIDDEN);
+
+        /* Square the progress bar's corners. The default theme gives the
+         * indicator pill-shaped (rounded) ends with a radius of half the bar
+         * height. At the start of a capture the value is tiny, so the indicator
+         * is narrower than that radius and the two rounded ends overlap, drawing
+         * a distorted blob until the value grows past the bar height. A zero
+         * radius makes the indicator render cleanly at every value. */
+        lv_obj_set_style_radius(alif::app::ScreenLayoutBarObject(), 0, LV_PART_MAIN);
+        lv_obj_set_style_radius(alif::app::ScreenLayoutBarObject(), 0, LV_PART_INDICATOR);
+
         lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(0), "");
         lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(result_label_idx), "");
         lv_obj_set_width(alif::app::ScreenLayoutLabelObject(result_label_idx), 460);
@@ -140,15 +150,38 @@ namespace app {
         *blue  = (color[idx2][2] - color[idx1][2]) * fractBetween + color[idx1][2];
     }
 
-    void drawMelSpec(fwk::iface::TensorIface &inputMelSpec)
+    void drawMelSpec(fwk::iface::TensorIface &inputMelSpec, size_t numValidFrames)
     {
         const int input_channels       = inputMelSpec.Shape()[2];
-        const int input_visualize_step = 3; // limited image space for spectroram, draw every third
+        const size_t maxFrames         = inputMelSpec.GetNumElements() / input_channels;
         float* mel_input               = (float*)inputMelSpec.GetData();
+
+        /* Only the frames generated from the captured audio hold valid data; the
+         * remainder of the input tensor is silence padding. Scale the spectrogram
+         * across the valid frames so the captured audio fills the image width
+         * instead of rendering the padding tail (which shows up as garbage). */
+        if (numValidFrames == 0 || numValidFrames > maxFrames) {
+            numValidFrames = maxFrames;
+        }
+
+        /* Hold the LVGL lock for the whole buffer fill (not just the invalidate).
+         * lvgl_image is the source bitmap for the (scaled) spectrogram image widget,
+         * which the GPU-backed renderer reads from the PendSV-driven lv_timer_handler.
+         * Writing it unlocked while a previous invalidate is being rendered lets the
+         * GPU read the buffer as it changes, corrupting the in-flight Dave2D dlist and
+         * stalling the GPU. Filling under the lock keeps the update atomic with respect
+         * to rendering, matching the object-detection use case. */
+        ScopedLVGLLock lv_lock;
         for (int xx = 0; xx < LIMAGE_X; xx++) {
+            /* Map each image column onto a frame within the valid region so the
+             * spectrogram stretches to fill the width regardless of audio length. */
+            const int frame =
+                (LIMAGE_X > 1) ? static_cast<int>((static_cast<size_t>(xx) * (numValidFrames - 1)) /
+                                                  (LIMAGE_X - 1))
+                               : 0;
             for (int yy = 0; yy < LIMAGE_Y; yy++) {
                 float mel_value =
-                    (mel_input[(xx * input_visualize_step * input_channels) + yy] + 1.0f) / 2;
+                    (mel_input[(frame * input_channels) + yy] + 1.0f) / 2;
 
                 float fr,fg,fb;
                 getHeatMapColor(mel_value, &fr, &fg, &fb);
@@ -159,10 +192,7 @@ namespace app {
                 lvgl_image[yy][xx] = rgb;
             }
         }
-        {
-            lv_obj_invalidate(alif::app::ScreenLayoutImageObject());
-            ScopedLVGLLock lv_lock;
-        }
+        lv_obj_invalidate(alif::app::ScreenLayoutImageObject());
     }
 
     bool ClassifyAudioHandler(ApplicationContext& ctx)
@@ -330,6 +360,20 @@ namespace app {
                 lv_obj_invalidate(alif::app::ScreenLayoutLabelObject(result_label_idx));
             }
 
+            /* Clamp the captured audio to what the mel-spectrogram input tensor
+             * can hold. A long button press can capture more audio than the
+             * model's fixed-size input tensor; passing it unclamped would overflow
+             * the tensor during pre-processing and crash. */
+            const size_t melBins        = inputTensorMelSpec->Shape()[2];
+            const size_t maxMelFrames   = inputTensorMelSpec->GetNumElements() / melBins;
+            const uint32_t maxAudioSamples =
+                melSpecWindowSize + (maxMelFrames - 1) * melSpecHopSize;
+            if (audioArrSize > maxAudioSamples) {
+                warn("Captured audio exceeds model capacity; truncating to %u samples\n",
+                     static_cast<unsigned>(maxAudioSamples));
+                audioArrSize = maxAudioSamples;
+            }
+
             /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
             uint32_t lv_lock_state = lv_port_lock();
@@ -343,7 +387,13 @@ namespace app {
             }
 #ifndef GPIO_PROFILING
             const uint32_t ts_done_pre = Get_SysTick_Cycle_Count32();
-            drawMelSpec(*inputTensorMelSpec);
+            /* Number of mel-spectrogram frames produced from the captured audio,
+             * matching the sliding-window count used during pre-processing. */
+            const size_t numValidMelFrames =
+                (audioArrSize >= melSpecWindowSize)
+                    ? (1 + (audioArrSize - melSpecWindowSize) / melSpecHopSize)
+                    : 0;
+            drawMelSpec(*inputTensorMelSpec, numValidMelFrames);
             const uint32_t ts_start_inference = Get_SysTick_Cycle_Count32();
 #endif
 
