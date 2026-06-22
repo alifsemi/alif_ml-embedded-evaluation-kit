@@ -93,7 +93,9 @@ extern "C" {
 /**
  * Enable Helium acceleration
  */
+#if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 1)
 #define AIPL_HELIUM_ACCELERATION
+#endif
 
 /**
  * Include every default function implementation even if it's suboptimal
