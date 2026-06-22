@@ -231,7 +231,7 @@
     #endif
 
 /* GCC (at least v13.3) fails to build Arm2D Helium parts properly so enable Helium optimization for LLVM compilers only*/
-#if defined(__clang__)
+#if defined(__clang__) && defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 1)
     #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_HELIUM
 #else
     #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_NONE
