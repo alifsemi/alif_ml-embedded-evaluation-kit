@@ -143,9 +143,14 @@ int32_t receive_voice_data(void *data, uint32_t data_len)
 
 static void PDM_fifo_callback(uint32_t event)
 {
-    if(event & ARM_PDM_EVENT_ERROR )
+
+    if(event & ARM_PDM_EVENT_ERROR)
     {
-        printf("*** PDM_fifo_callback: ARM_PDM_EVENT_ERROR ***\n");
+        static uint32_t pdm_err_count = 0;
+        pdm_err_count++;
+        if(pdm_err_count == 1) {
+            printf("*** PDM_fifo_callback: ARM_PDM_EVENT_ERROR (PDM FIFO overflow, further occurrences suppressed)***\n");
+        }
     }
 
     if(event & ARM_PDM_EVENT_CAPTURE_COMPLETE)
