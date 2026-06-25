@@ -40,6 +40,7 @@ import argparse
 import logging
 import os
 import sys
+import typing
 
 FORMAT = "[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s"
 logging.basicConfig(level=logging.WARNING, format=FORMAT)
@@ -172,6 +173,13 @@ def _get_args() -> argparse.Namespace:
         default=None,
         help="Enable ATen-to-TOSA debug mode.",
     )
+    parser.add_argument(
+        "--direct-drive", "--direct_drive",
+        dest="direct_drive",
+        action="store_true",
+        default=False,
+        help="Enable direct-drive lowering.",
+    )
     args = parser.parse_args()
 
     if args.debug:
@@ -187,7 +195,7 @@ def _get_args() -> argparse.Namespace:
     return args
 
 
-def _build_compile_spec(args: argparse.Namespace):
+def _build_compile_spec(args: argparse.Namespace) -> typing.Any:
     """Construct an ``EthosUCompileSpec`` using MLEK's extra flags."""
     # ExecuTorch is an optional mlek_tools dependency and is only required
     # when this script is executed inside the ExecuTorch setup environment.
@@ -202,7 +210,25 @@ def _build_compile_spec(args: argparse.Namespace):
     )
 
 
-def main() -> None:
+def _apply_replace_quant_nodes(
+        edge: typing.Any,
+        direct_drive: bool,
+        replace_quant_nodes_pass: typing.Callable[[], typing.Any],
+) -> typing.Any:
+    """
+    Apply the Cortex-M quant-node replacement pass when it is required.
+
+    :param edge:                     Edge program to update.
+    :param direct_drive:             Whether direct-drive lowering is enabled.
+    :param replace_quant_nodes_pass: Replacement pass constructor.
+    :return:                         Updated edge program.
+    """
+    if not direct_drive:
+        edge = edge.transform([replace_quant_nodes_pass()])
+    return edge
+
+
+def main():
     """
     Lower an ExecuTorch model for an Ethos-U target.
     """
@@ -266,9 +292,11 @@ def main() -> None:
             compile_config=EdgeCompileConfig(_check_ir_validity=False),
         )
 
-    # pylint: disable=fixme
-    # TODO: Exclude this when targeting direct drive
-    edge = edge.transform([ReplaceQuantNodesPass()])
+    edge = _apply_replace_quant_nodes(
+        edge,
+        args.direct_drive,
+        ReplaceQuantNodesPass,
+    )
     dump_delegation_info(edge, args.intermediates)
 
     exec_prog = edge.to_executorch(

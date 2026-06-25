@@ -22,6 +22,7 @@ import sys
 sys.modules.setdefault("mlek_tools", sys.modules[__name__])
 
 from mlek_tools.config import (
+    CopFormat,
     DownloadConfig,
     ExecuTorchConfig,
     NpuConfig,

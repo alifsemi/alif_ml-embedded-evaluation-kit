@@ -71,6 +71,20 @@ def add_entrypoint_metadata(
         )
 
 
+def add_lowering_options_metadata(
+        metadata: typing.Dict,
+        lowering_options: typing.Optional[typing.Dict[str, typing.Any]],
+):
+    """
+    Add ExecuTorch lowering mode options to metadata.
+
+    :param metadata:         Metadata dictionary to update.
+    :param lowering_options: Lowering mode options, if any.
+    """
+    if lowering_options is not None:
+        metadata["lowering_options"] = lowering_options
+
+
 def build_optimization_metadata(
         input_model: typing.Union[str, Path],
         npu_config: typing.Optional[NpuConfig],

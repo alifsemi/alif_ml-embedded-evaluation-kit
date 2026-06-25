@@ -15,17 +15,18 @@
 #  limitations under the License.
 """ExecuTorch model optimization via the MLEK lowering script."""
 import concurrent.futures
-import dataclasses
 import itertools
 import logging
 import os
 import typing
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from mlek_tools.config.executorch import ExecuTorchConfig
 from mlek_tools.config.npu import NpuConfig
 from mlek_tools.config.optimizer import OptimizerConfig
 from mlek_tools.optimize.metadata import (
+    add_lowering_options_metadata,
     build_optimization_metadata,
     output_matches_optimization_metadata,
     write_optimization_metadata,
@@ -44,7 +45,7 @@ _MLEK_LOWERING_SCRIPT = (
 _TOSA_LOWERING_MODULE = "-m backends.arm.scripts.aot_arm_compiler"
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class ExecuTorchOptimizationContext:
     """
     Shared state for ExecuTorch optimization.
@@ -54,6 +55,52 @@ class ExecuTorchOptimizationContext:
     optimizer_config: OptimizerConfig
     output_dir: Path
     vela_version: str
+
+
+@dataclass(frozen=True)
+class EthosULoweringCommand:
+    """
+    Parameters used to invoke MLEK's Ethos-U lowering script.
+    """
+    python_exe: Path
+    lowering_entrypoint: typing.Union[str, Path]
+    input_model: typing.Union[str, Path]
+    npu_config: NpuConfig
+    optimizer_config: OptimizerConfig
+    output_dir: Path
+    vela_flags: typing.List[str]
+
+    @property
+    def command(self) -> str:
+        """
+        Build the command line for MLEK's Ethos-U lowering script.
+
+        :return: Shell command string.
+        """
+        extra_flags_args = " ".join(
+            f'--extra-vela-flag="{flag}"'
+            for flag in self.vela_flags
+        )
+        config_arg = (
+            f'--config="{self.optimizer_config.vela_config_file}"'
+            if self.optimizer_config.vela_config_file else ""
+        )
+        direct_drive_arg = (
+            " --direct-drive"
+            if self.optimizer_config.direct_drive else ""
+        )
+        return (
+            f'"{self.python_exe}" "{self.lowering_entrypoint}"'
+            f' --model_name="{self.input_model}"'
+            f" --target={self.npu_config.config_name}"
+            f" --system_config={self.npu_config.system_config}"
+            f" --memory_mode={self.npu_config.memory_mode}"
+            f" {config_arg}"
+            f" {extra_flags_args}"
+            f" --delegate --quantize"
+            f"{direct_drive_arg}"
+            f' --output "{self.output_dir}"'
+        )
 
 
 def optimize_executorch_model(
@@ -100,6 +147,10 @@ def optimize_executorch_model(
 
     input_model = model_res if model_res is not None else model_name
     optimized_model_path = context.output_dir / optimized_model_name
+    lowering_options = (
+        {"direct_drive": context.optimizer_config.direct_drive}
+        if npu_config is not None else None
+    )
     optimization_metadata = build_optimization_metadata(
         input_model,
         npu_config,
@@ -107,6 +158,7 @@ def optimize_executorch_model(
         vela_flags,
         lowering_entrypoint,
     )
+    add_lowering_options_metadata(optimization_metadata, lowering_options)
     logging.info("Looking for %s", optimized_model_path)
     if output_matches_optimization_metadata(optimized_model_path, optimization_metadata):
         logging.info("File %s exists, skipping optimisation.", optimized_model_path)
@@ -121,26 +173,17 @@ def optimize_executorch_model(
 
     if npu_config is not None:
         # Ethos-U path: use MLEK lowering script for full OptimizerConfig control.
-        extra_flags_args = " ".join(
-            f'--extra-vela-flag="{f}"'
-            for f in vela_flags
-        )
-        config_arg = (
-            f'--config="{context.optimizer_config.vela_config_file}"'
-            if context.optimizer_config.vela_config_file else ""
+        command = EthosULoweringCommand(
+            python_exe=python_exe,
+            lowering_entrypoint=lowering_entrypoint,
+            input_model=input_model,
+            npu_config=npu_config,
+            optimizer_config=context.optimizer_config,
+            output_dir=context.output_dir,
+            vela_flags=vela_flags,
         )
         call_command(
-            command=(
-                f'"{python_exe}" "{lowering_entrypoint}"'
-                f' --model_name="{input_model}"'
-                f" --target={npu_config.config_name}"
-                f" --system_config={npu_config.system_config}"
-                f" --memory_mode={npu_config.memory_mode}"
-                f" {config_arg}"
-                f" {extra_flags_args}"
-                f" --delegate --quantize"
-                f' --output "{context.output_dir}"'
-            ),
+            command=command.command,
             cwd=context.executorch_config.executorch_path,
             buffer_logs=False,
             capture_output=False,
@@ -195,7 +238,7 @@ def submit_executorch_optimizations(
                 optimize_executorch_model,
                 executorch_resource.model_name,
                 npu_config,
-                dataclasses.replace(context, output_dir=context.output_dir / use_case.name),
+                replace(context, output_dir=context.output_dir / use_case.name),
                 executorch_resource.lowering_script,
             )
             for executorch_resource in use_case.executorch_resources

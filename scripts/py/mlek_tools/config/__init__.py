@@ -22,7 +22,7 @@ from mlek_tools.config.npu import (
     get_default_npu_config_from_name,
     valid_npu_configs,
 )
-from mlek_tools.config.optimizer import OptimizerConfig
+from mlek_tools.config.optimizer import CopFormat, OptimizerConfig
 from mlek_tools.config.paths import PathsConfig
 from mlek_tools.config.tflite import TfliteConfig
 
@@ -31,6 +31,7 @@ __all__ = [
     "ExecuTorchConfig",
     "NpuConfig",
     "NpuConfigs",
+    "CopFormat",
     "OptimizerConfig",
     "PathsConfig",
     "TfliteConfig",

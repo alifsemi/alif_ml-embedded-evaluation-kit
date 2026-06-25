@@ -16,37 +16,76 @@
 """MLEK's single source of truth for NPU compilation settings."""
 import typing
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 
 # Applied when memory_mode is Shared_Sram and no explicit arena_cache_size is set.
 _DEFAULT_SHARED_SRAM_ARENA_SIZE = 2 * 1024 * 1024  # 2 MiB
 
 
+class CopFormat(str, Enum):
+    """Vela command stream output formats supported by MLEK."""
+    COP1 = "COP1"
+    COP2 = "COP2"
+
+
 @dataclass(frozen=True)
 class OptimizerConfig:
     """MLEK's NPU optimization intent.
 
-    All fields map directly to Vela compiler options and are applied identically
-    to both the TFLM (Vela CLI) and ExecuTorch (``EthosUCompileSpec``) paths,
-    ensuring a single source of truth for how models are compiled for the NPU.
+    ``direct_drive`` is the high-level target intent.  The lower-level
+    ``cop_format`` and ``separate_io_regions`` options remain accepted so
+    existing callers can continue to provide Vela-specific settings directly.
     """
     vela_config_file: typing.Optional[Path] = None
     arena_cache_size: int = 0
-    cop_format: str = "COP1"
-    separate_io_regions: bool = False
+    cop_format: typing.Optional[typing.Union[str, CopFormat]] = None
+    separate_io_regions: typing.Optional[bool] = None
     additional_npu_config_names: typing.List[str] = field(default_factory=list)
+    direct_drive: bool = False
 
     def __post_init__(self):
         """
-        Validate optimization parameters.
+        Resolve and validate optimization parameters.
 
         :raises ValueError: If any option is outside the supported range.
         """
         if self.arena_cache_size < 0:
             raise ValueError("Arena cache size cannot be less than 0")
 
-        if self.cop_format not in ("COP1", "COP2"):
+        cop_format = self.cop_format
+        if cop_format is None:
+            cop_format = (
+                CopFormat.COP2.value
+                if self.direct_drive
+                else CopFormat.COP1.value
+            )
+        elif isinstance(cop_format, CopFormat):
+            cop_format = cop_format.value
+
+        valid_cop_formats = [format_value.value for format_value in CopFormat]
+        if cop_format not in valid_cop_formats:
             raise ValueError("COP format should be one of: COP1, COP2")
+
+        separate_io_regions = self.separate_io_regions
+        if separate_io_regions is None:
+            separate_io_regions = self.direct_drive
+
+        if self.direct_drive and cop_format != CopFormat.COP2.value:
+            raise ValueError("Direct drive requires COP format COP2")
+
+        if self.direct_drive and not separate_io_regions:
+            raise ValueError("Direct drive requires separate I/O regions")
+
+        if (
+                not self.direct_drive
+                and cop_format == CopFormat.COP2.value
+                and separate_io_regions
+        ):
+            object.__setattr__(self, "direct_drive", True)
+
+        object.__setattr__(self, "cop_format", cop_format)
+        object.__setattr__(self, "separate_io_regions", separate_io_regions)
 
     def _effective_arena_cache_size(self, memory_mode: str) -> int:
         """Resolve the arena cache size, applying the Shared_Sram default when needed."""
