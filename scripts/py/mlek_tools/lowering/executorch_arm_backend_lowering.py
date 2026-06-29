@@ -304,11 +304,11 @@ def main():
     )
 
     model_stem = os.path.basename(os.path.splitext(args.model_name)[0])
-    output_name = (
-        f"{model_stem}_arm_delegate_{args.target}"
-        if args.delegate
-        else f"{model_stem}_arm_{args.target}"
-    )
+    if args.delegate:
+        memory_mode_suffix = f"_{args.memory_mode}" if args.memory_mode else ""
+        output_name = f"{model_stem}_arm_delegate_{args.target}{memory_mode_suffix}"
+    else:
+        output_name = f"{model_stem}_arm_{args.target}"
     output_file_name = f"{output_name}.pte"
 
     if args.output is not None:

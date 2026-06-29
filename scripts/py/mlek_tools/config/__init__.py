@@ -17,10 +17,11 @@
 from mlek_tools.config.download import DownloadConfig
 from mlek_tools.config.executorch import ExecuTorchConfig
 from mlek_tools.config.npu import (
+    MemoryMode,
+    Npu,
     NpuConfig,
-    NpuConfigs,
-    get_default_npu_config_from_name,
-    valid_npu_configs,
+    iter_npu_configs,
+    supported_npu_config_names,
 )
 from mlek_tools.config.optimizer import CopFormat, OptimizerConfig
 from mlek_tools.config.paths import PathsConfig
@@ -29,12 +30,13 @@ from mlek_tools.config.tflite import TfliteConfig
 __all__ = [
     "DownloadConfig",
     "ExecuTorchConfig",
+    "MemoryMode",
+    "Npu",
     "NpuConfig",
-    "NpuConfigs",
     "CopFormat",
     "OptimizerConfig",
     "PathsConfig",
     "TfliteConfig",
-    "get_default_npu_config_from_name",
-    "valid_npu_configs",
+    "iter_npu_configs",
+    "supported_npu_config_names",
 ]

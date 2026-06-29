@@ -25,7 +25,7 @@ from pathlib import Path
 
 from mlek_tools.config.download import DownloadConfig
 from mlek_tools.config.executorch import ExecuTorchConfig
-from mlek_tools.config.npu import NpuConfig, NpuConfigs, get_default_npu_config_from_name
+from mlek_tools.config.npu import NpuConfig
 from mlek_tools.config.optimizer import OptimizerConfig
 from mlek_tools.config.paths import PathsConfig
 from mlek_tools.config.tflite import TfliteConfig
@@ -43,6 +43,34 @@ from mlek_tools.optimize.tflite import run_vela
 from mlek_tools.setup.install import install_executorch_project, setup_executorch, setup_vela
 from mlek_tools.setup.python_venv import set_up_python_venv
 from mlek_tools.use_case.model import UseCase, load_use_case_resources
+
+
+def _merge_npu_configs(
+        default_npu_configs: typing.Sequence[NpuConfig],
+        additional_npu_config_names: typing.Sequence[str],
+) -> typing.List[NpuConfig]:
+    """
+    Merge default and additional NPU configurations without losing memory modes.
+
+    :param default_npu_configs:             Configs supplied by the caller.
+    :param additional_npu_config_names:     Extra config names requested by users.
+    :return:                                Ordered unique NPU configs.
+    """
+    merged_configs: typing.List[NpuConfig] = []
+    seen_configs: typing.Set[NpuConfig] = set()
+
+    for config in itertools.chain(
+            default_npu_configs,
+            (
+                NpuConfig.from_name(config_name)
+                for config_name in additional_npu_config_names
+            ),
+    ):
+        if config not in seen_configs:
+            seen_configs.add(config)
+            merged_configs.append(config)
+
+    return merged_configs
 
 
 def _update_metadata(
@@ -163,7 +191,7 @@ def set_up_resources(
         executorch_config: ExecuTorchConfig,
         paths_config: PathsConfig,
         setup_script_hash: str,
-        default_npu_configs: NpuConfigs,
+        default_npu_configs: typing.Sequence[NpuConfig],
         default_downloads_path: typing.Optional[Path] = None,
         min_python_version: typing.Tuple[int, int] = (3, 10),
 ) -> Path:
@@ -240,11 +268,11 @@ def set_up_resources(
                     logging.info("Installing dependencies for %s", resource.model)
                     install_executorch_project(python_env, resource)
 
-    # Resolve which NPU configs to compile for, merging defaults with any extras.
-    npu_config_names = set(
-        default_npu_configs.names + list(optimizer_config.additional_npu_config_names)
+    # Resolve which NPU configs to compile for, preserving memory-mode variants.
+    tflm_npu_configs = _merge_npu_configs(
+        default_npu_configs,
+        optimizer_config.additional_npu_config_names,
     )
-    tflm_npu_configs = [get_default_npu_config_from_name(n) for n in npu_config_names]
 
     executorch_npu_configs: typing.List[typing.Optional[NpuConfig]] = [
         config for config in tflm_npu_configs

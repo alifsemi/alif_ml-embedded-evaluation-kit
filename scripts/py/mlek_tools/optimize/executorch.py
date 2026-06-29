@@ -133,7 +133,9 @@ def optimize_executorch_model(
         model_name = Path(model_res).name.split('.')[0]
 
     if npu_config is not None:
-        optimized_model_name = f"{model_name}_arm_delegate_{npu_config.config_name}.pte"
+        optimized_model_name = (
+            f"{model_name}_{npu_config.delegate_target_suffix}.pte"
+        )
         vela_flags = context.optimizer_config.to_vela_extra_flags(npu_config.memory_mode)
         lowering_entrypoint: typing.Union[str, Path] = (
             lowering_script if lowering_script is not None else _MLEK_LOWERING_SCRIPT

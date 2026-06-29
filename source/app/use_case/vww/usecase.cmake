@@ -43,7 +43,7 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/vww4_128_128_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/vww4_128_128_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.tflite)
 else()
     set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/vww4_128_128_INT8.tflite)
 endif()

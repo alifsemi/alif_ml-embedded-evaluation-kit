@@ -29,7 +29,11 @@ from pathlib import Path
 
 from scripts.py.mlek_tools.config.download import DownloadConfig
 from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
-from scripts.py.mlek_tools.config.npu import NpuConfigs, valid_npu_configs
+from scripts.py.mlek_tools.config.npu import (
+    Npu,
+    NpuConfig,
+    supported_npu_config_names,
+)
 from scripts.py.mlek_tools.config.optimizer import OptimizerConfig
 from scripts.py.mlek_tools.config.paths import PathsConfig
 from scripts.py.mlek_tools.config.tflite import TfliteConfig
@@ -64,10 +68,10 @@ MIN_PYTHON_VERSION = (3, 10)
 EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS = ("U65",)
 
 # Default NPU configurations always optimised when models are downloaded.
-default_npu_configs = NpuConfigs.create(
-    valid_npu_configs.get("ethos-u55", 128),
-    valid_npu_configs.get("ethos-u65", 256),
-    valid_npu_configs.get("ethos-u85", 256),
+default_npu_configs = (
+    NpuConfig(Npu.ETHOS_U55, 128, Npu.ETHOS_U55.default_memory_mode),
+    NpuConfig(Npu.ETHOS_U65, 256, Npu.ETHOS_U65.default_memory_mode),
+    NpuConfig(Npu.ETHOS_U85, 256, Npu.ETHOS_U85.default_memory_mode),
 )
 
 _current_file_dir = Path(__file__).parent.resolve()
@@ -179,10 +183,16 @@ if __name__ == "__main__":
         action="store",
     )
     parser.add_argument(
+        "--additional-npu-config-name",
         "--additional-ethos-u-config-name",
-        help=f"Additional (non-default) NPU configurations for Vela: {valid_npu_configs.names}",
+        help=f"Additional NPU configurations for Vela. "
+             f"Unqualified names select default memory modes: "
+             f"{supported_npu_config_names()}. "
+             f"Memory mode may also be specified: "
+             f"{supported_npu_config_names(memory_mode=True)}",
         default=[],
         action="append",
+        dest="additional_ethos_u_config_name",
     )
     parser.add_argument(
         "--use-case",

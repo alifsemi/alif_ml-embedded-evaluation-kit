@@ -84,6 +84,11 @@ class TargetConfig:
     memory_mode: str
     extra_vela_flags: typing.Tuple[str, ...] = ()
 
+    @property
+    def delegate_target_suffix(self) -> str:
+        """ExecuTorch delegated output suffix for this target."""
+        return f"arm_delegate_{self.target_name}_{self.memory_mode}"
+
 
 def preprocess_audio(audio: Path | str) -> torch.Tensor:
     """
@@ -222,7 +227,9 @@ def generate_pte(
     model_name = Path(checkpoint_path).name.split('.')[0]
 
     if cfg.target_name.startswith("ethos-u"):
-        output_model_name = f"{model_name}_arm_delegate_{cfg.target_name}.pte"
+        output_model_name = (
+            f"{model_name}_{cfg.delegate_target_suffix}.pte"
+        )
         exported_program, partitioner = quantize(
             graph_module,
             example_inputs,

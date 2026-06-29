@@ -14,7 +14,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Sidecar metadata helpers for optimized model outputs."""
-import dataclasses
 import hashlib
 import json
 import typing
@@ -105,7 +104,7 @@ def build_optimization_metadata(
     metadata = {
         "input": str(input_model),
         "input_hash": get_optimization_input_hash(input_model),
-        "npu_config": dataclasses.asdict(npu_config) if npu_config is not None else None,
+        "npu_config": npu_config.to_metadata_dict() if npu_config is not None else None,
         "ethosu_vela_version": vela_version,
         "vela_flags": vela_flags,
     }

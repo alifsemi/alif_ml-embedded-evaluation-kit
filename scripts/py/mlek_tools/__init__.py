@@ -25,13 +25,14 @@ from mlek_tools.config import (
     CopFormat,
     DownloadConfig,
     ExecuTorchConfig,
+    MemoryMode,
+    Npu,
     NpuConfig,
-    NpuConfigs,
+    iter_npu_configs,
     OptimizerConfig,
     PathsConfig,
     TfliteConfig,
-    get_default_npu_config_from_name,
-    valid_npu_configs,
+    supported_npu_config_names,
 )
 from mlek_tools.config import __all__ as _config_exports
 from mlek_tools.orchestrate import set_up_resources

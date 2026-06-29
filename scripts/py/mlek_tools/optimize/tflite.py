@@ -64,7 +64,7 @@ def run_vela(
     :return:                    ``True`` if optimization was skipped.
     """
     # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
-    new_suffix = f"_vela_{config.config_id}.tflite"
+    new_suffix = f"{config.vela_output_suffix}.tflite"
     optimized_model_path = output_dir / (model.stem + new_suffix)
     vela_flags = optimizer_config.to_vela_extra_flags(config.memory_mode)
     optimization_metadata = build_optimization_metadata(
@@ -73,7 +73,7 @@ def run_vela(
         vela_version,
         vela_flags,
     )
-    work_parent_dir = output_dir / config.config_name
+    work_parent_dir = output_dir / f"{config.config_name}_{config.memory_mode}"
 
     if output_matches_optimization_metadata(optimized_model_path, optimization_metadata):
         logging.info("File %s exists, skipping optimisation.", optimized_model_path)
@@ -111,7 +111,10 @@ def run_vela(
         call_command(vela_command, buffer_logs=True)
 
         for vela_output in work_dir.glob("*"):
-            new_file_name = f"{vela_output.stem}_{config.config_id}{vela_output.suffix}"
+            new_file_name = (
+                f"{vela_output.stem}_{config.filename_suffix}"
+                f"{vela_output.suffix}"
+            )
             logging.info("Renaming %s to %s.", vela_output.name, new_file_name)
             vela_output.rename(output_dir / new_file_name)
     try:

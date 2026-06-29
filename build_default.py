@@ -32,8 +32,8 @@ from pathlib import Path
 from scripts.py.mlek_tools.config.download import DownloadConfig
 from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
 from scripts.py.mlek_tools.config.npu import (
-    get_default_npu_config_from_name,
-    valid_npu_configs,
+    NpuConfig,
+    supported_npu_config_names,
 )
 from scripts.py.mlek_tools.config.optimizer import OptimizerConfig
 from scripts.py.mlek_tools.config.paths import PathsConfig
@@ -110,7 +110,7 @@ class BuildConfig:
     Attributes:
         toolchain (str)             : Specifies if 'gnu' or 'arm' toolchain needs to be used.
         download_resources (bool)   : Specifies if 'Download resources' step is performed.
-        npu_config_name (str)       : Ethos-U NPU configuration name. See "valid_npu_config_names"
+        npu_config_name (str)       : Ethos-U NPU configuration name.
         fpga (bool)                 : Build for FPGA instead of FVP
                                     (only when these platforms differ)
         make_jobs (int)             : The number of make jobs to use (`-j` flag).
@@ -261,7 +261,7 @@ def run(
             "toolchains" /
             toolchain_file_name
     )
-    ethos_u_cfg = get_default_npu_config_from_name(build_config.npu_config_name)
+    ethos_u_cfg = NpuConfig.from_name(build_config.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
     if build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO:
         # TensorFlow Lite Micro is already the default option. Just ensure
@@ -291,6 +291,7 @@ def run(
             f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
             f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
             f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
+            f" -DETHOS_U_NPU_MEMORY_MODE={ethos_u_cfg.memory_mode}"
             f" {framework_arg}"
             f" {fpga_arg}"
         ),
@@ -342,8 +343,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
-            {valid_npu_configs.names}""",
-        default=default_npu_configs.names[0],
+            {supported_npu_config_names()}
+            Memory mode may also be specified:
+            {supported_npu_config_names(memory_mode=True)}""",
+        default=default_npu_configs[0].config_name,
     )
     parser.add_argument(
         "--fpga",
