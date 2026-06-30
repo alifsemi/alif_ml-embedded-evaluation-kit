@@ -73,6 +73,7 @@ target_include_directories(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/Device/core/common/config
     ${ALIF_CMSIS_PATH}/ospi_xip/source/ospi # hopyfully this wont'd be needed and ospi_private.h will be moved (also change the name)
     ${ALIF_CMSIS_PATH}/libs/board_config
+    ${ALIF_CMSIS_PATH}/libs/isp
     ${ALIF_CMSIS_PATH}/libs/isp/inc
     ${ALIF_CMSIS_PATH}/se_services/port/include
     Boards/${TARGET_BOARD}
