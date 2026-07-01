@@ -115,12 +115,6 @@ int32_t isp_configure(uint32_t width, uint32_t height)
     // Configure ISP output resolution
     isp_param_set_output_dimensions(width, height);
 
-
-    res = Driver_ISP.SetConfig(&calibration_data, &port_attr, &chan_attr);
-    if (res != ARM_DRIVER_OK) {
-        return res;
-    }
-
     res = Driver_ISP.Initialize(CameraEventHandler);
     if (res != ARM_DRIVER_OK) {
         return res;
@@ -170,18 +164,10 @@ int32_t camera_init(uint8_t* buffer)
     GPIO_Driver_PWR->SetValue(BOARD_CAMERA_POWER_PIN_NO, GPIO_PIN_OUTPUT_STATE_HIGH);
 #endif
 
-    int32_t res = 0;
-#if RTE_ISP
-    res = Driver_ISP.SetConfig(&calibration_data, &port_attr, &chan_attr);
-    if (res != ARM_DRIVER_OK) {
-        printf("Failed to set ISP configuration: %ld\n", res);
-        return res;
-    }
-#endif
-
     //////////////////////////////////////////////////////////////////////////////
     // Camera initialization
     //////////////////////////////////////////////////////////////////////////////
+    int32_t res = 0;
 #ifdef RESOLUTION_PARAMETER
     res = camera->Initialize(RESOLUTION_PARAMETER, CameraEventHandler);
 #else

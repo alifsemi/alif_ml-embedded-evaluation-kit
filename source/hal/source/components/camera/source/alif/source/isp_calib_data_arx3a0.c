@@ -16,55 +16,105 @@
 
 ISP_CALIB_DATA_S calibration_data = {
     .modules = {
-    		.autoRoute = {
-    			.autoRoute = {100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200,
-    					102400, 204800, 409600, 819200, 1638400, 3276800},
-    		},
+        .autoRoute = {
+            .autoRoute = {100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200,
+                    102400, 204800, 409600, 819200, 1638400, 3276800},
+        },
 #if (RTE_ISP_BLS_MODULE)
-		.bls = {
-			.enable = 1,
-			.opType = OP_TYPE_AUTO,
-			.manualAttr = {
-				.blackLevel = {64, 64, 64, 64},
-			},
-			.autoAttr = {
-				.blackLevel  = {
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-					{64, 64, 64, 64},
-				},
-			},
-		},
+        .bls = {
+            .enable = 1,
+            .opType = OP_TYPE_MANUAL,
+            .manualAttr = {
+                .blackLevel = {64, 64, 64, 64},
+            },
+            .autoAttr = {
+                .blackLevel  = {
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                    {64, 64, 64, 64},
+                },
+            },
+        },
 #endif /* RTE_ISP_BLS_MODULE */
 #if (RTE_ISP_EXPM_MODULE)
-		.aem = {
-			.enable = 1,
-			.expAltMode = 0,
-			.blockWin = {
-				.hOffs = 0,
-				.vOffs = 0,
-				.hSize = RTE_ARX3A0_CAMERA_SENSOR_FRAME_WIDTH,
-				.vSize = RTE_ARX3A0_CAMERA_SENSOR_FRAME_HEIGHT,
-			},
-		},
+        .aem = {
+            .enable = 1,
+            .expAltMode = 0,
+            .blockWin = {
+                .hOffs = 0,
+                .vOffs = 0,
+                .hSize = RTE_ARX3A0_CAMERA_SENSOR_FRAME_WIDTH,
+                .vSize = RTE_ARX3A0_CAMERA_SENSOR_FRAME_HEIGHT,
+            },
+        },
 #endif /* RTE_ISP_EXPM_MODULE */
+
+#if (RTE_ISP_AE_MODULE)
+        .ae = {
+            .opType = OP_TYPE_AUTO,
+            .manualAttr = {
+                .intTime = 10165,
+                .again = 10 * 1024,
+                .dgain = 1024,
+            },
+            .autoAttr = {
+                .expTimeRange = {
+                    .min =  100,
+                    .max =  10165,
+                },
+                .againRange = {
+                    .min = 1 * 1024,
+                    .max = 10 * 1024,
+                },
+                .dgainRange = {
+                    .min = 1024,
+                    .max = 8 * 1024,
+                },
+                .aeRunInterval = 6,
+                .aeTarget = 100,
+                .dampOver = 0x10,
+                .dampUnder = 0x10,
+                .tolerance = 30,
+                .antiflicker = {
+                    .enable = 0,
+                    .flickerFreq = 100,
+                },
+                .aeMode = AE_MODE_FIX_FRAME_RATE,
+                .gainThreshold = 12000,
+                .aeRoute = {
+                    .totalNum = 0,
+                },
+                .aeDelayAttr = {
+                    .blackDelayFrame = 0,
+                    .whiteDelayFrame = 0,
+                },
+                .weight = {
+                    {1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1},
+                    {1, 1, 1, 1, 1}
+                },
+            },
+        },
+#endif /* RTE_ISP_AE_MODULE */
 
 #if (RTE_ISP_WBM_MODULE)
         .wbm = {
-            .enable   = 1,
+            .enable   = 0,
             .measMode = ISP_AWB_MEAS_MODE_RGB,
             .measRect = {
                 .hOffs = 0,
@@ -84,100 +134,98 @@ ISP_CALIB_DATA_S calibration_data = {
 #endif /* RTE_ISP_WBM_MODULE */
 
 #if (RTE_ISP_WB_MODULE)
-		.wb = {
-			.enable = 1,
-			.opType = OP_TYPE_AUTO,
-			.manualAttr = {
-				.wbGain = {0x100, 0x100, 0x100, 0x100},
-			},
-			.autoAttr = {
-				.runInterval = 1,
-				.speed = 64,
-				.tolerance = 1,
-				.initColorTemp = 5000,
-				.calibParam = {
-					.centLine = {-766376, -642393, -2921800},
-					.rgMin = 1086700,
-					.rgMax = 3050800,
-					.wpRange0 = {
-						.wpLCurve = {
-							.rg = { 790659, 953496, 1087350, 1277770,
-								1427190, 1521530, 1594220, 1791900,
-								1965800, 2113520, 2264770, 2450610,
-								2600660, 2750720, 2818650,
-								3050800 },
-							.dist = { 560682, 506246, 480332, 408497,
-								256789, 269600, 317996, 416285,
-								245149, 80289, -42413, -71649,
-								-4396, 111498, 229011, 453350 },
-						},
-						.wpRCurve = {
-							.rg = { 796080, 971478, 1096380, 1295500,
-								1423700, 1550280, 1700330, 1850390,
-								2000440, 2150500, 2300550, 2450610,
-								2630520, 2750720, 2900770,
-								3050800 },
-							.dist = { -48178, 37442, 108593, 173398,
-								161051, 170806, 219416, 259086,
-								288821, 304528, 301610, 271649,
-								266912,  88502,  -67514,
-								-253350 },
-						},
-					},
-					.wpRange1 = {
-						.wpLCurve = {
-							.rg = { 791651, 1289310, 1508700, 1631550,
-								1762950, 1861430, 1976370, 2091310,
-								2206250, 2321190, 2490840, 2629990,
-								2687900, 2780950, 2895890,
-								3010800 },
-							.dist = { -178231, 46924, 124591, 108020,
-								168323, 171752, 194948, 210209,
-								216012, 209423, 225067, 235329,
-								111501, -30197, -152124, -292180 },
-						},
-
-						.wpRCurve = {
-							.rg =  { 797383, 1275640, 1482030, 1601860,
-								1792600, 1869890, 1959780, 2076980,
-								2281190, 2332430, 2431000, 2574250,
-								2654400, 2765620, 2839520,
-								3010800 },
-							.dist = { 449646, 289261, 93411, 142743,
-								266621, 286629, 206521, 53599,
-								-134047, -144737, -124515, -148586,
-								-49479,  73539,  227056, 312180 },
-						},
-					},
-					.illuminant[ILLUMINANT_A] = {
-						.illuType = ILLUMINANT_A,
-						.colorTemp = 2856,
-						.wbGain = { 0x15e, 0x100, 0x100, 0x301 },
-					},
-					.illuminant[ILLUMINANT_TL84] = {
-						.illuType = ILLUMINANT_TL84,
-						.colorTemp = 4000,
-						.wbGain = { 0x1b5, 0x100, 0x100, 0x23D },
-					},
-					.illuminant[ILLUMINANT_CWF] = {
-						.illuType = ILLUMINANT_CWF,
-						.colorTemp = 4100,
-						.wbGain = { 0x216, 0x100, 0x100, 0x25c },
-					},
-					.illuminant[ILLUMINANT_D50] = {
-						.illuType = ILLUMINANT_D50,
-						.colorTemp = 5000,
-						.wbGain = { 0x245, 0x100, 0x100, 0x1AE },
-					},
-					.illuminant[ILLUMINANT_D65] = {
-						.illuType = ILLUMINANT_D65,
-						.colorTemp = 6500,
-						.wbGain = { 0x286, 0x100, 0x100, 0x15E },
-					},
-				},
-			},
-		},
-
+        .wb = {
+            .enable = 0,
+            .opType = OP_TYPE_AUTO,
+            .manualAttr = {
+                .wbGain = {0x100, 0x100, 0x100, 0x100},
+            },
+            .autoAttr = {
+                .runInterval = 1,
+                .speed = 64,
+                .tolerance = 1,
+                .initColorTemp = 5000,
+                .calibParam = {
+                    .centLine = {-766376, -642393, -2921800},
+                    .rgMin = 1086700,
+                    .rgMax = 3050800,
+                    .wpRange0 = {
+                        .wpLCurve = {
+                            .rg = { 790659, 953496, 1087350, 1277770,
+                                1427190, 1521530, 1594220, 1791900,
+                                1965800, 2113520, 2264770, 2450610,
+                                2600660, 2750720, 2818650,
+                                3050800 },
+                            .dist = { 560682, 506246, 480332, 408497,
+                                256789, 269600, 317996, 416285,
+                                245149, 80289, -42413, -71649,
+                                -4396, 111498, 229011, 453350 },
+                        },
+                        .wpRCurve = {
+                            .rg = { 796080, 971478, 1096380, 1295500,
+                                1423700, 1550280, 1700330, 1850390,
+                                2000440, 2150500, 2300550, 2450610,
+                                2630520, 2750720, 2900770,
+                                3050800 },
+                            .dist = { -48178, 37442, 108593, 173398,
+                                161051, 170806, 219416, 259086,
+                                288821, 304528, 301610, 271649,
+                                266912,  88502,  -67514,
+                                -253350 },
+                        },
+                    },
+                    .wpRange1 = {
+                        .wpLCurve = {
+                            .rg = { 791651, 1289310, 1508700, 1631550,
+                                1762950, 1861430, 1976370, 2091310,
+                                2206250, 2321190, 2490840, 2629990,
+                                2687900, 2780950, 2895890,
+                                3010800 },
+                            .dist = { -178231, 46924, 124591, 108020,
+                                168323, 171752, 194948, 210209,
+                                216012, 209423, 225067, 235329,
+                                111501, -30197, -152124, -292180 },
+                        },
+                        .wpRCurve = {
+                            .rg =  { 797383, 1275640, 1482030, 1601860,
+                                1792600, 1869890, 1959780, 2076980,
+                                2281190, 2332430, 2431000, 2574250,
+                                2654400, 2765620, 2839520,
+                                3010800 },
+                            .dist = { 449646, 289261, 93411, 142743,
+                                266621, 286629, 206521, 53599,
+                                -134047, -144737, -124515, -148586,
+                                -49479,  73539,  227056, 312180 },
+                        },
+                    },
+                    .illuminant[ILLUMINANT_A] = {
+                        .illuType = ILLUMINANT_A,
+                        .colorTemp = 2856,
+                        .wbGain = { 0x15e, 0x100, 0x100, 0x301 },
+                    },
+                    .illuminant[ILLUMINANT_TL84] = {
+                        .illuType = ILLUMINANT_TL84,
+                        .colorTemp = 4000,
+                        .wbGain = { 0x1b5, 0x100, 0x100, 0x23D },
+                    },
+                    .illuminant[ILLUMINANT_CWF] = {
+                        .illuType = ILLUMINANT_CWF,
+                        .colorTemp = 4100,
+                        .wbGain = { 0x216, 0x100, 0x100, 0x25c },
+                    },
+                    .illuminant[ILLUMINANT_D50] = {
+                        .illuType = ILLUMINANT_D50,
+                        .colorTemp = 5000,
+                        .wbGain = { 0x245, 0x100, 0x100, 0x1AE },
+                    },
+                    .illuminant[ILLUMINANT_D65] = {
+                        .illuType = ILLUMINANT_D65,
+                        .colorTemp = 6500,
+                        .wbGain = { 0x286, 0x100, 0x100, 0x15E },
+                    },
+                },
+            },
+        },
 #endif /* RTE_ISP_WB_MODULE */
 
 #if (RTE_ISP_DMSC_MODULE)
@@ -205,18 +253,18 @@ ISP_CALIB_DATA_S calibration_data = {
 #endif /* RTE_ISP_DMSC_MODULE */
 
 #if (RTE_ISP_FLT_MODULE)
-		.flt = {
-			.enable = 1,
-			.opType = OP_TYPE_AUTO,
-			.manualAttr = {
-				.denoiseLevel = 0,
-				.sharpenLevel = 0,
-			},
-			.autoAttr = {
-				.denoiseLevel = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-				.sharpenLevel = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-			},
-		},
+        .flt = {
+            .enable = 1,
+            .opType = OP_TYPE_AUTO,
+            .manualAttr = {
+                .denoiseLevel = 0,
+                .sharpenLevel = 0,
+            },
+            .autoAttr = {
+                .denoiseLevel = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                .sharpenLevel = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            },
+        },
 #endif /* RTE_ISP_FLT_MODULE */
 
 #if (RTE_ISP_CCM_MODULE)
@@ -263,20 +311,20 @@ ISP_CALIB_DATA_S calibration_data = {
 #endif /* RTE_ISP_CCM_MODULE */
 
 #if (RTE_ISP_GAMMAOUT_MODULE)
-		.gammaOut = {
-			.enable = 1,
-			.gammaY = {
-				0x000, 0x049, 0x089, 0x0B7, 0x0DF, 0x11F, 0x154, 0x183, 0x1AD,
-				0x1F6, 0x235, 0x26F, 0x2D3, 0x32A, 0x378, 0x3BF, 0x3FF
-			},
-		},
+        .gammaOut = {
+            .enable = 1,
+            .gammaY = {
+                0x000, 0x049, 0x089, 0x0B7, 0x0DF, 0x11F, 0x154, 0x183, 0x1AD,
+                0x1F6, 0x235, 0x26F, 0x2D3, 0x32A, 0x378, 0x3BF, 0x3FF
+            },
+        },
 #endif /* RTE_ISP_GAMMAOUT_MODULE */
 
 #if (RTE_ISP_CSM_MODULE)
-		.csm = {
-			.type = ISP_CSM_TYPE_601,
-			.quantization = ISP_CSM_LIM_RANGE,
-		},
+        .csm = {
+            .type = ISP_CSM_TYPE_601,
+            .quantization = ISP_CSM_LIM_RANGE,
+        },
 #endif /* RTE_ISP_CSM_MODULE */
 
 
