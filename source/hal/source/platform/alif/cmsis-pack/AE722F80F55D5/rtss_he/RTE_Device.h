@@ -2241,7 +2241,7 @@
 // <o> OSPI0 DFS
 // <i> Defines OSPI0 Data Frame Size
 // <i> Default: 32
-#define RTE_OSPI0_DFS                             16
+#define RTE_OSPI0_DFS                             32
 
 // <o> OSPI0 TX FIFO Start level <0-255>
 // <i> Defines TX FIFO transfer start level for OSPI0

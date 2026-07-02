@@ -2000,6 +2000,7 @@
 // <e> "APS512XXN PSRAM" connected to HSPI presence flag
 #define BOARD_APS512XXN_PSRAM_PRESENT                   0
 #define BOARD_FLASH_OSPI_SS                             1
+#define BOARD_RAM_OSPI_SS                               0
 #define BOARD_HAS_IS25WX_FLASH                          1
 
 #define BOARD_OSPI_RAM_BASE                     0xA0000000

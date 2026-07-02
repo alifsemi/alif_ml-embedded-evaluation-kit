@@ -121,6 +121,13 @@ target_sources(${CMSIS_DEVICE_TARGET}
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/MX66UW1G.c>
     )
 
+if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "AppKit-e8"))
+    target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/APS512XXN_PSRAM.c>
+    )
+endif()
+
 # Alif DFP RTE_Components does not support yet building the module if it is disabled
 if (NOT IS_BALLETTO_DEVICE)
     target_sources(${CMSIS_DEVICE_TARGET}

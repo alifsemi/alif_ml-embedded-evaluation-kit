@@ -2428,11 +2428,14 @@
 // <o> "MIC_INPUT_SCLK" GPIO pin alternate function <0-7>
 #define BOARD_MIC_INPUT_SCLK_ALTERNATE_FUNCTION         2
 
+// NOTE: Both ISSI and APS512XXN PSRAM are enabled for DevKit-E8
+//       because either of them can be present on the board. The actual presence is detected in runtime.
 // <e> "ISSI HYPERRAM" connected to HSPI presence flag
 #define BOARD_ISSI_HYPERRAM_PRESENT                     1
 
 // <e> "APS512XXN PSRAM" connected to HSPI presence flag
-#define BOARD_APS512XXN_PSRAM_PRESENT                   0
+#define BOARD_APS512XXN_PSRAM_PRESENT                   1
+#define BOARD_APS512XXN_PSRAM_DUAL_OCTAL_MODE_ENABLE    0
 
 #define BOARD_OSPI0_SPI_FRAME_FORMAT                    3
 #define BOARD_OSPI0_WAIT_CYCLES                         6

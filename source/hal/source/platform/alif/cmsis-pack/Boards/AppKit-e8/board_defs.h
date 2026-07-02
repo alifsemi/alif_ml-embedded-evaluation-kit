@@ -1365,6 +1365,7 @@
 
 // <e> "APS512XXN PSRAM" connected to HSPI presence flag
 #define BOARD_APS512XXN_PSRAM_PRESENT                   1
+#define BOARD_APS512XXN_PSRAM_DUAL_OCTAL_MODE_ENABLE    1
 
 #define BOARD_OSPI0_SPI_FRAME_FORMAT                    4
 #define BOARD_OSPI0_WAIT_CYCLES                         4
