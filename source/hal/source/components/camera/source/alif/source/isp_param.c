@@ -33,7 +33,7 @@
 #elif RTE_MT9M114_CAMERA_SENSOR_MIPI_ENABLE
 #define CAMERA_SENSOR_FRAME_WIDTH   RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH
 #define CAMERA_SENSOR_FRAME_HEIGHT  RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT
-#define CAMERA_SENSOR_PIXEL_FORMAT  PIXEL_FORMAT_GRBG8
+#define CAMERA_SENSOR_PIXEL_FORMAT  PIXEL_FORMAT_GRBG10
 #include "isp_calib_data_mt9m114.c"
 #elif RTE_OV5675_CAMERA_SENSOR_ENABLE
 #define CAMERA_SENSOR_FRAME_WIDTH   RTE_OV5675_CAMERA_SENSOR_FRAME_WIDTH
@@ -113,6 +113,12 @@ void isp_param_set_crop(vsi_u32_t top, vsi_u32_t left, vsi_u32_t width, vsi_u32_
     port_attr.outFormRect.left   = top;
     port_attr.outFormRect.width  = width;
     port_attr.outFormRect.height = height;
+
+    /* Set the AE measurement block to match the crop region */
+    calibration_data.modules.aem.blockWin.hOffs = 0;
+    calibration_data.modules.aem.blockWin.vOffs = 0;
+    calibration_data.modules.aem.blockWin.hSize = width;
+    calibration_data.modules.aem.blockWin.vSize = height;
 }
 
 

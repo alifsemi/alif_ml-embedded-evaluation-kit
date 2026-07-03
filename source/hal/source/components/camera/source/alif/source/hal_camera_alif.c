@@ -200,6 +200,10 @@ static hal_cam_status wait_for_capture(void)
     while ( hal_camera_get_status() != HAL_CAMERA_STATUS_STOPPED) {
         __WFE();
     }
+
+    if (camera_process_frame_end() != ARM_DRIVER_OK) {
+        s_cam_dev.status = HAL_CAMERA_STATUS_ERROR;
+    }
 #else
     s_cam_dev.status = HAL_CAMERA_STATUS_STOPPED;
 #endif

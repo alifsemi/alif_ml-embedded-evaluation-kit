@@ -40,7 +40,6 @@ extern ARM_DRIVER_CPI Driver_CPI;
 static const ARM_DRIVER_CPI * const camera = &Driver_CPI;
 #endif
 
-#include "Driver_Common.h"
 #include "image_processing.h"
 #include "hal_log.h"
 
@@ -59,6 +58,9 @@ static bool isp_buffers_configured = false;
 static uint8_t* camera_capture_buffer = 0;
 static atomic_int image_received = 0;
 static bool init_done = false;
+
+    
+
 
 static void CameraEventHandler(uint32_t event)
 {
@@ -260,18 +262,44 @@ int32_t camera_gain(uint32_t gain)
     return camera->Control(CPI_CAMERA_SENSOR_GAIN, gain);
 }
 
-int32_t camera_wait()
+int32_t camera_process_frame_end()
 {
-    while (!image_received) {
-        __WFE();
-    };
-
 #if RTE_ISP
     int32_t res = camera->Control(ISP_PROCESS_FRAME_END, 0);
     if (res != ARM_DRIVER_OK) {
         printf("Error: ISP Process Frame End failed: %ld\n", res);
         return res;
     }
+
+#if RTE_ISP_AE_MODULE
+    // Apply AE-computed exposure and gain to the sensor. 
+    static uint32_t prev_int_line = 0;
+    static uint32_t prev_gain_q16_16 = 0;
+    struct isp_ae_cached_values ae = {0};
+    res = Driver_ISP.Control(ISP_CONTROL_AE_GET_CACHED, (uint32_t)&ae);
+    if (res == ARM_DRIVER_OK && ae.int_line != 0) {
+        uint32_t gain_q16_16 = (ae.again * ae.dgain) / 16;
+        if (ae.int_line != prev_int_line || gain_q16_16 != prev_gain_q16_16) {
+            debug("AE set: intLine=%lu again=%lu dgain=%lu\n",
+                    (unsigned long)ae.int_line,
+                    (unsigned long)ae.again,
+                    (unsigned long)ae.dgain);
+            res = camera->Control(CPI_ISP_CAMERA_SENSOR_EXPOSURE, ae.int_line);
+            if (res != ARM_DRIVER_OK) {
+                printf("Error: Setting camera exposure failed: %ld\n", res);
+                return res;
+            }
+            res = camera->Control(CPI_ISP_CAMERA_SENSOR_GAIN, gain_q16_16);
+            if (res != ARM_DRIVER_OK) {
+                printf("Error: Setting camera gain failed: %ld\n", res);
+                return res;
+            }
+            prev_int_line = ae.int_line;
+            prev_gain_q16_16 = gain_q16_16;
+        }
+    }
+#endif /* RTE_ISP_AE_MODULE */
+
 #endif
 
     return ARM_DRIVER_OK;

@@ -51,7 +51,7 @@ ISP_CALIB_DATA_S calibration_data = {
 #endif /* RTE_ISP_BLS_MODULE */
 #if (RTE_ISP_EXPM_MODULE)
         .aem = {
-            .enable = 0,
+            .enable = 1,
             .expAltMode = 0,
             .blockWin = {
                 .hOffs = 0,
@@ -64,7 +64,7 @@ ISP_CALIB_DATA_S calibration_data = {
 
 #if (RTE_ISP_AE_MODULE)
         .ae = {
-            .opType = OP_TYPE_MANUAL,
+            .opType = OP_TYPE_AUTO,
             .manualAttr = {
                 .intTime = 10000,
                 .again = 3072,
@@ -73,21 +73,21 @@ ISP_CALIB_DATA_S calibration_data = {
             .autoAttr = {
                 .expTimeRange = {
                     .min =  100,
-                    .max =  300000,
+                    .max =  33000,
                 },
                 .againRange = {
-                    .min = 3 * 1024,
-                    .max = 1056 * 1024,
+                    .min = 1024,
+                    .max = 8192,
                 },
                 .dgainRange = {
                     .min = 1024,
                     .max = 1024,
                 },
-                .aeRunInterval = 6,
-                .aeTarget = 100,
-                .dampOver = 0x10,
-                .dampUnder = 0x10,
-                .tolerance = 30,
+                .aeRunInterval = 3,
+                .aeTarget = 128,
+                .dampOver = 0x20,
+                .dampUnder = 0x20,
+                .tolerance = 1,
                 .antiflicker = {
                     .enable = 0,
                     .flickerFreq = 100,

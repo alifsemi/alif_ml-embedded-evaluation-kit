@@ -12,6 +12,7 @@
 #define CAMERA_H_
 
 #include <stdint.h>
+#include "Driver_Common.h"
 
 #define CAM_CTRL		0x00
 #define CAM_INTR		0x04
@@ -35,7 +36,7 @@ void camera_uninit();
 void camera_start(uint32_t mode);
 int32_t camera_gain(uint32_t gain);
 int32_t camera_vsync(uint32_t timeout_ms);
-int32_t camera_wait();
+int32_t camera_process_frame_end();
 bool camera_image_ready();
 
 #endif /* CAMERA_H_ */
