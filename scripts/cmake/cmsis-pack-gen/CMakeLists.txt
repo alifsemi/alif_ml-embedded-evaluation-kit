@@ -31,6 +31,9 @@ project(ml-embedded-eval-kit-lib
 option(CMSIS_PACK_GEN_FLOW "Enable CMSIS-pack generation flow" ON)
 
 set(MLEK_LIB_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../source/lib)
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_LIST_DIR}/..")
+include(ml_framework)
 
 # Add the lib but no framework implementation yet (by setting the proider
 # as external).
@@ -38,11 +41,11 @@ set(MLEK_RUNTIME_PROVIDER "External")
 add_subdirectory(${MLEK_LIB_PROJECT_DIR} ${CMAKE_BINARY_DIR}/mlek-lib)
 
 # Include support for TensorFlow Lite Micro implementation.
-set(ML_FRAMEWORK "TensorFlowLiteMicro")
+set(ML_FRAMEWORK "${ML_FRAMEWORK_TFLM}")
 add_subdirectory(${MLEK_LIB_PROJECT_DIR}/mlek/fwk/tflm
     ${CMAKE_BINARY_DIR}/mlek-lib/tflm)
 
 # Include ExecuTorch framework implementation.
-set(ML_FRAMEWORK "ExecuTorch")
+set(ML_FRAMEWORK "${ML_FRAMEWORK_EXECUTORCH}")
 add_subdirectory(${MLEK_LIB_PROJECT_DIR}/mlek/fwk/executorch
     ${CMAKE_BINARY_DIR}/mlek-lib/executorch)

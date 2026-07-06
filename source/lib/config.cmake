@@ -53,6 +53,10 @@ endif()
 # Add CMake scripts to module path
 list(APPEND CMAKE_MODULE_PATH ${MLEK_ROOT}/scripts/cmake)
 
+# ML Framework
+include(ml_framework)
+configure_ml_framework_option()
+
 # CMSIS sources
 set(CMSIS_DSP_SRC_PATH ${MLEK_DEPENDENCIES_DIR}/cmsis-dsp
     CACHE PATH "CMSIS-DSP path")

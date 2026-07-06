@@ -89,16 +89,16 @@ cmake --build build -j$(nproc)
 
 Key CMake options (see [build options](docs/sections/building.md#build-options) for full list):
 
-| Option | Values | Description |
-|--------|--------|-------------|
-| `TARGET_PLATFORM` | `mps3` (default), `mps4`, `native`, `simple_platform` | Target platform |
-| `TARGET_SUBSYSTEM` | `sse-300` (default), `sse-310`, `sse-315`, `sse-320` | Platform subsystem/design |
-| `ML_FRAMEWORK` | `TensorFlowLiteMicro` (default), `ExecuTorch` | ML inference framework |
-| `ETHOS_U_NPU_ID` | `U55` (default), `U65`, `U85` | Ethos-U NPU variant |
-| `ETHOS_U_NPU_ENABLED` | `ON` (default), `OFF` | Enable/disable NPU support |
-| `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED` | `ON` (default), `OFF` | Enable/disable timing adapter (simulates memory bandwidth/latency constraints; disable for faster builds) |
-| `USE_CASE_BUILD` | e.g. `img_class`, `"img_class;kws"` | Build only specific use cases |
-| `USE_SINGLE_INPUT` | `ON`, `OFF` (default) | Use single input sample per use case (faster for testing) |
+| Option                                  | Values                                                     | Description                                                                                           |
+|-----------------------------------------|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `TARGET_PLATFORM`                       | `mps3` (default), `mps4`, `native`, `simple_platform`      | Target platform                                                                                       |
+| `TARGET_SUBSYSTEM`                      | `sse-300` (default), `sse-310`, `sse-315`, `sse-320`       | Platform subsystem/design                                                                             |
+| `ML_FRAMEWORK`                          | `tflm` (default), `executorch`; aliases include `et`       | ML inference framework                                                                                |
+| `ETHOS_U_NPU_ID`                        | `U55` (default), `U65`, `U85`                              | Ethos-U NPU variant                                                                                   |
+| `ETHOS_U_NPU_ENABLED`                   | `ON` (default), `OFF`                                      | Enable/disable NPU support                                                                            |
+| `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED`    | `ON` (default), `OFF`                                      | Enable/disable timing adapter                                                                         |
+| `USE_CASE_BUILD`                        | e.g. `img_class`, `"img_class;kws"`                        | Build only specific use cases                                                                         |
+| `USE_SINGLE_INPUT`                      | `ON`, `OFF` (default)                                      | Use single input sample per use case (faster for testing)                                             |
 
 ## Testing
 

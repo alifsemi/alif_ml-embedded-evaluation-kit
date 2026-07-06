@@ -43,6 +43,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Include source generator.
 include(source_gen_utils)
+include(ml_framework)
 
 # Enable testing - allows top level to add tests.
 enable_testing()
@@ -75,10 +76,10 @@ assert_defined(CPU_PROFILE_ENABLED)
 assert_defined(CMAKE_TOOLCHAIN_FILE)
 
 if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
-        AND "ExecuTorch" STREQUAL "${ML_FRAMEWORK}")
+        AND "${ML_FRAMEWORK_EXECUTORCH}" STREQUAL "${ML_FRAMEWORK}")
     assert_defined(EXECUTORCH_SRC_PATH)
 elseif("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
-        AND "TensorFlowLiteMicro" STREQUAL "${ML_FRAMEWORK}")
+        AND "${ML_FRAMEWORK_TFLM}" STREQUAL "${ML_FRAMEWORK}")
     assert_defined(TENSORFLOW_SRC_PATH)
 endif()
 

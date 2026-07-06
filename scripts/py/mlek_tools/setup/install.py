@@ -32,14 +32,13 @@ def setup_vela(python_env: PythonEnv, tflite_config: TfliteConfig, parallel: int
     :param parallel:        Build parallelism (used only when installing from source).
     """
     if tflite_config.vela_install_from_source:
-        python_env.pip_install_if_needed(
-            f"git+{tflite_config.vela_url}@{tflite_config.vela_version}",
-            installed_name="ethos-u-vela",
-            environment={"CMAKE_BUILD_PARALLEL_LEVEL": parallel},
+        python_env.pip_install(
+            package_specs=f"git+{tflite_config.vela_url}@{tflite_config.vela_version}",
+            environment={"CMAKE_BUILD_PARALLEL_LEVEL": str(parallel)},
         )
     else:
-        python_env.pip_install_if_needed(
-            f"ethos-u-vela=={tflite_config.vela_version}"
+        python_env.pip_install(
+            package_specs=f"ethos-u-vela=={tflite_config.vela_version}",
         )
 
 
@@ -70,9 +69,10 @@ def setup_executorch(python_env: PythonEnv, executorch_config: ExecuTorchConfig)
     """Install ExecuTorch into *python_env* if not already present."""
     if not python_env.is_installed("executorch"):
         install_executorch(python_env, executorch_config)
+
     python_env.pip_install_if_needed(
-        executorch_config.cmsis_nn_path,
-        "cmsis-nn"
+        package_specs=executorch_config.cmsis_nn_path,
+        installed_names="cmsis-nn",
     )
 
 
@@ -88,7 +88,9 @@ def install_executorch_project(
     """
     if executorch_resource.requirements_path:
         if executorch_resource.requirements_path.exists():
-            python_env.pip_install_requirements(executorch_resource.requirements_path)
+            python_env.pip_install(
+                requirements_files=executorch_resource.requirements_path
+            )
         else:
             raise FileNotFoundError(
                 f"Requirements file does not exist: {executorch_resource.requirements_path}"

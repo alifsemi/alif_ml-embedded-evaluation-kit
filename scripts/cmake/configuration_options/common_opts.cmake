@@ -26,6 +26,7 @@ include_guard()
 message(STATUS "Assessing common user options...")
 
 include(util_functions)
+include(ml_framework)
 
 USER_OPTION(MLEK_LOG_ENABLE "Enable MLEK logging functions."
     ON
@@ -44,17 +45,15 @@ set_property(CACHE MLEK_RUNTIME_PROVIDER PROPERTY STRINGS
     External)
 
 USER_OPTION(ML_FRAMEWORK "Select the ML inference framework to be used."
-    "TensorFlowLiteMicro"
+    "${ML_FRAMEWORK_TFLM}"
     STRING
 )
 
-set_property(CACHE ML_FRAMEWORK PROPERTY STRINGS
-    TensorFlowLiteMicro
-    ExecuTorch)
+configure_ml_framework_option()
 
 ## TensorFlow options
 if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
-        AND "${ML_FRAMEWORK}" STREQUAL "TensorFlowLiteMicro")
+        AND "${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_TFLM}")
     USER_OPTION(TENSORFLOW_SRC_PATH "Path to the root of the TensorFlow Lite Micro sources."
             "${MLEK_DEPENDENCY_ROOT_DIR}/tensorflow"
             PATH)
@@ -71,7 +70,7 @@ if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
             ON
             BOOL)
 elseif ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
-        AND "${ML_FRAMEWORK}" STREQUAL "ExecuTorch")
+        AND "${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_EXECUTORCH}")
     USER_OPTION(EXECUTORCH_SRC_PATH "Root directory for ExecuTorch source tree."
             "${MLEK_DEPENDENCY_ROOT_DIR}/executorch"
             PATH)
@@ -95,7 +94,7 @@ USER_OPTION(USE_CASE_BUILD "Optional. Defines the use-case to build from the ava
     all
     STRING)
 
-USER_OPTION(CPU_PROFILE_ENABLED "Output CPU performance profiling information. Should be used only for MPS3 board."
+USER_OPTION(CPU_PROFILE_ENABLED "Output CPU performance profiling information. Should be used only for MPS3 and MPS4 boards."
     OFF
     BOOL)
 

@@ -16,6 +16,7 @@
 """Configuration dataclasses for mlek_tools."""
 from mlek_tools.config.download import DownloadConfig
 from mlek_tools.config.executorch import ExecuTorchConfig
+from mlek_tools.config.ml_framework import MLFramework, parse_ml_framework
 from mlek_tools.config.npu import (
     MemoryMode,
     Npu,
@@ -30,6 +31,8 @@ from mlek_tools.config.tflite import TfliteConfig
 __all__ = [
     "DownloadConfig",
     "ExecuTorchConfig",
+    "MLFramework",
+    "parse_ml_framework",
     "MemoryMode",
     "Npu",
     "NpuConfig",

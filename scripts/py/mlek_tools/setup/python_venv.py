@@ -18,6 +18,7 @@
 PythonEnv dataclass and helper for creating Python virtual environments.
 """
 import os
+import shlex
 import subprocess
 import sys
 import typing
@@ -26,6 +27,21 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from mlek_tools.setup.util import call_command
+
+PipInstallArg = typing.Union[str, Path]
+PipInstallArgs = typing.Union[PipInstallArg, typing.Iterable[PipInstallArg]]
+
+
+def _normalise_pip_args(pip_args: PipInstallArgs) -> typing.List[str]:
+    """
+    Convert pip install arguments into command-line tokens.
+
+    :param pip_args:   A single pip argument or an iterable of pip arguments.
+    :return:           Command-line tokens for ``pip install``.
+    """
+    if isinstance(pip_args, (str, Path)):
+        return [str(pip_args)]
+    return [str(pip_arg) for pip_arg in pip_args]
 
 
 @dataclass
@@ -69,59 +85,63 @@ class PythonEnv:
 
     def pip_install(
             self,
-            package_spec: str,
-            no_deps: bool = False,
-            environment: typing.Optional[typing.Dict] = None,
-    ) -> None:
+            package_specs: PipInstallArgs = (),
+            requirements_files: PipInstallArgs = (),
+            environment: typing.Optional[typing.Mapping[str, str]] = None,
+    ):
         """
-        Install a package or package spec into this virtual environment.
+        Install packages into this virtual environment.
 
-        :param package_spec:    Spec passed to ``pip install`` (name, path, URL, or
-                                a string that includes extra index flags).
-        :param no_deps:         Pass ``--no-deps`` to pip if True.
-        :param environment:     Optional dict of extra environment variables for the process.
+        :param package_specs:           Specs passed to ``pip install``. For pip options
+                                        that take a value, pass the option and its value
+                                        as separate entries.
+        :param requirements_files:      Requirements files passed to ``pip install`` as
+                                        ``-r`` arguments.
+        :param environment:             Extra environment variables for the process.
+        :raises ValueError:             If no package specs or requirements files are
+                                        supplied.
         """
-        no_deps_token = "--no-deps" if no_deps else ""
-        call_command(
-            f'"{self.python}" -m pip install {no_deps_token} {package_spec}',
-            env=environment,
-        )
+        package_args = _normalise_pip_args(package_specs)
+        requirements_args = _normalise_pip_args(requirements_files)
+        if not package_args and not requirements_args:
+            raise ValueError("No package specs or requirements files supplied.")
+
+        command = [str(self.python), "-m", "pip", "install"]
+        for requirements_file in requirements_args:
+            command.extend(["-r", requirements_file])
+        command.extend(package_args)
+
+        process_environment = os.environ.copy()
+        if environment is not None:
+            process_environment.update(environment)
+        call_command(shlex.join(command), env=process_environment)
 
     def pip_install_if_needed(
             self,
-            package_spec: typing.Union[str, Path],
-            installed_name: typing.Optional[str] = None,
-            no_deps: bool = False,
-            environment: typing.Optional[typing.Dict] = None,
-    ) -> None:
+            installed_names: typing.Union[str, typing.Iterable[str]],
+            **pip_install_kwargs: typing.Any,
+    ):
         """
-        Install a package only if it is not already present.
+        Install packages only if one or more checked packages are not present.
 
-        :param package_spec:    Spec passed to ``pip install``.
-        :param installed_name:  Name checked by ``pip show``; defaults to ``package_spec``.
-                                Useful when ``package_spec`` is a URL or path.
-        :param no_deps:         Pass ``--no-deps`` to pip if True.
-        :param environment:     Optional dict of extra environment variables.
+        :param installed_names:      Names checked by ``pip show``.
+        :param pip_install_kwargs:   Keyword arguments forwarded to
+                                     :meth:`pip_install`.
+        :raises ValueError:          If no installed package names are supplied.
         """
-        check_name = installed_name if installed_name else package_spec
-        if not self.is_installed(check_name):
-            self.pip_install(package_spec, no_deps=no_deps, environment=environment)
+        if isinstance(installed_names, str):
+            check_names = [installed_names]
+        else:
+            check_names = list(installed_names)
+        if not check_names:
+            raise ValueError("At least one installed package name must be supplied.")
 
-    def pip_install_requirements(
-            self,
-            requirements_file: Path,
-            no_deps: bool = False,
-    ) -> None:
-        """
-        Install packages from a requirements file.
-
-        :param requirements_file:   Path to the requirements.txt file.
-        :param no_deps:             Pass ``--no-deps`` to pip if True.
-        """
-        no_deps_token = "--no-deps" if no_deps else ""
-        call_command(
-            f'"{self.python}" -m pip install {no_deps_token} -r {requirements_file}'
-        )
+        missing_names = [
+            check_name for check_name in check_names
+            if not self.is_installed(check_name)
+        ]
+        if missing_names:
+            self.pip_install(**pip_install_kwargs)
 
 
 def set_up_python_venv(
@@ -150,8 +170,11 @@ def set_up_python_venv(
 
     python_env = PythonEnv(path=env_dir)
 
-    for requirements_file in requirements_files:
-        if os.path.isfile(requirements_file):
-            python_env.pip_install_requirements(requirements_file)
+    existing_requirements_files = [
+        requirements_file for requirements_file in requirements_files
+        if Path(requirements_file).is_file()
+    ]
+    if existing_requirements_files:
+        python_env.pip_install(requirements_files=existing_requirements_files)
 
     return python_env

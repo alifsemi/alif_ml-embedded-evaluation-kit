@@ -24,9 +24,9 @@ all orchestration logic lives in the mlek_tools package.
 import itertools
 import typing
 from argparse import Action, ArgumentParser, ArgumentTypeError
-from enum import Enum
 from pathlib import Path
 
+from scripts.py.mlek_tools.config import MLFramework, parse_ml_framework
 from scripts.py.mlek_tools.config.download import DownloadConfig
 from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
 from scripts.py.mlek_tools.config.npu import (
@@ -47,15 +47,6 @@ from scripts.py.mlek_tools.setup.logging_config import (
 from scripts.py.mlek_tools.setup.python_venv import PythonEnv
 from scripts.py.mlek_tools.setup.util import get_sha256sum_for_file
 from scripts.py.mlek_tools.use_case.model import load_use_case_resources
-
-
-class MLFramework(Enum):
-    """Supported ML frameworks for resource setup."""
-    TENSORFLOW_LITE_MICRO = "tflm"
-    EXECUTORCH = "executorch"
-
-
-valid_ml_frameworks: typing.Set[str] = {f.value for f in MLFramework}
 
 # ── Project-specific constants ────────────────────────────────────────────────
 
@@ -125,14 +116,14 @@ def set_up_resources_with_defaults(
     # Install mlek_tools as an editable package so entry-point scripts
     # (gen-audio, gen-model-cpp, pte-ops-dump, …) are available in the venv.
     python_env.pip_install_if_needed(
-        f"-e {_current_file_dir / 'scripts' / 'py'}",
-        installed_name="mlek-tools",
+        package_specs=["-e", _current_file_dir / "scripts" / "py"],
+        installed_names=["mlek-tools"],
     )
 
     # Install CI test-suite dependencies so tests/ci/ can run from the venv.
     _test_requirements = _current_file_dir / "tests" / "ci" / "requirements.txt"
     if _test_requirements.is_file():
-        python_env.pip_install_requirements(_test_requirements)
+        python_env.pip_install(requirements_files=_test_requirements)
 
     return venv_path
 
@@ -176,10 +167,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ml-frameworks", "--ml-framework",
         help=f"Specify the ML frameworks to set up resources for. "
-             f"Valid values: {valid_ml_frameworks}",
+             f"Valid values: {', '.join(sorted(MLFramework.accepted_values()))}",
         nargs="+",
-        choices=sorted(valid_ml_frameworks),
-        default=[MLFramework.TENSORFLOW_LITE_MICRO.value],
+        type=parse_ml_framework,
+        default=[MLFramework.TENSORFLOW_LITE_MICRO],
         action="store",
     )
     parser.add_argument(
@@ -266,14 +257,10 @@ if __name__ == "__main__":
         ),
     )
 
-    ml_frameworks = (
-        valid_ml_frameworks
-        if len(parsed_args.ml_frameworks) == 0
-        else valid_ml_frameworks.intersection(parsed_args.ml_frameworks)
-    )
+    ml_frameworks = set(parsed_args.ml_frameworks)
 
-    use_tflm = MLFramework.TENSORFLOW_LITE_MICRO.value in ml_frameworks
-    use_et = MLFramework.EXECUTORCH.value in ml_frameworks
+    use_tflm = MLFramework.TENSORFLOW_LITE_MICRO in ml_frameworks
+    use_et = MLFramework.EXECUTORCH in ml_frameworks
 
     use_case_resources_files = (
         [default_use_case_resources_path]

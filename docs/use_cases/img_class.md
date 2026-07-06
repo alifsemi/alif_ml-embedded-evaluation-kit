@@ -244,7 +244,7 @@ Or for ExecuTorch, it should be:
 
 ```commandline
 cmake .. \
-    -DML_FRAMEWORK=ExecuTorch \
+    -DML_FRAMEWORK=executorch \
     -Dimg_class_MODEL_PATH=<path/to/custom_model_from_arm_aot_compiler.pte> \
     -Dimg_class_LABELS_TXT_FILE=<path/to/labels_custom_model.txt> \
     -DUSE_CASE_BUILD=img_class

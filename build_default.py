@@ -29,6 +29,7 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
+from scripts.py.mlek_tools.config import MLFramework, parse_ml_framework
 from scripts.py.mlek_tools.config.download import DownloadConfig
 from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
 from scripts.py.mlek_tools.config.npu import (
@@ -41,7 +42,6 @@ from scripts.py.mlek_tools.config.tflite import TfliteConfig
 from scripts.py.mlek_tools.setup.logging_config import LoggingOptions, configure_logging
 from set_up_default_resources import EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS
 from set_up_default_resources import INSTALL_VELA_FROM_SOURCE
-from set_up_default_resources import MLFramework, valid_ml_frameworks
 from set_up_default_resources import VELA_URL, VELA_VERSION
 from set_up_default_resources import default_downloads_path
 from set_up_default_resources import default_executorch_path
@@ -263,14 +263,12 @@ def run(
     )
     ethos_u_cfg = NpuConfig.from_name(build_config.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
+    framework_arg = f'-DML_FRAMEWORK={build_config.ml_framework.value}'
     if build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO:
         # TensorFlow Lite Micro is already the default option. Just ensure
         # a clean build for the framework.
-        framework_arg = '-DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
-    elif build_config.ml_framework == MLFramework.EXECUTORCH:
-        # Set framework to ExecuTorch.
-        framework_arg = '-DML_FRAMEWORK=ExecuTorch'
-    else:
+        framework_arg += ' -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
+    elif build_config.ml_framework != MLFramework.EXECUTORCH:
         raise NotImplementedError(f'Unsupported ML Framework {build_config.ml_framework}')
 
     fpga_arg = ""
@@ -336,9 +334,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ml-framework",
         help=f"""Specify the ML framework to use for building the examples.
-        Valid values are: {valid_ml_frameworks}
+        Valid values are: {", ".join(sorted(MLFramework.accepted_values()))}
         """,
-        default=f'{MLFramework.TENSORFLOW_LITE_MICRO.value}'
+        type=parse_ml_framework,
+        default=MLFramework.TENSORFLOW_LITE_MICRO,
     )
     parser.add_argument(
         "--npu-config-name",
@@ -384,7 +383,7 @@ if __name__ == "__main__":
         fpga=parsed_args.fpga,
         make_jobs=parsed_args.make_jobs,
         make_verbose=parsed_args.make_verbose,
-        ml_framework=MLFramework(parsed_args.ml_framework)
+        ml_framework=parsed_args.ml_framework,
     )
 
     use_tflm = build.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO

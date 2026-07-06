@@ -26,7 +26,7 @@ project(${ML_FWK_TFLM_TARGET}
     DESCRIPTION     "TensorFlow Lite Micro framework module"
     LANGUAGES       C CXX)
 
-if (NOT "TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+if (NOT "${ML_FRAMEWORK_TFLM}" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
 endif()
 

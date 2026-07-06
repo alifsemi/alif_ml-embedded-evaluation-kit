@@ -209,10 +209,11 @@ The build parameters are:
 - `<use_case>_LINKER_SCRIPT_OVERRIDE_PATH`: Optional linker control file override for a specific use case. This is set
   in the use case CMake logic and takes precedence over `LINKER_SCRIPT_OVERRIDE_PATH` for that application target.
 
-- `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Valid options are `TensorFlowLiteMicro` and
-  `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
-  include them in the binary tree. All use case examples should advertise which framework they support and only
-  the examples that support the framework selected will be included in the binary tree.
+- `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Canonical values are `tflm` and
+  `executorch`. Default value is `tflm`. The values `TensorFlowLiteMicro`, `ExecuTorch`, and `et` are also accepted
+  case-insensitively as aliases. This option will configure the framework build steps and include them in the binary
+  tree. All use case examples should advertise which framework they support and only the examples that support the
+  framework selected will be included in the binary tree.
 
 - `TENSORFLOW_SRC_PATH`: Path for TensorFlow Lite Micro source tree. Default value points to the
   `dependencies/tensorflow` git submodule. Repository is hosted
