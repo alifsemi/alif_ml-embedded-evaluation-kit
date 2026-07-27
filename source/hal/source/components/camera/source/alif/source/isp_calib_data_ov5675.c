@@ -64,7 +64,7 @@ ISP_CALIB_DATA_S calibration_data = {
 
 #if (RTE_ISP_AE_MODULE)
         .ae = {
-            .opType = OP_TYPE_MANUAL,
+            .opType = OP_TYPE_AUTO,
             .manualAttr = {
                 .intTime = 33000,
                 .again = 8 * 1024,
@@ -73,7 +73,7 @@ ISP_CALIB_DATA_S calibration_data = {
             .autoAttr = {
                 .expTimeRange = {
                     .min =  100,
-                    .max =  33000,
+                    .max =  16000,
                 },
                 .againRange = {
                     .min = 1 * 1024,

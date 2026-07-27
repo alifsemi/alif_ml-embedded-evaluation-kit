@@ -182,7 +182,8 @@ target_compile_definitions(${CMSIS_DEVICE_TARGET}
     ${ALIF_CORE}
     TARGET_BOARD=BOARD_${TARGET_BOARD}
     ALIF_CAMERA_MODULE_${ALIF_CAMERA_MODULE}=1
-    ALIF_ISP_ENABLED=$<BOOL:${ALIF_ISP_ENABLED}>)
+    ALIF_ISP_ENABLED=$<BOOL:${ALIF_ISP_ENABLED}>
+    RTE_Drivers_CAMERA_SENSOR_${ALIF_CAMERA_MODULE})
 
 # Tell linker that reset interrupt handler is our entry point
 target_link_options(

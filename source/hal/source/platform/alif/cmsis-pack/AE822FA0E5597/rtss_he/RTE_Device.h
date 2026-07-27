@@ -1060,9 +1060,13 @@
 //     <5=>   320x320_RGB565
 // Use RAW bayer configuration if ISP is enabled, otherwise use RGB565
 #if ALIF_ISP_ENABLED
-#define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            1
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            0
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1288
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 728
 #else
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            2
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1280
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 720
 #endif
 
 // <o> select MT9M114 MIPI number of lanes in DPHY
@@ -1099,14 +1103,6 @@
 //     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
-
-// <o> MT9M114 sensor frame width for ISP / CSI2 pipeline
-// <i> Width in pixels of the MT9M114 MIPI sensor frame
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1280
-
-// <o> MT9M114 sensor frame height for ISP / CSI2 pipeline
-// <i> Height in pixels of the MT9M114 MIPI sensor frame
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 720
 
 #endif
 // </e> MT9M114_MIPI [Driver_MT9M114_MIPI]
