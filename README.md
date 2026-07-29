@@ -6,6 +6,8 @@ For instructions on setting up the build environment and creating loadable image
 
 The instructions and build by default is for Generation 2 device AppKit.
 
+test CI pr from public repo!
+
 By default the build is for AppKit; for any other board set the `TARGET_BOARD` apropriately.
 The default camera for the build is `MT9M114`. If you have `ARX3A0` camera, set the `ALIF_CAMERA_MODULE` accordingly (`-DALIF_CAMERA_MODULE=ARX3A0`).
 
