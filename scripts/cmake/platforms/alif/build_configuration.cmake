@@ -74,6 +74,10 @@ function(set_platform_global_defaults)
         set(IS_EAGLE_DEVICE OFF)
     endif()
 
+    USER_OPTION(ALIF_ISP_ENABLED "If enabled, use the ISP, otherwise use software image pipeline. Enabled by default on devices with ISP support."
+        ${IS_EAGLE_DEVICE}
+        BOOL)
+
     if ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e7")) # Add other Devkit and AppKits which are Ensemble devices
         set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "" FORCE)
     endif()

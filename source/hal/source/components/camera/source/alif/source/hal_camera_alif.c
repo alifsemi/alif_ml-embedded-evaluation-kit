@@ -20,7 +20,6 @@
 #include "RTE_Components.h"
 #include "RTE_Device.h"
 #include "image_processing.h"
-#include "bayer.h"
 #include "camera.h"
 #include "board_defs.h"
 #include "board_utils.h"
@@ -45,6 +44,11 @@ static struct {
 	uint8_t image_data[CIMAGE_RGB_WIDTH_MAX * CIMAGE_RGB_HEIGHT_MAX * RGB_BYTES];
 } rgb_image __attribute__((section(".bss.camera_frame_bayer_to_rgb_buf")));
 
+#if RTE_ISP
+// Camera capture buffer is not applicable for ISP mode
+static uint8_t *raw_image = 0;
+#else
+/* Non-ISP SW pipeline buffers */
 #if defined(CIMAGE_X_ORIG) && defined(CIMAGE_Y_ORIG)
 // Save RAM by cropping raw camera image in place in bayer color space
 static uint8_t raw_image[CIMAGE_X_ORIG * CIMAGE_Y_ORIG]
@@ -52,6 +56,7 @@ static uint8_t raw_image[CIMAGE_X_ORIG * CIMAGE_Y_ORIG]
 #else
 static uint8_t raw_image[CIMAGE_X * CIMAGE_Y + CIMAGE_USE_RGB565 * CIMAGE_X * CIMAGE_Y]
     __attribute__((aligned(32),section(".bss.camera_frame_buf")));
+#endif
 #endif
 
 typedef struct hal_camera_device_ {
@@ -145,6 +150,14 @@ bool hal_camera_configure(const uint32_t width,
         return false;
     }
 
+#ifndef USE_FAKE_CAMERA
+    int32_t err = camera_configure(width, height);
+    if (err != 0) {
+        printf_err("Failed to configure camera driver: %ld\n", err);
+        return false;
+    }
+#endif
+
     info("Camera configured\n");
     return true;
 }
@@ -186,6 +199,10 @@ static hal_cam_status wait_for_capture(void)
     /* Wait for video input frame */
     while ( hal_camera_get_status() != HAL_CAMERA_STATUS_STOPPED) {
         __WFE();
+    }
+
+    if (camera_process_frame_end() != ARM_DRIVER_OK) {
+        s_cam_dev.status = HAL_CAMERA_STATUS_ERROR;
     }
 #else
     s_cam_dev.status = HAL_CAMERA_STATUS_STOPPED;

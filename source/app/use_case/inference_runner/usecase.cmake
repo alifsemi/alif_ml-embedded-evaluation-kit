@@ -28,6 +28,9 @@ set(${use_case}_supports_${ML_FRAMEWORK} ON)
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "inference_runner")
 
+USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
+    OFF
+    BOOL)
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
     0x00200000
     STRING)

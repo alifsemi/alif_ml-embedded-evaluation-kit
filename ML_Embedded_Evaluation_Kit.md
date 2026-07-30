@@ -796,3 +796,10 @@ Specifies which NPU to use for interference. (Default is U55)
 
 `-DGPIO_PROFILING=<ON|OFF>`<br>
 Enables or disables GPIO profiling. When enabled, certain GPIO pins are configured to toggle at specific stages of the benchmark (preprocessing, inference, postprocessing) to correlate power measurements with these stages. (Default is OFF). See more details in the [Alif Benchmark User Guide](Alif_benchmark.md).
+
+
+### Starting inference
+
+Use cases (`alif_img_class`, `alif_object_detection`, `alif_vww`, `alif_asr`) don't start inferencing automatically:
+- Press the **'joystick button'** to start inferencing
+- When paired with the KWS application on the HE core, saying "Go" starts inferencing on HP core

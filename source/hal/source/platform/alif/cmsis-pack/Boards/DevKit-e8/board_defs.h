@@ -74,6 +74,9 @@
 // <o> Select MIPI display by default
 #define BOARD_CONFIGURE_LVDS_MUX             1
 
+// <o> Camera video stream enable flag
+#define BOARD_CAMERA_HAS_STREAM_BIT_ENABLED  0
+
 // <e> ETH module enabled flag
 #define BOARD_ETH_ENABLED                    1
 // <e> "RTL8201" on ETH presence flag
@@ -1137,6 +1140,14 @@
 // <6=> PIN6 <7=> PIN7
 #define BOARD_CAMERA_POWER_GPIO_PIN                     5
 
+// <o> "CAMERA_XSLEEP" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
+// GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
+// GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_CAMERA_XSLEEP_GPIO_PORT                   6
+// <o> "CAMERA_XSLEEP" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
+// <6=> PIN6 <7=> PIN7
+#define BOARD_CAMERA_XSLEEP_GPIO_PIN                    3
+
 // <o> "I2C1_SDA_C" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
 // GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
 // GPIO13 <14=> GPIO14 <15=> LPGPIO
@@ -1156,6 +1167,14 @@
 #define BOARD_CAMERA_I2C_SCL_GPIO_PIN                   3
 // <o> "I2C1_SCL_C" GPIO pin alternate function <0-7>
 #define BOARD_CAMERA_I2C_SCL_ALTERNATE_FUNCTION         5
+
+// <o> "I2C_C1_C2" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
+// GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
+// GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_CAMERA_I2C_C1_C2_GPIO_PORT                14
+// <o> "I2C_C1_C2" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5 <6=>
+// PIN6 <7=> PIN7
+#define BOARD_CAMERA_I2C_C1_C2_GPIO_PIN                 3
 
 // <o> "CAM_HSYNC_A" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
 // GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
@@ -1942,21 +1961,21 @@
 // <6=> PIN6 <7=> PIN7
 #define BOARD_CLICKBOARD_RST_GPIO_PIN                   3
 
-// <o> "ICM_IMU_IRQ" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
-// GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
-// GPIO13 <14=> GPIO14 <15=> LPGPIO
-#define BOARD_ICM_IMU_IRQ_GPIO_PORT                     8
-// <o> "ICM_IMU_IRQ" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
-// <6=> PIN6 <7=> PIN7
-#define BOARD_ICM_IMU_IRQ_GPIO_PIN                      4
+// <o> "ICM42670_IMU_IRQ" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4
+// <5=> GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12
+// <13=> GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_ICM42670_IMU_IRQ_GPIO_PORT                8
+// <o> "ICM42670_IMU_IRQ" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4
+// <5=> PIN5 <6=> PIN6 <7=> PIN7
+#define BOARD_ICM42670_IMU_IRQ_GPIO_PIN                 5
 
-// <o> "BMI_IMU_IRQ" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
+// <o> "BMI323_IMU_IRQ" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
 // GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
 // GPIO13 <14=> GPIO14 <15=> LPGPIO
-#define BOARD_BMI_IMU_IRQ_GPIO_PORT                     8
-// <o> "BMI_IMU_IRQ" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
+#define BOARD_BMI323_IMU_IRQ_GPIO_PORT                  8
+// <o> "BMI323_IMU_IRQ" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
 // <6=> PIN6 <7=> PIN7
-#define BOARD_BMI_IMU_IRQ_GPIO_PIN                      5
+#define BOARD_BMI323_IMU_IRQ_GPIO_PIN                   4
 
 // <o> "CAMERA_RESET" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
 // GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
@@ -1965,6 +1984,22 @@
 // <o> "CAMERA_RESET" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
 // <6=> PIN6 <7=> PIN7
 #define BOARD_CAMERA_RESET_GPIO_PIN                     4
+
+// <o> "LCD_RESET" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
+// GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
+// GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_LCD_RESET_GPIO_PORT                       15
+// <o> "LCD_RESET" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
+// <6=> PIN6 <7=> PIN7
+#define BOARD_LCD_RESET_GPIO_PIN                        5
+
+// <o> "LCD_BL_LED" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
+// GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
+// GPIO13 <14=> GPIO14 <15=> LPGPIO
+#define BOARD_LCD_BL_LED_GPIO_PORT                      6
+// <o> "LCD_BL_LED" GPIO pin number <0=> PIN0 <1=> PIN1 <2=> PIN2 <3=> PIN3 <4=> PIN4 <5=> PIN5
+// <6=> PIN6 <7=> PIN7
+#define BOARD_LCD_BL_LED_GPIO_PIN                       1
 
 // <o> "CAMERA_FLASH" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=>
 // GPIO5 <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=>
@@ -2393,11 +2428,14 @@
 // <o> "MIC_INPUT_SCLK" GPIO pin alternate function <0-7>
 #define BOARD_MIC_INPUT_SCLK_ALTERNATE_FUNCTION         2
 
+// NOTE: Both ISSI and APS512XXN PSRAM are enabled for DevKit-E8
+//       because either of them can be present on the board. The actual presence is detected in runtime.
 // <e> "ISSI HYPERRAM" connected to HSPI presence flag
 #define BOARD_ISSI_HYPERRAM_PRESENT                     1
 
 // <e> "APS512XXN PSRAM" connected to HSPI presence flag
-#define BOARD_APS512XXN_PSRAM_PRESENT                   0
+#define BOARD_APS512XXN_PSRAM_PRESENT                   1
+#define BOARD_APS512XXN_PSRAM_DUAL_OCTAL_MODE_ENABLE    0
 
 #define BOARD_OSPI0_SPI_FRAME_FORMAT                    3
 #define BOARD_OSPI0_WAIT_CYCLES                         6

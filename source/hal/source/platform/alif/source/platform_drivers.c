@@ -533,6 +533,7 @@ bool run_requested(void)
 #endif
 }
 
+#if defined(ARM_NPU)
 uint64_t ethosu_address_remap(uint64_t address, int index)
 {
     UNUSED(index);
@@ -569,6 +570,7 @@ unsigned int ethosu_config_select(uint64_t address, int index)
     }
 #endif
 }
+#endif /* defined(ARM_NPU) */
 
 typedef struct address_range
 {
