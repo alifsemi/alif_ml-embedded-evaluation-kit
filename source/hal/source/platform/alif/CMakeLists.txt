@@ -49,7 +49,14 @@ set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
 set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
 set(CONSOLE_STM OFF) # M55 cores cannot access STM, and don't really need to, as they have ITM. so no user-visible option
 set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (cannot be used in conjunction with other console options)")
-set(OSPI_FLASH_SUPPORT ON CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
+
+# StartKit-e1c has no OSPI flash, so default the driver initialization off for it.
+if (TARGET_BOARD STREQUAL "StartKit-e1c")
+    set(OSPI_FLASH_SUPPORT_DEFAULT OFF)
+else()
+    set(OSPI_FLASH_SUPPORT_DEFAULT ON)
+endif()
+set(OSPI_FLASH_SUPPORT ${OSPI_FLASH_SUPPORT_DEFAULT} CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
 
 set(OSPI_RAM_SUPPORT OFF CACHE BOOL "Enables OSPI RAM driver initialization")
 set(OSPI_RAM_TEST OFF CACHE BOOL "Enables built in memory test for external RAM")
