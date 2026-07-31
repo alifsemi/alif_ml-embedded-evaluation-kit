@@ -19,6 +19,7 @@
 #include CMSIS_device_header
 
 #define RTE_Drivers_CPI
+#define RTE_Drivers_ISP
 #define RTE_Drivers_IO
 
 #define RTE_Drivers_I3C0

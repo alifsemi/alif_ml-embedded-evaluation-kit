@@ -35,17 +35,20 @@ add_library(${CAMERA_ALIF_COMPONENT_TARGET} STATIC)
 ## Component sources
 target_sources(${CAMERA_ALIF_COMPONENT_TARGET}
     PRIVATE
-    source/bayer2rgb.c
     source/camera.c
     source/color_correction.c
+    source/exposure_count.c
     source/hal_camera_alif.c
     source/image_processing.c
     source/tiff.c
+    source/isp_param.c
+    source/isp_buffer.c
     )
 
 target_compile_definitions(${CAMERA_ALIF_COMPONENT_TARGET}
     PUBLIC
     ALIF_CAMERA_MODULE_${ALIF_CAMERA_MODULE}=1
+    ALIF_ISP_ENABLED=$<BOOL:${ALIF_ISP_ENABLED}>
     $<$<BOOL:${USE_FAKE_CAMERA}>:USE_FAKE_CAMERA>)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
@@ -69,7 +72,8 @@ target_link_libraries(${CAMERA_ALIF_COMPONENT_TARGET} PUBLIC
     hal_log
     cmsis_device
     platform_drivers_core
-    rte_components)
+    rte_components
+    aipl)
 
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})

@@ -150,17 +150,9 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/delay.c
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_aps512xx.c>
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram_is66.c>
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram.c>
     source/ram_test.c
     )
-
-if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "AppKit-e4"))
-    target_sources(${PLATFORM_DRIVERS_CORE}
-    PRIVATE
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/APS512XXN_PSRAM.c>
-    )
-endif()
 
 ## Directory for additional components required by MPS3:
 if (NOT DEFINED COMPONENTS_DIR)
@@ -174,6 +166,9 @@ endif()
 
 ## Platform component: cmsis_device (provides generic Cortex-M start up library)
 add_subdirectory(cmsis-pack ${CMAKE_BINARY_DIR}/cmsis_device)
+
+## Platform component: aipl (Alif Image Processing Library)
+include(${MLEK_SCRIPTS_DIR}/cmake/alif_image_processing.cmake)
 
 ## Platform component: stdout
 #add_subdirectory(${COMPONENTS_DIR}/stdout ${CMAKE_BINARY_DIR}/stdout)
@@ -219,6 +214,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} INTERFACE
     hal_audio_static_streams
     $<IF:$<BOOL:${ALIF_CAMERA_ENABLED}>,camera_alif,hal_camera_static_images>
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:alif_se_services>
+    $<$<BOOL:${ALIF_CAMERA_ENABLED}>:aipl>
 )
 
 add_compile_options(-Werror-implicit-function-declaration)

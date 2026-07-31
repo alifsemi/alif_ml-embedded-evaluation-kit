@@ -38,7 +38,8 @@
 #include <tgmath.h>
 #include <inttypes.h>
 #include "image_processing.h"
-#include "bayer.h"
+#include "aipl_demosaic.h"
+#include "exposure_count.h"
 #include "hal_log.h"
 
 #include "timer_alif.h"
@@ -57,7 +58,14 @@
 #include "camera.h"
 #endif
 
-#define BAYER_FORMAT DC1394_COLOR_FILTER_GRBG
+#if RTE_ISP
+#include "isp_buffer.h"
+#include "isp_param.h"
+#include "camera.h"
+#include "aipl_color_conversion.h"
+#endif
+
+#define BAYER_FORMAT AIPL_BAYER_GRBG
 
 int frame_crop(const void *input_fb,
 		       uint32_t ip_row_size,
@@ -120,6 +128,17 @@ int resize_image_A(
     if (pixel_size_B != 3) {
         abort();
     }
+
+    if (srcWidth == dstWidth &&
+        srcHeight == dstHeight) {
+
+        // No-op if resizing and in-place
+        if (srcImage != dstImage) {
+            memcpy(dstImage, srcImage, srcWidth * srcHeight * pixel_size_B);
+        }
+        return 0;
+    }
+
 // Copied from ei_camera.cpp in firmware-eta-compute
 // Modified for RGB888
 // This needs to be < 16 or it won't fit. Cortex-M4 only has SIMD for signed multiplies
@@ -296,7 +315,7 @@ int resize_image_RGB565(
 
             // We now have 4 corners packed in separate red, green blue registers
             // Permute so we have red green blue packed in separate corner registers
-            uint8x16x4_t rgbx = { red, green, blue, vuninitializedq_u8() };
+            uint8x16x4_t rgbx = {{ red, green, blue, vuninitializedq_u8() }};
             uint8_t swapbuf[64];
             vst4q_u8(swapbuf, rgbx);
             uint32x4_t p00 = vldrbq_u32(swapbuf + 0);
@@ -451,6 +470,7 @@ int crop_and_interpolate( uint8_t *image,
     return result;
 }
 
+#if CIMAGE_SW_GAIN_CONTROL
 
 static float current_log_gain = 0.0;
 static int32_t current_api_gain = 0;
@@ -473,7 +493,6 @@ static int32_t log_gain_to_api(float gain)
     return expf(gain) * 0x1p16f;
 }
 
-#if CIMAGE_SW_GAIN_CONTROL
 static void process_autogain(void)
 {
     /* Simple "auto-exposure" algorithm. We work a single "gain" value
@@ -573,8 +592,13 @@ static void process_autogain(void)
 
 const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_header, uint8_t *image_data, int image_size, uint8_t *raw_image)
 {
-    extern uint32_t tprof1, tprof2, tprof3, tprof4;
+    aipl_error_t aipl_ret = AIPL_ERR_OK;
+    extern uint32_t tprof2, tprof3;
 #ifdef USE_FAKE_CAMERA
+    if (!raw_image) {
+        printf_err("Fake camera: Null raw image buffer\n");
+        return NULL;
+    }
     static int roll = 0;
     for (int y = 0; y < CIMAGE_Y; y+=2) {
     	uint8_t *p = raw_image + y * CIMAGE_X;
@@ -587,10 +611,10 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
     		float r = barr * intensity + 0.5f;
     		float g = barg * intensity + 0.5f;
     		float b = barb * intensity + 0.5f;
-            if (BAYER_FORMAT == DC1394_COLOR_FILTER_BGGR) {
+            if (BAYER_FORMAT == AIPL_BAYER_BGGR) {
                 p[0]        = b; p[1]            = g;
                 p[CIMAGE_X] = g; p[CIMAGE_X + 1] = r;
-            } else if (BAYER_FORMAT == DC1394_COLOR_FILTER_GRBG) {
+            } else if (BAYER_FORMAT == AIPL_BAYER_GRBG) {
                 p[0]        = g; p[1]            = r;
                 p[CIMAGE_X] = b; p[CIMAGE_X + 1] = g;
             }
@@ -604,6 +628,10 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
 
     // Crop in bayer space
 #if defined(CIMAGE_X_ORIG) && defined(CIMAGE_Y_ORIG)
+    if (!raw_image) {
+        printf_err("Bayer crop: Null raw image buffer\n");
+        return NULL;
+    }
     if (frame_crop(raw_image,
                    CIMAGE_X_ORIG,
                    CIMAGE_Y_ORIG,
@@ -624,16 +652,44 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
      *
      * while stopped at an appropriate breakpoint below.
      */
-    write_tiff_header(&tiff_header, CIMAGE_X, CIMAGE_Y);
+#if RTE_ISP
+    const int32_t capture_width = chan_attr.chnFormat.width;
+    const int32_t capture_height = chan_attr.chnFormat.height;
+#else
+    const int32_t capture_width = CIMAGE_X;
+    const int32_t capture_height = CIMAGE_Y;
+#endif
+    write_tiff_header(&tiff_header, capture_width, capture_height);
+    extern uint32_t tprof1;
     tprof1 = Get_SysTick_Cycle_Count32();
+
     // RGB conversion and frame resize
-    dc1394_bayer_Simple(raw_image, image_data, CIMAGE_X, CIMAGE_Y, BAYER_FORMAT);
+#if RTE_ISP
+    (void)raw_image;
+#if RTE_ISP_OUTPUT_FORMAT == 39
+    aipl_ret = aipl_color_convert_rgb888p_to_rgb888(isp_buffer_get(0)->y, image_data, capture_width, capture_width, capture_height);
+#elif RTE_ISP_OUTPUT_FORMAT == 32
+    aipl_ret = aipl_color_convert_yuy2_to_rgb888(isp_buffer_get(0)->y, image_data, capture_width, capture_width, capture_height);
+#else
+#error "Unsupported ISP output format"
+#endif
+#else
+    aipl_ret = aipl_demosaic(raw_image, image_data, capture_width, capture_width, capture_height, BAYER_FORMAT, AIPL_COLOR_RGB888);
+#endif
     tprof1 = Get_SysTick_Cycle_Count32() - tprof1;
 #endif
 
+    if (aipl_ret != AIPL_ERR_OK)
+    {
+        printf_err("Conversion to RGB failed (%s)\n",
+                   aipl_error_str(aipl_ret));
+        return NULL;
+    }
+
 #ifndef USE_FAKE_CAMERA
 #if CIMAGE_SW_GAIN_CONTROL
-    // Use pixel analysis from bayer_to_RGB to adjust gain
+    // Analyse raw bayer data for exposure statistics
+    exposure_count_bayer(raw_image, CIMAGE_X, CIMAGE_Y);
     process_autogain();
 #endif
 #endif
@@ -648,17 +704,19 @@ const uint8_t *get_image_data(int ml_width, int ml_height, tiff_header_t tiff_he
                          image_data, ml_width, ml_height,
                          RGB565_BYTES * 8);
 #else
-    if (ml_width > CIMAGE_X || ml_height > CIMAGE_Y) {
+    (void)image_size;
+    if (ml_width > capture_width || ml_height > capture_height) {
         printf_err("Requested image can't be processed in place\n");
         return NULL;
     }
-    crop_and_interpolate(image_data, CIMAGE_X, CIMAGE_Y,
+    crop_and_interpolate(image_data, capture_width, capture_height,
                          image_data, ml_width, ml_height, RGB_BYTES * 8);
 #endif
     // Rewrite the TIFF header for the new size
     write_tiff_header(&tiff_header, ml_width, ml_height);
 
 #if CIMAGE_COLOR_CORRECTION
+    extern uint32_t tprof4;
     tprof4 = Get_SysTick_Cycle_Count32();
     // Color correction for white balance
     white_balance(ml_width, ml_height, image_data, image_data);
