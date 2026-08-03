@@ -38,7 +38,7 @@ function(set_platform_global_defaults)
     set_property(CACHE ALIF_DEVICE_SKU PROPERTY STRINGS "AE1C1F4051920" "AE722F80F55D5" "AE822FA0E5597")
 
     set(TARGET_BOARD "AppKit-e7" CACHE STRING "Board type")
-    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8" "AppKit-e8")
+    set_property(CACHE TARGET_BOARD PROPERTY STRINGS "AppKit-e7" "DevKit-e1c" "StartKit-e1c" "DevKit-e4" "DevKit-e7" "DevKit-e8" "AppKit-e8")
 
     set(GPIO_PROFILING OFF CACHE BOOL "Enable GPIO profiling and LED0_B toggle for preprocess, inference and postprocess.")
     if (GPIO_PROFILING)
@@ -54,9 +54,9 @@ function(set_platform_global_defaults)
     endif()
 
     # Sanity check DevKit or AppKit
-    if (NOT ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "DevKit-e7")
+    if (NOT ((TARGET_BOARD STREQUAL "AppKit-e7") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "StartKit-e1c") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "DevKit-e7")
         OR (TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "AppKit-e8") ))
-        message(FATAL_ERROR "Possible TARGET_BOARD values are: AppKit-e7, DevKit-e1c, DevKit-e4, DevKit-e7, DevKit-e8 and AppKit-e8 but given value was ${TARGET_BOARD}")
+        message(FATAL_ERROR "Possible TARGET_BOARD values are: AppKit-e7, DevKit-e1c, StartKit-e1c, DevKit-e4, DevKit-e7, DevKit-e8 and AppKit-e8 but given value was ${TARGET_BOARD}")
     endif()
 
 
@@ -82,7 +82,7 @@ function(set_platform_global_defaults)
         set(ALIF_DEVICE_SKU "AE722F80F55D5" CACHE STRING "" FORCE)
     endif()
 
-    if (TARGET_BOARD STREQUAL "DevKit-e1c") # Add other Devkit and AppKits which are Balletto devices
+    if ((TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "StartKit-e1c")) # Add other Devkit and AppKits which are Balletto devices
         set(IS_BALLETTO_DEVICE ON)
         set(ALIF_DEVICE_SKU "AE1C1F4051920" CACHE STRING "" FORCE)
         add_compile_definitions("BALLETTO_DEVICE") # Flag used by ServicesLIB and our ml-devkit files.

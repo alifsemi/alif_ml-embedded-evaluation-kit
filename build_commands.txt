@@ -83,13 +83,22 @@ cmake -DTARGET_PLATFORM=alif \
 -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=AppKit-e7 ..
 
-; ------------Keyword spotting on CM55-HE GCC E1C ----------------
+; ------------Keyword spotting on CM55-HE GCC DevKit-E1C ----------------
 cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
 -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
 -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
 -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=DevKit-e1c ..
+
+; ------------Keyword spotting on CM55-HE GCC StartKit-E1C ----------------
+cmake -DTARGET_PLATFORM=alif \
+-DTARGET_SUBSYSTEM=RTSS-HE \
+-DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
+-DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
+-DTARGET_BOARD=StartKit-e1c ..
+
 
 ; ------------Keyword spotting on CM55-HE GCC E8 ----------------
 cmake -DTARGET_PLATFORM=alif \
