@@ -115,39 +115,19 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/drivers/source/ospi.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi_psram_xip.c
     ${ALIF_CMSIS_PATH}/components/Source/driver_phy.c
-    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
-    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
-    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c>
-    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/MX66UW1G.c>
-    )
-
-if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "AppKit-e8"))
-    target_sources(${CMSIS_DEVICE_TARGET}
-    PRIVATE
-    $<$<BOOL:${OSPI_RAM_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/APS512XXN_PSRAM.c>
-    )
-endif()
-
-# Alif DFP RTE_Components does not support yet building the module if it is disabled
-if (NOT IS_BALLETTO_DEVICE)
-    target_sources(${CMSIS_DEVICE_TARGET}
-    PRIVATE
-    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
-    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_ISP.c
-    ${ALIF_CMSIS_PATH}/drivers/source/csi.c
-    $<$<STREQUAL:${ALIF_CAMERA_MODULE},MT9M114>:${ALIF_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
-    $<$<STREQUAL:${ALIF_CAMERA_MODULE},ARX3A0>:${ALIF_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
-    $<$<STREQUAL:${ALIF_CAMERA_MODULE},OV5675>:${ALIF_CMSIS_PATH}/components/Source/OV5675_camera_sensor.c>
-    )
-endif() # not DevKit_E1C
-
-
-target_sources(${CMSIS_DEVICE_TARGET}
-    PRIVATE
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_IO.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I2S.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_USART.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CPI.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
+# We are temporarily using a modified version of the OV5640 driver which enables XVCLOCK and supports 320x240 resolution.
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},OV5640>:source/OV5640_Camera_Sensor_mod.c>
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},MT9M114>:${ALIF_CMSIS_PATH}/components/Source/MT9M114_Camera_Sensor.c>
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_Common.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_OSPI.c
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/IS25WX256.c>
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/MX66UW1G.c>
     )
 
 # Alif DFP RTE_Components does not support yet building the module if it is disabled
@@ -160,11 +140,21 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
-    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Camera_Sensor_i2c.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_ISP.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_DSI.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/DPHY_CSI2.c
+    ${ALIF_CMSIS_PATH}/drivers/source/csi.c
     ${ALIF_CMSIS_PATH}/components/Source/ILI9806E_LCD_panel.c
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},ARX3A0>:${ALIF_CMSIS_PATH}/components/Source/arx3A0_camera_sensor.c>
+    $<$<STREQUAL:${ALIF_CAMERA_MODULE},OV5675>:${ALIF_CMSIS_PATH}/components/Source/OV5675_camera_sensor.c>
 )
+endif()
+
+if ((TARGET_BOARD STREQUAL "DevKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e4") OR (TARGET_BOARD STREQUAL "AppKit-e8"))
+    target_sources(${CMSIS_DEVICE_TARGET}
+    PRIVATE
+    $<$<BOOL:${OSPI_RAM_SUPPORT}>:${ALIF_CMSIS_PATH}/components/Source/APS512XXN_PSRAM.c>
+    )
 endif()
 
 ## Board sources
@@ -173,7 +163,6 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/libs/board_config/board_config.c
     Boards/utils/board_utils.c
     )
-
 
 # Device definition needs to be set, is checked in source files to include correct header
 target_compile_definitions(${CMSIS_DEVICE_TARGET}

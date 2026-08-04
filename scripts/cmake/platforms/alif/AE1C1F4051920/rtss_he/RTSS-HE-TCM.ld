@@ -28,6 +28,7 @@
  */
 
 #include "board_defs.h"
+#include "app_mem_regions.h"
 
 __STACK_SIZE = 0x00001000;
 __HEAP_SIZE  = 0x00008000;
@@ -44,8 +45,13 @@ MEMORY
   ITCM  (rwx) : ORIGIN = 0x01000000, LENGTH = 0x00080000
   DTCM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00180000
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
+
+#ifdef BOARD_OSPI_FLASH_BASE
   OSPI_FLASH (rx) : ORIGIN = __OSPI_FLASH_BASE, LENGTH = __OSPI_FLASH_SIZE
+#endif
 }
+
+
 
 ENTRY(Reset_Handler)
 
@@ -143,6 +149,19 @@ SECTIONS
   {
     *(.bss.audio_rec)
   } > ITCM
+
+  /* Non-secure DTCM region.
+   *
+   * E1C has no SRAM, so the camera frame buffer is placed in DTCM. The LPCPI
+   * master must be able to write to the frame buffer in DTCM */
+  .nonsecure0_region (NOLOAD) :
+  {
+    . = ALIGN(TGU_BLOCK_SIZE);
+    __ns_region_0_start = .;
+    *(.bss.camera_frame_buf)
+    . = ALIGN(TGU_BLOCK_SIZE);
+    __ns_region_0_end = .;
+  } > DTCM
 
   .bss (NOLOAD) : ALIGN(8)
   {

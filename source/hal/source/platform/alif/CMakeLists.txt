@@ -40,10 +40,7 @@ project(${PLATFORM_DRIVERS_TARGET}
     DESCRIPTION     "Platform drivers library for Alif RTSS-HP/RTSS-HE targets"
     LANGUAGES       C CXX ASM)
 
-set(ALIF_CAMERA_MODULE MT9M114 CACHE STRING "Camera module type for Alif kits")
-set_property(CACHE ALIF_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0" "OV5675")
 
-message(STATUS "Camera: ${ALIF_CAMERA_MODULE}")
 
 set(CONSOLE_UART 2 CACHE STRING "Console UART for the application, or 'None'")
 set(CONSOLE_ITM OFF CACHE BOOL "Send console output to ITM (hardware trace system)")
@@ -53,10 +50,17 @@ set(CONSOLE_SEMIHOSTING OFF CACHE BOOL "Use debugger semihosting for console (ca
 # StartKit-e1c has no OSPI flash, so default the driver initialization off for it.
 if (TARGET_BOARD STREQUAL "StartKit-e1c")
     set(OSPI_FLASH_SUPPORT_DEFAULT OFF)
+    set(ALIF_CAMERA_MODULE_DEFAULT "OV5640")
 else()
     set(OSPI_FLASH_SUPPORT_DEFAULT ON)
+    set(ALIF_CAMERA_MODULE_DEFAULT "MT9M114")
 endif()
+
 set(OSPI_FLASH_SUPPORT ${OSPI_FLASH_SUPPORT_DEFAULT} CACHE BOOL "Enables OSPI flash driver initialization (keep enabled when setting ML_MODEL_IN_EXT_FLASH)")
+set(ALIF_CAMERA_MODULE ${ALIF_CAMERA_MODULE_DEFAULT} CACHE STRING "Camera module type for Alif kits")
+set_property(CACHE ALIF_CAMERA_MODULE PROPERTY STRINGS "MT9M114" "ARX3A0" "OV5675" "OV5640")
+
+message(STATUS "Camera: ${ALIF_CAMERA_MODULE}")
 
 set(OSPI_RAM_SUPPORT OFF CACHE BOOL "Enables OSPI RAM driver initialization")
 set(OSPI_RAM_TEST OFF CACHE BOOL "Enables built in memory test for external RAM")

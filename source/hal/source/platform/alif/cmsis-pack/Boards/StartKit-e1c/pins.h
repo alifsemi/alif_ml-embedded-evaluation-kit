@@ -166,25 +166,25 @@ const struct pinconf board_pinconf[] = {
 	/* Selected: LPCAM_D2_A for "Camera" */
 	{PORT_4, PIN_2, PINMUX_ALTERNATE_FUNCTION_5, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-	/* P4_3 on pin F6. Functions: [0]: GPIO4_3, [1]: JTAG_TRACECLK, [2]: LPI2S_SDI_B, [3]: >>>UT1_T1_A<<<, [4]: LPCAM_D3_A, [5]: SD_D3_A, [6]: CMP0_OUT_B, [7]: Reserved */
-	/* Selected: UT1_T1_A for "LEDRGB0_B" */
-	{PORT_4, PIN_3, PINMUX_ALTERNATE_FUNCTION_3, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+	/* P4_3 on pin F6. Functions: [0]: GPIO4_3, [1]: JTAG_TRACECLK, [2]: LPI2S_SDI_B, [3]: UT1_T1_A, [4]: >>>LPCAM_D3_A<<<, [5]: SD_D3_A, [6]: CMP0_OUT_B, [7]: Reserved */
+	/* Selected: LPCAM_D3_A for "Camera" */
+	{PORT_4, PIN_3, PINMUX_ALTERNATE_FUNCTION_4, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-	/* P4_4 on pin A6. Functions: [0]: GPIO4_4, [1]: JTAG_TDATA0, [2]: LPI2S_SDO_B, [3]: LPSPI_SCLK_B, [4]: >>>UT2_T0_A<<<, [5]: LPCAM_D4_A, [6]: SD_D4_A, [7]: Reserved */
-	/* Selected: UT2_T0_A for "CLICKBOARD_PWM,LEDRGB0_G" */
-	{PORT_4, PIN_4, PINMUX_ALTERNATE_FUNCTION_4, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+	/* P4_4 on pin A6. Functions: [0]: GPIO4_4, [1]: JTAG_TDATA0, [2]: LPI2S_SDO_B, [3]: LPSPI_SCLK_B, [4]: UT2_T0_A, [5]: >>>LPCAM_D4_A<<<, [6]: SD_D4_A, [7]: Reserved */
+	/* Selected: LPCAM_D4_A for "Camera" */
+	{PORT_4, PIN_4, PINMUX_ALTERNATE_FUNCTION_5, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-	/* P4_5 on pin B6. Functions: [0]: GPIO4_5, [1]: JTAG_TDATA1, [2]: OSPI0_RXDS_B, [3]: LPI2S_SCLK_B, [4]: >>>UT2_T1_A<<<, [5]: LPCAM_D5_A, [6]: SD_D5_A, [7]: Reserved */
-	/* Selected: UT2_T1_A for "CLICKBOARD_PWM,LEDRGB0_G" */
-	{PORT_4, PIN_5, PINMUX_ALTERNATE_FUNCTION_4, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+	/* P4_5 on pin B6. Functions: [0]: GPIO4_5, [1]: JTAG_TDATA1, [2]: OSPI0_RXDS_B, [3]: LPI2S_SCLK_B, [4]: UT2_T1_A, [5]: >>>LPCAM_D5_A<<<, [6]: SD_D5_A, [7]: Reserved */
+	/* Selected: LPCAM_D5_A for "Camera" */
+	{PORT_4, PIN_5, PINMUX_ALTERNATE_FUNCTION_5, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
 	/* P4_6 on pin B5. Functions: [0]: GPIO4_6, [1]: JTAG_TDATA2, [2]: OSPI0_SCLKN_B, [3]: LPI2S_WS_B, [4]: UT3_T0_A, [5]: >>>LPCAM_D6_A<<<, [6]: SD_D6_A, [7]: Reserved */
 	/* Selected: LPCAM_D6_A for "Camera" */
 	{PORT_4, PIN_6, PINMUX_ALTERNATE_FUNCTION_5, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-	/* P4_7 on pin D6. Functions: [0]: GPIO4_7, [1]: JTAG_TDATA3, [2]: OSPI0_SCLK_B, [3]: >>>UT3_T1_A<<<, [4]: LPCAM_D7_A, [5]: SD_D7_A, [6]: CMP1_OUT_B, [7]: Reserved */
-	/* Selected: UT3_T1_A for "LEDRGB0_R" */
-	{PORT_4, PIN_7, PINMUX_ALTERNATE_FUNCTION_3, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+	/* P4_7 on pin D6. Functions: [0]: GPIO4_7, [1]: JTAG_TDATA3, [2]: OSPI0_SCLK_B, [3]: UT3_T1_A, [4]: >>>LPCAM_D7_A<<<, [5]: SD_D7_A, [6]: CMP1_OUT_B, [7]: Reserved */
+	/* Selected: LPCAM_D7_A for "Camera" */
+	{PORT_4, PIN_7, PINMUX_ALTERNATE_FUNCTION_4, PADCTRL_READ_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
        /* P7_0 on pin D9. Functions: [0]: GPIO7_0, [1]: OSPI0_SCLK_C, [2]: >>>LPUART_RX_B<<<, [3]: SPI2_MISO_B, [4]: I2C0_SDA_, [5]: LPCAM_D0_B, [6]: CDC_D16_A, [7]: BLE_DBG24 */
        /* Selected: LPUART_RX_B */
