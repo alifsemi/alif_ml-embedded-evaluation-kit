@@ -10,7 +10,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'PR-*'
-                    branch 'alif_main'
+                    branch 'main'
                 }
             }
             agent { label 'ml_build' }
@@ -32,7 +32,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'PR-*'
-                    branch 'alif_main'
+                    branch 'main'
                 }
             }
             parallel {
@@ -81,7 +81,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'PR-*'
-                    branch 'alif_main'
+                    branch 'main'
                 }
             }
             parallel {
@@ -262,7 +262,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'PR-*'
-                    branch 'alif_main'
+                    branch 'main'
                 }
             }
             parallel {

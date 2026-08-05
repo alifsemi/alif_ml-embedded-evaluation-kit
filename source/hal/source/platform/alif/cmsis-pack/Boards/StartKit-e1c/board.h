@@ -21,6 +21,6 @@
 // <i> Default: E43RB_FW405
 #define BOARD_ILI9806E_PANEL_VARIANT    1
 
-#define BOARD_HAS_IS25WX_FLASH  1
+#define BOARD_HAS_IS25WX_FLASH          1
 
 #endif // __BOARD_H
