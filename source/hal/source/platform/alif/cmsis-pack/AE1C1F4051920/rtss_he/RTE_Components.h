@@ -27,4 +27,6 @@
 #define RTE_Drivers_ISSI_FLASH
 #define RTE_Drivers_OSPI
 
+#define RTE_Drivers_CPI
+
 #endif /* RTE_COMPONENTS_H */

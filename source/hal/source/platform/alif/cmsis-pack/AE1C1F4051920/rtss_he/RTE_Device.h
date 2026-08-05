@@ -53,7 +53,7 @@
 //     <1=> enable
 // <i> define if to enable or disable MT9M114 camera sensor
 // <i> default: disable
-#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_ENABLE                1
+#define RTE_MT9M114_CAMERA_SENSOR_LPCPI_ENABLE                ALIF_CAMERA_MODULE_MT9M114
 
 #if (RTE_MT9M114_CAMERA_SENSOR_LPCPI_ENABLE)
 
@@ -134,7 +134,7 @@
 //     <1=> enable
 // <i> define if to enable or disable OV5640 camera sensor
 // <i> default: disable
-#define RTE_OV5640_CAMERA_SENSOR_LPCPI_ENABLE 0
+#define RTE_OV5640_CAMERA_SENSOR_LPCPI_ENABLE ALIF_CAMERA_MODULE_OV5640
 
 #if (RTE_OV5640_CAMERA_SENSOR_LPCPI_ENABLE)
 
@@ -199,12 +199,12 @@
 // <o> select OV5640 frame height
 // <i> defines select OV5640 frame height.
 // <i> default: 120
-#define RTE_OV5640_CAMERA_SENSOR_LPCPI_FRAME_HEIGHT    120
+#define RTE_OV5640_CAMERA_SENSOR_LPCPI_FRAME_HEIGHT    240
 
 // <o> select OV5640 frame width
 // <i> defines select OV5640 frame width.
 // <i> default: 160
-#define RTE_OV5640_CAMERA_SENSOR_LPCPI_FRAME_WIDTH     160
+#define RTE_OV5640_CAMERA_SENSOR_LPCPI_FRAME_WIDTH     320
 
 // <o> Select OV5640 camera sensor I2C instance
 // <i> Defines camera sensor OV5640 i2c instance
@@ -215,6 +215,8 @@
 //     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_OV5640_CAMERA_SENSOR_LPCPI_I2C_INSTANCE    1
+
+#define RTE_OV5640_CAMERA_SENSOR_LPCPI_CLK_DIV         6
 
 #endif
 // </e> OV5640 [Driver_OV5640]

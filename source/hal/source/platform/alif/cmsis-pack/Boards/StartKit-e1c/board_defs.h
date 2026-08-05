@@ -85,6 +85,7 @@
 
 // <o> "LPCAM" I2C instance number <0-3>
 #define BOARD_LPCAM_I2C_INSTANCE                        1
+#define BOARD_CAMERA_I2C_INSTANCE                       BOARD_LPCAM_I2C_INSTANCE
 
 // <o> "GT911 Touchscreen" I2C instance number <0-3>
 #define BOARD_GT911_TOUCHSCREEN_I2C_INSTANCE            1

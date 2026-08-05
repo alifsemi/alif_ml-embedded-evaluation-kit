@@ -14,28 +14,26 @@
 
 /* Project Includes */
 #include "camera.h"
-#include "Driver_GPIO.h"
 
 #if defined(RTE_Drivers_CPI)
 
-#ifndef RTE_CPI
-#include "Driver_Camera_Controller.h"
-extern ARM_DRIVER_CAMERA_CONTROLLER Driver_CAMERA0;
-static const ARM_DRIVER_CAMERA_CONTROLLER * const camera = &Driver_CAMERA0;
-
-#define CPI_CAMERA_SENSOR_CONFIGURE             CAMERA_SENSOR_CONFIGURE
-#define CPI_EVENTS_CONFIGURE                    CAMERA_EVENTS_CONFIGURE
-#define CPI_CAMERA_SENSOR_GAIN                  CAMERA_SENSOR_GAIN
-#define ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED    ARM_CAMERA_CONTROLLER_EVENT_CAMERA_CAPTURE_STOPPED
-#define RESOLUTION_PARAMETER                    CAMERA_RESOLUTION_560x560
-
-#ifdef BOARD_CAMERA_POWER_GPIO_PORT
-#define MANUAL_CAMERA_POWER
-extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
-static ARM_DRIVER_GPIO * const GPIO_Driver_PWR = &ARM_Driver_GPIO_(BOARD_CAMERA_POWER_GPIO_PORT);
-#endif
-#else
 #include "Driver_CPI.h"
+#include "Driver_IO.h"
+
+#if RTE_LPCPI
+/* LPCPI camera (e.g. E1C and OV5640) */
+extern ARM_DRIVER_CPI Driver_LPCPI;
+static const ARM_DRIVER_CPI * const camera = &Driver_LPCPI;
+
+#ifdef BOARD_LPCAM_ENBUF_GPIO_PORT
+/* Board has Camera level-shifter */
+extern ARM_DRIVER_GPIO  ARM_Driver_GPIO_(BOARD_LPCAM_ENBUF_GPIO_PORT);
+static ARM_DRIVER_GPIO *GPIO_Driver_LPCAM_ENA =
+    &ARM_Driver_GPIO_(BOARD_LPCAM_ENBUF_GPIO_PORT);
+#endif
+
+#else
+/* Ensemble CPI (parallel camera) interface. */
 extern ARM_DRIVER_CPI Driver_CPI;
 static const ARM_DRIVER_CPI * const camera = &Driver_CPI;
 #endif
@@ -59,31 +57,61 @@ static uint8_t* camera_capture_buffer = 0;
 static atomic_int image_received = 0;
 static bool init_done = false;
 
-    
+#ifndef DEBUG_CPI_EVENTS
+#define DEBUG_CPI_EVENTS 0
+#endif
 
+#if DEBUG_CPI_EVENTS
+// --- CPI interrupt diagnostics (debug) ---
+static volatile uint32_t s_cpi_vsync_cnt;
+static volatile uint32_t s_cpi_hsync_cnt;
+static volatile uint32_t s_cpi_infifo_ovr_cnt;
+static volatile uint32_t s_cpi_outfifo_ovr_cnt;
+static volatile uint32_t s_cpi_bus_err_cnt;
+static volatile uint32_t s_cpi_stop_cnt;
+#endif
 
 static void CameraEventHandler(uint32_t event)
 {
-    switch (event) {
-    case ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED:
-        image_received = 1;
-        break;
 #if RTE_ISP
-    case ARM_ISP_EVENT_FRAME_VSYNC_DETECTED:
-    case ARM_ISP_EVENT_FRAME_IN_DETECTED:
-        break;
-    case ARM_ISP_MI_EVENT_MP_FRAME_END_DETECTED:
-    case ARM_ISP_MI_EVENT_FILL_MP_Y_DETECTED:
-    case ARM_ISP_MI_EVENT_MP_Y_WRAP_DETECTED:
+    if (event == ARM_ISP_MI_EVENT_MP_FRAME_END_DETECTED ||
+        event == ARM_ISP_MI_EVENT_FILL_MP_Y_DETECTED ||
+        event == ARM_ISP_MI_EVENT_MP_Y_WRAP_DETECTED) {
         image_received = 1;
-        break;
-    case ARM_ISP_EVENT_AWB_DONE:
-        break;
-    case ARM_ISP_EVENT_EXP_MEASURE_DONE:
-        break;
+    }
 #endif
-    default:
-        break;
+
+#if DEBUG_CPI_EVENTS
+    /* CPI events arrive as a bitmask (several bits may be set at once). */
+    if (event & ARM_CPI_EVENT_CAMERA_FRAME_HSYNC_DETECTED) {
+        s_cpi_hsync_cnt++;
+    }
+    if (event & ARM_CPI_EVENT_CAMERA_FRAME_VSYNC_DETECTED) {
+        s_cpi_vsync_cnt++;
+    }
+    if (event & ARM_CPI_EVENT_ERR_CAMERA_INPUT_FIFO_OVERRUN) {
+        s_cpi_infifo_ovr_cnt++;
+    }
+    if (event & ARM_CPI_EVENT_ERR_CAMERA_OUTPUT_FIFO_OVERRUN) {
+        s_cpi_outfifo_ovr_cnt++;
+    }
+    if (event & ARM_CPI_EVENT_ERR_HARDWARE) {
+        s_cpi_bus_err_cnt++;
+    }
+    if (event & ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED) {
+        s_cpi_stop_cnt++;
+        printf("CPI stopped: vsync=%lu hsync=%lu inFifoOvr=%lu "
+               "outFifoOvr=%lu busErr=%lu\n",
+               (unsigned long)s_cpi_vsync_cnt,
+               (unsigned long)s_cpi_hsync_cnt,
+               (unsigned long)s_cpi_infifo_ovr_cnt,
+               (unsigned long)s_cpi_outfifo_ovr_cnt,
+               (unsigned long)s_cpi_bus_err_cnt);
+    }
+#endif
+
+    if (event & ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED) {
+        image_received = 1;
     }
 }
 
@@ -162,19 +190,40 @@ int32_t camera_init(uint8_t* buffer)
         printf("camera_init, already initialized!\n");
         return 0;
     }
-#ifdef MANUAL_CAMERA_POWER
-    GPIO_Driver_PWR->SetValue(BOARD_CAMERA_POWER_PIN_NO, GPIO_PIN_OUTPUT_STATE_HIGH);
+
+    int32_t res = 0;
+#if RTE_LPCPI && defined(BOARD_LPCAM_ENBUF_GPIO_PORT)
+    /* Enable the camera data-bus buffer / level-shifter before anything else.
+     * On the StartKit-e1c the parallel camera lines pass through an external
+     * buffer. */
+    res = GPIO_Driver_LPCAM_ENA->Initialize(BOARD_LPCAM_ENBUF_GPIO_PIN, NULL);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = GPIO_Driver_LPCAM_ENA->PowerControl(BOARD_LPCAM_ENBUF_GPIO_PIN,
+                                            ARM_POWER_FULL);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = GPIO_Driver_LPCAM_ENA->SetDirection(BOARD_LPCAM_ENBUF_GPIO_PIN,
+                                            GPIO_PIN_DIRECTION_OUTPUT);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
+
+    res = GPIO_Driver_LPCAM_ENA->SetValue(BOARD_LPCAM_ENBUF_GPIO_PIN,
+                                        GPIO_PIN_OUTPUT_STATE_HIGH);
+    if (res != ARM_DRIVER_OK) {
+        return res;
+    }
 #endif
 
     //////////////////////////////////////////////////////////////////////////////
     // Camera initialization
     //////////////////////////////////////////////////////////////////////////////
-    int32_t res = 0;
-#ifdef RESOLUTION_PARAMETER
-    res = camera->Initialize(RESOLUTION_PARAMETER, CameraEventHandler);
-#else
     res = camera->Initialize(CameraEventHandler);
-#endif
 
     if (res != ARM_DRIVER_OK) {
         return res;
@@ -185,11 +234,7 @@ int32_t camera_init(uint8_t* buffer)
         return res;
     }
 
-#ifdef RESOLUTION_PARAMETER
-    res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, RESOLUTION_PARAMETER);
-#else
     res = camera->Control(CPI_CAMERA_SENSOR_CONFIGURE, 0);
-#endif
     if (res != ARM_DRIVER_OK) {
         return res;
     }
@@ -201,7 +246,15 @@ int32_t camera_init(uint8_t* buffer)
     }
 #endif
 
-    res = camera->Control(CPI_EVENTS_CONFIGURE, ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED);
+    res = camera->Control(CPI_EVENTS_CONFIGURE,
+                          ARM_CPI_EVENT_CAMERA_CAPTURE_STOPPED
+#if DEBUG_CPI_EVENTS
+                        | ARM_CPI_EVENT_CAMERA_FRAME_VSYNC_DETECTED |
+                        ARM_CPI_EVENT_ERR_CAMERA_INPUT_FIFO_OVERRUN |
+                        ARM_CPI_EVENT_ERR_CAMERA_OUTPUT_FIFO_OVERRUN |
+                        ARM_CPI_EVENT_ERR_HARDWARE
+#endif
+                    );
     if (res != ARM_DRIVER_OK) {
         return res;
     }
@@ -235,6 +288,16 @@ void camera_uninit()
 void camera_start(uint32_t mode)
 {
     image_received = 0;
+
+#if DEBUG_CPI_EVENTS
+    /* Reset CPI interrupt diagnostics for this capture. */
+    s_cpi_vsync_cnt       = 0;
+    s_cpi_hsync_cnt       = 0;
+    s_cpi_infifo_ovr_cnt  = 0;
+    s_cpi_outfifo_ovr_cnt = 0;
+    s_cpi_bus_err_cnt     = 0;
+    s_cpi_stop_cnt        = 0;
+#endif
 
     /* A non-null framebuffer address is required by the CPI driver.
      * Use dummy address when ISP is enabled.

@@ -99,7 +99,6 @@ cmake -DTARGET_PLATFORM=alif \
 -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
 -DTARGET_BOARD=StartKit-e1c ..
 
-
 ; ------------Keyword spotting on CM55-HE GCC E8 ----------------
 cmake -DTARGET_PLATFORM=alif \
 -DTARGET_SUBSYSTEM=RTSS-HE \
@@ -110,7 +109,16 @@ cmake -DTARGET_PLATFORM=alif \
 
 make mlek_alif_kws -j4
 
+; ------------Object detection on CM55-HE GCC StartKit-E1C ----------------
+cmake -DTARGET_PLATFORM=alif \
+-DTARGET_SUBSYSTEM=RTSS-HE \
+-DALIF_CAMERA_ENABLED=ON -DALIF_CAMERA_MODULE=OV5640 \
+-DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM \
+-DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+-DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO \
+-DTARGET_BOARD=StartKit-e1c ..
 
+make mlek_object_detection -j4
 
 ; ------------ASR on CM55-HP GCC E8 ----------------
 cmake -DML_FWK_TMP_MEM_SIZE=0x002C0000 -DTARGET_PLATFORM=alif \
