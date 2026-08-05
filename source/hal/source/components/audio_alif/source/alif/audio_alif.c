@@ -50,7 +50,11 @@ static int32_t srshr(int32_t n, unsigned shift)
 #define AUDIO_R_ONLY 2
 #define AUDIO_LR_MIX 3
 
-#define AUDIO_MICS  AUDIO_LR_MIX
+#ifndef USE_MIC
+#define USE_MIC             AUDIO_LR_MIX
+#endif
+
+#define AUDIO_MICS          USE_MIC
 
 #define MAX_GAIN 10000.0f // 80dB
 //#define MAX_GAIN_INC_PER_STRIDE 1.05925373f // 0.5dB, so 1dB per second

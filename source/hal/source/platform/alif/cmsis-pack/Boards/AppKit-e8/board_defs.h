@@ -119,7 +119,11 @@
 // </e>
 
 // <e> LPPDM module enabled flag
-#define BOARD_LPPDM_ENABLED                             0
+#if (USE_APPKIT_LPPDM == 1)
+    #define BOARD_LPPDM_ENABLED                         1
+#else
+    #define BOARD_LPPDM_ENABLED                         0
+#endif
 // </e>
 
 // <e> MISC module enabled flag

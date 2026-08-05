@@ -243,15 +243,24 @@ const struct pinconf board_pinconf[] = {
     /* Selected: I2C0_SCL_B for "Clickboard,Slave" */
     {PORT_3,
      PIN_4,
+     #if (USE_APPKIT_LPPDM == 1)
+     PINMUX_ALTERNATE_FUNCTION_3,
+     PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
+     #else
      PINMUX_ALTERNATE_FUNCTION_5,
      PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
+     #endif
 
     /* P3_5 on pin F13. Functions: [0]: GPIO3_5, [1]: OSPI0_SCLKN_A, [2]: UART5_TX_A, [3]:
        LPPDM_D0_B, [4]: SPI0_SS1_B, [5]: >>>I2C0_SDA_B<<<, [6]: QEC1_Z_A, [7]: CAM_D9_A */
     /* Selected: I2C0_SDA_B for "Clickboard,Slave" */
     {PORT_3,
      PIN_5,
+     #if (USE_APPKIT_LPPDM == 1)
+     PINMUX_ALTERNATE_FUNCTION_3,
+     #else
      PINMUX_ALTERNATE_FUNCTION_5,
+     #endif
      PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_12MA},
 
     /* P3_6 on pin AA16. Functions: [0]: GPIO3_6, [1]: Reserved, [2]: LPUART_CTS_B, [3]:
@@ -356,7 +365,11 @@ const struct pinconf board_pinconf[] = {
     /* Selected: PDM_D2_B for "PDM MIC" */
     {PORT_5,
      PIN_4,
+     #if (USE_APPKIT_LPPDM == 1)
+     PINMUX_ALTERNATE_FUNCTION_0,
+     #else
      PINMUX_ALTERNATE_FUNCTION_3,
+     #endif
      PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P5_5 on pin A6. Functions: [0]: GPIO5_5, [1]: >>>OSPI1_SCLK_C<<<, [2]: UART3_RTS_A, [3]:
@@ -431,7 +444,11 @@ const struct pinconf board_pinconf[] = {
     /* P6_7 on pin D11. Functions: [0]: GPIO6_7, [1]: OSPI0_D7_C, [2]: UART0_RTS_B, [3]:
        >>>PDM_C2_A<<<, [4]: SPI1_SS3_B, [5]: UT7_T1_B, [6]: SD_D7_D, [7]: ETH_CRS_DV_A */
     /* Selected: PDM_C2_A for "PDM MIC" */
+    #if (USE_APPKIT_LPPDM == 1)
+    {PORT_6, PIN_7, PINMUX_ALTERNATE_FUNCTION_0, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+    #else
     {PORT_6, PIN_7, PINMUX_ALTERNATE_FUNCTION_3, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+    #endif
 
     /* P7_0 on pin A12. Functions: [0]: GPIO7_0, [1]: Reserved, [2]: CMP3_OUT_A, [3]: SPI0_MISO_C,
        [4]: I2C0_SDA_C, [5]: UT8_T0_B, [6]: >>>SD_CMD_A<<<, [7]: CAN_RXD_A */
