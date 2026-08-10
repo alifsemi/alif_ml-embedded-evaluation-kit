@@ -57,6 +57,15 @@ target_link_libraries(${ML_FWK_ET_TARGET} PUBLIC
     mlek::ml_framework_iface                                    # ML framework interface lib
     $<$<NOT:$<BOOL:${CMSIS_PACK_GEN_FLOW}>>:meta::executorch>)  # ExecuTorch libraries
 
+# The Zephyr ExecuTorch module links program_schema PRIVATE into
+# executorch_core, so the generated flatbuffer schema headers
+# (executorch/schema/program_generated.h) and the bundled flatbuffers headers
+# are not propagated through meta::executorch. EtModel.cc includes them
+# directly, so link the INTERFACE schema target to pull in its include dirs.
+if (NOT CMSIS_PACK_GEN_FLOW AND TARGET program_schema)
+    target_link_libraries(${ML_FWK_ET_TARGET} PRIVATE program_schema)
+endif()
+
 target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE
     MLEK_FWK_EXECUTORCH=1)
 

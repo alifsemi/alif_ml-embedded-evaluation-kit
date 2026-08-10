@@ -45,10 +45,15 @@ if (CONFIG_MLEK_EXAMPLES_FWK_EXECUTORCH)
         mlek_config_err(CONFIG_EXECUTORCH)
     endif()
 
-    if (TARGET modules__executorch)
+    # The Zephyr ExecuTorch module names its library target explicitly with
+    # zephyr_library_named(libexecutorch), so the default "modules__executorch"
+    # target does not exist. Support both names for robustness.
+    if (TARGET libexecutorch)
+        add_library(meta::executorch ALIAS libexecutorch)
+    elseif (TARGET modules__executorch)
         add_library(meta::executorch ALIAS modules__executorch)
     else()
-        message(FATAL_ERROR "Target modules__executorch not found.")
+        message(FATAL_ERROR "Neither target 'libexecutorch' nor 'modules__executorch' found.")
     endif()
 elseif (CONFIG_MLEK_EXAMPLES_FWK_TFLM)
     set(ML_FRAMEWORK "TensorFlowLiteMicro")
