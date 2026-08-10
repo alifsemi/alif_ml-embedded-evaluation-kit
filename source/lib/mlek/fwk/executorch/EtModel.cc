@@ -63,6 +63,7 @@ bool ContainsSubstring(const char* str, const char* substr)
  * @param[in] size  Size of the PTE buffer in bytes.
  * @return Memory mode string if found, or empty string otherwise.
  */
+#if defined(MLEK_LOG_ENABLE)
 std::string ParsePteMemoryMode(const uint8_t* data, size_t size)
 {
     if (!data || size == 0) {
@@ -97,6 +98,7 @@ std::string ParsePteMemoryMode(const uint8_t* data, size_t size)
 
     return {};
 }
+#endif /* defined(MLEK_LOG_ENABLE) */
 } /* anonymous namespace */
 
 EtModel::EtModel()
@@ -416,6 +418,8 @@ void EtModel::LogOperatorInfo()
     }
 
     if (this->m_hasEthosUDelegate) {
+#if defined(MLEK_LOG_ENABLE)
+        // Scans the whole PTE (in slow XIP flash); only worth it when the result is logged.
         const auto* data = static_cast<const uint8_t*>(this->m_modelBuffer.data);
         const std::string mode = ParsePteMemoryMode(data, this->m_modelBuffer.size);
         if (!mode.empty()) {
@@ -423,6 +427,7 @@ void EtModel::LogOperatorInfo()
         } else {
             warn("Unable to infer NPU memory mode.\n");
         }
+#endif /* MLEK_LOG_ENABLE */
     }
 }
 
