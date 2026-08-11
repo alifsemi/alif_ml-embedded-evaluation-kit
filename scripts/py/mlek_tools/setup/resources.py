@@ -25,6 +25,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import sys
 import typing
 from pathlib import Path
@@ -256,6 +257,91 @@ def install_executorch(executorch_path: Path, python_env: PythonEnv) -> None:
         env=env,
     )
 
+    # The Arm/Cortex-M backend (used by aot_arm_compiler for the Ethos-U delegate)
+    # needs extra deps (e.g. cmsis_nn) that install_executorch.sh does not pull in.
+    cortex_m_requirements = (
+        executorch_path / 'backends' / 'cortex_m' / 'requirements-cortex-m.txt'
+    )
+    if cortex_m_requirements.is_file():
+        install_cortex_m_deps(cortex_m_requirements, python_env)
+
+
+def install_cortex_m_deps(
+        requirements_file: Path,
+        python_env: PythonEnv,
+) -> None:
+    """
+    Install the ExecuTorch Cortex-M backend Python dependencies (e.g. cmsis_nn).
+
+    Versions are taken from ``requirements-cortex-m.txt`` (shipped with the
+    ExecuTorch source), not hardcoded here. We first attempt the upstream install
+    path (build isolation, matching examples/arm/setup.sh). Only if that fails do
+    we apply a workaround: the CMSIS-NN commit currently pinned by ExecuTorch still
+    uses the deprecated ``cmake.minimum-version`` key, which scikit-build-core >= 0.8
+    rejects, and pip's build isolation always pulls the latest scikit-build-core.
+    The fallback provides a compatible build backend (< 0.8) in the venv and
+    disables build isolation. Once the pinned CMSIS-NN is fixed upstream, the first
+    attempt succeeds and the fallback is never used.
+
+    :param requirements_file:   Path to requirements-cortex-m.txt.
+    :param python_env:          The Python virtual environment.
+    """
+    try:
+        python_env.pip_install_requirements(requirements_file, no_deps=True)
+        return
+    except subprocess.CalledProcessError:
+        logging.warning(
+            "Cortex-M deps install failed with build isolation; retrying with a "
+            "pinned scikit-build-core (< 0.8) and no build isolation. This works "
+            "around the deprecated cmake.minimum-version key in the CMSIS-NN "
+            "commit pinned by ExecuTorch."
+        )
+
+    python_env.pip_install('"scikit-build-core[pyproject]<0.8" "pybind11>=2.10"')
+    call_command(
+        f'"{python_env.python}" -m pip install --no-build-isolation --no-deps '
+        f'-r {requirements_file}'
+    )
+
+
+def executorch_install_matches_source(
+        executorch_path: Path,
+        python_env: PythonEnv,
+) -> bool:
+    """
+    Check whether the ExecuTorch installed in the venv matches the source tree.
+
+    Compares the git revision recorded in the installed ``executorch`` package
+    against the current HEAD of the source checkout at ``executorch_path``. This
+    catches the case where the venv still holds an ExecuTorch built from a
+    different checkout (e.g. after switching ``--executorch-path``), which would
+    otherwise cause import errors for modules added in the newer source.
+
+    :param executorch_path: Root of the ExecuTorch source tree.
+    :param python_env:      The Python virtual environment.
+    :return:                True if the installed revision matches the source HEAD,
+                            or if the comparison cannot be made (to avoid forcing an
+                            unnecessary reinstall); False on a confirmed mismatch.
+    """
+    try:
+        source_rev = subprocess.run(
+            ['git', '-C', str(executorch_path), 'rev-parse', 'HEAD'],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (subprocess.SubprocessError, OSError):
+        return True
+
+    installed_rev = subprocess.run(
+        [str(python_env.python), '-c',
+         'import executorch.version as v; print(v.git_version)'],
+        capture_output=True, text=True, check=False,
+    ).stdout.strip()
+
+    if not source_rev or not installed_rev:
+        return True
+
+    return installed_rev == source_rev
+
 
 def optimize_executorch_model(
         model_name: typing.Union[str, Path],
@@ -345,7 +431,12 @@ def setup_executorch(
     python_env = setup_context.python_env
     executorch_path = setup_context.paths_config.executorch_path
 
-    if not python_env.is_installed("executorch"):
+    if (not python_env.is_installed("executorch")
+            or not executorch_install_matches_source(executorch_path, python_env)):
+        logging.info(
+            "Installing ExecuTorch from %s into the virtual environment.",
+            executorch_path,
+        )
         install_executorch(executorch_path, python_env)
 
 

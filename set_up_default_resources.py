@@ -235,6 +235,12 @@ if __name__ == "__main__":
         default=default_downloads_path,
     )
     parser.add_argument(
+        "--executorch-path",
+        help="Path to the root of the ExecuTorch source tree",
+        type=Path,
+        default=default_executorch_path,
+    )
+    parser.add_argument(
         "--http-header",
         help="Specify HTTP Headers to set when downloading from a domain. "
              "Example: --http-header my-internal-website.com 'Authorization: Bearer $TOKEN'",
@@ -284,7 +290,7 @@ if __name__ == "__main__":
         use_case_resources_files=use_case_resources_files,
         downloads_dir=parsed_args.downloads_dir,
         additional_requirements_file=parsed_args.requirements_file,
-        executorch_path=default_executorch_path,
+        executorch_path=parsed_args.executorch_path,
         vela_config_file=_default_vela_config_file,
     )
 
