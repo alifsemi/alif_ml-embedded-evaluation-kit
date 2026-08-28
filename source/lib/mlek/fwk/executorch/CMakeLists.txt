@@ -61,9 +61,19 @@ target_link_libraries(${ML_FWK_ET_TARGET} PUBLIC
 # executorch_core, so the generated flatbuffer schema headers
 # (executorch/schema/program_generated.h) and the bundled flatbuffers headers
 # are not propagated through meta::executorch. EtModel.cc includes them
-# directly, so link the INTERFACE schema target to pull in its include dirs.
+# directly, so consume the INTERFACE schema target's include dirs.
+#
+# program_schema is only linked for its include directories, but linking it
+# (even PRIVATE) would record it in this static library's export interface as a
+# $<LINK_ONLY:> dependency. Since program_schema is not part of the MLEK export
+# set, export(TARGETS) would fail. Instead, pull in its include dirs and compile
+# definitions directly and depend on it only for build ordering.
 if (NOT CMSIS_PACK_GEN_FLOW AND TARGET program_schema)
-    target_link_libraries(${ML_FWK_ET_TARGET} PRIVATE program_schema)
+    add_dependencies(${ML_FWK_ET_TARGET} program_schema)
+    target_include_directories(${ML_FWK_ET_TARGET} PRIVATE
+        $<TARGET_PROPERTY:program_schema,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(${ML_FWK_ET_TARGET} PRIVATE
+        $<TARGET_PROPERTY:program_schema,INTERFACE_COMPILE_DEFINITIONS>)
 endif()
 
 target_compile_definitions(${ML_FWK_ET_TARGET} INTERFACE
