@@ -1,6 +1,15 @@
+# This file was ported to work on Alif Semiconductor devices.
+
+#  Copyright (C) 2023 Alif Semiconductor - All Rights Reserved.
+#  Use, distribution and modification of this code is permitted under the
+#  terms stated in the Alif Semiconductor Software License Agreement
+#
+#  You should have received a copy of the Alif Semiconductor Software
+#  License Agreement with this file. If not, please write to:
+#  contact@alifsemi.com, or visit: https://alifsemi.com/license
+
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
-#  affiliates <open-source-office@arm.com>
+#  Copyright (c) 2021 Arm Limited. All rights reserved.
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,8 +39,16 @@ list(APPEND ${use_case}_API_LIST "kws")
 
 set_input_file_path_user_option(".wav" ${use_case})
 
+USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
+    ${MLEK_ROOT}/resources/kws/labels/micronet_kws_labels.txt
+    FILEPATH)
+
 USER_OPTION(${use_case}_AUDIO_RATE "Specify the target sampling rate. Default is 16000."
     16000
+    STRING)
+
+USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0, 1.0) that must be applied to the inference results for a label to be deemed valid."
+    0.5
     STRING)
 
 USER_OPTION(${use_case}_AUDIO_MONO "Specify if the audio needs to be converted to mono. Default is ON."
@@ -54,9 +71,11 @@ USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples
     16000
     STRING)
 
-USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD "Specify the score threshold [0.0, 1.0) that must be applied to the inference results for a label to be deemed valid."
-    0.7
-    STRING)
+set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Needed for power examples and KWS MHU communication.")
+
+set(${use_case}_COMPILE_DEFS
+    $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
+)
 
 # Generate input files
 generate_audio_code(${${use_case}_FILE_PATH} ${SAMPLES_GEN_DIR}
@@ -67,22 +86,31 @@ generate_audio_code(${${use_case}_FILE_PATH} ${SAMPLES_GEN_DIR}
     ${${use_case}_AUDIO_RES_TYPE}
     ${${use_case}_AUDIO_MIN_SAMPLES})
 
+# Generate labels file
+set(${use_case}_LABELS_CPP_FILE Labels)
+generate_labels_code(
+    INPUT           "${${use_case}_LABELS_TXT_FILE}"
+    DESTINATION_SRC ${SRC_GEN_DIR}
+    DESTINATION_HDR ${INC_GEN_DIR}
+    OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
+)
 
 USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
-    0x00100000
+    0x00020000
     STRING)
 
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/kws/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
 else()
-    set(DEFAULT_MODEL_PATH      ${DEFAULT_MODEL_DIR}/kws_micronet_m.tflite)
+    set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/kws/kws_micronet_m.tflite)
 endif()
 
 set(EXTRA_MODEL_CODE
     "/* Model parameters for ${use_case} */"
     "extern const int   g_FrameLength    = 640"
     "extern const int   g_FrameStride    = 320"
+    "extern const int   g_AudioRate      = ${${use_case}_AUDIO_RATE}"
     "extern const float g_ScoreThreshold = ${${use_case}_MODEL_SCORE_THRESHOLD}"
     )
 

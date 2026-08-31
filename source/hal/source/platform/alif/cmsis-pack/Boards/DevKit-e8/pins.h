@@ -550,9 +550,8 @@ const struct pinconf board_pinconf[] = {
     /* Selected: I2S3_SDI_B for "MIC Input" */
     {PORT_9,
      PIN_0,
-     PINMUX_ALTERNATE_FUNCTION_2,
-     PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_BUS_REPEATER |
-         PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+     PINMUX_ALTERNATE_FUNCTION_0,
+     PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P9_1 on pin K1. Functions: [0]: >>>GPIO9_1<<<, [1]: LPUART_RX_B, [2]: I2S3_SDO_B, [3]:
        QEC1_Z_B, [4]: SD_CLK_C, [5]: CDC_D9_A, [6]: CAM_D9_B, [7]: LPSPI_SS4_A */
@@ -575,8 +574,8 @@ const struct pinconf board_pinconf[] = {
     /* Selected: GPIO9_3 for "CAMERA_TRIGGER" */
     {PORT_9,
      PIN_3,
-     PINMUX_ALTERNATE_FUNCTION_0,
-     PADCTRL_DRIVER_DISABLED_PULL_DOWN | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+     PINMUX_ALTERNATE_FUNCTION_3,
+     PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P9_4 on pin J5. Functions: [0]: >>>GPIO9_4<<<, [1]: UART7_TX_B, [2]: I2S3_SCLK_A, [3]:
        SPI2_SCLK_B, [4]: I2C3_SDA_C, [5]: QEC2_Z_B, [6]: CDC_D12_A, [7]: CAM_D12_B */
@@ -823,13 +822,13 @@ const struct pinconf board_pinconf[] = {
     /* Selected: LPI2S_WS_C for "My LPI2S" */
     {PORT_13, PIN_7, PINMUX_ALTERNATE_FUNCTION_2, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-    /* P14_0 on pin B9. Functions: [0]: GPIO14_0 [1]: OSPI1_SCLK_B, [2]: >>>UART6_RX_C<<<,, [3]:
+    /* P14_0 on pin B9. Functions: [0]: >>>GPIO14_0<<< [1]: OSPI1_SCLK_B, [2]: UART6_RX_C, [3]:
        QEC2_Z_C, [4]: SD_CMD_B, [5]: LFRC_OUT_B */
-    /* Selected: UART6_RX_C */
+    /* Selected: GPIO14_0 for "WM8904 codec IRQ input" */
     {PORT_14,
      PIN_0,
-     PINMUX_ALTERNATE_FUNCTION_2,
-     PADCTRL_READ_ENABLE | PADCTRL_SCHMITT_TRIGGER_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP},
+     PINMUX_ALTERNATE_FUNCTION_0,
+     PADCTRL_READ_ENABLE | PADCTRL_SCHMITT_TRIGGER_ENABLE}, //PADCTRL_DRIVER_DISABLED_PULL_UP
 
     /* P14_1 on pin H2. Functions: [0]: GPIO14_1 [1]: OSPI1_SCLKN_B, [2]: >>>UART6_TX_C<<<,, [3]:
        Reserved, [4]: QEC3_X_C, [5]: SD_CLK_B, [6]: LFXO_OUT_B */

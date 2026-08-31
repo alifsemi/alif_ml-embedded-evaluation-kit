@@ -2940,7 +2940,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S0 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S0_WSS_CLOCK_CYCLES     2
+#define RTE_I2S0_WSS_CLOCK_CYCLES     0
 
 // <o> I2S0 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -3283,7 +3283,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S3
 // <i> Default: ENABLE
-#define RTE_I2S3_DMA_ENABLE   1
+#define RTE_I2S3_DMA_ENABLE   0
 
 // <o> I2S3 DMA IRQ priority <0-255>
 // <i> Defines I2S3 DMA Interrupt priority

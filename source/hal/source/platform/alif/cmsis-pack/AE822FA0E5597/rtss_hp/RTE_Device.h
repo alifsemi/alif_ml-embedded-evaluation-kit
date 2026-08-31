@@ -3283,7 +3283,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S3
 // <i> Default: ENABLE
-#define RTE_I2S3_DMA_ENABLE   1
+#define RTE_I2S3_DMA_ENABLE   0
 
 // <o> I2S3 DMA IRQ priority <0-255>
 // <i> Defines I2S3 DMA Interrupt priority

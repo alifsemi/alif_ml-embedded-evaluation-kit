@@ -1,0 +1,16 @@
+{
+    "HE_alif_aec": {
+        "binary": "mlek_alif_aec.bin",
+        "version" : "1.0.0",
+        "mramAddress": "0x80008000",
+        "cpu_id": "M55_HE",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "DEVICE": {
+        "disabled" : false,
+        "binary": "app-device-config.json",
+        "version" : "0.5.00",
+        "signed": true
+    }
+}

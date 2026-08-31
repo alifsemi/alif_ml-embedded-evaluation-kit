@@ -188,6 +188,7 @@ SECTIONS
 
   .bss.itcm (NOLOAD) : ALIGN(8)
   {
+    *(.bss.audio_rec)
   } > ITCM
 
 #ifdef BOARD_OSPI_RAM_BASE

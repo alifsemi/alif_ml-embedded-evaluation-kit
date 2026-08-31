@@ -180,7 +180,7 @@ static uint32_t set_power_profiles()
     default_runprof.phy_pwr_gating  = LDO_PHY_MASK | MIPI_PLL_DPHY_MASK | MIPI_TX_DPHY_MASK | MIPI_RX_DPHY_MASK;
     default_runprof.ip_clock_gating = MIPI_DSI_MASK | CDC200_MASK | MIPI_CSI_MASK | CAMERA_MASK | LP_PERIPH_MASK | NPU_HE_MASK | NPU_HP_MASK;
 #endif
-    default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK;
+    default_runprof.power_domains   = PD_VBAT_AON_MASK | PD_SSE700_AON_MASK | PD_SYST_MASK | PD_SESS_MASK | PD_DBSS_MASK;
     default_runprof.dcdc_voltage    = DCDC_VOUT_0825;
     default_runprof.aon_clk_src     = CLK_SRC_LFXO;
     default_runprof.run_clk_src     = CLK_SRC_PLL;
@@ -286,6 +286,7 @@ uint32_t enable_audio_peripheral_clocks(void)
                                        CLKEN_HFOSCx2,
                                        true,
                                        &service_error_code);
+    printf("audio_init enable_audio_peripheral_clocks : %" PRIi32 "\n", err);
 #else // SE_SERVICES_SUPPORT
     // Enable I2S clk
     CGU->CLK_ENA |= CLK_ENA_CLK76P8M;

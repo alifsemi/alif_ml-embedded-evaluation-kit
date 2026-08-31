@@ -90,7 +90,6 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
         i2s_drv->PowerControl(ARM_POWER_OFF);
     }
 
-    printf(" (OUT) I2S Control status = %" PRId32 "\n", status);
     return ARM_DRIVER_OK;
 }
 
