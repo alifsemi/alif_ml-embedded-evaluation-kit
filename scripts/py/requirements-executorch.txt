@@ -7,13 +7,13 @@
 # On macOS, PyTorch wheels are CPU-only and are not published with the +cpu suffix.
 --extra-index-url https://download.pytorch.org/whl/cpu
 
-executorch==1.3.1
-torch==2.12.0+cpu; sys_platform == "linux"
-torch==2.12.0; sys_platform == "darwin"
-torchao==0.17.0+cpu; sys_platform == "linux"
-torchao==0.17.0; sys_platform == "darwin"
+executorch==1.5.1
+torch==2.14.0+cpu; sys_platform == "linux"
+torch==2.14.0; sys_platform == "darwin"
+torchao==0.18.0+cpu; sys_platform == "linux"
+torchao==0.18.0; sys_platform == "darwin"
 torchaudio==2.11.0+cpu; sys_platform == "linux"
 torchaudio==2.11.0; sys_platform == "darwin"
-torchvision==0.27.0+cpu; sys_platform == "linux"
-torchvision==0.27.0; sys_platform == "darwin"
-tosa-tools==2026.2.1
+torchvision==0.29.0+cpu; sys_platform == "linux"
+torchvision==0.29.0; sys_platform == "darwin"
+tosa-tools==2026.5.0

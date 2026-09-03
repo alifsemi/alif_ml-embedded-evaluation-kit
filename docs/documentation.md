@@ -294,7 +294,7 @@ The TensorFlow Lite models used in the use-cases implemented in this project can
 
 ### ExecuTorch models
 
-- [torchvision](https://docs.pytorch.org/vision/0.27/)
+- [torchvision](https://docs.pytorch.org/vision/0.28/)
   - [MobileNet V2](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.mobilenet_v2.html)
 
 - [Hugging Face - PyTorch Image Models (timm)](https://huggingface.co/timm) ( [Apache 2.0 License](https://github.com/huggingface/pytorch-image-models/blob/main/LICENSE) )

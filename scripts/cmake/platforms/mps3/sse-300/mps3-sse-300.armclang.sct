@@ -1,4 +1,4 @@
-;  SPDX-FileCopyrightText: Copyright 2021, 2023, 2025 Arm Limited and/or its
+;  SPDX-FileCopyrightText: Copyright 2021, 2023, 2025-2026 Arm Limited and/or its
 ;  affiliates <open-source-office@arm.com>
 ;  SPDX-License-Identifier: Apache-2.0
 ;
@@ -110,11 +110,17 @@ LOAD_REGION_1       0x70000000                  0x02000000
     }
 
     ;-----------------------------------------------------
-    ; First 256kiB of BRAM (FPGA SRAM) used for RO data.
+    ; First 256kiB of BRAM (FPGA SRAM) used for RO data
+    ; and model initialization code, loaded from DDR.
     ; Note: Total BRAM size available is 1MiB.
     ;-----------------------------------------------------
     bram.bin        0x11000000          ALIGN 8 0x00040000
     {
+        ; Keep model setup code out of ITCM to leave room for kernels.
+        *flatbuffer_conversions.o* (+RO-CODE)
+        *MicroMutableAllOpsResolver*.o* (+RO-CODE)
+        *micro_allocator.o* (+RO-CODE)
+
         ; RO data (incl. unwinding tables for debugging)
         .ANY (+RO-DATA)
         *s16*.o* (+RO +RW +ZI)

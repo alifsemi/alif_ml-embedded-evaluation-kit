@@ -207,6 +207,18 @@ The build parameters are:
 - `<use_case>_LINKER_SCRIPT_OVERRIDE_PATH`: Optional linker control file override for a specific use case. This is set
   in the use case CMake logic and takes precedence over `LINKER_SCRIPT_OVERRIDE_PATH` for that application target.
 
+  When neither override is set, CMake first looks for a build-type-specific linker control file. The variant must have
+  the same filename as the common file and be in a lowercase build-type subdirectory beside it. For example, a Debug
+  build whose common file is `sse-300/mps3-sse-300.llvm.ld` uses
+  `sse-300/debug/mps3-sse-300.llvm.ld` when it exists. If the variant does not exist, CMake falls back to the common
+  file. This convention applies to LLVM and GNU linker scripts and Arm Compiler scatter files. Explicit target and
+  global overrides are exact selections and are not searched for build-type variants. Add or remove a variant by
+  reconfiguring the build so CMake can select it.
+
+  The SSE-300 LLVM Debug variant executes TensorFlow Lite for Microcontrollers code from BRAM and places the heap in
+  DDR to preserve full operators and `-O0` debugging within the available ITCM and BRAM. This placement is slower than
+  the common Release layout; use Release builds for performance measurements.
+
 - `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Canonical values are `tflm` and
   `executorch`. Default value is `tflm`. The values `TensorFlowLiteMicro`, `ExecuTorch`, and `et` are also accepted
   case-insensitively as aliases. This option will configure the framework build steps and include them in the binary

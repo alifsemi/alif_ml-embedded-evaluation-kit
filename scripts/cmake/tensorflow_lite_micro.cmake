@@ -34,13 +34,13 @@ assert_defined(TENSORFLOW_SRC_PATH)
 function(build_tflite_micro_cmake)
     include(FetchContent)
     set(CORE_SOFTWARE_REPO_URL "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-software")
-    set(CORE_SOFTWARE_GIT_REF  "26.05")
+    set(CORE_SOFTWARE_GIT_REF  "26.08")
     set(TFLM_CMAKE_URL "${CORE_SOFTWARE_REPO_URL}/-/raw/${CORE_SOFTWARE_GIT_REF}/tflite_micro.cmake?ref_type=tags&inline=false")
-    set(TFLM_CMAKE_MD5 "52985fb8910dbaf034a17f9c6140b9d2")
+    set(TFLM_CMAKE_SHA256 "f3477fbac685e27516d6e5ca6f1dfd88fdd416dfe469a4be33817e0c4c819ad6")
 
     FetchContent_Declare(TensorFlow_Lite_Micro_CMake_Wrapper
         URL                 ${TFLM_CMAKE_URL}
-        URL_HASH            MD5=${TFLM_CMAKE_MD5}
+        URL_HASH            SHA256=${TFLM_CMAKE_SHA256}
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}
         DOWNLOAD_NAME       "tflite_micro.cmake"
         DOWNLOAD_NO_EXTRACT ON)

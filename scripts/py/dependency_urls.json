@@ -1,10 +1,10 @@
 {
   "avh": "https://github.com/ARM-software/AVH/archive/11012b599bd77fd901e7f57c17a3420624db47d1.zip",
-  "cmsis-6": "https://github.com/ARM-software/CMSIS_6/archive/3bff869359332fc3756036c91cdd96c6a3df50af.zip",
+  "cmsis-6": "https://github.com/ARM-software/CMSIS_6/archive/855aedd3979036dcc2c2439dcf6eec9697c55d2e.zip",
   "cmsis-dsp": "https://github.com/ARM-software/CMSIS-DSP/archive/refs/tags/v1.17.0.zip",
-  "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/ece5a38a62804a8430ef40b12c0a8339671de75f.zip",
-  "core-driver": "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver/-/archive/26.05/ethos-u-core-driver-26.05.zip",
-  "core-platform": "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-platform/-/archive/26.05/ethos-u-core-platform-26.05.zip",
+  "cmsis-nn": "https://github.com/ARM-software/CMSIS-NN/archive/13c97dbb6f781d4aab38ed34e6e441f42b79aff4.zip",
+  "core-driver": "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-driver/-/archive/26.08/ethos-u-core-driver-26.08.zip",
+  "core-platform": "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-platform/-/archive/26.08/ethos-u-core-platform-26.08.zip",
   "cortex-dfp": "https://github.com/ARM-software/Cortex_DFP/archive/cd38dbb875f7195e70460eee51faa7ab180c24a1.zip",
-  "tensorflow": "https://github.com/tensorflow/tflite-micro/archive/730449fef1510c5d7848a4e9f0069ba357c16b96.zip"
+  "tensorflow": "https://github.com/tensorflow/tflite-micro/archive/90b983c2b3f1480642e040bbd2ddb37b998f3424.zip"
 }

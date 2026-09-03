@@ -50,7 +50,7 @@ from scripts.py.mlek_tools.use_case.model import load_use_case_resources
 
 # ── Project-specific constants ────────────────────────────────────────────────
 
-VELA_VERSION = "5.1.0"
+VELA_VERSION = "5.2.0"
 INSTALL_VELA_FROM_SOURCE = False
 VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
 MIN_PYTHON_VERSION = (3, 10)

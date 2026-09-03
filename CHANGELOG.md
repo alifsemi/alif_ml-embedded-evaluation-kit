@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [26.09]
+
+### Added
+
+- Support for selecting NPU memory modes during model preparation and
+  application builds, allowing multiple memory-mode variants for
+  the same NPU and MAC configuration to be generated in a single setup run
+- Support for preparing models for Ethos-U direct drive targets
+- Automatic selection of build-type-specific linker scripts and scatter files
+
+### Changed
+
+- Updated to the CE-ML 26.08 component set, including core-driver, core-platform,
+  CMSIS-6, CMSIS-NN, TensorFlow Lite Micro and Vela 5.2.0
+- Updated ExecuTorch to 1.5.1 and refreshed its companion Python packages
+- Standardised ML framework selection across Python tooling and CMake, using
+  canonical values `tflm` and `executorch` and accepting case-insensitive aliases
+  including `TensorFlowLiteMicro`, `ExecuTorch` and `et`
+- Included memory modes in generated NPU model filenames and updated application
+  defaults to select the corresponding models
+
+### Removed
+
+- Removed the `simple_platform` target, including its HAL implementation,
+  linker files and CMake presets
+
 ## [26.06]
 
 ### Added
