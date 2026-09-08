@@ -300,7 +300,9 @@ pipeline {
             parallel {
                 stage('Test Inference runner HP GCC Release DevKit-E7') {
                     agent { label 'E7' }
+                    options { skipDefaultCheckout() }
                     steps {
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_gnu_inf_hp_release_devkit_e7"
                         script {
                             try {
@@ -326,7 +328,9 @@ pipeline {
                 }
                 stage('Test KWS HE GCC Release DevKit-E7') {
                     agent { label 'E7' }
+                    options { skipDefaultCheckout() }
                     steps {
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_gnu_kws_he_release_devkit_e7"
                         script {
                             try {
@@ -352,7 +356,9 @@ pipeline {
                 }
                 stage('Test KWS HE ARMCLANG Release DevKit-E7') {
                     agent { label 'E7' }
+                    options { skipDefaultCheckout() }
                     steps {
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_armclang_kws_he_release_devkit_e7"
                         script {
                             try {
@@ -378,8 +384,10 @@ pipeline {
                 }
                 stage('Test Image Classification HP GCC Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_gnu_img_hp_release_devkit_e7"
                         script {
                             try {
@@ -409,8 +417,10 @@ pipeline {
                 }
                 stage('Test Image Classification HP ARMCLANG Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_armclang_img_hp_release_devkit_e7"
                         script {
                             try {
@@ -440,8 +450,10 @@ pipeline {
                 }
                 stage('Test Object Detection HP GCC Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_gnu_obj_hp_release_devkit_e7"
                         script {
                             try {
@@ -471,8 +483,10 @@ pipeline {
                 }
                 stage('Test Object Detection HP ARMCLANG Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_armclang_obj_hp_release_devkit_e7"
                         script {
                             try {
@@ -502,8 +516,10 @@ pipeline {
                 }
                 stage('Test Visual Wake Word HP GCC Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_gnu_vww_hp_release_devkit_e7"
                         script {
                             try {
@@ -533,8 +549,10 @@ pipeline {
                 }
                 stage('Test Visual Wake Word HP ARMCLANG Release DevKit-E7') {
                     agent { label 'Blinky' } // DevKit-e7 device with camera and display
+                    options { skipDefaultCheckout() }
                     steps {
                         build job: 'camera_start_record'
+                        unstash name: "ml_base_stash"
                         unstash name: "test_build_armclang_vww_hp_release_devkit_e7"
                         script {
                             try {
