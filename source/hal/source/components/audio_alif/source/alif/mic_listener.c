@@ -90,7 +90,7 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
         i2s_drv->PowerControl(ARM_POWER_OFF);
     }
 
-    return ARM_DRIVER_OK;
+    return status;
 }
 
 int32_t enable_microphone(voice_callback_t callback)

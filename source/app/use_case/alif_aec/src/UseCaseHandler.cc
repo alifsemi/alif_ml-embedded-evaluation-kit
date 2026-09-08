@@ -145,8 +145,8 @@ using namespace arm::app::kws;
         int index = 0;
         std::vector<kws::KwsResult> infResults;
         static bool audio_inited;
-        const int16_t* audioData = nullptr;
-        int strides_in_example_audio = 0;
+        static const int16_t* audioData = nullptr;
+        static int strides_in_example_audio = 0;
         if (!audio_inited) {
             // LIVE AUDIO IN init
             err = hal_audio_alif_init(audioRate);
@@ -190,7 +190,7 @@ using namespace arm::app::kws;
             // // Wait until stride buffer is full - initiated above or by previous interation of loop
             err = hal_wait_for_audio();
             if (err) {
-                printf_err("hal_get_audio_data failed with error: %d\n", err);
+                printf_err("hal_wait_for_audio failed with error: %d\n", err);
                 return false;
             }
 
@@ -198,7 +198,10 @@ using namespace arm::app::kws;
             std::copy(audio_inf + AUDIO_STRIDE, audio_inf + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
 
             // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
-            hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+            // Skip on the final stride: an unconsumed receive leaves the driver busy (rx_busy) and the next session fails with -2.
+            if (index + 1 < strides_in_example_audio) {
+                hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+            }
 
             hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
