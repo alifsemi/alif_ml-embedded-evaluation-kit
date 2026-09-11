@@ -114,6 +114,9 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/drivers/source/uart.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi.c
     ${ALIF_CMSIS_PATH}/drivers/source/ospi_psram_xip.c
+    ${ALIF_CMSIS_PATH}/drivers/source/sd.c
+    ${ALIF_CMSIS_PATH}/drivers/source/sdio.c
+    ${ALIF_CMSIS_PATH}/drivers/source/sd_host.c
     ${ALIF_CMSIS_PATH}/components/Source/driver_phy.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_GPIO.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_IO.c

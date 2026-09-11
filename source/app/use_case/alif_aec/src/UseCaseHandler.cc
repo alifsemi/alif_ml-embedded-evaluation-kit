@@ -41,6 +41,7 @@
 #include "mlek/fwk/tflm/MicroNetKwsModel.hpp"
 #include "audio/audio_out.h"
 #include "board_utils.h"
+#include "FatFS/sd_fatfs.h"
 
 #include <vector>
 
@@ -61,6 +62,11 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
 static int16_t audio_out[AUDIO_STRIDE*2];
+
+/* AEC output accumulated in on-chip SRAM (NoInit region), one AUDIO_STRIDE per inference. */
+#define AEC_OUTPUT_MAX_SAMPLES (128 * AUDIO_STRIDE)
+static int16_t aec_output_sram[AEC_OUTPUT_MAX_SAMPLES] __attribute__((section(".bss.NoInit.temp_buf_sram")));
+static uint32_t aec_output_len = 0;
 
 static volatile bool button_pressed = false;
 
@@ -141,6 +147,8 @@ using namespace arm::app::kws;
         KwsPostProcess postProcess = KwsPostProcess(outputTensor, ctx.Get<KwsClassifier &>("classifier"),
                                                     ctx.Get<std::vector<std::string>&>("labels"),
                                                     singleInfResult);
+
+        aec_output_len = 0;
 
         int index = 0;
         std::vector<kws::KwsResult> infResults;
@@ -230,10 +238,44 @@ using namespace arm::app::kws;
                 return false;
             }
 
-            // AEC done, write to memory
+            // AEC done, store this stride's output window in SRAM
+            if (aec_output_len + AUDIO_STRIDE <= AEC_OUTPUT_MAX_SAMPLES) {
+                std::copy(audio_out, audio_out + AUDIO_STRIDE,
+                          aec_output_sram + aec_output_len);
+                // std::copy(inferenceWindow, inferenceWindow + AUDIO_STRIDE,
+                //           aec_output_sram + aec_output_len);
+                aec_output_len += AUDIO_STRIDE;
+            } else {
+                printf_err("AEC output SRAM buffer full, dropping stride %d\n", index);
+            }
 
             index++;
         } while (index < strides_in_example_audio);
+
+        info("AEC output stored in SRAM: %lu samples at %p\n",
+             aec_output_len, (void*)aec_output_sram);
+
+        // Write the accumulated SRAM buffer to a file
+        err = init_fs();
+        if (err) {
+            printf_err("init_fs failed with error: %d\n", err);
+            return false;
+        }
+        err = write_file(aec_output_sram, aec_output_len);
+        if (err) {
+            printf_err("write_file failed with error: %d\n", err);
+            return false;
+        }
+        err = close_file();
+        if (err) {
+            printf_err("close_file failed with error: %d\n", err);
+            return false;
+        }
+        err = deinit_fs();
+        if (err) {
+            printf_err("deinit_fs failed with error: %d\n", err);
+            return false;
+        }
         return true;
     }
 
