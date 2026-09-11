@@ -517,35 +517,6 @@
 // <i> Height in pixels of the ISP scaler output (after scaling from sensor dimensions).
 #define RTE_ISP_OUTPUT_HEIGHT       480
 
-// <o> ISP Sensor Input Width
-// <i> Width in pixels of the sensor input to the ISP pipeline.
-// <i> Default: MT9M114 sensor resolution (1280). Change for different sensors.
-#define RTE_ISP_SENSOR_INPUT_WIDTH  RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH
-
-
-// <o> ISP Sensor Input Height
-// <i> Height in pixels of the sensor input to the ISP pipeline.
-// <i> Default: MT9M114 sensor resolution (720). Change for different sensors.
-#define RTE_ISP_SENSOR_INPUT_HEIGHT RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT
-
-// <o> ISP Crop Top offset <0-4095>
-// <i> Top offset in pixels for the cropped output window
-#define RTE_ISP_CROP_TOP    0
-
-// <o> ISP Crop Left offset <0-4095>
-// <i> Left offset in pixels for the cropped output window
-#define RTE_ISP_CROP_LEFT   0
-
-// <o> ISP Crop Width <1-4095>
-// <i> Width in pixels of the cropped output window.
-// <i> Default: full sensor input (no crop). Override with smaller value to crop.
-#define RTE_ISP_CROP_WIDTH  RTE_ISP_SENSOR_INPUT_WIDTH
-
-// <o> ISP Crop Height <1-4095>
-// <i> Height in pixels of the cropped output window.
-// <i> Default: full sensor input (no crop). Override with smaller value to crop.
-#define RTE_ISP_CROP_HEIGHT RTE_ISP_SENSOR_INPUT_HEIGHT
-
 #endif
 // </e> ISP (ISP) [Driver_ISP]
 
@@ -1067,6 +1038,27 @@
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            2
 #define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1280
 #define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 720
+#endif
+
+// <i> MT9M114 MIPI frame width and height(derived from IMAGE_CONFIG)
+// <i> defines MT9M114 MIPI frame  width & height
+// <i> default: 1280x720
+#if (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 0)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              1288
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT            728
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 1) || \
+      (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 2)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              1280
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             720
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 3)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              640
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             480
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 4)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              320
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             240
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 5)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              320
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             320
 #endif
 
 // <o> select MT9M114 MIPI number of lanes in DPHY
@@ -2940,7 +2932,7 @@
 //    <2=> WSS_CLOCK_CYCLES_32
 // <i> Defines I2S0 size of word
 // <i> Default: WSS_CLOCK_CYCLES_32
-#define RTE_I2S0_WSS_CLOCK_CYCLES     2
+#define RTE_I2S0_WSS_CLOCK_CYCLES     0
 
 // <o> I2S0 SCLK GATING
 //    <0=> NO_CLOCK_GATING
@@ -3586,7 +3578,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART2
 // <i> Default: DISABLE
-#define RTE_UART2_DMA_ENABLE   0
+#define RTE_UART2_DMA_ENABLE           0
 
 // <o> UART2 DMA IRQ priority <0-255>
 // <i> Defines UART2 DMA Interrupt priority
@@ -3713,7 +3705,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for UART4
 // <i> Default: DISABLE
-#define RTE_UART4_DMA_ENABLE   0
+#define RTE_UART4_DMA_ENABLE           0
 
 // <o> UART4 DMA Selection
 //    <0=> DMA1(M55-HP)
@@ -8266,6 +8258,29 @@
 // <i> Default: ENABLE
 #define RTE_ADC120_COMPARATOR_BIAS     2
 
+// <o> ADC120 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC120 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC120_DMA_ENABLE          0
+
+// <o> ADC120 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC120_SELECT_DMA0         1
+
+// <o> ADC120 DMA IRQ priority <0-255>
+// <i> Defines ADC120 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC120_DMA_IRQ_PRI         0
+
+// <o> ADC120 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC120_DMA_MCODE_SIZE      256
+
 #endif
 // </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
 
@@ -8367,6 +8382,29 @@
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
 #define RTE_ADC121_COMPARATOR_BIAS     2
+
+// <o> ADC121 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC121 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC121_DMA_ENABLE          0
+
+// <o> ADC121 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC121_SELECT_DMA0         1
+
+// <o> ADC121 DMA IRQ priority <0-255>
+// <i> Defines ADC121 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC121_DMA_IRQ_PRI         0
+
+// <o> ADC121 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC121_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
@@ -8470,6 +8508,29 @@
 // <i> Default: ENABLE
 #define RTE_ADC122_COMPARATOR_BIAS     2
 
+// <o> ADC122 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC122 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC122_DMA_ENABLE          0
+
+// <o> ADC122 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC122_SELECT_DMA0         1
+
+// <o> ADC122 DMA IRQ priority <0-255>
+// <i> Defines ADC122 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC122_DMA_IRQ_PRI         0
+
+// <o> ADC122 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC122_DMA_MCODE_SIZE      256
+
 #endif
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 
@@ -8563,6 +8624,29 @@
 // <i> Defines Bias control
 // <i> Default: 3
 #define RTE_ADC24_BIAS                (3)
+
+// <o> ADC24 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC24 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC24_DMA_ENABLE          0
+
+// <o> ADC24 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC24_SELECT_DMA0         1
+
+// <o> ADC24 DMA IRQ priority <0-255>
+// <i> Defines ADC24 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC24_DMA_IRQ_PRI         0
+
+// <o> ADC24 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC24_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
@@ -9104,6 +9188,16 @@
 // <i> Default: 0
 #define RTE_I2C0_RX_FIFO_THRESHOLD 0
 
+// <o> I2C0 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C0 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9116,6 +9210,12 @@
 // <i> Defines I2C0 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C0_DMA_IRQ_PRI 0
+
+// <o> I2C0 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C0_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9141,6 +9241,16 @@
 // <i> Default: 0
 #define RTE_I2C1_RX_FIFO_THRESHOLD 0
 
+// <o> I2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9153,6 +9263,12 @@
 // <i> Defines I2C1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C1_DMA_IRQ_PRI 0
+
+// <o> I2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9178,6 +9294,16 @@
 // <i> Default: 0
 #define RTE_I2C2_RX_FIFO_THRESHOLD 0
 
+// <o> I2C2 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C2 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9190,6 +9316,12 @@
 // <i> Defines I2C2 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C2_DMA_IRQ_PRI 0
+
+// <o> I2C2 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C2_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9216,6 +9348,16 @@
 // <i> Default: 0
 #define RTE_I2C3_RX_FIFO_THRESHOLD 0
 
+// <o> I2C3 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C3 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9228,6 +9370,12 @@
 // <i> Defines I2C3 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C3_DMA_IRQ_PRI 0
+
+// <o> I2C3 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C3_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9273,6 +9421,16 @@
 // <i> Default: 0
 #define RTE_LPI2C1_RX_FIFO_THRESHOLD 0
 
+// <o> LPI2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 160MHz)
+#define RTE_LPI2C1_SCL_STUCK_LOW_TIMEOUT 1600000
+
+// <o> LPI2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 160MHz)
+#define RTE_LPI2C1_SDA_STUCK_LOW_TIMEOUT 1600000
+
 // <o> LPI2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9285,6 +9443,12 @@
 // <i> Defines LPI2C1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_LPI2C1_DMA_IRQ_PRI 0
+
+// <o> LPI2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_LPI2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -10872,6 +11036,7 @@
 //    <o> SDC BUS WIDTH SELECT
 //    <0=> BUS_WIDTH_1BIT
 //    <1=> BUS_WIDTH_4BIT
+//    <2=> BUS_WIDTH_8BIT
 // <i> Defines SDC0 size of bus width
 // <i> Default: BUS_WIDTH_4BIT
 #define RTE_SDC_BUS_WIDTH       1

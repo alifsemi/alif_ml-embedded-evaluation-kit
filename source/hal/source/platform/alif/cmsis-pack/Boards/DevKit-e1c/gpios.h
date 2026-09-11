@@ -84,7 +84,7 @@ const struct gpioconf board_gpioconf[] = {
         0,
     },
 
-    /* Pin settings (8-bit, 1 bit per pin) for GPIO5
+    /* Pin settings (8-bit, 1 bit per pin) for GPIO6
         1 - Reserved for LPGPIO
         2 - Output pins that will drive logic '1' after startup. Other output pins will drive '0'
         3 - Output pins. Other pins are inputs
@@ -202,8 +202,8 @@ const struct gpioconf board_gpioconf[] = {
         5 - Pins that will generate interrupts
         6 - Interrupts that are edge sensitive. Other interrupts are level sensitive
         7 - Interrupts generated on high level or on rising edge - depending on previous setting.
-       Other pins are low level/falling edge sensitive 8 - Interrupts generated on both edges. Other
-       pins behavior is based on previous 2 settings */
+            Other pins are low level/falling edge sensitive
+        8 - Interrupts generated on both edges. Other pins behavior is based on previous 2 settings */
     {
         PORT_15,
         0,

@@ -79,7 +79,7 @@ const struct gpioconf board_gpioconf[] = {
     {
         PORT_4,
         0,
-        (1 << PIN_0),
+        0,
         (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0),
         0,
         0,
@@ -104,7 +104,7 @@ const struct gpioconf board_gpioconf[] = {
         PORT_6,
         0,
         0,
-        (1 << PIN_6) | (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1),
+        (1 << PIN_6) | (1 << PIN_5) | (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1),
         0,
         0,
         0,
@@ -224,7 +224,7 @@ const struct gpioconf board_gpioconf[] = {
         PORT_14,
         0,
         (1 << PIN_2),
-        (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0),
+        (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0) | (1 << PIN_7),
         0,
         0,
         0,
@@ -251,9 +251,9 @@ const struct gpioconf board_gpioconf[] = {
         (1 << PIN_7) | (1 << PIN_6) | (1 << PIN_5),
         (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0),
         (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0),
-        (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_1) | (1 << PIN_0),
+        (1 << PIN_4) | (1 << PIN_3) | (1 << PIN_2) | (1 << PIN_1) | (1 << PIN_0),
         0,
-        (1 << PIN_2),
+        0,
     }};
 
 #endif /* __GPIOS_H__ */

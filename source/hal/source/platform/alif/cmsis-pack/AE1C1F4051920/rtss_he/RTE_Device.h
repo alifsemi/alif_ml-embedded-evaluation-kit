@@ -3232,7 +3232,24 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC120_COMPARATOR_BIAS          2
+#define RTE_ADC120_COMPARATOR_BIAS     2
+
+// <o> ADC120 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC120 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC120_DMA_ENABLE          0
+
+// <o> ADC120 DMA IRQ priority <0-255>
+// <i> Defines ADC120 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC120_DMA_IRQ_PRI         0
+
+// <o> ADC120 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC120_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
@@ -3333,7 +3350,24 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC121_COMPARATOR_BIAS          2
+#define RTE_ADC121_COMPARATOR_BIAS     2
+
+// <o> ADC121 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC121 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC121_DMA_ENABLE          0
+
+// <o> ADC121 DMA IRQ priority <0-255>
+// <i> Defines ADC121 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC121_DMA_IRQ_PRI         0
+
+// <o> ADC121 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC121_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
@@ -3427,7 +3461,24 @@
 //     <7=> 8.75 uA
 // <i> Defines Bias control
 // <i> Default: 3
-#define RTE_ADC24_BIAS                     (3)
+#define RTE_ADC24_BIAS                (3)
+
+// <o> ADC24 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC24 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC24_DMA_ENABLE          0
+
+// <o> ADC24 DMA IRQ priority <0-255>
+// <i> Defines ADC24 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC24_DMA_IRQ_PRI         0
+
+// <o> ADC24 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC24_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
@@ -3631,6 +3682,16 @@
 // <i> Default: 16
 #define RTE_I2C0_RX_FIFO_THRESHOLD   16
 
+// <o> I2C0 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 40MHz)
+#define RTE_I2C0_SCL_STUCK_LOW_TIMEOUT 400000
+
+// <o> I2C0 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 40MHz)
+#define RTE_I2C0_SDA_STUCK_LOW_TIMEOUT 400000
+
 // <o> I2C0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -3642,7 +3703,13 @@
 // <o> I2C0 DMA IRQ priority <0-255>
 // <i> Defines I2C0 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C0_DMA_IRQ_PRI         0
+#define RTE_I2C0_DMA_IRQ_PRI 0
+
+// <o> I2C0 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C0_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -3668,6 +3735,16 @@
 // <i> Default: 16
 #define RTE_I2C1_RX_FIFO_THRESHOLD   16
 
+// <o> I2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 40MHz)
+#define RTE_I2C1_SCL_STUCK_LOW_TIMEOUT 400000
+
+// <o> I2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 40MHz)
+#define RTE_I2C1_SDA_STUCK_LOW_TIMEOUT 400000
+
 // <o> I2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -3679,7 +3756,13 @@
 // <o> I2C1 DMA IRQ priority <0-255>
 // <i> Defines I2C1 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C1_DMA_IRQ_PRI         0
+#define RTE_I2C1_DMA_IRQ_PRI 0
+
+// <o> I2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
