@@ -86,8 +86,8 @@ void MainLoop()
     bool executionSuccessful = true;
 
     /* Loop. */
-    do {
+    // do {
         executionSuccessful = alif::app::ClassifyAudioHandler(caseContext);
-    } while (executionSuccessful);
+    // } while (executionSuccessful);
     info("Main loop terminated.\n");
 }

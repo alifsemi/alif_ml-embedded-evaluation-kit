@@ -204,6 +204,7 @@ SECTIONS
     __ns_region_0_start = .;
     * (.bss.lvgl_buf)
     * (.bss.d0_heap)
+    * (sd_dma_buf)
     . = ALIGN(TGU_BLOCK_SIZE);
     __ns_region_0_end = .;
   } > DTCM
