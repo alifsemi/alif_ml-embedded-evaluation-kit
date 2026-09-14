@@ -21,7 +21,6 @@
     - [Configuring the build for MPS4 SSE-315](./building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring the build for MPS4 SSE-320](./building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
-    - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building with CMake Presets](./building.md#building-with-cmake-presets)
     - [Building the configured project](./building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
@@ -188,7 +187,6 @@ The build parameters are:
   - `mps3` (default)
   - `mps4`
   - `native`
-  - `simple_platform`
 
 - `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target.
   - For `mps3` target these sub-systems are available:
@@ -748,20 +746,6 @@ bin
 ├── arm_ml_embedded_evaluation_kit-<usecase2>-tests
 ├── ethos-u-<usecase1>
 └── ethos-u-<usecase1>
-```
-
-### Configuring the build for simple-platform
-
-```commandline
-cmake ../ -DTARGET_PLATFORM=simple_platform
-```
-
-Again, if using `Arm Compiler`, use:
-
-```commandline
-cmake .. \
-    -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
 ### Building with CMake Presets

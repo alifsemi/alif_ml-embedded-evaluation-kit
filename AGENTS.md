@@ -91,7 +91,7 @@ Key CMake options (see [build options](docs/sections/building.md#build-options) 
 
 | Option                                  | Values                                                     | Description                                                                                           |
 |-----------------------------------------|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| `TARGET_PLATFORM`                       | `mps3` (default), `mps4`, `native`, `simple_platform`      | Target platform                                                                                       |
+| `TARGET_PLATFORM`                       | `mps3` (default), `mps4`, `native`                         | Target platform                                                                                       |
 | `TARGET_SUBSYSTEM`                      | `sse-300` (default), `sse-310`, `sse-315`, `sse-320`       | Platform subsystem/design                                                                             |
 | `ML_FRAMEWORK`                          | `tflm` (default), `executorch`; aliases include `et`       | ML inference framework                                                                                |
 | `ETHOS_U_NPU_ID`                        | `U55` (default), `U65`, `U85`                              | Ethos-U NPU variant                                                                                   |

@@ -82,7 +82,7 @@ else ()
     message(FATAL_ERROR "Invalid ML_FRAMEWORK: ${ML_FRAMEWORK}")
 endif ()
 
-USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4, simple_platform and native."
+USER_OPTION(TARGET_PLATFORM "Target platform to build for: mps3, mps4 and native."
     mps3
     STRING)
 

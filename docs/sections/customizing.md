@@ -842,12 +842,6 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
     hal_display_mps3)
 ```
-The implementation for simple platform on the other hand has:
-```cmake
-target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
-    <other libs>
-    hal_display_stubs)
-```
 
 The standard output (stdout) component follows the same convention. It can expose three targets:
 

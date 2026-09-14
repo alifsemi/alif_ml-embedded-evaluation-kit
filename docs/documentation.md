@@ -119,8 +119,7 @@ The repository has the following structure:
 │     │    ├── platforms
 │     │    │      ├── mps3
 │     │    │      ├── mps4
-│     │    │      ├── native
-│     │    │      └── simple_platform
+│     │    │      └── native
 │     │    └── ...
 │     └── ...
 ├── source
@@ -350,7 +349,6 @@ For further information, please see:
     - [Configuring the build for MPS4 SSE-315](./sections/building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring the build for MPS4 SSE-320](./sections/building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
-    - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./sections/building.md#add-custom-inputs)

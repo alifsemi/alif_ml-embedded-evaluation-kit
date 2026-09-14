@@ -176,22 +176,21 @@ The current level of support for these frameworks against Arm NPUs and toolchain
 
 | Platform           | NPU             | TensorFlow™ Lite for Microcontrollers | ExecuTorch              |
 |--------------------|-----------------|---------------------------------------|-------------------------|
-| Arm® Corstone™-300 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
-| Arm® Corstone™-300 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
-| Arm® Corstone™-310 | Arm® Ethos™-U55 | ✅ Supported                           | ⚠️ Partially supported* |
-| Arm® Corstone™-310 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
-| Arm® Corstone™-315 | Arm® Ethos™-U65 | ✅ Supported                           | ❌ Not yet supported     |
-| Arm® Corstone™-320 | Arm® Ethos™-U85 | ✅ Supported                           | ✅ Supported             |
-| Simple platform    | n/a             | ✅ Supported                           | ❌ Not yet supported     |
-| Native             | n/a             | ✅ Supported                           | ⚠️ Partially supported* |
+| Arm® Corstone™-300 | Arm® Ethos™-U55 | ✅ Supported                          | ⚠️ Partially supported* |
+| Arm® Corstone™-300 | Arm® Ethos™-U65 | ✅ Supported                          | ❌ Not yet supported    |
+| Arm® Corstone™-310 | Arm® Ethos™-U55 | ✅ Supported                          | ⚠️ Partially supported* |
+| Arm® Corstone™-310 | Arm® Ethos™-U65 | ✅ Supported                          | ❌ Not yet supported    |
+| Arm® Corstone™-315 | Arm® Ethos™-U65 | ✅ Supported                          | ❌ Not yet supported    |
+| Arm® Corstone™-320 | Arm® Ethos™-U85 | ✅ Supported                          | ✅ Supported            |
+| Native             | n/a             | ✅ Supported                          | ⚠️ Partially supported* |
 
 *The *Conformer* model for the ASR use case currently works only on Arm® Corstone™-320 with Arm® Ethos™-U85.
 
-| Toolchain                  | TensorFlow™ Lite for Microcontrollers | ExecuTorch          |
-|----------------------------|---------------------------------------|---------------------|
-| Arm Compiler for Embedded  | ✅ Supported                           | ❌ Not yet supported |
-| Arm Toolchain for Embedded | ✅ Supported                           | ❌ Not yet supported |
-| Arm GNU Toolchain          | ✅ Supported                           | ✅ Supported         |
+| Toolchain                  | TensorFlow™ Lite for Microcontrollers | ExecuTorch           |
+|----------------------------|---------------------------------------|----------------------|
+| Arm Compiler for Embedded  | ✅ Supported                          | ❌ Not yet supported |
+| Arm Toolchain for Embedded | ✅ Supported                          | ❌ Not yet supported |
+| Arm GNU Toolchain          | ✅ Supported                          | ✅ Supported         |
 
 ## Software and hardware overview
 
