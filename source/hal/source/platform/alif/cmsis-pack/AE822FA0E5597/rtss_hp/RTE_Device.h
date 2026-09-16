@@ -376,83 +376,6 @@
 // <i> Default: 0
 #define RTE_ISP_IRQ_PRIORITY                    0
 
-// <o> ISP Enable AE Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if AE Module is enabled or not
-// <i> default: false
-#define RTE_ISP_AE_MODULE 1
-
-// <o> ISP Enable BLS Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Black Level Subtraction Module is enabled or not
-// <i> default: false
-#define RTE_ISP_BLS_MODULE 1
-
-// <o> ISP Enable DMSC Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Demosaic Module is enabled or not
-// <i> default: false
-#define RTE_ISP_DMSC_MODULE 1
-
-// <o> ISP Enable FLT Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Noise/Sharpening-Filter Module is enabled or not
-// <i> default: false
-#define RTE_ISP_FLT_MODULE 1
-
-// <o> ISP Enable CCM Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Color Correction Matrix Module is enabled or not
-// <i> default: false
-#define RTE_ISP_CCM_MODULE 1
-
-// <o> ISP Enable CSM Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Color Space Conversion Module is enabled or not
-// <i> default: false
-#define RTE_ISP_CSM_MODULE 1
-
-// <o> ISP Enable WB Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if White Balancing Module is enabled or not
-// <i> default: false
-#define RTE_ISP_WB_MODULE 1
-
-// <o> ISP Enable EXPM Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Auto-Exposure Statistics Module is enabled or not
-// <i> default: false
-#define RTE_ISP_EXPM_MODULE 1
-
-// <o> ISP Enable Gamma-out Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Gamma-out Module is enabled or not
-// <i> default: false
-#define RTE_ISP_GAMMAOUT_MODULE 1
-
-// <o> ISP Enable WBM Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if White-Balancing Statistics Module is enabled or not
-// <i> default: false
-#define RTE_ISP_WBM_MODULE 1
-
-// <o> ISP Enable Binning Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if Binning Module is enabled or not
-// <i> default: false
-#define RTE_ISP_BINNING_MODULE 1
-
 // <o> ISP Binning Enable
 //     <0=> disable
 //     <1=> enable
@@ -469,13 +392,6 @@
 // <i> Vertical binning step size
 // <i> default: 0
 #define RTE_ISP_BINNING_VSTEP 0
-
-// <o> ISP Enable Scaling Module
-//     <0=> disable
-//     <1=> enable
-// <i> defines if scaling Module is enabled or not
-// <i> default: true
-#define RTE_ISP_SCALAR_MODULE 1
 
 // <o> ISP log level
 //    <0=> NONE
@@ -516,35 +432,6 @@
 // <o> ISP Scaler Output Height
 // <i> Height in pixels of the ISP scaler output (after scaling from sensor dimensions).
 #define RTE_ISP_OUTPUT_HEIGHT       480
-
-// <o> ISP Sensor Input Width
-// <i> Width in pixels of the sensor input to the ISP pipeline.
-// <i> Default: MT9M114 sensor resolution (1280). Change for different sensors.
-#define RTE_ISP_SENSOR_INPUT_WIDTH  RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH
-
-
-// <o> ISP Sensor Input Height
-// <i> Height in pixels of the sensor input to the ISP pipeline.
-// <i> Default: MT9M114 sensor resolution (720). Change for different sensors.
-#define RTE_ISP_SENSOR_INPUT_HEIGHT RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT
-
-// <o> ISP Crop Top offset <0-4095>
-// <i> Top offset in pixels for the cropped output window
-#define RTE_ISP_CROP_TOP    0
-
-// <o> ISP Crop Left offset <0-4095>
-// <i> Left offset in pixels for the cropped output window
-#define RTE_ISP_CROP_LEFT   0
-
-// <o> ISP Crop Width <1-4095>
-// <i> Width in pixels of the cropped output window.
-// <i> Default: full sensor input (no crop). Override with smaller value to crop.
-#define RTE_ISP_CROP_WIDTH  RTE_ISP_SENSOR_INPUT_WIDTH
-
-// <o> ISP Crop Height <1-4095>
-// <i> Height in pixels of the cropped output window.
-// <i> Default: full sensor input (no crop). Override with smaller value to crop.
-#define RTE_ISP_CROP_HEIGHT RTE_ISP_SENSOR_INPUT_HEIGHT
 
 #endif
 // </e> ISP (ISP) [Driver_ISP]
@@ -1061,12 +948,29 @@
 // Use RAW bayer configuration if ISP is enabled, otherwise use RGB565
 #if ALIF_ISP_ENABLED
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            0
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1288
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 728
 #else
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG            2
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  1280
-#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT 720
+#endif
+
+// <i> MT9M114 MIPI frame width and height(derived from IMAGE_CONFIG)
+// <i> defines MT9M114 MIPI frame  width & height
+// <i> default: 1280x720
+#if (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 0)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              1288
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT            728
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 1) || \
+      (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 2)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              1280
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             720
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 3)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              640
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             480
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 4)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              320
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             240
+#elif (RTE_MT9M114_CAMERA_SENSOR_MIPI_IMAGE_CONFIG == 5)
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH              320
+#define RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT             320
 #endif
 
 // <o> select MT9M114 MIPI number of lanes in DPHY
@@ -1103,6 +1007,14 @@
 //     <4=>   I2C OVER I3C
 // <i> Default: 1
 #define RTE_MT9M114_CAMERA_SENSOR_MIPI_I2C_INSTANCE                 BOARD_CAMERA_I2C_INSTANCE
+
+// <o> MT9M114 sensor frame width for ISP / CSI2 pipeline
+// <i> Width in pixels of the MT9M114 MIPI sensor frame
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_WIDTH  RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_WIDTH
+
+// <o> MT9M114 sensor frame height for ISP / CSI2 pipeline
+// <i> Height in pixels of the MT9M114 MIPI sensor frame
+#define RTE_MT9M114_CAMERA_SENSOR_FRAME_HEIGHT RTE_MT9M114_CAMERA_SENSOR_MIPI_FRAME_HEIGHT
 
 #endif
 // </e> MT9M114_MIPI [Driver_MT9M114_MIPI]
@@ -8266,6 +8178,29 @@
 // <i> Default: ENABLE
 #define RTE_ADC120_COMPARATOR_BIAS     2
 
+// <o> ADC120 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC120 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC120_DMA_ENABLE          0
+
+// <o> ADC120 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC120_SELECT_DMA0         1
+
+// <o> ADC120 DMA IRQ priority <0-255>
+// <i> Defines ADC120 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC120_DMA_IRQ_PRI         0
+
+// <o> ADC120 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC120_DMA_MCODE_SIZE      256
+
 #endif
 // </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
 
@@ -8367,6 +8302,29 @@
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
 #define RTE_ADC121_COMPARATOR_BIAS     2
+
+// <o> ADC121 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC121 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC121_DMA_ENABLE          0
+
+// <o> ADC121 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC121_SELECT_DMA0         1
+
+// <o> ADC121 DMA IRQ priority <0-255>
+// <i> Defines ADC121 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC121_DMA_IRQ_PRI         0
+
+// <o> ADC121 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC121_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
@@ -8470,6 +8428,29 @@
 // <i> Default: ENABLE
 #define RTE_ADC122_COMPARATOR_BIAS     2
 
+// <o> ADC122 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC122 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC122_DMA_ENABLE          0
+
+// <o> ADC122 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC122_SELECT_DMA0         1
+
+// <o> ADC122 DMA IRQ priority <0-255>
+// <i> Defines ADC122 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC122_DMA_IRQ_PRI         0
+
+// <o> ADC122 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC122_DMA_MCODE_SIZE      256
+
 #endif
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 
@@ -8563,6 +8544,29 @@
 // <i> Defines Bias control
 // <i> Default: 3
 #define RTE_ADC24_BIAS                (3)
+
+// <o> ADC24 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC24 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC24_DMA_ENABLE          0
+
+// <o> ADC24 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC24_SELECT_DMA0         1
+
+// <o> ADC24 DMA IRQ priority <0-255>
+// <i> Defines ADC24 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC24_DMA_IRQ_PRI         0
+
+// <o> ADC24 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 256
+#define RTE_ADC24_DMA_MCODE_SIZE      256
 
 #endif
 // </e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
@@ -9104,6 +9108,16 @@
 // <i> Default: 0
 #define RTE_I2C0_RX_FIFO_THRESHOLD 0
 
+// <o> I2C0 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C0 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9116,6 +9130,12 @@
 // <i> Defines I2C0 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C0_DMA_IRQ_PRI 0
+
+// <o> I2C0 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C0_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9141,6 +9161,16 @@
 // <i> Default: 0
 #define RTE_I2C1_RX_FIFO_THRESHOLD 0
 
+// <o> I2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9153,6 +9183,12 @@
 // <i> Defines I2C1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C1_DMA_IRQ_PRI 0
+
+// <o> I2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9178,6 +9214,16 @@
 // <i> Default: 0
 #define RTE_I2C2_RX_FIFO_THRESHOLD 0
 
+// <o> I2C2 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C2 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9190,6 +9236,12 @@
 // <i> Defines I2C2 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C2_DMA_IRQ_PRI 0
+
+// <o> I2C2 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C2_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9216,6 +9268,16 @@
 // <i> Default: 0
 #define RTE_I2C3_RX_FIFO_THRESHOLD 0
 
+// <o> I2C3 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C3 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SDA_STUCK_LOW_TIMEOUT 1000000
+
 // <o> I2C3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9228,6 +9290,12 @@
 // <i> Defines I2C3 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_I2C3_DMA_IRQ_PRI 0
+
+// <o> I2C3 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C3_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -9273,6 +9341,16 @@
 // <i> Default: 0
 #define RTE_LPI2C1_RX_FIFO_THRESHOLD 0
 
+// <o> LPI2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 160MHz)
+#define RTE_LPI2C1_SCL_STUCK_LOW_TIMEOUT 1600000
+
+// <o> LPI2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 160MHz)
+#define RTE_LPI2C1_SDA_STUCK_LOW_TIMEOUT 1600000
+
 // <o> LPI2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
@@ -9285,6 +9363,12 @@
 // <i> Defines LPI2C1 DMA Interrupt priority
 // <i> Default: 0
 #define RTE_LPI2C1_DMA_IRQ_PRI 0
+
+// <o> LPI2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_LPI2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
