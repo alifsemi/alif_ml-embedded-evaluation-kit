@@ -2758,7 +2758,8 @@
 // <o> ISSI FLASH Wait cycles
 // <i> Defines the number of wait (dummy) cycles needed for fast read operations
 // <i> Default: 16
-#define RTE_ISSI_FLASH_WAIT_CYCLES    10
+// 20 is up to 200MHz operation thus allowing runtime upgrade to 200MHz if signal calibration data is available
+#define RTE_ISSI_FLASH_WAIT_CYCLES    20
 #endif
 // </e> FLASH (ISSI FLASH) [Driver_Flash]
 
@@ -2785,7 +2786,8 @@
 // <o> MX66UW1G FLASH Wait cycles
 // <i> Defines the number of wait (dummy) cycles needed for fast read operations
 // <i> Default: 10
-#define RTE_MX66UW1G_FLASH_WAIT_CYCLES    10
+// 20 to enable switching to 200MHz
+#define RTE_MX66UW1G_FLASH_WAIT_CYCLES    20
 #endif
 // </e> FLASH (MX66UW1G FLASH) [Driver_MX66UW1G_FLASH]
 // </h> FLASH
@@ -2798,8 +2800,9 @@
 
 // <o> APS512XXN PSRAM Wait cycles
 // <i> Defines the number of wait cycles needed for fast read write operations.
-// <i> Default: 4
-#define RTE_APS512XXN_PSRAM_WAIT_CYCLES            4
+// <i> Default: 4 (up to 109MHz operation)
+// 7 is up to 200MHz operation thus allowing runtime upgrade to 200MHz if signal calibration data is available
+#define RTE_APS512XXN_PSRAM_WAIT_CYCLES            7
 
 // <o> APS512XXN PSRAM Enable Dual Octal Mode
 //    <0=> Disable

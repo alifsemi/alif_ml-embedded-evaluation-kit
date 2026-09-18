@@ -11,6 +11,7 @@
 #define OSPI_RAM_H_
 
 #include <stdint.h>
+#include "ospi_delay.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ extern "C" {
  * @brief Initialize OSPI driver and RAM chip. Enables XIP mode.
  *
  */
-int32_t ospi_ram_init(void);
+int32_t ospi_ram_init(const ospi_delay_cfg_t *signal_delay);
 
 #ifdef __cplusplus
 }
