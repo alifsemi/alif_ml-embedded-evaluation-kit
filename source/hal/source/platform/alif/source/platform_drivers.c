@@ -43,6 +43,7 @@
 #include "tracelib.h"
 #include "ospi_flash.h"
 #include "ospi_ram.h"
+#include "ospi_calib.h"
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
@@ -360,6 +361,16 @@ int platform_init(void)
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
+        } else {
+            if (ospi_calib_repo_init((ospi_delay_blob_t *)(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - OSPI_DELAY_CAL_FLASH_SECTOR_SIZE)) == 0) {
+                printf("OSPI calibration data found\n");
+                const ospi_delay_cfg_t *flash_cfg = ospi_calib_repo_get_cfg(OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE);
+                if (ospi_flash_switch_clock(flash_cfg) == 0) {
+                    printf("Set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", flash_cfg->idx, flash_cfg->sclk_freq);
+                } else {
+                    printf_err("Failed to set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", flash_cfg->idx, flash_cfg->sclk_freq);
+                }
+            }
         }
 #ifdef EAGLE_DEVICE
         // Enable long bursts to SPI interfaces
@@ -370,7 +381,7 @@ int platform_init(void)
 #endif
 
 #ifdef OSPI_RAM_SUPPORT
-        err = ospi_ram_init();
+        err = ospi_ram_init(ospi_calib_repo_get_cfg(BOARD_PSRAM_OSPI_INSTANCE));
         if (err) {
             printf_err("Failed initializing OSPI RAM. err=%d\n", err);
         }

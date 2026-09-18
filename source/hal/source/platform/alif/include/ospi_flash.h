@@ -11,6 +11,9 @@
 #define OSPI_FLASH_H_
 
 #include <stdint.h>
+#include "ospi_delay.h"
+
+#define OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE RTE_ISSI_FLASH_OSPI_DRV_NUM
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,6 +27,8 @@ int32_t ospi_flash_init(void);
 
 int32_t ospi_flash_set_linear(void);
 int32_t ospi_flash_set_wrap32(void);
+
+int32_t ospi_flash_switch_clock(const ospi_delay_cfg_t *signal_delay);
 
 #ifdef __cplusplus
 }

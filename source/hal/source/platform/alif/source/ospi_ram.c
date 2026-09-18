@@ -24,8 +24,11 @@
 #include "APS512XXN_PSRAM.h"
 #include "hal_log.h"
 
-#define ISSI_WAIT_CYCLES    6 // 166MHz max
+#define ISSI_WAIT_CYCLES     6 // 166MHz max
+#define ISSI_WAIT_CYCLES_200 7
 #define DEBUG_ISSI_CR0_READBACK 0 // Set to 1 to enable reading back the ISSI CR0 register after writing it
+
+static ospi_psram_xip_config psram_config;
 
 #ifdef BOARD_IS66_HYPERRAM_RESET_GPIO_PORT
 
@@ -69,6 +72,17 @@ int32_t is66_psram_init(OSPI_Type *ospi, AES_Type *aes)
     (void)aes;
     ospi_transfer_t ospi_config;
     uint32_t        buff[3];
+    uint32_t        latency_value = 0; // variable latency by default
+    uint32_t        wait_cycles = psram_config.wait_cycles;
+
+    // Use fixed delay with 200MHz operation
+    if (psram_config.signal_delay &&
+        psram_config.signal_delay->sclk_freq == 200000000) {
+        latency_value = 1;
+        // psram_config.wait_cycles are controller wait cycles,
+        // with fixed latency enabled IS66 doubles the effective wait cycles
+        wait_cycles = wait_cycles / 2;
+    }
 
     /*
      * CA bit assignment for Configuration Register 0 write operation
@@ -82,8 +96,8 @@ int32_t is66_psram_init(OSPI_Type *ospi, AES_Type *aes)
     const uint16_t cr0 = (1 << 15)  // Normal operation
                 | (0 << 12)  // 34 ohm output drive strength
                 | (0xF << 8) // reserved - must write all 1s
-                | (((ISSI_WAIT_CYCLES - 5) & 0xF) << 4)
-                | (0 << 3)   // variable latency
+                | (((wait_cycles - 5) & 0xF) << 4)
+                | (latency_value << 3)
                 | (1 << 2)   // standard wrapped operation
                 | (3 << 0);  // 32-byte wrap
 
@@ -124,7 +138,7 @@ int32_t is66_psram_init(OSPI_Type *ospi, AES_Type *aes)
 }
 
 
-static int32_t init_psram_config(OSPI_INSTANCE instance, ospi_psram_xip_config *config)
+static int32_t init_psram_config(OSPI_INSTANCE instance, ospi_psram_xip_config *config, const ospi_delay_cfg_t *signal_delay)
 {
     if (!config) {
         return -1;
@@ -140,9 +154,6 @@ static int32_t init_psram_config(OSPI_INSTANCE instance, ospi_psram_xip_config *
         config->bus_speed = RTE_OSPI0_BUS_SPEED;
         config->ddr_drive_edge = RTE_OSPI0_DDR_DRIVE_EDGE;
         config->rxds_delay = RTE_OSPI0_RXDS_DELAY;
-#if SOC_FEAT_AES_OSPI_SIGNALS_DELAY
-        config->signal_delay = RTE_OSPI0_SIGNAL_DELAY;
-#endif
         config->dfs = RTE_OSPI0_DFS;
 
 // On E1C, the RAM is connected to OSPI0 and uses chip select 0
@@ -161,9 +172,6 @@ static int32_t init_psram_config(OSPI_INSTANCE instance, ospi_psram_xip_config *
         config->bus_speed = RTE_OSPI1_BUS_SPEED;
         config->ddr_drive_edge = RTE_OSPI1_DDR_DRIVE_EDGE;
         config->rxds_delay = RTE_OSPI1_RXDS_DELAY;
-#if SOC_FEAT_AES_OSPI_SIGNALS_DELAY
-        config->signal_delay = RTE_OSPI1_SIGNAL_DELAY;
-#endif
         config->dfs = RTE_OSPI1_DFS;
         config->slave_select = RTE_OSPI1_CHIP_SELECTION_PIN;
         config->wait_cycles = RTE_OSPI1_WAIT_CYCLES;
@@ -172,15 +180,25 @@ static int32_t init_psram_config(OSPI_INSTANCE instance, ospi_psram_xip_config *
         return -1;
     }
 
+#if SOC_FEAT_AES_OSPI_SIGNALS_DELAY
+    if (signal_delay) {
+        if(signal_delay->idx != config->instance) {
+            return -1;
+        }
+
+        printf("Set OSPI%" PRIu32 " (RAM) SCLK=%" PRIu32 "\n", signal_delay->idx, signal_delay->sclk_freq);
+        config->bus_speed = signal_delay->sclk_freq;
+    }
+    config->signal_delay = signal_delay;
+#endif
+
     return 0;
 }
 
-static ospi_psram_xip_config psram_config = {0};
 
-
-int32_t ospi_ram_init(void)
+int32_t ospi_ram_init(const ospi_delay_cfg_t *signal_delay)
 {
-    int32_t ret = init_psram_config(BOARD_PSRAM_OSPI_INSTANCE, &psram_config);
+    int32_t ret = init_psram_config(BOARD_PSRAM_OSPI_INSTANCE, &psram_config, signal_delay);
     if (ret) {
         printf_err("PSRAM config error\n");
         return ARM_DRIVER_ERROR;
@@ -197,6 +215,7 @@ int32_t ospi_ram_init(void)
     psram_config.ram_init = aps512xxn_psram_init;
     psram_config.ram_type = RAM_TYPE_PSRAM;
     psram_config.wait_cycles = RTE_APS512XXN_PSRAM_WAIT_CYCLES;
+    psram_config.rxds_sig_en = false;
     if (ospi_psram_xip_init(&psram_config) == 0)
     {
         printf("APS512XXN RAM detected\n");
@@ -206,10 +225,18 @@ int32_t ospi_ram_init(void)
 
 #if BOARD_ISSI_HYPERRAM_PRESENT
     // APS512XXN PSRAM not detected, try IS66 HyperRAM
-    init_psram_config(BOARD_PSRAM_OSPI_INSTANCE, &psram_config);
+    init_psram_config(BOARD_PSRAM_OSPI_INSTANCE, &psram_config, signal_delay);
     psram_config.ram_init = is66_psram_init;
     psram_config.ram_type = RAM_TYPE_HYPERRAM;
     psram_config.wait_cycles = ISSI_WAIT_CYCLES;
+    psram_config.rxds_sig_en = true;
+    if (psram_config.signal_delay && psram_config.signal_delay->sclk_freq > 166000000) {
+        // psram_config.wait_cycles are controller wait cycles,
+        // with fixed latency enabled IS66 doubles the effective wait cycles
+        psram_config.wait_cycles = ISSI_WAIT_CYCLES_200 * 2;
+        psram_config.rxds_sig_en = false;
+    }
+
     if (ospi_psram_xip_init(&psram_config) == 0)
     {
         printf("IS66 RAM detected\n");
