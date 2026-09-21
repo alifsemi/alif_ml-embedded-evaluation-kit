@@ -82,14 +82,17 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
         cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
         cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
         pushd $ALIF_SETOOLS_LOCATION/
-        ./app-gen-toc --filename build/config/$jsonfile
-        ./app-write-mram -p
+        {
+            ./app-gen-toc --filename build/config/$jsonfile
+            ./app-write-mram -e app
+            ./app-write-mram -p
+        } 2>&1 | tee $WORKSPACE/flash_device.log
         popd"""
 
-    logs = currentBuild.rawBuild.getLog(10000).join('\n').toString()
-    //if (logs.contains('Maintenance Mode = Disabled')) {
-    //    error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
-    //}
+    if (fileExists('flash_device.log') &&
+        readFile('flash_device.log').contains('Maintenance Mode = Disabled')) {
+        error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
+    }
 
     def run_pytest = "\
     pytest \

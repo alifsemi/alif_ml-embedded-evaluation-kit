@@ -7261,14 +7261,37 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC120_COMPARATOR_BIAS          2
+#define RTE_ADC120_COMPARATOR_BIAS     2
+
+// <o> ADC120 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC120 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC120_DMA_ENABLE          0
+
+// <o> ADC120 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC120_SELECT_DMA0         1
+
+// <o> ADC120 DMA IRQ priority <0-255>
+// <i> Defines ADC120 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC120_DMA_IRQ_PRI         0
+
+// <o> ADC120 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 4096
+#define RTE_ADC120_DMA_MCODE_SIZE      4096
 
 #endif
 // </e> ADC120 (Analog to Digital Converter 0) [Driver_ADC120]
 
 // <e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
 // <i> Configuration settings for Driver_ADC121 in component ::Drivers:ADC
-#define RTE_ADC121   1
+#define RTE_ADC121 1
 #if RTE_ADC121
 
 // <o> ADC121 DONE0 IRQ PRIORITY <0-225>
@@ -7363,13 +7386,34 @@
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
 #define RTE_ADC121_COMPARATOR_BIAS          2
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC121 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC121_DMA_ENABLE          0
+
+// <o> ADC121 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC121_SELECT_DMA0         1
+
+// <o> ADC121 DMA IRQ priority <0-255>
+// <i> Defines ADC121 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC121_DMA_IRQ_PRI         0
+
+// <o> ADC121 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 4096
+#define RTE_ADC121_DMA_MCODE_SIZE      4096
 
 #endif
 // </e> ADC121 (Analog to Digital Converter 1) [Driver_ADC121]
 
 // <e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 // <i> Configuration settings for Driver_ADC122 in component ::Drivers:ADC
-#define RTE_ADC122   1
+#define RTE_ADC122 1
 #if RTE_ADC122
 
 // <o> ADC122 DONE0 IRQ PRIORITY <0-225>
@@ -7463,14 +7507,37 @@
 //     <3=> 5MS/s
 // <i> Defines: "11":5MS/s; "10""2.5MS/s; "01":1MS/s;"00":0.5MS/s
 // <i> Default: ENABLE
-#define RTE_ADC122_COMPARATOR_BIAS          2
+#define RTE_ADC122_COMPARATOR_BIAS     2
+
+// <o> ADC122 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC122 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC122_DMA_ENABLE          0
+
+// <o> ADC122 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC122_SELECT_DMA0         1
+
+// <o> ADC122 DMA IRQ priority <0-255>
+// <i> Defines ADC122 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC122_DMA_IRQ_PRI         0
+
+// <o> ADC122 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 4096
+#define RTE_ADC122_DMA_MCODE_SIZE      4096
 
 #endif
 // </e> ADC122 (Analog to Digital Converter 2) [Driver_ADC122]
 
 // <e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
 // <i> Configuration settings for Driver_ADC24 in component ::Drivers:ADC
-#define RTE_ADC24   1
+#define RTE_ADC24 1
 #if RTE_ADC24
 
 // <o> ADC24 DONE0 IRQ PRIORITY <0-225>
@@ -7557,7 +7624,30 @@
 //     <7=> 8.75 uA
 // <i> Defines Bias control
 // <i> Default: 3
-#define RTE_ADC24_BIAS                     (3)
+#define RTE_ADC24_BIAS                (3)
+
+// <o> ADC24 DMA ENABLE
+//    <0=> DISABLE
+//    <1=> ENABLE
+// <i> Defines DMA feature for ADC24 (StartN buffered mode)
+// <i> Default: DISABLE
+#define RTE_ADC24_DMA_ENABLE          0
+
+// <o> ADC24 DMA Selection
+//    <0=> DMA2 (M55-HE)
+//    <1=> DMA0
+// <i> Default: DMA0
+#define RTE_ADC24_SELECT_DMA0         1
+
+// <o> ADC24 DMA IRQ priority <0-255>
+// <i> Defines ADC24 DMA interrupt priority
+// <i> Default: 0
+#define RTE_ADC24_DMA_IRQ_PRI         0
+
+// <o> ADC24 DMA mcode buffer size (bytes) <256-16384:64>
+// <i> Larger buffer -> fewer DMA interrupts at high sample rates.
+// <i> Default: 4096
+#define RTE_ADC24_DMA_MCODE_SIZE      4096
 
 #endif
 // </e> ADC24 (Analog to Digital Converter 0) [Driver_ADC24]
@@ -7566,7 +7656,7 @@
 // <h> CRC (Cyclic Redundancy Check)
 // <e> CRC0 (Cyclic Redundancy Check) [Driver_CRC0]
 // <i> Configuration settings for Driver_CRC0 in component ::Drivers:CRC
-#define RTE_CRC0      1
+#define RTE_CRC0 1
 #if RTE_CRC0
 
 // <o> CRC0 DMA ENABLE
@@ -7574,7 +7664,7 @@
 //    <1=> ENABLE
 // <i> Defines DMA feature for CRC0
 // <i> Default: 0
-#define RTE_CRC0_DMA_ENABLE    0
+#define RTE_CRC0_DMA_ENABLE 0
 #if RTE_CRC0_DMA_ENABLE
 
 // <o RTE_CRC0_SELECT_DMA> CRC0 DMA Selection
@@ -8111,21 +8201,38 @@
 
 // <o> I2C0 RX FIFO threshold <0-31>
 // <i> Defines RX FIFO threshold for I2C0.
-// <i> Default: 16
-#define RTE_I2C0_RX_FIFO_THRESHOLD   16
+// <i> Default: 0
+#define RTE_I2C0_RX_FIFO_THRESHOLD 0
+
+// <o> I2C0 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C0 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C0_SDA_STUCK_LOW_TIMEOUT 1000000
+
 
 // <o> I2C0 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2C0
 // <i> Default: DISABLE
-#define RTE_I2C0_DMA_ENABLE          0
+#define RTE_I2C0_DMA_ENABLE        0
 #if RTE_I2C0_DMA_ENABLE
 
 // <o> I2C0 DMA IRQ priority <0-255>
 // <i> Defines I2C0 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C0_DMA_IRQ_PRI         0
+#define RTE_I2C0_DMA_IRQ_PRI 0
+
+// <o> I2C0 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C0_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -8140,29 +8247,45 @@
 // <o> I2C1 IRQ priority <0-255>
 // <i> Defines Interrupt priority for I2C1.
 // <i> Default: 0
-#define RTE_I2C1_IRQ_PRIORITY        0
+#define RTE_I2C1_IRQ_PRIORITY      0
 // <o> I2C1 TX FIFO threshold <0-31>
 // <i> Defines TX FIFO threshold for I2C1.
 // <i> Default: 16
-#define RTE_I2C1_TX_FIFO_THRESHOLD   16
+#define RTE_I2C1_TX_FIFO_THRESHOLD 16
 
 // <o> I2C1 RX FIFO threshold <0-31>
 // <i> Defines RX FIFO threshold for I2C1.
-// <i> Default: 16
-#define RTE_I2C1_RX_FIFO_THRESHOLD   16
+// <i> Default: 0
+#define RTE_I2C1_RX_FIFO_THRESHOLD 0
+
+// <o> I2C1 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C1 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C1_SDA_STUCK_LOW_TIMEOUT 1000000
 
 // <o> I2C1 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2C1
 // <i> Default: DISABLE
-#define RTE_I2C1_DMA_ENABLE          0
+#define RTE_I2C1_DMA_ENABLE        0
 #if RTE_I2C1_DMA_ENABLE
 
 // <o> I2C1 DMA IRQ priority <0-255>
 // <i> Defines I2C1 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C1_DMA_IRQ_PRI         0
+#define RTE_I2C1_DMA_IRQ_PRI 0
+
+// <o> I2C1 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C1_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -8171,35 +8294,51 @@
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C2]
 // <i> Configuration settings for Driver_I2C2 in component ::Drivers:I2C
 
-#define RTE_I2C2                     1
+#define RTE_I2C2 1
 #if RTE_I2C2
 
 // <o> I2C2 IRQ priority <0-255>
 // <i> Defines Interrupt priority for I2C2.
 // <i> Default: 0
-#define RTE_I2C2_IRQ_PRIORITY        0
+#define RTE_I2C2_IRQ_PRIORITY      0
 // <o> I2C2 TX FIFO threshold <0-31>
 // <i> Defines TX FIFO threshold for I2C2.
 // <i> Default: 16
-#define RTE_I2C2_TX_FIFO_THRESHOLD   16
+#define RTE_I2C2_TX_FIFO_THRESHOLD 16
 
 // <o> I2C2 RX FIFO threshold <0-31>
 // <i> Defines RX FIFO threshold for I2C2.
-// <i> Default: 16
-#define RTE_I2C2_RX_FIFO_THRESHOLD   16
+// <i> Default: 0
+#define RTE_I2C2_RX_FIFO_THRESHOLD 0
+
+// <o> I2C2 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C2 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C2_SDA_STUCK_LOW_TIMEOUT 1000000
 
 // <o> I2C2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2C2
 // <i> Default: DISABLE
-#define RTE_I2C2_DMA_ENABLE          0
+#define RTE_I2C2_DMA_ENABLE        0
 #if RTE_I2C2_DMA_ENABLE
 
 // <o> I2C2 DMA IRQ priority <0-255>
 // <i> Defines I2C2 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C2_DMA_IRQ_PRI         0
+#define RTE_I2C2_DMA_IRQ_PRI 0
+
+// <o> I2C2 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C2_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -8208,36 +8347,52 @@
 // <e> I2C (Inter Integrated Circuit) [Driver_I2C3]
 // <i> Configuration settings for Driver_I2C3 in component ::Drivers:I2C
 
-#define RTE_I2C3                     1
+#define RTE_I2C3 1
 
 #if RTE_I2C3
 
 // <o> I2C3 IRQ priority <0-255>
 // <i> Defines Interrupt priority for I2C3.
 // <i> Default: 0
-#define RTE_I2C3_IRQ_PRIORITY        0
+#define RTE_I2C3_IRQ_PRIORITY      0
 // <o> I2C3 TX FIFO threshold <0-31>
 // <i> Defines TX FIFO threshold for I2C3.
 // <i> Default: 16
-#define RTE_I2C3_TX_FIFO_THRESHOLD   16
+#define RTE_I2C3_TX_FIFO_THRESHOLD 16
 
 // <o> I2C3 RX FIFO threshold <0-31>
 // <i> Defines RX FIFO threshold for I2C3.
-// <i> Default: 16
-#define RTE_I2C3_RX_FIFO_THRESHOLD   16
+// <i> Default: 0
+#define RTE_I2C3_RX_FIFO_THRESHOLD 0
+
+// <o> I2C3 SCL Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SCL stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SCL_STUCK_LOW_TIMEOUT 1000000
+
+// <o> I2C3 SDA Stuck at Low Timeout <0x00000000-0xFFFFFFFF>
+// <i> Defines SDA stuck-at-low timeout (in ic_clk cycles).
+// <i> Default: 10ms (Considered the input clock as 100MHz)
+#define RTE_I2C3_SDA_STUCK_LOW_TIMEOUT 1000000
 
 // <o> I2C3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2C3
 // <i> Default: DISABLE
-#define RTE_I2C3_DMA_ENABLE          0
+#define RTE_I2C3_DMA_ENABLE        0
 #if RTE_I2C3_DMA_ENABLE
 
 // <o> I2C3 DMA IRQ priority <0-255>
 // <i> Defines I2C3 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2C3_DMA_IRQ_PRI         0
+#define RTE_I2C3_DMA_IRQ_PRI 0
+
+// <o> I2C3 DMA scratch buffer size (entries) <32-256:8>
+// <i> Per-instance 16-bit DMA scratch buffer; sized in DATA_CMD entries.
+// <i> Caps the per-chunk DMA transfer (max 256).
+// <i> Default: 256
+#define RTE_I2C3_DMA_SCRATCH_SIZE 256
 #endif
 
 #endif
@@ -8246,13 +8401,13 @@
 // <e> LPI2C0 (Low Power Inter-Integrated Circuit) [Driver_LPI2C0]
 // <i> Configuration settings for Driver_LPI2C0 in component ::Drivers:LPI2C
 #if defined(RTSS_HE)
-#define RTE_LPI2C0   1
+#define RTE_LPI2C0 1
 #if RTE_LPI2C0
 
 // <o> LPI2C0 IRQ PRIORITY <0-225>
 // <i> defines LPI2C0 interrupt priority
 // <i> default: 0
-#define RTE_LPI2C0_IRQ_PRIORITY       0
+#define RTE_LPI2C0_IRQ_PRIORITY 0
 
 // <o> LPI2C0 Bus-Speed <1-400000>
 // <i> defines LPI2C0 Bus-Speed - It is used for Bit-time calculation in driver
