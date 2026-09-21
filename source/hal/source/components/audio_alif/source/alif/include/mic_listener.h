@@ -18,6 +18,12 @@
  */
 typedef void (*voice_callback_t)(uint32_t data);
 
+/* Microphone selector for dual-mic builds. */
+typedef enum {
+    MIC_TYPE_I2S = 0,
+    MIC_TYPE_PDM = 1,
+} mic_type_t;
+
 /**
  * @brief Initialize microphone with wanted values
  *
@@ -49,5 +55,15 @@ int32_t disable_microphone();
  */
 int32_t receive_voice_data(void *data, uint32_t data_len);
 
+/*
+ * Per-mic variants used when both USE_I2S_MICS and USE_PDM_MICS are defined,
+ * so that the two microphones can be driven independently in parallel.
+ * When only one mic type is compiled in, calls on the disabled mic return an
+ * error and calls on the enabled mic forward to the single-mic implementation.
+ */
+int32_t init_microphone_ex(mic_type_t mic, uint32_t sampling_rate, uint32_t data_bit_len);
+int32_t enable_microphone_ex(mic_type_t mic, voice_callback_t callback);
+int32_t disable_microphone_ex(mic_type_t mic);
+int32_t receive_voice_data_ex(mic_type_t mic, void *data, uint32_t data_len);
 
 #endif /* MIC_LISTENER_H_ */

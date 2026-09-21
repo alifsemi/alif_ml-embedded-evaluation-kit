@@ -114,7 +114,7 @@ int32_t audio_out_init(uint32_t sample_rate)
                                 ARM_SAI_MODE_MASTER  |
                                 ARM_SAI_ASYNCHRONOUS |
                                 ARM_SAI_PROTOCOL_I2S |
-                                ARM_SAI_MONO_MODE |
+                                // ARM_SAI_MONO_MODE |
                                 ARM_SAI_DATA_SIZE(wlen), wlen*2, sample_rate);
     if(status) {
         printf("DAC Control status = %" PRId32 "\n", status);

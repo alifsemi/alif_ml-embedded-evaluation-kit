@@ -20,6 +20,12 @@
  */
 typedef void (*audio_callback_t)(uint32_t data);
 
+/* Microphone selector for dual-mic builds. Matches mic_type_t. */
+typedef enum {
+    AUDIO_MIC_I2S = 0,
+    AUDIO_MIC_PDM = 1,
+} audio_mic_t;
+
 int audio_init(int sampling_rate);
 
 int audio_uninit();
@@ -41,5 +47,19 @@ void audio_preprocessing(int16_t *data, int len);
 
 /* Set fixed microphone gain */
 void set_audio_gain(float gain_db);
+
+/*
+ * Per-mic variants. When both USE_I2S_MICS and USE_PDM_MICS are compiled in,
+ * these let callers drive each microphone independently in parallel. Calls
+ * against a microphone that is not compiled in return a non-zero error.
+ */
+int audio_init_ex(audio_mic_t mic, int sampling_rate);
+int audio_uninit_ex(audio_mic_t mic);
+int get_audio_data_ex(audio_mic_t mic, int16_t *data, int len);
+void audio_set_callback_ex(audio_mic_t mic, audio_callback_t cb);
+int get_audio_samples_received_ex(audio_mic_t mic);
+int wait_for_audio_ex(audio_mic_t mic);
+void audio_preprocessing_ex(audio_mic_t mic, int16_t *data, int len);
+void set_audio_gain_ex(audio_mic_t mic, float gain_db);
 
 #endif // AUDIO_DATA_H

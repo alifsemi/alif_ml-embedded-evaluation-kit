@@ -40,11 +40,10 @@ static int32_t srshr(int32_t n, unsigned shift)
 
 #define AUDIO_REC_SAMPLES 512
 
-#ifdef USE_I2S_MICS
-#define AUDIO_REC_WIDTH 32
-#elif defined(USE_PDM_MICS)
-#define AUDIO_REC_WIDTH 16
-#endif
+/* Per-mic sample widths. I2S captures 32-bit words (used because the SAI 24-bit
+ * mode does not sign-extend), PDM captures 16-bit words. */
+#define AUDIO_REC_WIDTH_I2S 32
+#define AUDIO_REC_WIDTH_PDM 16
 
 #define AUDIO_L_ONLY 1
 #define AUDIO_R_ONLY 2
@@ -63,69 +62,89 @@ static int32_t srshr(int32_t n, unsigned shift)
 // Define with number of raw samples to store, for debugging
 //#define STORE_AUDIO (16000*10)
 
-// Two options for input format
-#if AUDIO_REC_WIDTH == 32
-// Note that we use 32-bit input for any >16-bit precision. The I2S peripheral has a 24-bit
-// mode but doesn't sign extend, so 32-bit is easier to work with.
-#define audio_rec_t int32_t
-#elif AUDIO_REC_WIDTH == 16
-#define audio_rec_t int16_t
-#else
-#error "AUDIO_REC_WIDTH must be 16 or 32"
+#if !defined(USE_I2S_MICS) && !defined(USE_PDM_MICS)
+#error "USE_I2S_MICS or USE_PDM_MICS must be defined"
 #endif
 
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * __RESTRICT rec, int samples);
+/* Per-mic stream state. One instance per compiled-in microphone. */
+struct audio_stream_state {
+    audio_callback_t user_cb;
+    int current_rec_buf;
+    int32_t current_dc;
+    float current_gain;
+    bool auto_gain;
+    int16_t *user_ptr;
+    int user_length;
+    atomic_int received;
+    atomic_int async_error;
+};
 
-// Stereo record buffer
-static audio_rec_t audio_rec[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec"))); // stereo record buffer
-
-#ifdef STORE_AUDIO
-audio_rec_t audio_store[STORE_AUDIO * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
-static size_t store_pos;
+#ifdef USE_I2S_MICS
+static struct audio_stream_state stream_i2s = {
+    .current_gain = MAX_GAIN,
+    .auto_gain    = true,
+};
+static int32_t audio_rec_i2s[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
 #endif
 
+#ifdef USE_PDM_MICS
+static struct audio_stream_state stream_pdm = {
+    .current_gain = MAX_GAIN,
+    .auto_gain    = true,
+};
+static int16_t audio_rec_pdm[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
+#endif
 
-static audio_callback_t user_audio_callback =  NULL;
-
-static int audio_current_rec_buf;
-
-static int32_t current_dc = 0;
-static float current_gain = MAX_GAIN;
-static bool auto_gain = true;
-
-static int16_t * restrict user_ptr;
-static int user_length;
-static atomic_int audio_received;
-static atomic_int audio_async_error;
-
-
-static void audio_start_next_rx(int data_to_go)
+static struct audio_stream_state *stream_for(audio_mic_t mic)
 {
-    if (data_to_go > AUDIO_REC_SAMPLES) {
-        data_to_go = AUDIO_REC_SAMPLES;
-    }
-    int err = receive_voice_data(audio_rec[audio_current_rec_buf], data_to_go * 2);
-    if (err) {
-        audio_async_error = err;
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case AUDIO_MIC_I2S:
+        return &stream_i2s;
+#endif
+#ifdef USE_PDM_MICS
+    case AUDIO_MIC_PDM:
+        return &stream_pdm;
+#endif
+    default:
+        return NULL;
     }
 }
 
-// Perform stereo->mono conversion and DC adjustment as we copy
-// Gain will be handled later.
-static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * __RESTRICT rec, int len)
+static mic_type_t mic_listener_type_for(audio_mic_t mic)
 {
-    const audio_rec_t *input = rec;
-    float16_t *output = in;
-    int32_t offset = current_dc;
-#if AUDIO_REC_WIDTH == 32
-    int64_t sum = 0;
+    return (mic == AUDIO_MIC_PDM) ? MIC_TYPE_PDM : MIC_TYPE_I2S;
+}
+
+#ifdef STORE_AUDIO
+/* Debug storage buffer; when both mics are enabled it stores the I2S stream. */
+#ifdef USE_I2S_MICS
+typedef int32_t audio_store_t;
 #else
-    int32_t sum = 0;
+typedef int16_t audio_store_t;
 #endif
+audio_store_t audio_store[STORE_AUDIO * 2] __attribute__((section(".bss.camera_frame_buf"))); // stereo record buffer
+static size_t store_pos;
+#endif
+
+/* ------------------------------------------------------------------------- */
+/*   copy_*_rec_to_in - stereo -> mono conversion + DC tracking + f16 pack    */
+/* ------------------------------------------------------------------------- */
+
+#ifdef USE_I2S_MICS
+/* 32-bit I2S source -> float16 output. */
+static void copy_i2s_rec_to_in(struct audio_stream_state *s,
+                               float16_t * __RESTRICT in,
+                               const int32_t * __RESTRICT rec,
+                               int len)
+{
+    const int32_t *input = rec;
+    float16_t *output = in;
+    int32_t offset = s->current_dc;
+    int64_t sum = 0;
     int samples_to_go = len;
 #if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
     while (samples_to_go >= 8) {
-#if AUDIO_REC_WIDTH == 32
         // Use 4-way deinterleave to load 4 sets of L/R/L/R.
         // Four vectors in produce one vector out, due to stereo->mono
         // conversion and 32-bit to 16-bit reduction.
@@ -143,41 +162,14 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * 
 #else
 #error "which microphone?"
 #endif
-        // Add it up to track the pre-adjustment mean
         sum = vaddlvaq(sum, mono.val[0]);
         sum = vaddlvaq(sum, mono.val[1]);
-        // Subtract the current DC offset (necessary to not lose accuracy
-        // when converting to float16)
         mono.val[0] = vqsubq(mono.val[0], offset);
         mono.val[1] = vqsubq(mono.val[1], offset);
-        // Convert to float32, in range -1,+1, so as not to overflow float16
         float32x4x2_t mono_f32 = { vcvtq_n(mono.val[0], 31), vcvtq_n(mono.val[1], 31) };
-        // Convert to float16 and pack
         float16x8_t mono_f16 = vuninitializedq_f16();
         mono_f16 = vcvtbq_f16_f32(mono_f16, mono_f32.val[0]);
         mono_f16 = vcvttq_f16_f32(mono_f16, mono_f32.val[1]);
-#else // AUDIO_REC_WIDTH == 16
-        // Classic 2-way deinterleave to get L and R
-        int16x8x2_t stereo = vld2q(input);
-#if AUDIO_MICS == AUDIO_LR_MIX
-        // Average left and right
-        int16x8_t mono = vrhaddq(stereo.val[0], stereo.val[1]);
-#elif AUDIO_MICS == AUDIO_L_ONLY
-        int16x8_t mono = stereo.val[0];
-#elif AUDIO_MICS == AUDIO_R_ONLY
-        int16x8_t mono = stereo.val[1];
-#else
-#error "which microphone?"
-#endif
-        // Add it up to track the pre-adjustment mean (32-bit sum - VADDLV only available for 32-bit vectors)
-        sum = vaddvaq(sum, mono);
-        // Subtract the current DC offset (necessary to not lose accuracy
-        // when converting to float16)
-        mono = vqsubq(mono, offset);
-        // Convert to float16, in range -1,+1
-        float16x8_t mono_f16 = vcvtq_n(mono, 15);
-#endif // AUDIO_REC_WIDTH
-        // Store 8 output values.
         vst1q(output, mono_f16);
         input += 16;
         output += 8;
@@ -186,7 +178,6 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * 
 #endif // ENABLE_MVE_COPY_AUDIO_REC_TO_IN
     while (samples_to_go > 0) {
 #if AUDIO_MICS == AUDIO_LR_MIX
-        // Average left and right
         int32_t mono = srshr(input[0], 1) + (input[1] >> 1);
 #elif AUDIO_MICS == AUDIO_L_ONLY
         int32_t mono = input[0];
@@ -195,104 +186,257 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * 
 #else
 #error "which microphone?"
 #endif
-        // Add it up to track the pre-adjustment mean
         sum += mono;
-        // Subtract the current DC offset (necessary to not lose accuracy
-        // when converting to float16)
         mono = __QSUB(mono, offset);
-        // Convert to float32, in range -1,+1, so as not to overflow float16
-#if AUDIO_REC_WIDTH == 32
         float mono_f32 = mono * 0x1p-31f;
-#else
-        float mono_f32 = mono * 0x1p-15f;
-#endif
-        // Convert to float16
         *output++ = (float16_t) mono_f32;
         input += 2;
         samples_to_go -= 1;
     }
-    // Update the DC offset based on the mean of this buffer
     int32_t mean = (int32_t) (sum / len);
-    current_dc = (current_dc / 8) * 7 + mean / 8;
+    s->current_dc = (s->current_dc / 8) * 7 + mean / 8;
+}
+#endif // USE_I2S_MICS
+
+#ifdef USE_PDM_MICS
+/* 16-bit PDM source -> float16 output. */
+static void copy_pdm_rec_to_in(struct audio_stream_state *s,
+                               float16_t * __RESTRICT in,
+                               const int16_t * __RESTRICT rec,
+                               int len)
+{
+    const int16_t *input = rec;
+    float16_t *output = in;
+    int32_t offset = s->current_dc;
+    int32_t sum = 0;
+    int samples_to_go = len;
+#if ENABLE_MVE_COPY_AUDIO_REC_TO_IN
+    while (samples_to_go >= 8) {
+        // Classic 2-way deinterleave to get L and R
+        int16x8x2_t stereo = vld2q(input);
+#if AUDIO_MICS == AUDIO_LR_MIX
+        int16x8_t mono = vrhaddq(stereo.val[0], stereo.val[1]);
+#elif AUDIO_MICS == AUDIO_L_ONLY
+        int16x8_t mono = stereo.val[0];
+#elif AUDIO_MICS == AUDIO_R_ONLY
+        int16x8_t mono = stereo.val[1];
+#else
+#error "which microphone?"
+#endif
+        sum = vaddvaq(sum, mono);
+        mono = vqsubq(mono, offset);
+        float16x8_t mono_f16 = vcvtq_n(mono, 15);
+        vst1q(output, mono_f16);
+        input += 16;
+        output += 8;
+        samples_to_go -= 8;
+    }
+#endif // ENABLE_MVE_COPY_AUDIO_REC_TO_IN
+    while (samples_to_go > 0) {
+#if AUDIO_MICS == AUDIO_LR_MIX
+        int32_t mono = srshr(input[0], 1) + (input[1] >> 1);
+#elif AUDIO_MICS == AUDIO_L_ONLY
+        int32_t mono = input[0];
+#elif AUDIO_MICS == AUDIO_R_ONLY
+        int32_t mono = input[1];
+#else
+#error "which microphone?"
+#endif
+        sum += mono;
+        mono = __QSUB(mono, offset);
+        float mono_f32 = mono * 0x1p-15f;
+        *output++ = (float16_t) mono_f32;
+        input += 2;
+        samples_to_go -= 1;
+    }
+    int32_t mean = (int32_t) (sum / len);
+    s->current_dc = (s->current_dc / 8) * 7 + mean / 8;
+}
+#endif // USE_PDM_MICS
+
+/* ------------------------------------------------------------------------- */
+/*   Async RX plumbing                                                        */
+/* ------------------------------------------------------------------------- */
+
+static void audio_start_next_rx(audio_mic_t mic, int data_to_go)
+{
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return;
+    }
+    if (data_to_go > AUDIO_REC_SAMPLES) {
+        data_to_go = AUDIO_REC_SAMPLES;
+    }
+    void *buf = NULL;
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case AUDIO_MIC_I2S:
+        buf = audio_rec_i2s[s->current_rec_buf];
+        break;
+#endif
+#ifdef USE_PDM_MICS
+    case AUDIO_MIC_PDM:
+        buf = audio_rec_pdm[s->current_rec_buf];
+        break;
+#endif
+    default:
+        return;
+    }
+    int err = receive_voice_data_ex(mic_listener_type_for(mic), buf, data_to_go * 2);
+    if (err) {
+        s->async_error = err;
+    }
 }
 
-static void voice_data_cb(uint32_t event)
+static void voice_data_cb_common(audio_mic_t mic)
 {
-    (void) event;
-    audio_current_rec_buf = !audio_current_rec_buf;
-    int samples = AUDIO_REC_SAMPLES;
-    int new_total = audio_received + AUDIO_REC_SAMPLES;
-    if (new_total < user_length) {
-        audio_start_next_rx(user_length - new_total);
-    } else if (new_total > user_length) {
-        samples = user_length - audio_received;
-        new_total = user_length;
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return;
     }
+    int previous_rec_buf = s->current_rec_buf;
+    s->current_rec_buf = !s->current_rec_buf;
+    int samples = AUDIO_REC_SAMPLES;
+    int new_total = s->received + AUDIO_REC_SAMPLES;
+    if (new_total < s->user_length) {
+        audio_start_next_rx(mic, s->user_length - new_total);
+    } else if (new_total > s->user_length) {
+        samples = s->user_length - s->received;
+        new_total = s->user_length;
+    }
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case AUDIO_MIC_I2S: {
 #ifdef STORE_AUDIO
-    if (store_pos < sizeof audio_store / sizeof audio_store[0]) {
-        memcpy(audio_store + store_pos,  audio_rec[!audio_current_rec_buf], samples * 2 * sizeof(int32_t));
-        store_pos += 2 * samples;
+        if (store_pos < sizeof audio_store / sizeof audio_store[0]) {
+            memcpy(audio_store + store_pos, audio_rec_i2s[previous_rec_buf],
+                   samples * 2 * sizeof(int32_t));
+            store_pos += 2 * samples;
+        }
+#endif
+        copy_i2s_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+                           audio_rec_i2s[previous_rec_buf], samples);
+        break;
     }
 #endif
-    copy_audio_rec_to_in((float16_t *) user_ptr + audio_received, audio_rec[!audio_current_rec_buf], samples);
-    audio_received = new_total;
-    if (audio_received >= user_length || audio_async_error) {
-        if (user_audio_callback) {
-            user_audio_callback(audio_async_error);
+#ifdef USE_PDM_MICS
+    case AUDIO_MIC_PDM: {
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+                           audio_rec_pdm[previous_rec_buf], samples);
+        break;
+    }
+#endif
+    default:
+        break;
+    }
+    (void)previous_rec_buf;
+    s->received = new_total;
+    if (s->received >= s->user_length || s->async_error) {
+        if (s->user_cb) {
+            s->user_cb(s->async_error);
         }
     }
 }
 
-void audio_set_callback(audio_callback_t callback)
+#ifdef USE_I2S_MICS
+static void voice_data_cb_i2s(uint32_t event)
 {
-    user_audio_callback = callback;
+    (void) event;
+    voice_data_cb_common(AUDIO_MIC_I2S);
+}
+#endif
+
+#ifdef USE_PDM_MICS
+static void voice_data_cb_pdm(uint32_t event)
+{
+    (void) event;
+    voice_data_cb_common(AUDIO_MIC_PDM);
+}
+#endif
+
+/* ------------------------------------------------------------------------- */
+/*   Public per-mic API                                                       */
+/* ------------------------------------------------------------------------- */
+
+void audio_set_callback_ex(audio_mic_t mic, audio_callback_t callback)
+{
+    struct audio_stream_state *s = stream_for(mic);
+    if (s) {
+        s->user_cb = callback;
+    }
 }
 
-int audio_init(int sampling_rate)
+int audio_init_ex(audio_mic_t mic, int sampling_rate)
 {
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return -1;
+    }
     int32_t ret = (int32_t)enable_audio_peripheral_clocks();
     if (ret != 0) {
         printf("audio_init enable_audio_peripheral_clocks failed: %" PRIi32 "\n", ret);
         return ret;
     }
-
-    int32_t err = init_microphone(sampling_rate, AUDIO_REC_WIDTH);
-
-    if (err == 0) {
-        // Enable microphone
-        err = enable_microphone(voice_data_cb);
+    uint32_t width;
+    voice_callback_t cb;
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case AUDIO_MIC_I2S:
+        width = AUDIO_REC_WIDTH_I2S;
+        cb = voice_data_cb_i2s;
+        break;
+#endif
+#ifdef USE_PDM_MICS
+    case AUDIO_MIC_PDM:
+        width = AUDIO_REC_WIDTH_PDM;
+        cb = voice_data_cb_pdm;
+        break;
+#endif
+    default:
+        return -1;
     }
-
+    int32_t err = init_microphone_ex(mic_listener_type_for(mic), sampling_rate, width);
+    if (err == 0) {
+        err = enable_microphone_ex(mic_listener_type_for(mic), cb);
+    }
     return err;
 }
 
-int audio_uninit()
+int audio_uninit_ex(audio_mic_t mic)
 {
-    return (int)disable_microphone();
+    return (int)disable_microphone_ex(mic_listener_type_for(mic));
 }
 
-int get_audio_samples_received(void)
+int get_audio_samples_received_ex(audio_mic_t mic)
 {
-    return audio_received;
+    struct audio_stream_state *s = stream_for(mic);
+    return s ? (int)s->received : 0;
 }
 
-int get_audio_data(int16_t *data, int len)
+int get_audio_data_ex(audio_mic_t mic, int16_t *data, int len)
 {
-    user_ptr = data;
-    user_length = len;
-    audio_received = 0;
-    audio_async_error = 0;
-    audio_start_next_rx(user_length);
-
-    return audio_async_error;
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return -1;
+    }
+    s->user_ptr = data;
+    s->user_length = len;
+    s->received = 0;
+    s->async_error = 0;
+    audio_start_next_rx(mic, s->user_length);
+    return s->async_error;
 }
 
-int wait_for_audio(void)
+int wait_for_audio_ex(audio_mic_t mic)
 {
-    while (audio_received < user_length && audio_async_error == 0) {
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return -1;
+    }
+    while (s->received < s->user_length && s->async_error == 0) {
         __WFE();
     }
-    return audio_async_error;
+    return s->async_error;
 }
 
 static void convert_to_s16_from_f16_with_gain(void *ptr, int length, float16_t gain)
@@ -323,23 +467,30 @@ static void convert_to_s16_from_f16_with_gain(void *ptr, int length, float16_t g
 }
 
 
-void set_audio_gain(float gain_db)
+void set_audio_gain_ex(audio_mic_t mic, float gain_db)
 {
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return;
+    }
     if (isnan(gain_db)) {
-        auto_gain = true;
+        s->auto_gain = true;
     } else {
-        auto_gain = false;
-        current_gain = gain_db;
+        s->auto_gain = false;
+        s->current_gain = gain_db;
     }
 }
-
 
 /* Reads the input in float16 format
  * Adjusts gain up or down, attempting to get full-scale input
  * Applies
  */
-void audio_preprocessing(int16_t *audio, int samples)
+void audio_preprocessing_ex(audio_mic_t mic, int16_t *audio, int samples)
 {
+    struct audio_stream_state *s = stream_for(mic);
+    if (!s) {
+        return;
+    }
     float16_t *audio_fp = (float16_t *) audio;
     float16_t audio_mean, audio_absmax;
 
@@ -349,19 +500,70 @@ void audio_preprocessing(int16_t *audio, int samples)
 #ifndef GPIO_PROFILING
     // printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
 #endif
-    if (auto_gain) {
-        // Rescale to full range  while converting to integer
+    if (s->auto_gain) {
+        // Rescale to full range while converting to integer
         float new_gain = fmin(1.0f / audio_absmax, MAX_GAIN);
         // Reduce gain immediately if necessary to avoid clipping, or increase slowly
-        current_gain = fmin(new_gain, current_gain * MAX_GAIN_INC_PER_STRIDE);
+        s->current_gain = fmin(new_gain, s->current_gain * MAX_GAIN_INC_PER_STRIDE);
     }
-    convert_to_s16_from_f16_with_gain(audio, samples, current_gain);
+    convert_to_s16_from_f16_with_gain(audio, samples, s->current_gain);
 
     q15_t audio_mean_q15, audio_absmax_q15;
     arm_mean_q15(audio, samples, &audio_mean_q15);
     arm_absmax_no_idx_q15(audio, samples, &audio_absmax_q15);
     if (audio_absmax_q15 == INT16_MIN) audio_absmax_q15 = INT16_MAX; // CMSIS-DSP issue #66
 #ifndef GPIO_PROFILING
-    // printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
+    // printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(s->current_gain) );
 #endif
+}
+
+/* ------------------------------------------------------------------------- */
+/*   Backwards-compatible single-mic API                                      */
+/*   When both mics are compiled in the legacy API drives the I2S stream.     */
+/* ------------------------------------------------------------------------- */
+
+#if defined(USE_I2S_MICS)
+#define AUDIO_DEFAULT_MIC AUDIO_MIC_I2S
+#else
+#define AUDIO_DEFAULT_MIC AUDIO_MIC_PDM
+#endif
+
+void audio_set_callback(audio_callback_t callback)
+{
+    audio_set_callback_ex(AUDIO_DEFAULT_MIC, callback);
+}
+
+int audio_init(int sampling_rate)
+{
+    return audio_init_ex(AUDIO_DEFAULT_MIC, sampling_rate);
+}
+
+int audio_uninit()
+{
+    return audio_uninit_ex(AUDIO_DEFAULT_MIC);
+}
+
+int get_audio_samples_received(void)
+{
+    return get_audio_samples_received_ex(AUDIO_DEFAULT_MIC);
+}
+
+int get_audio_data(int16_t *data, int len)
+{
+    return get_audio_data_ex(AUDIO_DEFAULT_MIC, data, len);
+}
+
+int wait_for_audio(void)
+{
+    return wait_for_audio_ex(AUDIO_DEFAULT_MIC);
+}
+
+void set_audio_gain(float gain_db)
+{
+    set_audio_gain_ex(AUDIO_DEFAULT_MIC, gain_db);
+}
+
+void audio_preprocessing(int16_t *audio, int samples)
+{
+    audio_preprocessing_ex(AUDIO_DEFAULT_MIC, audio, samples);
 }

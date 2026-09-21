@@ -18,26 +18,28 @@
 #include "mic_listener.h"
 #include <RTE_Device.h>
 
-voice_callback_t rx_callback;
-
+/* I2S microphone driver ---------------------------------------------------- */
 #ifdef USE_I2S_MICS
 #include <Driver_SAI.h>
-
-ARM_DRIVER_SAI       *i2s_drv;
 
 #define Driver_SAI4 Driver_SAILP
 
 extern ARM_DRIVER_SAI ARM_Driver_SAI_(BOARD_MIC_INPUT_I2S_INSTANCE);
+
+static ARM_DRIVER_SAI *i2s_drv;
+static voice_callback_t i2s_rx_callback;
 
 /**
   \fn          void sai_callback(uint32_t event)
   \brief       Callback routine from the i2s driver
   \param[in]   event Event for which the callback has been called
 */
-void i2s_callback(uint32_t event)
+static void i2s_callback(uint32_t event)
 {
     if (event & ARM_SAI_EVENT_RECEIVE_COMPLETE) {
-        rx_callback(event);
+        if (i2s_rx_callback) {
+            i2s_rx_callback(event);
+        }
     } else if (event & ARM_SAI_EVENT_RX_OVERFLOW) {
         printf("*** i2s_callback with event: ARM_SAI_EVENT_RX_OVERFLOW ***\n");
     } else if (event & ARM_SAI_EVENT_FRAME_ERROR) {
@@ -47,7 +49,7 @@ void i2s_callback(uint32_t event)
     }
 }
 
-int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
+static int32_t init_microphone_i2s(uint32_t sampling_rate, uint32_t data_bit_len)
 {
     ARM_SAI_CAPABILITIES cap;
     int32_t status;
@@ -93,23 +95,23 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
     return status;
 }
 
-int32_t enable_microphone(voice_callback_t callback)
+static int32_t enable_microphone_i2s(voice_callback_t callback)
 {
     /* enable Receiver */
     int32_t status = i2s_drv->Control(ARM_SAI_CONTROL_RX, 1, 0);
     if (status != ARM_DRIVER_OK) {
         printf("I2S enabled failed = %" PRId32 "\n", status);
         i2s_drv->PowerControl(ARM_POWER_OFF);
-        rx_callback = NULL;
+        i2s_rx_callback = NULL;
         return status;
     }
 
-    rx_callback = callback;
+    i2s_rx_callback = callback;
 
     return ARM_DRIVER_OK;
 }
 
-int32_t disable_microphone()
+static int32_t disable_microphone_i2s(void)
 {
     /* Stop the RX */
     int32_t status = i2s_drv->Control(ARM_SAI_CONTROL_RX, 0, 0);
@@ -120,12 +122,13 @@ int32_t disable_microphone()
     return status;
 }
 
-int32_t receive_voice_data(void *data, uint32_t data_len)
+static int32_t receive_voice_data_i2s(void *data, uint32_t data_len)
 {
     return i2s_drv->Receive(data, data_len);
 }
-#endif
+#endif /* USE_I2S_MICS */
 
+/* PDM microphone driver ---------------------------------------------------- */
 #ifdef USE_PDM_MICS
 #include "Driver_PDM.h"
 
@@ -138,8 +141,8 @@ int32_t receive_voice_data(void *data, uint32_t data_len)
 #define SECONDARY_CHANNEL    5
 #endif
 
-uint32_t primary_ch   = PRIMARY_CHANNEL;
-uint32_t secondary_ch = SECONDARY_CHANNEL;
+static uint32_t primary_ch   = PRIMARY_CHANNEL;
+static uint32_t secondary_ch = SECONDARY_CHANNEL;
 
 /* PDM Channel configurations */
 #define PDM_PHASE             0x0000001F
@@ -147,6 +150,8 @@ uint32_t secondary_ch = SECONDARY_CHANNEL;
 #define PDM_PEAK_DETECT_TH    0x00060002
 #define PDM_PEAK_DETECT_ITV   0x0004002D
 #define PDM_IIR_COEF          0x00000004
+
+static voice_callback_t pdm_rx_callback;
 
 static void PDM_fifo_callback(uint32_t event)
 {
@@ -162,7 +167,9 @@ static void PDM_fifo_callback(uint32_t event)
 
     if(event & ARM_PDM_EVENT_CAPTURE_COMPLETE)
     {
-        rx_callback(event);
+        if (pdm_rx_callback) {
+            pdm_rx_callback(event);
+        }
     }
 
     if(event & ARM_PDM_EVENT_AUDIO_DETECTION)
@@ -224,7 +231,7 @@ static int32_t resolution(uint32_t data_bit_len)
     }
 }
 
-int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
+static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len)
 {
     int32_t ret;
     /* Initialize PDM driver */
@@ -365,20 +372,116 @@ int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
     return 0;
 }
 
-int32_t enable_microphone(voice_callback_t callback)
+static int32_t enable_microphone_pdm(voice_callback_t callback)
 {
-    rx_callback = callback;
+    pdm_rx_callback = callback;
     return 0;
 }
 
-int32_t disable_microphone()
+static int32_t disable_microphone_pdm(void)
 {
     return 0;
 }
 
-int32_t receive_voice_data(void* data, uint32_t data_len)
+static int32_t receive_voice_data_pdm(void *data, uint32_t data_len)
 {
     return PDMdrv->Receive(data, data_len);
 }
+#endif /* USE_PDM_MICS */
 
+/* Per-mic dispatch --------------------------------------------------------- */
+
+int32_t init_microphone_ex(mic_type_t mic, uint32_t sampling_rate, uint32_t data_bit_len)
+{
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case MIC_TYPE_I2S:
+        return init_microphone_i2s(sampling_rate, data_bit_len);
 #endif
+#ifdef USE_PDM_MICS
+    case MIC_TYPE_PDM:
+        return init_microphone_pdm(sampling_rate, data_bit_len);
+#endif
+    default:
+        return -1;
+    }
+}
+
+int32_t enable_microphone_ex(mic_type_t mic, voice_callback_t callback)
+{
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case MIC_TYPE_I2S:
+        return enable_microphone_i2s(callback);
+#endif
+#ifdef USE_PDM_MICS
+    case MIC_TYPE_PDM:
+        return enable_microphone_pdm(callback);
+#endif
+    default:
+        return -1;
+    }
+}
+
+int32_t disable_microphone_ex(mic_type_t mic)
+{
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case MIC_TYPE_I2S:
+        return disable_microphone_i2s();
+#endif
+#ifdef USE_PDM_MICS
+    case MIC_TYPE_PDM:
+        return disable_microphone_pdm();
+#endif
+    default:
+        return -1;
+    }
+}
+
+int32_t receive_voice_data_ex(mic_type_t mic, void *data, uint32_t data_len)
+{
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case MIC_TYPE_I2S:
+        return receive_voice_data_i2s(data, data_len);
+#endif
+#ifdef USE_PDM_MICS
+    case MIC_TYPE_PDM:
+        return receive_voice_data_pdm(data, data_len);
+#endif
+    default:
+        return -1;
+    }
+}
+
+/* Single-mic API preserved for existing callers.
+ * When both mics are compiled in, the single-mic API drives I2S (arbitrary
+ * primary choice); callers that need both mics must use the *_ex variants. */
+#if defined(USE_I2S_MICS)
+#define MIC_LISTENER_DEFAULT MIC_TYPE_I2S
+#elif defined(USE_PDM_MICS)
+#define MIC_LISTENER_DEFAULT MIC_TYPE_PDM
+#endif
+
+#ifdef MIC_LISTENER_DEFAULT
+int32_t init_microphone(uint32_t sampling_rate, uint32_t data_bit_len)
+{
+    return init_microphone_ex(MIC_LISTENER_DEFAULT, sampling_rate, data_bit_len);
+}
+
+int32_t enable_microphone(voice_callback_t callback)
+{
+    return enable_microphone_ex(MIC_LISTENER_DEFAULT, callback);
+}
+
+int32_t disable_microphone(void)
+{
+    return disable_microphone_ex(MIC_LISTENER_DEFAULT);
+}
+
+int32_t receive_voice_data(void *data, uint32_t data_len)
+{
+    return receive_voice_data_ex(MIC_LISTENER_DEFAULT, data, data_len);
+}
+#endif /* MIC_LISTENER_DEFAULT */

@@ -61,6 +61,8 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 #define AUDIO_STRIDE 8000 // 0.5 seconds
 
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
+/* Second capture buffer used to run the PDM microphone in parallel with I2S. */
+static int16_t audio_inf_pdm[AUDIO_SAMPLES + AUDIO_STRIDE];
 static int16_t audio_out[AUDIO_STRIDE*2];
 
 /* AEC output accumulated in on-chip SRAM (NoInit region), one AUDIO_STRIDE per inference. */
@@ -156,10 +158,15 @@ using namespace arm::app::kws;
         static const int16_t* audioData = nullptr;
         static int strides_in_example_audio = 0;
         if (!audio_inited) {
-            // LIVE AUDIO IN init
-            err = hal_audio_alif_init(audioRate);
+            // LIVE AUDIO IN init - drive I2S and PDM microphones in parallel.
+            err = hal_audio_alif_init_ex(HAL_AUDIO_MIC_I2S, audioRate);
             if (err) {
-                printf_err("hal_audio_alif_init failed with error: %d\n", err);
+                printf_err("hal_audio_alif_init_ex(I2S) failed with error: %d\n", err);
+                return false;
+            }
+            err = hal_audio_alif_init_ex(HAL_AUDIO_MIC_PDM, audioRate);
+            if (err) {
+                printf_err("hal_audio_alif_init_ex(PDM) failed with error: %d\n", err);
                 return false;
             }
             audio_inited = true;
@@ -191,34 +198,51 @@ using namespace arm::app::kws;
             }
         }
 
-        // Start first fill of final stride section of buffer
-        hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+        // Start first fill of final stride section of both mic buffers
+        hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
+        hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
 
         do {
-            // // Wait until stride buffer is full - initiated above or by previous interation of loop
-            err = hal_wait_for_audio();
+            // Wait until both stride buffers are full - initiated above or by previous iteration
+            err = hal_wait_for_audio_ex(HAL_AUDIO_MIC_I2S);
             if (err) {
-                printf_err("hal_wait_for_audio failed with error: %d\n", err);
+                printf_err("hal_wait_for_audio_ex(I2S) failed with error: %d\n", err);
+                return false;
+            }
+            err = hal_wait_for_audio_ex(HAL_AUDIO_MIC_PDM);
+            if (err) {
+                printf_err("hal_wait_for_audio_ex(PDM) failed with error: %d\n", err);
                 return false;
             }
 
-            // move buffer down by one stride, clearing space at the end for the next stride
-            std::copy(audio_inf + AUDIO_STRIDE, audio_inf + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
+            // Slide both buffers down by one stride, clearing space at the end
+            std::copy(audio_inf     + AUDIO_STRIDE, audio_inf     + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
+            std::copy(audio_inf_pdm + AUDIO_STRIDE, audio_inf_pdm + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf_pdm);
 
-            // start receiving the next stride immediately before we start heavy processing, so as not to lose anything
-            // Skip on the final stride: an unconsumed receive leaves the driver busy (rx_busy) and the next session fails with -2.
+            // Kick off the next stride on both mics immediately before heavy processing
+            // so nothing is dropped. Skip on the final stride to avoid leaving the driver busy.
             if (index + 1 < strides_in_example_audio) {
-                hal_get_audio_data(audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+                hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
+                hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
             }
 
-            hal_audio_alif_preprocessing(audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
 
             const int16_t* inferenceWindow = audio_inf;
 
             const int16_t* audio_out_ptr = audioData + index * AUDIO_STRIDE;
 
             std::copy(audio_out_ptr, audio_out_ptr + AUDIO_STRIDE, audio_out);
-            err = audio_out_transmit(audio_out, AUDIO_STRIDE);
+
+            // Interleave I2S (L) and PDM (R) into stereo frames: L0,R0,L1,R1,...
+            // The SAI driver expects interleaved stereo; a planar layout would
+            // read every other sample per channel and play back at 2x pitch.
+            for (int i = 0; i < AUDIO_STRIDE; ++i) {
+                audio_out[2 * i]     = audio_inf[i];
+                audio_out[2 * i + 1] = audio_inf_pdm[i];
+            }
+            err = audio_out_transmit(audio_out, AUDIO_STRIDE * 2);
             if (err) {
                 printf_err("audio_out_transmit failed with error: %d\n", err);
                 return false;
