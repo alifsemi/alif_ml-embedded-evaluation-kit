@@ -1398,4 +1398,26 @@
 #define BOARD_OSPI_FLASH_BASE                   0xC0000000
 #define BOARD_OSPI_FLASH_SIZE                   0x08000000
 
+/**
+ * @brief Calibrated OSPI bus speed targets for RAM and Flash
+ *        Set to 0 in order to keep RTE default clock speed
+ *
+ * @note The OSPI bus clock speeds are first initialized to RTE default values.
+ *       Values presented here are used in platform initialization phase to configure the OSPI bus speeds
+ *       (if signal delay calibration data is available).
+ *       See https://github.com/alifsemi/alif_xspi-calibrator.git for more details
+ *       and an example how to calibrate the OSPI bus signal delays.
+ * @note OSPI controller instances have individual delay settings and baudrate divider but the OSPI input clock is shared.
+ *       This means you can set bus clock speed pairs like (200MHz 200MHz), (100MHz 200MHz), etc. with input clock 400MHz
+ *       And (133MHz, 133MHz) with input clock 266MHz but you can not combine frequencies
+ *       divided from different input clocks. e.g. (200MHz, 133MHz)
+ *
+ */
+#define BOARD_OSPI_RAM_CALIB_BUS_SPEED                200000000
+#define BOARD_OSPI_FLASH_CALIB_BUS_SPEED              200000000
+
+// <o> Front Camera or Display selector mux GPIO port number and pin number (LOW = Camera, HIGH = Display)
+#define BOARD_CAMERA_DISPLAY_MUX_GPIO_PORT      14
+#define BOARD_CAMERA_DISPLAY_MUX_GPIO_PIN       2
+
 // </h>

@@ -159,6 +159,8 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     source/tracelib.c
     source/retarget_alif.c
     source/delay.c
+    source/ospi_calib.c
+    $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_is25wx.c>
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram.c>
