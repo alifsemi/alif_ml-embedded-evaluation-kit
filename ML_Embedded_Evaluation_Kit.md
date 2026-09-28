@@ -650,6 +650,40 @@ Normalized sample stats: absmax = 0, mean = 0 (gain = 80 dB)
     - [Using USB serial connection and XMODEM](https://github.com/alifsemi/alif_usb-to-ospi-flasher)
 
 
+## Running external OSPI flash/PSRAM above the default 100 MHz SCLK (AppKit-E8 / DevKit-E8)
+
+On AppKit-E8 and DevKit-E8 the external OSPI flash and PSRAM is by default clocked at 100 MHz SCLK.
+When a use-case executes model weights (or any code/data) from external flash, the OSPI SCLK directly
+affects inference latency and overall throughput. Both boards are capable of running the OSPI
+flash at higher SCLK frequencies (133Mhz|200MHz), but the interface must be **calibrated** before it can be
+used above 100 MHz.
+
+Alif provides a standalone calibration application example for this purpose:
+
+- **Repository:** [alifsemi/alif_xspi-calibrator](https://github.com/alifsemi/alif_xspi-calibrator.git)
+- Follow the instructions in the calibrator's `README.md` for building, flashing and running the
+  tool. The README documents the supported SCLK frequencies and the calibration procedure.
+
+### Recommended sequence
+
+1. **Run the OSPI calibration first.**
+   > **Caution:** The calibration procedure may modify (overwrite/erase) the contents of the
+   > external OSPI flash. Do **not** run the calibrator on a board whose OSPI flash contains data
+   > you have not backed up.
+
+2. **Program your ML application and external flash (model) payload after calibration.** Once the board
+   has valid calibration data stored, program model data part, e.g. `ext_flash.bin` produced by builds with
+   `${use_case}_MODEL_IN_EXT_FLASH=ON`) using a method that **does not** wipe the calibration
+   data. Finally write and execute the ML application (MRAM part).
+   - **J-Flash:** use *Production Programming* (which only programs the specified sectors).
+     Do **not** use *Erase Chip* — that will erase the calibration data along with everything
+     else and force you to re-run the calibrator.
+   - **Alif USB / XMODEM flasher:** use the
+     [alif_usb-to-ospi-flasher](https://github.com/alifsemi/alif_usb-to-ospi-flasher) utility,
+     which programs only the target sectors and preserves the rest of the OSPI flash (including
+     the calibration data).
+
+
 ## Deploying a model outside of ML Embedded Evaluation Kit
 
 The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
