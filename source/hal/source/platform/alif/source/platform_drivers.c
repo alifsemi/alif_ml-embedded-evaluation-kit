@@ -41,12 +41,15 @@
 #include "board_utils.h"
 #include "board_config.h"
 #include "tracelib.h"
+#include "ospi.h"
 #include "ospi_flash.h"
 #include "ospi_ram.h"
+#include "ospi_calib.h"
 #include "soc.h"
 #include "core_defines.h"
 #include "sys_utils.h"
 #include "sys_clocks.h"
+#include "sys_ctrl_ospi.h"
 #include "app_mem_regions.h"
 
 #include CMSIS_device_header
@@ -115,10 +118,14 @@ static void ipc_rx_callback(void *data)
 #define PWR_CTRL_DPHY_PLL_ISO              (1U << 9)    /* Enable isolation for MIPI PLL */
 #define PWR_CTRL_DPHY_VPH_1P8_PWR_BYP_EN   (1U << 12)   /* dphy vph 1p8 power bypass enable */
 
-#define CLK_ENA_CLK100M    (1U << 21) /* Enable 100M_CLK  */
+
 #define CLK_ENA_CLK38P4M   (1U << 23) /* Enable HFOSC_CLK */
 #if defined(EAGLE_DEVICE)
 #define CLK_ENA_CLK76P8M   (1U << 24) /* Enable 76M8_CLK  */
+#define CLK_ENA_CLK266M    (1U << 21) /* Enable 266M_CLK  */
+#define CLK_ENA_CLK100M    (1U << 7)  /* Enable 100M_CLK  */
+#else
+#define CLK_ENA_CLK100M    (1U << 21) /* Enable 100M_CLK  */
 #endif // EAGLE_DEVICE
 #endif
 
@@ -295,6 +302,65 @@ uint32_t enable_audio_peripheral_clocks(void)
     return (err + service_error_code);
 }
 
+
+/* Select the appropriate OSPI core clock which is compatible with board specific RAM and flash SCLK settings
+ * Returns 0 on success, 1 if no suitable clock is found.
+ */
+static uint32_t select_ospi_core_clock(void)
+{
+    uint32_t ret = 0;
+#if SOC_FEAT_OSPI_CLK_SELECT
+    uint32_t clk_sel = 0;
+    uint32_t core_clk = 0;
+
+    uint32_t sclk0 = 0;
+    uint32_t sclk1 = 0;
+
+#if BOARD_OSPI_FLASH_CALIB_BUS_SPEED
+    sclk0 = BOARD_OSPI_FLASH_CALIB_BUS_SPEED;
+#endif
+
+#if BOARD_OSPI_RAM_CALIB_BUS_SPEED
+    sclk1 = BOARD_OSPI_RAM_CALIB_BUS_SPEED;
+#endif
+
+    ret = 1;
+    do {
+        core_clk = ospi_core_clock_enum_to_hz((OSPI_CLK_SEL)clk_sel);
+
+        if ((sclk0 == 0 || ospi_get_baudr(sclk0, core_clk)) &&
+            (sclk1 == 0 || ospi_get_baudr(sclk1, core_clk))) {
+            // Suitable clock found for both sclk0 and sclk1
+            ret = 0;
+
+            // Enable the corresponding clock if needed
+            if (clk_sel == OSPI_CLK_SEL_PLL_CLK1_DIV3) {
+#ifdef SE_SERVICES_SUPPORT
+                uint32_t service_error_code = 0;
+                ret = SERVICES_clocks_enable_clock(services_handle,
+                                                   CLKEN_CLK_266M,
+                                                   true,
+                                                   &service_error_code);
+                ret = ret | service_error_code;
+#else
+                CGU->CLK_ENA |= CLK_ENA_CLK266M;
+#endif // SE_SERVICES_SUPPORT
+            }
+
+            if (ret == 0) {
+                set_ospi_clk_sel((OSPI_CLK_SEL)clk_sel);
+            }
+            break;
+        }
+
+        clk_sel++;
+    } while (core_clk);
+#endif // SOC_FEAT_OSPI_CLK_SELECT
+
+    return ret;
+}
+
+
 int platform_init(void)
 {
 #if defined(EAGLE_DEVICE)
@@ -356,10 +422,33 @@ int platform_init(void)
         BOARD_UTILS_Init();
 
         tracelib_init(NULL);
+
+        const ospi_delay_cfg_t *ram_cfg = NULL;
 #ifdef OSPI_FLASH_SUPPORT
         err = ospi_flash_init();
         if (err) {
             printf_err("Failed initializing OSPI flash. err=%d\n", err);
+        } else {
+            if (ospi_calib_repo_init((ospi_delay_blob_t *)(BOARD_OSPI_FLASH_BASE + BOARD_OSPI_FLASH_SIZE - OSPI_DELAY_CAL_FLASH_SECTOR_SIZE)) == 0) {
+                printf("OSPI calibration data found\n");
+                if (select_ospi_core_clock() == 0) {
+#if BOARD_OSPI_FLASH_CALIB_BUS_SPEED
+                    const ospi_delay_cfg_t *flash_cfg = ospi_calib_repo_get_cfg(OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE,
+                                                                                BOARD_OSPI_FLASH_CALIB_BUS_SPEED);
+                    if (ospi_flash_switch_clock(flash_cfg) == 0) {
+                        printf("Set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", flash_cfg->idx, flash_cfg->sclk_freq);
+                    } else {
+                        printf_err("Failed to set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE,
+                                                                                               BOARD_OSPI_FLASH_CALIB_BUS_SPEED);
+                    }
+#endif
+#if BOARD_OSPI_RAM_CALIB_BUS_SPEED
+                    ram_cfg = ospi_calib_repo_get_cfg(BOARD_PSRAM_OSPI_INSTANCE, BOARD_OSPI_RAM_CALIB_BUS_SPEED);
+#endif
+                } else {
+                    printf_err("OSPI core clock select failed\n");
+                }
+            }
         }
 #ifdef EAGLE_DEVICE
         // Enable long bursts to SPI interfaces
@@ -370,7 +459,7 @@ int platform_init(void)
 #endif
 
 #ifdef OSPI_RAM_SUPPORT
-        err = ospi_ram_init();
+        err = ospi_ram_init(ram_cfg);
         if (err) {
             printf_err("Failed initializing OSPI RAM. err=%d\n", err);
         }
@@ -384,6 +473,7 @@ int platform_init(void)
         }
 #endif // OSPI_RAM_TEST
 #endif // OSPI_RAM_SUPPORT
+        (void)ram_cfg;
 
 #if !defined(BALLETTO_DEVICE)
         /* Lock a second time to raise the count to 2 - the signal that we've finished */

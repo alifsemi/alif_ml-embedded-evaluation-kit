@@ -20,7 +20,6 @@
 #include "pinconf.h"
 #include "Driver_IO.h"
 #include "Driver_Flash.h"
-#include "Driver_OSPI.h"
 #include "IS25WX256.h"
 #include "ospi.h"
 #include "ospi_private.h"
@@ -142,7 +141,7 @@ static int32_t ospi_flash_toggle_reset(void)
 }
 
 
-int32_t ospi_flash_init()
+int32_t ospi_flash_init(void)
 {
     int32_t ret = ospi_flash_toggle_reset();
     if (ret != ARM_DRIVER_OK) {
@@ -168,6 +167,7 @@ int32_t ospi_flash_init()
 #endif
     return ret;
 }
+
 
 const uint8_t *do_flash_write(const uint8_t *ptr, size_t len)
 {
