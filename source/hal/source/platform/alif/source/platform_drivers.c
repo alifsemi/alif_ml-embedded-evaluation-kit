@@ -438,8 +438,8 @@ int platform_init(void)
                     if (ospi_flash_switch_clock(flash_cfg) == 0) {
                         printf("Set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", flash_cfg->idx, flash_cfg->sclk_freq);
                     } else {
-                        printf_err("Failed to set OSPI%" PRIu32 " (flash) SCLK=%" PRIu32 "\n", OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE,
-                                                                                               BOARD_OSPI_FLASH_CALIB_BUS_SPEED);
+                        printf_err("Failed to set OSPI%d (flash) SCLK=%d\n", OSPI_CONTROLLER_INSTANCE_CONNECTED_TO_FLASH_DEVICE,
+                                                                             BOARD_OSPI_FLASH_CALIB_BUS_SPEED);
                     }
 #endif
 #if BOARD_OSPI_RAM_CALIB_BUS_SPEED
