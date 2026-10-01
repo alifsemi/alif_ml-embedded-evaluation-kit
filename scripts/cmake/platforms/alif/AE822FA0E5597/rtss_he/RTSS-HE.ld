@@ -179,6 +179,9 @@ SECTIONS
     * (.bss.NoInit.ethos_u_cache)
     * (.bss.NoInit.activation_buf_sram)
     * (.bss.NoInit.temp_buf_sram)
+    /* DMA-touched audio buffers kept in shared SRAM. */
+    * (.bss.audio_rec)
+    * (.bss.NoInit.audio_out)
   } > SRAM
 
   .bss.unstriped (NOLOAD) :

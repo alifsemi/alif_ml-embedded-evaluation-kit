@@ -3268,14 +3268,17 @@
 // <o> I2S3 IRQ priority <0-255>
 // <i> Defines I2S3 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S3_IRQ_PRI   10
+// Highest priority: the SEND_COMPLETE DMA ISR MUST run with no preemption so
+// the next DMA Send is reprogrammed before the SAI TX FIFO drains. Any delay
+// here produces an audible underrun click at every stride boundary.
+#define RTE_I2S3_IRQ_PRI   0
 
 // <o> I2S3 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S3
 // <i> Default: ENABLE
-#define RTE_I2S3_DMA_ENABLE   0
+#define RTE_I2S3_DMA_ENABLE   1
 
 // <o> I2S3 DMA IRQ priority <0-255>
 // <i> Defines I2S3 DMA Interrupt priority
@@ -3363,14 +3366,16 @@
 // <o> LPI2S IRQ priority <0-255>
 // <i> Defines LPI2S Interrupt priority
 // <i> Default: 1
-#define RTE_LPI2S_IRQ_PRI            1
+// Numerically higher (lower priority) than RTE_I2S3_IRQ_PRI so the DAC TX
+// ISR always preempts.
+#define RTE_LPI2S_IRQ_PRI            4
 
 // <o> LPI2S DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for LPI2S
 // <i> Default: ENABLE
-#define RTE_LPI2S_DMA_ENABLE         0
+#define RTE_LPI2S_DMA_ENABLE         1
 #if RTE_LPI2S_DMA_ENABLE
 
 // <o> LPI2S DMA Selection
@@ -3384,7 +3389,7 @@
 // <o> LPI2S DMA IRQ priority <0-255>
 // <i> Defines LPI2S DMA Interrupt priority
 // <i> Default: 0
-#define RTE_LPI2S_DMA_IRQ_PRI          0
+#define RTE_LPI2S_DMA_IRQ_PRI          RTE_LPI2S_IRQ_PRI
 
 // <o> LPI2S Blocking Mode
 //    <0=> DISABLE
@@ -10934,12 +10939,18 @@
 // <o> PDM IRQ priority <0-255>
 // <i> Defines Interrupt priority for PDM.
 // <i> Default: 0
-#define RTE_PDM_IRQ_PRIORITY     0
+// Numerically higher (= lower priority) than RTE_I2S3_IRQ_PRI (=0) so the
+// DAC TX DMA completion IRQ preempts PDM FIFO drains. Otherwise the two
+// IRQs serialise and the DAC Send-to-Send restart is deferred until the
+// in-flight PDM handler returns, underrunning the I2S3 TX FIFO.
+#define RTE_PDM_IRQ_PRIORITY     2
 
 // <o> PDM Fifo watermark <0-7>
 // <i> Defines number of PCM samples in the internal FIFO
 // <i> Default: 5
-#define RTE_PDM_FIFO_WATERMARK   5
+// Set near the top of the 8-entry FIFO to minimise PDM IRQ frequency; a
+// lower value causes extra CPU/IRQ load that fights the DAC TX IRQ.
+#define RTE_PDM_FIFO_WATERMARK   7
 
 #endif
 // </e> PDM (Pulse density modulation) [Driver_PDM]

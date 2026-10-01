@@ -77,11 +77,16 @@ struct audio_stream_state {
     int user_length;
     atomic_int received;
     atomic_int async_error;
+    /* True while a Receive() is in flight on the underlying driver. The ISR
+     * chains the next RX before processing the current one so capture never
+     * stops between user chains; get_audio_data_ex uses this flag to skip
+     * double-starting a Receive when one is already running. */
+    atomic_bool rx_in_flight;
 };
 
 #ifdef USE_I2S_MICS
 static struct audio_stream_state stream_i2s = {
-    .current_gain = MAX_GAIN,
+    .current_gain = 8.0f,   /* +18 dB fixed; AGC (if enabled) overrides on first stride */
     .auto_gain    = true,
 };
 static int32_t audio_rec_i2s[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
@@ -89,7 +94,7 @@ static int32_t audio_rec_i2s[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute
 
 #ifdef USE_PDM_MICS
 static struct audio_stream_state stream_pdm = {
-    .current_gain = MAX_GAIN,
+    .current_gain = 8.0f,   /* +18 dB fixed; AGC (if enabled) overrides on first stride */
     .auto_gain    = true,
 };
 static int16_t audio_rec_pdm[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
@@ -285,6 +290,8 @@ static void audio_start_next_rx(audio_mic_t mic, int data_to_go)
     int err = receive_voice_data_ex(mic_listener_type_for(mic), buf, data_to_go * 2);
     if (err) {
         s->async_error = err;
+    } else {
+        atomic_store(&s->rx_in_flight, true);
     }
 }
 
@@ -294,16 +301,26 @@ static void voice_data_cb_common(audio_mic_t mic)
     if (!s) {
         return;
     }
+    atomic_store(&s->rx_in_flight, false);
     int previous_rec_buf = s->current_rec_buf;
     s->current_rec_buf = !s->current_rec_buf;
     int samples = AUDIO_REC_SAMPLES;
     int new_total = s->received + AUDIO_REC_SAMPLES;
+    int next_rx_size;
     if (new_total < s->user_length) {
-        audio_start_next_rx(mic, s->user_length - new_total);
-    } else if (new_total > s->user_length) {
-        samples = s->user_length - s->received;
-        new_total = s->user_length;
+        next_rx_size = s->user_length - new_total;
+    } else {
+        if (new_total > s->user_length) {
+            samples = s->user_length - s->received;
+            new_total = s->user_length;
+        }
+        /* Chain the next full-size RX immediately so the mic HW never idles
+         * between user chains. Otherwise the HW-level gap between successive
+         * get_audio_data_ex calls paces the use case loop slower than the
+         * DAC rate and the TX FIFO margin bleeds away one P ms per stride. */
+        next_rx_size = AUDIO_REC_SAMPLES;
     }
+    audio_start_next_rx(mic, next_rx_size);
     switch (mic) {
 #ifdef USE_I2S_MICS
     case AUDIO_MIC_I2S: {
@@ -419,11 +436,18 @@ int get_audio_data_ex(audio_mic_t mic, int16_t *data, int len)
     if (!s) {
         return -1;
     }
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
     s->user_ptr = data;
     s->user_length = len;
     s->received = 0;
     s->async_error = 0;
-    audio_start_next_rx(mic, s->user_length);
+    /* With continuous chaining the ISR always has a Receive in flight after
+     * the very first call. Only kick a fresh one off here on initial start. */
+    if (!atomic_load(&s->rx_in_flight)) {
+        audio_start_next_rx(mic, s->user_length);
+    }
+    __set_PRIMASK(primask);
     return s->async_error;
 }
 
@@ -500,12 +524,14 @@ void audio_preprocessing_ex(audio_mic_t mic, int16_t *audio, int samples)
 #ifndef GPIO_PROFILING
     // printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
 #endif
+#if 0
     if (s->auto_gain) {
         // Rescale to full range while converting to integer
         float new_gain = fmin(1.0f / audio_absmax, MAX_GAIN);
         // Reduce gain immediately if necessary to avoid clipping, or increase slowly
         s->current_gain = fmin(new_gain, s->current_gain * MAX_GAIN_INC_PER_STRIDE);
     }
+#endif
     convert_to_s16_from_f16_with_gain(audio, samples, s->current_gain);
 
     q15_t audio_mean_q15, audio_absmax_q15;

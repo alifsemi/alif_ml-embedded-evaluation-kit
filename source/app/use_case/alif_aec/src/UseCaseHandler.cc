@@ -31,6 +31,7 @@
 
 #include "hal.h"
 #include "timer_alif.h"
+#include "delay.h"
 #include "sys_utils.h"
 #include "UseCaseCommonUtils.hpp"
 #include "mlek/common/ImageUtils.hpp"
@@ -43,6 +44,11 @@
 #include "board_utils.h"
 #include "FatFS/sd_fatfs.h"
 
+#if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE & 1)
+#include <arm_mve.h>
+#endif
+
+#include <cstring>
 #include <vector>
 
 using arm::app::KwsClassifier;
@@ -63,7 +69,17 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
 /* Second capture buffer used to run the PDM microphone in parallel with I2S. */
 static int16_t audio_inf_pdm[AUDIO_SAMPLES + AUDIO_STRIDE];
-static int16_t audio_out[AUDIO_STRIDE*2];
+/* Triple-buffered DMA-source buffers for the I2S3 TX DMA. We prime two Sends
+ * before the loop (one playing, one queued), so main's audio_out_transmit
+ * ALWAYS finds the queue full on first attempt and spins. That pins main's
+ * iteration rate to the DAC rate; otherwise the mic wait paces main at
+ * 500+P ms per iter and the ~5 ms/stride drift exhausts the DAC's 500 ms
+ * window after ~87 strides (~44 s), producing a 100% Send-to-Send miss rate
+ * and a continuous 0.5 s crackle. Must live in shared SRAM (fabric DMA cannot
+ * reach M55 TCM). */
+static int16_t audio_out_a[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
+static int16_t audio_out_b[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
+static int16_t audio_out_c[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
 
 /* AEC output accumulated in on-chip SRAM (NoInit region), one AUDIO_STRIDE per inference. */
 #define AEC_OUTPUT_MAX_SAMPLES (128 * AUDIO_STRIDE)
@@ -158,7 +174,6 @@ using namespace arm::app::kws;
         static const int16_t* audioData = nullptr;
         static int strides_in_example_audio = 0;
         if (!audio_inited) {
-            // LIVE AUDIO IN init - drive I2S and PDM microphones in parallel.
             err = hal_audio_alif_init_ex(HAL_AUDIO_MIC_I2S, audioRate);
             if (err) {
                 printf_err("hal_audio_alif_init_ex(I2S) failed with error: %d\n", err);
@@ -197,13 +212,80 @@ using namespace arm::app::kws;
                 return false;
             }
         }
+        // set_audio_gain(30);
 
-        // Start first fill of final stride section of both mic buffers
+        std::memset(audio_out_a, 0, sizeof(audio_out_a));
+        std::memset(audio_out_b, 0, sizeof(audio_out_b));
+        std::memset(audio_out_c, 0, sizeof(audio_out_c));
+
+        // Start first fill of final stride section of both mic buffers.
         hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
         hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
 
+        // Prime the DAC pipeline with TWO silent buffers (one playing + one
+        // queued). The loop will then always find the queue full on its first
+        // transmit attempt and spin on -1, pinning main to the DAC rate.
+        err = audio_out_transmit(audio_out_a, AUDIO_STRIDE * 2);
+        if (err) {
+            printf_err("prime 1 audio_out_transmit failed with error: %d\n", err);
+            return false;
+        }
+        err = audio_out_transmit(audio_out_b, AUDIO_STRIDE * 2);
+        if (err) {
+            printf_err("prime 2 audio_out_transmit failed with error: %d\n", err);
+            return false;
+        }
+
+        // After prime: A is being Sent, B is queued (data_ready=true). The
+        // loop first fills C, then rotates C -> A -> B -> C -> ...
+        int16_t *audio_out_fill = audio_out_c;
+
         do {
-            // Wait until both stride buffers are full - initiated above or by previous iteration
+            // Fill audio_out_fill from the PREVIOUS iteration's preprocessed
+            // mic data (already in audio_inf / audio_inf_pdm from last iter's
+            // tail). Doing this BEFORE the mic wait means the next DAC buffer
+            // is queued near the top of the stride, giving the DAC_Callback a
+            // ~500 ms margin before it needs data_ready=true.
+            const int16_t* src_l = audio_inf     + AUDIO_SAMPLES - AUDIO_STRIDE;
+            const int16_t* src_r = audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE;
+#if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE & 1)
+            static_assert(AUDIO_STRIDE % 8 == 0,
+                          "AUDIO_STRIDE must be a multiple of 8 for MVE VST2");
+            for (int i = 0; i < AUDIO_STRIDE; i += 8) {
+                int16x8x2_t v;
+                v.val[0] = vld1q_s16(&src_l[i]);
+                v.val[1] = vld1q_s16(&src_r[i]);
+                vst2q_s16(&audio_out_fill[2 * i], v);
+            }
+#else
+            for (int i = 0; i < AUDIO_STRIDE; ++i) {
+                audio_out_fill[2 * i]     = src_l[i];
+                audio_out_fill[2 * i + 1] = src_r[i];
+            }
+#endif
+
+            // Spin until the DAC queue has room. With triple-buffered priming
+            // this spin is where main sleeps for most of each stride, pinning
+            // iteration rate to the DAC rate and eliminating drift.
+            while (audio_out_transmit(audio_out_fill, AUDIO_STRIDE * 2) == -1) {
+                __WFE();
+            }
+
+            // Swap: cycle through the three buffers (C -> A -> B -> C ...).
+            // After this transmit, the fill buffer is now "queued" and the
+            // one that was previously queued is now "being Sent". The buffer
+            // that was being Sent two iters ago is now free.
+            if (audio_out_fill == audio_out_a) {
+                audio_out_fill = audio_out_b;
+            } else if (audio_out_fill == audio_out_b) {
+                audio_out_fill = audio_out_c;
+            } else {
+                audio_out_fill = audio_out_a;
+            }
+
+            // Now spend the ~500 ms stride waiting for the next mic data and
+            // preprocessing it. All of this happens in parallel with the DAC
+            // DMA'ing the buffer we just queued.
             err = hal_wait_for_audio_ex(HAL_AUDIO_MIC_I2S);
             if (err) {
                 printf_err("hal_wait_for_audio_ex(I2S) failed with error: %d\n", err);
@@ -215,38 +297,22 @@ using namespace arm::app::kws;
                 return false;
             }
 
-            // Slide both buffers down by one stride, clearing space at the end
-            std::copy(audio_inf     + AUDIO_STRIDE, audio_inf     + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf);
-            std::copy(audio_inf_pdm + AUDIO_STRIDE, audio_inf_pdm + AUDIO_STRIDE + AUDIO_SAMPLES, audio_inf_pdm);
+            std::memmove(audio_inf, audio_inf + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
+            std::memmove(audio_inf_pdm, audio_inf_pdm + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
+            __disable_irq();
+            hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+            hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
+            __enable_irq();
 
-            // Kick off the next stride on both mics immediately before heavy processing
-            // so nothing is dropped. Skip on the final stride to avoid leaving the driver busy.
-            if (index + 1 < strides_in_example_audio) {
-                hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
-                hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
-            }
-
-            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
-            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE, AUDIO_STRIDE);
+            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_I2S,
+                                            audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE,
+                                            AUDIO_STRIDE);
+            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_PDM,
+                                            audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE,
+                                            AUDIO_STRIDE);
 
             const int16_t* inferenceWindow = audio_inf;
-
-            const int16_t* audio_out_ptr = audioData + index * AUDIO_STRIDE;
-
-            std::copy(audio_out_ptr, audio_out_ptr + AUDIO_STRIDE, audio_out);
-
-            // Interleave I2S (L) and PDM (R) into stereo frames: L0,R0,L1,R1,...
-            // The SAI driver expects interleaved stereo; a planar layout would
-            // read every other sample per channel and play back at 2x pitch.
-            for (int i = 0; i < AUDIO_STRIDE; ++i) {
-                audio_out[2 * i]     = audio_inf[i];
-                audio_out[2 * i + 1] = audio_inf_pdm[i];
-            }
-            err = audio_out_transmit(audio_out, AUDIO_STRIDE * 2);
-            if (err) {
-                printf_err("audio_out_transmit failed with error: %d\n", err);
-                return false;
-            }
+            (void) inferenceWindow;  // Unused until inference is re-enabled.
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
@@ -262,19 +328,8 @@ using namespace arm::app::kws;
                 return false;
             }
 
-            // AEC done, store this stride's output window in SRAM
-            if (aec_output_len + AUDIO_STRIDE <= AEC_OUTPUT_MAX_SAMPLES) {
-                std::copy(audio_out, audio_out + AUDIO_STRIDE,
-                          aec_output_sram + aec_output_len);
-                // std::copy(inferenceWindow, inferenceWindow + AUDIO_STRIDE,
-                //           aec_output_sram + aec_output_len);
-                aec_output_len += AUDIO_STRIDE;
-            } else {
-                printf_err("AEC output SRAM buffer full, dropping stride %d\n", index);
-            }
-
             index++;
-        } while (index < strides_in_example_audio);
+        } while (1);//while (index < strides_in_example_audio);
 
         info("AEC output stored in SRAM: %lu samples at %p\n",
              aec_output_len, (void*)aec_output_sram);

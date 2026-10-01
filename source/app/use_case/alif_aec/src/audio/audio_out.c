@@ -135,14 +135,9 @@ int32_t audio_out_init(uint32_t sample_rate)
 
 int32_t audio_out_transmit(const void *data, uint32_t num)
 {
-    // while (running && data_ready) {
-    //     // Wait for previous transmission to complete
-    //     __WFE();
-    // }
-
     if (running && data_ready) {
-        printf("running : %d\t data_ready : %d\n", running, data_ready);
-        printf("audio out overflow\n");
+        // printf("running : %d\t data_ready : %d\n", running, data_ready);
+        // printf("audio out overflow\n");
         return -1;
     }
 
