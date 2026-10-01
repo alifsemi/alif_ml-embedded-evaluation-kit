@@ -144,12 +144,27 @@ static int32_t receive_voice_data_i2s(void *data, uint32_t data_len)
 static uint32_t primary_ch   = PRIMARY_CHANNEL;
 static uint32_t secondary_ch = SECONDARY_CHANNEL;
 
-/* PDM Channel configurations */
-#define PDM_PHASE             0x0000001F
-#define PDM_GAIN              0x00000800
-#define PDM_PEAK_DETECT_TH    0x00060002
-#define PDM_PEAK_DETECT_ITV   0x0004002D
-#define PDM_IIR_COEF          0x00000004
+/* PDM Channel configurations.
+ *
+ * The two PDM channels on a shared PDM clock sample on opposite clock edges,
+ * so each channel needs its own phase, gain and FIR coefficients. Phase,
+ * peak-detect and FIR values match the Alif Baremetal demo_pdm.c reference.
+ * The gains are raised ~10x above the demo values because our audio
+ * preprocessing step applies an additional ~8x software gain and the
+ * low-level demo values were set for direct raw-PDM playback. Tune these
+ * if the PDM channel ends up too quiet or clipped. Max register value is
+ * PDM_MAX_GAIN_CTRL = 0xFFF. */
+#define PDM_CH_PRIMARY_PHASE             0x0000001F
+#define PDM_CH_PRIMARY_GAIN              0x00000200
+#define PDM_CH_PRIMARY_PEAK_DETECT_TH    0x00060002
+#define PDM_CH_PRIMARY_PEAK_DETECT_ITV   0x0004002D
+
+#define PDM_CH_SECONDARY_PHASE           0x00000003
+#define PDM_CH_SECONDARY_GAIN            0x000002E0
+#define PDM_CH_SECONDARY_PEAK_DETECT_TH  0x00060002
+#define PDM_CH_SECONDARY_PEAK_DETECT_ITV 0x00020027
+
+#define PDM_IIR_COEF                     0x00000004
 
 static voice_callback_t pdm_rx_callback;
 
@@ -187,8 +202,17 @@ extern ARM_DRIVER_PDM Driver_PDM;
 static ARM_DRIVER_PDM* const PDMdrv = &Driver_PDM;
 #endif
 
-static const uint32_t ch_fir[18] = { 0x00000001, 0x00000003, 0x00000003, 0x000007F4, 0x00000004, 0x000007ED, 0x000007F5, 0x000007F4, 0x000007D3,
-                                     0x000007FE, 0x000007BC, 0x000007E5, 0x000007D9, 0x00000793, 0x00000029, 0x0000072C, 0x00000072, 0x000002FD };
+/* FIR coefficients for the two channels. Even and odd PDM channels sample on
+ * opposite edges of the shared PDM clock so each needs its own FIR response. */
+static const uint32_t ch_fir_primary[18] = {
+    0x00000001, 0x00000003, 0x00000003, 0x000007F4, 0x00000004, 0x000007ED,
+    0x000007F5, 0x000007F4, 0x000007D3, 0x000007FE, 0x000007BC, 0x000007E5,
+    0x000007D9, 0x00000793, 0x00000029, 0x0000072C, 0x00000072, 0x000002FD };
+
+static const uint32_t ch_fir_secondary[18] = {
+    0x00000000, 0x000007FF, 0x00000000, 0x00000004, 0x00000004, 0x000007FC,
+    0x00000000, 0x000007FB, 0x000007E4, 0x00000000, 0x0000002B, 0x00000009,
+    0x00000016, 0x00000049, 0x00000793, 0x000006F8, 0x00000045, 0x00000178 };
 
 static int32_t pdm_mode(uint32_t sampling_rate)
 {
@@ -283,36 +307,38 @@ static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len
         return -1;
     }
 
-    /* Select the DC blocking IIR filter */
-    ret = PDMdrv->Control(ARM_PDM_BYPASS_IIR_FILTER, 1, 0);
+    /* Enable the DC blocking IIR filter (0 == don't bypass). The Alif demos
+     * pass 1 here (= bypass) which is fine for raw-PDM analysis but leaves a
+     * large DC component that is heard as rumble/noise on voice playback. */
+    ret = PDMdrv->Control(ARM_PDM_BYPASS_IIR_FILTER, 0, 0);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM DC blocking IIR control failed\n");
         return -1;
     }
 
     /* Set Channel 4 Phase value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, primary_ch, PDM_PHASE);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, primary_ch, PDM_CH_PRIMARY_PHASE);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 4 Gain value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, primary_ch, PDM_GAIN);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, primary_ch, PDM_CH_PRIMARY_GAIN);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 4 Peak detect threshold value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, primary_ch, PDM_PEAK_DETECT_TH);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, primary_ch, PDM_CH_PRIMARY_PEAK_DETECT_TH);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 4 Peak detect ITV value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, primary_ch, PDM_PEAK_DETECT_ITV);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, primary_ch, PDM_CH_PRIMARY_PEAK_DETECT_ITV);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
@@ -321,7 +347,7 @@ static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len
     /* Channel 4 configuration values */
     PDM_CH_CONFIG pdm_coef_reg;
     pdm_coef_reg.ch_num              = primary_ch;       /* Channel 4 */
-    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir, sizeof(pdm_coef_reg.ch_fir_coef)); /* Channel 4 fir coefficient */
+    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir_primary, sizeof(pdm_coef_reg.ch_fir_coef));
     pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
 
     ret = PDMdrv->Config(&pdm_coef_reg);
@@ -331,28 +357,28 @@ static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len
     }
 
     /* Set Channel 5 Phase value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, secondary_ch, PDM_PHASE);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, secondary_ch, PDM_CH_SECONDARY_PHASE);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 5 Gain value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, secondary_ch, PDM_GAIN);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, secondary_ch, PDM_CH_SECONDARY_GAIN);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 5 Peak detect threshold value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, secondary_ch, PDM_PEAK_DETECT_TH);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, secondary_ch, PDM_CH_SECONDARY_PEAK_DETECT_TH);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
     }
 
     /* Set Channel 5 Peak detect ITV value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, secondary_ch, PDM_PEAK_DETECT_ITV);
+    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, secondary_ch, PDM_CH_SECONDARY_PEAK_DETECT_ITV);
     if(ret != ARM_DRIVER_OK){
         printf("\r\n Error: PDM Channel_Config failed\n");
         return -1;
@@ -360,7 +386,7 @@ static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len
 
     /* Channel 5 configuration values */
     pdm_coef_reg.ch_num              = secondary_ch;       /* Channel 5 */
-    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir, sizeof(pdm_coef_reg.ch_fir_coef)); /* Channel 5 fir coefficient */
+    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir_secondary, sizeof(pdm_coef_reg.ch_fir_coef));
     pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
 
     ret = PDMdrv->Config(&pdm_coef_reg);

@@ -94,7 +94,7 @@ static int32_t audio_rec_i2s[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute
 
 #ifdef USE_PDM_MICS
 static struct audio_stream_state stream_pdm = {
-    .current_gain = 8.0f,   /* +18 dB fixed; AGC (if enabled) overrides on first stride */
+    .current_gain = 4.0f,   /* +12 dB; HW stage does the heavy lifting */
     .auto_gain    = true,
 };
 static int16_t audio_rec_pdm[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
