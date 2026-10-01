@@ -20,6 +20,7 @@
 #include "pinconf.h"
 #include "Driver_IO.h"
 #include "Driver_Flash.h"
+#include "Driver_Flash_EX.h"
 #include "IS25WX256.h"
 #include "ospi.h"
 #include "ospi_private.h"
@@ -49,18 +50,20 @@
 extern ARM_DRIVER_FLASH ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
 static ARM_DRIVER_FLASH* const ptrDrvFlash = &ARM_Driver_Flash_(BOARD_OSPI_FLASH_INSTANCE);
 
+extern ARM_DRIVER_FLASH_EX ARM_Driver_Flash_EX_(BOARD_OSPI_FLASH_INSTANCE);
+static ARM_DRIVER_FLASH_EX* const ptrDrvFlashEx = &ARM_Driver_Flash_EX_(BOARD_OSPI_FLASH_INSTANCE);
+
 extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
 static ARM_DRIVER_GPIO* const GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
 int32_t ospi_flash_set_linear(void)
 {
-    return ARM_DRIVER_OK;
+    return ptrDrvFlashEx->SetWrapMode(ARM_FLASH_WRAP_MODE_CONTINUOUS);
 }
 
 int32_t ospi_flash_set_wrap32(void)
 {
-    // TO DO - flash device does support this
-    return ARM_DRIVER_ERROR_UNSUPPORTED;
+    return ptrDrvFlashEx->SetWrapMode(ARM_FLASH_WRAP_MODE_32BYTE);
 }
 
 static void ospi_flash_enable_xip()
