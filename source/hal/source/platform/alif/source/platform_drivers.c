@@ -58,6 +58,15 @@
 #include "ram_test.h"
 #endif
 
+#ifdef USE_INA228
+#include "drv_ina228.h"
+#ifndef INA228_SHUNT_MOHM
+#define INA228_SHUNT_MOHM INA228_SHUNT_AUTO
+#endif
+const uint8_t INA228_I2C_ADDR = 0x40;
+uint8_t dev_list[] = {INA228_I2C_ADDR};
+#endif
+
 #define HW_REG32(base,offset) *((volatile uint32_t *)(base + offset))
 
 #if defined(ARM_NPU)
@@ -200,7 +209,11 @@ static uint32_t set_power_profiles()
 #elif defined(M55_HP) || defined(RTSS_HP)
     default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_400MHZ;
 #endif
+#if FLEX_IO_VOLTAGE_1V8 == 1
     default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+#else
+    default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_3V3;
+#endif
     err = SERVICES_set_run_cfg(services_handle, &default_runprof, &service_error_code);
 
     if ((err + service_error_code) == 0) {
@@ -219,7 +232,11 @@ static uint32_t set_power_profiles()
         // default_offprof.sysref_clk_src = /* SoC Reference Clock shared with all subsystems */
         default_offprof.ip_clock_gating = 0;
         default_offprof.phy_pwr_gating  = 0;
+#if FLEX_IO_VOLTAGE_1V8 == 1
         default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+#else
+        default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_3V3;
+#endif
         default_offprof.wakeup_events   = WE_LPGPIO;
         default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
 #if defined(M55_HE) || defined(RTSS_HE)
@@ -240,6 +257,94 @@ static uint32_t set_power_profiles()
     }
 
     return (err + service_error_code);
+}
+#endif
+
+#ifdef USE_INA228
+static int32_t init_ina228(void)
+{
+    uint32_t reg_data32;
+    int32_t current_nA;
+    uint16_t reg_data;
+    uint8_t dev_count = sizeof(dev_list)/sizeof(dev_list[0]);
+
+    if (INA228_Init(dev_list, dev_count) != 0) {
+        return -1;
+    }
+
+    /* Reset the device to its power-on defaults. */
+    reg_data = 1U << 15;
+    if (INA228_Write(dev_list[0], CONFIG, reg_data) != 0) {
+        return -1;
+    }
+    if (INA228_Read16(dev_list[0], ADC_CONFIG, &reg_data) != 0) {
+        return -1;
+    }
+    info("INA228 ADC_CONFIG (default): 0x%04X\r\n", reg_data);
+    if (INA228_Read16(dev_list[0], SHUNT_CAL, &reg_data) != 0) {
+        return -1;
+    }
+    info("INA228 SHUNT_CAL (default): 0x%04X\r\n", reg_data);
+
+    /* ADC_CONFIG: MODE[15:12] = 0xB (continuous shunt + bus voltage)
+     * VBUSCT[11:9] = VSHCT[8:6] = 0 (50us), AVG[2:0] = 0 (1 sample)
+     */
+    reg_data = 0xB000;
+    if (INA228_Write(dev_list[0], ADC_CONFIG, reg_data) != 0) {
+        return -1;
+    }
+    if (INA228_Read16(dev_list[0], ADC_CONFIG, &reg_data) != 0) {
+        return -1;
+    }
+    info("INA228 ADC_CONFIG: 0x%04X\r\n", reg_data);
+
+    /* Boards are fitted with either a 15 mOhm or a 2 Ohm shunt and nothing on the board says
+     * which, so infer it from the shunt voltage while the system is running (still on the
+     * reset-default 163.84 mV range here). INA228_SHUNT_MOHM (CMake) can force a value; the
+     * detection result is then only used as a cross-check. */
+    {
+        uint16_t shunt_mohm = INA228_SHUNT_MOHM;
+        uint16_t detected_mohm = 0;
+        int32_t vshunt_nV = 0;
+
+        if (INA228_DetectShunt(dev_list[0], &detected_mohm, &vshunt_nV) != 0) {
+            return -1;
+        }
+        if (shunt_mohm == INA228_SHUNT_AUTO) {
+            shunt_mohm = detected_mohm;
+            info("INA228 shunt auto-detected as %u mOhm (VSHUNT %" PRId32 " uV)\r\n",
+                 shunt_mohm, vshunt_nV / 1000);
+        } else if (shunt_mohm != detected_mohm) {
+            warn("INA228 shunt configured as %u mOhm but VSHUNT %" PRId32
+                 " uV looks like %u mOhm\r\n", shunt_mohm, vshunt_nV / 1000, detected_mohm);
+        }
+
+        /* Sets the ADC range, current LSB and SHUNT_CAL to match the shunt. */
+        if (INA228_ConfigureShunt(dev_list[0], shunt_mohm) != 0) {
+            return -1;
+        }
+    }
+    if (INA228_Read16(dev_list[0], SHUNT_CAL, &reg_data) != 0) {
+        return -1;
+    }
+    info("INA228 SHUNT_CAL: 0x%04X\r\n", reg_data);
+
+    if (INA228_ReadVBUS(dev_list[0], &reg_data32) != 0) {   /* given as micro-Volts */
+        return -1;
+    }
+    info("INA228 VBUS: %" PRIu32 " mV\r\n", reg_data32/1000);
+
+    if (INA228_ReadCURRENT(dev_list[0], &current_nA) != 0) {   /* given as signed nano-amps */
+        return -1;
+    }
+    info("INA228 CURRENT: %" PRId32 " uA\r\n", current_nA/1000);
+
+    /* Leave the ADC in shutdown; the application starts/stops conversions around each
+     * inference so the accumulators cover exactly that window. */
+    if (INA228_StopConversions(dev_list[0]) != 0) {
+        return -1;
+    }
+    return 0;
 }
 #endif
 
@@ -518,6 +623,15 @@ int platform_init(void)
 
     /* Print target design info */
     info("Target system design: %s\n", s_platform_name);
+
+#ifdef USE_INA228
+    err = init_ina228();
+    if (err) {
+        printf_err("Failed to set init ina228!\n");
+        return -1;
+    }
+#endif
+
     return err;
 }
 
