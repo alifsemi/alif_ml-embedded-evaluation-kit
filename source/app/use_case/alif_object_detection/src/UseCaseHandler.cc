@@ -38,6 +38,10 @@
 #include "ScreenLayout.hpp"
 #include "hal.h"
 
+#ifdef USE_INA228
+#include "drv_ina228.h"
+#endif
+
 #include <cinttypes>
 #include <cmath>
 
@@ -76,6 +80,10 @@ using namespace arm::app::object_detection;
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
         lv_label_set_text_static(ScreenLayoutLabelObject(0), "Faces Detected: 0");
         lv_label_set_text_static(ScreenLayoutLabelObject(1), "192px image (24-bit)");
+#ifdef USE_INA228
+        lv_label_set_text_static(ScreenLayoutLabelObject(2), "Average Power:      0 mW");
+        lv_label_set_text_static(ScreenLayoutLabelObject(3), "Average Current:    0 mA");
+#endif
 
         lv_style_init(&boxStyle);
         lv_style_set_bg_opa(&boxStyle, LV_OPA_TRANSP);
@@ -205,11 +213,52 @@ using namespace arm::app::object_detection;
             }
 
             /* Run inference over this image. */
+#ifdef USE_INA228
+            /* The ADC is left in shutdown between inferences, so clearing the accumulators here
+             * cannot race with a conversion. Starting conversions defines the window's leading
+             * edge; the timestamp is taken as soon as that write completes. */
+            bool ina228Ok = (INA228_ClearAccumulators(dev_list[0]) == 0) &&
+                            (INA228_StartConversions(dev_list[0]) == 0);
+            uint32_t ina228Start = Get_SysTick_Cycle_Count32();
+#endif
 
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
                 return false;
             }
+
+#ifdef USE_INA228
+            /* Stopping conversions freezes ENERGY/CHARGE, so the trailing edge is the end of this
+             * write and the subsequent reads no longer stretch the window. The inference here is
+             * only ~3 ms, so even the ~75 us of this write at 400 kHz is a visible ~2.5%. */
+            ina228Ok = ina228Ok && (INA228_StopConversions(dev_list[0]) == 0);
+            uint32_t ina228Cycles = Get_SysTick_Cycle_Count32() - ina228Start;
+            int64_t charge_nC = 0;
+            uint32_t vbus_uV = 0;
+            int32_t avg_mA = 0;
+            int32_t avg_mW = 0;
+
+            /* Average current comes from the CHARGE accumulator: with a 500 nA current LSB its
+             * 0.5 uC LSB gives ~750 counts over a ~3 ms inference (~0.15% resolution). Power is
+             * derived as VBUS * I_avg rather than read from ENERGY, whose 25.6 uJ LSB is only
+             * ~25-30 counts over a window this short (+/-4%). VBUS is a regulated rail, and with
+             * conversions stopped the register still holds the last bus sample taken during the
+             * inference. */
+            ina228Ok = ina228Ok && (INA228_ReadCHARGE(dev_list[0], &charge_nC) == 0)
+                                && (INA228_ReadVBUS(dev_list[0], &vbus_uV) == 0);
+            if (ina228Ok) {
+                uint64_t elapsed_us = (uint64_t)ina228Cycles * 1000000ULL / SystemCoreClock;
+                if (elapsed_us > 0) {
+                    /* nC / us == mA */
+                    avg_mA = (int32_t)(charge_nC / (int64_t)elapsed_us);
+                    /* uV * nC / us == nW; keep full precision before the final /1e6 to mW. */
+                    avg_mW = (int32_t)((((int64_t)vbus_uV * charge_nC) / (int64_t)elapsed_us) / 1000000LL);
+                }
+                info("INA228: %" PRId64 " nC over %" PRIu64 " us @ %" PRIu32 " mV -> avg %" PRId32
+                     " mA, %" PRId32 " mW\r\n",
+                     charge_nC, elapsed_us, vbus_uV / 1000, avg_mA, avg_mW);
+            }
+#endif
 
             if (!postProcess.DoPostProcess()) {
                 printf_err("Post-processing failed.");
@@ -229,6 +278,16 @@ using namespace arm::app::object_detection;
 #endif
 
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "Faces Detected: %i", results.size());
+
+#ifdef USE_INA228
+            if (ina228Ok) {
+                lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "Average Power:  %4" PRId32 " mW", avg_mW);
+                lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Average Current: %4" PRId32 " mA", avg_mA);
+            } else {
+                lv_label_set_text_static(ScreenLayoutLabelObject(2), "Average Power:     -- mW");
+                lv_label_set_text_static(ScreenLayoutLabelObject(3), "Average Current:   -- mA");
+            }
+#endif
 
             /* Draw boxes. */
             DrawDetectionBoxes(results, inputImgCols, inputImgRows);
