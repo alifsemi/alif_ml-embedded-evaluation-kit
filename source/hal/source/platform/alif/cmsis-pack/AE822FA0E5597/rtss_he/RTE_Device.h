@@ -10948,9 +10948,13 @@
 // <o> PDM Fifo watermark <0-7>
 // <i> Defines number of PCM samples in the internal FIFO
 // <i> Default: 5
-// Set near the top of the 8-entry FIFO to minimise PDM IRQ frequency; a
-// lower value causes extra CPU/IRQ load that fights the DAC TX IRQ.
-#define RTE_PDM_FIFO_WATERMARK   7
+// The non-DMA PDM IRQ handler drains `watermark` frames per interrupt and
+// discards whatever part of the last batch exceeds the requested length. The
+// audio_alif mic chunks (512 frames, and 320 for the tail of a stride) must
+// therefore be a multiple of the watermark, otherwise frames are lost at every
+// chunk boundary (with 7: 6 frames per chunk, so PDM ran at ~15.82 kHz).
+// 4 divides both 512 and 320 and leaves 4 frames (250 us) of FIFO headroom.
+#define RTE_PDM_FIFO_WATERMARK   4
 
 #endif
 // </e> PDM (Pulse density modulation) [Driver_PDM]
