@@ -684,6 +684,51 @@ Alif provides a standalone calibration application example for this purpose:
      the calibration data).
 
 
+<a name="powermeasurement"></a>
+## Measuring power per inference with an INA228
+
+`alif_object_detection` can measure the average supply current and power of each inference with a
+TI INA228 current/power monitor and show them on the display and the console. Enable it with
+`-DUSE_INA228=ON` (see [Alif-specific build options](#alif-specific-build-options)); it is off by
+default.
+
+### Connecting the sensor
+
+- **Bus:** the I3C controller in legacy I2C mode, on the I3C_D pins shared with the IMUs and the I3C
+  pin header: **P7_6 = SDA**, **P7_7 = SCL**. Connect GND as well.
+- **Address:** 0x40 (A0 and A1 tied to GND).
+- **Shunt:** the INA228 shunt goes in series with the supply being measured. 15 mOhm and 2 Ohm
+  shunts are supported. By default the shunt is detected at boot from the shunt voltage, which
+  assumes a boot current between roughly 5 mA and 650 mA; use `-DINA228_SHUNT_MOHM=15|2000` to set
+  it explicitly. Measurable current is up to about 262 mA with 15 mOhm and 82 mA with 2 Ohm.
+- **I/O voltage:** with `USE_INA228=ON` the AppKit-E8 build sets the FLEX I/O rail (which includes
+  P7_6/P7_7) to 3.3 V. This must match the VDD_IO_FLEX supply actually fitted on the board.
+- **Pull-ups:** SDA and SCL need pull-ups to the I/O voltage, on the board or on the sensor module.
+
+If no INA228 answers at 0x40 the application still runs: a warning is printed at boot and the power
+readout is not shown.
+
+### What is measured
+
+Conversions run only during the inference: the accumulators are cleared and the ADC started just
+before inference, and the ADC is stopped right after it, so pre/post-processing and the I2C reads
+are not included. Average current comes from the INA228 CHARGE accumulator divided by the measured
+time; average power is that current multiplied by the bus voltage. Each inference prints a line
+such as:
+
+```
+INFO - Power measurement: avg 120 mA, 240 mW over 3104 us
+```
+
+For very short inferences (a few ms) expect a few percent of error: the window is quantised to the
+100 us conversion cycle, and the ~75 us I2C write that stops the ADC falls inside the window.
+
+The application uses the platform interface in
+`source/hal/source/platform/alif/include/power_measurement.h`
+(`power_measurement_begin()` / `power_measurement_end()`), which can be used to measure any other
+section of code in the same way.
+
+
 ## Deploying a model outside of ML Embedded Evaluation Kit
 
 The first steps to test your own model in ML Embedded Evaluation Kit are converting the model to correct format and optimising the model with Vela.
@@ -830,6 +875,12 @@ Specifies which NPU to use for interference. (Default is U55)
 
 `-DGPIO_PROFILING=<ON|OFF>`<br>
 Enables or disables GPIO profiling. When enabled, certain GPIO pins are configured to toggle at specific stages of the benchmark (preprocessing, inference, postprocessing) to correlate power measurements with these stages. (Default is OFF). See more details in the [Alif Benchmark User Guide](Alif_benchmark.md).
+
+`-DUSE_INA228=<ON|OFF>`<br>
+Measures the average current and power of each inference with an INA228 sensor and shows them on the display (currently `alif_object_detection`). A missing sensor is not fatal. (Default is OFF) See [Measuring power per inference with an INA228](#powermeasurement).
+
+`-DINA228_SHUNT_MOHM=<AUTO|15|2000>`<br>
+Shunt resistor fitted to the INA228, in mOhm. AUTO detects it at boot. Only used with `USE_INA228=ON`. (Default is AUTO)
 
 
 ### Starting inference

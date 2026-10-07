@@ -296,7 +296,11 @@
 // <i> Make sure this setting corresponds to the VDD_IO_FLEX pin voltage. If the VDD_IO_FLEX pin is
 // connected to a 3.3 V supply, do not change the value of the GPIO_CNTL register to command 1.8-V
 // operation mode!
+#ifdef USE_INA228
+#define FLEX_IO_VOLTAGE_1V8                             0
+#else
 #define FLEX_IO_VOLTAGE_1V8                             1
+#endif
 
 // <o> "SD_RESET" GPIO port number <0=> GPIO0 <1=> GPIO1 <2=> GPIO2 <3=> GPIO3 <4=> GPIO4 <5=> GPIO5
 // <6=> GPIO6 <7=> GPIO7 <8=> GPIO8 <9=> GPIO9 <10=> GPIO10 <11=> GPIO11 <12=> GPIO12 <13=> GPIO13
