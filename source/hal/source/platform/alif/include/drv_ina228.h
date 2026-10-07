@@ -52,7 +52,6 @@ typedef enum {
 #define INA228_ADCRANGE_163_84MV 0   /* +/-163.84 mV full scale, 312.5 nV/LSB (default) */
 #define INA228_ADCRANGE_40_96MV  1   /* +/-40.96 mV full scale, 78.125 nV/LSB */
 
-extern uint8_t dev_list[];
 int32_t INA228_Init  (uint8_t *dev_addr, uint8_t dev_count);
 int32_t INA228_SetADCRange(uint8_t dev_addr, uint8_t range);
 int32_t INA228_DetectShunt(uint8_t dev_addr, uint16_t *shunt_mohm, int32_t *vshunt_nV);
@@ -72,12 +71,6 @@ int32_t INA228_ReadPOWER  (uint8_t dev_addr, uint64_t *reg_data);
 int32_t INA228_ReadENERGY (uint8_t dev_addr, uint64_t *reg_data);
 int32_t INA228_ReadCHARGE (uint8_t dev_addr, int64_t  *reg_data);
 int32_t INA228_ClearAccumulators(uint8_t dev_addr);
-
-/* Average current/power over a window, e.g. one inference:
- *     INA228_WindowBegin(dev);  <do work>  INA228_WindowEnd(dev, &mA, &mW, &us);
- * Mask anything that should not be measured (e.g. hold the LVGL lock) around the pair. */
-int32_t INA228_WindowBegin(uint8_t dev_addr);
-int32_t INA228_WindowEnd(uint8_t dev_addr, int32_t *avg_mA, int32_t *avg_mW, uint32_t *elapsed_us);
 
 #ifdef __cplusplus
 }

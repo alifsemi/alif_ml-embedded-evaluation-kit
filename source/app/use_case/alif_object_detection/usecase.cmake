@@ -63,7 +63,6 @@ USER_OPTION(${use_case}_SHOW_INF_TIME "Show inference time"
 
 set(${use_case}_COMPILE_DEFS
     SHOW_INF_TIME=$<BOOL:${${use_case}_SHOW_INF_TIME}>
-    $<$<BOOL:${USE_INA228}>:USE_INA228>
 )
 
 if (ETHOS_U_NPU_ENABLED)

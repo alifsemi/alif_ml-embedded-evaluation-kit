@@ -75,7 +75,7 @@ set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Neede
 
 set(USE_FAKE_CAMERA OFF CACHE BOOL "If enabled, does not use real camera.")
 
-set(USE_INA228 OFF CACHE BOOL "Uses INA228 to read system power draw.")
+set(USE_INA228 OFF CACHE BOOL "Measure average power per inference with an INA228 sensor.")
 
 set(INA228_SHUNT_MOHM "AUTO" CACHE STRING "INA228 shunt resistance in mOhm, or AUTO to detect it at boot")
 set_property(CACHE INA228_SHUNT_MOHM PROPERTY STRINGS "AUTO" "15" "2000")
@@ -157,6 +157,11 @@ target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE
     # USE_SEMIHOSTING is handled via configure_semihosting in the CMSIS pack
 )
 
+# Generic switch for the application: power_measurement.h is backed by the selected sensor.
+target_compile_definitions(${PLATFORM_DRIVERS_CORE} PUBLIC
+    $<$<BOOL:${USE_INA228}>:POWER_MEASUREMENT_SUPPORT>
+)
+
 if (COPY_VECTORS)
     target_compile_definitions(${PLATFORM_DRIVERS_CORE} PRIVATE COPY_VECTORS)
 endif()
@@ -179,6 +184,7 @@ target_sources(${PLATFORM_DRIVERS_CORE}
     $<$<BOOL:${OSPI_FLASH_SUPPORT}>:source/ospi_flash_mx66uw1g.c>
     $<$<BOOL:${OSPI_RAM_SUPPORT}>:source/ospi_ram.c>
     $<$<BOOL:${USE_INA228}>:source/drv_ina228.c>
+    $<$<BOOL:${USE_INA228}>:source/power_measurement.c>
     source/ram_test.c
     )
 

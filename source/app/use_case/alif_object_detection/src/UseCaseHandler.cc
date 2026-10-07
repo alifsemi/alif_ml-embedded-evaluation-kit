@@ -38,8 +38,8 @@
 #include "ScreenLayout.hpp"
 #include "hal.h"
 
-#ifdef USE_INA228
-#include "drv_ina228.h"
+#ifdef POWER_MEASUREMENT_SUPPORT
+#include "power_measurement.h"
 #endif
 
 #include <cinttypes>
@@ -72,6 +72,27 @@ namespace object_detection {
 using namespace arm::app::object_detection;
 }
 
+#ifdef POWER_MEASUREMENT_SUPPORT
+    /* Labels showing average power and current, in that order. */
+    static constexpr uint32_t powerLabelIdx = 2;
+
+    /* Shows the averages of the last measured inference, or "--" if the measurement failed
+     * (result == nullptr). Does nothing if no sensor is fitted. Call with the LVGL lock held. */
+    static void ShowPowerMeasurement(const power_measurement_result_t* result)
+    {
+        if (!power_measurement_is_available()) {
+            return;
+        }
+        if (result) {
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:  %4" PRId32 " mW", result->avg_mW);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current: %4" PRId32 " mA", result->avg_mA);
+        } else {
+            lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:     -- mW");
+            lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current:   -- mA");
+        }
+    }
+#endif
+
     bool ObjectDetectionInit(YoloFastestModel& model)
     {
 
@@ -80,9 +101,8 @@ using namespace arm::app::object_detection;
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
         lv_label_set_text_static(ScreenLayoutLabelObject(0), "Faces Detected: 0");
         lv_label_set_text_static(ScreenLayoutLabelObject(1), "192px image (24-bit)");
-#ifdef USE_INA228
-        lv_label_set_text_static(ScreenLayoutLabelObject(2), "Average Power:      0 mW");
-        lv_label_set_text_static(ScreenLayoutLabelObject(3), "Average Current:    0 mA");
+#ifdef POWER_MEASUREMENT_SUPPORT
+        ShowPowerMeasurement(nullptr);
 #endif
 
         lv_style_init(&boxStyle);
@@ -213,13 +233,11 @@ using namespace arm::app::object_detection;
             }
 
             /* Run inference over this image. */
-#ifdef USE_INA228
+#ifdef POWER_MEASUREMENT_SUPPORT
             /* Measure average current/power over the inference only. The LVGL lock is already
              * held here, so no UI work is interleaved with the window. */
-            int32_t avg_mA = 0;
-            int32_t avg_mW = 0;
-            uint32_t ina228ElapsedUs = 0;
-            bool ina228Ok = (INA228_WindowBegin(dev_list[0]) == 0);
+            power_measurement_result_t power;
+            bool powerOk = (power_measurement_begin() == 0);
 #endif
 
             if (!RunInference(model, profiler)) {
@@ -227,13 +245,8 @@ using namespace arm::app::object_detection;
                 return false;
             }
 
-#ifdef USE_INA228
-            ina228Ok = ina228Ok &&
-                       (INA228_WindowEnd(dev_list[0], &avg_mA, &avg_mW, &ina228ElapsedUs) == 0);
-            if (ina228Ok) {
-                info("INA228: avg %" PRId32 " mA, %" PRId32 " mW over %" PRIu32 " us\r\n",
-                     avg_mA, avg_mW, ina228ElapsedUs);
-            }
+#ifdef POWER_MEASUREMENT_SUPPORT
+            powerOk = powerOk && (power_measurement_end(&power) == 0);
 #endif
 
             if (!postProcess.DoPostProcess()) {
@@ -255,14 +268,8 @@ using namespace arm::app::object_detection;
 
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "Faces Detected: %i", results.size());
 
-#ifdef USE_INA228
-            if (ina228Ok) {
-                lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "Average Power:  %4" PRId32 " mW", avg_mW);
-                lv_label_set_text_fmt(ScreenLayoutLabelObject(3), "Average Current: %4" PRId32 " mA", avg_mA);
-            } else {
-                lv_label_set_text_static(ScreenLayoutLabelObject(2), "Average Power:     -- mW");
-                lv_label_set_text_static(ScreenLayoutLabelObject(3), "Average Current:   -- mA");
-            }
+#ifdef POWER_MEASUREMENT_SUPPORT
+            ShowPowerMeasurement(powerOk ? &power : nullptr);
 #endif
 
             /* Draw boxes. */
