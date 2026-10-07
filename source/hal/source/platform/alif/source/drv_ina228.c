@@ -10,6 +10,8 @@
 
 #ifdef USE_INA228
 #include <string.h>
+#include "alif.h"
+#include "RTE_Components.h"
 #include "drv_ina228.h"
 #include "Driver_I3C.h"
 #include "timer_alif.h"
@@ -420,5 +422,61 @@ int32_t INA228_ReadCHARGE(uint8_t dev_addr, int64_t *reg_data) {
     int32_t ret = INA228_Read64(dev_addr, CHARGE, &raw);
     *reg_data = (((int64_t)(raw << 24)) >> 24) * current_lsb_nA;
     return ret;
+}
+
+/* Cycle-counter timestamp of the open measurement window. One window at a time. */
+static uint32_t window_start_cycles;
+
+/* Opens a measurement window. The ADC is expected to be in shutdown (as init and
+ * INA228_WindowEnd leave it), so clearing the accumulators cannot race with a conversion.
+ * Starting conversions defines the leading edge; the timestamp is taken as soon as that
+ * write completes. */
+int32_t INA228_WindowBegin(uint8_t dev_addr) {
+    if ((INA228_ClearAccumulators(dev_addr) != 0) || (INA228_StartConversions(dev_addr) != 0)) {
+        return -1;
+    }
+    window_start_cycles = Get_SysTick_Cycle_Count32();
+    return 0;
+}
+
+/* Closes the window opened by INA228_WindowBegin and returns the averages over it.
+ *
+ * Stopping conversions freezes the accumulators, so the trailing edge is the end of that
+ * write and the reads that follow do not stretch the window. Average current comes from the
+ * CHARGE accumulator. Power is derived as VBUS * I_avg rather than read from ENERGY, whose
+ * LSB (51.2 x the current LSB, in joules) is too coarse for windows of a few milliseconds;
+ * VBUS is a regulated rail and the register holds the last bus sample taken in the window.
+ *
+ * The window is limited to ~10 s by the 32-bit cycle counter. elapsed_us may be NULL. */
+int32_t INA228_WindowEnd(uint8_t dev_addr, int32_t *avg_mA, int32_t *avg_mW, uint32_t *elapsed_us) {
+    int64_t  charge_nC = 0;
+    uint32_t vbus_uV   = 0;
+    uint32_t cycles;
+    int64_t  us;
+
+    if (INA228_StopConversions(dev_addr) != 0) {
+        return -1;
+    }
+    cycles = Get_SysTick_Cycle_Count32() - window_start_cycles;
+
+    if ((INA228_ReadCHARGE(dev_addr, &charge_nC) != 0) ||
+        (INA228_ReadVBUS(dev_addr, &vbus_uV) != 0)) {
+        return -1;
+    }
+
+    /* The cycle counter is derived from SysTick, which is configured from this clock. */
+    us = (int64_t)(((uint64_t)cycles * 1000000ULL) / GetSystemCoreClock());
+    if (us <= 0) {
+        return -1;
+    }
+
+    /* nC / us == mA */
+    *avg_mA = (int32_t)(charge_nC / us);
+    /* uV * nC / us == nW; keep full precision before the final /1e6 to mW. */
+    *avg_mW = (int32_t)((((int64_t)vbus_uV * charge_nC) / us) / 1000000LL);
+    if (elapsed_us) {
+        *elapsed_us = (uint32_t)us;
+    }
+    return 0;
 }
 #endif
