@@ -31,11 +31,22 @@
 #define ENABLE_MVE_COPY_AUDIO_REC_TO_IN 0
 #endif
 
-#if !(__ARM_FEATURE_MVE & 1)
+#if !(__ARM_FEATURE_MVE & 1) && !defined(USE_STEREO)
 static int32_t srshr(int32_t n, unsigned shift)
 {
     return (n + (1 << (shift - 1))) >> shift;
 }
+#endif
+
+/* Number of output channels per stream. By default the two mics of a stream
+ * are mixed down to mono (see USE_MIC). With USE_STEREO the left and right
+ * mic are kept as interleaved L/R samples. All lengths in the API (data
+ * length, samples received, preprocessing length) are counted in frames, so
+ * with USE_STEREO the user buffers must have room for 2 * length samples. */
+#ifdef USE_STEREO
+#define AUDIO_OUT_CHANNELS 2
+#else
+#define AUDIO_OUT_CHANNELS 1
 #endif
 
 #define AUDIO_REC_SAMPLES 512
@@ -71,6 +82,7 @@ struct audio_stream_state {
     audio_callback_t user_cb;
     int current_rec_buf;
     int32_t current_dc;
+    int32_t current_dc_r; /* DC level of the right channel, USE_STEREO only */
     float current_gain;
     bool auto_gain;
     int16_t *user_ptr;
@@ -156,6 +168,29 @@ static size_t store_pos;
 /* ------------------------------------------------------------------------- */
 
 #ifdef USE_I2S_MICS
+#ifdef USE_STEREO
+/* 32-bit I2S source -> interleaved stereo float16 output (2 * len values). */
+static void copy_i2s_rec_to_in(struct audio_stream_state *s,
+                               float16_t * __RESTRICT in,
+                               const int32_t * __RESTRICT rec,
+                               int len)
+{
+    const int32_t offset_l = s->current_dc;
+    const int32_t offset_r = s->current_dc_r;
+    int64_t sum_l = 0;
+    int64_t sum_r = 0;
+    for (int i = 0; i < len; ++i) {
+        const int32_t l = rec[2 * i];
+        const int32_t r = rec[2 * i + 1];
+        sum_l += l;
+        sum_r += r;
+        in[2 * i]     = (float16_t) (__QSUB(l, offset_l) * 0x1p-31f);
+        in[2 * i + 1] = (float16_t) (__QSUB(r, offset_r) * 0x1p-31f);
+    }
+    s->current_dc   = (s->current_dc / 8) * 7 + (int32_t) (sum_l / len) / 8;
+    s->current_dc_r = (s->current_dc_r / 8) * 7 + (int32_t) (sum_r / len) / 8;
+}
+#else  // USE_STEREO
 /* 32-bit I2S source -> float16 output. */
 static void copy_i2s_rec_to_in(struct audio_stream_state *s,
                                float16_t * __RESTRICT in,
@@ -220,9 +255,33 @@ static void copy_i2s_rec_to_in(struct audio_stream_state *s,
     int32_t mean = (int32_t) (sum / len);
     s->current_dc = (s->current_dc / 8) * 7 + mean / 8;
 }
+#endif // USE_STEREO
 #endif // USE_I2S_MICS
 
 #if defined(USE_PDM_MICS) || defined(USE_LPPDM_MICS)
+#ifdef USE_STEREO
+/* 16-bit PDM / LPPDM source -> interleaved stereo float16 output (2 * len values). */
+static void copy_pdm_rec_to_in(struct audio_stream_state *s,
+                               float16_t * __RESTRICT in,
+                               const int16_t * __RESTRICT rec,
+                               int len)
+{
+    const int32_t offset_l = s->current_dc;
+    const int32_t offset_r = s->current_dc_r;
+    int32_t sum_l = 0;
+    int32_t sum_r = 0;
+    for (int i = 0; i < len; ++i) {
+        const int32_t l = rec[2 * i];
+        const int32_t r = rec[2 * i + 1];
+        sum_l += l;
+        sum_r += r;
+        in[2 * i]     = (float16_t) (__QSUB(l, offset_l) * 0x1p-15f);
+        in[2 * i + 1] = (float16_t) (__QSUB(r, offset_r) * 0x1p-15f);
+    }
+    s->current_dc   = (s->current_dc / 8) * 7 + (sum_l / len) / 8;
+    s->current_dc_r = (s->current_dc_r / 8) * 7 + (sum_r / len) / 8;
+}
+#else  // USE_STEREO
 /* 16-bit PDM / LPPDM source -> float16 output. */
 static void copy_pdm_rec_to_in(struct audio_stream_state *s,
                                float16_t * __RESTRICT in,
@@ -276,6 +335,7 @@ static void copy_pdm_rec_to_in(struct audio_stream_state *s,
     int32_t mean = (int32_t) (sum / len);
     s->current_dc = (s->current_dc / 8) * 7 + mean / 8;
 }
+#endif // USE_STEREO
 #endif // USE_PDM_MICS || USE_LPPDM_MICS
 
 /* ------------------------------------------------------------------------- */
@@ -355,21 +415,21 @@ static void voice_data_cb_common(audio_mic_t mic)
             store_pos += 2 * samples;
         }
 #endif
-        copy_i2s_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+        copy_i2s_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
                            audio_rec_i2s[previous_rec_buf], samples);
         break;
     }
 #endif
 #ifdef USE_PDM_MICS
     case AUDIO_MIC_PDM: {
-        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
                            audio_rec_pdm[previous_rec_buf], samples);
         break;
     }
 #endif
 #ifdef USE_LPPDM_MICS
     case AUDIO_MIC_LPPDM: {
-        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
                            audio_rec_lppdm[previous_rec_buf], samples);
         break;
     }
@@ -560,6 +620,8 @@ void audio_preprocessing_ex(audio_mic_t mic, int16_t *audio, int samples)
     if (!s) {
         return;
     }
+    /* The length is in frames, with USE_STEREO each frame holds L and R. */
+    samples *= AUDIO_OUT_CHANNELS;
     float16_t *audio_fp = (float16_t *) audio;
     float16_t audio_mean, audio_absmax;
 

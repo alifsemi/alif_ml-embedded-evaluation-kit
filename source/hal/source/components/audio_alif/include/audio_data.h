@@ -51,6 +51,13 @@ void audio_preprocessing(int16_t *data, int len);
 void set_audio_gain(float gain_db);
 
 /*
+ * Stereo output: by default each microphone stream is mono (the two mics of
+ * a stream are mixed down, see USE_MIC). When USE_STEREO is defined the
+ * streams keep their left and right mic as interleaved L/R samples. All
+ * lengths in this API are counted in frames, so with USE_STEREO the data
+ * buffers passed to get_audio_data*() / audio_preprocessing*() need room for
+ * 2 * len samples.
+ *
  * Per-mic variants. When several of USE_I2S_MICS, USE_PDM_MICS and
  * USE_LPPDM_MICS are compiled in, these let callers drive each microphone
  * stream independently in parallel. Calls

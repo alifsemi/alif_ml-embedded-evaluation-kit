@@ -185,6 +185,14 @@ else()
 endif()
 
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    USE_MIC=${USE_MIC})
+
+# USE_STEREO: keep the left and right mic of each stream as interleaved stereo
+# samples instead of mixing them down to mono (USE_MIC is then not used).
+# PUBLIC so that applications know the layout of the captured data.
+option(USE_STEREO "Keep microphone streams stereo instead of converting to mono" OFF)
+if (USE_STEREO)
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC USE_STEREO=1)
+endif()
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    PRIMARY_CHANNEL=${USE_PRIMARY_CH})
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    SECONDARY_CHANNEL=${USE_SECONDARY_CH})
 
@@ -214,6 +222,7 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
 message(STATUS "Library                                : " ${AUDIO_ALIF_COMPONENT_TARGET})
 message(STATUS "Microphone type                        : " ${TARGET_MICS})
+message(STATUS "Stereo microphone streams (USE_STEREO) : " ${USE_STEREO})
 message(STATUS "*******************************************************")
 
 if (TARGET_MICS STREQUAL "I2S_PDM")

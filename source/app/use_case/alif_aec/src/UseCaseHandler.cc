@@ -66,11 +66,23 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
 
-/* Microphone streams. Each stream is mono (the HAL mixes the two mics of a
- * stream down), the first one is played on the left DAC channel and the
- * second one on the right.
+/* Microphone streams. Each stream has two mics.
+ *   USE_STEREO not defined (default): each stream is mono (the HAL mixes the
+ *     two mics of a stream down). The first stream is played on the left DAC
+ *     channel and the second one on the right.
+ *   USE_STEREO defined: the HAL keeps the two mics of a stream as interleaved
+ *     L/R samples. The first stream is played as is on the stereo DAC
+ *     (left mic -> left, right mic -> right), the second stream is captured
+ *     in the same format into its own buffer. Sample counts below are frames,
+ *     buffers hold AEC_CHANNELS samples per frame.
+ *
  *   LPPDM_PDM defined: PDM block (2 mics) + LPPDM block (2 mics) = 4 PDM mics
  *   otherwise:         I2S mic + PDM mic */
+#if defined(USE_STEREO)
+#define AEC_CHANNELS    2
+#else
+#define AEC_CHANNELS    1
+#endif
 #if defined(LPPDM_PDM)
 #define AEC_MIC_L       HAL_AUDIO_MIC_PDM
 #define AEC_MIC_R       HAL_AUDIO_MIC_LPPDM
@@ -83,10 +95,23 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 #define AEC_MIC_R_NAME  "PDM"
 #endif
 
-static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
+/* The stereo capture buffers are too big for DTCM together with the rest of
+ * the application, keep them in the shared SRAM. The mono buffers stay in
+ * DTCM. */
+#if defined(USE_STEREO)
+#define AEC_CAPTURE_BUF_SECTION __attribute__((section(".bss.NoInit.temp_buf_sram")))
+#else
+#define AEC_CAPTURE_BUF_SECTION
+#endif
+
+static int16_t audio_inf[(AUDIO_SAMPLES + AUDIO_STRIDE) * AEC_CHANNELS] AEC_CAPTURE_BUF_SECTION;
 /* Second capture buffer used to run the second microphone stream in parallel
  * with the first one. */
-static int16_t audio_inf_pdm[AUDIO_SAMPLES + AUDIO_STRIDE];
+static int16_t audio_inf_pdm[(AUDIO_SAMPLES + AUDIO_STRIDE) * AEC_CHANNELS] AEC_CAPTURE_BUF_SECTION;
+#if defined(USE_STEREO)
+/* Mono (left mic) copy of the first stream, the model input is mono. */
+static int16_t audio_inf_mono[AUDIO_SAMPLES] AEC_CAPTURE_BUF_SECTION;
+#endif
 /* Triple-buffered DMA-source buffers for the DAC I2S TX DMA
  * (I2S3 on DevKit-e8, I2S2 on AppKit-e8). We prime two Sends
  * before the loop (one playing, one queued), so main's audio_out_transmit
@@ -266,8 +291,8 @@ using namespace arm::app::kws;
         std::memset(audio_out_c, 0, sizeof(audio_out_c));
 
         // Start first fill of final stride section of both mic buffers.
-        hal_get_audio_data_ex(AEC_MIC_L, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
-        hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
+        hal_get_audio_data_ex(AEC_MIC_L, audio_inf     + AUDIO_SAMPLES * AEC_CHANNELS, AUDIO_STRIDE);
+        hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES * AEC_CHANNELS, AUDIO_STRIDE);
 
         // Prime the DAC pipeline with TWO silent buffers (one playing + one
         // queued). The loop will then always find the queue full on its first
@@ -293,6 +318,12 @@ using namespace arm::app::kws;
             // tail). Doing this BEFORE the mic wait means the next DAC buffer
             // is queued near the top of the stride, giving the DAC_Callback a
             // ~500 ms margin before it needs data_ready=true.
+#if defined(USE_STEREO)
+            // The first stream is already interleaved L/R, which is the DAC format.
+            std::memcpy(audio_out_fill,
+                        audio_inf + (AUDIO_SAMPLES - AUDIO_STRIDE) * AEC_CHANNELS,
+                        AUDIO_STRIDE * AEC_CHANNELS * sizeof(int16_t));
+#else
             const int16_t* src_l = audio_inf     + AUDIO_SAMPLES - AUDIO_STRIDE;
             const int16_t* src_r = audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE;
 #if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE & 1)
@@ -310,6 +341,7 @@ using namespace arm::app::kws;
                 audio_out_fill[2 * i + 1] = src_r[i];
             }
 #endif
+#endif // USE_STEREO
 
             // Spin until the DAC queue has room. With triple-buffered priming
             // this spin is where main sleeps for most of each stride, pinning
@@ -344,21 +376,32 @@ using namespace arm::app::kws;
                 return false;
             }
 
-            std::memmove(audio_inf, audio_inf + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
-            std::memmove(audio_inf_pdm, audio_inf_pdm + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
+            std::memmove(audio_inf,
+                         audio_inf + AUDIO_STRIDE * AEC_CHANNELS,
+                         AUDIO_SAMPLES * AEC_CHANNELS * sizeof(int16_t));
+            std::memmove(audio_inf_pdm,
+                         audio_inf_pdm + AUDIO_STRIDE * AEC_CHANNELS,
+                         AUDIO_SAMPLES * AEC_CHANNELS * sizeof(int16_t));
             __disable_irq();
-            hal_get_audio_data_ex(AEC_MIC_L, audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
-            hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
+            hal_get_audio_data_ex(AEC_MIC_L, audio_inf + AUDIO_SAMPLES * AEC_CHANNELS, AUDIO_STRIDE);
+            hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES * AEC_CHANNELS, AUDIO_STRIDE);
             __enable_irq();
 
             hal_audio_alif_preprocessing_ex(AEC_MIC_L,
-                                            audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE,
+                                            audio_inf + (AUDIO_SAMPLES - AUDIO_STRIDE) * AEC_CHANNELS,
                                             AUDIO_STRIDE);
             hal_audio_alif_preprocessing_ex(AEC_MIC_R,
-                                            audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE,
+                                            audio_inf_pdm + (AUDIO_SAMPLES - AUDIO_STRIDE) * AEC_CHANNELS,
                                             AUDIO_STRIDE);
 
+#if defined(USE_STEREO)
+            for (int i = 0; i < AUDIO_SAMPLES; ++i) {
+                audio_inf_mono[i] = audio_inf[AEC_CHANNELS * i];
+            }
+            const int16_t* inferenceWindow = audio_inf_mono;
+#else
             const int16_t* inferenceWindow = audio_inf;
+#endif
             (void) inferenceWindow;  // Unused until inference is re-enabled.
 
             /* Run the pre-processing, inference and post-processing. */
