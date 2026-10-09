@@ -31,14 +31,19 @@
 #include <stdatomic.h>
 
 #include "Driver_SAI.h"
+#include "board_defs.h"
 #include "audio_out.h"
 #include "wm8904_driver.h"
 
 #include "RTE_Components.h"
 #include CMSIS_device_header
 
-/* I2S_Driver */
-#define I2S_DAC 3                    /* DAC I2S Controller 3 */
+/* I2S_Driver: the I2S controller wired to the WM8904 codec is board specific
+ * (DevKit-e8: I2S3, AppKit-e8: I2S2), see BOARD_DAC_OUTPUT_I2S_INSTANCE. */
+#ifndef BOARD_DAC_OUTPUT_I2S_INSTANCE
+#define BOARD_DAC_OUTPUT_I2S_INSTANCE 3
+#endif
+#define I2S_DAC BOARD_DAC_OUTPUT_I2S_INSTANCE
 
 /* Callback events */
 #define DAC_SEND_COMPLETE_EVENT    (1U << 0)

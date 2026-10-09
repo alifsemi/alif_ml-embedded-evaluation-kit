@@ -3175,19 +3175,23 @@
 // <o> I2S2 IRQ priority <0-255>
 // <i> Defines I2S2 Interrupt priority
 // <i> Default: 0
-#define RTE_I2S2_IRQ_PRI              10
+// I2S2 is the DAC (WM8904 codec) output on AppKit-e8, used by the alif_aec
+// use case the same way I2S3 is used on DevKit-e8: highest priority so the
+// SEND_COMPLETE DMA ISR can reprogram the next Send before the TX FIFO drains.
+#define RTE_I2S2_IRQ_PRI              0
 
 // <o> I2S2 DMA ENABLE
 //    <0=> DISABLE
 //    <1=> ENABLE
 // <i> Defines DMA feature for I2S2
 // <i> Default: ENABLE
-#define RTE_I2S2_DMA_ENABLE           0
+// DMA0 group 1 request 30 (TX). Does not clash with I2S3 (request 31).
+#define RTE_I2S2_DMA_ENABLE           1
 
 // <o> I2S2 DMA IRQ priority <0-255>
 // <i> Defines I2S2 DMA Interrupt priority
 // <i> Default: 0
-#define RTE_I2S2_DMA_IRQ_PRI          0
+#define RTE_I2S2_DMA_IRQ_PRI          RTE_I2S2_IRQ_PRI
 
 // <o> I2S2 Blocking Mode
 //    <0=> DISABLE
@@ -10972,12 +10976,17 @@
 // <o> LPPDM IRQ priority <0-255>
 // <i> Defines Interrupt priority for LPPDM.
 // <i> Default: 0
-#define RTE_LPPDM_IRQ_PRIORITY   0
+// Same as RTE_PDM_IRQ_PRIORITY: numerically higher than RTE_I2S3_IRQ_PRI so
+// the DAC TX IRQ preempts LPPDM FIFO drains when PDM and LPPDM run together.
+#define RTE_LPPDM_IRQ_PRIORITY   2
 
 // <o> LPPDM Fifo watermark <0-7>
 // <i> Defines number of PCM samples in the internal FIFO
 // <i> Default: 5
-#define RTE_LPPDM_FIFO_WATERMARK 5
+// Same reasoning as RTE_PDM_FIFO_WATERMARK: the audio_alif mic chunks (512
+// and 320 frames) must be a multiple of the watermark, otherwise frames are
+// dropped at every chunk boundary. 4 divides both.
+#define RTE_LPPDM_FIFO_WATERMARK 4
 
 // <o> LPPDM DMA ENABLE
 //    <0=> DISABLE

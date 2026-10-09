@@ -10,6 +10,7 @@
 
 /*System Includes */
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -17,6 +18,8 @@
 #include "board_defs.h"
 #include "mic_listener.h"
 #include <RTE_Device.h>
+#include "RTE_Components.h"
+#include CMSIS_device_header
 
 /* I2S microphone driver ---------------------------------------------------- */
 #ifdef USE_I2S_MICS
@@ -128,11 +131,24 @@ static int32_t receive_voice_data_i2s(void *data, uint32_t data_len)
 }
 #endif /* USE_I2S_MICS */
 
-/* PDM microphone driver ---------------------------------------------------- */
-#ifdef USE_PDM_MICS
+/* PDM / LPPDM microphone drivers -------------------------------------------
+ *
+ * Two PDM-type microphone streams can be compiled in:
+ *   USE_PDM_MICS   - the "PDM" stream. Driven by Driver_PDM, except on boards
+ *                    where the microphones are wired to the low power PDM
+ *                    (BOARD_LPPDM_ENABLED == 1) and no separate LPPDM stream
+ *                    is requested; then it is driven by Driver_LPPDM.
+ *   USE_LPPDM_MICS - the "LPPDM" stream. Always driven by Driver_LPPDM. With
+ *                    USE_PDM_MICS this gives four PDM microphones (two per
+ *                    PDM block) that can be captured in parallel.
+ * Both streams share the code below; each one has its own struct pdm_mic.
+ */
+#if defined(USE_PDM_MICS) || defined(USE_LPPDM_MICS)
 #include "Driver_PDM.h"
 
-/* channel number used for channel configuration and status register */
+/* Channel numbers used for channel configuration and status register of the
+ * PDM block. The LPPDM stream has its own selection so that both PDM blocks
+ * can be used at the same time. */
 #ifndef PRIMARY_CHANNEL
 #define PRIMARY_CHANNEL      4
 #endif
@@ -141,8 +157,13 @@ static int32_t receive_voice_data_i2s(void *data, uint32_t data_len)
 #define SECONDARY_CHANNEL    5
 #endif
 
-static uint32_t primary_ch   = PRIMARY_CHANNEL;
-static uint32_t secondary_ch = SECONDARY_CHANNEL;
+#ifndef LPPDM_PRIMARY_CHANNEL
+#define LPPDM_PRIMARY_CHANNEL      0
+#endif
+
+#ifndef LPPDM_SECONDARY_CHANNEL
+#define LPPDM_SECONDARY_CHANNEL    1
+#endif
 
 /* PDM Channel configurations.
  *
@@ -166,42 +187,6 @@ static uint32_t secondary_ch = SECONDARY_CHANNEL;
 
 #define PDM_IIR_COEF                     0x00000004
 
-static voice_callback_t pdm_rx_callback;
-
-static void PDM_fifo_callback(uint32_t event)
-{
-
-    if(event & ARM_PDM_EVENT_ERROR)
-    {
-        static uint32_t pdm_err_count = 0;
-        pdm_err_count++;
-        if(pdm_err_count == 1) {
-            printf("*** PDM_fifo_callback: ARM_PDM_EVENT_ERROR (PDM FIFO overflow, further occurrences suppressed)***\n");
-        }
-    }
-
-    if(event & ARM_PDM_EVENT_CAPTURE_COMPLETE)
-    {
-        if (pdm_rx_callback) {
-            pdm_rx_callback(event);
-        }
-    }
-
-    if(event & ARM_PDM_EVENT_AUDIO_DETECTION)
-    {
-        printf("*** PDM_fifo_callback: ARM_PDM_EVENT_AUDIO_DETECTION ***\n");
-    }
-}
-
-/* PDM driver instance */
-#if defined(BOARD_LPPDM_ENABLED) && (BOARD_LPPDM_ENABLED == 1)
-extern ARM_DRIVER_PDM Driver_LPPDM;
-static ARM_DRIVER_PDM* const PDMdrv = &Driver_LPPDM;
-#else
-extern ARM_DRIVER_PDM Driver_PDM;
-static ARM_DRIVER_PDM* const PDMdrv = &Driver_PDM;
-#endif
-
 /* FIR coefficients for the two channels. Even and odd PDM channels sample on
  * opposite edges of the shared PDM clock so each needs its own FIR response. */
 static const uint32_t ch_fir_primary[18] = {
@@ -213,6 +198,67 @@ static const uint32_t ch_fir_secondary[18] = {
     0x00000000, 0x000007FF, 0x00000000, 0x00000004, 0x00000004, 0x000007FC,
     0x00000000, 0x000007FB, 0x000007E4, 0x00000000, 0x0000002B, 0x00000009,
     0x00000016, 0x00000049, 0x00000793, 0x000006F8, 0x00000045, 0x00000178 };
+
+struct pdm_ch_params {
+    uint32_t phase;
+    uint32_t gain;
+    uint32_t peak_detect_th;
+    uint32_t peak_detect_itv;
+    const uint32_t *fir;
+};
+
+static const struct pdm_ch_params pdm_params_primary = {
+    .phase           = PDM_CH_PRIMARY_PHASE,
+    .gain            = PDM_CH_PRIMARY_GAIN,
+    .peak_detect_th  = PDM_CH_PRIMARY_PEAK_DETECT_TH,
+    .peak_detect_itv = PDM_CH_PRIMARY_PEAK_DETECT_ITV,
+    .fir             = ch_fir_primary,
+};
+
+static const struct pdm_ch_params pdm_params_secondary = {
+    .phase           = PDM_CH_SECONDARY_PHASE,
+    .gain            = PDM_CH_SECONDARY_GAIN,
+    .peak_detect_th  = PDM_CH_SECONDARY_PEAK_DETECT_TH,
+    .peak_detect_itv = PDM_CH_SECONDARY_PEAK_DETECT_ITV,
+    .fir             = ch_fir_secondary,
+};
+
+/* State of one PDM block (PDM or LPPDM) */
+struct pdm_mic {
+    const char *name;
+    ARM_DRIVER_PDM *drv;
+    ARM_PDM_SignalEvent_t event_cb;
+    uint32_t primary_ch;
+    uint32_t secondary_ch;
+    voice_callback_t rx_callback;
+    uint32_t err_count;
+    /* The block is the low power PDM (see receive_voice_data_pdm_block()). */
+    bool is_lppdm;
+};
+
+/* Audio detect interrupt enable bits (one per channel) in PDM_IRQ_ENABLE */
+#define PDM_AUDIO_DETECT_IRQ_MASK (0xFFU << 8U)
+
+static void pdm_event_handler(struct pdm_mic *m, uint32_t event)
+{
+    if (event & ARM_PDM_EVENT_ERROR) {
+        m->err_count++;
+        if (m->err_count == 1) {
+            printf("*** %s callback: ARM_PDM_EVENT_ERROR (FIFO overflow, further occurrences suppressed)***\n",
+                   m->name);
+        }
+    }
+
+    if (event & ARM_PDM_EVENT_CAPTURE_COMPLETE) {
+        if (m->rx_callback) {
+            m->rx_callback(event);
+        }
+    }
+
+    if (event & ARM_PDM_EVENT_AUDIO_DETECTION) {
+        printf("*** %s callback: ARM_PDM_EVENT_AUDIO_DETECTION ***\n", m->name);
+    }
+}
 
 static int32_t pdm_mode(uint32_t sampling_rate)
 {
@@ -255,165 +301,232 @@ static int32_t resolution(uint32_t data_bit_len)
     }
 }
 
-static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len)
+/* Issues a driver Control() call and prints an error on failure. */
+static int32_t pdm_control(const struct pdm_mic *m, uint32_t control, uint32_t arg1,
+                           uint32_t arg2, const char *what)
+{
+    int32_t ret = m->drv->Control(control, arg1, arg2);
+    if (ret != ARM_DRIVER_OK) {
+        printf("\r\n Error: %s %s failed\n", m->name, what);
+        return -1;
+    }
+    return 0;
+}
+
+/* Programs phase, gain, peak detect and filter coefficients of one channel. */
+static int32_t pdm_configure_channel(const struct pdm_mic *m, uint32_t ch,
+                                     const struct pdm_ch_params *p)
+{
+    if (pdm_control(m, ARM_PDM_CHANNEL_PHASE, ch, p->phase, "Channel_Config") ||
+        pdm_control(m, ARM_PDM_CHANNEL_GAIN, ch, p->gain, "Channel_Config") ||
+        pdm_control(m, ARM_PDM_CHANNEL_PEAK_DETECT_TH, ch, p->peak_detect_th, "Channel_Config") ||
+        pdm_control(m, ARM_PDM_CHANNEL_PEAK_DETECT_ITV, ch, p->peak_detect_itv, "Channel_Config")) {
+        return -1;
+    }
+
+    PDM_CH_CONFIG pdm_coef_reg;
+    pdm_coef_reg.ch_num = ch;
+    memcpy(pdm_coef_reg.ch_fir_coef, p->fir, sizeof(pdm_coef_reg.ch_fir_coef));
+    pdm_coef_reg.ch_iir_coef = PDM_IIR_COEF; /* Channel IIR Filter Coefficient */
+
+    int32_t ret = m->drv->Config(&pdm_coef_reg);
+    if (ret != ARM_DRIVER_OK) {
+        printf("\r\n Error: %s Channel_Config failed\n", m->name);
+        return -1;
+    }
+    return 0;
+}
+
+static int32_t init_microphone_pdm_block(struct pdm_mic *m, uint32_t sampling_rate,
+                                         uint32_t data_bit_len)
 {
     int32_t ret;
     /* Initialize PDM driver */
-    ret = PDMdrv->Initialize(PDM_fifo_callback);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM init failed\n");
+    ret = m->drv->Initialize(m->event_cb);
+    if (ret != ARM_DRIVER_OK) {
+        printf("\r\n Error: %s init failed\n", m->name);
         return -1;
     }
 
     /* Enable the power for PDM */
-    ret = PDMdrv->PowerControl(ARM_POWER_FULL);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Power up failed\n");
+    ret = m->drv->PowerControl(ARM_POWER_FULL);
+    if (ret != ARM_DRIVER_OK) {
+        printf("\r\n Error: %s Power up failed\n", m->name);
         return -1;
     }
 
-    /* To select the PDM channel 4 and channel 5 */
-    ret = PDMdrv->Control(ARM_PDM_SELECT_CHANNEL, ((1 << primary_ch) | (1 << secondary_ch)), 0);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM channel select control failed\n");
+    /* Select the two PDM channels in use */
+    if (pdm_control(m, ARM_PDM_SELECT_CHANNEL,
+                    ((1U << m->primary_ch) | (1U << m->secondary_ch)), 0, "channel select")) {
         return -1;
     }
 
     /* Select PDM mode based on the requested sampling rate*/
     int32_t mode = pdm_mode(sampling_rate);
-    if(mode < 0)
-    {
-        printf("\r\n Error: Invalid sampling rate (%" PRIu32 ") for PDM.", sampling_rate);
+    if (mode < 0) {
+        printf("\r\n Error: Invalid sampling rate (%" PRIu32 ") for %s.", sampling_rate, m->name);
         return -1;
     }
 
-    ret = PDMdrv->Control(ARM_PDM_MODE, (uint32_t)mode, 0);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM mode control failed\n");
+    if (pdm_control(m, ARM_PDM_MODE, (uint32_t)mode, 0, "mode control")) {
         return -1;
     }
 
     /* Select resolution */
     int32_t pdm_resolution = resolution(data_bit_len);
-    if(pdm_resolution < 0)
-    {
-        printf("\r\n Error: Invalid data bit len (%" PRIu32 ") for PDM.", data_bit_len);
+    if (pdm_resolution < 0) {
+        printf("\r\n Error: Invalid data bit len (%" PRIu32 ") for %s.", data_bit_len, m->name);
         return -1;
     }
 
-    ret = PDMdrv->Control(ARM_PDM_SELECT_RESOLUTION, (uint32_t)pdm_resolution, 0);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM resolution control failed\n");
+    if (pdm_control(m, ARM_PDM_SELECT_RESOLUTION, (uint32_t)pdm_resolution, 0,
+                    "resolution control")) {
         return -1;
     }
 
     /* Enable the DC blocking IIR filter (0 == don't bypass). The Alif demos
      * pass 1 here (= bypass) which is fine for raw-PDM analysis but leaves a
      * large DC component that is heard as rumble/noise on voice playback. */
-    ret = PDMdrv->Control(ARM_PDM_BYPASS_IIR_FILTER, 0, 0);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM DC blocking IIR control failed\n");
+    if (pdm_control(m, ARM_PDM_BYPASS_IIR_FILTER, 0, 0, "DC blocking IIR control")) {
         return -1;
     }
 
-    /* Set Channel 4 Phase value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, primary_ch, PDM_CH_PRIMARY_PHASE);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 4 Gain value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, primary_ch, PDM_CH_PRIMARY_GAIN);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 4 Peak detect threshold value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, primary_ch, PDM_CH_PRIMARY_PEAK_DETECT_TH);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 4 Peak detect ITV value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, primary_ch, PDM_CH_PRIMARY_PEAK_DETECT_ITV);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Channel 4 configuration values */
-    PDM_CH_CONFIG pdm_coef_reg;
-    pdm_coef_reg.ch_num              = primary_ch;       /* Channel 4 */
-    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir_primary, sizeof(pdm_coef_reg.ch_fir_coef));
-    pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
-
-    ret = PDMdrv->Config(&pdm_coef_reg);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 5 Phase value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PHASE, secondary_ch, PDM_CH_SECONDARY_PHASE);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 5 Gain value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_GAIN, secondary_ch, PDM_CH_SECONDARY_GAIN);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 5 Peak detect threshold value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_TH, secondary_ch, PDM_CH_SECONDARY_PEAK_DETECT_TH);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Set Channel 5 Peak detect ITV value */
-    ret = PDMdrv->Control(ARM_PDM_CHANNEL_PEAK_DETECT_ITV, secondary_ch, PDM_CH_SECONDARY_PEAK_DETECT_ITV);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
-        return -1;
-    }
-
-    /* Channel 5 configuration values */
-    pdm_coef_reg.ch_num              = secondary_ch;       /* Channel 5 */
-    memcpy(pdm_coef_reg.ch_fir_coef, ch_fir_secondary, sizeof(pdm_coef_reg.ch_fir_coef));
-    pdm_coef_reg.ch_iir_coef         = PDM_IIR_COEF;    /* Channel IIR Filter Coefficient */
-
-    ret = PDMdrv->Config(&pdm_coef_reg);
-    if(ret != ARM_DRIVER_OK){
-        printf("\r\n Error: PDM Channel_Config failed\n");
+    /* Primary and secondary channel */
+    if (pdm_configure_channel(m, m->primary_ch, &pdm_params_primary) ||
+        pdm_configure_channel(m, m->secondary_ch, &pdm_params_secondary)) {
         return -1;
     }
 
     return 0;
+}
+
+static int32_t enable_microphone_pdm_block(struct pdm_mic *m, voice_callback_t callback)
+{
+    m->rx_callback = callback;
+    return 0;
+}
+
+static int32_t disable_microphone_pdm_block(struct pdm_mic *m)
+{
+    (void)m;
+    return 0;
+}
+
+static int32_t receive_voice_data_pdm_block(struct pdm_mic *m, void *data, uint32_t data_len)
+{
+    if (!m->is_lppdm) {
+        return m->drv->Receive(data, data_len);
+    }
+
+    /* LPPDM: Driver_PDM's Receive() unmasks the per-channel audio detect
+     * interrupts, but the LPPDM interrupt is the OR of FIFO warning, error and
+     * audio detect, and its handler only services the FIFO warning. The audio
+     * detect status is never read there, so the shared IRQ line would stay
+     * asserted and the CPU would be stuck in the LPPDM ISR forever. This
+     * stream does not use audio detection, so mask it again. Done with
+     * interrupts disabled so that the ISR can't run in between. */
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    int32_t ret = m->drv->Receive(data, data_len);
+    LPPDM->PDM_IRQ_ENABLE &= ~PDM_AUDIO_DETECT_IRQ_MASK;
+    __set_PRIMASK(primask);
+    return ret;
+}
+
+/* "PDM" stream ------------------------------------------------------------- */
+#ifdef USE_PDM_MICS
+#if defined(BOARD_LPPDM_ENABLED) && (BOARD_LPPDM_ENABLED == 1) && !defined(USE_LPPDM_MICS)
+/* Microphones are wired to the low power PDM and there is no separate LPPDM
+ * stream, so the PDM stream is served by the LPPDM block. */
+extern ARM_DRIVER_PDM Driver_LPPDM;
+#define PDM_STREAM_NAME   "LPPDM"
+#define PDM_STREAM_DRIVER (&Driver_LPPDM)
+#define PDM_STREAM_IS_LPPDM true
+#else
+extern ARM_DRIVER_PDM Driver_PDM;
+#define PDM_STREAM_NAME   "PDM"
+#define PDM_STREAM_DRIVER (&Driver_PDM)
+#define PDM_STREAM_IS_LPPDM false
+#endif
+
+static void pdm_event_cb(uint32_t event);
+
+static struct pdm_mic pdm_mic = {
+    .name         = PDM_STREAM_NAME,
+    .is_lppdm     = PDM_STREAM_IS_LPPDM,
+    .drv          = PDM_STREAM_DRIVER,
+    .event_cb     = pdm_event_cb,
+    .primary_ch   = PRIMARY_CHANNEL,
+    .secondary_ch = SECONDARY_CHANNEL,
+};
+
+static void pdm_event_cb(uint32_t event)
+{
+    pdm_event_handler(&pdm_mic, event);
+}
+
+static int32_t init_microphone_pdm(uint32_t sampling_rate, uint32_t data_bit_len)
+{
+    return init_microphone_pdm_block(&pdm_mic, sampling_rate, data_bit_len);
 }
 
 static int32_t enable_microphone_pdm(voice_callback_t callback)
 {
-    pdm_rx_callback = callback;
-    return 0;
+    return enable_microphone_pdm_block(&pdm_mic, callback);
 }
 
 static int32_t disable_microphone_pdm(void)
 {
-    return 0;
+    return disable_microphone_pdm_block(&pdm_mic);
 }
 
 static int32_t receive_voice_data_pdm(void *data, uint32_t data_len)
 {
-    return PDMdrv->Receive(data, data_len);
+    return receive_voice_data_pdm_block(&pdm_mic, data, data_len);
 }
 #endif /* USE_PDM_MICS */
+
+/* "LPPDM" stream ----------------------------------------------------------- */
+#ifdef USE_LPPDM_MICS
+extern ARM_DRIVER_PDM Driver_LPPDM;
+
+static void lppdm_event_cb(uint32_t event);
+
+static struct pdm_mic lppdm_mic = {
+    .name         = "LPPDM",
+    .is_lppdm     = true,
+    .drv          = &Driver_LPPDM,
+    .event_cb     = lppdm_event_cb,
+    .primary_ch   = LPPDM_PRIMARY_CHANNEL,
+    .secondary_ch = LPPDM_SECONDARY_CHANNEL,
+};
+
+static void lppdm_event_cb(uint32_t event)
+{
+    pdm_event_handler(&lppdm_mic, event);
+}
+
+static int32_t init_microphone_lppdm(uint32_t sampling_rate, uint32_t data_bit_len)
+{
+    return init_microphone_pdm_block(&lppdm_mic, sampling_rate, data_bit_len);
+}
+
+static int32_t enable_microphone_lppdm(voice_callback_t callback)
+{
+    return enable_microphone_pdm_block(&lppdm_mic, callback);
+}
+
+static int32_t disable_microphone_lppdm(void)
+{
+    return disable_microphone_pdm_block(&lppdm_mic);
+}
+
+static int32_t receive_voice_data_lppdm(void *data, uint32_t data_len)
+{
+    return receive_voice_data_pdm_block(&lppdm_mic, data, data_len);
+}
+#endif /* USE_LPPDM_MICS */
+#endif /* USE_PDM_MICS || USE_LPPDM_MICS */
 
 /* Per-mic dispatch --------------------------------------------------------- */
 
@@ -427,6 +540,10 @@ int32_t init_microphone_ex(mic_type_t mic, uint32_t sampling_rate, uint32_t data
 #ifdef USE_PDM_MICS
     case MIC_TYPE_PDM:
         return init_microphone_pdm(sampling_rate, data_bit_len);
+#endif
+#ifdef USE_LPPDM_MICS
+    case MIC_TYPE_LPPDM:
+        return init_microphone_lppdm(sampling_rate, data_bit_len);
 #endif
     default:
         return -1;
@@ -444,6 +561,10 @@ int32_t enable_microphone_ex(mic_type_t mic, voice_callback_t callback)
     case MIC_TYPE_PDM:
         return enable_microphone_pdm(callback);
 #endif
+#ifdef USE_LPPDM_MICS
+    case MIC_TYPE_LPPDM:
+        return enable_microphone_lppdm(callback);
+#endif
     default:
         return -1;
     }
@@ -459,6 +580,10 @@ int32_t disable_microphone_ex(mic_type_t mic)
 #ifdef USE_PDM_MICS
     case MIC_TYPE_PDM:
         return disable_microphone_pdm();
+#endif
+#ifdef USE_LPPDM_MICS
+    case MIC_TYPE_LPPDM:
+        return disable_microphone_lppdm();
 #endif
     default:
         return -1;
@@ -476,18 +601,25 @@ int32_t receive_voice_data_ex(mic_type_t mic, void *data, uint32_t data_len)
     case MIC_TYPE_PDM:
         return receive_voice_data_pdm(data, data_len);
 #endif
+#ifdef USE_LPPDM_MICS
+    case MIC_TYPE_LPPDM:
+        return receive_voice_data_lppdm(data, data_len);
+#endif
     default:
         return -1;
     }
 }
 
 /* Single-mic API preserved for existing callers.
- * When both mics are compiled in, the single-mic API drives I2S (arbitrary
- * primary choice); callers that need both mics must use the *_ex variants. */
+ * When several mics are compiled in, the single-mic API drives I2S first, then
+ * PDM (arbitrary primary choice); callers that need more than one mic must use
+ * the *_ex variants. */
 #if defined(USE_I2S_MICS)
 #define MIC_LISTENER_DEFAULT MIC_TYPE_I2S
 #elif defined(USE_PDM_MICS)
 #define MIC_LISTENER_DEFAULT MIC_TYPE_PDM
+#elif defined(USE_LPPDM_MICS)
+#define MIC_LISTENER_DEFAULT MIC_TYPE_LPPDM
 #endif
 
 #ifdef MIC_LISTENER_DEFAULT

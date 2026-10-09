@@ -20,10 +20,12 @@
  */
 typedef void (*audio_callback_t)(uint32_t data);
 
-/* Microphone selector for dual-mic builds. Matches mic_type_t. */
+/* Microphone selector for multi-mic builds. Matches mic_type_t.
+ * AUDIO_MIC_LPPDM is the low power PDM block (AppKit-e8 LPPDM_PDM build). */
 typedef enum {
     AUDIO_MIC_I2S = 0,
     AUDIO_MIC_PDM = 1,
+    AUDIO_MIC_LPPDM = 2,
 } audio_mic_t;
 
 int audio_init(int sampling_rate);
@@ -49,8 +51,9 @@ void audio_preprocessing(int16_t *data, int len);
 void set_audio_gain(float gain_db);
 
 /*
- * Per-mic variants. When both USE_I2S_MICS and USE_PDM_MICS are compiled in,
- * these let callers drive each microphone independently in parallel. Calls
+ * Per-mic variants. When several of USE_I2S_MICS, USE_PDM_MICS and
+ * USE_LPPDM_MICS are compiled in, these let callers drive each microphone
+ * stream independently in parallel. Calls
  * against a microphone that is not compiled in return a non-zero error.
  */
 int audio_init_ex(audio_mic_t mic, int sampling_rate);

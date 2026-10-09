@@ -18,10 +18,12 @@
  */
 typedef void (*voice_callback_t)(uint32_t data);
 
-/* Microphone selector for dual-mic builds. */
+/* Microphone selector for multi-mic builds. MIC_TYPE_LPPDM is the low power
+ * PDM block and is only available when USE_LPPDM_MICS is defined. */
 typedef enum {
     MIC_TYPE_I2S = 0,
     MIC_TYPE_PDM = 1,
+    MIC_TYPE_LPPDM = 2,
 } mic_type_t;
 
 /**
@@ -56,8 +58,9 @@ int32_t disable_microphone();
 int32_t receive_voice_data(void *data, uint32_t data_len);
 
 /*
- * Per-mic variants used when both USE_I2S_MICS and USE_PDM_MICS are defined,
- * so that the two microphones can be driven independently in parallel.
+ * Per-mic variants used when several of USE_I2S_MICS, USE_PDM_MICS and
+ * USE_LPPDM_MICS are defined, so that the microphones can be driven
+ * independently in parallel.
  * When only one mic type is compiled in, calls on the disabled mic return an
  * error and calls on the enabled mic forward to the single-mic implementation.
  */

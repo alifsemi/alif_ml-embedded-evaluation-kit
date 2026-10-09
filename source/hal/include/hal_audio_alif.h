@@ -47,12 +47,14 @@
 #define hal_set_audio_gain(gain_db) set_audio_gain(gain_db)
 
 /*
- * Per-mic HAL wrappers. When both USE_I2S_MICS and USE_PDM_MICS are compiled
- * into audio_alif, each microphone can be driven independently by supplying
- * HAL_AUDIO_MIC_I2S or HAL_AUDIO_MIC_PDM.
+ * Per-mic HAL wrappers. When several of USE_I2S_MICS, USE_PDM_MICS and
+ * USE_LPPDM_MICS are compiled into audio_alif, each microphone stream can be
+ * driven independently by supplying HAL_AUDIO_MIC_I2S, HAL_AUDIO_MIC_PDM or
+ * HAL_AUDIO_MIC_LPPDM.
  */
 #define HAL_AUDIO_MIC_I2S                       AUDIO_MIC_I2S
 #define HAL_AUDIO_MIC_PDM                       AUDIO_MIC_PDM
+#define HAL_AUDIO_MIC_LPPDM                     AUDIO_MIC_LPPDM
 
 #define hal_audio_alif_init_ex(mic, rate)               audio_init_ex((mic), (rate))
 #define hal_audio_alif_uninit_ex(mic)                   audio_uninit_ex(mic)

@@ -62,8 +62,8 @@ static int32_t srshr(int32_t n, unsigned shift)
 // Define with number of raw samples to store, for debugging
 //#define STORE_AUDIO (16000*10)
 
-#if !defined(USE_I2S_MICS) && !defined(USE_PDM_MICS)
-#error "USE_I2S_MICS or USE_PDM_MICS must be defined"
+#if !defined(USE_I2S_MICS) && !defined(USE_PDM_MICS) && !defined(USE_LPPDM_MICS)
+#error "USE_I2S_MICS, USE_PDM_MICS or USE_LPPDM_MICS must be defined"
 #endif
 
 /* Per-mic stream state. One instance per compiled-in microphone. */
@@ -100,6 +100,14 @@ static struct audio_stream_state stream_pdm = {
 static int16_t audio_rec_pdm[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
 #endif
 
+#ifdef USE_LPPDM_MICS
+static struct audio_stream_state stream_lppdm = {
+    .current_gain = 8.0f,   /* +18 dB; HW stage does the heavy lifting */
+    .auto_gain    = true,
+};
+static int16_t audio_rec_lppdm[2][AUDIO_REC_SAMPLES * 2] __ALIGNED(32) __attribute__((section(".bss.audio_rec")));
+#endif
+
 static struct audio_stream_state *stream_for(audio_mic_t mic)
 {
     switch (mic) {
@@ -111,6 +119,10 @@ static struct audio_stream_state *stream_for(audio_mic_t mic)
     case AUDIO_MIC_PDM:
         return &stream_pdm;
 #endif
+#ifdef USE_LPPDM_MICS
+    case AUDIO_MIC_LPPDM:
+        return &stream_lppdm;
+#endif
     default:
         return NULL;
     }
@@ -118,7 +130,14 @@ static struct audio_stream_state *stream_for(audio_mic_t mic)
 
 static mic_type_t mic_listener_type_for(audio_mic_t mic)
 {
-    return (mic == AUDIO_MIC_PDM) ? MIC_TYPE_PDM : MIC_TYPE_I2S;
+    switch (mic) {
+    case AUDIO_MIC_PDM:
+        return MIC_TYPE_PDM;
+    case AUDIO_MIC_LPPDM:
+        return MIC_TYPE_LPPDM;
+    default:
+        return MIC_TYPE_I2S;
+    }
 }
 
 #ifdef STORE_AUDIO
@@ -203,8 +222,8 @@ static void copy_i2s_rec_to_in(struct audio_stream_state *s,
 }
 #endif // USE_I2S_MICS
 
-#ifdef USE_PDM_MICS
-/* 16-bit PDM source -> float16 output. */
+#if defined(USE_PDM_MICS) || defined(USE_LPPDM_MICS)
+/* 16-bit PDM / LPPDM source -> float16 output. */
 static void copy_pdm_rec_to_in(struct audio_stream_state *s,
                                float16_t * __RESTRICT in,
                                const int16_t * __RESTRICT rec,
@@ -257,7 +276,7 @@ static void copy_pdm_rec_to_in(struct audio_stream_state *s,
     int32_t mean = (int32_t) (sum / len);
     s->current_dc = (s->current_dc / 8) * 7 + mean / 8;
 }
-#endif // USE_PDM_MICS
+#endif // USE_PDM_MICS || USE_LPPDM_MICS
 
 /* ------------------------------------------------------------------------- */
 /*   Async RX plumbing                                                        */
@@ -282,6 +301,11 @@ static void audio_start_next_rx(audio_mic_t mic, int data_to_go)
 #ifdef USE_PDM_MICS
     case AUDIO_MIC_PDM:
         buf = audio_rec_pdm[s->current_rec_buf];
+        break;
+#endif
+#ifdef USE_LPPDM_MICS
+    case AUDIO_MIC_LPPDM:
+        buf = audio_rec_lppdm[s->current_rec_buf];
         break;
 #endif
     default:
@@ -343,6 +367,13 @@ static void voice_data_cb_common(audio_mic_t mic)
         break;
     }
 #endif
+#ifdef USE_LPPDM_MICS
+    case AUDIO_MIC_LPPDM: {
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received,
+                           audio_rec_lppdm[previous_rec_buf], samples);
+        break;
+    }
+#endif
     default:
         break;
     }
@@ -368,6 +399,14 @@ static void voice_data_cb_pdm(uint32_t event)
 {
     (void) event;
     voice_data_cb_common(AUDIO_MIC_PDM);
+}
+#endif
+
+#ifdef USE_LPPDM_MICS
+static void voice_data_cb_lppdm(uint32_t event)
+{
+    (void) event;
+    voice_data_cb_common(AUDIO_MIC_LPPDM);
 }
 #endif
 
@@ -407,6 +446,12 @@ int audio_init_ex(audio_mic_t mic, int sampling_rate)
     case AUDIO_MIC_PDM:
         width = AUDIO_REC_WIDTH_PDM;
         cb = voice_data_cb_pdm;
+        break;
+#endif
+#ifdef USE_LPPDM_MICS
+    case AUDIO_MIC_LPPDM:
+        width = AUDIO_REC_WIDTH_PDM;
+        cb = voice_data_cb_lppdm;
         break;
 #endif
     default:
@@ -545,13 +590,16 @@ void audio_preprocessing_ex(audio_mic_t mic, int16_t *audio, int samples)
 
 /* ------------------------------------------------------------------------- */
 /*   Backwards-compatible single-mic API                                      */
-/*   When both mics are compiled in the legacy API drives the I2S stream.     */
+/*   When several mics are compiled in the legacy API drives the first one   */
+/*   of I2S, PDM, LPPDM (in that order).                                      */
 /* ------------------------------------------------------------------------- */
 
 #if defined(USE_I2S_MICS)
 #define AUDIO_DEFAULT_MIC AUDIO_MIC_I2S
-#else
+#elif defined(USE_PDM_MICS)
 #define AUDIO_DEFAULT_MIC AUDIO_MIC_PDM
+#else
+#define AUDIO_DEFAULT_MIC AUDIO_MIC_LPPDM
 #endif
 
 void audio_set_callback(audio_callback_t callback)

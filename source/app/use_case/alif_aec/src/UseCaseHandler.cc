@@ -66,10 +66,29 @@ using arm::app::fwk::tflm::MicroNetKwsModel;
 #define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
 #define AUDIO_STRIDE 8000 // 0.5 seconds
 
+/* Microphone streams. Each stream is mono (the HAL mixes the two mics of a
+ * stream down), the first one is played on the left DAC channel and the
+ * second one on the right.
+ *   LPPDM_PDM defined: PDM block (2 mics) + LPPDM block (2 mics) = 4 PDM mics
+ *   otherwise:         I2S mic + PDM mic */
+#if defined(LPPDM_PDM)
+#define AEC_MIC_L       HAL_AUDIO_MIC_PDM
+#define AEC_MIC_R       HAL_AUDIO_MIC_LPPDM
+#define AEC_MIC_L_NAME  "PDM"
+#define AEC_MIC_R_NAME  "LPPDM"
+#else
+#define AEC_MIC_L       HAL_AUDIO_MIC_I2S
+#define AEC_MIC_R       HAL_AUDIO_MIC_PDM
+#define AEC_MIC_L_NAME  "I2S"
+#define AEC_MIC_R_NAME  "PDM"
+#endif
+
 static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_STRIDE];
-/* Second capture buffer used to run the PDM microphone in parallel with I2S. */
+/* Second capture buffer used to run the second microphone stream in parallel
+ * with the first one. */
 static int16_t audio_inf_pdm[AUDIO_SAMPLES + AUDIO_STRIDE];
-/* Triple-buffered DMA-source buffers for the I2S3 TX DMA. We prime two Sends
+/* Triple-buffered DMA-source buffers for the DAC I2S TX DMA
+ * (I2S3 on DevKit-e8, I2S2 on AppKit-e8). We prime two Sends
  * before the loop (one playing, one queued), so main's audio_out_transmit
  * ALWAYS finds the queue full on first attempt and spins. That pins main's
  * iteration rate to the DAC rate; otherwise the mic wait paces main at
@@ -100,6 +119,34 @@ void button_cb(uint32_t event)
     lastPressTime = now;
 
     button_pressed = !button_pressed;
+}
+
+/* Longest time to wait for one stride of microphone data. A stride is 0.5 s,
+ * so anything much longer means that the stream is not delivering data. */
+#define AEC_MIC_WAIT_TIMEOUT_MS 3000
+
+/**
+ * Wait for a full stride of data from one microphone stream, with a timeout
+ * so that a dead stream is reported instead of silently stalling the loop.
+ * @return 0 on success, non-zero on error or timeout.
+ */
+static int WaitForMic(audio_mic_t mic, const char* name)
+{
+    const uint32_t start = Get_SysTick_Count();
+    int err = 0;
+    while (hal_get_audio_samples_received_ex(mic) < AUDIO_STRIDE) {
+        if (Get_SysTick_Count() - start > AEC_MIC_WAIT_TIMEOUT_MS) {
+            printf_err("%s mic: no data, got %d/%d samples in %d ms\n",
+                       name,
+                       hal_get_audio_samples_received_ex(mic),
+                       AUDIO_STRIDE,
+                       AEC_MIC_WAIT_TIMEOUT_MS);
+            return -3;
+        }
+        __WFE();
+    }
+    err = hal_wait_for_audio_ex(mic);
+    return err;
 }
 
 namespace alif {
@@ -174,14 +221,14 @@ using namespace arm::app::kws;
         static const int16_t* audioData = nullptr;
         static int strides_in_example_audio = 0;
         if (!audio_inited) {
-            err = hal_audio_alif_init_ex(HAL_AUDIO_MIC_I2S, audioRate);
+            err = hal_audio_alif_init_ex(AEC_MIC_L, audioRate);
             if (err) {
-                printf_err("hal_audio_alif_init_ex(I2S) failed with error: %d\n", err);
+                printf_err("hal_audio_alif_init_ex(" AEC_MIC_L_NAME ") failed with error: %d\n", err);
                 return false;
             }
-            err = hal_audio_alif_init_ex(HAL_AUDIO_MIC_PDM, audioRate);
+            err = hal_audio_alif_init_ex(AEC_MIC_R, audioRate);
             if (err) {
-                printf_err("hal_audio_alif_init_ex(PDM) failed with error: %d\n", err);
+                printf_err("hal_audio_alif_init_ex(" AEC_MIC_R_NAME ") failed with error: %d\n", err);
                 return false;
             }
             audio_inited = true;
@@ -219,8 +266,8 @@ using namespace arm::app::kws;
         std::memset(audio_out_c, 0, sizeof(audio_out_c));
 
         // Start first fill of final stride section of both mic buffers.
-        hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
-        hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
+        hal_get_audio_data_ex(AEC_MIC_L, audio_inf     + AUDIO_SAMPLES, AUDIO_STRIDE);
+        hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
 
         // Prime the DAC pipeline with TWO silent buffers (one playing + one
         // queued). The loop will then always find the queue full on its first
@@ -286,28 +333,28 @@ using namespace arm::app::kws;
             // Now spend the ~500 ms stride waiting for the next mic data and
             // preprocessing it. All of this happens in parallel with the DAC
             // DMA'ing the buffer we just queued.
-            err = hal_wait_for_audio_ex(HAL_AUDIO_MIC_I2S);
+            err = WaitForMic(AEC_MIC_L, AEC_MIC_L_NAME);
             if (err) {
-                printf_err("hal_wait_for_audio_ex(I2S) failed with error: %d\n", err);
+                printf_err("Waiting for " AEC_MIC_L_NAME " audio failed with error: %d\n", err);
                 return false;
             }
-            err = hal_wait_for_audio_ex(HAL_AUDIO_MIC_PDM);
+            err = WaitForMic(AEC_MIC_R, AEC_MIC_R_NAME);
             if (err) {
-                printf_err("hal_wait_for_audio_ex(PDM) failed with error: %d\n", err);
+                printf_err("Waiting for " AEC_MIC_R_NAME " audio failed with error: %d\n", err);
                 return false;
             }
 
             std::memmove(audio_inf, audio_inf + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
             std::memmove(audio_inf_pdm, audio_inf_pdm + AUDIO_STRIDE, AUDIO_SAMPLES * sizeof(int16_t));
             __disable_irq();
-            hal_get_audio_data_ex(HAL_AUDIO_MIC_I2S, audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
-            hal_get_audio_data_ex(HAL_AUDIO_MIC_PDM, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
+            hal_get_audio_data_ex(AEC_MIC_L, audio_inf + AUDIO_SAMPLES, AUDIO_STRIDE);
+            hal_get_audio_data_ex(AEC_MIC_R, audio_inf_pdm + AUDIO_SAMPLES, AUDIO_STRIDE);
             __enable_irq();
 
-            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_I2S,
+            hal_audio_alif_preprocessing_ex(AEC_MIC_L,
                                             audio_inf + AUDIO_SAMPLES - AUDIO_STRIDE,
                                             AUDIO_STRIDE);
-            hal_audio_alif_preprocessing_ex(HAL_AUDIO_MIC_PDM,
+            hal_audio_alif_preprocessing_ex(AEC_MIC_R,
                                             audio_inf_pdm + AUDIO_SAMPLES - AUDIO_STRIDE,
                                             AUDIO_STRIDE);
 

@@ -365,7 +365,7 @@ const struct pinconf board_pinconf[] = {
     /* Selected: PDM_D2_B for "PDM MIC" */
     {PORT_5,
      PIN_4,
-     #if (USE_APPKIT_LPPDM == 1)
+     #if (USE_APPKIT_LPPDM == 1) && (USE_APPKIT_LPPDM_PDM != 1)
      PINMUX_ALTERNATE_FUNCTION_0,
      #else
      PINMUX_ALTERNATE_FUNCTION_3,
@@ -444,7 +444,7 @@ const struct pinconf board_pinconf[] = {
     /* P6_7 on pin D11. Functions: [0]: GPIO6_7, [1]: OSPI0_D7_C, [2]: UART0_RTS_B, [3]:
        >>>PDM_C2_A<<<, [4]: SPI1_SS3_B, [5]: UT7_T1_B, [6]: SD_D7_D, [7]: ETH_CRS_DV_A */
     /* Selected: PDM_C2_A for "PDM MIC" */
-    #if (USE_APPKIT_LPPDM == 1)
+    #if (USE_APPKIT_LPPDM == 1) && (USE_APPKIT_LPPDM_PDM != 1)
     {PORT_6, PIN_7, PINMUX_ALTERNATE_FUNCTION_0, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
     #else
     {PORT_6, PIN_7, PINMUX_ALTERNATE_FUNCTION_3, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
@@ -527,21 +527,19 @@ const struct pinconf board_pinconf[] = {
      PINMUX_ALTERNATE_FUNCTION_0,
      PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-    /* P8_3 on pin C14. Functions: [0]: >>>GPIO8_3<<<, [1]: I2S2_SCLK_A, [2]: SPI1_MISO_B, [3]:
-       FAULT3_B, [4]: LPCAM_D3_A, [5]: SD_D3_C, [6]: CDC_D3_A, [7]: CAM_D3_B */
-    /* Selected: GPIO8_3 for "CLICKBOARD_RST" */
-    {PORT_8,
-     PIN_3,
-     PINMUX_ALTERNATE_FUNCTION_0,
-     PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+    /* P8_2. Functions: [0]: GPIO8_2, [1]: >>>I2S2_SDO_A<<< */
+    /* Selected: I2S2_SDO_A for "WM8904 codec DAC output" (see BOARD_DAC_OUTPUT_*) */
+    {PORT_8, PIN_2, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
-    /* P8_4 on pin G12. Functions: [0]: >>>GPIO8_4<<<, [1]: I2S2_WS_A, [2]: SPI1_MOSI_B, [3]:
+    /* P8_3 on pin C14. Functions: [0]: GPIO8_3, [1]: >>>I2S2_SCLK_A<<<, [2]: SPI1_MISO_B, [3]:
+       FAULT3_B, [4]: LPCAM_D3_A, [5]: SD_D3_C, [6]: CDC_D3_A, [7]: CAM_D3_B */
+    /* Selected: I2S2_SCLK_A for "WM8904 codec DAC output". Was GPIO8_3 for "CLICKBOARD_RST". */
+    {PORT_8, PIN_3, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+
+    /* P8_4 on pin G12. Functions: [0]: GPIO8_4, [1]: >>>I2S2_WS_A<<<, [2]: SPI1_MOSI_B, [3]:
        QEC0_X_B, [4]: LPCAM_D4_A, [5]: SD_D4_C, [6]: CDC_D4_A, [7]: CAM_D4_B */
-    /* Selected: GPIO8_4 for "ICM_IMU_IRQ" */
-    {PORT_8,
-     PIN_4,
-     PINMUX_ALTERNATE_FUNCTION_0,
-     PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+    /* Selected: I2S2_WS_A for "WM8904 codec DAC output". Was GPIO8_4 for "ICM_IMU_IRQ". */
+    {PORT_8, PIN_4, PINMUX_ALTERNATE_FUNCTION_1, PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P8_5 on pin G16. Functions: [0]: GPIO8_5, [1]: >>>HSPI0_RXDS1<<<, [2]: SPI1_SCLK_B, [3]:
        QEC0_Y_B, [4]: LPCAM_D5_A, [5]: SD_D5_C, [6]: CDC_D5_A, [7]: CAM_D5_B */

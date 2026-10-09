@@ -85,19 +85,22 @@ target_link_libraries(${AUDIO_ALIF_COMPONENT_TARGET} PRIVATE
 if ((TARGET_BOARD STREQUAL "AppKit-e8") OR (TARGET_BOARD STREQUAL "DevKit-e1c") OR (TARGET_BOARD STREQUAL "StartKit-e1c"))
     set(TARGET_MICS "PDM" CACHE STRING "Microphone selection")
     set_property(CACHE TARGET_MICS PROPERTY STRINGS "PDM")
-        if (TARGET_BOARD STREQUAL "AppKit-e8")
-        get_property(TARGET_MICS_LIST   CACHE   TARGET_MICS      PROPERTY    STRINGS)
-        list(APPEND TARGET_MICS_LIST   "LPPDM")
-        set_property(CACHE      TARGET_MICS     PROPERTY    STRINGS     "${TARGET_MICS_LIST}")
+    if (TARGET_BOARD STREQUAL "AppKit-e8")
+        # AppKit-e8 has 2 PDM mics (PDM block) and 2 LPPDM mics (LPPDM block):
+        #   PDM        - the 2 PDM mics
+        #   LPPDM      - the 2 LPPDM mics
+        #   LPPDM_PDM  - all 4 mics, captured in parallel as two streams
+        set_property(CACHE TARGET_MICS PROPERTY STRINGS "PDM" "LPPDM" "LPPDM_PDM")
     endif()
 else()
     set(TARGET_MICS "I2S" CACHE STRING "Microphone selection")
     set_property(CACHE TARGET_MICS PROPERTY STRINGS "I2S" "PDM" "I2S_PDM")
 endif()
 
-# When both mics are selected the PDM channel cache keys are still driven by
-# "PDM"; there is no I2S channel selection to make.
-if (TARGET_MICS STREQUAL "I2S_PDM")
+# When two mic types are selected the PDM channel cache keys are still driven by
+# "PDM"; there is no I2S channel selection to make. For LPPDM_PDM the LPPDM
+# channels are selected separately further below.
+if ((TARGET_MICS STREQUAL "I2S_PDM") OR (TARGET_MICS STREQUAL "LPPDM_PDM"))
     set(TARGET_MICS_CHANNEL_KEY "PDM")
 else()
     set(TARGET_MICS_CHANNEL_KEY "${TARGET_MICS}")
@@ -114,8 +117,22 @@ else()
     set(USE_MIC       3)
 endif()
 
+if ( (TARGET_BOARD STREQUAL "AppKit-e8") AND ((TARGET_MICS STREQUAL "LPPDM") OR (TARGET_MICS STREQUAL "LPPDM_PDM")) )
+    # The LPPDM pin muxing (pins.h) and BOARD_LPPDM_ENABLED (board_defs.h) are
+    # evaluated in cmsis_device sources as well, so the define must be visible
+    # there, not only in this component.
+    if (TARGET cmsis_device)
+        target_compile_definitions(cmsis_device PUBLIC USE_APPKIT_LPPDM=1)
+        if (TARGET_MICS STREQUAL "LPPDM_PDM")
+            # Keep the PDM mic pins muxed to PDM next to the LPPDM mic pins
+            target_compile_definitions(cmsis_device PUBLIC USE_APPKIT_LPPDM_PDM=1)
+        endif()
+    else()
+        message(FATAL_ERROR "cmsis_device target is needed for TARGET_MICS=${TARGET_MICS}")
+    endif()
+endif()
+
 if ( (TARGET_BOARD STREQUAL "AppKit-e8") AND (TARGET_MICS STREQUAL "LPPDM") )
-    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    USE_APPKIT_LPPDM=1)
     set(USE_${TARGET_MICS_CHANNEL_KEY}_PRIMARY_CH     0    CACHE   STRING  "Primary channel as ")
     set(USE_${TARGET_MICS_CHANNEL_KEY}_SECONDARY_CH   1    CACHE   STRING  "Secondary channel as ")
 else()
@@ -171,6 +188,27 @@ target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    USE_MIC=$
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    PRIMARY_CHANNEL=${USE_PRIMARY_CH})
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}   PRIVATE    SECONDARY_CHANNEL=${USE_SECONDARY_CH})
 
+# LPPDM_PDM: the LPPDM block has its own channel selection (the two LPPDM mics
+# of AppKit-e8 are on channels 0 and 1), while PRIMARY/SECONDARY_CHANNEL above
+# select the channels of the PDM block (channels 4 and 5).
+if (TARGET_MICS STREQUAL "LPPDM_PDM")
+    set(USE_LPPDM_PRIMARY_CH     0    CACHE   STRING  "LPPDM primary channel as ")
+    set(USE_LPPDM_SECONDARY_CH   1    CACHE   STRING  "LPPDM secondary channel as ")
+    set_property(CACHE  USE_LPPDM_PRIMARY_CH     PROPERTY    STRINGS     0 1 2 3 4 5 6 7)
+    set_property(CACHE  USE_LPPDM_SECONDARY_CH   PROPERTY    STRINGS     0 1 2 3 4 5 6 7)
+
+    foreach(LPPDM_CH_VAR USE_LPPDM_PRIMARY_CH USE_LPPDM_SECONDARY_CH)
+        if (NOT "${${LPPDM_CH_VAR}}" MATCHES "^[0-7]$")
+            message(WARNING "${LPPDM_CH_VAR} is not proper")
+        endif()
+    endforeach()
+
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
+        PRIVATE
+        LPPDM_PRIMARY_CHANNEL=${USE_LPPDM_PRIMARY_CH}
+        LPPDM_SECONDARY_CHANNEL=${USE_LPPDM_SECONDARY_CH})
+endif()
+
 # Display status
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "*******************************************************")
@@ -182,6 +220,19 @@ if (TARGET_MICS STREQUAL "I2S_PDM")
     target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
         PRIVATE
         USE_I2S_MICS
+        USE_PDM_MICS)
+elseif (TARGET_MICS STREQUAL "LPPDM_PDM")
+    # Two PDM streams: PDM block (Driver_PDM) and LPPDM block (Driver_LPPDM)
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
+        PRIVATE
+        USE_PDM_MICS
+        USE_LPPDM_MICS)
+    # Visible to applications (e.g. alif_aec) to select the 4 PDM mic setup
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET} PUBLIC LPPDM_PDM=1)
+elseif (TARGET_MICS STREQUAL "LPPDM")
+    # Single PDM stream; BOARD_LPPDM_ENABLED makes mic_listener use Driver_LPPDM
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
+        PRIVATE
         USE_PDM_MICS)
 else()
     target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
