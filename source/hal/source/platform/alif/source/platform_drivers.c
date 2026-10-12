@@ -58,6 +58,10 @@
 #include "ram_test.h"
 #endif
 
+#ifdef POWER_MEASUREMENT_SUPPORT
+#include "power_measurement.h"
+#endif
+
 #define HW_REG32(base,offset) *((volatile uint32_t *)(base + offset))
 
 #if defined(ARM_NPU)
@@ -200,7 +204,11 @@ static uint32_t set_power_profiles()
 #elif defined(M55_HP) || defined(RTSS_HP)
     default_runprof.cpu_clk_freq    = CLOCK_FREQUENCY_400MHZ;
 #endif
+#if FLEX_IO_VOLTAGE_1V8 == 1
     default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+#else
+    default_runprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_3V3;
+#endif
     err = SERVICES_set_run_cfg(services_handle, &default_runprof, &service_error_code);
 
     if ((err + service_error_code) == 0) {
@@ -219,7 +227,11 @@ static uint32_t set_power_profiles()
         // default_offprof.sysref_clk_src = /* SoC Reference Clock shared with all subsystems */
         default_offprof.ip_clock_gating = 0;
         default_offprof.phy_pwr_gating  = 0;
+#if FLEX_IO_VOLTAGE_1V8 == 1
         default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_1V8;
+#else
+        default_offprof.vdd_ioflex_3V3  = IOFLEX_LEVEL_3V3;
+#endif
         default_offprof.wakeup_events   = WE_LPGPIO;
         default_offprof.ewic_cfg        = EWIC_VBAT_GPIO;
 #if defined(M55_HE) || defined(RTSS_HE)
@@ -518,6 +530,14 @@ int platform_init(void)
 
     /* Print target design info */
     info("Target system design: %s\n", s_platform_name);
+
+#ifdef POWER_MEASUREMENT_SUPPORT
+    /* Not fatal: the application checks power_measurement_is_available(). */
+    if (power_measurement_init() != 0) {
+        warn("Power measurement unavailable: sensor not found or not responding\n");
+    }
+#endif
+
     return err;
 }
 

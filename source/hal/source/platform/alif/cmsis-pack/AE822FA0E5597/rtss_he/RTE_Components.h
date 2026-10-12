@@ -22,7 +22,7 @@
 #define RTE_Drivers_ISP
 #define RTE_Drivers_IO
 
-#define RTE_Drivers_I3C0
+#define RTE_Drivers_I3C
 #define RTE_Drivers_PINCONF
 
 #define RTE_Drivers_USART

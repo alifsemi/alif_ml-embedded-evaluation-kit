@@ -38,6 +38,10 @@
 #include "ScreenLayout.hpp"
 #include "hal.h"
 
+#ifdef POWER_MEASUREMENT_SUPPORT
+#include "power_measurement.h"
+#endif
+
 #include <cinttypes>
 #include <cmath>
 
@@ -68,6 +72,27 @@ namespace object_detection {
 using namespace arm::app::object_detection;
 }
 
+#ifdef POWER_MEASUREMENT_SUPPORT
+    /* Labels showing average power and current, in that order. */
+    static constexpr uint32_t powerLabelIdx = 2;
+
+    /* Shows the averages of the last measured inference, or "--" if the measurement failed
+     * (result == nullptr). Does nothing if no sensor is fitted. Call with the LVGL lock held. */
+    static void ShowPowerMeasurement(const power_measurement_result_t* result)
+    {
+        if (!power_measurement_is_available()) {
+            return;
+        }
+        if (result) {
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:  %4" PRId32 " mW", result->avg_mW);
+            lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current: %4" PRId32 " mA", result->avg_mA);
+        } else {
+            lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:     -- mW");
+            lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current:   -- mA");
+        }
+    }
+#endif
+
     bool ObjectDetectionInit(YoloFastestModel& model)
     {
 
@@ -76,6 +101,9 @@ using namespace arm::app::object_detection;
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
         lv_label_set_text_static(ScreenLayoutLabelObject(0), "Faces Detected: 0");
         lv_label_set_text_static(ScreenLayoutLabelObject(1), "192px image (24-bit)");
+#ifdef POWER_MEASUREMENT_SUPPORT
+        ShowPowerMeasurement(nullptr);
+#endif
 
         lv_style_init(&boxStyle);
         lv_style_set_bg_opa(&boxStyle, LV_OPA_TRANSP);
@@ -205,11 +233,21 @@ using namespace arm::app::object_detection;
             }
 
             /* Run inference over this image. */
+#ifdef POWER_MEASUREMENT_SUPPORT
+            /* Measure average current/power over the inference only. The LVGL lock is already
+             * held here, so no UI work is interleaved with the window. */
+            power_measurement_result_t power;
+            bool powerOk = (power_measurement_begin() == 0);
+#endif
 
             if (!RunInference(model, profiler)) {
                 printf_err("Inference failed.");
                 return false;
             }
+
+#ifdef POWER_MEASUREMENT_SUPPORT
+            powerOk = powerOk && (power_measurement_end(&power) == 0);
+#endif
 
             if (!postProcess.DoPostProcess()) {
                 printf_err("Post-processing failed.");
@@ -229,6 +267,10 @@ using namespace arm::app::object_detection;
 #endif
 
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "Faces Detected: %i", results.size());
+
+#ifdef POWER_MEASUREMENT_SUPPORT
+            ShowPowerMeasurement(powerOk ? &power : nullptr);
+#endif
 
             /* Draw boxes. */
             DrawDetectionBoxes(results, inputImgCols, inputImgRows);
