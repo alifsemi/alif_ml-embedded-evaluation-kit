@@ -190,6 +190,7 @@ SECTIONS
     * (.bss.NoInit.ethos_u_cache)
     * (.bss.NoInit.activation_buf_sram)
     * (.bss.NoInit.temp_buf_sram)
+    * (eth_buf)                            /* Ethernet MAC driver descriptors and buffers */
   } > SRAM
 
   .bss.unstriped (NOLOAD) :

@@ -182,6 +182,7 @@ SECTIONS
     /* DMA-touched audio buffers kept in shared SRAM. */
     * (.bss.audio_rec)
     * (.bss.NoInit.audio_out)
+    * (eth_buf)                            /* Ethernet MAC driver descriptors and buffers */
   } > SRAM
 
   .bss.unstriped (NOLOAD) :

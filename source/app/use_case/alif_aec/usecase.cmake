@@ -77,6 +77,42 @@ set(${use_case}_COMPILE_DEFS
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
 )
 
+# Stream the speaker output as RTP (L16, stereo) over UDP/IPv4 on Ethernet.
+USER_OPTION(ETH_STREAM "Stream the speaker output over Ethernet as RTP L16."
+    OFF
+    BOOL)
+USER_OPTION(ETH_STREAM_SRC_IP "IPv4 address of this board."
+    "192.168.1.10"
+    STRING)
+USER_OPTION(ETH_STREAM_DEST_IP "IPv4 address of the receiver: unicast on the same subnet, multicast or 255.255.255.255."
+    "192.168.1.100"
+    STRING)
+USER_OPTION(ETH_STREAM_PORT "UDP port, used as source and destination port."
+    5004
+    STRING)
+USER_OPTION(ETH_STREAM_MAC "MAC address of this board."
+    "02:00:00:ae:c0:01"
+    STRING)
+USER_OPTION(ETH_STREAM_FRAMES_PER_PACKET "Stereo frames per RTP packet (160 = 10 ms at 16 kHz, max 365)."
+    160
+    STRING)
+
+if (ETH_STREAM)
+    if (NOT TARGET_BOARD STREQUAL "AppKit-e8")
+        message(WARNING "ETH_STREAM has only been set up for AppKit-e8 (ETH pins, RTL8201 PHY).")
+    endif()
+    string(REPLACE "." "," ETH_STREAM_SRC_IP_BYTES "${ETH_STREAM_SRC_IP}")
+    string(REPLACE "." "," ETH_STREAM_DEST_IP_BYTES "${ETH_STREAM_DEST_IP}")
+    string(REPLACE ":" ",0x" ETH_STREAM_MAC_BYTES "0x${ETH_STREAM_MAC}")
+    list(APPEND ${use_case}_COMPILE_DEFS
+        ETH_STREAM
+        ETH_STREAM_SRC_IP=${ETH_STREAM_SRC_IP_BYTES}
+        ETH_STREAM_DEST_IP=${ETH_STREAM_DEST_IP_BYTES}
+        ETH_STREAM_PORT=${ETH_STREAM_PORT}
+        ETH_STREAM_MAC=${ETH_STREAM_MAC_BYTES}
+        ETH_STREAM_FRAMES_PER_PACKET=${ETH_STREAM_FRAMES_PER_PACKET})
+endif()
+
 # Generate input files
 generate_audio_code(${${use_case}_FILE_PATH} ${SAMPLES_GEN_DIR}
     ${${use_case}_AUDIO_RATE}

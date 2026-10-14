@@ -43,6 +43,9 @@
 #include "audio/audio_out.h"
 #include "board_utils.h"
 #include "FatFS/sd_fatfs.h"
+#if defined(ETH_STREAM)
+#include "net/eth_stream.h"
+#endif
 
 #if defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE & 1)
 #include <arm_mve.h>
@@ -283,6 +286,13 @@ using namespace arm::app::kws;
                 printf_err("audio_out_init failed with error: %d\n", err);
                 return false;
             }
+#if defined(ETH_STREAM)
+            // Streaming is optional: on failure keep running with the speaker only.
+            err = eth_stream_init(audioRate);
+            if (err) {
+                printf_err("eth_stream_init failed with error: %d\n", err);
+            }
+#endif
         }
         // set_audio_gain(30);
 
@@ -349,6 +359,14 @@ using namespace arm::app::kws;
             while (audio_out_transmit(audio_out_fill, AUDIO_STRIDE * 2) == -1) {
                 __WFE();
             }
+
+#if defined(ETH_STREAM)
+            // Send the same stride to the network. Does not block: packets are
+            // sent in the background from the Ethernet TX interrupt (~4 ms for
+            // a 0.5 s stride at 100 Mbit/s). audio_out_fill is read until then;
+            // it is not rewritten for another two strides.
+            eth_stream_send(audio_out_fill, AUDIO_STRIDE);
+#endif
 
             // Swap: cycle through the three buffers (C -> A -> B -> C ...).
             // After this transmit, the fill buffer is now "queued" and the

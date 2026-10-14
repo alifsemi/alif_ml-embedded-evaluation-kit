@@ -140,6 +140,7 @@ target_sources(${CMSIS_DEVICE_TARGET}
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_HWSEM.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_I3C.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_DMA.c
+    ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/driver_mac.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_CDC200.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_DSI.c
     ${ALIF_CMSIS_PATH}/Alif_CMSIS/Source/Driver_MIPI_CSI2.c
