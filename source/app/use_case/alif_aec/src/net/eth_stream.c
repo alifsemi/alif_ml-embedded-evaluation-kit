@@ -379,6 +379,11 @@ int32_t eth_stream_init(uint32_t sample_rate)
         printf("ETH stream: MAC configuration failed\n");
         return -1;
     }
+    /* The MAC latches the address only on a low register write, and
+     * SetMacAddress() writes low before high. Rewrite low so that unicast
+     * frames to our MAC pass the RX filter. */
+    ETH->ETH_MAC_ADDRESS0_LOW = ((uint32_t)our_mac[3] << 24) | ((uint32_t)our_mac[2] << 16) |
+                                ((uint32_t)our_mac[1] << 8) | our_mac[0];
 
     dest_mac_init();
     hdr_template_init();
