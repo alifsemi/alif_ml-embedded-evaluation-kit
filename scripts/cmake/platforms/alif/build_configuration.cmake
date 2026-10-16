@@ -46,6 +46,12 @@ function(set_platform_global_defaults)
         message(STATUS "Alif GPIO profiling enabled!")
     endif()
 
+    set(GPIO_PROFILING_CI OFF CACHE BOOL "Automated (CI) power measurement: keep the GPIO profiling line idle for the first rounds so the automation can start waiting for the signal. Only used with GPIO_PROFILING.")
+    if (GPIO_PROFILING AND GPIO_PROFILING_CI)
+        add_compile_definitions(GPIO_PROFILING_CI)
+        message(STATUS "Alif GPIO profiling: CI mode enabled!")
+    endif()
+
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM

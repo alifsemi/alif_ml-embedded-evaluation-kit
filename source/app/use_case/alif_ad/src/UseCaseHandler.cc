@@ -139,8 +139,11 @@ using namespace arm::app::ad;
         const int16_t* inferenceWindow = audio_inf;
 
 #if defined(GPIO_PROFILING)
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+        const bool gpioMarker = arm::app::GpioMarkerStartRound();
+        arm::app::GpioMarkerToggle(gpioMarker);
 #else
+        const bool gpioMarker = true;
         uint32_t start = Get_SysTick_Cycle_Count32();
 #endif
 
@@ -154,7 +157,7 @@ using namespace arm::app::ad;
         start = Get_SysTick_Cycle_Count32();
 #endif
 
-        if (!RunInference(model, profiler)) {
+        if (!RunInference(model, profiler, gpioMarker)) {
             printf_err("Inference failed.");
             return false;
         }
@@ -170,7 +173,7 @@ using namespace arm::app::ad;
         }
 
 #if defined(GPIO_PROFILING)
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        arm::app::GpioMarkerToggle(gpioMarker);
         ctx.Set<int>("index", index + 1); /* Increment the audio window index for the next inference call so that audio is not initialized again */
 #else
         printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);

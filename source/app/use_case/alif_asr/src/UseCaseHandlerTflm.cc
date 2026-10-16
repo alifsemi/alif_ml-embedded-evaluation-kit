@@ -156,6 +156,12 @@ namespace app {
 #endif /* INTERACTIVE_MODE */
 
 #if AUDIO_LIVE
+#if defined(GPIO_PROFILING_CI)
+            /* Automated measurement: no button press. Start listening immediately and
+             * capture the maximum length (AUDIO_CHUNKS chunks, ~10 s). */
+            const int start_samples = 0;
+            int16_t *audio_inf_ptr = audio_inf;
+#else
             // Wait for button press callback ...
             button_pressed = false;
             uint32_t idle_count = 0;
@@ -177,15 +183,19 @@ namespace app {
                         &audio_inf[button_pressed_sample_count - 1],
                         start_samples * sizeof(audio_inf[0]));
             }
+#endif /* defined(GPIO_PROFILING_CI) */
 
             // Capture audio as long as button is kept pressed or until we have max samples
+            // (always until max samples when GPIO_PROFILING_CI is defined)
             int audio_idx = 0;
 
             hal_get_audio_data(audio_inf_ptr, AUDIO_CHUNK_SIZE_SAMPLES);
 
             while (1) {
+#if !defined(GPIO_PROFILING_CI)
                 BOARD_BUTTON_STATE bs;
                 BOARD_BUTTON2_GetState(&bs);
+#endif
                 int err = hal_wait_for_audio();
                 if (err) {
                     printf_err("hal audio error: %d\n", err);
@@ -204,9 +214,11 @@ namespace app {
                 hal_audio_alif_preprocessing(audio_inf_ptr + (audio_idx * AUDIO_CHUNK_SIZE_SAMPLES),
                                              AUDIO_CHUNK_SIZE_SAMPLES);
 
+#if !defined(GPIO_PROFILING_CI)
                 if (bs != BOARD_BUTTON_STATE_LOW) {
                     break;
                 }
+#endif
 
                 if (audio_idx >= (AUDIO_CHUNKS - 1)) {
                     break;
@@ -265,13 +277,21 @@ namespace app {
                      audioDataSlider.Index() + 1,
                      static_cast<size_t>(ceilf(audioDataSlider.FractionalTotalStrides() + 1)));
 
+#if defined(GPIO_PROFILING)
+                /* One round per audio window. Skipped (sync line idle) for the first rounds
+                 * when GPIO_PROFILING_CI is set. */
+                const bool gpioMarker = GpioMarkerStartRound();
+                GpioMarkerToggle(gpioMarker);
+#else
+                const bool gpioMarker = true;
+#endif
                 /* Run the pre-processing, inference and post-processing. */
                 if (!preProcess.DoPreProcess(inferenceWindow, inferenceWindowLen)) {
                     printf_err("Pre-processing failed.");
                     return false;
                 }
 
-                if (!RunInference(model, profiler)) {
+                if (!RunInference(model, profiler, gpioMarker)) {
                     printf_err("Inference failed.");
                     return false;
                 }
@@ -282,6 +302,9 @@ namespace app {
                     printf_err("Post-processing failed.");
                     return false;
                 }
+#if defined(GPIO_PROFILING)
+                GpioMarkerToggle(gpioMarker);
+#endif
 
                 /* Add results from this window to our final results vector. */
                 finalResults.emplace_back(asr::AsrResult(

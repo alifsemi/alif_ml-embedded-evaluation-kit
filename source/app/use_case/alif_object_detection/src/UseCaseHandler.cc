@@ -53,6 +53,13 @@
 #define LIMAGE_Y        192
 #define LV_ZOOM         (2 * 256)
 
+#if defined(GPIO_PROFILING_CI)
+/* Automated measurement: run inference continuously, without waiting for a button press. */
+#define INFERENCE_REQUESTED() (true)
+#else
+#define INFERENCE_REQUESTED() run_requested()
+#endif
+
 namespace {
 lv_style_t boxStyle;
 lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 192x192x2 = 73,728
@@ -209,7 +216,7 @@ using namespace arm::app::object_detection;
                             currImage, &lvgl_image[0][0]);
             lv_obj_invalidate(ScreenLayoutImageObject());
 
-            if (!run_requested()) {
+            if (!INFERENCE_REQUESTED()) {
                lv_led_off(ScreenLayoutLEDObject());
                return false;
             }
@@ -224,7 +231,11 @@ using namespace arm::app::object_detection;
 
 #if defined(GPIO_PROFILING)
             uint32_t lv_lock_state = lv_port_lock();
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+            const bool gpioMarker = arm::app::GpioMarkerStartRound();
+            arm::app::GpioMarkerToggle(gpioMarker);
+#else
+            const bool gpioMarker = true;
 #endif
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(currImage, copySz)) {
@@ -240,7 +251,7 @@ using namespace arm::app::object_detection;
             bool powerOk = (power_measurement_begin() == 0);
 #endif
 
-            if (!RunInference(model, profiler)) {
+            if (!RunInference(model, profiler, gpioMarker)) {
                 printf_err("Inference failed.");
                 return false;
             }
@@ -255,7 +266,7 @@ using namespace arm::app::object_detection;
             }
 
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
             lv_port_unlock(lv_lock_state);
 #endif
 

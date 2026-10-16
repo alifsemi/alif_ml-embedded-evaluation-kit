@@ -1,6 +1,6 @@
 /* This file was ported to work on Alif Semiconductor devices. */
 
-/* Copyright (C) 2023-2024 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -205,8 +205,15 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 
 
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            /* Single power-measurement line, 4 edges per iteration:
+             *   HIGH: pre-processing, LOW: inference, HIGH: post-processing, LOW: idle.
+             * Edges 2 and 3 are generated inside RunInference(). With GPIO_PROFILING_CI all
+             * of them are suppressed for the first GPIO_PROFILING_CI_SKIP_ROUNDS rounds,
+             * so the line stays LOW. Without it the marker is always active. */
+            const bool gpioMarker = arm::app::GpioMarkerStartRound();
+            arm::app::GpioMarkerToggle(gpioMarker);
 #else
+            const bool gpioMarker = true;
             uint32_t start = Get_SysTick_Cycle_Count32();
 #endif
             /* Run the pre-processing, inference and post-processing. */
@@ -218,7 +225,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
             start = Get_SysTick_Cycle_Count32();
 #endif
-            if (!RunInference(model, profiler)) {
+            if (!RunInference(model, profiler, gpioMarker)) {
                 printf_err("Inference failed.");
                 return false;
             }
@@ -231,7 +238,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 return false;
             }
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
 #else
             printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 

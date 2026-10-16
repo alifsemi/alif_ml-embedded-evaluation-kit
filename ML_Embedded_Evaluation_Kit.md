@@ -876,6 +876,9 @@ Specifies which NPU to use for interference. (Default is U55)
 `-DGPIO_PROFILING=<ON|OFF>`<br>
 Enables or disables GPIO profiling. When enabled, certain GPIO pins are configured to toggle at specific stages of the benchmark (preprocessing, inference, postprocessing) to correlate power measurements with these stages. (Default is OFF). See more details in the [Alif Benchmark User Guide](Alif_benchmark.md).
 
+`-DGPIO_PROFILING_CI=<ON|OFF>`<br>
+For automated power measurements. Only used with `GPIO_PROFILING=ON`. When enabled, the GPIO profiling line stays idle for the first 10 rounds so that the automation has time to start waiting for the signal (`alif_kws`, `alif_ad`, `alif_asr` (ExecuTorch), `alif_img_class`, `alif_vww` and `alif_object_detection`). The `alif_asr` use case (both TFLM and ExecuTorch) also does not wait for a button press in this mode: it starts listening immediately and captures the maximum length (~10 s) each time. The camera use cases `alif_img_class`, `alif_vww` and `alif_object_detection` also run inference continuously in this mode, without waiting for a button press. When disabled, the line is active from the first round. (Default is OFF)
+
 `-DUSE_INA228=<ON|OFF>`<br>
 Measures the average current and power of each inference with an INA228 sensor and shows them on the display (currently `alif_object_detection`). A missing sensor is not fatal. (Default is OFF) See [Measuring power per inference with an INA228](#powermeasurement).
 

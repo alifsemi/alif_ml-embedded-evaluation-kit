@@ -65,6 +65,13 @@
 
 using arm::app::fwk::iface::Model;
 
+#if defined(GPIO_PROFILING_CI)
+/* Automated measurement: run inference continuously, without waiting for a button press. */
+#define INFERENCE_REQUESTED() (true)
+#else
+#define INFERENCE_REQUESTED() run_requested()
+#endif
+
 extern "C" {
 extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 }
@@ -156,7 +163,7 @@ namespace app {
         tprof5 = Get_SysTick_Cycle_Count32() - tprof5;
         lv_obj_invalidate(ScreenLayoutImageObject());
 
-        if (SKIP_MODEL || !run_requested()) {
+        if (SKIP_MODEL || !INFERENCE_REQUESTED()) {
 #if SHOW_PROFILING
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
@@ -176,7 +183,11 @@ namespace app {
         const size_t imgSz = inputTensor->Bytes();
 #if defined(GPIO_PROFILING)
         lv_lock_state = lv_port_lock();
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+        const bool gpioMarker = arm::app::GpioMarkerStartRound();
+        arm::app::GpioMarkerToggle(gpioMarker);
+#else
+        const bool gpioMarker = true;
 #endif
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(image_data, imgSz)) {
@@ -184,7 +195,7 @@ namespace app {
             return false;
         }
 
-        if (!RunInference(model, profiler)) {
+        if (!RunInference(model, profiler, gpioMarker)) {
             printf_err("Inference failed.");
             return false;
         }
@@ -194,7 +205,7 @@ namespace app {
             return false;
         }
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
             lv_port_unlock(lv_lock_state);
 #endif
 

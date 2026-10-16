@@ -68,20 +68,46 @@ namespace app {
         return true;
     }
 
-    bool RunInference(fwk::iface::Model& model, Profiler& profiler)
+    bool RunInference(fwk::iface::Model& model, Profiler& profiler, bool gpioMarker)
     {
         profiler.StartProfiling("Inference");
 #ifdef GPIO_PROFILING
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        if (gpioMarker) {
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        }
+#else
+        (void) gpioMarker;
 #endif
         bool runInf = model.RunInference();
 #ifdef GPIO_PROFILING
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        if (gpioMarker) {
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        }
 #endif
         profiler.StopProfiling();
 
         return runInf;
     }
+
+#if defined(GPIO_PROFILING)
+    bool GpioMarkerStartRound()
+    {
+        /* Saturates at GPIO_PROFILING_CI_SKIP_ROUNDS, so it can never overflow. */
+        static int s_round = 0;
+        const bool active  = (s_round >= GPIO_PROFILING_CI_SKIP_ROUNDS);
+        if (!active) {
+            ++s_round;
+        }
+        return active;
+    }
+
+    void GpioMarkerToggle(bool enabled)
+    {
+        if (enabled) {
+            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        }
+    }
+#endif /* defined(GPIO_PROFILING) */
 
 #ifdef INTERACTIVE_MODE
     void AwaitUserInput()

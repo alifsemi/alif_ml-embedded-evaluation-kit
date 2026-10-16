@@ -62,6 +62,13 @@
 using ImgClassClassifier = arm::app::Classifier;
 using arm::app::fwk::iface::Model;
 
+#if defined(GPIO_PROFILING_CI)
+/* Automated measurement: run inference continuously, without waiting for a button press. */
+#define INFERENCE_REQUESTED() (true)
+#else
+#define INFERENCE_REQUESTED() run_requested()
+#endif
+
 
 /** Based on ML framework, set up the model namespace. */
 #if defined(MLEK_FWK_TFLM)
@@ -228,7 +235,7 @@ namespace app {
 
         lv_obj_invalidate(ScreenLayoutImageObject());
 
-        if (SKIP_MODEL || !run_requested()) {
+        if (SKIP_MODEL || !INFERENCE_REQUESTED()) {
 #if SHOW_PROFILING
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
@@ -259,14 +266,18 @@ namespace app {
         /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
         lv_lock_state = lv_port_lock();
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+        const bool gpioMarker = arm::app::GpioMarkerStartRound();
+        arm::app::GpioMarkerToggle(gpioMarker);
+#else
+        const bool gpioMarker = true;
 #endif
         if (!preProcess.DoPreProcess(image_data, imgSz)) {
             printf_err("Pre-processing failed.");
             return false;
         }
 
-        if (!RunInference(model, profiler)) {
+        if (!RunInference(model, profiler, gpioMarker)) {
             printf_err("Inference failed.");
             return false;
         }
@@ -276,7 +287,7 @@ namespace app {
             return false;
         }
 #if defined(GPIO_PROFILING)
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+        arm::app::GpioMarkerToggle(gpioMarker);
         lv_port_unlock(lv_lock_state);
 #endif
 #if SHOW_INF_TIME

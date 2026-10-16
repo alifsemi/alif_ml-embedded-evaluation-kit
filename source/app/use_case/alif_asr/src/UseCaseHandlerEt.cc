@@ -254,6 +254,7 @@ namespace app {
 #endif /* INTERACTIVE_MODE */
 
 #if AUDIO_LIVE
+#if !defined(GPIO_PROFILING_CI)
             // Wait for button press callback ...
             button_pressed = false;
             uint32_t idle_count = 0;
@@ -274,6 +275,7 @@ namespace app {
                 hal_audio_alif_preprocessing(audio_inf, AUDIO_CHUNK_SIZE_SAMPLES);
                 idle_count++;
             }
+#endif /* !defined(GPIO_PROFILING_CI) */
 
             {
                 ScopedLVGLLock lv_lock;
@@ -285,6 +287,12 @@ namespace app {
                 }
             }
 
+#if defined(GPIO_PROFILING_CI)
+            /* Automated measurement: no button press. Start listening immediately and
+             * capture the maximum length (AUDIO_CHUNKS chunks, ~10 s). */
+            const int start_samples = 0;
+            int16_t *audio_inf_ptr = audio_inf;
+#else
             // Copy the starting chunk
             const int start_samples = AUDIO_CHUNK_SIZE_SAMPLES - button_pressed_sample_count;
             int16_t *audio_inf_ptr = &audio_inf[start_samples];
@@ -293,16 +301,20 @@ namespace app {
                         &audio_inf[button_pressed_sample_count - 1],
                         start_samples * sizeof(audio_inf[0]));
             }
+#endif /* defined(GPIO_PROFILING_CI) */
 
             // Capture audio as long as button is kept pressed
+            // (always until max samples when GPIO_PROFILING_CI is defined)
             BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
             int audio_idx = 0;
 
             hal_get_audio_data(audio_inf_ptr, AUDIO_CHUNK_SIZE_SAMPLES);
 
             while (1) {
+#if !defined(GPIO_PROFILING_CI)
                 BOARD_BUTTON_STATE bs;
                 BOARD_BUTTON2_GetState(&bs);
+#endif
                 int err = hal_wait_for_audio();
                 if (err) {
                     printf_err("hal audio error: %d\n", err);
@@ -326,9 +338,11 @@ namespace app {
                 hal_audio_alif_preprocessing(audio_inf_ptr + (audio_idx * AUDIO_CHUNK_SIZE_SAMPLES),
                                              AUDIO_CHUNK_SIZE_SAMPLES);
 
+#if !defined(GPIO_PROFILING_CI)
                 if (bs != BOARD_BUTTON_STATE_LOW) {
                     break;
                 }
+#endif
 
                 if (audio_idx >= (AUDIO_CHUNKS - 1)) {
                     break;
@@ -377,8 +391,11 @@ namespace app {
             /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
             uint32_t lv_lock_state = lv_port_lock();
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+            const bool gpioMarker = arm::app::GpioMarkerStartRound();
+            arm::app::GpioMarkerToggle(gpioMarker);
 #else
+            const bool gpioMarker = true;
             const uint32_t ts_start_pre = Get_SysTick_Cycle_Count32();
 #endif
             if (!preProcess.DoPreProcess(audioArr, audioArrSize)) {
@@ -397,7 +414,7 @@ namespace app {
             const uint32_t ts_start_inference = Get_SysTick_Cycle_Count32();
 #endif
 
-            if (!RunInference(model, profiler)) {
+            if (!RunInference(model, profiler, gpioMarker)) {
                 printf_err("Inference failed.");
                 return false;
             }
@@ -410,7 +427,7 @@ namespace app {
                 return false;
             }
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
             lv_port_unlock(lv_lock_state);
 #else
             const uint32_t ts_done = Get_SysTick_Cycle_Count32();
