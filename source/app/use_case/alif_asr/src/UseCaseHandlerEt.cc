@@ -34,7 +34,6 @@
 #include "mlek/use_case/asr/ConformerProcessing.hpp"
 #include "mlek/common/ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
-// #include "Wav2LetterPreprocess.hpp"
 #include "hal.h"
 #include "mlek/log/log_macros.h"
 
@@ -64,7 +63,7 @@ static const int result_label_idx = 4;
 #define AUDIO_CHUNK_SIZE_SAMPLES (2048)
 #define AUDIO_CHUNKS             (78) // ~10s max
 #define AUDIO_SAMPLES            (AUDIO_CHUNK_SIZE_SAMPLES * AUDIO_CHUNKS)
-static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_CHUNK_SIZE_SAMPLES];
+static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_CHUNK_SIZE_SAMPLES] __attribute__((section(".bss.NoInit.temp_buf_sram")));
 #endif
 
 static volatile bool button_pressed = false;

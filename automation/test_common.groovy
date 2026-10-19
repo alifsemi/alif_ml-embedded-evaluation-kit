@@ -74,7 +74,31 @@ def build_inf_runner(String build_type, String toolchain, String board, String c
         exit \$exit_code"""
 }
 
-def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name) {
+def build_ci_power_test(String core, String board, String toolchain, String npu_id, String linker_script_name, String ml_framework, String use_case="all") {
+    build_path = "build_ci_power_test_${core}_${board}_${toolchain}_${npu_id}_${linker_script_name}_${ml_framework}".toLowerCase()
+
+    if (use_case == "all") {
+        use_case_build = "alif_img_class\\;alif_object_detection\\;alif_ad\\;alif_vww\\;alif_asr\\;alif_kws"
+    } else {
+        use_case_build = use_case
+    }
+
+    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO"
+
+    sh """#!/bin/bash -xe
+        export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
+        export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
+        echo $PATH
+        which armclang
+        mkdir $build_path
+        pushd $build_path
+        $cmake_cmd && make -j 4
+        exit_code=\$?
+        popd
+        exit \$exit_code"""
+}
+
+def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name, String extra_pytest_options = "") {
     sh """#!/bin/bash -xe
         printenv NODE_NAME
         cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
@@ -96,7 +120,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
 
     def run_pytest = "\
     pytest \
-    -s -v -k $test_name \
+    -s -v -k $test_name ${extra_pytest_options} \
     --tb=native \
     --root-logdir=pytest-logs \
     --junit-prefix=$target_binary_name \
@@ -129,5 +153,6 @@ return [
     build_hp: this.&build_hp,
     build_he_tcm: this.&build_he_tcm,
     build_inf_runner: this.&build_inf_runner,
+    build_ci_power_test: this.&build_ci_power_test,
     flash_and_run_pytest: this.&flash_and_run_pytest,
 ]

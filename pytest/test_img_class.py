@@ -9,7 +9,7 @@
 # */
 
 from pytest_embedded import Dut
-
+import pytest
 
 def test_img_find_correct_classification(dut: Dut):
 

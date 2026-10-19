@@ -104,6 +104,51 @@ pipeline {
                 }
             }
             parallel {
+                stage('Build HP GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'docker_build2' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        script {
+                            unstash name: "ml_base_stash"
+                            common_funcs.build_ci_power_test("HP", "DevKit-e8", "gcc", "U55", "RTSS-HP", "TensorFlowLiteMicro", "all");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_ci_power_test_img_hp_devkit_e8", includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_img_class/mram.bin"
+                            stash name: "test_build_ci_power_test_obj_hp_devkit_e8", includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_object_detection/mram.bin"
+                            stash name: "test_build_ci_power_test_ad_hp_devkit_e8",  includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin"
+                            stash name: "test_build_ci_power_test_vww_hp_devkit_e8", includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin"
+                            stash name: "test_build_ci_power_test_asr_hp_devkit_e8", includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin"
+                            stash name: "test_build_ci_power_test_kws_hp_devkit_e8", includes: "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
+                stage('Build HE GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'docker_build2' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        script {
+                            unstash name: "ml_base_stash"
+                            common_funcs.build_ci_power_test("HE", "DevKit-e8", "gcc", "U55", "RTSS-HE", "TensorFlowLiteMicro", "all");
+                            common_funcs.build_ci_power_test("HE", "DevKit-e8", "gcc", "U55", "RTSS-HE-TCM", "TensorFlowLiteMicro", "alif_kws");
+                        }
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                            archiveArtifacts artifacts: '*/bin/sectors/**/*.bin', fingerprint: true
+                            stash name: "test_build_ci_power_test_img_he_devkit_e8", includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_img_class/mram.bin"
+                            stash name: "test_build_ci_power_test_obj_he_devkit_e8", includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_object_detection/mram.bin"
+                            stash name: "test_build_ci_power_test_ad_he_devkit_e8",  includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin"
+                            stash name: "test_build_ci_power_test_vww_he_devkit_e8", includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin"
+                            stash name: "test_build_ci_power_test_asr_he_devkit_e8", includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin"
+                            stash name: "test_build_ci_power_test_kws_he_devkit_e8", includes: "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin"
+                        }
+                    }
+                }
                 stage('Build HP ROTATE_DISPLAY=180 Release for DevKit-e8') {
                     agent { label 'docker_build2' }
                     options { skipDefaultCheckout() }
@@ -574,6 +619,152 @@ pipeline {
                             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
                             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_vww.bin.xml'
                             archiveArtifacts artifacts: 'vww_armclang_video/recording.mov', fingerprint: false, allowEmptyArchive: true
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test KWS HE GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'E8_JS' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        unstash name: "ml_base_stash"
+                        unstash name: "test_build_ci_power_test_kws_he_devkit_e8"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_kws_he.json", "build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws", "mram.bin", "mlek_alif_kws.bin", "test_power_kws", '--power_results power_results_kws_he_devkit_e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro.md --power_board "DevKit-E8 rev b, SE v112.0" --power_core HE_U55');
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_kws_he.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/power_results_kws_he_devkit_e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_kws.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Object Detection HP GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'E8_JS' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        unstash name: "ml_base_stash"
+                        unstash name: "test_build_ci_power_test_obj_hp_devkit_e8"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_obj_detect_hp.json", "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_object_detection", "mram.bin", "mlek_alif_object_detection.bin", "test_power_object_detection", '--power_results power_results_obj_detect_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md --power_board "DevKit-E8 rev b, SE v112.0" --power_core HP_U55');
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_obj_detect_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/power_results_obj_detect_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_object_detection.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                stage('Test Image Classification HP GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'E8_JS' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        unstash name: "ml_base_stash"
+                        unstash name: "test_build_ci_power_test_img_hp_devkit_e8"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_img_class_hp.json", "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_img_class", "mram.bin", "mlek_alif_img_class.bin", "test_power_img_class", '--power_results power_results_img_class_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md --power_board "DevKit-E8 rev b, SE v112.0" --power_core HP_U55');
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_img_class_hp.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/power_results_img_class_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_img_class.bin.xml'
+                        }
+                        cleanup {
+                            cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                        }
+                    }
+                }
+                // ASR Has model in OSPI Flash, not supported yet
+                // stage('Test ASR HP GCC Release CI Power Test for DevKit-e8') {
+                //     agent { label 'E8_JS' }
+                //     options { skipDefaultCheckout() }
+                //     steps {
+                //         unstash name: "ml_base_stash"
+                //         unstash name: "test_build_ci_power_test_asr_hp_devkit_e8"
+                //         script {
+                //             try {
+                //             common_funcs.flash_and_run_pytest("alif_asr_hp.json", "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr", "mram.bin", "mlek_alif_asr.bin", "test_power_asr", '--power_results power_results_asr_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md --power_board "DevKit-E8 rev b, SE v112.0" --power_core HP_U55');
+                //             } catch (Exception e) {
+                //                 echo 'Exception occurred: ' + e.toString()
+                //                 stageResult: 'UNSTABLE'
+                //             }
+                //         }
+                //     }
+                //     post {
+                //         always {
+                //             archiveArtifacts artifacts: 'alif_asr_hp.json', fingerprint: false, allowEmptyArchive: true
+                //             archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                //             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                //             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_asr.bin.html', fingerprint: false, allowEmptyArchive: true
+                //             archiveArtifacts artifacts: 'pytest/power_results_asr_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                //             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_asr.bin.xml'
+                //         }
+                //         cleanup {
+                //             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+                //         }
+                //     }
+                // }
+                stage('Test Visual Wake Word HP GCC Release CI Power Test for DevKit-e8') {
+                    agent { label 'E8_JS' }
+                    options { skipDefaultCheckout() }
+                    steps {
+                        unstash name: "ml_base_stash"
+                        unstash name: "test_build_ci_power_test_vww_hp_devkit_e8"
+                        script {
+                            try {
+                            common_funcs.flash_and_run_pytest("alif_vww.json", "build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww", "mram.bin", "mlek_alif_vww.bin", "test_power_vww", '--power_results power_results_vww_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md --power_board "DevKit-E8 rev b, SE v112.0" --power_core HP_U55');
+                            } catch (Exception e) {
+                                echo 'Exception occurred: ' + e.toString()
+                                stageResult: 'UNSTABLE'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'alif_vww.json', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: '*/junit/*', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'pytest/power_results_vww_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_vww.bin.xml'
                         }
                         cleanup {
                             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
