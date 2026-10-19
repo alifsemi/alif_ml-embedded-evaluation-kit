@@ -84,6 +84,7 @@
 
 #define ETHERTYPE_IPV4 0x0800
 #define ETHERTYPE_ARP  0x0806
+#define ETHERTYPE_VLAN 0x8100
 #define ARP_OP_REQUEST 1
 #define ARP_OP_REPLY   2
 
@@ -94,6 +95,34 @@ _Static_assert(IP_HDR_LEN + UDP_HDR_LEN + RTP_HDR_LEN + PAYLOAD_MAX <= 1500,
 
 /* Retry interval for ARP requests while the receiver is not resolved. */
 #define ARP_RETRY_MS 500U
+
+/* Receive diagnostics: printed once per second while the receiver is not
+ * resolved, and once when it is. */
+#ifndef ETH_STREAM_DIAG
+#define ETH_STREAM_DIAG 1
+#endif
+
+#if ETH_STREAM_DIAG
+#define DIAG_PERIOD_MS 1000U
+/* PHY address of the AppKit-e8 RTL8201F. */
+#define DIAG_PHY_ADDR  1U
+
+/* Frames seen by rx_poll(). The MAC passes frames with errors and undersized
+ * frames up (MTL FEP/FUP set by the pack driver), so these cover them too;
+ * this MAC has no MMC counters. */
+static struct {
+    uint32_t frames;
+    uint32_t errors;
+    uint32_t vlan;
+    uint32_t arp;
+    uint32_t arp_from_dest;
+    uint32_t other;
+    uint16_t last_type;
+    uint32_t last_len;
+    uint8_t last_src[6];
+} rx_stats;
+static uint32_t diag_last_ms;
+#endif
 
 #if defined(SE_SERVICES_SUPPORT)
 /* Run profile applied by the platform at boot, see platform_drivers.c. */
@@ -264,7 +293,8 @@ static void arp_send(uint16_t op, const uint8_t* eth_dst, const uint8_t* tha, co
  * address. Everything else is dropped. */
 static void rx_poll(void)
 {
-    uint8_t f[ETH_HDR_LEN + ARP_LEN];
+    /* Minimum Ethernet frame without FCS: room for an 802.1Q tag and ARP. */
+    uint8_t f[60];
 
     for (;;) {
         const uint32_t len = mac->GetRxFrameSize();
@@ -273,21 +303,49 @@ static void rx_poll(void)
         }
         if (len == (uint32_t)ARM_DRIVER_ERROR) {
             mac->ReadFrame(NULL, 0); /* drop a bad frame */
+#if ETH_STREAM_DIAG
+            rx_stats.errors++;
+#endif
             continue;
         }
         /* Only the start of the frame is needed, the rest is dropped. */
-        mac->ReadFrame(f, (len < sizeof(f)) ? len : sizeof(f));
-        if (len < sizeof(f) || get16(&f[12]) != ETHERTYPE_ARP) {
+        const uint32_t n = (len < sizeof(f)) ? len : sizeof(f);
+        mac->ReadFrame(f, n);
+
+        /* Skip an 802.1Q tag, some host NIC drivers add a priority tag. */
+        uint32_t type_ofs = 12U;
+        if (n >= 16U && get16(&f[type_ofs]) == ETHERTYPE_VLAN) {
+            type_ofs += 4U;
+#if ETH_STREAM_DIAG
+            rx_stats.vlan++;
+#endif
+        }
+#if ETH_STREAM_DIAG
+        rx_stats.frames++;
+        rx_stats.last_len = len;
+        memcpy(rx_stats.last_src, &f[6], 6);
+        rx_stats.last_type = (n >= type_ofs + 2U) ? get16(&f[type_ofs]) : 0U;
+#endif
+        if (n < type_ofs + 2U + ARP_LEN || get16(&f[type_ofs]) != ETHERTYPE_ARP) {
+#if ETH_STREAM_DIAG
+            rx_stats.other++;
+#endif
             continue;
         }
 
-        const uint8_t* arp = &f[ETH_HDR_LEN];
+        const uint8_t* arp = &f[type_ofs + 2U];
         if (get16(&arp[0]) != 1 || get16(&arp[2]) != ETHERTYPE_IPV4) {
             continue;
         }
         const uint8_t* sha = &arp[8];
         const uint8_t* spa = &arp[14];
         const uint8_t* tpa = &arp[24];
+#if ETH_STREAM_DIAG
+        rx_stats.arp++;
+        if (memcmp(spa, dest_ip, 4) == 0) {
+            rx_stats.arp_from_dest++;
+        }
+#endif
 
         if (!dest_mac_valid && memcmp(spa, dest_ip, 4) == 0) {
             memcpy(dest_mac, sha, 6);
@@ -301,6 +359,32 @@ static void rx_poll(void)
         }
     }
 }
+
+#if ETH_STREAM_DIAG
+static void diag_print(void)
+{
+    uint16_t bmsr = 0;
+    uint16_t anlpar = 0;
+
+    /* Link status is latched low, the second read gives the current state. */
+    mac->PHY_Read(DIAG_PHY_ADDR, 1, &bmsr);
+    mac->PHY_Read(DIAG_PHY_ADDR, 1, &bmsr);
+    mac->PHY_Read(DIAG_PHY_ADDR, 5, &anlpar);
+    printf("ETH diag: PHY link %u aneg done %u, partner%s%s%s%s\n", (bmsr >> 2) & 1U,
+           (bmsr >> 5) & 1U, (anlpar & 0x100U) ? " 100FD" : "", (anlpar & 0x080U) ? " 100HD" : "",
+           (anlpar & 0x040U) ? " 10FD" : "", (anlpar & 0x020U) ? " 10HD" : "");
+
+    printf("ETH diag: missed %" PRIu32 "/%" PRIu32 ", driver rx %" PRIu32 " err %" PRIu32
+           " vlan %" PRIu32 " arp %" PRIu32 " (from %d.%d.%d.%d: %" PRIu32 ") other %" PRIu32
+           ", last %" PRIu32 " B type 0x%04X from %02X:%02X:%02X:%02X:%02X:%02X\n",
+           ETH->ETH_MTL_RXQ0_MISSED_PACKET_OVERFLOW_CNT, ETH->ETH_DMA_CH0_MISS_FRAME_CNT,
+           rx_stats.frames, rx_stats.errors, rx_stats.vlan, rx_stats.arp, dest_ip[0], dest_ip[1],
+           dest_ip[2], dest_ip[3], rx_stats.arp_from_dest, rx_stats.other, rx_stats.last_len,
+           rx_stats.last_type,
+           rx_stats.last_src[0], rx_stats.last_src[1], rx_stats.last_src[2], rx_stats.last_src[3],
+           rx_stats.last_src[4], rx_stats.last_src[5]);
+}
+#endif
 
 /* Send as much of the pending audio as the MAC TX ring takes. Called from
  * eth_stream_send() and from the ETH IRQ when a frame has been sent. */
@@ -417,7 +501,20 @@ void eth_stream_send(const int16_t* frames, uint32_t num_frames)
     const uint32_t ts = rtp_ts;
     rtp_ts += num_frames;
 
+#if ETH_STREAM_DIAG
+    const bool was_resolved = dest_mac_valid;
+#endif
     rx_poll();
+
+#if ETH_STREAM_DIAG
+    if (!was_resolved) {
+        const uint32_t now = Get_SysTick_Count();
+        if (dest_mac_valid || (now - diag_last_ms) >= DIAG_PERIOD_MS) {
+            diag_print();
+            diag_last_ms = now;
+        }
+    }
+#endif
 
     if (!dest_mac_valid) {
         const uint32_t now = Get_SysTick_Count();
