@@ -51,6 +51,7 @@
 #include <arm_mve.h>
 #endif
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 
@@ -64,10 +65,21 @@ using arm::app::KwsPostProcess;
 using arm::app::fwk::tflm::MicroNetKwsModel;
 
 
-// #define AUDIO_SAMPLES 256
-// #define AUDIO_STRIDE 128
-#define AUDIO_SAMPLES 16000 // 16k samples/sec, 1sec sample
-#define AUDIO_STRIDE 8000 // 0.5 seconds
+/* Samples per loop iteration, set by alif_aec_FRAME_STRIDE (256 = 16 ms, the
+ * AEC/NS frame stride). Mic capture, DAC output and the Ethernet stream all
+ * run in strides. */
+#ifndef AEC_FRAME_STRIDE
+#define AEC_FRAME_STRIDE 256
+#endif
+#define AUDIO_STRIDE AEC_FRAME_STRIDE
+/* History kept in the capture buffers, ending with the newest stride. The KWS
+ * model needs a 1 s window; otherwise two strides, until the AEC/NS model
+ * defines its window. */
+#if defined(AEC_RUN_KWS)
+#define AUDIO_SAMPLES 16000
+#else
+#define AUDIO_SAMPLES (2 * AUDIO_STRIDE)
+#endif
 
 /* Microphone streams. Each stream has two mics.
  *   USE_STEREO not defined (default): each stream is mono (the HAL mixes the
@@ -111,7 +123,7 @@ static int16_t audio_inf[(AUDIO_SAMPLES + AUDIO_STRIDE) * AEC_CHANNELS] AEC_CAPT
 /* Second capture buffer used to run the second microphone stream in parallel
  * with the first one. */
 static int16_t audio_inf_pdm[(AUDIO_SAMPLES + AUDIO_STRIDE) * AEC_CHANNELS] AEC_CAPTURE_BUF_SECTION;
-#if defined(USE_STEREO)
+#if defined(USE_STEREO) && defined(AEC_RUN_KWS)
 /* Mono (left mic) copy of the first stream, the model input is mono. */
 static int16_t audio_inf_mono[AUDIO_SAMPLES] AEC_CAPTURE_BUF_SECTION;
 #endif
@@ -119,11 +131,8 @@ static int16_t audio_inf_mono[AUDIO_SAMPLES] AEC_CAPTURE_BUF_SECTION;
  * (I2S3 on DevKit-e8, I2S2 on AppKit-e8). We prime two Sends
  * before the loop (one playing, one queued), so main's audio_out_transmit
  * ALWAYS finds the queue full on first attempt and spins. That pins main's
- * iteration rate to the DAC rate; otherwise the mic wait paces main at
- * 500+P ms per iter and the ~5 ms/stride drift exhausts the DAC's 500 ms
- * window after ~87 strides (~44 s), producing a 100% Send-to-Send miss rate
- * and a continuous 0.5 s crackle. Must live in shared SRAM (fabric DMA cannot
- * reach M55 TCM). */
+ * iteration rate to the DAC rate, so mic and DAC can't drift apart. Must live
+ * in shared SRAM (fabric DMA cannot reach M55 TCM). */
 static int16_t audio_out_a[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
 static int16_t audio_out_b[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
 static int16_t audio_out_c[AUDIO_STRIDE*2] __attribute__((section(".bss.NoInit.audio_out"))) __attribute__((aligned(32)));
@@ -149,8 +158,86 @@ void button_cb(uint32_t event)
     button_pressed = !button_pressed;
 }
 
-/* Longest time to wait for one stride of microphone data. A stride is 0.5 s,
- * so anything much longer means that the stream is not delivering data. */
+#if defined(AEC_TIMING_PROBE)
+/* Loop timing probe. Per iteration it measures the time spent waiting for the
+ * DAC queue and the mics; the rest is work. A summary of the last 10 s is
+ * printed at the top of an iteration, and the iteration that contains the
+ * print is left out of the next summary. */
+#define AEC_PROBE_ITERATIONS (10 * 16000 / AUDIO_STRIDE)
+
+static struct {
+    uint64_t iterStart;
+    uint64_t waitStart;
+    uint64_t wait;
+    uint64_t sumIter;
+    uint64_t minIter;
+    uint64_t maxIter;
+    uint64_t sumWork;
+    uint64_t maxWork;
+    uint32_t count;
+    uint32_t overBudget;
+    uint32_t underrunsAtStart;
+    bool skip;
+} s_probe = {0, 0, 0, 0, UINT64_MAX, 0, 0, 0, 0, 0, 0, true};
+
+static uint32_t CyclesToUs(uint64_t cycles)
+{
+    return static_cast<uint32_t>(cycles * 1000000u / GetSystemCoreClock());
+}
+
+static void ProbeIteration(uint32_t audioRate)
+{
+    const uint64_t strideCycles =
+        static_cast<uint64_t>(GetSystemCoreClock()) * AUDIO_STRIDE / audioRate;
+    const uint64_t now = Get_SysTick_Cycle_Count();
+
+    if (s_probe.iterStart != 0 && !s_probe.skip) {
+        const uint64_t iter = now - s_probe.iterStart;
+        const uint64_t work = iter - s_probe.wait;
+        s_probe.sumIter += iter;
+        s_probe.sumWork += work;
+        s_probe.minIter = (iter < s_probe.minIter) ? iter : s_probe.minIter;
+        s_probe.maxIter = (iter > s_probe.maxIter) ? iter : s_probe.maxIter;
+        s_probe.maxWork = (work > s_probe.maxWork) ? work : s_probe.maxWork;
+        s_probe.overBudget += (work > strideCycles) ? 1 : 0;
+        s_probe.count++;
+    }
+    s_probe.skip = false;
+
+    if (s_probe.count >= AEC_PROBE_ITERATIONS) {
+        const uint32_t underruns = audio_out_underruns();
+        const uint32_t strideUs = CyclesToUs(strideCycles);
+        const uint32_t maxWorkUs = CyclesToUs(s_probe.maxWork);
+        printf("AEC loop: %" PRIu32 " it, period avg %" PRIu32 " min %" PRIu32 " max %" PRIu32
+               " us, work avg %" PRIu32 " max %" PRIu32 " us (%" PRIu32 "%% of %" PRIu32
+               " us), over budget %" PRIu32 ", DAC underruns %" PRIu32 "\n",
+               s_probe.count, CyclesToUs(s_probe.sumIter / s_probe.count),
+               CyclesToUs(s_probe.minIter), CyclesToUs(s_probe.maxIter),
+               CyclesToUs(s_probe.sumWork / s_probe.count), maxWorkUs,
+               maxWorkUs * 100u / strideUs, strideUs, s_probe.overBudget,
+               underruns - s_probe.underrunsAtStart);
+        s_probe.sumIter = s_probe.sumWork = s_probe.maxIter = s_probe.maxWork = 0;
+        s_probe.minIter = UINT64_MAX;
+        s_probe.count = s_probe.overBudget = 0;
+        s_probe.underrunsAtStart = underruns;
+        s_probe.skip = true;
+    }
+
+    s_probe.iterStart = Get_SysTick_Cycle_Count();
+    s_probe.wait = 0;
+}
+
+#define PROBE_ITERATION(rate) ProbeIteration(rate)
+#define PROBE_WAIT_START()    (s_probe.waitStart = Get_SysTick_Cycle_Count())
+#define PROBE_WAIT_END()      (s_probe.wait += Get_SysTick_Cycle_Count() - s_probe.waitStart)
+#else
+#define PROBE_ITERATION(rate)
+#define PROBE_WAIT_START()
+#define PROBE_WAIT_END()
+#endif
+
+/* Longest time to wait for one stride of microphone data. Anything much
+ * longer than a stride means that the stream is not delivering data. */
 #define AEC_MIC_WAIT_TIMEOUT_MS 3000
 
 /**
@@ -192,7 +279,7 @@ using namespace arm::app::kws;
     /* inference handler. */
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
-        auto& profiler = ctx.Get<Profiler&>("profiler");
+        [[maybe_unused]] auto& profiler = ctx.Get<Profiler&>("profiler");  // KWS only
         auto& model = ctx.Get<Model&>("model");
         const auto mfccFrameLength = ctx.Get<int>("frameLength");
         const auto mfccFrameStride = ctx.Get<int>("frameStride");
@@ -323,11 +410,13 @@ using namespace arm::app::kws;
         int16_t *audio_out_fill = audio_out_c;
 
         do {
+            PROBE_ITERATION(audioRate);
+
             // Fill audio_out_fill from the PREVIOUS iteration's preprocessed
             // mic data (already in audio_inf / audio_inf_pdm from last iter's
             // tail). Doing this BEFORE the mic wait means the next DAC buffer
-            // is queued near the top of the stride, giving the DAC_Callback a
-            // ~500 ms margin before it needs data_ready=true.
+            // is queued near the top of the stride, giving the DAC_Callback
+            // most of a stride of margin before it needs data_ready=true.
 #if defined(USE_STEREO)
             // The first stream is already interleaved L/R, which is the DAC format.
             std::memcpy(audio_out_fill,
@@ -353,20 +442,21 @@ using namespace arm::app::kws;
 #endif
 #endif // USE_STEREO
 
+#if defined(ETH_STREAM)
+            // Send the same stride to the network before waiting for the DAC,
+            // so the network copy doesn't wait for the speaker. Does not
+            // block; audio_out_fill is not rewritten for another two strides.
+            eth_stream_send(audio_out_fill, AUDIO_STRIDE);
+#endif
+
             // Spin until the DAC queue has room. With triple-buffered priming
             // this spin is where main sleeps for most of each stride, pinning
             // iteration rate to the DAC rate and eliminating drift.
+            PROBE_WAIT_START();
             while (audio_out_transmit(audio_out_fill, AUDIO_STRIDE * 2) == -1) {
                 __WFE();
             }
-
-#if defined(ETH_STREAM)
-            // Send the same stride to the network. Does not block: packets are
-            // sent in the background from the Ethernet TX interrupt (~4 ms for
-            // a 0.5 s stride at 100 Mbit/s). audio_out_fill is read until then;
-            // it is not rewritten for another two strides.
-            eth_stream_send(audio_out_fill, AUDIO_STRIDE);
-#endif
+            PROBE_WAIT_END();
 
             // Swap: cycle through the three buffers (C -> A -> B -> C ...).
             // After this transmit, the fill buffer is now "queued" and the
@@ -380,9 +470,10 @@ using namespace arm::app::kws;
                 audio_out_fill = audio_out_a;
             }
 
-            // Now spend the ~500 ms stride waiting for the next mic data and
+            // Now spend the rest of the stride waiting for the next mic data and
             // preprocessing it. All of this happens in parallel with the DAC
             // DMA'ing the buffer we just queued.
+            PROBE_WAIT_START();
             err = WaitForMic(AEC_MIC_L, AEC_MIC_L_NAME);
             if (err) {
                 printf_err("Waiting for " AEC_MIC_L_NAME " audio failed with error: %d\n", err);
@@ -393,6 +484,7 @@ using namespace arm::app::kws;
                 printf_err("Waiting for " AEC_MIC_R_NAME " audio failed with error: %d\n", err);
                 return false;
             }
+            PROBE_WAIT_END();
 
             std::memmove(audio_inf,
                          audio_inf + AUDIO_STRIDE * AEC_CHANNELS,
@@ -412,6 +504,7 @@ using namespace arm::app::kws;
                                             audio_inf_pdm + (AUDIO_SAMPLES - AUDIO_STRIDE) * AEC_CHANNELS,
                                             AUDIO_STRIDE);
 
+#if defined(AEC_RUN_KWS)
 #if defined(USE_STEREO)
             for (int i = 0; i < AUDIO_SAMPLES; ++i) {
                 audio_inf_mono[i] = audio_inf[AEC_CHANNELS * i];
@@ -420,7 +513,6 @@ using namespace arm::app::kws;
 #else
             const int16_t* inferenceWindow = audio_inf;
 #endif
-            (void) inferenceWindow;  // Unused until inference is re-enabled.
 
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
@@ -435,6 +527,7 @@ using namespace arm::app::kws;
                 printf_err("Post-processing failed.");
                 return false;
             }
+#endif // AEC_RUN_KWS
 
             index++;
         } while (1);//while (index < strides_in_example_audio);

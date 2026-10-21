@@ -45,9 +45,9 @@
 #ifndef ETH_STREAM_PORT
 #define ETH_STREAM_PORT 5004
 #endif
-/* 160 frames = 10 ms at 16 kHz. */
+/* 256 frames = 16 ms at 16 kHz, one packet per AEC stride. */
 #ifndef ETH_STREAM_FRAMES_PER_PACKET
-#define ETH_STREAM_FRAMES_PER_PACKET 160
+#define ETH_STREAM_FRAMES_PER_PACKET 256
 #endif
 /* Dynamic RTP payload type, there is no static one for L16 at 16 kHz. */
 #ifndef ETH_STREAM_RTP_PT
@@ -112,6 +112,9 @@ _Static_assert(IP_HDR_LEN + UDP_HDR_LEN + RTP_HDR_LEN + PAYLOAD_MAX <= 1500,
  * this MAC has no MMC counters. */
 static struct {
     uint32_t frames;
+    uint32_t bcast;
+    uint32_t mcast;
+    uint32_t ucast;
     uint32_t errors;
     uint32_t vlan;
     uint32_t arp;
@@ -323,6 +326,13 @@ static void rx_poll(void)
 #if ETH_STREAM_DIAG
         rx_stats.frames++;
         rx_stats.last_len = len;
+        if (memcmp(f, bcast_mac, 6) == 0) {
+            rx_stats.bcast++;
+        } else if (f[0] & 1U) {
+            rx_stats.mcast++;
+        } else {
+            rx_stats.ucast++;
+        }
         memcpy(rx_stats.last_src, &f[6], 6);
         rx_stats.last_type = (n >= type_ofs + 2U) ? get16(&f[type_ofs]) : 0U;
 #endif
@@ -374,6 +384,8 @@ static void diag_print(void)
            (bmsr >> 5) & 1U, (anlpar & 0x100U) ? " 100FD" : "", (anlpar & 0x080U) ? " 100HD" : "",
            (anlpar & 0x040U) ? " 10FD" : "", (anlpar & 0x020U) ? " 10HD" : "");
 
+    printf("ETH diag: rx dst bcast %" PRIu32 " mcast %" PRIu32 " ucast %" PRIu32 "\n", rx_stats.bcast,
+           rx_stats.mcast, rx_stats.ucast);
     printf("ETH diag: missed %" PRIu32 "/%" PRIu32 ", driver rx %" PRIu32 " err %" PRIu32
            " vlan %" PRIu32 " arp %" PRIu32 " (from %d.%d.%d.%d: %" PRIu32 ") other %" PRIu32
            ", last %" PRIu32 " B type 0x%04X from %02X:%02X:%02X:%02X:%02X:%02X\n",
@@ -468,6 +480,12 @@ int32_t eth_stream_init(uint32_t sample_rate)
      * frames to our MAC pass the RX filter. */
     ETH->ETH_MAC_ADDRESS0_LOW = ((uint32_t)our_mac[3] << 24) | ((uint32_t)our_mac[2] << 16) |
                                 ((uint32_t)our_mac[1] << 8) | our_mac[0];
+#if ETH_STREAM_DIAG
+    printf("ETH diag: MAC addr hi 0x%08" PRIX32 " lo 0x%08" PRIX32 ", filter 0x%08" PRIX32
+           ", MAC cfg 0x%08" PRIX32 ", MTL rxq 0x%08" PRIX32 ", MAC version 0x%08" PRIX32 "\n",
+           ETH->ETH_MAC_ADDRESS0_HIGH, ETH->ETH_MAC_ADDRESS0_LOW, ETH->ETH_MAC_PACKET_FILTER,
+           ETH->ETH_MAC_CONFIGURATION, ETH->ETH_MTL_RXQ0_OPERATION_MODE, ETH->ETH_MAC_VERSION);
+#endif
 
     dest_mac_init();
     hdr_template_init();

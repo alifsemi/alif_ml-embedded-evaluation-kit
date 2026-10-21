@@ -11,6 +11,8 @@ extern "C" {
 int32_t audio_out_init(uint32_t sample_rate);
 int32_t audio_out_transmit(const void *data, uint32_t num);
 void audio_out_set_volume(uint8_t volume);
+/* Number of times the DAC finished a buffer with no next one queued. */
+uint32_t audio_out_underruns(void);
 
 #ifdef __cplusplus
 }

@@ -73,8 +73,23 @@ USER_OPTION(${use_case}_AUDIO_MIN_SAMPLES "Specify the minimum number of samples
 
 set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Needed for power examples and KWS MHU communication.")
 
+USER_OPTION(${use_case}_FRAME_STRIDE "Samples per processing loop iteration (256 = 16 ms at 16 kHz, the AEC/NS frame stride)."
+    256
+    STRING)
+
+USER_OPTION(${use_case}_RUN_KWS "Run the KWS model on a 1 s window every stride (placeholder until the AEC/NS model is added)."
+    OFF
+    BOOL)
+
+USER_OPTION(${use_case}_TIMING_PROBE "Print processing loop timing (period, work time, DAC underruns) every 10 s."
+    OFF
+    BOOL)
+
 set(${use_case}_COMPILE_DEFS
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
+    $<$<BOOL:${${use_case}_TIMING_PROBE}>:AEC_TIMING_PROBE>
+    AEC_FRAME_STRIDE=${${use_case}_FRAME_STRIDE}
+    $<$<BOOL:${${use_case}_RUN_KWS}>:AEC_RUN_KWS>
 )
 
 # Stream the speaker output as RTP (L16, stereo) over UDP/IPv4 on Ethernet.
@@ -93,8 +108,8 @@ USER_OPTION(ETH_STREAM_PORT "UDP port, used as source and destination port."
 USER_OPTION(ETH_STREAM_MAC "MAC address of this board."
     "02:00:00:ae:c0:01"
     STRING)
-USER_OPTION(ETH_STREAM_FRAMES_PER_PACKET "Stereo frames per RTP packet (160 = 10 ms at 16 kHz, max 365)."
-    160
+USER_OPTION(ETH_STREAM_FRAMES_PER_PACKET "Stereo frames per RTP packet (256 = 16 ms at 16 kHz, one packet per default stride; max 365)."
+    256
     STRING)
 
 if (ETH_STREAM)

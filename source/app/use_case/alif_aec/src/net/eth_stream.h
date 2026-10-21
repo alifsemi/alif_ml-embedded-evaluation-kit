@@ -32,9 +32,9 @@ int32_t eth_stream_init(uint32_t sample_rate);
 
 /**
  * Send interleaved stereo 16-bit frames. Never blocks: as many packets as the
- * MAC TX ring takes are queued right away, the rest are sent from the TX
- * complete interrupt (a 0.5 s stride takes ~4 ms at 100 Mbit/s). The buffer
- * is read until then, so it must stay unchanged for a few ms.
+ * MAC TX ring (8 packets) takes are queued right away, the rest are sent from
+ * the TX complete interrupt. In that case the buffer is read until then
+ * (~80 us per packet at 100 Mbit/s), so it must stay unchanged meanwhile.
  * While the receiver's MAC address is not known yet the audio is dropped, and
  * audio still unsent when the next call comes is dropped too.
  * @param frames     Interleaved L/R samples.

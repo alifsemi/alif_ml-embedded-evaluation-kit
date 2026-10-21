@@ -94,6 +94,12 @@ struct audio_stream_state {
      * stops between user chains; get_audio_data_ex uses this flag to skip
      * double-starting a Receive when one is already running. */
     atomic_bool rx_in_flight;
+    /* Size of the Receive in flight, in frames. */
+    int rx_samples;
+    /* Chunk that completed after the user chain was already full, kept for
+     * the next get_audio_data_ex() instead of being dropped. */
+    int pending_buf;
+    int pending_samples;
 };
 
 #ifdef USE_I2S_MICS
@@ -375,9 +381,20 @@ static void audio_start_next_rx(audio_mic_t mic, int data_to_go)
     if (err) {
         s->async_error = err;
     } else {
+        s->rx_samples = data_to_go;
         atomic_store(&s->rx_in_flight, true);
     }
 }
+
+/* Chunk size to chain between user chains: at most one user chain, so that a
+ * chunk never spans two chains. */
+static int chain_rx_size(const struct audio_stream_state *s)
+{
+    return (s->user_length < AUDIO_REC_SAMPLES) ? s->user_length : AUDIO_REC_SAMPLES;
+}
+
+static void copy_rec_to_user(audio_mic_t mic, struct audio_stream_state *s, int rec_buf,
+                             int samples);
 
 static void voice_data_cb_common(audio_mic_t mic)
 {
@@ -388,8 +405,19 @@ static void voice_data_cb_common(audio_mic_t mic)
     atomic_store(&s->rx_in_flight, false);
     int previous_rec_buf = s->current_rec_buf;
     s->current_rec_buf = !s->current_rec_buf;
-    int samples = AUDIO_REC_SAMPLES;
-    int new_total = s->received + AUDIO_REC_SAMPLES;
+    int samples = s->rx_samples;
+
+    if (s->received >= s->user_length) {
+        /* The user chain is full and not re-armed yet: keep this chunk for
+         * the next chain. Its buffer stays untouched until the RX started
+         * below completes. */
+        s->pending_buf = previous_rec_buf;
+        s->pending_samples = samples;
+        audio_start_next_rx(mic, chain_rx_size(s));
+        return;
+    }
+
+    int new_total = s->received + samples;
     int next_rx_size;
     if (new_total < s->user_length) {
         next_rx_size = s->user_length - new_total;
@@ -398,51 +426,58 @@ static void voice_data_cb_common(audio_mic_t mic)
             samples = s->user_length - s->received;
             new_total = s->user_length;
         }
-        /* Chain the next full-size RX immediately so the mic HW never idles
-         * between user chains. Otherwise the HW-level gap between successive
+        /* Chain the next RX immediately so the mic HW never idles between
+         * user chains. Otherwise the gap between successive
          * get_audio_data_ex calls paces the use case loop slower than the
-         * DAC rate and the TX FIFO margin bleeds away one P ms per stride. */
-        next_rx_size = AUDIO_REC_SAMPLES;
+         * DAC rate. */
+        next_rx_size = chain_rx_size(s);
     }
     audio_start_next_rx(mic, next_rx_size);
-    switch (mic) {
-#ifdef USE_I2S_MICS
-    case AUDIO_MIC_I2S: {
-#ifdef STORE_AUDIO
-        if (store_pos < sizeof audio_store / sizeof audio_store[0]) {
-            memcpy(audio_store + store_pos, audio_rec_i2s[previous_rec_buf],
-                   samples * 2 * sizeof(int32_t));
-            store_pos += 2 * samples;
-        }
-#endif
-        copy_i2s_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
-                           audio_rec_i2s[previous_rec_buf], samples);
-        break;
+#if defined(STORE_AUDIO) && defined(USE_I2S_MICS)
+    if (mic == AUDIO_MIC_I2S && store_pos < sizeof audio_store / sizeof audio_store[0]) {
+        memcpy(audio_store + store_pos, audio_rec_i2s[previous_rec_buf],
+               samples * 2 * sizeof(int32_t));
+        store_pos += 2 * samples;
     }
 #endif
-#ifdef USE_PDM_MICS
-    case AUDIO_MIC_PDM: {
-        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
-                           audio_rec_pdm[previous_rec_buf], samples);
-        break;
-    }
-#endif
-#ifdef USE_LPPDM_MICS
-    case AUDIO_MIC_LPPDM: {
-        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
-                           audio_rec_lppdm[previous_rec_buf], samples);
-        break;
-    }
-#endif
-    default:
-        break;
-    }
-    (void)previous_rec_buf;
+    copy_rec_to_user(mic, s, previous_rec_buf, samples);
     s->received = new_total;
     if (s->received >= s->user_length || s->async_error) {
         if (s->user_cb) {
             s->user_cb(s->async_error);
         }
+    }
+}
+
+/* Convert samples from a record buffer into the user chain at its current
+ * position. */
+static void copy_rec_to_user(audio_mic_t mic, struct audio_stream_state *s, int rec_buf,
+                             int samples)
+{
+    switch (mic) {
+#ifdef USE_I2S_MICS
+    case AUDIO_MIC_I2S:
+        copy_i2s_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
+                           audio_rec_i2s[rec_buf], samples);
+        break;
+#endif
+#ifdef USE_PDM_MICS
+    case AUDIO_MIC_PDM:
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
+                           audio_rec_pdm[rec_buf], samples);
+        break;
+#endif
+#ifdef USE_LPPDM_MICS
+    case AUDIO_MIC_LPPDM:
+        copy_pdm_rec_to_in(s, (float16_t *) s->user_ptr + s->received * AUDIO_OUT_CHANNELS,
+                           audio_rec_lppdm[rec_buf], samples);
+        break;
+#endif
+    default:
+        (void) s;
+        (void) rec_buf;
+        (void) samples;
+        break;
     }
 }
 
@@ -547,10 +582,20 @@ int get_audio_data_ex(audio_mic_t mic, int16_t *data, int len)
     s->user_length = len;
     s->received = 0;
     s->async_error = 0;
+    /* A chunk that arrived before this call starts the chain. */
+    if (s->pending_samples) {
+        int samples = (s->pending_samples < len) ? s->pending_samples : len;
+        copy_rec_to_user(mic, s, s->pending_buf, samples);
+        s->received = samples;
+        s->pending_samples = 0;
+        if (s->received >= s->user_length && s->user_cb) {
+            s->user_cb(0);
+        }
+    }
     /* With continuous chaining the ISR always has a Receive in flight after
      * the very first call. Only kick a fresh one off here on initial start. */
     if (!atomic_load(&s->rx_in_flight)) {
-        audio_start_next_rx(mic, s->user_length);
+        audio_start_next_rx(mic, (s->received < len) ? len - s->received : chain_rx_size(s));
     }
     __set_PRIMASK(primask);
     return s->async_error;

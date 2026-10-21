@@ -5,10 +5,11 @@ device over Ethernet. Supported on **AppKit-E8** (RTSS-HE).
 
 - Format: RTP (RFC 3550) with L16 payload: 16-bit big-endian PCM, stereo,
   16 kHz, payload type 96.
-- Transport: UDP/IPv4, port 5004, 160 frames (10 ms) per packet,
-  100 packets/s, ~70 kB/s.
-- The capture loop never waits for the network. Each 0.5 s stride is queued
-  to the Ethernet MAC and sent in the background (~4 ms at 100 Mbit/s).
+- Transport: UDP/IPv4, port 5004, 256 frames (16 ms) per packet,
+  62.5 packets/s, ~67 kB/s.
+- One packet per 16 ms processing stride (`alif_aec_FRAME_STRIDE`). Each
+  stride is sent as soon as it is ready, before it is queued to the speaker,
+  and the capture loop never waits for the network.
 
 ## Network setup
 
@@ -35,7 +36,7 @@ Everything is set at build time:
 | `ETH_STREAM_DEST_IP` | `192.168.1.100` | Receiver: unicast on the same subnet, multicast (224.0.0.0–239.255.255.255) or `255.255.255.255` |
 | `ETH_STREAM_PORT` | `5004` | UDP source and destination port |
 | `ETH_STREAM_MAC` | `02:00:00:ae:c0:01` | Board MAC address |
-| `ETH_STREAM_FRAMES_PER_PACKET` | `160` | Stereo frames per packet (max 365) |
+| `ETH_STREAM_FRAMES_PER_PACKET` | `256` | Stereo frames per packet (max 365). Keep it equal to `alif_aec_FRAME_STRIDE` for one packet per stride |
 
 At startup the board:
 
@@ -123,7 +124,7 @@ sample with the Alif Security Toolkit (`app-gen-toc`, `app-write-mram`).
 On boot the console shows:
 
 ```
-ETH stream: RTP L16/16000/2 PT 96, 160 frames/packet, 192.168.1.10 -> 192.168.1.100:5004
+ETH stream: RTP L16/16000/2 PT 96, 256 frames/packet, 192.168.1.10 -> 192.168.1.100:5004
 ETH stream: receiver at 3C:49:37:08:AD:F0
 ```
 
@@ -131,8 +132,8 @@ ETH stream: receiver at 3C:49:37:08:AD:F0
 
 The player has to receive RTP on UDP port 5004 and decode it as **L16,
 16000 Hz, 2 channels, payload type 96**. RTP doesn't carry the format, so the
-player has to be told. The audio arrives in 0.5 s bursts, so give it a
-jitter buffer of at least ~600 ms.
+player has to be told. Packets arrive every 16 ms; a jitter buffer of ~50 ms
+is enough.
 
 ### VLC or ffmpeg (any OS)
 
@@ -149,7 +150,7 @@ a=rtpmap:96 L16/16000/2
 ```
 
 - **Play:** open `aec.sdp` in VLC (Media → Open File). Raise the network
-  caching to ~600 ms if the audio breaks up.
+  caching to ~50 ms for low latency (raise it if the audio breaks up).
 - **Record to WAV:**
   `ffmpeg -protocol_whitelist file,udp,rtp -i aec.sdp aec.wav`. Stop with
   `q`.
@@ -165,7 +166,7 @@ using `\`.
 ```sh
 gst-launch-1.0 udpsrc port=5004 \
   caps="application/x-rtp,media=audio,clock-rate=16000,encoding-name=L16,channels=2,payload=96" \
-  ! rtpjitterbuffer latency=600 ! rtpL16depay ! audioconvert ! autoaudiosink
+  ! rtpjitterbuffer latency=50 ! rtpL16depay ! audioconvert ! autoaudiosink
 ```
 
 #### Record to a WAV file (for Audacity)
@@ -173,7 +174,7 @@ gst-launch-1.0 udpsrc port=5004 \
 ```sh
 gst-launch-1.0 -e udpsrc port=5004 \
   caps="application/x-rtp,media=audio,clock-rate=16000,encoding-name=L16,channels=2,payload=96" \
-  ! rtpjitterbuffer latency=600 ! rtpL16depay ! audioconvert ! wavenc \
+  ! rtpjitterbuffer latency=50 ! rtpL16depay ! audioconvert ! wavenc \
   ! filesink location=aec.wav
 ```
 
@@ -191,7 +192,7 @@ device.
 pactl load-module module-null-sink sink_name=aec_stream
 gst-launch-1.0 udpsrc port=5004 \
   caps="application/x-rtp,media=audio,clock-rate=16000,encoding-name=L16,channels=2,payload=96" \
-  ! rtpjitterbuffer latency=600 ! rtpL16depay ! audioconvert \
+  ! rtpjitterbuffer latency=50 ! rtpL16depay ! audioconvert \
   ! pulsesink device=aec_stream
 ```
 
@@ -206,5 +207,5 @@ with `pactl unload-module module-null-sink`.
 | Link LED off, host shows the cable as disconnected | Cable, board running the `ETH_STREAM=ON` image |
 | `ETH stream: MAC init failed (no RMII reference clock from the PHY?)` | PHY not running: PHY reset line (P11_6) or PHY power |
 | No `receiver at …` line | Host adapter IP must equal `ETH_STREAM_DEST_IP`, mask `255.255.255.0` |
-| `receiver at …` printed but no audio | Firewall must allow incoming UDP 5004. Wireshark (any OS) or `tcpdump` (Linux/macOS) should show ~100 packets/s from the board |
+| `receiver at …` printed but no audio | Firewall must allow incoming UDP 5004. Wireshark (any OS) or `tcpdump` (Linux/macOS) should show ~62 packets/s from the board |
 | Audio has gaps | Jitter buffer too small: raise `latency` |

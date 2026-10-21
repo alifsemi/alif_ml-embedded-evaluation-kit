@@ -59,6 +59,7 @@ static atomic_bool running = false;
 static atomic_bool data_ready = false;
 static const void *next_data = NULL;
 static uint32_t next_samples = 0;
+static volatile uint32_t underruns = 0;
 
 static void DAC_Callback(uint32_t event)
 {
@@ -69,6 +70,7 @@ static void DAC_Callback(uint32_t event)
         running = false;
 
         if (!data_ready) {
+            underruns++;
             return;
         }
 
@@ -162,6 +164,11 @@ int32_t audio_out_transmit(const void *data, uint32_t num)
     running = true;
 
     return ret;
+}
+
+uint32_t audio_out_underruns(void)
+{
+    return underruns;
 }
 
 void audio_out_set_volume(uint8_t volume)
