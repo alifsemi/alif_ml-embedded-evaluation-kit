@@ -37,6 +37,7 @@ Everything is set at build time:
 | `ETH_STREAM_PORT` | `5004` | UDP source and destination port |
 | `ETH_STREAM_MAC` | `02:00:00:ae:c0:01` | Board MAC address |
 | `ETH_STREAM_FRAMES_PER_PACKET` | `256` | Stereo frames per packet (max 365). Keep it equal to `alif_aec_FRAME_STRIDE` for one packet per stride |
+| `ETH_STREAM_PROMISC` | `OFF` | Receive all frames and filter on the destination MAC in software, for boards where unicast frames to the board don't get through the MAC address filter |
 
 At startup the board:
 
@@ -206,6 +207,6 @@ with `pactl unload-module module-null-sink`.
 |---|---|
 | Link LED off, host shows the cable as disconnected | Cable, board running the `ETH_STREAM=ON` image |
 | `ETH stream: MAC init failed (no RMII reference clock from the PHY?)` | PHY not running: PHY reset line (P11_6) or PHY power |
-| No `receiver at …` line | Host adapter IP must equal `ETH_STREAM_DEST_IP`, mask `255.255.255.0` |
+| No `receiver at …` line | Host adapter IP must equal `ETH_STREAM_DEST_IP`, mask `255.255.255.0`. If the host's ARP replies are visible in Wireshark but the `ETH diag` lines show `ucast 0`, build with `ETH_STREAM_PROMISC=ON` |
 | `receiver at …` printed but no audio | Firewall must allow incoming UDP 5004. Wireshark (any OS) or `tcpdump` (Linux/macOS) should show ~62 packets/s from the board |
 | Audio has gaps | Jitter buffer too small: raise `latency` |

@@ -96,6 +96,17 @@ _Static_assert(IP_HDR_LEN + UDP_HDR_LEN + RTP_HDR_LEN + PAYLOAD_MAX <= 1500,
 /* Retry interval for ARP requests while the receiver is not resolved. */
 #define ARP_RETRY_MS 500U
 
+/* ETH_STREAM_PROMISC: receive all frames and filter on the destination MAC in
+ * software instead of the MAC's address filter. For boards where unicast
+ * frames to our address don't get through the hardware filter. */
+#if defined(ETH_STREAM_PROMISC)
+/* BROADCAST as well: without it the driver sets DBF, which blocks broadcast
+ * frames even in promiscuous mode. */
+#define ETH_RX_ADDRESS_MODE (ARM_ETH_MAC_ADDRESS_ALL | ARM_ETH_MAC_ADDRESS_BROADCAST)
+#else
+#define ETH_RX_ADDRESS_MODE ARM_ETH_MAC_ADDRESS_BROADCAST
+#endif
+
 /* Receive diagnostics: printed once per second while the receiver is not
  * resolved, and once when it is. */
 #ifndef ETH_STREAM_DIAG
@@ -115,6 +126,7 @@ static struct {
     uint32_t bcast;
     uint32_t mcast;
     uint32_t ucast;
+    uint32_t not_ours;
     uint32_t errors;
     uint32_t vlan;
     uint32_t arp;
@@ -123,6 +135,9 @@ static struct {
     uint16_t last_type;
     uint32_t last_len;
     uint8_t last_src[6];
+    /* Source and destination of the last IPv4 frame. */
+    uint8_t last_ip_src[4];
+    uint8_t last_ip_dst[4];
 } rx_stats;
 static uint32_t diag_last_ms;
 #endif
@@ -333,8 +348,23 @@ static void rx_poll(void)
         } else {
             rx_stats.ucast++;
         }
+#endif
+#if defined(ETH_STREAM_PROMISC)
+        /* Software address filter: our unicast address and broadcast. */
+        if (memcmp(f, our_mac, 6) != 0 && memcmp(f, bcast_mac, 6) != 0) {
+#if ETH_STREAM_DIAG
+            rx_stats.not_ours++;
+#endif
+            continue;
+        }
+#endif
+#if ETH_STREAM_DIAG
         memcpy(rx_stats.last_src, &f[6], 6);
         rx_stats.last_type = (n >= type_ofs + 2U) ? get16(&f[type_ofs]) : 0U;
+        if (rx_stats.last_type == ETHERTYPE_IPV4 && n >= type_ofs + 2U + IP_HDR_LEN) {
+            memcpy(rx_stats.last_ip_src, &f[type_ofs + 2U + 12U], 4);
+            memcpy(rx_stats.last_ip_dst, &f[type_ofs + 2U + 16U], 4);
+        }
 #endif
         if (n < type_ofs + 2U + ARP_LEN || get16(&f[type_ofs]) != ETHERTYPE_ARP) {
 #if ETH_STREAM_DIAG
@@ -384,8 +414,9 @@ static void diag_print(void)
            (bmsr >> 5) & 1U, (anlpar & 0x100U) ? " 100FD" : "", (anlpar & 0x080U) ? " 100HD" : "",
            (anlpar & 0x040U) ? " 10FD" : "", (anlpar & 0x020U) ? " 10HD" : "");
 
-    printf("ETH diag: rx dst bcast %" PRIu32 " mcast %" PRIu32 " ucast %" PRIu32 "\n", rx_stats.bcast,
-           rx_stats.mcast, rx_stats.ucast);
+    printf("ETH diag: rx dst bcast %" PRIu32 " mcast %" PRIu32 " ucast %" PRIu32
+           ", not ours (promiscuous) %" PRIu32 "\n",
+           rx_stats.bcast, rx_stats.mcast, rx_stats.ucast, rx_stats.not_ours);
     printf("ETH diag: missed %" PRIu32 "/%" PRIu32 ", driver rx %" PRIu32 " err %" PRIu32
            " vlan %" PRIu32 " arp %" PRIu32 " (from %d.%d.%d.%d: %" PRIu32 ") other %" PRIu32
            ", last %" PRIu32 " B type 0x%04X from %02X:%02X:%02X:%02X:%02X:%02X\n",
@@ -395,6 +426,10 @@ static void diag_print(void)
            rx_stats.last_type,
            rx_stats.last_src[0], rx_stats.last_src[1], rx_stats.last_src[2], rx_stats.last_src[3],
            rx_stats.last_src[4], rx_stats.last_src[5]);
+    printf("ETH diag: last IPv4 %d.%d.%d.%d -> %d.%d.%d.%d\n", rx_stats.last_ip_src[0],
+           rx_stats.last_ip_src[1], rx_stats.last_ip_src[2], rx_stats.last_ip_src[3],
+           rx_stats.last_ip_dst[0], rx_stats.last_ip_dst[1], rx_stats.last_ip_dst[2],
+           rx_stats.last_ip_dst[3]);
 }
 #endif
 
@@ -469,7 +504,7 @@ int32_t eth_stream_init(uint32_t sample_rate)
     }
     if (mac->SetMacAddress(&addr) ||
         mac->Control(ARM_ETH_MAC_CONFIGURE, ARM_ETH_MAC_SPEED_100M | ARM_ETH_MAC_DUPLEX_FULL |
-                                                ARM_ETH_MAC_ADDRESS_BROADCAST |
+                                                ETH_RX_ADDRESS_MODE |
                                                 ARM_ETH_MAC_CHECKSUM_OFFLOAD_TX) ||
         mac->Control(ARM_ETH_MAC_CONTROL_TX, 1) || mac->Control(ARM_ETH_MAC_CONTROL_RX, 1)) {
         printf("ETH stream: MAC configuration failed\n");

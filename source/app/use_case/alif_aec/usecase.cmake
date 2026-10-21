@@ -108,9 +108,13 @@ USER_OPTION(ETH_STREAM_PORT "UDP port, used as source and destination port."
 USER_OPTION(ETH_STREAM_MAC "MAC address of this board."
     "02:00:00:ae:c0:01"
     STRING)
-USER_OPTION(ETH_STREAM_FRAMES_PER_PACKET "Stereo frames per RTP packet (256 = 16 ms at 16 kHz, one packet per default stride; max 365)."
+USER_OPTION(ETH_STREAM_FRAMES_PER_PACKET "Stereo frames per RTP packet (256 = 16 ms at 16 kHz, one packet per default stride, max 365)."
     256
     STRING)
+
+USER_OPTION(ETH_STREAM_PROMISC "Receive all frames and filter on the destination MAC in software instead of the MAC address filter."
+    OFF
+    BOOL)
 
 if (ETH_STREAM)
     if (NOT TARGET_BOARD STREQUAL "AppKit-e8")
@@ -125,7 +129,8 @@ if (ETH_STREAM)
         ETH_STREAM_DEST_IP=${ETH_STREAM_DEST_IP_BYTES}
         ETH_STREAM_PORT=${ETH_STREAM_PORT}
         ETH_STREAM_MAC=${ETH_STREAM_MAC_BYTES}
-        ETH_STREAM_FRAMES_PER_PACKET=${ETH_STREAM_FRAMES_PER_PACKET})
+        ETH_STREAM_FRAMES_PER_PACKET=${ETH_STREAM_FRAMES_PER_PACKET}
+        $<$<BOOL:${ETH_STREAM_PROMISC}>:ETH_STREAM_PROMISC>)
 endif()
 
 # Generate input files
