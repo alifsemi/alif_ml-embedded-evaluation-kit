@@ -34,7 +34,9 @@
 #include "UseCaseCommonUtils.hpp"
 #include "hal.h"
 #include "mlek/log/log_macros.h"
+#ifndef NO_DISPLAY
 #include "ScreenLayout.hpp"
+#endif // NO_DISPLAY
 
 #if defined(MLEK_FWK_TFLM)
 #include "mlek/fwk/tflm/MobileNetModel.hpp"
@@ -48,12 +50,14 @@
 
 #include <cinttypes>
 
+#ifndef NO_DISPLAY
 #include "lvgl.h"
 #include "lv_port.h"
 #include "lv_paint_utils.h"
 
 // Do we get LVGL to zoom the camera image, or do we double it up?
 #define USE_LVGL_ZOOM
+#endif // NO_DISPLAY
 
 #define NORM_VAL_MULTIPLIER 100
 #define NORM_VAL_THRESHOLD_UPPER 0.7f
@@ -86,6 +90,7 @@ using arm::app::fwk::iface::Model;
 #define MIMAGE_X 224
 #define MIMAGE_Y 224
 
+#ifndef NO_DISPLAY
 #ifdef USE_LVGL_ZOOM
 #define LIMAGE_X        MIMAGE_X
 #define LIMAGE_Y        MIMAGE_Y
@@ -95,34 +100,41 @@ using arm::app::fwk::iface::Model;
 #define LIMAGE_Y        (MIMAGE_Y * 2)
 #define LV_ZOOM         (1 * 256)
 #endif
+#endif // NO_DISPLAY
 
 
 extern "C" {
 extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 }
 
+#ifndef NO_DISPLAY
 namespace {
 
 lvgl_pixel_t  lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 448x448x4 = 802,856
 };
+#endif // NO_DISPLAY
 
 namespace alif {
 namespace app {
 
     using namespace arm::app;
 
+#ifndef NO_DISPLAY
     static std::string first_bit(const std::string &s)
     {
         std::string::size_type comma = s.find_first_of(',');
         return s.substr(0, comma);
     }
+#endif // NO_DISPLAY
 
     bool ClassifyImageInit(MobileNetModel& model)
     {
+#ifndef NO_DISPLAY
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Image Classifier");
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
 #if !SKIP_MODEL
         auto inputTensor = model.GetInputTensor(0);
@@ -222,6 +234,7 @@ namespace app {
             return false;
         }
 
+#ifndef NO_DISPLAY
         uint32_t lv_lock_state = lv_port_lock();
         tprof5 = Get_SysTick_Cycle_Count32();
         /* Display this image on the LCD. */
@@ -234,8 +247,10 @@ namespace app {
         tprof5 = Get_SysTick_Cycle_Count32() - tprof5;
 
         lv_obj_invalidate(ScreenLayoutImageObject());
+#endif // NO_DISPLAY
 
         if (SKIP_MODEL || !INFERENCE_REQUESTED()) {
+#ifndef NO_DISPLAY
 #if SHOW_PROFILING
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
@@ -250,22 +265,27 @@ namespace app {
 #endif
             lv_led_off(ScreenLayoutLEDObject());
             lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
             return true;
         }
 
+#ifndef NO_DISPLAY
         lv_led_on(ScreenLayoutLEDObject());
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->Bytes();
 
-#if SHOW_INF_TIME
+#if SHOW_INF_TIME && !defined(NO_DISPLAY)
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();
 #endif
 
         /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
+#ifndef NO_DISPLAY
         lv_lock_state = lv_port_lock();
+#endif // NO_DISPLAY
         /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
         const bool gpioMarker = arm::app::GpioMarkerStartRound();
         arm::app::GpioMarkerToggle(gpioMarker);
@@ -288,9 +308,11 @@ namespace app {
         }
 #if defined(GPIO_PROFILING)
         arm::app::GpioMarkerToggle(gpioMarker);
+#ifndef NO_DISPLAY
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 #endif
-#if SHOW_INF_TIME
+#if SHOW_INF_TIME && !defined(NO_DISPLAY)
         inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
 #endif
 
@@ -303,6 +325,7 @@ namespace app {
             results[n].m_normalisedVal = results[n].m_normalisedVal/10;
         }
 #endif
+#ifndef NO_DISPLAY
         lv_lock_state = lv_port_lock();
         for (int r = 0; r < 3; r++) {
             lv_obj_t *label = ScreenLayoutLabelObject(r);
@@ -324,6 +347,7 @@ namespace app {
         lv_label_set_text_fmt(ScreenLayoutTimeObject(), "%.3f ms", (double)inf_prof / SystemCoreClock * 1000);
 #endif
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
         if (!PresentInferenceResult(results)) {
             return false;

@@ -29,6 +29,7 @@ list(APPEND ${use_case}_API_LIST "vww" "alif_ui")
 
 set(${use_case}_COMPILE_DEFS SHOW_PROFILING=0 SKIP_MODEL=0)
 
+
 USER_OPTION(${use_case}_IMAGE_SIZE "Square image size in pixels. Images will be resized to this size."
     128
     STRING)

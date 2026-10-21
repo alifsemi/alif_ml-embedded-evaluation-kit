@@ -84,7 +84,6 @@ USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen
         ${DEFAULT_ACTIVATION_BUF_SZ}
         STRING)
 
-
 USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model"
         ${LABELS_TXT_FILE}
         FILEPATH)

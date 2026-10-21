@@ -52,6 +52,12 @@ function(set_platform_global_defaults)
         message(STATUS "Alif GPIO profiling: CI mode enabled!")
     endif()
 
+    set(NO_DISPLAY OFF CACHE BOOL "Build the use cases without any on-device UI (LVGL screen layout, camera preview, result labels), e.g. for power profiling without a display.")
+    if (NO_DISPLAY)
+        add_compile_definitions(NO_DISPLAY)
+        message(STATUS "Alif use cases built without display UI!")
+    endif()
+
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM

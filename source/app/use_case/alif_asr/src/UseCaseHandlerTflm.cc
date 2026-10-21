@@ -90,8 +90,10 @@ namespace app {
         auto mfccFrameStride = ctx.Get<uint32_t>("frameStride");
         auto scoreThreshold  = ctx.Get<float>("scoreThreshold");
         auto inputCtxLen     = ctx.Get<uint32_t>("ctxLen");
+#ifndef NO_DISPLAY
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
+#endif // NO_DISPLAY
 
         BOARD_BUTTON2_Init(button_cb);
         BOARD_BUTTON2_Control(BOARD_BUTTON_ENABLE_INTERRUPT);
@@ -229,7 +231,9 @@ namespace app {
             int16_t *audioArr = audio_inf;
             uint32_t audioArrSize = start_samples + (audio_idx + 1) * AUDIO_CHUNK_SIZE_SAMPLES;
 #else
+#ifndef NO_DISPLAY
             hal_display_clear(COLOR_BLACK);
+#endif // NO_DISPLAY
 
             /* Get the current audio buffer and respective size. */
             uint32_t audioArrSize = 0;
@@ -255,10 +259,12 @@ namespace app {
             /* Declare a container for final results. */
             std::vector<asr::AsrResult> finalResults;
 
+#ifndef NO_DISPLAY
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
             hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+#endif // NO_DISPLAY
 
             size_t inferenceWindowLen = audioDataWindowLen;
 
@@ -319,10 +325,12 @@ namespace app {
 #endif        /* VERIFY_TEST_OUTPUT */
             } /* while (audioDataSlider.HasNext()) */
 
+#ifndef NO_DISPLAY
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+#endif // NO_DISPLAY
 
             if (!PresentInferenceResult(finalResults)) {
                 return false;
@@ -336,11 +344,13 @@ namespace app {
 
     static bool PresentInferenceResult(std::vector<asr::AsrResult>& results)
     {
+#ifndef NO_DISPLAY
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 60;
         constexpr bool allow_multiple_lines  = true;
 
         hal_display_set_text_color(COLOR_GREEN);
+#endif // NO_DISPLAY
 
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
@@ -365,11 +375,13 @@ namespace app {
          /* Get the decoded result for the combined result. */
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
+#ifndef NO_DISPLAY
         hal_display_show_text(finalResultStr.c_str(),
                               finalResultStr.size(),
                               dataPsnTxtStartX1,
                               dataPsnTxtStartY1,
                               allow_multiple_lines);
+#endif // NO_DISPLAY
 
         info("Complete recognition: %s\n", finalResultStr.c_str());
         return true;

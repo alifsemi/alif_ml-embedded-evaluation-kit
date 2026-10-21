@@ -35,7 +35,6 @@
 #if defined(GPIO_PROFILING)
 #include "board_utils.h"
 #endif
-#include "ScreenLayout.hpp"
 #include "hal.h"
 
 #ifdef POWER_MEASUREMENT_SUPPORT
@@ -45,6 +44,8 @@
 #include <cinttypes>
 #include <cmath>
 
+#ifndef NO_DISPLAY
+#include "ScreenLayout.hpp"
 #include "lvgl.h"
 #include "lv_port.h"
 #include "lv_paint_utils.h"
@@ -52,6 +53,7 @@
 #define LIMAGE_X        192
 #define LIMAGE_Y        192
 #define LV_ZOOM         (2 * 256)
+#endif // NO_DISPLAY
 
 #if defined(GPIO_PROFILING_CI)
 /* Automated measurement: run inference continuously, without waiting for a button press. */
@@ -60,10 +62,12 @@
 #define INFERENCE_REQUESTED() run_requested()
 #endif
 
+#ifndef NO_DISPLAY
 namespace {
 lv_style_t boxStyle;
 lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 192x192x2 = 73,728
 };
+#endif // NO_DISPLAY
 
 using arm::app::Profiler;
 using arm::app::ApplicationContext;
@@ -80,16 +84,27 @@ using namespace arm::app::object_detection;
 }
 
 #ifdef POWER_MEASUREMENT_SUPPORT
+#ifndef NO_DISPLAY
     /* Labels showing average power and current, in that order. */
     static constexpr uint32_t powerLabelIdx = 2;
+#endif // NO_DISPLAY
 
     /* Shows the averages of the last measured inference, or "--" if the measurement failed
-     * (result == nullptr). Does nothing if no sensor is fitted. Call with the LVGL lock held. */
+     * (result == nullptr). Does nothing if no sensor is fitted. Call with the LVGL lock held.
+     * Without a display the averages are logged instead. */
     static void ShowPowerMeasurement(const power_measurement_result_t* result)
     {
         if (!power_measurement_is_available()) {
             return;
         }
+#ifdef NO_DISPLAY
+        if (result) {
+            info("Average Power: %" PRId32 " mW, Average Current: %" PRId32 " mA\n",
+                 result->avg_mW, result->avg_mA);
+        } else {
+            info("Power measurement failed\n");
+        }
+#else
         if (result) {
             lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:  %4" PRId32 " mW", result->avg_mW);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current: %4" PRId32 " mA", result->avg_mA);
@@ -97,12 +112,13 @@ using namespace arm::app::object_detection;
             lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx), "Average Power:     -- mW");
             lv_label_set_text_static(ScreenLayoutLabelObject(powerLabelIdx + 1), "Average Current:   -- mA");
         }
+#endif // NO_DISPLAY
     }
 #endif
 
     bool ObjectDetectionInit(YoloFastestModel& model)
     {
-
+#ifndef NO_DISPLAY
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Face Detection");
@@ -121,6 +137,7 @@ using namespace arm::app::object_detection;
         lv_style_set_outline_color(&boxStyle, lv_theme_get_color_primary(ScreenLayoutHeaderObject()));
         lv_style_set_radius(&boxStyle, 4);
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
         /* Initialise the camera */
         if (!hal_camera_init()) {
@@ -151,6 +168,7 @@ using namespace arm::app::object_detection;
      **/
     static bool PresentInferenceResult(const std::vector<object_detection::DetectionResult>& results);
 
+#ifndef NO_DISPLAY
     /**
      * @brief           Draw boxes directly on the LCD for all detected objects.
      * @param[in]       results            Vector of detection results to be displayed.
@@ -158,6 +176,7 @@ using namespace arm::app::object_detection;
     static void DrawDetectionBoxes(
            const std::vector<object_detection::DetectionResult>& results,
            int imgInputCols, int imgInputRows);
+#endif // NO_DISPLAY
 
     /* Object detection inference handler. */
     bool ObjectDetectionHandler(ApplicationContext& ctx)
@@ -209,28 +228,36 @@ using namespace arm::app::object_detection;
         }
 
         {
+#ifndef NO_DISPLAY
             ScopedLVGLLock lv_lock;
 
             /* Display this image on the LCD. */
             write_to_lvgl_buf(inputImgCols, inputImgRows,
                             currImage, &lvgl_image[0][0]);
             lv_obj_invalidate(ScreenLayoutImageObject());
+#endif // NO_DISPLAY
 
             if (!INFERENCE_REQUESTED()) {
+#ifndef NO_DISPLAY
                lv_led_off(ScreenLayoutLEDObject());
+#endif // NO_DISPLAY
                return false;
             }
 
+#ifndef NO_DISPLAY
             lv_led_on(ScreenLayoutLEDObject());
+#endif // NO_DISPLAY
 
             const size_t copySz = inputTensor->Bytes();
 
-#if SHOW_INF_TIME
+#if SHOW_INF_TIME && !defined(NO_DISPLAY)
         uint32_t inf_prof = Get_SysTick_Cycle_Count32();
 #endif
 
 #if defined(GPIO_PROFILING)
+#ifndef NO_DISPLAY
             uint32_t lv_lock_state = lv_port_lock();
+#endif // NO_DISPLAY
             /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
             const bool gpioMarker = arm::app::GpioMarkerStartRound();
             arm::app::GpioMarkerToggle(gpioMarker);
@@ -246,7 +273,7 @@ using namespace arm::app::object_detection;
             /* Run inference over this image. */
 #ifdef POWER_MEASUREMENT_SUPPORT
             /* Measure average current/power over the inference only. The LVGL lock is already
-             * held here, so no UI work is interleaved with the window. */
+             * held here (unless NO_DISPLAY), so no UI work is interleaved with the window. */
             power_measurement_result_t power;
             bool powerOk = (power_measurement_begin() == 0);
 #endif
@@ -267,9 +294,12 @@ using namespace arm::app::object_detection;
 
 #if defined(GPIO_PROFILING)
             arm::app::GpioMarkerToggle(gpioMarker);
+#ifndef NO_DISPLAY
             lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 #endif
 
+#ifndef NO_DISPLAY
 #if SHOW_INF_TIME
             inf_prof = Get_SysTick_Cycle_Count32() - inf_prof;
             lv_label_set_text_fmt(ScreenLayoutLabelObject(2), "Inference time: %.3f ms", (double)inf_prof / SystemCoreClock * 1000);
@@ -278,13 +308,16 @@ using namespace arm::app::object_detection;
 #endif
 
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "Faces Detected: %i", results.size());
+#endif // NO_DISPLAY
 
 #ifdef POWER_MEASUREMENT_SUPPORT
             ShowPowerMeasurement(powerOk ? &power : nullptr);
 #endif
 
+#ifndef NO_DISPLAY
             /* Draw boxes. */
             DrawDetectionBoxes(results, inputImgCols, inputImgRows);
+#endif // NO_DISPLAY
 
         } // ScopedLVGLLock
 
@@ -317,6 +350,7 @@ using namespace arm::app::object_detection;
         return true;
     }
 
+#ifndef NO_DISPLAY
     static void DeleteBoxes(lv_obj_t *frame)
     {
         // Assume that child 0 of the frame is the image itself
@@ -352,6 +386,7 @@ using namespace arm::app::object_detection;
                       ceil(result.m_h * yScale));
         }
     }
+#endif // NO_DISPLAY
 
 } /* namespace app */
 } /* namespace alif */

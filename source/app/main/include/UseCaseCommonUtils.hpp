@@ -49,7 +49,7 @@ namespace app {
 /* Automated measurement: keep the sync line idle for the first rounds, giving the automation
  * time to start waiting for the LED signal and skipping the warm-up iterations. */
 #ifndef GPIO_PROFILING_CI_SKIP_ROUNDS
-#define GPIO_PROFILING_CI_SKIP_ROUNDS 10
+#define GPIO_PROFILING_CI_SKIP_ROUNDS 20
 #endif
 #else
 /* Manual measurement: the sync line is active from the first round. */

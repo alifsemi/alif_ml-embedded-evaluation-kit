@@ -647,6 +647,7 @@ pipeline {
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_kws.bin.html', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/power_results_kws_he_devkit_e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            // stash name: "power_results_kws_he_devkit_e8", includes: "pytest/power_results_kws_he_devkit_e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro.md", allowEmpty: true
                             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_kws.bin.xml'
                         }
                         cleanup {
@@ -676,6 +677,7 @@ pipeline {
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_object_detection.bin.html', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/power_results_obj_detect_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            // stash name: "power_results_obj_detect_hp_devkit_e8", includes: "pytest/power_results_obj_detect_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md", allowEmpty: true
                             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_object_detection.bin.xml'
                         }
                         cleanup {
@@ -705,6 +707,7 @@ pipeline {
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_img_class.bin.html', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/power_results_img_class_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            // stash name: "power_results_img_class_hp_devkit_e8", includes: "pytest/power_results_img_class_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md", allowEmpty: true
                             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_img_class.bin.xml'
                         }
                         cleanup {
@@ -764,6 +767,7 @@ pipeline {
                             archiveArtifacts artifacts: 'pytest/pytest-logs/pytest-embedded/**', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/html-report-mlek_alif_vww.bin.html', fingerprint: false, allowEmptyArchive: true
                             archiveArtifacts artifacts: 'pytest/power_results_vww_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md', fingerprint: false, allowEmptyArchive: true
+                            // stash name: "power_results_vww_hp_devkit_e8", includes: "pytest/power_results_vww_hp_devkit_e8_gcc_u55_rtss-hp_tensorflowlitemicro.md", allowEmpty: true
                             junit skipPublishingChecks: true, testResults: 'pytest/junit/junit-report-mlek_alif_vww.bin.xml'
                         }
                         cleanup {
@@ -773,5 +777,47 @@ pipeline {
                 }
             }
         }
+        // Every power test stage runs on its own agent and writes its own markdown file,
+        // so collect the files here to one table.
+        // stage('Merge power results') {
+        //     when {
+        //         anyOf {
+        //             branch 'PR-*'
+        //             branch 'main'
+        //         }
+        //     }
+        //     agent { label 'ml_build' }
+        //     options { skipDefaultCheckout() }
+        //     steps {
+        //         unstash name: "ml_base_stash"
+        //         script {
+        //             // A stage that failed early may not have stashed its results
+        //             def power_stashes = [
+        //                 "power_results_kws_he_devkit_e8",
+        //                 "power_results_obj_detect_hp_devkit_e8",
+        //                 "power_results_img_class_hp_devkit_e8",
+        //                 "power_results_vww_hp_devkit_e8",
+        //             ]
+        //             for (power_stash in power_stashes) {
+        //                 try {
+        //                     unstash name: power_stash
+        //                 } catch (Exception e) {
+        //                     echo "No results to merge from ${power_stash}: " + e.toString()
+        //                 }
+        //             }
+        //         }
+        //         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+        //             sh "python3 pytest/merge_power_results.py -o pytest/power_results_merged.md pytest/power_results_*.md"
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             archiveArtifacts artifacts: 'pytest/power_results_merged.md', fingerprint: false, allowEmptyArchive: true
+        //         }
+        //         cleanup {
+        //             cleanWs(cleanWhenNotBuilt: false, deleteDirs: true, disableDeferredWipeout: true, notFailBuild: true)
+        //         }
+        //     }
+        // }
     }
 }

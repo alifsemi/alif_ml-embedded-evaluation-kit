@@ -83,7 +83,7 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
         use_case_build = use_case
     }
 
-    cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO"
+    cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON"
 
     sh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
