@@ -67,11 +67,12 @@ def clear():
 def use_case_name(test_name: str) -> str:
     """Derive the use case name from a power test name.
 
-    :param test_name:   Test function name, for example ``test_kws_power[param]``.
+    :param test_name:   Test function name, for example ``test_power_kws[param]``.
     :returns:           Use case name, for example ``alif_kws``.
     """
     base = re.sub(r'\[.*\]$', '', test_name)
     base = re.sub(r'^test_', '', base)
+    base = re.sub(r'^power_', '', base)
     base = re.sub(r'_power$', '', base)
     return f'alif_{base}'
 
