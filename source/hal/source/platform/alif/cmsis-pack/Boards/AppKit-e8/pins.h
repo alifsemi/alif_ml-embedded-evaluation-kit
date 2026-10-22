@@ -811,11 +811,11 @@ const struct pinconf board_pinconf[] = {
 
     /* P13_2 on pin F1. Functions: [0]: GPIO13_2, [1]: OSPI1_D2_B, [2]: SPI3_SS3_A, [3]:
        >>>QEC0_Z_C<<<, [4]: SD_D2_B, [5]: CDC_D18_B */
-    /* Selected: QEC0_Z_C for "Encoder" */
+    /* Selected: GPIO13_2 for "SD_RESET" */
     {PORT_13,
      PIN_2,
-     PINMUX_ALTERNATE_FUNCTION_3,
-     PADCTRL_READ_ENABLE | PADCTRL_SCHMITT_TRIGGER_ENABLE | PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
+     PINMUX_ALTERNATE_FUNCTION_0,
+     PADCTRL_OUTPUT_DRIVE_STRENGTH_4MA},
 
     /* P13_4 on pin G4. Functions: [0]: >>>GPIO13_4<<<, [1]: OSPI1_D4_B, [2]: LPI2S_SDI_C, [3]:
        QEC1_Y_C, [4]: SD_D4_B, [5]: CDC_D20_B */

@@ -11,6 +11,7 @@
 #include "diskio.h" /* Declarations of disk functions */
 #include "string.h"
 #include "stdio.h"
+#include <inttypes.h>
 #include "board_config.h"
 
 #if defined(BOARD_SD_RESET_GPIO_PORT) || \
@@ -234,6 +235,20 @@ DSTATUS disk_initialize(BYTE drivenum)  // FATFS *p_sd_card, char *MEDIA_NAME, v
     status                = p_SD_Driver->disk_initialize(&sd_param);
 
     if (status) {
+        /* The SD driver is silent on most failures (CMD timeouts etc.), so report what we can:
+         * the driver status (2=host init, 3=card init), the card detect GPIO level and the
+         * SDHC present state register (bit16 = card inserted, bit17 = card stable). */
+        printf("SD init failed: drv status=%d", status);
+#ifdef BOARD_SD_CARD_DETECT_GPIO_PORT
+        {
+            uint32_t cd_state = 0xFFU;
+            ARM_Driver_GPIO_(BOARD_SD_CARD_DETECT_GPIO_PORT)
+                .GetValue(BOARD_SD_CARD_DETECT_GPIO_PIN, &cd_state);
+            printf(", CD pin P%d_%d=%" PRIu32 " (0=card present)",
+                   BOARD_SD_CARD_DETECT_GPIO_PORT, BOARD_SD_CARD_DETECT_GPIO_PIN, cd_state);
+        }
+#endif
+        printf(", PSTATE=0x%08" PRIx32 "\n", Hsd.regs->SDMMC_PSTATE_REG);
         return STA_NOINIT;
     }
 
