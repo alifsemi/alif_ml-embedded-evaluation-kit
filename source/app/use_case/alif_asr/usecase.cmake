@@ -138,7 +138,7 @@ elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
         set(DEFAULT_ACT_BUF_SZ      0x00108000) # ~1 MiB
     else()
         set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/conformer_fp32_cln_wer_6_47_arm_TOSA-1.0+FP.pte)
-        set(DEFAULT_ACT_BUF_SZ      0x03000000) # 48 MiB
+        set(DEFAULT_ACT_BUF_SZ      0x00108000) # ~1 MiB
     endif()
 
     USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"

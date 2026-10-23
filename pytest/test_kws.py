@@ -9,6 +9,7 @@
 # */
 
 from pytest_embedded import Dut
+import pytest
 import re
 
 def get_time(dut, timestring) -> float:

@@ -34,20 +34,23 @@
 #include "mlek/use_case/asr/ConformerProcessing.hpp"
 #include "mlek/common/ImageUtils.hpp"
 #include "UseCaseCommonUtils.hpp"
-// #include "Wav2LetterPreprocess.hpp"
 #include "hal.h"
 #include "mlek/log/log_macros.h"
 
-#include "ScreenLayout.hpp"
 #include "board_utils.h"
+
+#ifndef NO_DISPLAY
+#include "ScreenLayout.hpp"
 #include "lv_paint_utils.h"
 #include "lv_port.h"
 #include "lvgl.h"
+#endif // NO_DISPLAY
 
 #include <cstring>
 
 #define AUDIO_LIVE      (1)
 
+#ifndef NO_DISPLAY
 #define LIMAGE_X        (340)
 #define LIMAGE_Y        (80)
 #define LV_ZOOM         (1.2 * 256)
@@ -58,13 +61,14 @@ namespace {
 };
 
 static const int result_label_idx = 4;
+#endif // NO_DISPLAY
 
 #if AUDIO_LIVE
 #define AUDIO_RATE               (16000)
 #define AUDIO_CHUNK_SIZE_SAMPLES (2048)
 #define AUDIO_CHUNKS             (78) // ~10s max
 #define AUDIO_SAMPLES            (AUDIO_CHUNK_SIZE_SAMPLES * AUDIO_CHUNKS)
-static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_CHUNK_SIZE_SAMPLES];
+static int16_t audio_inf[AUDIO_SAMPLES + AUDIO_CHUNK_SIZE_SAMPLES] __attribute__((section(".bss.NoInit.temp_buf_sram")));
 #endif
 
 static volatile bool button_pressed = false;
@@ -81,6 +85,7 @@ namespace arm {
 namespace app {
      bool ClassifyAudioInit()
     {
+#ifndef NO_DISPLAY
         alif::app::ScreenLayoutInit(lvgl_image, sizeof(lvgl_image), LIMAGE_X, LIMAGE_Y, LV_ZOOM, true);
         std::memset(lvgl_image, 0, sizeof(lvgl_image));
         uint32_t lv_lock_state = lv_port_lock();
@@ -114,6 +119,7 @@ namespace app {
                                LV_LABEL_LONG_WRAP);
 
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
         BOARD_BUTTON2_Init(button_cb);
         BOARD_BUTTON2_Control(BOARD_BUTTON_ENABLE_INTERRUPT);
@@ -121,6 +127,7 @@ namespace app {
         return true;
     }
 
+#ifndef NO_DISPLAY
     // from https://www.andrewnoske.com
     void getHeatMapColor(float value, float* red, float* green, float* blue)
     {
@@ -194,6 +201,7 @@ namespace app {
         }
         lv_obj_invalidate(alif::app::ScreenLayoutImageObject());
     }
+#endif // NO_DISPLAY
 
     bool ClassifyAudioHandler(ApplicationContext& ctx)
     {
@@ -254,13 +262,17 @@ namespace app {
 #endif /* INTERACTIVE_MODE */
 
 #if AUDIO_LIVE
+#if !defined(GPIO_PROFILING_CI)
             // Wait for button press callback ...
             button_pressed = false;
+#ifndef NO_DISPLAY
             uint32_t idle_count = 0;
+#endif // NO_DISPLAY
             while(!button_pressed) {
                 // run audio in order to update the automatic gain
                 hal_get_audio_data(audio_inf, AUDIO_CHUNK_SIZE_SAMPLES);
 
+#ifndef NO_DISPLAY
                 // Blink the UI 'LED'
                 {
                     ScopedLVGLLock lv_lock;
@@ -270,11 +282,16 @@ namespace app {
                         lv_led_off(alif::app::ScreenLayoutLEDObject());
                     }
                 }
+#endif // NO_DISPLAY
                 hal_wait_for_audio();
                 hal_audio_alif_preprocessing(audio_inf, AUDIO_CHUNK_SIZE_SAMPLES);
+#ifndef NO_DISPLAY
                 idle_count++;
+#endif // NO_DISPLAY
             }
+#endif /* !defined(GPIO_PROFILING_CI) */
 
+#ifndef NO_DISPLAY
             {
                 ScopedLVGLLock lv_lock;
                 lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(0), "");
@@ -284,7 +301,14 @@ namespace app {
                     lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(ii), "");
                 }
             }
+#endif // NO_DISPLAY
 
+#if defined(GPIO_PROFILING_CI)
+            /* Automated measurement: no button press. Start listening immediately and
+             * capture the maximum length (AUDIO_CHUNKS chunks, ~10 s). */
+            const int start_samples = 0;
+            int16_t *audio_inf_ptr = audio_inf;
+#else
             // Copy the starting chunk
             const int start_samples = AUDIO_CHUNK_SIZE_SAMPLES - button_pressed_sample_count;
             int16_t *audio_inf_ptr = &audio_inf[start_samples];
@@ -293,16 +317,20 @@ namespace app {
                         &audio_inf[button_pressed_sample_count - 1],
                         start_samples * sizeof(audio_inf[0]));
             }
+#endif /* defined(GPIO_PROFILING_CI) */
 
             // Capture audio as long as button is kept pressed
+            // (always until max samples when GPIO_PROFILING_CI is defined)
             BOARD_LED2_Control(BOARD_LED_STATE_HIGH);
             int audio_idx = 0;
 
             hal_get_audio_data(audio_inf_ptr, AUDIO_CHUNK_SIZE_SAMPLES);
 
             while (1) {
+#if !defined(GPIO_PROFILING_CI)
                 BOARD_BUTTON_STATE bs;
                 BOARD_BUTTON2_GetState(&bs);
+#endif
                 int err = hal_wait_for_audio();
                 if (err) {
                     printf_err("hal audio error: %d\n", err);
@@ -315,20 +343,24 @@ namespace app {
                                        AUDIO_CHUNK_SIZE_SAMPLES);
                 }
 
+#ifndef NO_DISPLAY
                 // Update bar
                 {
                     ScopedLVGLLock lv_lock;
                     lv_bar_set_value(alif::app::ScreenLayoutBarObject(), 100 * (audio_idx + 1) / AUDIO_CHUNKS, LV_ANIM_OFF);
                     lv_obj_invalidate(alif::app::ScreenLayoutBarObject());
                 }
+#endif // NO_DISPLAY
 
                 // Preprocess current chunk
                 hal_audio_alif_preprocessing(audio_inf_ptr + (audio_idx * AUDIO_CHUNK_SIZE_SAMPLES),
                                              AUDIO_CHUNK_SIZE_SAMPLES);
 
+#if !defined(GPIO_PROFILING_CI)
                 if (bs != BOARD_BUTTON_STATE_LOW) {
                     break;
                 }
+#endif
 
                 if (audio_idx >= (AUDIO_CHUNKS - 1)) {
                     break;
@@ -350,6 +382,7 @@ namespace app {
                 break;
             }
 #endif
+#ifndef NO_DISPLAY
             {
                 ScopedLVGLLock lv_lock;
                 lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(result_label_idx), "");
@@ -359,6 +392,7 @@ namespace app {
                                  LV_ANIM_OFF);
                 lv_obj_invalidate(alif::app::ScreenLayoutLabelObject(result_label_idx));
             }
+#endif // NO_DISPLAY
 
             /* Clamp the captured audio to what the mel-spectrogram input tensor
              * can hold. A long button press can capture more audio than the
@@ -376,16 +410,23 @@ namespace app {
 
             /* Run the pre-processing, inference and post-processing. */
 #if defined(GPIO_PROFILING)
+#ifndef NO_DISPLAY
             uint32_t lv_lock_state = lv_port_lock();
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif // NO_DISPLAY
+            /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+            const bool gpioMarker = arm::app::GpioMarkerStartRound();
+            arm::app::GpioMarkerToggle(gpioMarker);
 #else
+            const bool gpioMarker = true;
+#ifndef NO_DISPLAY
             const uint32_t ts_start_pre = Get_SysTick_Cycle_Count32();
+#endif // NO_DISPLAY
 #endif
             if (!preProcess.DoPreProcess(audioArr, audioArrSize)) {
                 printf_err("Pre-processing failed.");
                 return false;
             }
-#ifndef GPIO_PROFILING
+#if !defined(GPIO_PROFILING) && !defined(NO_DISPLAY)
             const uint32_t ts_done_pre = Get_SysTick_Cycle_Count32();
             /* Number of mel-spectrogram frames produced from the captured audio,
              * matching the sliding-window count used during pre-processing. */
@@ -397,12 +438,12 @@ namespace app {
             const uint32_t ts_start_inference = Get_SysTick_Cycle_Count32();
 #endif
 
-            if (!RunInference(model, profiler)) {
+            if (!RunInference(model, profiler, gpioMarker)) {
                 printf_err("Inference failed.");
                 return false;
             }
 
-#ifndef GPIO_PROFILING
+#if !defined(GPIO_PROFILING) && !defined(NO_DISPLAY)
             const uint32_t ts_start_post = Get_SysTick_Cycle_Count32();
 #endif
             if (!postProcess.DoPostProcess()) {
@@ -410,9 +451,11 @@ namespace app {
                 return false;
             }
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
+#ifndef NO_DISPLAY
             lv_port_unlock(lv_lock_state);
-#else
+#endif // NO_DISPLAY
+#elif !defined(NO_DISPLAY)
             const uint32_t ts_done = Get_SysTick_Cycle_Count32();
 
             {
@@ -434,12 +477,14 @@ namespace app {
                     (double)(ts_done - ts_start_post) / SystemCoreClock * 1000);
             }
 #endif
+#ifndef NO_DISPLAY
             {
                 ScopedLVGLLock lv_lock;
                 lv_label_set_text_static(alif::app::ScreenLayoutLabelObject(3), "Output:");
                 lv_label_set_text(alif::app::ScreenLayoutLabelObject(result_label_idx), decodedResult.c_str());
                 lv_obj_invalidate(alif::app::ScreenLayoutLabelObject(result_label_idx));
             }
+#endif // NO_DISPLAY
 
             profiler.PrintProfilingResult();
             info("Decoded output: %s\n", decodedResult.c_str());

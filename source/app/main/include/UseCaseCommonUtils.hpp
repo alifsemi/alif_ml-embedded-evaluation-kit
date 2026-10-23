@@ -38,9 +38,42 @@ namespace app {
      *                  statistics too.
      * @param[in]       model      Reference to the initialised model.
      * @param[in]       profiler   Reference to the initialised profiler.
+     * @param[in]       gpioMarker If false, the GPIO power-measurement line is not toggled
+     *                             around the inference (only relevant with GPIO_PROFILING).
      * @return          true if inference succeeds, false otherwise.
      **/
-    bool RunInference(fwk::iface::Model& model, Profiler& profiler);
+    bool RunInference(fwk::iface::Model& model, Profiler& profiler, bool gpioMarker = true);
+
+#if defined(GPIO_PROFILING)
+#if defined(GPIO_PROFILING_CI)
+/* Automated measurement: keep the sync line idle for the first rounds, giving the automation
+ * time to start waiting for the LED signal and skipping the warm-up iterations. */
+#ifndef GPIO_PROFILING_CI_SKIP_ROUNDS
+#define GPIO_PROFILING_CI_SKIP_ROUNDS 20
+#endif
+#else
+/* Manual measurement: the sync line is active from the first round. */
+#define GPIO_PROFILING_CI_SKIP_ROUNDS 0
+#endif
+
+    /**
+     * @brief           Marks the start of a pre-processing, inference and post-processing
+     *                  round for the GPIO power-measurement line. Must be called exactly once
+     *                  per round.
+     * @return          true if the sync line is active for this round, false while the first
+     *                  GPIO_PROFILING_CI_SKIP_ROUNDS rounds are being skipped.
+     **/
+    bool GpioMarkerStartRound();
+
+    /**
+     * @brief           Toggles the GPIO power-measurement line if enabled. Each active round
+     *                  must toggle it 4 times (HIGH: pre-processing, LOW: inference,
+     *                  HIGH: post-processing, LOW: idle). The two middle edges come from
+     *                  RunInference().
+     * @param[in]       enabled   Value returned by GpioMarkerStartRound() for this round.
+     **/
+    void GpioMarkerToggle(bool enabled);
+#endif /* defined(GPIO_PROFILING) */
 
 #ifdef INTERACTIVE_MODE
     /**

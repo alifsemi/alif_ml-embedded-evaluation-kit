@@ -40,18 +40,17 @@
 #endif
 #include <cinttypes>
 
+#define MIMAGE_X 128
+#define MIMAGE_Y 128
 
+#ifndef NO_DISPLAY
 #include "lvgl.h"
 #include "lv_port.h"
 #include "lv_paint_utils.h"
 #include "ScreenLayout.hpp"
 
-
 // Do we get LVGL to zoom the camera image, or do we double it up?
 #define USE_LVGL_ZOOM
-
-#define MIMAGE_X 128
-#define MIMAGE_Y 128
 
 #ifdef USE_LVGL_ZOOM
 #define LIMAGE_X        MIMAGE_X
@@ -63,17 +62,24 @@
 #define LV_ZOOM         (1 * 256)
 #endif
 
+namespace {
+    lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 256x256x2 = 131,072
+    };
+
+#endif // NO_DISPLAY
+
 using arm::app::fwk::iface::Model;
+
+#if defined(GPIO_PROFILING_CI)
+/* Automated measurement: run inference continuously, without waiting for a button press. */
+#define INFERENCE_REQUESTED() (true)
+#else
+#define INFERENCE_REQUESTED() run_requested()
+#endif
 
 extern "C" {
 extern uint32_t tprof1, tprof2, tprof3, tprof4, tprof5;
 }
-
-namespace {
-
-lvgl_pixel_t lvgl_image[LIMAGE_Y][LIMAGE_X] __attribute__((section(".bss.lcd_image_buf")));                      // 256x256x2 = 131,072
-};
-
 
 namespace alif {
 namespace app {
@@ -82,10 +88,12 @@ namespace app {
 
     bool ClassifyImageInit()
     {
+#ifndef NO_DISPLAY
         ScreenLayoutInit(lvgl_image, sizeof lvgl_image, LIMAGE_X, LIMAGE_Y, LV_ZOOM);
         uint32_t lv_lock_state = lv_port_lock();
         lv_label_set_text_static(ScreenLayoutHeaderObject(), "Visual Wake Word");
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
         /* Initialise the camera */
         if (!hal_camera_init()) {
@@ -144,6 +152,7 @@ namespace app {
             return false;
         }
 
+#ifndef NO_DISPLAY
         uint32_t lv_lock_state = lv_port_lock();
         tprof5 = Get_SysTick_Cycle_Count32();
         /* Display this image on the LCD. */
@@ -155,8 +164,10 @@ namespace app {
                 MIMAGE_X, MIMAGE_Y, image_data, &lvgl_image[0][0]);
         tprof5 = Get_SysTick_Cycle_Count32() - tprof5;
         lv_obj_invalidate(ScreenLayoutImageObject());
+#endif // NO_DISPLAY
 
-        if (SKIP_MODEL || !run_requested()) {
+        if (SKIP_MODEL || !INFERENCE_REQUESTED()) {
+#ifndef NO_DISPLAY
 #if SHOW_PROFILING
             lv_label_set_text_fmt(ScreenLayoutLabelObject(0), "tprof1=%.3f ms", (double)tprof1 / SystemCoreClock * 1000);
             lv_label_set_text_fmt(ScreenLayoutLabelObject(1), "tprof2=%.3f ms", (double)tprof2 / SystemCoreClock * 1000);
@@ -166,17 +177,26 @@ namespace app {
 #endif
             lv_led_off(ScreenLayoutLEDObject());
             lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
             return true;
         }
 
+#ifndef NO_DISPLAY
         lv_led_on(ScreenLayoutLEDObject());
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
 #if !SKIP_MODEL
         const size_t imgSz = inputTensor->Bytes();
 #if defined(GPIO_PROFILING)
+#ifndef NO_DISPLAY
         lv_lock_state = lv_port_lock();
-        BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+#endif // NO_DISPLAY
+        /* Skipped (sync line idle) for the first rounds when GPIO_PROFILING_CI is set. */
+        const bool gpioMarker = arm::app::GpioMarkerStartRound();
+        arm::app::GpioMarkerToggle(gpioMarker);
+#else
+        const bool gpioMarker = true;
 #endif
         /* Run the pre-processing, inference and post-processing. */
         if (!preProcess.DoPreProcess(image_data, imgSz)) {
@@ -184,7 +204,7 @@ namespace app {
             return false;
         }
 
-        if (!RunInference(model, profiler)) {
+        if (!RunInference(model, profiler, gpioMarker)) {
             printf_err("Inference failed.");
             return false;
         }
@@ -194,13 +214,16 @@ namespace app {
             return false;
         }
 #if defined(GPIO_PROFILING)
-            BOARD_LED1_BLUE_Control(BOARD_LED_STATE_TOGGLE);
+            arm::app::GpioMarkerToggle(gpioMarker);
+#ifndef NO_DISPLAY
             lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 #endif
 
         /* Add results to context for access outside handler. */
         ctx.Set<std::vector<ClassificationResult>>("results", results);
 
+#ifndef NO_DISPLAY
         lv_lock_state = lv_port_lock();
         for (int r = 0; r <results.size() ; r++) {
             lv_obj_t *label = ScreenLayoutLabelObject(r);
@@ -217,6 +240,7 @@ namespace app {
             }
         }
         lv_port_unlock(lv_lock_state);
+#endif // NO_DISPLAY
 
         if (!PresentInferenceResult(results)) {
             return false;

@@ -90,8 +90,10 @@ namespace app {
         auto mfccFrameStride = ctx.Get<uint32_t>("frameStride");
         auto scoreThreshold  = ctx.Get<float>("scoreThreshold");
         auto inputCtxLen     = ctx.Get<uint32_t>("ctxLen");
+#ifndef NO_DISPLAY
         constexpr uint32_t dataPsnTxtInfStartX = 20;
         constexpr uint32_t dataPsnTxtInfStartY = 40;
+#endif // NO_DISPLAY
 
         BOARD_BUTTON2_Init(button_cb);
         BOARD_BUTTON2_Control(BOARD_BUTTON_ENABLE_INTERRUPT);
@@ -156,6 +158,12 @@ namespace app {
 #endif /* INTERACTIVE_MODE */
 
 #if AUDIO_LIVE
+#if defined(GPIO_PROFILING_CI)
+            /* Automated measurement: no button press. Start listening immediately and
+             * capture the maximum length (AUDIO_CHUNKS chunks, ~10 s). */
+            const int start_samples = 0;
+            int16_t *audio_inf_ptr = audio_inf;
+#else
             // Wait for button press callback ...
             button_pressed = false;
             uint32_t idle_count = 0;
@@ -177,15 +185,19 @@ namespace app {
                         &audio_inf[button_pressed_sample_count - 1],
                         start_samples * sizeof(audio_inf[0]));
             }
+#endif /* defined(GPIO_PROFILING_CI) */
 
             // Capture audio as long as button is kept pressed or until we have max samples
+            // (always until max samples when GPIO_PROFILING_CI is defined)
             int audio_idx = 0;
 
             hal_get_audio_data(audio_inf_ptr, AUDIO_CHUNK_SIZE_SAMPLES);
 
             while (1) {
+#if !defined(GPIO_PROFILING_CI)
                 BOARD_BUTTON_STATE bs;
                 BOARD_BUTTON2_GetState(&bs);
+#endif
                 int err = hal_wait_for_audio();
                 if (err) {
                     printf_err("hal audio error: %d\n", err);
@@ -204,9 +216,11 @@ namespace app {
                 hal_audio_alif_preprocessing(audio_inf_ptr + (audio_idx * AUDIO_CHUNK_SIZE_SAMPLES),
                                              AUDIO_CHUNK_SIZE_SAMPLES);
 
+#if !defined(GPIO_PROFILING_CI)
                 if (bs != BOARD_BUTTON_STATE_LOW) {
                     break;
                 }
+#endif
 
                 if (audio_idx >= (AUDIO_CHUNKS - 1)) {
                     break;
@@ -217,7 +231,9 @@ namespace app {
             int16_t *audioArr = audio_inf;
             uint32_t audioArrSize = start_samples + (audio_idx + 1) * AUDIO_CHUNK_SIZE_SAMPLES;
 #else
+#ifndef NO_DISPLAY
             hal_display_clear(COLOR_BLACK);
+#endif // NO_DISPLAY
 
             /* Get the current audio buffer and respective size. */
             uint32_t audioArrSize = 0;
@@ -243,10 +259,12 @@ namespace app {
             /* Declare a container for final results. */
             std::vector<asr::AsrResult> finalResults;
 
+#ifndef NO_DISPLAY
             /* Display message on the LCD - inference running. */
             std::string str_inf{"Running inference... "};
             hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+#endif // NO_DISPLAY
 
             size_t inferenceWindowLen = audioDataWindowLen;
 
@@ -265,13 +283,21 @@ namespace app {
                      audioDataSlider.Index() + 1,
                      static_cast<size_t>(ceilf(audioDataSlider.FractionalTotalStrides() + 1)));
 
+#if defined(GPIO_PROFILING)
+                /* One round per audio window. Skipped (sync line idle) for the first rounds
+                 * when GPIO_PROFILING_CI is set. */
+                const bool gpioMarker = GpioMarkerStartRound();
+                GpioMarkerToggle(gpioMarker);
+#else
+                const bool gpioMarker = true;
+#endif
                 /* Run the pre-processing, inference and post-processing. */
                 if (!preProcess.DoPreProcess(inferenceWindow, inferenceWindowLen)) {
                     printf_err("Pre-processing failed.");
                     return false;
                 }
 
-                if (!RunInference(model, profiler)) {
+                if (!RunInference(model, profiler, gpioMarker)) {
                     printf_err("Inference failed.");
                     return false;
                 }
@@ -282,6 +308,9 @@ namespace app {
                     printf_err("Post-processing failed.");
                     return false;
                 }
+#if defined(GPIO_PROFILING)
+                GpioMarkerToggle(gpioMarker);
+#endif
 
                 /* Add results from this window to our final results vector. */
                 finalResults.emplace_back(asr::AsrResult(
@@ -296,10 +325,12 @@ namespace app {
 #endif        /* VERIFY_TEST_OUTPUT */
             } /* while (audioDataSlider.HasNext()) */
 
+#ifndef NO_DISPLAY
             /* Erase. */
             str_inf = std::string(str_inf.size(), ' ');
             hal_display_show_text(
                 str_inf.c_str(), str_inf.size(), dataPsnTxtInfStartX, dataPsnTxtInfStartY, 0);
+#endif // NO_DISPLAY
 
             if (!PresentInferenceResult(finalResults)) {
                 return false;
@@ -313,11 +344,13 @@ namespace app {
 
     static bool PresentInferenceResult(std::vector<asr::AsrResult>& results)
     {
+#ifndef NO_DISPLAY
         constexpr uint32_t dataPsnTxtStartX1 = 20;
         constexpr uint32_t dataPsnTxtStartY1 = 60;
         constexpr bool allow_multiple_lines  = true;
 
         hal_display_set_text_color(COLOR_GREEN);
+#endif // NO_DISPLAY
 
         info("Final results:\n");
         info("Total number of inferences: %zu\n", results.size());
@@ -342,11 +375,13 @@ namespace app {
          /* Get the decoded result for the combined result. */
         std::string finalResultStr = audio::asr::DecodeOutput(combinedResults);
 
+#ifndef NO_DISPLAY
         hal_display_show_text(finalResultStr.c_str(),
                               finalResultStr.size(),
                               dataPsnTxtStartX1,
                               dataPsnTxtStartY1,
                               allow_multiple_lines);
+#endif // NO_DISPLAY
 
         info("Complete recognition: %s\n", finalResultStr.c_str());
         return true;
