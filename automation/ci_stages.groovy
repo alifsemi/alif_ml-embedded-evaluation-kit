@@ -145,6 +145,11 @@ def more_builds() {
              ['test_build_armclang_kws_he_release_appkit_e8', 'build_armclang_he_tcm_release_appkit-e8/bin/sectors/alif_kws/ER_ROM']]],
         [name: 'Build HE-TCM GCC Debug DevKit-e1c/e7/e8/e1c-sk',
          builds: [['he_tcm', 'Debug', 'gcc', 'DevKit-e1c'], ['he_tcm', 'Debug', 'gcc', 'DevKit-e7'], ['he_tcm', 'Debug', 'gcc', 'DevKit-e8'], ['he_tcm', 'Debug', 'gcc', 'StartKit-e1c']]],
+        [name: 'Build HE GCC Release CI Power Test for DevKit-e1c',
+         builds: [['ci_power_test', 'HE', 'DevKit-e1c', 'gcc', 'U55', 'RTSS-HE-TCM', 'TensorFlowLiteMicro', 'alif_kws']],
+         artifact: '*.bin',
+         stashes: [
+             ['test_build_ci_power_test_kws_he_devkit_e1c', 'build_ci_power_test_he_devkit-e1c_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin']]],
     ]
 }
 
@@ -225,6 +230,24 @@ def tests() {
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
          power: [id: 'vww_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+        [name: 'Test KWS HE GCC Release DevKit-E1C',
+         label: 'E1C', unstash: ['test_build_gnu_kws_he_release_devkit_e1c'],
+         json: 'alif_kws_he_e1c.json',
+         dir: 'build_gcc_he_tcm_release_devkit-e1c/bin/sectors/alif_kws',
+         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_kws'],
+        [name: 'Test KWS HE ARMCLANG Release DevKit-E1C',
+         label: 'E1C', unstash: ['test_build_armclang_kws_he_release_devkit_e1c'],
+         json: 'alif_kws_he_e1c.json',
+         dir: 'build_armclang_he_tcm_release_devkit-e1c/bin/sectors/alif_kws',
+         src: 'ER_ROM', bin: 'mlek_alif_kws.bin', test: 'test_kws'],
+        [name: 'Test KWS HE GCC Release CI Power Test for DevKit-E1C',
+         label: 'E1C_JS', unstash: ['test_build_ci_power_test_kws_he_devkit_e1c'],
+         json: 'alif_kws_he_e1c.json',
+         dir: 'build_ci_power_test_he_devkit-e1c_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
+         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
+         power: [id: 'kws_he_devkit_e1c', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E1C, SE v112.0']],
+
+
         // ASR has the model in OSPI Flash, not supported yet
         // [name: 'Test ASR HP GCC Release CI Power Test for DevKit-e8',
         //  label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8'],
