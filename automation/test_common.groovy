@@ -4,8 +4,10 @@ def download_dependencies() {
 }
 
 def setup_resources() {
-
-    sh "python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256"
+    /* CI builds only use TensorFlow Lite Micro, so install the trimmed requirements (no torch,
+     * CUDA or ExecuTorch, several GB) and run the downloads and Vela optimisations in parallel. */
+    sh "python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256 " +
+       "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
 
     /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
