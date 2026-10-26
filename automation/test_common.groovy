@@ -1,3 +1,30 @@
+/**
+ * Prefix for the log lines of an agent and a stage, see psh.
+ */
+def log_prefix(String stage_name) {
+    return "[${env.NODE_NAME}|${stage_name}]"
+}
+
+/**
+ * Same as the sh step but every output line gets the prefix of env.LOG_PREFIX (see log_prefix
+ * and withEnv in build_stage and test_stage, the agent name only if not set). The console of a
+ * parallel build mixes the output of all the agents, with the prefix the lines of different
+ * agents can be told apart. The time stamp of each line is added by the timestamps() option of
+ * the pipeline. The script is run with bash and the options -xe like the scripts of the callers
+ * had in their shebang.
+ *
+ * @param script  The shell script.
+ */
+def psh(String script) {
+    writeFile file: '.psh_script.sh', text: script + '\n'
+    sh '''#!/bin/bash
+bash -xe .psh_script.sh 2>&1 | awk 'BEGIN { p = ENVIRON["LOG_PREFIX"]; if (p == "") p = "[" ENVIRON["NODE_NAME"] "]" } { print p " " $0; fflush() }'
+rc=${PIPESTATUS[0]}
+rm -f .psh_script.sh
+exit $rc
+'''
+}
+
 def download_dependencies() {
     sh "rm -Rf dependencies"
     sh "python3.10 download_dependencies.py"
@@ -6,8 +33,8 @@ def download_dependencies() {
 def setup_resources() {
     /* CI builds only use TensorFlow Lite Micro, so install the trimmed requirements (no torch,
      * CUDA or ExecuTorch, several GB) and run the downloads and Vela optimisations in parallel. */
-    sh "python3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256 " +
-       "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
+    psh "#!/bin/bash\npython3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256 " +
+        "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
 
     /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
@@ -24,7 +51,7 @@ def build_hp(String build_type, String toolchain, String board, String extra_cma
     def build_path = "build_${toolchain}_hp_${build_type}_${board}".toLowerCase()
     def cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HP -DUSE_CASE_BUILD=alif_img_class\\;alif_object_detection\\;alif_ad\\;alif_vww -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} ${extra_cmake_options}"
 
-    sh """#!/bin/bash -xe
+    psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
         export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
         echo $PATH
@@ -43,7 +70,7 @@ def build_he_tcm(String build_type, String toolchain, String board) {
     def build_path = "build_${toolchain}_he_tcm_${build_type}_${board}".toLowerCase()
     def cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-HE -DUSE_CASE_BUILD=alif_kws -DGLCD_UI=NO -DLINKER_SCRIPT_NAME=RTSS-HE-TCM -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DINTERACTIVE_MODE=1"
 
-    sh """#!/bin/bash -xe
+    psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
         export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
         echo $PATH
@@ -62,7 +89,7 @@ def build_inf_runner(String build_type, String toolchain, String board, String c
     def build_path = "build_${toolchain}_${core}_${build_type}_${board}_inf_runner".toLowerCase()
     def cmake_cmd = "cmake .. -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=inference_runner -DLINKER_SCRIPT_NAME=RTSS-${core}-infrun -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=${build_type} -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGLCD_UI=NO"
 
-    sh """#!/bin/bash -xe
+    psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
         export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
         echo $PATH
@@ -88,7 +115,7 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
 
     def cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON"
 
-    sh """#!/bin/bash -xe
+    psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
         export PATH=$PATH:/opt/ArmCompilerforEmbedded6.23/bin
         echo $PATH
@@ -103,7 +130,7 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
 
 def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name, String extra_pytest_options = "") {
     try {
-        sh """#!/bin/bash -xe
+        psh """#!/bin/bash -xe
             printenv NODE_NAME
             cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
             rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
@@ -131,7 +158,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
         --html-report=html-report-${target_binary_name}.html \
         --junit-xml junit/junit-report-${target_binary_name}.xml"
 
-        sh """#!/bin/bash -xe
+        psh """#!/bin/bash -xe
             set +e
             pushd pytest
             sed -e "s/ttyUSB0/ttyAlifUART2$DUT_NUMBER/g" pytest.ini.template > pytest.ini
@@ -150,7 +177,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
             ./app-write-mram
             popd"""
     } catch (Exception e) {
-        echo 'Exception occurred: ' + e.toString()
+        echo "${env.LOG_PREFIX} Exception occurred: " + e.toString()
     }
 }
 
@@ -208,15 +235,18 @@ def run_build(List build_def) {
  */
 def build_stage(Map stage_def) {
     node('docker_build2') {
-        unstash name: "ml_base_stash"
-        for (build_def in stage_def.builds) {
-            run_build(build_def)
-        }
-        if (stage_def.artifact) {
-            archiveArtifacts artifacts: '*/bin/*', fingerprint: true
-            archiveArtifacts artifacts: '*/bin/sectors/**/' + stage_def.artifact, fingerprint: true
-            for (stash_def in stage_def.stashes) {
-                stash name: stash_def[0], includes: stash_def[1]
+        withEnv(["LOG_PREFIX=" + log_prefix(stage_def.name)]) {
+            echo "${env.LOG_PREFIX} Running on ${env.NODE_NAME}"
+            unstash name: "ml_base_stash"
+            for (build_def in stage_def.builds) {
+                run_build(build_def)
+            }
+            if (stage_def.artifact) {
+                archiveArtifacts artifacts: '*/bin/*', fingerprint: true
+                archiveArtifacts artifacts: '*/bin/sectors/**/' + stage_def.artifact, fingerprint: true
+                for (stash_def in stage_def.stashes) {
+                    stash name: stash_def[0], includes: stash_def[1]
+                }
             }
         }
     }
@@ -228,33 +258,36 @@ def build_stage(Map stage_def) {
 def test_stage(Map stage_def) {
     node(stage_def.label) {
         try {
-            try {
-                if (stage_def.video) {
-                    build job: 'camera_start_record'
-                }
-                unstash name: "ml_base_stash"
-                for (stash_name in stage_def.unstash) {
-                    unstash name: stash_name
-                }
-                def pytest_options = ""
-                if (stage_def.power) {
-                    pytest_options = '--power_results ' + power_results_file(stage_def.power) +
-                        ' --power_board "' + stage_def.power.board + '" --power_core ' + stage_def.power.core
-                }
-                flash_and_run_pytest(stage_def.json, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
-                if (stage_def.video) {
-                    build job: 'camera_stop_record'
-                    copyArtifacts(projectName: 'camera_stop_record', filter: 'recording.mov', target: stage_def.video, optional: true)
-                    stash name: stage_def.video, includes: stage_def.video + '/recording.mov'
-                }
-            } finally {
-                archive_pytest_results(stage_def.json, stage_def.bin)
-                if (stage_def.power) {
-                    archiveArtifacts artifacts: 'pytest/' + power_results_file(stage_def.power), fingerprint: false, allowEmptyArchive: true
-                    stash name: power_stash_name(stage_def.power), includes: 'pytest/' + power_results_file(stage_def.power), allowEmpty: true
-                }
-                if (stage_def.video) {
-                    archiveArtifacts artifacts: stage_def.video + '/recording.mov', fingerprint: false, allowEmptyArchive: true
+            withEnv(["LOG_PREFIX=" + log_prefix(stage_def.name)]) {
+                echo "${env.LOG_PREFIX} Running on ${env.NODE_NAME}"
+                try {
+                    if (stage_def.video) {
+                        build job: 'camera_start_record'
+                    }
+                    unstash name: "ml_base_stash"
+                    for (stash_name in stage_def.unstash) {
+                        unstash name: stash_name
+                    }
+                    def pytest_options = ""
+                    if (stage_def.power) {
+                        pytest_options = '--power_results ' + power_results_file(stage_def.power) +
+                            ' --power_board "' + stage_def.power.board + '" --power_core ' + stage_def.power.core
+                    }
+                    flash_and_run_pytest(stage_def.json, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
+                    if (stage_def.video) {
+                        build job: 'camera_stop_record'
+                        copyArtifacts(projectName: 'camera_stop_record', filter: 'recording.mov', target: stage_def.video, optional: true)
+                        stash name: stage_def.video, includes: stage_def.video + '/recording.mov'
+                    }
+                } finally {
+                    archive_pytest_results(stage_def.json, stage_def.bin)
+                    if (stage_def.power) {
+                        archiveArtifacts artifacts: 'pytest/' + power_results_file(stage_def.power), fingerprint: false, allowEmptyArchive: true
+                        stash name: power_stash_name(stage_def.power), includes: 'pytest/' + power_results_file(stage_def.power), allowEmpty: true
+                    }
+                    if (stage_def.video) {
+                        archiveArtifacts artifacts: stage_def.video + '/recording.mov', fingerprint: false, allowEmptyArchive: true
+                    }
                 }
             }
         } finally {
