@@ -9,6 +9,11 @@ def ci_stages
 
 pipeline {
     agent none
+    options {
+        // Time stamp at the beginning of each console line. The lines of the shell scripts also
+        // have the agent and stage prefix, see psh in test_common.groovy.
+        timestamps()
+    }
     environment {
         LOG_JUNIT_RESULTS = 'true'
     }
