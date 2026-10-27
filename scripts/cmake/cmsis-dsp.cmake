@@ -43,9 +43,16 @@ set(CMSISCORE               "${CMSIS_SRC_PATH}/CMSIS/Core")
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55 OR
     CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85 OR
     CMAKE_SYSTEM_PROCESSOR STREQUAL armv8.1-m.main)
-    set(HELIUM              ON)
-    set(MVEF                ON)
-    set(MVEI                ON)
+    if (NO_HELIUM AND DEFINED ETHOS_U_NPU_ENABLED AND NOT ETHOS_U_NPU_ENABLED)
+        message(STATUS "Disabling Helium (NO_HELIUM=ON, NPU disabled) in CMSIS-DSP")
+        set(HELIUM          OFF)
+        set(MVEF            OFF)
+        set(MVEI            OFF)
+    else()
+        set(HELIUM          ON)
+        set(MVEF            ON)
+        set(MVEI            ON)
+    endif()
 endif()
 
 # There is a known issue with Arm GNU Compiler version 14.

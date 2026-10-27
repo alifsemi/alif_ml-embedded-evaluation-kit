@@ -58,6 +58,16 @@ function(set_platform_global_defaults)
         message(STATUS "Alif use cases built without display UI!")
     endif()
 
+    set(NO_HELIUM OFF CACHE BOOL "Build without Helium (MVE) support, e.g. for power profiling of the CPU without the NPU. Only used with ETHOS_U_NPU_ENABLED=OFF.")
+    if (NO_HELIUM)
+        # Same condition as in toolchains/bare-metal-gcc.cmake and cmsis-dsp.cmake.
+        if (DEFINED ETHOS_U_NPU_ENABLED AND NOT ETHOS_U_NPU_ENABLED)
+            message(STATUS "Alif build without Helium (MVE)!")
+        else()
+            message(WARNING "NO_HELIUM is only used with -DETHOS_U_NPU_ENABLED=OFF, ignoring it.")
+        endif()
+    endif()
+
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
 
     # Sanity check for USE_STRIPED_SRAM

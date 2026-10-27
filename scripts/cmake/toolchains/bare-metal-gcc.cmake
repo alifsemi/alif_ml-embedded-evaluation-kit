@@ -40,9 +40,22 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m55)
     set(CPU_COMPILE_DEF             CPU_CORTEX_${CPU_ID})
     set(ARM_CPU                     "ARMC${CPU_ID}")
     set(CPU_HEADER_FILE             "${ARM_CPU}.h")
-    set(CPU_COMPILE_OPTION          "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(FLOAT_ABI_COMPILE_OPTION    "-mfloat-abi=hard")
-    set(CPU_LINK_OPT                "--cpu=Cortex-${CPU_ID}")
+    # NO_HELIUM is only honoured with the NPU explicitly disabled. The toolchain file is
+    # processed before the project defaults, so ETHOS_U_NPU_ENABLED is only defined here when
+    # given on the command line. Keep in sync with scripts/cmake/cmsis-dsp.cmake.
+    if (NO_HELIUM AND DEFINED ETHOS_U_NPU_ENABLED AND NOT ETHOS_U_NPU_ENABLED)
+        # Must also disable MVE at compile time; otherwise __ARM_FEATURE_MVE stays
+        # defined and CMSIS-DSP emits references to MVE-only tables that are not
+        # built when HELIUM/MVEF/MVEI are OFF (see scripts/cmake/cmsis-dsp.cmake).
+        set(CPU_COMPILE_OPTION      "-mcpu=cortex-m55+nomve")
+        set(CPU_LINK_OPT            "-mcpu=cortex-m55+nomve")
+        message(STATUS "Disabling Helium (NO_HELIUM=ON, NPU disabled) in toolchain")
+    else()
+        set(CPU_LINK_OPT            "--cpu=Cortex-${CPU_ID}")
+        set(CPU_COMPILE_OPTION      "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL cortex-m85)
     # Flags for cortex-m85
     set(MIN_GCC_VERSION             13.2.1)

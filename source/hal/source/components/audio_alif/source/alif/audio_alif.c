@@ -11,6 +11,7 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <tgmath.h>
 
 #include "RTE_Components.h"
@@ -35,6 +36,30 @@
 static int32_t srshr(int32_t n, unsigned shift)
 {
     return (n + (1 << (shift - 1))) >> shift;
+}
+#endif
+
+/* GCC on cortex-m55+nomve lowers scalar _Float16 load/store to Advanced-SIMD
+   lane instructions that Cortex-M55 does not implement. clang and armclang
+   emit the correct FPv5 scalar half-precision encodings, so the fallback is
+   compiled only for real GCC when MVE-F is unavailable. */
+#if !(__ARM_FEATURE_MVE & 2) && defined(__GNUC__) && !defined(__clang__)
+#define MLEK_NEED_F16_SCALAR_WORKAROUND 1
+#else
+#define MLEK_NEED_F16_SCALAR_WORKAROUND 0
+#endif
+
+#if MLEK_NEED_F16_SCALAR_WORKAROUND
+/* Load one f16 as f32 via LDRH + VCVTB.F32.F16, avoiding the buggy pattern. */
+static inline float f16_load_as_f32(const void *p)
+{
+    uint16_t bits;
+    memcpy(&bits, p, sizeof(bits));
+    float f;
+    __asm__("vmov %0, %1\n\t"
+            "vcvtb.f32.f16 %0, %0\n\t"
+            : "=t"(f) : "r"((uint32_t) bits));
+    return f;
 }
 #endif
 
@@ -207,7 +232,16 @@ static void copy_audio_rec_to_in(float16_t * __RESTRICT in, const audio_rec_t * 
         float mono_f32 = mono * 0x1p-15f;
 #endif
         // Convert to float16
+#if MLEK_NEED_F16_SCALAR_WORKAROUND
+        // Force a plain halfword store to avoid the GCC Neon lane-store bug.
+        float16_t mono_f16 = (float16_t) mono_f32;
+        uint16_t mono_bits;
+        memcpy(&mono_bits, &mono_f16, sizeof(mono_bits));
+        memcpy(output, &mono_bits, sizeof(mono_bits));
+        output += 1;
+#else
         *output++ = (float16_t) mono_f32;
+#endif
         input += 2;
         samples_to_go -= 1;
     }
@@ -311,6 +345,13 @@ static void convert_to_s16_from_f16_with_gain(void *ptr, int length, float16_t g
         vst1q_p_s16(ptr, data, p);
         ptr = (int16_t *) ptr + 8;
         length -= 8;
+#elif MLEK_NEED_F16_SCALAR_WORKAROUND
+        float fp = f16_load_as_f32(ptr);
+        fp *= (float) gain;
+        int16_t data = (int16_t) (fp * 0x1p15f);
+        *(int16_t *) ptr = data;
+        ptr = (int16_t *) ptr + 1;
+        length -= 1;
 #else
         float16_t fp = *(float16_t *) ptr;
         fp *= gain;
@@ -340,12 +381,32 @@ void set_audio_gain(float gain_db)
  */
 void audio_preprocessing(int16_t *audio, int samples)
 {
+#if MLEK_NEED_F16_SCALAR_WORKAROUND
+    // Scalar F32 fallback: CMSIS-DSP's arm_*_f16 helpers hit the GCC bug
+    // that lowers scalar _Float16 loads to Advanced-SIMD lane instructions.
+    float audio_mean = 0.0f;
+    float audio_absmax = 0.0f;
+    {
+        float sum = 0.0f;
+        const uint16_t *audio_bits = (const uint16_t *) audio;
+        for (int i = 0; i < samples; i++) {
+            float v = f16_load_as_f32(&audio_bits[i]);
+            sum += v;
+            float a = fabsf(v);
+            if (a > audio_absmax) {
+                audio_absmax = a;
+            }
+        }
+        audio_mean = sum / (float) samples;
+    }
+#else
     float16_t *audio_fp = (float16_t *) audio;
     float16_t audio_mean, audio_absmax;
 
     arm_mean_f16(audio_fp, samples, &audio_mean);
     arm_absmax_no_idx_f16(audio_fp, samples, &audio_absmax);
     //if (audio_absmax == INT16_MIN) audio_absmax = INT16_MAX; // CMSIS-DSP issue #66
+#endif
 #ifndef GPIO_PROFILING
     printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
 #endif

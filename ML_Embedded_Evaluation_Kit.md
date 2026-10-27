@@ -882,6 +882,9 @@ For automated power measurements. Only used with `GPIO_PROFILING=ON`. When enabl
 `-DNO_DISPLAY=<ON|OFF>`<br>
 Builds the use cases without any on-device UI: no LVGL screen layout, camera preview or result labels, and no GLCD text output in `alif_asr` (`alif_img_class`, `alif_object_detection`, `alif_vww` and `alif_asr`). Camera, audio, inference, console logging and GPIO profiling work as before. Intended for power profiling without a display attached. Combine with `-DGLCD_UI=OFF` to also remove the GLCD text drawn by the shared result presentation code. (Default is OFF)
 
+`-DNO_HELIUM=<ON|OFF>`<br>
+Builds without Helium (MVE) support, for example to profile the CPU-only power consumption. The compiler is invoked with `-mcpu=cortex-m55+nomve` and CMSIS-DSP is built without its MVE code. Only used with `-DETHOS_U_NPU_ENABLED=OFF` (it must be given on the command line) and the GCC toolchain; otherwise it is ignored with a warning. (Default is OFF)
+
 `-DUSE_INA228=<ON|OFF>`<br>
 Measures the average current and power of each inference with an INA228 sensor and shows them on the display (currently `alif_object_detection`). A missing sensor is not fatal. (Default is OFF) See [Measuring power per inference with an INA228](#powermeasurement).
 
