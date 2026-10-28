@@ -1,0 +1,109 @@
+def common_funcs
+def ci_stages_weekly
+
+// NOTE: Tests that are run weekly are defined in automation/ci_stages.groovy.
+pipeline {
+    agent none
+    options {
+        // Time stamp at the beginning of each console line. The lines of the shell scripts also
+        // have the agent and stage prefix, see psh in test_common.groovy.
+        timestamps()
+    }
+    environment {
+        LOG_JUNIT_RESULTS = 'true'
+    }
+    triggers {
+        cron('0 20 * * 6') // Every Saturday at 20:00 UTC
+    }
+    stages {
+        stage('Init') {
+            when {
+                anyOf {
+                    branch 'main'
+                }
+            }
+            agent { label 'ml_build' }
+            steps {
+                script {
+                    common_funcs = load ("automation/test_common.groovy");
+                    ci_stages_weekly = load ("automation/ci_stages_weekly.groovy");
+                    common_funcs.setup_resources()
+                }
+            }
+            post {
+                always {
+                    stash name: "ml_base_stash", includes: "**"
+                }
+            }
+        }
+        // First build can end up doing some patching of Tensorflow
+        // so run one build sequentially to start with
+        stage('Initial Builds') {
+            when {
+                anyOf {
+                    branch 'main'
+                }
+            }
+            steps {
+                script {
+                    parallel common_funcs.build_branches(ci_stages_weekly.initial_weekly_builds())
+                }
+            }
+        }
+        // Remaining builds can be parallel. Different Devkits could be run in the same branch but
+        // then it would not be parallel, so use a separate entry for each to save build time.
+        stage('More builds') {
+            when {
+                anyOf {
+                    branch 'main'
+                }
+            }
+            steps {
+                script {
+                    parallel common_funcs.build_branches(ci_stages_weekly.more_weekly_builds())
+                }
+            }
+        }
+        stage('Test phase') {
+            when {
+                anyOf {
+                    branch 'main'
+                }
+            }
+            steps {
+                script {
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests())
+                }
+            }
+        }
+        // Every power test runs on its own agent and writes its own markdown file,
+        // so collect the files here to one table.
+        stage('Merge power results') {
+            when {
+                anyOf {
+                    branch 'main'
+                }
+            }
+            agent { label 'ml_build' }
+            options { skipDefaultCheckout() }
+            steps {
+                unstash name: "ml_base_stash"
+                script {
+                    // A test that failed early may not have stashed its results
+                    common_funcs.unstash_power_results(ci_stages_weekly.tests())
+                }
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh "python3 pytest/merge_power_results.py -o pytest/power_results_merged.md pytest/power_results_*.md"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'pytest/power_results_merged.md', fingerprint: false, allowEmptyArchive: true
+                }
+                cleanup {
+                    script { common_funcs.clean_workspace() }
+                }
+            }
+        }
+    }
+}

@@ -103,8 +103,22 @@ def build_inf_runner(String build_type, String toolchain, String board, String c
         exit \$exit_code"""
 }
 
-def build_ci_power_test(String core, String board, String toolchain, String npu_id, String linker_script_name, String ml_framework, String use_case="all") {
+/**
+ * Builds the CI power test binaries.
+ *
+ * @param extra_cmake_options  Optional extra CMake options, passed as they are, e.g.
+ *                             '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF'
+ */
+def build_ci_power_test(String core, String board, String toolchain, String npu_id, String linker_script_name, String ml_framework, String use_case="all", String extra_cmake_options="") {
     def build_path = "build_ci_power_test_${core}_${board}_${toolchain}_${npu_id}_${linker_script_name}_${ml_framework}".toLowerCase()
+
+    /* Keep builds with different options in separate directories */
+    if (extra_cmake_options.contains('-DNO_HELIUM=ON')) {
+        build_path += "_no_helium"
+    }
+    if (extra_cmake_options.contains('-DETHOS_U_NPU_ENABLED=OFF')) {
+        build_path += "_no_npu"
+    }
 
     def use_case_build
     if (use_case == "all") {
@@ -113,7 +127,7 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
         use_case_build = use_case
     }
 
-    def cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON"
+    def cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON ${extra_cmake_options}"
 
     psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
@@ -223,7 +237,7 @@ def run_build(List build_def) {
     } else if (build_def[0] == 'inf_runner') {
         build_inf_runner(build_def[1], build_def[2], build_def[3], build_def[4])
     } else if (build_def[0] == 'ci_power_test') {
-        build_ci_power_test(build_def[1], build_def[2], build_def[3], build_def[4], build_def[5], build_def[6], build_def[7])
+        build_ci_power_test(build_def[1], build_def[2], build_def[3], build_def[4], build_def[5], build_def[6], build_def[7], build_def.size() > 8 ? build_def[8] : "")
     } else {
         error "Unknown build type ${build_def[0]}"
     }
