@@ -142,6 +142,39 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
         exit \$exit_code"""
 }
 
+/**
+ * Write the SE tools configuration file (json) of an application binary, which is given to
+ * app-gen-toc. Used instead of a json file of the repository for each core, linker script and
+ * binary combination.
+ *
+ * @param flash   Map with core (HE or HP), mram (MRAM address of the linker script, e.g.
+ *                '0x80008000') and optionally device_config (default app-device-config.json).
+ * @param binary  The name of the binary the application is flashed with.
+ * @return        The name of the written file.
+ */
+def flash_config_file(Map flash, String binary) {
+    def device_config = flash.device_config ?: 'app-device-config.json'
+    def file_name = binary.replaceFirst(/\.bin$/, '') + '_' + flash.core.toLowerCase() + '.json'
+    writeFile file: file_name, text: """{
+    "${flash.core}_Image": {
+        "binary": "${binary}",
+        "version": "1.0.0",
+        "mramAddress": "${flash.mram}",
+        "cpu_id": "M55_${flash.core}",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "DEVICE": {
+        "disabled": false,
+        "binary": "${device_config}",
+        "version": "0.5.00",
+        "signed": true
+    }
+}
+"""
+    return file_name
+}
+
 def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name, String extra_pytest_options = "") {
     try {
         psh """#!/bin/bash -xe
@@ -274,6 +307,8 @@ def test_stage(Map stage_def) {
         try {
             withEnv(["LOG_PREFIX=" + log_prefix(stage_def.name)]) {
                 echo "${env.LOG_PREFIX} Running on ${env.NODE_NAME}"
+                /* Either a json file of the repository or generated from the flash definition */
+                def json_file = stage_def.json ?: flash_config_file(stage_def.flash, stage_def.bin)
                 try {
                     if (stage_def.video) {
                         build job: 'camera_start_record'
@@ -287,14 +322,14 @@ def test_stage(Map stage_def) {
                         pytest_options = '--power_results ' + power_results_file(stage_def.power) +
                             ' --power_board "' + stage_def.power.board + '" --power_core ' + stage_def.power.core
                     }
-                    flash_and_run_pytest(stage_def.json, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
+                    flash_and_run_pytest(json_file, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
                     if (stage_def.video) {
                         build job: 'camera_stop_record'
                         copyArtifacts(projectName: 'camera_stop_record', filter: 'recording.mov', target: stage_def.video, optional: true)
                         stash name: stage_def.video, includes: stage_def.video + '/recording.mov'
                     }
                 } finally {
-                    archive_pytest_results(stage_def.json, stage_def.bin)
+                    archive_pytest_results(json_file, stage_def.bin)
                     if (stage_def.power) {
                         archiveArtifacts artifacts: 'pytest/' + power_results_file(stage_def.power), fingerprint: false, allowEmptyArchive: true
                         stash name: power_stash_name(stage_def.power), includes: 'pytest/' + power_results_file(stage_def.power), allowEmpty: true
@@ -369,4 +404,5 @@ return [
     build_branches: this.&build_branches,
     test_branches: this.&test_branches,
     unstash_power_results: this.&unstash_power_results,
+    flash_config_file: this.&flash_config_file,
 ]

@@ -50,6 +50,13 @@ function(set_platform_global_defaults)
     if (GPIO_PROFILING AND GPIO_PROFILING_CI)
         add_compile_definitions(GPIO_PROFILING_CI)
         message(STATUS "Alif GPIO profiling: CI mode enabled!")
+
+        set(GPIO_PROFILING_CI_SKIP_ROUNDS 20 CACHE STRING "Number of rounds the GPIO profiling line stays idle in CI mode (warm-up and time for the automation to start waiting for the signal). Only used with GPIO_PROFILING_CI.")
+        if (NOT GPIO_PROFILING_CI_SKIP_ROUNDS MATCHES "^[0-9]+$")
+            message(FATAL_ERROR "GPIO_PROFILING_CI_SKIP_ROUNDS must be a non-negative integer, got '${GPIO_PROFILING_CI_SKIP_ROUNDS}'")
+        endif()
+        add_compile_definitions(GPIO_PROFILING_CI_SKIP_ROUNDS=${GPIO_PROFILING_CI_SKIP_ROUNDS})
+        message(STATUS "Alif GPIO profiling: CI skip rounds: ${GPIO_PROFILING_CI_SKIP_ROUNDS}")
     endif()
 
     set(NO_DISPLAY OFF CACHE BOOL "Build the use cases without any on-device UI (LVGL screen layout, camera preview, result labels), e.g. for power profiling without a display.")
@@ -248,6 +255,20 @@ function(platform_custom_post_build)
             PRIVATE
                 -E
                 -xc
+        )
+    endif()
+
+    # Define a per-target macro named after the use case (e.g. ALIF_ASR for
+    # "alif_asr") only while preprocessing this target's linker file. This lets
+    # the linker files select use-case specific values (such as __HEAP_SIZE)
+    # with `#if defined(ALIF_<USE_CASE>)`, even when several use cases are
+    # built in a single CMake build.
+    if (DEFINED use_case AND NOT "${use_case}" STREQUAL "")
+        string(TOUPPER "${use_case}" LINKER_USE_CASE_DEFINE)
+        string(MAKE_C_IDENTIFIER "${LINKER_USE_CASE_DEFINE}" LINKER_USE_CASE_DEFINE)
+        target_compile_definitions(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                ${LINKER_USE_CASE_DEFINE}
         )
     endif()
 

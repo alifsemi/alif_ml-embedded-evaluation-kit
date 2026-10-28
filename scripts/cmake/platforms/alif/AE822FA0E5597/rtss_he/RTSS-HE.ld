@@ -31,11 +31,13 @@
 #include "alif_mem_config.h"
 #include "board_defs.h"
 
-/* #if defined(ALIF_ASR)
+#if defined(ALIF_ASR)
 __HEAP_SIZE  = 0x00037000;
-#else */
+#elif defined(ALIF_IMG_CLASS)
+__HEAP_SIZE  = 0x00017000;
+#else
 __HEAP_SIZE  = 0x00008000;
-/* #endif */
+#endif
 
 
 __STACK_SIZE = 0x00002000;

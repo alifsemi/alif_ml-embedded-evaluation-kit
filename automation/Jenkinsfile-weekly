@@ -1,7 +1,7 @@
 def common_funcs
 def ci_stages_weekly
 
-// NOTE: Tests that are run weekly are defined in automation/ci_stages.groovy.
+// NOTE: Tests that are run weekly are defined in automation/ci_stages_weekly.groovy.
 pipeline {
     agent none
     options {
