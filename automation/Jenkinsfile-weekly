@@ -13,13 +13,14 @@ pipeline {
         LOG_JUNIT_RESULTS = 'true'
     }
     triggers {
-        cron('0 20 * * 6') // Every Saturday at 20:00 UTC
+        cron('30 10 * * 4') // Every Thursday at 10:30 UTC
+        // cron('0 20 * * 6') // Every Saturday at 20:00 UTC
     }
     stages {
         stage('Init') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'add_weekly_ci'
                 }
             }
             agent { label 'ml_build' }
@@ -41,7 +42,7 @@ pipeline {
         stage('Initial Builds') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'add_weekly_ci'
                 }
             }
             steps {
@@ -55,7 +56,7 @@ pipeline {
         stage('More builds') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'add_weekly_ci'
                 }
             }
             steps {
@@ -67,7 +68,7 @@ pipeline {
         stage('Test phase') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'add_weekly_ci'
                 }
             }
             steps {
@@ -81,7 +82,7 @@ pipeline {
         stage('Merge power results') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'add_weekly_ci'
                 }
             }
             agent { label 'ml_build' }
