@@ -1,0 +1,16 @@
+{
+  "DEVICE": {
+    "disabled" : false,
+    "binary": "app-device-config.json",
+    "version" : "0.5.00",
+    "signed": true
+  },
+  "EXT_FLASH": {
+    "binary": "flasher_e8_he.bin",
+    "mramAddress": "0x80000000",
+    "version": "1.0.0",
+    "cpu_id": "M55_HE",
+    "flags": ["boot"],
+    "signed": false
+  }
+}

@@ -77,6 +77,18 @@ pipeline {
                 }
             }
         }
+        stage('Test phase Model in OSPI Flash') {
+            when {
+                anyOf {
+                    branch 'add_weekly_ci'
+                }
+            }
+            steps {
+                script {
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests_withmodel_in_ospi_flash())
+                }
+            }
+        }
         // Every power test runs on its own agent and writes its own markdown file,
         // so collect the files here to one table.
         stage('Merge power results') {
@@ -91,7 +103,7 @@ pipeline {
                 unstash name: "ml_base_stash"
                 script {
                     // A test that failed early may not have stashed its results
-                    common_funcs.unstash_power_results(ci_stages_weekly.tests())
+                    common_funcs.unstash_power_results(ci_stages_weekly.tests() + ci_stages_weekly.tests_withmodel_in_ospi_flash())
                 }
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     sh "python3 pytest/merge_power_results.py -o pytest/power_results_merged.md pytest/power_results_*.md"

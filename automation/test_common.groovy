@@ -175,26 +175,40 @@ def flash_config_file(Map flash, String binary) {
     return file_name
 }
 
+/**
+ * Write a binary to the MRAM of the device under test with the SE tools. Fails if the device is
+ * not in the maintenance mode.
+ *
+ * @param jsonfile             SE tools json file of the binary, with or without the directories.
+ * @param build_dir            Directory of the binary.
+ * @param source_binary_name   Name of the binary in build_dir.
+ * @param target_binary_name   Name of the binary in the json file.
+ */
+def flash_mram(String jsonfile, String build_dir, String source_binary_name, String target_binary_name) {
+    def json_name = jsonfile.substring(jsonfile.lastIndexOf('/') + 1)
+    psh """#!/bin/bash -xe
+        printenv NODE_NAME
+        cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
+        rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
+        cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
+        cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
+        pushd $ALIF_SETOOLS_LOCATION/
+        {
+            ./app-gen-toc --filename build/config/$json_name
+            ./app-write-mram -e app
+            ./app-write-mram -p
+        } 2>&1 | tee $WORKSPACE/flash_device.log
+        popd"""
+
+    if (fileExists('flash_device.log') &&
+        readFile('flash_device.log').contains('Maintenance Mode = Disabled')) {
+        error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
+    }
+}
+
 def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name, String extra_pytest_options = "") {
     try {
-        psh """#!/bin/bash -xe
-            printenv NODE_NAME
-            cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
-            rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
-            cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
-            cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
-            pushd $ALIF_SETOOLS_LOCATION/
-            {
-                ./app-gen-toc --filename build/config/$jsonfile
-                ./app-write-mram -e app
-                ./app-write-mram -p
-            } 2>&1 | tee $WORKSPACE/flash_device.log
-            popd"""
-
-        if (fileExists('flash_device.log') &&
-            readFile('flash_device.log').contains('Maintenance Mode = Disabled')) {
-            error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
-        }
+        flash_mram(jsonfile, build_dir, source_binary_name, target_binary_name)
 
         def run_pytest = "\
         pytest \
@@ -300,7 +314,38 @@ def build_stage(Map stage_def) {
 }
 
 /**
- * Run a test stage definition (see ci_stages.groovy) on the agent of the device under test.
+ * Write a file (e.g. the model of a use case which is too large for the MRAM) to the OSPI flash
+ * of the device under test with the alif_usb-to-ospi-flasher. The flasher application
+ * (automation/flasher, for DevKit-E8 HE) is first written to the MRAM, then the file is sent to
+ * it over the USB serial port with XMODEM, see send_file_via_xmodem. The serial port of the
+ * flasher is read from the environment variable OSPI_FLASHER_PORT of the agent. The test
+ * binary written after this replaces the flasher in the MRAM, the OSPI flash content stays.
+ *
+ * @param file_path  Path of the file, including the directories (e.g. the ext_flash.bin of a build)
+ */
+def flash_ospi_file(String file_path) {
+    if (!env.OSPI_FLASHER_PORT) {
+        error "OSPI_FLASHER_PORT is not set on ${env.NODE_NAME}, cannot write ${file_path} to the OSPI flash"
+    }
+    if (!fileExists(file_path)) {
+        error "${file_path} to be written to the OSPI flash does not exist, is it unstashed?"
+    }
+    echo "${env.LOG_PREFIX} Writing ${file_path} to the OSPI flash"
+    flash_mram('automation/flasher/e8_flasher-cfg.json', 'automation/flasher', 'flasher_e8_he.bin', 'flasher_e8_he.bin')
+
+    /* The USB serial port appears when the flasher has booted */
+    psh """#!/bin/bash -xe
+        for i in \$(seq 30); do
+            [ -c '${env.OSPI_FLASHER_PORT}' ] && exit 0
+            sleep 1
+        done
+        echo "${env.OSPI_FLASHER_PORT} did not appear, is the flasher running?"
+        exit 1"""
+    send_file_via_xmodem(env.OSPI_FLASHER_PORT, file_path)
+}
+
+/**
+ * Run a test stage definition (see ci_stages_weekly.groovy) on the agent of the device under test.
  */
 def test_stage(Map stage_def) {
     node(stage_def.label) {
@@ -316,6 +361,10 @@ def test_stage(Map stage_def) {
                     unstash name: "ml_base_stash"
                     for (stash_name in stage_def.unstash) {
                         unstash name: stash_name
+                    }
+                    /* The model of the use case is in the OSPI flash, write it before the test */
+                    if (stage_def.ospi_file) {
+                        flash_ospi_file(stage_def.ospi_file)
                     }
                     def pytest_options = ""
                     if (stage_def.power) {
@@ -390,6 +439,18 @@ def unstash_power_results(List stage_defs) {
     unstash_if_exists(stash_names)
 }
 
+/**
+ * Send a file to a device over a serial port using classic XMODEM. Runs
+ * automation/send_file_via_xmodem.sh, which can also be used locally.
+ *
+ * @param port       Serial device, e.g. /dev/ttyACM1
+ * @param file_path  Path of the file to send
+ * @param timeout_s  Maximum duration of the transfer in seconds
+ */
+def send_file_via_xmodem(String port, String file_path, int timeout_s = 1800) {
+    psh "bash automation/send_file_via_xmodem.sh '${port}' '${file_path}' ${timeout_s}"
+}
+
 return [
     download_dependencies: this.&download_dependencies,
     setup_resources: this.&setup_resources,
@@ -404,5 +465,8 @@ return [
     build_branches: this.&build_branches,
     test_branches: this.&test_branches,
     unstash_power_results: this.&unstash_power_results,
+    send_file_via_xmodem: this.&send_file_via_xmodem,
+    flash_mram: this.&flash_mram,
+    flash_ospi_file: this.&flash_ospi_file,
     flash_config_file: this.&flash_config_file,
 ]

@@ -34,6 +34,11 @@
  *              from it, see flash_config_file in test_common.groovy.
  *   dir, src, bin:  Binary directory, name of the binary there and name it is flashed with.
  *   test:      pytest -k expression.
+ *   ospi_file: Optional. Path of a file (including the directories, from the workspace after the
+ *              unstash) to write to the OSPI flash before the test, e.g. the ext_flash.bin of a
+ *              use case with the model in the OSPI flash. The usb-to-ospi-flasher from
+ *              automation/flasher is flashed to the device first, see flash_ospi_file in
+ *              test_common.groovy.
  *   video:     Optional. Record the device with the camera job, the video is stashed with this name.
  *   power:     Optional. Power test, the results are written to
  *              power_results_<id>_<suffix>.md and stashed as power_results_<id>.
@@ -52,6 +57,7 @@ def initial_weekly_builds() {
              ['test_build_ci_power_test_ad_hp_devkit_e8', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin'],
              ['test_build_ci_power_test_vww_hp_devkit_e8', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin'],
              ['test_build_ci_power_test_asr_hp_devkit_e8', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_hp_devkit_e8_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin'],
              ['test_build_ci_power_test_kws_hp_devkit_e8', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin']]],
         /* U55 builds HE-E1C */
         [name: 'Build HE GCC Release CI Power Test for DevKit-E1C',
@@ -75,6 +81,7 @@ def more_weekly_builds() {
              ['test_build_ci_power_test_ad_he_devkit_e8', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin'],
              ['test_build_ci_power_test_vww_he_devkit_e8', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin'],
              ['test_build_ci_power_test_asr_he_devkit_e8', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_he_devkit_e8_ext_flash', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin'],
              ['test_build_ci_power_test_kws_he_devkit_e8', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin']]],
         /* U85 builds HP-E8 */
         [name: 'Build HP GCC Release CI Power Test for DevKit-e8 U85',
@@ -86,6 +93,7 @@ def more_weekly_builds() {
              ['test_build_ci_power_test_ad_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin'],
              ['test_build_ci_power_test_vww_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin'],
              ['test_build_ci_power_test_asr_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_hp_devkit_e8_u85_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin'],
              ['test_build_ci_power_test_kws_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin']]],
         /* U85 builds HE-E8 */
         [name: 'Build HE GCC Release CI Power Test for DevKit-e8 U85',
@@ -98,6 +106,7 @@ def more_weekly_builds() {
              ['test_build_ci_power_test_ad_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_ad/mram.bin'],
              ['test_build_ci_power_test_vww_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_vww/mram.bin'],
              ['test_build_ci_power_test_asr_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_he_devkit_e8_u85_ext_flash', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin'],
              ['test_build_ci_power_test_kws_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws/mram.bin']]],
         /* Builds without Helium and NPU HE-E8. Use less inference rounds as without NPU and Helium inference is so much slower (-DGPIO_PROFILING_CI_SKIP_ROUNDS=10) */
         [name: 'Build HE GCC Release CI Power Without Helium and NPU for DevKit-e8',
@@ -122,6 +131,19 @@ def more_weekly_builds() {
              ['test_build_ci_power_test_vww_hp_devkit_e8_no_helium_no_npu', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_vww/mram.bin'],
              ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/mram.bin'],
              ['test_build_ci_power_test_kws_hp_devkit_e8_no_helium_no_npu', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_kws/mram.bin']]],
+
+        /* ASR Use case with model in OSPI Flash takes so much time without Helium and NPU that is must start from the first inference round */
+        [name: 'Build HE GCC ASR Release CI Power Without Helium and NPU for DevKit-e8',
+         builds: [['ci_power_test', 'HE', 'DevKit-e8', 'gcc', 'U55', 'RTSS-HE', 'TensorFlowLiteMicro', 'alif_asr', '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF -DGPIO_PROFILING_CI_SKIP_ROUNDS=10'],
+         artifact: '*.bin',
+         stashes: [
+             ['test_build_ci_power_test_asr_he_devkit_e8_no_helium_no_npu_ext_flash', 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin']]],
+        /* ASR Use case with model in OSPI Flash takes so much time without Helium and NPU that is must start from the first inference round */
+        [name: 'Build HP GCC ASR Release CI Power Without Helium and NPU for DevKit-e8',
+         builds: [['ci_power_test', 'HP', 'DevKit-e8', 'gcc', 'U55', 'RTSS-HP', 'TensorFlowLiteMicro', 'alif_asr', '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF -DGPIO_PROFILING_CI_SKIP_ROUNDS=10']],
+         artifact: '*.bin',
+         stashes: [
+             ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin']]],
     ]
 }
 
@@ -362,8 +384,69 @@ def tests() {
     ]
 }
 
+/* Tests of the use cases with the model in the OSPI flash. The model (ext_flash.bin) is written
+ * to the OSPI flash with the usb-to-ospi-flasher before the application (mram.bin) is flashed
+ * and the test is run, see ospi_file in the description of the test stage entries. */
+def tests_withmodel_in_ospi_flash() {
+    /* Flash configurations (see flash_config_file in test_common.groovy) of the cores */
+    def hp = [core: 'HP', mram: '0x80008000']
+    def he = [core: 'HE', mram: '0x80008000']
+    return [
+        /* ASR tests (TensorFlow Lite Micro) */
+        /* HP-E8 U55 tests */
+        [name: 'Test ASR HP U55 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8', 'test_build_ci_power_test_asr_hp_devkit_e8_ext_flash'],
+         flash: hp,
+         dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HE-E8 U55 tests */
+        [name: 'Test ASR HE U55 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8', 'test_build_ci_power_test_asr_he_devkit_e8_ext_flash'],
+         flash: he,
+         dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HP-E8 U85 tests */
+        [name: 'Test ASR HP U85 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8_u85', 'test_build_ci_power_test_asr_hp_devkit_e8_u85_ext_flash'],
+         flash: hp,
+         dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HE-E8 U85 tests */
+        [name: 'Test ASR HE U85 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8_u85', 'test_build_ci_power_test_asr_he_devkit_e8_u85_ext_flash'],
+         flash: he,
+         dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HE-E8 without Helium and NPU tests */
+        [name: 'Test ASR HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_he_devkit_e8_no_helium_no_npu_ext_flash'],
+         flash: he,
+         dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HP-E8 without Helium and NPU tests */
+        [name: 'Test ASR HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu_ext_flash'],
+         flash: hp,
+         dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+    ]
+}
+
 return [
     initial_weekly_builds: this.&initial_weekly_builds,
     more_weekly_builds: this.&more_weekly_builds,
     tests: this.&tests,
+    tests_withmodel_in_ospi_flash: this.&tests_withmodel_in_ospi_flash,
 ]

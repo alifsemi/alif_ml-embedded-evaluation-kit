@@ -27,6 +27,15 @@
 #include <new>
 #include <exception>
 
+#if defined(GPIO_PROFILING_CI)
+#include "delay.h"
+
+/* Time to wait before the application is started in an automated power measurement. */
+#ifndef GPIO_PROFILING_CI_START_DELAY_MS
+#define GPIO_PROFILING_CI_START_DELAY_MS 2000
+#endif
+#endif /* defined(GPIO_PROFILING_CI) */
+
 extern void MainLoop();
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -56,6 +65,14 @@ int main ()
         PrintApplicationIntro();
 
         std::set_new_handler(out_of_heap);
+
+#if defined(GPIO_PROFILING_CI)
+        /* Automated power measurement: give the Joulescope recording time to start before the
+         * application starts toggling the GPIO sync line. */
+        info("Waiting %d ms for the power measurement to start\n",
+             GPIO_PROFILING_CI_START_DELAY_MS);
+        sleep_or_wait_msec(GPIO_PROFILING_CI_START_DELAY_MS);
+#endif /* defined(GPIO_PROFILING_CI) */
 
         /* Run the application. */
         MainLoop();

@@ -22,7 +22,7 @@ def test_asr_power(dut: Dut, JScope, record_power):
     # the capture ends at the next rising edge, so the base (idle) phase is included.
     with RoundCapture(None, JScope) as capture:
         capture.start()
-        result = capture.wait_for_round(timeout=60)
+        result = capture.wait_for_round(timeout=260) # 260 seconds is the timeout needed for without Helium and NPU builds
 
     record_power(result)
     print(result.summary())
