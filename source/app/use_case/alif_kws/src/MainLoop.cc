@@ -51,6 +51,15 @@ void MainLoop()
 {
     init_trigger_tx();
 
+#ifdef KWS_RECORD_MODE
+    /* The tensor arena is unused in record mode, so it doubles as the record buffer. */
+    alif::app::RecordAudioHandler(arm::app::kws::g_AudioRate,
+                                  reinterpret_cast<int16_t*>(arm::app::tensorArena),
+                                  sizeof(arm::app::tensorArena) / sizeof(int16_t));
+    info("Main loop terminated.\n");
+    return;
+#endif /* KWS_RECORD_MODE */
+
     arm::app::fwk::tflm::MicroNetKwsModel model;  /* Model wrapper object. */
 
     arm::app::fwk::iface::MemoryRegion modelMem{arm::app::kws::GetModelPointer(),

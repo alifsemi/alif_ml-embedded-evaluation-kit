@@ -1,6 +1,6 @@
 # /* This file was ported to work on Alif Semiconductor devices. */
 #
-#/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
+#/* Copyright (C) 2022-2024, 2026 Alif Semiconductor - All Rights Reserved.
 # * Use, distribution and modification of this code is permitted under the
 # * terms stated in the Alif Semiconductor Software License Agreement
 # *
@@ -55,7 +55,18 @@ add_library(${AUDIO_ALIF_COMPONENT_TARGET} STATIC)
 target_sources(${AUDIO_ALIF_COMPONENT_TARGET}
     PRIVATE
     source/alif/audio_alif.c
-    source/alif/mic_listener.c)
+    source/alif/mic_listener.c
+    source/alif/tone_out.c)
+
+# Test tone output through the WM8904 codec (microphone calibration)
+if (TARGET_BOARD STREQUAL "AppKit-e8")
+    target_sources(${AUDIO_ALIF_COMPONENT_TARGET}
+        PRIVATE
+        ${ALIF_CMSIS_PATH}/components/Source/WM8904_codec_i2c.c)
+    target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}
+        PRIVATE
+        RTE_Drivers_WM8904_CODEC)
+endif()
 
 # Alif TARGET_BOARD needs to be set
 target_compile_definitions(${AUDIO_ALIF_COMPONENT_TARGET}

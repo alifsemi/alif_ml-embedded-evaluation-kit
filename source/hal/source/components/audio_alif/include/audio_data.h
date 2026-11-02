@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024, 2026 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -28,6 +28,11 @@ int audio_uninit();
 int get_audio_data(int16_t *data, int len);
 
 void audio_set_callback(audio_callback_t cb);
+
+/* While set, get_audio_data() also stores the raw interleaved left/right microphone samples
+ * (2 * len values) here, before the stereo to mono mix and DC removal. NULL to stop.
+ * Returns -1 if the microphone samples are not 16-bit. */
+int audio_set_raw_capture(int16_t *stereo);
 
 /* Returns number of samples that have been received in the current transfer */
 int get_audio_samples_received(void);

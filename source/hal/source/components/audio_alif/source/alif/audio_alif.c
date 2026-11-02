@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2024 Alif Semiconductor - All Rights Reserved.
+/* Copyright (C) 2022-2024, 2026 Alif Semiconductor - All Rights Reserved.
  * Use, distribution and modification of this code is permitted under the
  * terms stated in the Alif Semiconductor Software License Agreement
  *
@@ -11,6 +11,7 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <tgmath.h>
 
 #include "RTE_Components.h"
@@ -21,6 +22,7 @@
 #endif
 
 #include "audio_data.h"
+#include "hal_log.h"
 #include "mic_listener.h"
 #include "platform_drivers.h"
 
@@ -94,6 +96,7 @@ static float current_gain = MAX_GAIN;
 static bool auto_gain = true;
 
 static int16_t * restrict user_ptr;
+static int16_t *raw_ptr;
 static int user_length;
 static atomic_int audio_received;
 static atomic_int audio_async_error;
@@ -234,6 +237,12 @@ static void voice_data_cb(uint32_t event)
         store_pos += 2 * samples;
     }
 #endif
+#if AUDIO_REC_WIDTH == 16
+    if (raw_ptr) {
+        memcpy(raw_ptr + 2 * audio_received, audio_rec[!audio_current_rec_buf],
+               samples * 2 * sizeof(audio_rec_t));
+    }
+#endif
     copy_audio_rec_to_in((float16_t *) user_ptr + audio_received, audio_rec[!audio_current_rec_buf], samples);
     audio_received = new_total;
     if (audio_received >= user_length || audio_async_error) {
@@ -246,6 +255,17 @@ static void voice_data_cb(uint32_t event)
 void audio_set_callback(audio_callback_t callback)
 {
     user_audio_callback = callback;
+}
+
+int audio_set_raw_capture(int16_t *stereo)
+{
+#if AUDIO_REC_WIDTH == 16
+    raw_ptr = stereo;
+    return 0;
+#else
+    (void) stereo;
+    return -1;
+#endif
 }
 
 int audio_init(int sampling_rate)
@@ -347,7 +367,7 @@ void audio_preprocessing(int16_t *audio, int samples)
     arm_absmax_no_idx_f16(audio_fp, samples, &audio_absmax);
     //if (audio_absmax == INT16_MIN) audio_absmax = INT16_MAX; // CMSIS-DSP issue #66
 #ifndef GPIO_PROFILING
-    printf("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
+    debug("Original sample stats: absmax = %ld, mean = %ld\n", lround(32768*audio_absmax), lround(32768*audio_mean));
 #endif
     if (auto_gain) {
         // Rescale to full range  while converting to integer
@@ -362,6 +382,6 @@ void audio_preprocessing(int16_t *audio, int samples)
     arm_absmax_no_idx_q15(audio, samples, &audio_absmax_q15);
     if (audio_absmax_q15 == INT16_MIN) audio_absmax_q15 = INT16_MAX; // CMSIS-DSP issue #66
 #ifndef GPIO_PROFILING
-    printf("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
+    debug("Normalized sample stats: absmax = %d, mean = %d (gain = %.0f dB)\n", audio_absmax_q15, audio_mean_q15, 20 * log10f(current_gain) );
 #endif
 }

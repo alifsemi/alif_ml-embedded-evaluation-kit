@@ -53,8 +53,13 @@ set(SE_SERVICES_SUPPORT ON CACHE BOOL "Enables SE Services initialization. Neede
 
 message(STATUS "alif_kws: SE_SERVICES_SUPPORT: ${SE_SERVICES_SUPPORT}")
 
+USER_OPTION(${use_case}_RECORD_MODE "Run as a microphone recorder instead of KWS: on 'R' over the console UART, record 1.5 s and send the raw float16 samples back (for model training)."
+    OFF
+    BOOL)
+
 set(${use_case}_COMPILE_DEFS
     $<$<BOOL:${SE_SERVICES_SUPPORT}>:SE_SERVICES_SUPPORT>
+    $<$<BOOL:${${use_case}_RECORD_MODE}>:KWS_RECORD_MODE>
 )
 
 # Generate labels file

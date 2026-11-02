@@ -31,6 +31,9 @@
 
 #include "AppContext.hpp"
 
+#include <cstddef>
+#include <cstdint>
+
 namespace alif {
 namespace app {
 
@@ -40,6 +43,15 @@ namespace app {
      * @return      true or false based on execution success.
      **/
     bool ClassifyAudioHandler(arm::app::ApplicationContext& ctx, bool oneshot);
+
+    /**
+     * @brief       Serves microphone recordings over the console UART (KWS_RECORD_MODE).
+     * @param[in]   audioRate       Sampling rate in Hz.
+     * @param[in]   buffer          Scratch buffer for the recording.
+     * @param[in]   bufferSamples   Size of the buffer in 16-bit samples.
+     * @return      false on error, otherwise does not return.
+     **/
+    bool RecordAudioHandler(int audioRate, int16_t* buffer, size_t bufferSamples);
 
 } /* namespace app */
 } /* namespace alif */

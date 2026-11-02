@@ -214,7 +214,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
             arm::app::GpioMarkerToggle(gpioMarker);
 #else
             const bool gpioMarker = true;
-            uint32_t start = Get_SysTick_Cycle_Count32();
+            [[maybe_unused]] uint32_t start = Get_SysTick_Cycle_Count32();
 #endif
             /* Run the pre-processing, inference and post-processing. */
             if (!preProcess.DoPreProcess(inferenceWindow, index)) {
@@ -222,7 +222,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 return false;
             }
 #ifndef GPIO_PROFILING
-            printf("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+            debug("Preprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
             start = Get_SysTick_Cycle_Count32();
 #endif
             if (!RunInference(model, profiler, gpioMarker)) {
@@ -230,7 +230,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 return false;
             }
 #ifndef GPIO_PROFILING
-            printf("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+            debug("Inference time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
             start = Get_SysTick_Cycle_Count32();
 #endif
             if (!postProcess.DoPostProcess()) {
@@ -240,7 +240,7 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
 #if defined(GPIO_PROFILING)
             arm::app::GpioMarkerToggle(gpioMarker);
 #else
-            printf("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
+            debug("Postprocessing time = %.3f ms\n", (double) (Get_SysTick_Cycle_Count32() - start) / SystemCoreClock * 1000);
 
             /* Add results from this window to our final results vector. */
             if (infResults.size() == RESULTS_MEMORY) {
@@ -263,7 +263,11 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                 return false;
             }
 
+#if MLEK_LOG_LEVEL <= MLEK_LOG_LEVEL_DEBUG
             profiler.PrintProfilingResult();
+#else
+            profiler.Reset();
+#endif
 #endif
             ++index;
         } while (!oneshot);
@@ -277,10 +281,10 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
         constexpr uint32_t dataPsnTxtYIncr   = 16;  /* Row index increment. */
 
         hal_display_set_text_color(COLOR_GREEN);
-        info("Final results:\n");
-        info("Total number of inferences: %zu\n", results.size());
+        debug("Final results:\n");
+        debug("Total number of inferences: %zu\n", results.size());
 
-        /* Display each result */
+        /* Display each result; only the newest one is new on the console */
         uint32_t rowIdx1 = dataPsnTxtStartY1 + 2 * dataPsnTxtYIncr;
 
         for (const auto& result : results) {
@@ -301,6 +305,9 @@ static void send_msg_if_needed(arm::app::kws::KwsResult &result)
                     dataPsnTxtStartX1, rowIdx1, false);
             rowIdx1 += dataPsnTxtYIncr;
 
+            if (&result != &results.back()) {
+                continue;
+            }
             if (result.m_resultVec.empty()) {
                 info("For timestamp: %f (inference #: %" PRIu32
                              "); label: %s; threshold: %f\n",
