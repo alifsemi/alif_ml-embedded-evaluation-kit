@@ -272,6 +272,15 @@ function(platform_custom_post_build)
         )
     endif()
 
+    # Same for the ML framework: MLEK_FWK_EXECUTORCH lets the linker files use
+    # different memory settings (heap size, code placement) for ExecuTorch builds.
+    if ("${ML_FRAMEWORK}" STREQUAL "ExecuTorch")
+        target_compile_definitions(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                MLEK_FWK_EXECUTORCH
+        )
+    endif()
+
     add_dependencies(${PARSED_TARGET_NAME}
         ${PARSED_TARGET_NAME}_linkerfile
     )
