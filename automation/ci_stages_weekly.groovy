@@ -144,6 +144,34 @@ def more_weekly_builds() {
          stashes: [
              ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/mram.bin'],
              ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin']]],
+
+        /* ASR ExecuTorch builds. The default Conformer model is not supported with U55, so U85 is used. */
+        [name: 'Build HP GCC ASR ExecuTorch Release CI Power Test for DevKit-e8 U85',
+         builds: [['ci_power_test', 'HP', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HP', 'ExecuTorch', 'alif_asr']],
+         artifact: '*.bin',
+         stashes: [
+             ['test_build_ci_power_test_asr_et_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_et_hp_devkit_e8_u85_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/ext_flash.bin']]],
+        [name: 'Build HE GCC ASR ExecuTorch Release CI Power Test for DevKit-e8 U85',
+         builds: [['ci_power_test', 'HE', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HE', 'ExecuTorch', 'alif_asr']],
+         artifact: '*.bin',
+         stashes: [
+             ['test_build_ci_power_test_asr_et_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr/mram.bin'],
+             ['test_build_ci_power_test_asr_et_he_devkit_e8_u85_ext_flash', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr/ext_flash.bin']]],
+        /* ASR ExecuTorch builds without Helium and NPU. U85 is used as the NPU id because the default Conformer model is not supported with U55.
+         * The build must start from the first inference round (-DGPIO_PROFILING_CI_SKIP_ROUNDS=0) as without Helium and NPU the inference is so slow. */
+        // [name: 'Build HE GCC ASR ExecuTorch Release CI Power Without Helium and NPU for DevKit-e8',
+        //  builds: [['ci_power_test', 'HE', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HE', 'ExecuTorch', 'alif_asr', '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF -DGPIO_PROFILING_CI_SKIP_ROUNDS=0']],
+        //  artifact: '*.bin',
+        //  stashes: [
+        //      ['test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr/mram.bin'],
+        //      ['test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu_ext_flash', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin']]],
+        // [name: 'Build HP GCC ASR ExecuTorch Release CI Power Without Helium and NPU for DevKit-e8',
+        //  builds: [['ci_power_test', 'HP', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HP', 'ExecuTorch', 'alif_asr', '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF -DGPIO_PROFILING_CI_SKIP_ROUNDS=0']],
+        //  artifact: '*.bin',
+        //  stashes: [
+        //      ['test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr/mram.bin'],
+        //      ['test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin']]],
     ]
 }
 
@@ -441,6 +469,40 @@ def tests_withmodel_in_ospi_flash() {
          ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
          power: [id: 'asr_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+
+        /* ASR tests (ExecuTorch) */
+        /* HP-E8 U85 tests */
+        [name: 'Test ASR ExecuTorch HP U85 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_hp_devkit_e8_u85', 'test_build_ci_power_test_asr_et_hp_devkit_e8_u85_ext_flash'],
+         flash: hp,
+         dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_et_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_executorch', core: 'HP_U85_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HE-E8 U85 tests */
+        [name: 'Test ASR ExecuTorch HE U85 GCC Release CI Power Test for DevKit-e8',
+         label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_he_devkit_e8_u85', 'test_build_ci_power_test_asr_et_he_devkit_e8_u85_ext_flash'],
+         flash: he,
+         dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr',
+         ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr/ext_flash.bin',
+         src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+         power: [id: 'asr_et_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_executorch', core: 'HE_U85_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HE-E8 without Helium and NPU tests */
+        // [name: 'Test ASR ExecuTorch HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
+        //  label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu_ext_flash'],
+        //  flash: he,
+        //  dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr',
+        //  ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
+        //  src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+        //  power: [id: 'asr_et_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-he_executorch_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+        /* HP-E8 without Helium and NPU tests */
+        // [name: 'Test ASR ExecuTorch HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
+        //  label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu_ext_flash'],
+        //  flash: hp,
+        //  dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr',
+        //  ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
+        //  src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
+        //  power: [id: 'asr_et_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-hp_executorch_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU_ET', board: 'DevKit-E8 rev b, SE v112.0']],
     ]
 }
 

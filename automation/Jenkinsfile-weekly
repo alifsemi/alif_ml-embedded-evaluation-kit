@@ -19,12 +19,16 @@ pipeline {
                 script {
                     common_funcs = load ("automation/test_common.groovy");
                     ci_stages_weekly = load ("automation/ci_stages_weekly.groovy");
-                    common_funcs.setup_resources()
+                    common_funcs.setup_resources(true)
                 }
             }
             post {
                 always {
+                    // The builds need the whole workspace (dependencies, models and the Python
+                    // environment with ExecuTorch, several GB). The tests only need pytest and
+                    // automation, so they and the merge of the power results use a small stash.
                     stash name: "ml_base_stash", includes: "**"
+                    stash name: "ml_test_stash", includes: "pytest/**,automation/**,*.json"
                 }
             }
         }
@@ -49,14 +53,14 @@ pipeline {
         stage('Test phase Model in OSPI Flash') {
             steps {
                 script {
-                    parallel common_funcs.test_branches(ci_stages_weekly.tests_withmodel_in_ospi_flash())
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests_withmodel_in_ospi_flash(), "ml_test_stash")
                 }
             }
         }
         stage('Test phase') {
             steps {
                 script {
-                    parallel common_funcs.test_branches(ci_stages_weekly.tests())
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests(), "ml_test_stash")
                 }
             }
         }
@@ -66,7 +70,7 @@ pipeline {
             agent { label 'ml_build' }
             options { skipDefaultCheckout() }
             steps {
-                unstash name: "ml_base_stash"
+                unstash name: "ml_test_stash"
                 script {
                     // A test that failed early may not have stashed its results
                     common_funcs.unstash_power_results(ci_stages_weekly.tests() + ci_stages_weekly.tests_withmodel_in_ospi_flash())

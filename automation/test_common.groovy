@@ -30,14 +30,29 @@ def download_dependencies() {
     sh "python3.10 download_dependencies.py"
 }
 
-def setup_resources() {
-    /* CI builds only use TensorFlow Lite Micro, so install the trimmed requirements (no torch,
-     * CUDA or ExecuTorch, several GB) and run the downloads and Vela optimisations in parallel. */
-    psh "#!/bin/bash\npython3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256 " +
-        "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
-
-    /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters */
+/**
+ * Install the Python packages and download and optimise the models of the use cases. The downloads
+ * and Vela optimisations are run in parallel (one job per CPU, only 2 with ExecuTorch).
+ *
+ * @param executorch  Set up ExecuTorch too (for the use case alif_asr with ExecuTorch). It needs
+ *                    torch and the other packages of the default requirements.txt (several GB).
+ *                    Without it only TensorFlow Lite Micro is set up with the trimmed
+ *                    requirements_tflm.txt (no torch, CUDA or ExecuTorch).
+ */
+def setup_resources(boolean executorch = false) {
+    /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters.
+     * Remove them before the set up: if the set up fails, the post action of the Init stage still stashes
+     * the workspace, the stash fails because of the file names and hides the real error. */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
+
+    /* Every ExecuTorch model optimisation is a separate torch process (export, quantisation and
+     * Vela) which needs a lot of memory, and the processes of the same model download the same
+     * weights to the same cache at the same time. Use only a few parallel jobs with ExecuTorch. */
+    def frameworks_and_parallel = executorch ?
+        "--ml-frameworks tflm executorch --parallel 2" :
+        "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
+    psh "#!/bin/bash\npython3.10 set_up_default_resources.py ${frameworks_and_parallel} " +
+        "--additional-ethos-u-config-name ethos-u55-256"
 }
 
 /**@
@@ -347,7 +362,7 @@ def flash_ospi_file(String file_path) {
 /**
  * Run a test stage definition (see ci_stages_weekly.groovy) on the agent of the device under test.
  */
-def test_stage(Map stage_def) {
+def test_stage(Map stage_def, String base_stash = "ml_base_stash") {
     node(stage_def.label) {
         try {
             withEnv(["LOG_PREFIX=" + log_prefix(stage_def.name)]) {
@@ -358,7 +373,7 @@ def test_stage(Map stage_def) {
                     if (stage_def.video) {
                         build job: 'camera_start_record'
                     }
-                    unstash name: "ml_base_stash"
+                    unstash name: base_stash
                     for (stash_name in stage_def.unstash) {
                         unstash name: stash_name
                     }
@@ -416,12 +431,17 @@ def build_branches(List stage_defs) {
 
 /**
  * Create the parallel branches of test stage definitions.
+ *
+ * @param stage_defs  The test stage definitions.
+ * @param base_stash  Stash unstashed first in each test stage. The tests only need the pytest and
+ *                    automation directories, so a small stash of them (see ml_test_stash in
+ *                    Jenkinsfile-weekly) is faster than the whole workspace of the builds.
  */
-def test_branches(List stage_defs) {
+def test_branches(List stage_defs, String base_stash = "ml_base_stash") {
     def branches = [:]
     for (stage_def in stage_defs) {
         def current = stage_def
-        branches[current.name] = { test_stage(current) }
+        branches[current.name] = { test_stage(current, base_stash) }
     }
     return branches
 }
