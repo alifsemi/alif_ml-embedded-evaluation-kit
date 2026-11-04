@@ -189,7 +189,8 @@ def flash_config_file(Map flash, String binary) {
 
 /**
  * Write a binary to the MRAM of the device under test with the SE tools. Fails if the device is
- * not in the maintenance mode.
+ * not in the maintenance mode. The console shows the write progress of each file only every 25 %
+ * (see automation/filter_setools_progress.awk), the complete output is in flash_device.log.
  *
  * @param jsonfile             SE tools json file of the binary, with or without the directories.
  * @param build_dir            Directory of the binary.
@@ -209,7 +210,7 @@ def flash_mram(String jsonfile, String build_dir, String source_binary_name, Str
             ./app-gen-toc --filename build/config/$json_name
             ./app-write-mram -e app
             ./app-write-mram -p
-        } 2>&1 | tee $WORKSPACE/flash_device.log
+        } 2>&1 | tee $WORKSPACE/flash_device.log | awk -f $WORKSPACE/automation/filter_setools_progress.awk
         popd"""
 
     if (fileExists('flash_device.log') &&
@@ -247,7 +248,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
             rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
             pushd $ALIF_SETOOLS_LOCATION/
             ./app-gen-toc --filename build/config/app-cpu-stubs.json
-            ./app-write-mram
+            ./app-write-mram 2>&1 | awk -f $WORKSPACE/automation/filter_setools_progress.awk
             popd"""
     } catch (Exception e) {
         echo "${env.LOG_PREFIX} Exception occurred: " + e.toString()
