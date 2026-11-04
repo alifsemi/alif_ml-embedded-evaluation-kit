@@ -32,7 +32,7 @@ def download_dependencies() {
 
 /**
  * Install the Python packages and download and optimise the models of the use cases. The downloads
- * and Vela optimisations are run in parallel (one job per CPU, only 2 with ExecuTorch).
+ * and Vela optimisations are run in parallel (one job per CPU).
  *
  * @param executorch  Set up ExecuTorch too (for the use case alif_asr with ExecuTorch). It needs
  *                    torch and the other packages of the default requirements.txt (several GB).
@@ -45,14 +45,11 @@ def setup_resources(boolean executorch = false) {
      * the workspace, the stash fails because of the file names and hides the real error. */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
 
-    /* Every ExecuTorch model optimisation is a separate torch process (export, quantisation and
-     * Vela) which needs a lot of memory, and the processes of the same model download the same
-     * weights to the same cache at the same time. Use only a few parallel jobs with ExecuTorch. */
-    def frameworks_and_parallel = executorch ?
-        "--ml-frameworks tflm executorch --parallel 2" :
-        "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
-    psh "#!/bin/bash\npython3.10 set_up_default_resources.py ${frameworks_and_parallel} " +
-        "--additional-ethos-u-config-name ethos-u55-256"
+    def frameworks_and_requirements = executorch ?
+        "--ml-frameworks tflm executorch" :
+        "--requirements-file scripts/py/requirements_tflm.txt"
+    psh "#!/bin/bash\npython3.10 set_up_default_resources.py ${frameworks_and_requirements} " +
+        "--additional-ethos-u-config-name ethos-u55-256 --parallel \$(nproc)"
 }
 
 /**@

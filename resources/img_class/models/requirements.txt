@@ -1,1 +1,4 @@
 timm==1.0.20
+# timm downloads the pretrained weights of the models from the Hugging Face hub and raises
+# "Hugging Face hub model specified but package not installed" if huggingface_hub cannot be imported.
+huggingface_hub==1.27.0

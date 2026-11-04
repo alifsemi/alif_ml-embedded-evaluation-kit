@@ -147,13 +147,13 @@ def more_weekly_builds() {
 
         /* ASR ExecuTorch builds. The default Conformer model is not supported with U55, so U85 is used. */
         [name: 'Build HP GCC ASR ExecuTorch Release CI Power Test for DevKit-e8 U85',
-         builds: [['ci_power_test', 'HP', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HP', 'ExecuTorch', 'alif_asr']],
+         builds: [['ci_power_test', 'HP', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HP', 'ExecuTorch', 'alif_asr', '-DML_FWK_TMP_MEM_SIZE=0x00590000']],
          artifact: '*.bin',
          stashes: [
              ['test_build_ci_power_test_asr_et_hp_devkit_e8_u85', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/mram.bin'],
              ['test_build_ci_power_test_asr_et_hp_devkit_e8_u85_ext_flash', 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/ext_flash.bin']]],
         [name: 'Build HE GCC ASR ExecuTorch Release CI Power Test for DevKit-e8 U85',
-         builds: [['ci_power_test', 'HE', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HE', 'ExecuTorch', 'alif_asr']],
+         builds: [['ci_power_test', 'HE', 'DevKit-e8', 'gcc', 'U85', 'RTSS-HE', 'ExecuTorch', 'alif_asr', '-DML_FWK_TMP_MEM_SIZE=0x00590000']],
          artifact: '*.bin',
          stashes: [
              ['test_build_ci_power_test_asr_et_he_devkit_e8_u85', 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr/mram.bin'],

@@ -29,3 +29,6 @@ scripts/py/env*
 scripts/py/venv*
 env
 venv
+
+# Testing / automation files
+pytest/pytest.ini

@@ -23,7 +23,9 @@ pipeline {
                 }
             }
             post {
-                always {
+                // Not always: the stash of the whole workspace takes more than 10 minutes, and
+                // when the Init stage fails the later stages are skipped and nothing uses it.
+                success {
                     // The builds need the whole workspace (dependencies, models and the Python
                     // environment with ExecuTorch, several GB). The tests only need pytest and
                     // automation, so they and the merge of the power results use a small stash.
