@@ -25,6 +25,48 @@ exit $rc
 '''
 }
 
+/**
+ * Read the identification of the device under test with the maintenance tool of the SE tools and
+ * return it as a one line label for the heading of the power results: the SES banner (device
+ * revision, SE firmware version and build date), the Version and the ALIF_PN of the revision
+ * info, e.g. "SES A1 v1.112.0 Aug 5 2026 19:58:23, Version 0x02A1, ALIF_PN AE822FA0E5597LS0".
+ *
+ * The maintenance tool is menu driven, it is given "Device Information" - "Get SES Banner",
+ * "Get revision info" and then Enter twice to leave the menus and exit the tool, so the serial
+ * port is free for the next SE tool. The device must be in the maintenance mode like for flashing.
+ * The full output of the tool is in device_info.log. Never fails the build: if the information
+ * cannot be read, the label is "Unknown board".
+ *
+ * @return  The label of the device.
+ */
+def read_device_info() {
+    psh """#!/bin/bash -x
+        set +e
+        rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
+        pushd $ALIF_SETOOLS_LOCATION/
+        {
+            printf '2\\n'; sleep 2
+            printf '2\\n'; sleep 2
+            printf '5\\n'; sleep 2
+            printf '\\n'; sleep 1
+            printf '\\n'
+        } | timeout 120 ./maintenance 2>&1 | tr -d '\\r' | sed -E 's/\\x1b\\[[0-9;]*[A-Za-z]//g' | tee $WORKSPACE/device_info.log
+        popd
+        banner=\$(grep -m1 -oE 'SES [A-Za-z0-9]+ v[0-9].*' $WORKSPACE/device_info.log | sed -E 's/^ +//; s/ +\$//; s/ +/ /g')
+        version=\$(grep -m1 -E '(^|[[:space:]])Version[[:space:]]*=' $WORKSPACE/device_info.log | sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+\$//')
+        part_number=\$(grep -m1 -E '(^|[[:space:]])ALIF_PN[[:space:]]*=' $WORKSPACE/device_info.log | sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+\$//')
+        if [ -n "\$banner" ] && [ -n "\$version" ] && [ -n "\$part_number" ]; then
+            echo "\$banner, Version \$version, ALIF_PN \$part_number" > $WORKSPACE/device_info.txt
+        else
+            echo "Could not read the device information"
+            echo "Unknown board" > $WORKSPACE/device_info.txt
+        fi
+        exit 0"""
+    def label = readFile('device_info.txt').trim()
+    echo "${env.LOG_PREFIX} Device: ${label}"
+    return label
+}
+
 def download_dependencies() {
     sh "rm -Rf dependencies"
     sh "python3.10 download_dependencies.py"
@@ -381,8 +423,10 @@ def test_stage(Map stage_def, String base_stash = "ml_base_stash") {
                     }
                     def pytest_options = ""
                     if (stage_def.power) {
+                        /* Read before the flashing, the device is in the maintenance mode */
+                        def board_label = read_device_info()
                         pytest_options = '--power_results ' + power_results_file(stage_def.power) +
-                            ' --power_board "' + stage_def.power.board + '" --power_core ' + stage_def.power.core
+                            ' --power_board "' + board_label + '" --power_core ' + stage_def.power.core
                     }
                     flash_and_run_pytest(json_file, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
                     if (stage_def.video) {
@@ -477,6 +521,7 @@ return [
     build_inf_runner: this.&build_inf_runner,
     build_ci_power_test: this.&build_ci_power_test,
     flash_and_run_pytest: this.&flash_and_run_pytest,
+    read_device_info: this.&read_device_info,
     archive_pytest_results: this.&archive_pytest_results,
     clean_workspace: this.&clean_workspace,
     unstash_if_exists: this.&unstash_if_exists,

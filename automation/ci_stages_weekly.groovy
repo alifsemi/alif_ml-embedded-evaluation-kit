@@ -42,6 +42,8 @@
  *   video:     Optional. Record the device with the camera job, the video is stashed with this name.
  *   power:     Optional. Power test, the results are written to
  *              power_results_<id>_<suffix>.md and stashed as power_results_<id>.
+ *              The board heading of the results (SES banner, Version and ALIF_PN) is read from
+ *              the device before the test, see read_device_info in test_common.groovy.
  */
 
 
@@ -189,49 +191,49 @@ def tests() {
          flash: he_tcm,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e8', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_he_devkit_e8', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55']],
         /* HE-E1C U55 tests */
         [name: 'Test KWS HE U55 GCC Release CI Power Test for DevKit-E1C',
          label: 'E1C_JS', unstash: ['test_build_ci_power_test_kws_he_devkit_e1c'],
          flash: he_e1c,
          dir: 'build_ci_power_test_he_devkit-e1c_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e1c', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_E1C_U55', board: 'DevKit-E1C, SE v112.0']],
+         power: [id: 'kws_he_devkit_e1c', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_E1C_U55']],
         /* HP-E8 U55 tests */
         [name: 'Test KWS HP U55 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_kws_hp_devkit_e8'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U85 tests */
         [name: 'Test KWS HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_kws_he_devkit_e8_u85'],
          flash: he_tcm,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U85']],
         /* HP-E8 U85 tests */
         [name: 'Test KWS HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_kws_hp_devkit_e8_u85'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 without Helium and NPU tests */
         [name: 'Test KWS HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_kws_he_devkit_e8_no_helium_no_npu'],
          flash: he_tcm,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
         [name: 'Test KWS HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_kws_hp_devkit_e8_no_helium_no_npu'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
 
         /* Object detection tests */
         /* HP-E8 U55 tests */
@@ -240,42 +242,42 @@ def tests() {
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U55 tests */
         [name: 'Test Object Detection HE U55 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_he_devkit_e8'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55']],
         /* HP-E8 U85 tests */
          [name: 'Test Object Detection HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_hp_devkit_e8_u85'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 U85 tests */
          [name: 'Test Object Detection HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_he_devkit_e8_u85'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85']],
         /* HE-E8 without Helium and NPU tests */
          [name: 'Test Object Detection HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_he_devkit_e8_no_helium_no_npu'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
          [name: 'Test Object Detection HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_hp_devkit_e8_no_helium_no_npu'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
 
 
         /* Image classification tests */
@@ -285,42 +287,42 @@ def tests() {
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U55 tests */
         [name: 'Test Image Classification HE U55 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_he_devkit_e8'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55']],
         /* HP-E8 U85 tests */
         [name: 'Test Image Classification HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_hp_devkit_e8_u85'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 U85 tests */
         [name: 'Test Image Classification HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_he_devkit_e8_u85'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85']],
         /* HE-E8 without Helium and NPU tests */
         [name: 'Test Image Classification HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_he_devkit_e8_no_helium_no_npu'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
         [name: 'Test Image Classification HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_hp_devkit_e8_no_helium_no_npu'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
 
         /* Visual Wake Word tests */
         /* HP-E8 U55 tests */
@@ -329,42 +331,42 @@ def tests() {
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U55 tests */
         [name: 'Test Visual Wake Word HE U55 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_he_devkit_e8'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55']],
         /* HP-E8 U85 tests */
         [name: 'Test Visual Wake Word HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_hp_devkit_e8_u85'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 U85 tests */
         [name: 'Test Visual Wake Word HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_he_devkit_e8_u85'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85']],
         /* HE-E8 without Helium and NPU tests */
         [name: 'Test Visual Wake Word HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_he_devkit_e8_no_helium_no_npu'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
         [name: 'Test Visual Wake Word HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_hp_devkit_e8_no_helium_no_npu'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
 
         /* Anomaly detection (alif_ad) tests */
         /* HP-E8 U55 tests */
@@ -373,42 +375,42 @@ def tests() {
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U55 tests */
         [name: 'Test Anomaly Detection HE GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_ad_he_devkit_e8'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55']],
         /* HP-E8 U85 tests */
         [name: 'Test Anomaly Detection HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_ad_hp_devkit_e8_u85'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 U85 tests */
         [name: 'Test Anomaly Detection HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_ad_he_devkit_e8_u85'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85']],
         /* HE-E8 without Helium and NPU tests */
         [name: 'Test Anomaly Detection HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_ad_he_devkit_e8_no_helium_no_npu'],
          flash: he,
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
         [name: 'Test Anomaly Detection HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_ad_hp_devkit_e8_no_helium_no_npu'],
          flash: hp,
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_ad',
          src: 'mram.bin', bin: 'mlek_alif_ad.bin', test: 'test_power_ad',
-         power: [id: 'ad_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'ad_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
     ]
 }
 
@@ -428,7 +430,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         /* HE-E8 U55 tests */
         [name: 'Test ASR HE U55 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8', 'test_build_ci_power_test_asr_he_devkit_e8_ext_flash'],
@@ -436,7 +438,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_he_devkit_e8', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro', core: 'HE_U55']],
         /* HP-E8 U85 tests */
         [name: 'Test ASR HP U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8_u85', 'test_build_ci_power_test_asr_hp_devkit_e8_u85_ext_flash'],
@@ -444,7 +446,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_tensorflowlitemicro', core: 'HP_U85']],
         /* HE-E8 U85 tests */
         [name: 'Test ASR HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8_u85', 'test_build_ci_power_test_asr_he_devkit_e8_u85_ext_flash'],
@@ -452,7 +454,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_tensorflowlitemicro/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_tensorflowlitemicro', core: 'HE_U85']],
         /* HE-E8 without Helium and NPU tests */
         [name: 'Test ASR HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_he_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_he_devkit_e8_no_helium_no_npu_ext_flash'],
@@ -460,7 +462,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-he_tensorflowlitemicro_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU']],
         /* HP-E8 without Helium and NPU tests */
         [name: 'Test ASR HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_hp_devkit_e8_no_helium_no_npu_ext_flash'],
@@ -468,7 +470,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU']],
 
         /* ASR tests (ExecuTorch) */
         /* HP-E8 U85 tests */
@@ -478,7 +480,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_et_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_executorch', core: 'HP_U85_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_et_hp_devkit_e8_u85', suffix: 'gcc_u85_rtss-hp_executorch', core: 'HP_U85_ET']],
         /* HE-E8 U85 tests */
         [name: 'Test ASR ExecuTorch HE U85 GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_he_devkit_e8_u85', 'test_build_ci_power_test_asr_et_he_devkit_e8_u85_ext_flash'],
@@ -486,7 +488,7 @@ def tests_withmodel_in_ospi_flash() {
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr',
          ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch/bin/sectors/alif_asr/ext_flash.bin',
          src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-         power: [id: 'asr_et_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_executorch', core: 'HE_U85_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'asr_et_he_devkit_e8_u85', suffix: 'gcc_u85_rtss-he_executorch', core: 'HE_U85_ET']],
         /* HE-E8 without Helium and NPU tests */
         // [name: 'Test ASR ExecuTorch HE without Helium and NPU GCC Release CI Power Test for DevKit-e8',
         //  label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_et_he_devkit_e8_no_helium_no_npu_ext_flash'],
@@ -494,7 +496,7 @@ def tests_withmodel_in_ospi_flash() {
         //  dir: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr',
         //  ospi_file: 'build_ci_power_test_he_devkit-e8_gcc_u85_rtss-he_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
         //  src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-        //  power: [id: 'asr_et_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-he_executorch_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+        //  power: [id: 'asr_et_he_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-he_executorch_no_helium_no_npu', core: 'HE_NO_HELIUM_NO_NPU_ET']],
         /* HP-E8 without Helium and NPU tests */
         // [name: 'Test ASR ExecuTorch HP without Helium and NPU GCC Release CI Power Test for DevKit-e8',
         //  label: 'E8_JS', unstash: ['test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu', 'test_build_ci_power_test_asr_et_hp_devkit_e8_no_helium_no_npu_ext_flash'],
@@ -502,7 +504,7 @@ def tests_withmodel_in_ospi_flash() {
         //  dir: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr',
         //  ospi_file: 'build_ci_power_test_hp_devkit-e8_gcc_u85_rtss-hp_executorch_no_helium_no_npu/bin/sectors/alif_asr/ext_flash.bin',
         //  src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-        //  power: [id: 'asr_et_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-hp_executorch_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU_ET', board: 'DevKit-E8 rev b, SE v112.0']],
+        //  power: [id: 'asr_et_hp_devkit_e8_no_helium_no_npu', suffix: 'gcc_u85_rtss-hp_executorch_no_helium_no_npu', core: 'HP_NO_HELIUM_NO_NPU_ET']],
     ]
 }
 

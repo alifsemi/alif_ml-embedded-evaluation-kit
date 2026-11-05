@@ -131,7 +131,7 @@ def pytest_addoption(parser):
         "--power_board",
         action="store",
         default="Unknown board",
-        help="Board / SE version heading of the power results table, e.g. 'DevKit-e8 rev. B, SE 112'.",
+        help="Board / SE version heading of the power results table, e.g. the SES banner, Version and ALIF_PN read from the device with the maintenance tool.",
     )
     parser.addoption(
         "--power_core",
