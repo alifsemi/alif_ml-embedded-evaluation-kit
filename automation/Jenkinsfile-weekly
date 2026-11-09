@@ -1,6 +1,43 @@
 def common_funcs
 def ci_stages_weekly
 
+/**
+ * Check out the sources and the submodules. This replaces the default checkout of the pipeline
+ * (see skipDefaultCheckout in the Init stage) because the clones of the submodules from GitHub
+ * fail sometimes with "HTTP 401 ... error reading section header 'shallow-info'" and the default
+ * checkout can only repeat the same failing clone.
+ *
+ * NOTE: The extensions of the job configuration are not used, so the submodule options of the
+ *       job configuration do not matter. This cannot be moved to automation/test_common.groovy
+ *       because that file is loaded from the checked out sources.
+ */
+def checkout_sources() {
+    retry(3) {
+        checkout([
+            $class: 'GitSCM',
+            branches: scm.branches,
+            userRemoteConfigs: scm.userRemoteConfigs,
+            extensions: [[$class: 'SubmoduleOption', disableSubmodules: true]]
+        ])
+    }
+    sh '''#!/bin/bash
+        export GIT_TERMINAL_PROMPT=0
+        git config --show-origin --get-regexp '^(http|https|url|credential|protocol|clone|fetch|submodule)\\.' || true
+        git submodule sync
+        ok=0
+        for opts in "" "-c http.version=HTTP/1.1" "-c protocol.version=0" "-c http.version=HTTP/1.1 -c protocol.version=0"; do
+            echo "Updating the submodules with git options: '$opts'"
+            if git $opts submodule update --init --jobs 2 &&
+               git $opts -C dependencies/executorch submodule update --init --jobs 2; then
+                ok=1
+                break
+            fi
+            sleep 30
+        done
+        exit $((1 - ok))
+    '''
+}
+
 // NOTE: Tests that are run weekly are defined in automation/ci_stages_weekly.groovy.
 pipeline {
     agent none
@@ -15,8 +52,10 @@ pipeline {
     stages {
         stage('Init') {
             agent { label 'ml_build' }
+            options { skipDefaultCheckout() }
             steps {
                 script {
+                    checkout_sources()
                     common_funcs = load ("automation/test_common.groovy");
                     ci_stages_weekly = load ("automation/ci_stages_weekly.groovy");
                     common_funcs.setup_resources(true)
