@@ -421,11 +421,12 @@ def test_stage(Map stage_def, String base_stash = "ml_base_stash") {
                     if (stage_def.ospi_file) {
                         flash_ospi_file(stage_def.ospi_file)
                     }
-                    def pytest_options = ""
+                    /* Extra pytest options of the stage, for example a board specific limit */
+                    def pytest_options = stage_def.pytest_options ?: ""
                     if (stage_def.power) {
                         /* Read before the flashing, the device is in the maintenance mode */
                         def board_label = read_device_info()
-                        pytest_options = '--power_results ' + power_results_file(stage_def.power) +
+                        pytest_options += ' --power_results ' + power_results_file(stage_def.power) +
                             ' --power_board "' + board_label + '" --power_core ' + stage_def.power.core
                     }
                     flash_and_run_pytest(json_file, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)

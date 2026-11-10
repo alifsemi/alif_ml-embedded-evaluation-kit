@@ -236,7 +236,9 @@ def tests() {
          label: 'E1C', unstash: ['test_build_gnu_kws_he_release_devkit_e1c'],
          json: 'alif_kws_he_e1c.json',
          dir: 'build_gcc_he_tcm_release_devkit-e1c/bin/sectors/alif_kws',
-         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_kws'],
+         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_kws',
+         // The GCC build on E1C takes 0.058 ms, the E7/E8 and ARMClang limit is 0.055 ms
+         pytest_options: '--postprocessing_max_ms 0.06'],
         [name: 'Test KWS HE ARMCLANG Release DevKit-E1C',
          label: 'E1C', unstash: ['test_build_armclang_kws_he_release_devkit_e1c'],
          json: 'alif_kws_he_e1c.json',

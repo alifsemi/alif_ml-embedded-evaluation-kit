@@ -22,10 +22,12 @@ def expect_in_range(min, max, value, timestring):
         raise Exception(timestring + ' time %f out of range [%f, %f] !' % (value, min, max))
 
 
-def test_max_kws_inference_times(dut: Dut):
+def test_max_kws_inference_times(dut: Dut, request):
     dut.write("")
 
     # Check durations, changed Preprocessing from 14->12 so armclang can be run with same test
     expect_in_range(11.0, 16.7, get_time(dut, 'Preprocessing'), 'Preprocessing')
     expect_in_range(2.6, 2.8, get_time(dut, 'Inference'), 'Inference')
-    expect_in_range(0.02, 0.055, get_time(dut, 'Postprocessing'), 'Postprocessing')
+    # The limit can be overridden per board and toolchain, see --postprocessing_max_ms
+    expect_in_range(0.02, request.config.getoption('--postprocessing_max_ms'),
+                    get_time(dut, 'Postprocessing'), 'Postprocessing')

@@ -140,6 +140,13 @@ def pytest_addoption(parser):
         help="Core / NPU label added to the power results rows, e.g. HE_U55.",
     )
     parser.addoption(
+        "--postprocessing_max_ms",
+        action="store",
+        type=float,
+        default=0.055,
+        help="Maximum postprocessing time in ms accepted by the KWS timing test. Default is 0.055.",
+    )
+    parser.addoption(
         "--se_magic_baudrate",
         action="store",
         default=57600,
