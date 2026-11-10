@@ -1,0 +1,133 @@
+def common_funcs
+def ci_stages_weekly
+
+/**
+ * Check out the sources and the submodules. This replaces the default checkout of the pipeline
+ * (see skipDefaultCheckout in the Init stage) because the clones of the submodules from GitHub
+ * fail sometimes with "HTTP 401 ... error reading section header 'shallow-info'" and the default
+ * checkout can only repeat the same failing clone.
+ *
+ * NOTE: The extensions of the job configuration are not used, so the submodule options of the
+ *       job configuration do not matter. This cannot be moved to automation/test_common.groovy
+ *       because that file is loaded from the checked out sources.
+ */
+def checkout_sources() {
+    retry(3) {
+        checkout([
+            $class: 'GitSCM',
+            branches: scm.branches,
+            userRemoteConfigs: scm.userRemoteConfigs,
+            extensions: [[$class: 'SubmoduleOption', disableSubmodules: true]]
+        ])
+    }
+    sh '''#!/bin/bash
+        export GIT_TERMINAL_PROMPT=0
+        git config --show-origin --get-regexp '^(http|https|url|credential|protocol|clone|fetch|submodule)\\.' || true
+        git submodule sync
+        ok=0
+        for opts in "" "-c http.version=HTTP/1.1" "-c protocol.version=0" "-c http.version=HTTP/1.1 -c protocol.version=0"; do
+            echo "Updating the submodules with git options: '$opts'"
+            if git $opts submodule update --init --jobs 2 &&
+               git $opts -C dependencies/executorch submodule update --init --jobs 2; then
+                ok=1
+                break
+            fi
+            sleep 30
+        done
+        exit $((1 - ok))
+    '''
+}
+
+// NOTE: Tests that are run weekly are defined in automation/ci_stages_weekly.groovy.
+pipeline {
+    agent none
+    options {
+        // Time stamp at the beginning of each console line. The lines of the shell scripts also
+        // have the agent and stage prefix, see psh in test_common.groovy.
+        timestamps()
+    }
+    environment {
+        LOG_JUNIT_RESULTS = 'true'
+    }
+    stages {
+        stage('Init') {
+            agent { label 'ml_build' }
+            options { skipDefaultCheckout() }
+            steps {
+                script {
+                    checkout_sources()
+                    common_funcs = load ("automation/test_common.groovy");
+                    ci_stages_weekly = load ("automation/ci_stages_weekly.groovy");
+                    common_funcs.setup_resources(true)
+                }
+            }
+            post {
+                // Not always: the stash of the whole workspace takes more than 10 minutes, and
+                // when the Init stage fails the later stages are skipped and nothing uses it.
+                success {
+                    // The builds need the whole workspace (dependencies, models and the Python
+                    // environment with ExecuTorch, several GB). The tests only need pytest and
+                    // automation, so they and the merge of the power results use a small stash.
+                    stash name: "ml_base_stash", includes: "**"
+                    stash name: "ml_test_stash", includes: "pytest/**,automation/**,*.json"
+                }
+            }
+        }
+        // First build can end up doing some patching of Tensorflow
+        // so run one build sequentially to start with
+        stage('Initial Builds') {
+            steps {
+                script {
+                    parallel common_funcs.build_branches(ci_stages_weekly.initial_weekly_builds())
+                }
+            }
+        }
+        // Remaining builds can be parallel. Different Devkits could be run in the same branch but
+        // then it would not be parallel, so use a separate entry for each to save build time.
+        stage('More builds') {
+            steps {
+                script {
+                    parallel common_funcs.build_branches(ci_stages_weekly.more_weekly_builds())
+                }
+            }
+        }
+        stage('Test phase Model in OSPI Flash') {
+            steps {
+                script {
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests_withmodel_in_ospi_flash(), "ml_test_stash")
+                }
+            }
+        }
+        stage('Test phase') {
+            steps {
+                script {
+                    parallel common_funcs.test_branches(ci_stages_weekly.tests(), "ml_test_stash")
+                }
+            }
+        }
+        // Every power test runs on its own agent and writes its own markdown file,
+        // so collect the files here to one table.
+        stage('Merge power results') {
+            agent { label 'ml_build' }
+            options { skipDefaultCheckout() }
+            steps {
+                unstash name: "ml_test_stash"
+                script {
+                    // A test that failed early may not have stashed its results
+                    common_funcs.unstash_power_results(ci_stages_weekly.tests() + ci_stages_weekly.tests_withmodel_in_ospi_flash())
+                }
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh "python3 pytest/merge_power_results.py -o pytest/power_results_merged.md pytest/power_results_*.md"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'pytest/power_results_merged.md', fingerprint: false, allowEmptyArchive: true
+                }
+                cleanup {
+                    script { common_funcs.clean_workspace() }
+                }
+            }
+        }
+    }
+}

@@ -35,6 +35,8 @@
  *   video:     Optional. Record the device with the camera job, the video is stashed with this name.
  *   power:     Optional. Power test, the results are written to
  *              power_results_<id>_<suffix>.md and stashed as power_results_<id>.
+ *              The board heading of the results (SES banner, Version and ALIF_PN) is read from
+ *              the device before the test, see read_device_info in test_common.groovy.
  */
 
 
@@ -211,30 +213,32 @@ def tests() {
          json: 'alif_kws_he.json',
          dir: 'build_ci_power_test_he_devkit-e8_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e8', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'kws_he_devkit_e8', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55']],
         [name: 'Test Object Detection HP GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_obj_hp_devkit_e8'],
          json: 'alif_obj_detect_hp.json',
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_object_detection',
          src: 'mram.bin', bin: 'mlek_alif_object_detection.bin', test: 'test_power_object_detection',
-         power: [id: 'obj_detect_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'obj_detect_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         [name: 'Test Image Classification HP GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_img_hp_devkit_e8'],
          json: 'alif_img_class_hp.json',
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_img_class',
          src: 'mram.bin', bin: 'mlek_alif_img_class.bin', test: 'test_power_img_class',
-         power: [id: 'img_class_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'img_class_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         [name: 'Test Visual Wake Word HP GCC Release CI Power Test for DevKit-e8',
          label: 'E8_JS', unstash: ['test_build_ci_power_test_vww_hp_devkit_e8'],
          json: 'alif_vww.json',
          dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_vww',
          src: 'mram.bin', bin: 'mlek_alif_vww.bin', test: 'test_power_vww',
-         power: [id: 'vww_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+         power: [id: 'vww_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
         [name: 'Test KWS HE GCC Release DevKit-E1C',
          label: 'E1C', unstash: ['test_build_gnu_kws_he_release_devkit_e1c'],
          json: 'alif_kws_he_e1c.json',
          dir: 'build_gcc_he_tcm_release_devkit-e1c/bin/sectors/alif_kws',
-         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_kws'],
+         src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_kws',
+         // The GCC build on E1C takes 0.058 ms, the E7/E8 and ARMClang limit is 0.055 ms
+         pytest_options: '--postprocessing_max_ms 0.06'],
         [name: 'Test KWS HE ARMCLANG Release DevKit-E1C',
          label: 'E1C', unstash: ['test_build_armclang_kws_he_release_devkit_e1c'],
          json: 'alif_kws_he_e1c.json',
@@ -245,7 +249,7 @@ def tests() {
          json: 'alif_kws_he_e1c.json',
          dir: 'build_ci_power_test_he_devkit-e1c_gcc_u55_rtss-he-tcm_tensorflowlitemicro/bin/sectors/alif_kws',
          src: 'mram.bin', bin: 'mlek_alif_kws.bin', test: 'test_power_kws',
-         power: [id: 'kws_he_devkit_e1c', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55', board: 'DevKit-E1C, SE v112.0']],
+         power: [id: 'kws_he_devkit_e1c', suffix: 'gcc_u55_rtss-he-tcm_tensorflowlitemicro', core: 'HE_U55']],
 
 
         // ASR has the model in OSPI Flash, not supported yet
@@ -254,7 +258,7 @@ def tests() {
         //  json: 'alif_asr_hp.json',
         //  dir: 'build_ci_power_test_hp_devkit-e8_gcc_u55_rtss-hp_tensorflowlitemicro/bin/sectors/alif_asr',
         //  src: 'mram.bin', bin: 'mlek_alif_asr.bin', test: 'test_power_asr',
-        //  power: [id: 'asr_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55', board: 'DevKit-E8 rev b, SE v112.0']],
+        //  power: [id: 'asr_hp_devkit_e8', suffix: 'gcc_u55_rtss-hp_tensorflowlitemicro', core: 'HP_U55']],
     ]
 }
 

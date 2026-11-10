@@ -24,8 +24,14 @@ endif()
 
 add_subdirectory(${PROFILER_DIR} ${CMAKE_BINARY_DIR}/profiler)
 
-# Add user case definition so it can be used to #ifdef in code
-if (NOT "${USE_CASE_BUILD}" STREQUAL "all")
+# Add user case definition so it can be used to #ifdef in code.
+# This is only done globally when a single use case is built. When several
+# use cases are built in one go, a global definition would make every target
+# see the macros of all use cases, so platforms are expected to add a
+# per-target definition instead (see platform_custom_post_build in the Alif
+# build configuration, which does this for the linker files).
+list(LENGTH USE_CASE_BUILD use_case_build_count)
+if (NOT "${USE_CASE_BUILD}" STREQUAL "all" AND use_case_build_count EQUAL 1)
 string(TOUPPER "${USE_CASE_BUILD}" use_case_upper)
 add_compile_definitions(${use_case_upper})
 endif()

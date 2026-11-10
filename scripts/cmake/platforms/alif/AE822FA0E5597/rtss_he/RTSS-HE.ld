@@ -31,11 +31,16 @@
 #include "alif_mem_config.h"
 #include "board_defs.h"
 
-/* #if defined(ALIF_ASR)
+#if defined(ALIF_ASR) && defined(MLEK_FWK_EXECUTORCH)
+/* Largest heap which fits in the DTCM with the ExecuTorch data and bss (0x37000 does not fit) */
+__HEAP_SIZE  = 0x00030000;
+#elif defined(ALIF_ASR)
 __HEAP_SIZE  = 0x00037000;
-#else */
+#elif defined(ALIF_IMG_CLASS)
+__HEAP_SIZE  = 0x00017000;
+#else
 __HEAP_SIZE  = 0x00008000;
-/* #endif */
+#endif
 
 
 __STACK_SIZE = 0x00002000;
@@ -108,6 +113,7 @@ SECTIONS
     *libtensorflow-microlite.a:arm_*_s16.o(.text* .rodata*)
     *libcmsis-nn.a:arm_*_s4.c.obj(.text* .rodata*)
     *libcmsis-nn.a:arm_*_s16.c.obj(.text* .rodata*)
+    *libquantized_kernels.a:*(.text* .rodata*)
 
     *(startup_ro_data)
   } > MRAM

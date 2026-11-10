@@ -50,12 +50,29 @@ function(set_platform_global_defaults)
     if (GPIO_PROFILING AND GPIO_PROFILING_CI)
         add_compile_definitions(GPIO_PROFILING_CI)
         message(STATUS "Alif GPIO profiling: CI mode enabled!")
+
+        set(GPIO_PROFILING_CI_SKIP_ROUNDS 20 CACHE STRING "Number of rounds the GPIO profiling line stays idle in CI mode (warm-up and time for the automation to start waiting for the signal). Only used with GPIO_PROFILING_CI.")
+        if (NOT GPIO_PROFILING_CI_SKIP_ROUNDS MATCHES "^[0-9]+$")
+            message(FATAL_ERROR "GPIO_PROFILING_CI_SKIP_ROUNDS must be a non-negative integer, got '${GPIO_PROFILING_CI_SKIP_ROUNDS}'")
+        endif()
+        add_compile_definitions(GPIO_PROFILING_CI_SKIP_ROUNDS=${GPIO_PROFILING_CI_SKIP_ROUNDS})
+        message(STATUS "Alif GPIO profiling: CI skip rounds: ${GPIO_PROFILING_CI_SKIP_ROUNDS}")
     endif()
 
     set(NO_DISPLAY OFF CACHE BOOL "Build the use cases without any on-device UI (LVGL screen layout, camera preview, result labels), e.g. for power profiling without a display.")
     if (NO_DISPLAY)
         add_compile_definitions(NO_DISPLAY)
         message(STATUS "Alif use cases built without display UI!")
+    endif()
+
+    set(NO_HELIUM OFF CACHE BOOL "Build without Helium (MVE) support, e.g. for power profiling of the CPU without the NPU. Only used with ETHOS_U_NPU_ENABLED=OFF.")
+    if (NO_HELIUM)
+        # Same condition as in toolchains/bare-metal-gcc.cmake and cmsis-dsp.cmake.
+        if (DEFINED ETHOS_U_NPU_ENABLED AND NOT ETHOS_U_NPU_ENABLED)
+            message(STATUS "Alif build without Helium (MVE)!")
+        else()
+            message(WARNING "NO_HELIUM is only used with -DETHOS_U_NPU_ENABLED=OFF, ignoring it.")
+        endif()
     endif()
 
     set(USE_STRIPED_SRAM OFF CACHE BOOL "Use SRAM0 and SRAM1 in Striped view. Support at the moment only for AE822FA0E5597")
@@ -238,6 +255,29 @@ function(platform_custom_post_build)
             PRIVATE
                 -E
                 -xc
+        )
+    endif()
+
+    # Define a per-target macro named after the use case (e.g. ALIF_ASR for
+    # "alif_asr") only while preprocessing this target's linker file. This lets
+    # the linker files select use-case specific values (such as __HEAP_SIZE)
+    # with `#if defined(ALIF_<USE_CASE>)`, even when several use cases are
+    # built in a single CMake build.
+    if (DEFINED use_case AND NOT "${use_case}" STREQUAL "")
+        string(TOUPPER "${use_case}" LINKER_USE_CASE_DEFINE)
+        string(MAKE_C_IDENTIFIER "${LINKER_USE_CASE_DEFINE}" LINKER_USE_CASE_DEFINE)
+        target_compile_definitions(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                ${LINKER_USE_CASE_DEFINE}
+        )
+    endif()
+
+    # Same for the ML framework: MLEK_FWK_EXECUTORCH lets the linker files use
+    # different memory settings (heap size, code placement) for ExecuTorch builds.
+    if ("${ML_FRAMEWORK}" STREQUAL "ExecuTorch")
+        target_compile_definitions(${PARSED_TARGET_NAME}_linkerfile
+            PRIVATE
+                MLEK_FWK_EXECUTORCH
         )
     endif()
 

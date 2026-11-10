@@ -27,6 +27,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import typing
 from pathlib import Path
 
@@ -35,6 +36,10 @@ from .python_venv import PythonEnv, set_up_python_venv
 from .setup_config import SetupConfig, PathsConfig, OptimizationConfig, SetupContext, VelaConfig
 from .use_case import ExecutorchResource, UseCase, load_use_case_resources
 from .util import download_file, call_command, remove_tree_dir
+
+# Locks of the ExecuTorch models, see _get_executorch_model_lock.
+_EXECUTORCH_MODEL_LOCKS: typing.Dict[str, threading.Lock] = {}
+_EXECUTORCH_MODEL_LOCKS_GUARD = threading.Lock()
 
 
 def get_downloaded_resources_directory(use_case: UseCase, downloads_dir: Path) -> Path:
@@ -402,18 +407,46 @@ def optimize_executorch_model(
     # subprocesses spawned by aot_arm_compiler.
     venv_env = os.environ.copy()
     venv_env["PATH"] = str(python_env.bin_dir) + os.pathsep + venv_env.get("PATH", "")
-    call_command(
-        command=(f'"{python_exe}" {optimize_arg}'
-                 f" --model_name={model_name if model_res is None else model_res}"
-                 f" {cfg}"
-                 f" --output {output_dir}"),
-        cwd=setup_context.paths_config.executorch_path,
-        buffer_logs=False,
-        capture_output=False,
-        env=venv_env,
-    )
+    target_name = npu_config.config_name if npu_config is not None else "TOSA-1.0+FP"
+    command = (f'"{python_exe}" {optimize_arg}'
+               f" --model_name={model_name if model_res is None else model_res}"
+               f" {cfg}"
+               f" --output {output_dir}")
+
+    # The optimisations of the same model for different NPU configs must not run at the same
+    # time: the example models of ExecuTorch download their sample inputs (e.g. dog.jpg of mv2)
+    # to the current directory, and processes writing the same file at the same time leave a
+    # truncated file for the others.
+    with _get_executorch_model_lock(str(model_name)):
+        logging.info("Optimising ExecuTorch model %s (%s)", model_name, target_name)
+        try:
+            # The output is buffered and logged when the command has finished so that the
+            # output of the models optimised in parallel does not get mixed and the error of
+            # a failed one is found next to the failure.
+            call_command(
+                command=command,
+                cwd=setup_context.paths_config.executorch_path,
+                buffer_logs=True,
+                capture_output=True,
+                env=venv_env,
+            )
+        except subprocess.CalledProcessError:
+            logging.error("Optimising ExecuTorch model %s (%s) failed, see the output above.",
+                          model_name, target_name)
+            raise
 
     return False
+
+
+def _get_executorch_model_lock(model_name: str) -> threading.Lock:
+    """
+    Get the lock of an ExecuTorch model, used to run only one optimisation of a model at a time.
+
+    :param model_name:  Name of the model.
+    :return:            The lock of the model.
+    """
+    with _EXECUTORCH_MODEL_LOCKS_GUARD:
+        return _EXECUTORCH_MODEL_LOCKS.setdefault(model_name, threading.Lock())
 
 
 def setup_executorch(
@@ -617,11 +650,18 @@ def parallel_setup(
                 setup_context.python_env,
                 setup_context.paths_config.vela_config_file,
             )
-        concurrent.futures.wait(
-            model_optimize_futures, return_when=concurrent.futures.ALL_COMPLETED
+        # Stop at the first failure: without cancelling the waiting optimisations the pool runs
+        # all of them (can take more than 10 minutes) before the failure is reported.
+        done, not_done = concurrent.futures.wait(
+            model_optimize_futures, return_when=concurrent.futures.FIRST_EXCEPTION
         )
+        for future in not_done:
+            future.cancel()
 
-        optimisation_skipped = any(future.result() for future in model_optimize_futures)
+        # result() raises the exception of a failed optimisation. The results are collected
+        # before checking them so that a skipped optimisation does not hide a later failure.
+        optimisation_results = [future.result() for future in done]
+        optimisation_skipped = any(optimisation_results)
         if optimisation_skipped:
             logging.warning("One or more optimisations were skipped.")
             logging.warning(

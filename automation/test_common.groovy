@@ -25,19 +25,73 @@ exit $rc
 '''
 }
 
+/**
+ * Read the identification of the device under test with the maintenance tool of the SE tools and
+ * return it as a one line label for the heading of the power results: the SES banner (device
+ * revision, SE firmware version and build date), the Version and the ALIF_PN of the revision
+ * info, e.g. "SES A1 v1.112.0 Aug 5 2026 19:58:23, Version 0x02A1, ALIF_PN AE822FA0E5597LS0".
+ *
+ * The maintenance tool is menu driven, it is given "Device Information" - "Get SES Banner",
+ * "Get revision info" and then Enter twice to leave the menus and exit the tool, so the serial
+ * port is free for the next SE tool. The device must be in the maintenance mode like for flashing.
+ * The full output of the tool is in device_info.log. Never fails the build: if the information
+ * cannot be read, the label is "Unknown board".
+ *
+ * @return  The label of the device.
+ */
+def read_device_info() {
+    psh """#!/bin/bash -x
+        set +e
+        rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
+        pushd $ALIF_SETOOLS_LOCATION/
+        {
+            printf '2\\n'; sleep 2
+            printf '2\\n'; sleep 2
+            printf '5\\n'; sleep 2
+            printf '\\n'; sleep 1
+            printf '\\n'
+        } | timeout 120 ./maintenance 2>&1 | tr -d '\\r' | sed -E 's/\\x1b\\[[0-9;]*[A-Za-z]//g' | tee $WORKSPACE/device_info.log
+        popd
+        banner=\$(grep -m1 -oE 'SES [A-Za-z0-9]+ v[0-9].*' $WORKSPACE/device_info.log | sed -E 's/^ +//; s/ +\$//; s/ +/ /g')
+        version=\$(grep -m1 -E '(^|[[:space:]])Version[[:space:]]*=' $WORKSPACE/device_info.log | sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+\$//')
+        part_number=\$(grep -m1 -E '(^|[[:space:]])ALIF_PN[[:space:]]*=' $WORKSPACE/device_info.log | sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+\$//')
+        if [ -n "\$banner" ] && [ -n "\$version" ] && [ -n "\$part_number" ]; then
+            echo "\$banner, Version \$version, ALIF_PN \$part_number" > $WORKSPACE/device_info.txt
+        else
+            echo "Could not read the device information"
+            echo "Unknown board" > $WORKSPACE/device_info.txt
+        fi
+        exit 0"""
+    def label = readFile('device_info.txt').trim()
+    echo "${env.LOG_PREFIX} Device: ${label}"
+    return label
+}
+
 def download_dependencies() {
     sh "rm -Rf dependencies"
     sh "python3.10 download_dependencies.py"
 }
 
-def setup_resources() {
-    /* CI builds only use TensorFlow Lite Micro, so install the trimmed requirements (no torch,
-     * CUDA or ExecuTorch, several GB) and run the downloads and Vela optimisations in parallel. */
-    psh "#!/bin/bash\npython3.10 set_up_default_resources.py --additional-ethos-u-config-name ethos-u55-256 " +
-        "--requirements-file scripts/py/requirements_tflm.txt --parallel \$(nproc)"
-
-    /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters */
+/**
+ * Install the Python packages and download and optimise the models of the use cases. The downloads
+ * and Vela optimisations are run in parallel (one job per CPU).
+ *
+ * @param executorch  Set up ExecuTorch too (for the use case alif_asr with ExecuTorch). It needs
+ *                    torch and the other packages of the default requirements.txt (several GB).
+ *                    Without it only TensorFlow Lite Micro is set up with the trimmed
+ *                    requirements_tflm.txt (no torch, CUDA or ExecuTorch).
+ */
+def setup_resources(boolean executorch = false) {
+    /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters.
+     * Remove them before the set up: if the set up fails, the post action of the Init stage still stashes
+     * the workspace, the stash fails because of the file names and hides the real error. */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
+
+    def frameworks_and_requirements = executorch ?
+        "--ml-frameworks tflm executorch" :
+        "--requirements-file scripts/py/requirements_tflm.txt"
+    psh "#!/bin/bash\npython3.10 set_up_default_resources.py ${frameworks_and_requirements} " +
+        "--additional-ethos-u-config-name ethos-u55-256 --parallel \$(nproc)"
 }
 
 /**@
@@ -103,8 +157,22 @@ def build_inf_runner(String build_type, String toolchain, String board, String c
         exit \$exit_code"""
 }
 
-def build_ci_power_test(String core, String board, String toolchain, String npu_id, String linker_script_name, String ml_framework, String use_case="all") {
+/**
+ * Builds the CI power test binaries.
+ *
+ * @param extra_cmake_options  Optional extra CMake options, passed as they are, e.g.
+ *                             '-DNO_HELIUM=ON -DETHOS_U_NPU_ENABLED=OFF'
+ */
+def build_ci_power_test(String core, String board, String toolchain, String npu_id, String linker_script_name, String ml_framework, String use_case="all", String extra_cmake_options="") {
     def build_path = "build_ci_power_test_${core}_${board}_${toolchain}_${npu_id}_${linker_script_name}_${ml_framework}".toLowerCase()
+
+    /* Keep builds with different options in separate directories */
+    if (extra_cmake_options.contains('-DNO_HELIUM=ON')) {
+        build_path += "_no_helium"
+    }
+    if (extra_cmake_options.contains('-DETHOS_U_NPU_ENABLED=OFF')) {
+        build_path += "_no_npu"
+    }
 
     def use_case_build
     if (use_case == "all") {
@@ -113,7 +181,7 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
         use_case_build = use_case
     }
 
-    def cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON"
+    def cmake_cmd = "cmake .. -DALIF_CAMERA_MODULE=OV5675 -DTARGET_PLATFORM=alif -DTARGET_SUBSYSTEM=RTSS-${core} -DUSE_CASE_BUILD=${use_case_build} -DETHOS_U_NPU_ID=${npu_id} -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-${toolchain}.cmake -DCMAKE_BUILD_TYPE=Release -DMLEK_LOG_LEVEL=MLEK_LOG_LEVEL_INFO -DTARGET_BOARD=${board} -DGPIO_PROFILING=ON -DGPIO_PROFILING_CI=ON -DLINKER_SCRIPT_NAME=${linker_script_name} -DML_FRAMEWORK=${ml_framework} -DGLCD_UI=NO -DNO_DISPLAY=ON ${extra_cmake_options}"
 
     psh """#!/bin/bash -xe
         export PATH=$PATH:/opt/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/bin
@@ -128,26 +196,74 @@ def build_ci_power_test(String core, String board, String toolchain, String npu_
         exit \$exit_code"""
 }
 
+/**
+ * Write the SE tools configuration file (json) of an application binary, which is given to
+ * app-gen-toc. Used instead of a json file of the repository for each core, linker script and
+ * binary combination.
+ *
+ * @param flash   Map with core (HE or HP), mram (MRAM address of the linker script, e.g.
+ *                '0x80008000') and optionally device_config (default app-device-config.json).
+ * @param binary  The name of the binary the application is flashed with.
+ * @return        The name of the written file.
+ */
+def flash_config_file(Map flash, String binary) {
+    def device_config = flash.device_config ?: 'app-device-config.json'
+    def file_name = binary.replaceFirst(/\.bin$/, '') + '_' + flash.core.toLowerCase() + '.json'
+    writeFile file: file_name, text: """{
+    "${flash.core}_Image": {
+        "binary": "${binary}",
+        "version": "1.0.0",
+        "mramAddress": "${flash.mram}",
+        "cpu_id": "M55_${flash.core}",
+        "flags": ["boot"],
+        "signed": false
+    },
+    "DEVICE": {
+        "disabled": false,
+        "binary": "${device_config}",
+        "version": "0.5.00",
+        "signed": true
+    }
+}
+"""
+    return file_name
+}
+
+/**
+ * Write a binary to the MRAM of the device under test with the SE tools. Fails if the device is
+ * not in the maintenance mode. The console shows the write progress of each file only every 25 %
+ * (see automation/filter_setools_progress.awk), the complete output is in flash_device.log.
+ *
+ * @param jsonfile             SE tools json file of the binary, with or without the directories.
+ * @param build_dir            Directory of the binary.
+ * @param source_binary_name   Name of the binary in build_dir.
+ * @param target_binary_name   Name of the binary in the json file.
+ */
+def flash_mram(String jsonfile, String build_dir, String source_binary_name, String target_binary_name) {
+    def json_name = jsonfile.substring(jsonfile.lastIndexOf('/') + 1)
+    psh """#!/bin/bash -xe
+        printenv NODE_NAME
+        cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
+        rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
+        cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
+        cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
+        pushd $ALIF_SETOOLS_LOCATION/
+        {
+            ./app-gen-toc --filename build/config/$json_name
+            ./app-write-mram -e app
+            ./app-write-mram -p
+        } 2>&1 | tee $WORKSPACE/flash_device.log | awk -f $WORKSPACE/automation/filter_setools_progress.awk
+        popd"""
+
+    if (fileExists('flash_device.log') &&
+        readFile('flash_device.log').contains('Maintenance Mode = Disabled')) {
+        error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
+    }
+}
+
 def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary_name, String target_binary_name, String test_name, String extra_pytest_options = "") {
     try {
-        psh """#!/bin/bash -xe
-            printenv NODE_NAME
-            cat $ALIF_SETOOLS_ORIG/isp_config_data.cfg
-            rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
-            cp $build_dir/$source_binary_name $ALIF_SETOOLS_LOCATION/build/images/$target_binary_name
-            cp $jsonfile $ALIF_SETOOLS_LOCATION/build/config/
-            pushd $ALIF_SETOOLS_LOCATION/
-            {
-                ./app-gen-toc --filename build/config/$jsonfile
-                ./app-write-mram -e app
-                ./app-write-mram -p
-            } 2>&1 | tee $WORKSPACE/flash_device.log
-            popd"""
-
-        if (fileExists('flash_device.log') &&
-            readFile('flash_device.log').contains('Maintenance Mode = Disabled')) {
-            error "Failed, Maintenance Mode not Enabled... No reason to continue execution"
-        }
+        flash_mram(jsonfile, build_dir, source_binary_name, target_binary_name)
 
         def run_pytest = "\
         pytest \
@@ -174,7 +290,7 @@ def flash_and_run_pytest(String jsonfile, String build_dir, String source_binary
             rsync -a --delete $ALIF_SETOOLS_ORIG $ALIF_SETOOLS_LOCATION
             pushd $ALIF_SETOOLS_LOCATION/
             ./app-gen-toc --filename build/config/app-cpu-stubs.json
-            ./app-write-mram
+            ./app-write-mram 2>&1 | awk -f $WORKSPACE/automation/filter_setools_progress.awk
             popd"""
     } catch (Exception e) {
         echo "${env.LOG_PREFIX} Exception occurred: " + e.toString()
@@ -223,7 +339,7 @@ def run_build(List build_def) {
     } else if (build_def[0] == 'inf_runner') {
         build_inf_runner(build_def[1], build_def[2], build_def[3], build_def[4])
     } else if (build_def[0] == 'ci_power_test') {
-        build_ci_power_test(build_def[1], build_def[2], build_def[3], build_def[4], build_def[5], build_def[6], build_def[7])
+        build_ci_power_test(build_def[1], build_def[2], build_def[3], build_def[4], build_def[5], build_def[6], build_def[7], build_def.size() > 8 ? build_def[8] : "")
     } else {
         error "Unknown build type ${build_def[0]}"
     }
@@ -253,34 +369,74 @@ def build_stage(Map stage_def) {
 }
 
 /**
- * Run a test stage definition (see ci_stages.groovy) on the agent of the device under test.
+ * Write a file (e.g. the model of a use case which is too large for the MRAM) to the OSPI flash
+ * of the device under test with the alif_usb-to-ospi-flasher. The flasher application
+ * (automation/flasher, for DevKit-E8 HE) is first written to the MRAM, then the file is sent to
+ * it over the USB serial port of the flasher (/dev/ttyACM1) with XMODEM, see
+ * send_file_via_xmodem. On the test agents /dev/ttyACM0 is used by the SE tools and /dev/ttyACM1
+ * by the OSPI flasher. The test binary written after this replaces the flasher in the MRAM, the
+ * OSPI flash content stays.
+ *
+ * @param file_path  Path of the file, including the directories (e.g. the ext_flash.bin of a build)
  */
-def test_stage(Map stage_def) {
+def flash_ospi_file(String file_path) {
+    def ospi_flasher_port = '/dev/ttyACM1'
+
+    if (!fileExists(file_path)) {
+        error "${file_path} to be written to the OSPI flash does not exist, is it unstashed?"
+    }
+    echo "${env.LOG_PREFIX} Writing ${file_path} to the OSPI flash"
+    flash_mram('automation/flasher/e8_flasher-cfg.json', 'automation/flasher', 'flasher_e8_he.bin', 'flasher_e8_he.bin')
+
+    /* The USB serial port appears when the flasher has booted */
+    psh """#!/bin/bash -xe
+        for i in \$(seq 30); do
+            [ -c '${ospi_flasher_port}' ] && exit 0
+            sleep 1
+        done
+        echo "${ospi_flasher_port} did not appear, is the flasher running?"
+        exit 1"""
+    send_file_via_xmodem(ospi_flasher_port, file_path)
+}
+
+/**
+ * Run a test stage definition (see ci_stages_weekly.groovy) on the agent of the device under test.
+ */
+def test_stage(Map stage_def, String base_stash = "ml_base_stash") {
     node(stage_def.label) {
         try {
             withEnv(["LOG_PREFIX=" + log_prefix(stage_def.name)]) {
                 echo "${env.LOG_PREFIX} Running on ${env.NODE_NAME}"
+                /* Either a json file of the repository or generated from the flash definition */
+                def json_file = stage_def.json ?: flash_config_file(stage_def.flash, stage_def.bin)
                 try {
                     if (stage_def.video) {
                         build job: 'camera_start_record'
                     }
-                    unstash name: "ml_base_stash"
+                    unstash name: base_stash
                     for (stash_name in stage_def.unstash) {
                         unstash name: stash_name
                     }
-                    def pytest_options = ""
-                    if (stage_def.power) {
-                        pytest_options = '--power_results ' + power_results_file(stage_def.power) +
-                            ' --power_board "' + stage_def.power.board + '" --power_core ' + stage_def.power.core
+                    /* The model of the use case is in the OSPI flash, write it before the test */
+                    if (stage_def.ospi_file) {
+                        flash_ospi_file(stage_def.ospi_file)
                     }
-                    flash_and_run_pytest(stage_def.json, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
+                    /* Extra pytest options of the stage, for example a board specific limit */
+                    def pytest_options = stage_def.pytest_options ?: ""
+                    if (stage_def.power) {
+                        /* Read before the flashing, the device is in the maintenance mode */
+                        def board_label = read_device_info()
+                        pytest_options += ' --power_results ' + power_results_file(stage_def.power) +
+                            ' --power_board "' + board_label + '" --power_core ' + stage_def.power.core
+                    }
+                    flash_and_run_pytest(json_file, stage_def.dir, stage_def.src, stage_def.bin, stage_def.test, pytest_options)
                     if (stage_def.video) {
                         build job: 'camera_stop_record'
                         copyArtifacts(projectName: 'camera_stop_record', filter: 'recording.mov', target: stage_def.video, optional: true)
                         stash name: stage_def.video, includes: stage_def.video + '/recording.mov'
                     }
                 } finally {
-                    archive_pytest_results(stage_def.json, stage_def.bin)
+                    archive_pytest_results(json_file, stage_def.bin)
                     if (stage_def.power) {
                         archiveArtifacts artifacts: 'pytest/' + power_results_file(stage_def.power), fingerprint: false, allowEmptyArchive: true
                         stash name: power_stash_name(stage_def.power), includes: 'pytest/' + power_results_file(stage_def.power), allowEmpty: true
@@ -318,12 +474,17 @@ def build_branches(List stage_defs) {
 
 /**
  * Create the parallel branches of test stage definitions.
+ *
+ * @param stage_defs  The test stage definitions.
+ * @param base_stash  Stash unstashed first in each test stage. The tests only need the pytest and
+ *                    automation directories, so a small stash of them (see ml_test_stash in
+ *                    Jenkinsfile-weekly) is faster than the whole workspace of the builds.
  */
-def test_branches(List stage_defs) {
+def test_branches(List stage_defs, String base_stash = "ml_base_stash") {
     def branches = [:]
     for (stage_def in stage_defs) {
         def current = stage_def
-        branches[current.name] = { test_stage(current) }
+        branches[current.name] = { test_stage(current, base_stash) }
     }
     return branches
 }
@@ -341,6 +502,18 @@ def unstash_power_results(List stage_defs) {
     unstash_if_exists(stash_names)
 }
 
+/**
+ * Send a file to a device over a serial port using classic XMODEM. Runs
+ * automation/send_file_via_xmodem.sh, which can also be used locally.
+ *
+ * @param port       Serial device, e.g. /dev/ttyACM1
+ * @param file_path  Path of the file to send
+ * @param timeout_s  Maximum duration of the transfer in seconds
+ */
+def send_file_via_xmodem(String port, String file_path, int timeout_s = 3600) {
+    psh "bash automation/send_file_via_xmodem.sh '${port}' '${file_path}' ${timeout_s}"
+}
+
 return [
     download_dependencies: this.&download_dependencies,
     setup_resources: this.&setup_resources,
@@ -349,10 +522,15 @@ return [
     build_inf_runner: this.&build_inf_runner,
     build_ci_power_test: this.&build_ci_power_test,
     flash_and_run_pytest: this.&flash_and_run_pytest,
+    read_device_info: this.&read_device_info,
     archive_pytest_results: this.&archive_pytest_results,
     clean_workspace: this.&clean_workspace,
     unstash_if_exists: this.&unstash_if_exists,
     build_branches: this.&build_branches,
     test_branches: this.&test_branches,
     unstash_power_results: this.&unstash_power_results,
+    send_file_via_xmodem: this.&send_file_via_xmodem,
+    flash_mram: this.&flash_mram,
+    flash_ospi_file: this.&flash_ospi_file,
+    flash_config_file: this.&flash_config_file,
 ]
