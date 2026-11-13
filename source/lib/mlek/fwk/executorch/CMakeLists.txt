@@ -26,7 +26,7 @@ project(${ML_FWK_ET_TARGET}
     DESCRIPTION     "ExecuTorch framework module"
     LANGUAGES       CXX)
 
-if (NOT "ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+if (NOT "${ML_FRAMEWORK_EXECUTORCH}" STREQUAL ${ML_FRAMEWORK})
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR} should not be included for ${ML_FRAMEWORK}")
 endif()
 

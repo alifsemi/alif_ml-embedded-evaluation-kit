@@ -84,7 +84,7 @@ computed the MFCC from this spectrogram, but for *Conformer* the Mel Spectrogram
 
 Our implementation of the Mel Spectrogram computation is intended to be as close as possible
 to that found in the
-[torchaudio](https://docs.pytorch.org/audio/2.9.0/generated/torchaudio.transforms.MelSpectrogram.html) project,
+[torchaudio](https://docs.pytorch.org/audio/2.11.0/generated/torchaudio.transforms.MelSpectrogram.html) project,
 as this was used for training the model.
 
 Unlike *wav2letter* where we run inference for a sliding window over the input audio data,
@@ -229,7 +229,6 @@ For further information, please refer to:
 
 - [Configuring with custom TPIP dependencies](../sections/building.md#configuring-with-custom-tpip-dependencies)
 - [Using Arm Compiler](../sections/building.md#using-arm-compiler)
-- [Configuring the build for simple-platform](../sections/building.md#configuring-the-build-for-simple_platform)
 - [Building for different Ethos-U NPU variants](../sections/building.md#building-for-different-ethos_u-npu-variants)
 
 > **Note:** If re-building with changed parameters values, we recommend that you clean the build directory and re-run

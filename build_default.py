@@ -29,21 +29,31 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.py.mlek_tools.setup.npu_config import (
-    get_default_npu_config_from_name,
-    valid_npu_configs,
+from scripts.py.mlek_tools.config import MLFramework, parse_ml_framework
+from scripts.py.mlek_tools.config.download import DownloadConfig
+from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
+from scripts.py.mlek_tools.config.npu import (
+    NpuConfig,
+    supported_npu_config_names,
 )
-from scripts.py.mlek_tools.setup.setup_config import (
-    SetupConfig, PathsConfig, OptimizationConfig,
-)
-from set_up_default_resources import MLFramework, valid_ml_frameworks
+from scripts.py.mlek_tools.config.optimizer import OptimizerConfig
+from scripts.py.mlek_tools.config.paths import PathsConfig
+from scripts.py.mlek_tools.config.tflite import TfliteConfig
+from scripts.py.mlek_tools.setup.logging_config import LoggingOptions, configure_logging
+from set_up_default_resources import EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS
+from set_up_default_resources import INSTALL_VELA_FROM_SOURCE
+from set_up_default_resources import VELA_URL, VELA_VERSION
 from set_up_default_resources import default_downloads_path
 from set_up_default_resources import default_executorch_path
+from set_up_default_resources import default_executorch_requirements_path
 from set_up_default_resources import default_npu_configs
 from set_up_default_resources import default_requirements_path
 from set_up_default_resources import default_use_case_resources_path
-from set_up_default_resources import EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS
+from set_up_default_resources import default_vela_config_file
 from set_up_default_resources import set_up_resources_with_defaults as set_up_resources
+
+current_file_dir = Path(__file__).parent.resolve()
+
 
 class PipeLogging(threading.Thread):
     """
@@ -98,22 +108,34 @@ class BuildConfig:
     Args used to build the project.
 
     Attributes:
-        toolchain (str)            : Specifies if 'gnu' or 'arm' toolchain needs to be used.
-        download_resources (bool)  : Specifies if 'Download resources' step is performed.
-        run_vela_on_models (bool)  : Only if `download_resources` is True, specifies whether to
-                                     run Vela on downloaded models.
-        npu_config_name (str)      : Ethos-U NPU configuration name. See "valid_npu_config_names"
-        make_jobs (int)            : The number of make jobs to use (`-j` flag).
-        make_verbose (bool)        : Runs make with VERBOSE=1.
-        ml_framework               : Specifies ML framework to use for the build.
+        toolchain (str)             : Specifies if 'gnu' or 'arm' toolchain needs to be used.
+        download_resources (bool)   : Specifies if 'Download resources' step is performed.
+        npu_config_name (str)       : Ethos-U NPU configuration name.
+        fpga (bool)                 : Build for FPGA instead of FVP
+                                    (only when these platforms differ)
+        make_jobs (int)             : The number of make jobs to use (`-j` flag).
+        make_verbose (bool)         : Runs make with VERBOSE=1.
+        ml_framework                : Specifies ML framework to use for the build.
     """
     toolchain: str
     download_resources: bool
-    run_vela_on_models: bool
     npu_config_name: str
+    fpga: bool
     make_jobs: int
     make_verbose: bool
     ml_framework: MLFramework
+
+
+@dataclass(frozen=True)
+class ResourceConfigs:
+    """
+    Resource setup configuration groups.
+    """
+    download: DownloadConfig
+    optimizer: OptimizerConfig
+    tflite: TfliteConfig
+    executorch: ExecuTorchConfig
+    paths: PathsConfig
 
 
 def get_toolchain_file_name(toolchain: str) -> str:
@@ -142,7 +164,6 @@ def get_toolchain_file_name(toolchain: str) -> str:
 
 
 def prep_build_dir(
-        current_file_dir: Path,
         target_platform: str,
         target_subsystem: str,
         build_config: BuildConfig
@@ -152,7 +173,6 @@ def prep_build_dir(
 
     Parameters
     ----------
-    current_file_dir    : The current directory of the running script
     target_platform     : The name of the target platform, e.g. "mps3"
     target_subsystem    : The name of the target subsystem, e.g. "sse-300"
     build_config        : Build config object
@@ -165,8 +185,8 @@ def prep_build_dir(
     build_dir = (
             current_file_dir /
             (f"cmake-build-{target_platform}-{target_subsystem}" +
-            f"-{build_config.npu_config_name}-{build_config.toolchain}"+
-            f"-{build_config.ml_framework.value}")
+             f"-{build_config.npu_config_name}-{build_config.toolchain}" +
+             f"-{build_config.ml_framework.value}")
     )
 
     try:
@@ -185,55 +205,33 @@ def prep_build_dir(
     return build_dir
 
 
-def download_resources(build_config: BuildConfig) -> Path:
-    """
-    Download resources for MLEK use cases
-
-    Parameters
-    ----------
-    build_config (BuildArgs)    : Config for the build
-
-    Returns
-    -------
-    The path to the downloaded resources
-    """
-    setup_config = SetupConfig(
-        run_vela_on_models=build_config.run_vela_on_models,
-        set_up_tensorflow=(build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO),
-        set_up_executorch=(build_config.ml_framework == MLFramework.EXECUTORCH),
-        executorch_excluded_npu_processor_ids=EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS,
-    )
-    optimization_config = OptimizationConfig(
-        additional_npu_config_names=[build_config.npu_config_name]
-    )
-    paths_config = PathsConfig(
-        additional_requirements_file=default_requirements_path,
-        use_case_resources_files=[default_use_case_resources_path],
-        downloads_dir=default_downloads_path,
-        executorch_path=default_executorch_path
-    )
-    return set_up_resources(setup_config, optimization_config, paths_config)
-
-
-def run(build_config: BuildConfig):
+def run(
+        build_config: BuildConfig,
+        resource_configs: ResourceConfigs,
+):
     """
     Run the helpers scripts.
 
     Parameters:
     ----------
-    build_config (BuildArgs)    : Config for the build
+    build_config (BuildArgs)        : Config for the build
+    resource_configs (ResourceConfigs): Resource setup config groups
     """
-
-    current_file_dir = Path(__file__).parent.resolve()
 
     # 1. Make sure the toolchain is supported, and set the right one here
     toolchain_file_name = get_toolchain_file_name(build_config.toolchain)
 
     # 2. Download models if specified
     if build_config.download_resources:
-        env_path = download_resources(build_config)
+        env_path = set_up_resources(
+            resource_configs.download,
+            resource_configs.optimizer,
+            resource_configs.tflite,
+            resource_configs.executorch,
+            resource_configs.paths,
+        )
     else:
-        env_path = default_downloads_path / "env"
+        env_path = resource_configs.paths.downloads_dir / "env"
 
     # 3. Build default configuration
     logging.info("Building default configuration.")
@@ -249,7 +247,6 @@ def run(build_config: BuildConfig):
         target_subsystem = "sse-300"
 
     build_dir = prep_build_dir(
-        current_file_dir,
         target_platform,
         target_subsystem,
         build_config
@@ -264,35 +261,52 @@ def run(build_config: BuildConfig):
             "toolchains" /
             toolchain_file_name
     )
-    ethos_u_cfg = get_default_npu_config_from_name(build_config.npu_config_name)
+    ethos_u_cfg = NpuConfig.from_name(build_config.npu_config_name)
     cmake_path = env_path / "bin" / "cmake"
-    framework_arg = ''
+    framework_arg = f'-DML_FRAMEWORK={build_config.ml_framework.value}'
     if build_config.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO:
         # TensorFlow Lite Micro is already the default option. Just ensure
         # a clean build for the framework.
-        framework_arg = '-DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
-    elif build_config.ml_framework == MLFramework.EXECUTORCH:
-        # Set framework to ExecuTorch.
-        framework_arg = '-DML_FRAMEWORK=ExecuTorch'
-    else:
+        framework_arg += ' -DTENSORFLOW_LITE_MICRO_CLEAN_DOWNLOADS=ON'
+    elif build_config.ml_framework != MLFramework.EXECUTORCH:
         raise NotImplementedError(f'Unsupported ML Framework {build_config.ml_framework}')
 
-    cmake_command = (
-        f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
-        f" -DTARGET_SUBSYSTEM={target_subsystem}"
-        f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
-        f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
-        f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
-        f" {framework_arg}"
+    fpga_arg = ""
+    if build_config.fpga:
+        if target_subsystem == "sse-320":
+            fpga_arg = "-DFPGA_PLATFORM_SSE_320=ON"
+        else:
+            logging.warning(
+                "--fpga argument passed but we are building for %s;"
+                " the binaries will work on both FVP and FPGA", target_subsystem
+            )
+
+    # CMake configure
+    run_command(
+        command=(
+            f"{cmake_path} -B {build_dir} -DTARGET_PLATFORM={target_platform}"
+            f" -DTARGET_SUBSYSTEM={target_subsystem}"
+            f" -DCMAKE_TOOLCHAIN_FILE={cmake_toolchain_file}"
+            f" -DETHOS_U_NPU_ID={ethos_u_cfg.processor_id}"
+            f" -DETHOS_U_NPU_CONFIG_ID={ethos_u_cfg.config_id}"
+            f" -DETHOS_U_NPU_MEMORY_MODE={ethos_u_cfg.memory_mode}"
+            f" {framework_arg}"
+            f" {fpga_arg}"
+        ),
+        logpipe=logpipe,
+        fail_message="Failed to configure the project."
     )
 
-    run_command(cmake_command, logpipe, fail_message="Failed to configure the project.")
-
-    make_command = f"{cmake_path} --build {build_dir} -j{build_config.make_jobs}"
+    # CMake build
+    build_command = f"{cmake_path} --build {build_dir} -j{build_config.make_jobs}"
     if build_config.make_verbose:
-        make_command += " --verbose"
+        build_command += " --verbose"
 
-    run_command(make_command, logpipe, fail_message="Failed to build project.")
+    run_command(
+        command=build_command,
+        logpipe=logpipe,
+        fail_message="Failed to build project."
+    )
 
     logpipe.close()
 
@@ -320,19 +334,33 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ml-framework",
         help=f"""Specify the ML framework to use for building the examples.
-        Valid values are: {valid_ml_frameworks}
+        Valid values are: {", ".join(sorted(MLFramework.accepted_values()))}
         """,
-        default=f'{MLFramework.TENSORFLOW_LITE_MICRO.value}'
+        type=parse_ml_framework,
+        default=MLFramework.TENSORFLOW_LITE_MICRO,
     )
     parser.add_argument(
         "--npu-config-name",
         help=f"""Arm Ethos-U configuration to build for. Choose from:
-            {valid_npu_configs.names}""",
-        default=default_npu_configs.names[0],
+            {supported_npu_config_names()}
+            Memory mode may also be specified:
+            {supported_npu_config_names(memory_mode=True)}""",
+        default=default_npu_configs[0].config_name,
+    )
+    parser.add_argument(
+        "--fpga",
+        help=(
+            "Build for FPGA platform. "
+            "This is only used for Arm Corstone-320 "
+            "where the FPGA and FVP require different binaries. "
+            "For all other platforms the same binary will work on FPGA and FVP."
+        ),
+        action="store_true",
     )
     parser.add_argument(
         "--make-jobs",
         help="Number of jobs to run with make",
+        type=int,
         default=multiprocessing.cpu_count(),
     )
     parser.add_argument(
@@ -340,19 +368,67 @@ if __name__ == "__main__":
     )
     parsed_args = parser.parse_args()
 
-    logging.basicConfig(
-        filename="log_build_default.log", level=logging.DEBUG, filemode="w"
+    configure_logging(
+        Path("log_build_default.log"),
+        LoggingOptions(
+            file_mode="w",
+            show_thread=parsed_args.make_jobs > 1,
+        ),
     )
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
     build = BuildConfig(
         toolchain=parsed_args.toolchain.lower(),
         download_resources=not parsed_args.skip_download,
-        run_vela_on_models=not parsed_args.skip_vela,
         npu_config_name=parsed_args.npu_config_name,
+        fpga=parsed_args.fpga,
         make_jobs=parsed_args.make_jobs,
         make_verbose=parsed_args.make_verbose,
-        ml_framework=MLFramework(parsed_args.ml_framework)
+        ml_framework=parsed_args.ml_framework,
     )
 
-    run(build)
+    use_tflm = build.ml_framework == MLFramework.TENSORFLOW_LITE_MICRO
+    use_executorch = build.ml_framework == MLFramework.EXECUTORCH
+
+    download = DownloadConfig(
+        parallel=parsed_args.make_jobs,
+    )
+
+    optimizer = OptimizerConfig(
+        vela_config_file=default_vela_config_file,
+        additional_npu_config_names=[build.npu_config_name],
+    )
+
+    tflite = TfliteConfig(
+        enabled=use_tflm,
+        run_vela=not parsed_args.skip_vela,
+        vela_version=VELA_VERSION,
+        vela_url=VELA_URL,
+        vela_install_from_source=INSTALL_VELA_FROM_SOURCE,
+    )
+
+    executorch = ExecuTorchConfig(
+        enabled=use_executorch,
+        run_lowering=not parsed_args.skip_vela,
+        executorch_path=default_executorch_path,
+        excluded_npu_processor_ids=EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS,
+    )
+
+    requirements_files = [default_requirements_path]
+    if use_executorch:
+        requirements_files.append(default_executorch_requirements_path)
+
+    paths = PathsConfig(
+        use_case_resources_files=[default_use_case_resources_path],
+        downloads_dir=default_downloads_path,
+        requirements_files=requirements_files,
+    )
+
+    resources = ResourceConfigs(
+        download=download,
+        optimizer=optimizer,
+        tflite=tflite,
+        executorch=executorch,
+        paths=paths,
+    )
+
+    run(build, resources)

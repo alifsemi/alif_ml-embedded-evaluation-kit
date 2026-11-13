@@ -49,7 +49,7 @@ parameter. Check that the path is correct, clean the build folder and re-run the
 **A:** For Fast Model simulations, active NPU cycles should be representative of a real system.
 However, when running code samples on Corstone-300 FVP, active CPU cycles should not be used for any performance analysis or interpretation.
 The Cortex-M part of the Fast Model **is not** cycle accurate or approximate, meanwhile NPU (Ethos-U) part **is** cycle approximate.
-If you need to interpret cycles for Cortex-M part, you need to use FPGA system (based on MPS3) or cycle accurate modelling environment.
+If you need to interpret cycles for Cortex-M part, you need to use FPGA system (based on MPS3 or MPS4) or cycle accurate modelling environment.
 
 ----
 

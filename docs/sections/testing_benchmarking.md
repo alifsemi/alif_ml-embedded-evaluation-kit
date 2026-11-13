@@ -139,7 +139,7 @@ INFO - NPU IDLE cycles: 626
 INFO - NPU TOTAL cycles: 1081634
 ```
 
-- For the MPS3 platform, the time duration in milliseconds is also reported when `-DCPU_PROFILE_ENABLED=1` is added to
+- For the MPS3 and MPS4 platforms, the time duration in milliseconds is also reported when `-DCPU_PROFILE_ENABLED=1` is added to
   CMake configuration command, like so:
 
 ```log

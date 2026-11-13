@@ -7,15 +7,18 @@
     "resources": [
       {
         "name": "ad_medium_int8.tflite",
-        "url": "{url_prefix:0}ad_medium_int8.tflite"
+        "url": "{url_prefix:0}ad_medium_int8.tflite",
+        "sha256": "a8b1c9037c2a80e6ff770f0a550777cf744a52850bed6545b2bfc9bacf604c98"
       },
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/input/0.npy"
+        "url": "{url_prefix:0}testing_input/input/0.npy",
+        "sha256": "69e552a9f80c793d33a019e786fc7217db328e2aab29c268f02bb89a6b22dc51"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity/0.npy",
+        "sha256": "f6b5d2556bcdc01576194f1d6aa2682df11b2183a8b01ae402eb98ef02ed608b"
       }
     ]
   },
@@ -28,19 +31,23 @@
     "resources": [
       {
         "name": "wav2letter_pruned_int8.tflite",
-        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite"
+        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite",
+        "sha256": "e0814a0e586f2f2881f7fe96e6bc0b8e4cfecc8d64ced56d8f7ca85b9b7ab257"
       },
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy",
+        "sha256": "84e23e7199b96820ed3f69c08a1832aa353976506ae0ab3333c975eb916e84ad"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
+        "sha256": "f813c6c406b355a10bb51974c660622ea2dfec0b5e6993c6ff02f30889ae1a9e"
       },
       {
         "name": "conformer_fp32_cln_wer_6_47.pt",
-        "url": "{url_prefix:1}conformer_fp32_cln_wer_6_47.pt?download=true"
+        "url": "{url_prefix:1}conformer_fp32_cln_wer_6_47.pt?download=true",
+        "sha256": "a0b7ac9f3714f217b3eb84fece5c82bafbf6c216613a6a06763321f8f7b56b0a"
       }
     ],
     "executorch_resources": [
@@ -81,15 +88,18 @@
     "resources": [
       {
         "name": "mobilenet_v2_1.0_224_INT8.tflite",
-        "url": "{url_prefix:0}mobilenet_v2_1.0_224_INT8.tflite"
+        "url": "{url_prefix:0}mobilenet_v2_1.0_224_INT8.tflite",
+        "sha256": "bd8d56b80557a5fca7acf14f61e5339285c02810f7d7afa714b9763fc4b86e95"
       },
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/tfl.quantize/0.npy"
+        "url": "{url_prefix:0}testing_input/tfl.quantize/0.npy",
+        "sha256": "454b7a6fea8ed14e236e831f1d77114a476a348fbbfab2dce5341d7e9e17cc64"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/MobilenetV2/Predictions/Reshape_11/0.npy"
+        "url": "{url_prefix:0}testing_output/MobilenetV2/Predictions/Reshape_11/0.npy",
+        "sha256": "f1b5d4fce5a6f8ddaf13352229cd862285f6cd0d48b17a7d11ec5881ba499ae7"
       }
     ],
     "executorch_resources": [
@@ -111,7 +121,8 @@
     "resources": [
       {
         "name": "yolo-fastest_192_face_v4.tflite",
-        "url": "{url_prefix:0}yolo-fastest_192_face_v4.tflite"
+        "url": "{url_prefix:0}yolo-fastest_192_face_v4.tflite",
+        "sha256": "e94bcdb011784bead70ab0c0e9d2dae1a9ea5f103b43e1e6fac3019302cf71ab"
       }
     ]
   },
@@ -123,15 +134,18 @@
     "resources": [
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/input/0.npy"
+        "url": "{url_prefix:0}testing_input/input/0.npy",
+        "sha256": "afac928cb5a966030eac08a0943c169fe5e80d0ba0d5e97986c90aba1afd3fe2"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity/0.npy",
+        "sha256": "302e3559ac7e867b477247d7625bc2408d6c27c27092c8b95f5e821a55652b72"
       },
       {
         "name": "kws_micronet_m.tflite",
-        "url": "{url_prefix:0}kws_micronet_m.tflite"
+        "url": "{url_prefix:0}kws_micronet_m.tflite",
+        "sha256": "c1feed3af5dac44de7477fb4161670ba18a3fc06039e4a14da41b1c4dd454cb4"
       }
     ]
   },
@@ -143,15 +157,18 @@
     "resources": [
       {
         "name": "vww4_128_128_INT8.tflite",
-        "url": "{url_prefix:0}vww4_128_128_INT8.tflite"
+        "url": "{url_prefix:0}vww4_128_128_INT8.tflite",
+        "sha256": "5e76364e80c45776b735563679d45f611cab7ce7fef2ec4e2db088afe009ccae"
       },
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/input/0.npy"
+        "url": "{url_prefix:0}testing_input/input/0.npy",
+        "sha256": "79f1c54d387f84e3d10bda5299d8eefdc0a684a95e9cf463152414335cb44700"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity/0.npy",
+        "sha256": "b178447c66875181eb7835c46eb9fd8e73069e0c8a12f5ed9529c7bb2c9f25ea"
       }
     ]
   },
@@ -164,31 +181,37 @@
     "resources": [
       {
         "name": "wav2letter_pruned_int8.tflite",
-        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite"
+        "url": "{url_prefix:0}wav2letter_pruned_int8.tflite",
+        "sha256": "e0814a0e586f2f2881f7fe96e6bc0b8e4cfecc8d64ced56d8f7ca85b9b7ab257"
       },
       {
         "sub_folder": "asr",
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/input_2_int8/0.npy",
+        "sha256": "84e23e7199b96820ed3f69c08a1832aa353976506ae0ab3333c975eb916e84ad"
       },
       {
         "sub_folder": "asr",
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
+        "sha256": "f813c6c406b355a10bb51974c660622ea2dfec0b5e6993c6ff02f30889ae1a9e"
       },
       {
         "sub_folder": "kws",
         "name": "ifm0.npy",
-        "url": "{url_prefix:1}testing_input/input/0.npy"
+        "url": "{url_prefix:1}testing_input/input/0.npy",
+        "sha256": "afac928cb5a966030eac08a0943c169fe5e80d0ba0d5e97986c90aba1afd3fe2"
       },
       {
         "sub_folder": "kws",
         "name": "ofm0.npy",
-        "url": "{url_prefix:1}testing_output/Identity/0.npy"
+        "url": "{url_prefix:1}testing_output/Identity/0.npy",
+        "sha256": "302e3559ac7e867b477247d7625bc2408d6c27c27092c8b95f5e821a55652b72"
       },
       {
         "name": "kws_micronet_m.tflite",
-        "url": "{url_prefix:1}kws_micronet_m.tflite"
+        "url": "{url_prefix:1}kws_micronet_m.tflite",
+        "sha256": "c1feed3af5dac44de7477fb4161670ba18a3fc06039e4a14da41b1c4dd454cb4"
       }
     ]
   },
@@ -200,43 +223,53 @@
     "resources": [
       {
         "name": "rnnoise_INT8.tflite",
-        "url": "{url_prefix:0}rnnoise_INT8.tflite"
+        "url": "{url_prefix:0}rnnoise_INT8.tflite",
+        "sha256": "9c582545b7c13af44616c44b654f4fe721aa2585630b0ca173ca3589f6f11c2c"
       },
       {
         "name": "ifm0.npy",
-        "url": "{url_prefix:0}testing_input/main_input_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/main_input_int8/0.npy",
+        "sha256": "7028e23f411623c409f704ea55a26230b7d0c63ec01e4c73ffbcdc99be588f7e"
       },
       {
         "name": "ifm1.npy",
-        "url": "{url_prefix:0}testing_input/vad_gru_prev_state_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/vad_gru_prev_state_int8/0.npy",
+        "sha256": "3050901964cb681bc57a8eb484d63e7e264197d4b00840017e27b1ecad83ae57"
       },
       {
         "name": "ifm2.npy",
-        "url": "{url_prefix:0}testing_input/noise_gru_prev_state_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/noise_gru_prev_state_int8/0.npy",
+        "sha256": "4f7f3b47c96f52843728df2ca83ee968c45fa1c1f57d2d30df3a08adda36d039"
       },
       {
         "name": "ifm3.npy",
-        "url": "{url_prefix:0}testing_input/denoise_gru_prev_state_int8/0.npy"
+        "url": "{url_prefix:0}testing_input/denoise_gru_prev_state_int8/0.npy",
+        "sha256": "427d58fb50aecd53ecb22ca6d0de8a068ae3e1a1f2fb8b28126267a3c4076c48"
       },
       {
         "name": "ofm0.npy",
-        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_int8/0.npy",
+        "sha256": "632c56e71c9d4f22079f03d0cdc70321ba6116fe76a64fee695a80b4462eb876"
       },
       {
         "name": "ofm1.npy",
-        "url": "{url_prefix:0}testing_output/Identity_1_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_1_int8/0.npy",
+        "sha256": "ee0d3f36d43246b80e74431cab8b85917082a845c03c922b77887a99739d5789"
       },
       {
         "name": "ofm2.npy",
-        "url": "{url_prefix:0}testing_output/Identity_2_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_2_int8/0.npy",
+        "sha256": "605d758f172a3bcd4c11d13dcd1df8232b5cd8eac02344716f3d017e18497a9d"
       },
       {
         "name": "ofm3.npy",
-        "url": "{url_prefix:0}testing_output/Identity_3_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_3_int8/0.npy",
+        "sha256": "6df79eec775860d81783c16a602214e5e5906a7462751346ff84bf593c308c04"
       },
       {
         "name": "ofm4.npy",
-        "url": "{url_prefix:0}testing_output/Identity_4_int8/0.npy"
+        "url": "{url_prefix:0}testing_output/Identity_4_int8/0.npy",
+        "sha256": "4ede4d14fb1c3ab0e6dac0bf029cdf516320032909f3b02a1e82eb15a2aaae97"
       }
     ]
   },
@@ -248,7 +281,8 @@
     "resources": [
       {
         "name": "dnn_s_quantized.tflite",
-        "url": "{url_prefix:0}dnn_s_quantized.tflite"
+        "url": "{url_prefix:0}dnn_s_quantized.tflite",
+        "sha256": "b34dea022996706a558f14fbc967631889cbc82b93f25d326c581763aed71f0b"
       }
     ]
   }

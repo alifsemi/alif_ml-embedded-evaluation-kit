@@ -1,4 +1,4 @@
-;  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
+;  SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
 ;  affiliates <open-source-office@arm.com>
 ;  SPDX-License-Identifier: Apache-2.0
 ;
@@ -31,16 +31,23 @@
 LOAD_REGION_0       0x11000000                  0x00010000
 {
     ;-----------------------------------------------------
-    ; 64K boot ROM. Our vector table also
-    ; resides here as the default INITSVTOR is 0x11000000.
-    ; We currently do not use the ITCM for any code, but
-    ; could potentially put some critical code in there
-    ; if we need to.
+    ; 64K boot ROM
     ;-----------------------------------------------------
     boot.bin        0x11000000                  0x00010000
     {
        *.o (RESET, +First)
        *(InRoot$$Sections)
+    }
+
+    ;-----------------------------------------------------
+    ; Vector table relocation to read write memory
+    ; Alignment requirement from up to 496 interrupts,
+    ; rounded to the closest power of two equals 512 (words),
+    ; thus 2048 bytes.
+    ;-----------------------------------------------------
+    vtable_rw       0x10000000 UNINIT ALIGN 2048 0x00008000
+    {
+        * (.bss.NoInit.vtable_rw, +First)
     }
 }
 
@@ -63,7 +70,10 @@ LOAD_REGION_1       0x12000000                  0x00200000
     ; Next 384K of SRAM/BRAM region for RW and ZI
     ; data, 8 byte aligned.
     ;-----------------------------------------------------
-    data.bin        0x120A0000 ALIGN 8          0x00060000
+    ; Load initialized data directly at its execution address.
+    ; This prevents the packed load image from overlapping its
+    ; destination as the preceding code region grows.
+    data.bin        0x120A0000 FIXED ALIGN 8    0x00060000
     {
         ; Any RO-DATA
         .ANY (+RO-DATA)

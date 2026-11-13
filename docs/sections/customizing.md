@@ -689,7 +689,7 @@ For the hello world use-case, create a `helloworld.cmake` file and add the follo
 
 ```cmake
 # Specify the ML frameworks the use case supports
-set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
+set(${use_case}_ML_FRAMEWORK "tflm")
 if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
     set(${use_case}_supports_${ML_FRAMEWORK} OFF)
     return()
@@ -699,7 +699,7 @@ set(${use_case}_supports_${ML_FRAMEWORK} ON)
 ```
 
 If your use case uses ExecuTorch instead of TensorFlow Lite Micro,
-set the value of `${use_case}_ML_FRAMEWORK` to `ExecuTorch`.
+set the value of `${use_case}_ML_FRAMEWORK` to `executorch`.
 
 Next, set the `DEFAULT_MODEL_PATH`:
 
@@ -753,7 +753,7 @@ cmake .. \
   -DTARGET_PLATFORM=mps3 \
   -DTARGET_SUBSYSTEM=sse-300 \
   -DUSE_CASE_BUILD=hello_world \
-  -DML_FRAMEWORK="TensorFlowLiteMicro" \
+  -DML_FRAMEWORK="tflm" \
   -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
@@ -764,7 +764,7 @@ cmake .. \
   -DTARGET_PLATFORM=mps3 \
   -DTARGET_SUBSYSTEM=sse-300 \
   -DUSE_CASE_BUILD=hello_world \
-  -DML_FRAMEWORK="ExecuTorch" \
+  -DML_FRAMEWORK="executorch" \
   -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
@@ -841,12 +841,6 @@ the MPS3 platform implementation has:
 target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     <other libs>
     hal_display_mps3)
-```
-The implementation for simple platform on the other hand has:
-```cmake
-target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
-    <other libs>
-    hal_display_stubs)
 ```
 
 The standard output (stdout) component follows the same convention. It can expose three targets:

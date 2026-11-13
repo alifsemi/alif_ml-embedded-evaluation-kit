@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,8 @@ namespace app {
     ImgClassPreProcess::ImgClassPreProcess(
         const std::shared_ptr<fwk::iface::TensorIface> inputTensor,
         const std::array<float, kNumChannels> mean,
-        const std::array<float, kNumChannels> stddev
-        ) : m_inputTensor{inputTensor},
-            m_mean{mean},
-            m_stddev{stddev}
+        const std::array<float, kNumChannels> stddev) :
+        m_inputTensor{inputTensor}, m_mean{mean}, m_stddev{stddev}
     {}
 
     bool ImgClassPreProcess::DoPreProcess(const void* data, size_t inputSize)
@@ -48,7 +46,8 @@ namespace app {
             image::ConvertUint8ToInt8(this->m_inputTensor->GetData<int8_t>(),
                                       src,
                                       this->m_inputTensor->GetNumElements(),
-                                      this->m_inputTensor->Layout());
+                                      this->m_inputTensor->Layout(),
+                                      this->m_inputTensor->GetQuantParams());
             break;
         case fwk::iface::TensorType::UINT8:
             assert(inputSize == this->m_inputTensor->Bytes());
@@ -56,13 +55,12 @@ namespace app {
             break;
         case fwk::iface::TensorType::FP32:
             assert(inputSize * sizeof(float) == this->m_inputTensor->Bytes());
-            return image::ConvertUint8ToFp32<kNumChannels>(
-                this->m_inputTensor->GetData<float>(),
-                src,
-                this->m_inputTensor->GetNumElements(),
-                this->m_inputTensor->Layout(),
-                this->m_mean,
-                this->m_stddev);
+            return image::ConvertUint8ToFp32<kNumChannels>(this->m_inputTensor->GetData<float>(),
+                                                           src,
+                                                           this->m_inputTensor->GetNumElements(),
+                                                           this->m_inputTensor->Layout(),
+                                                           this->m_mean,
+                                                           this->m_stddev);
         default:
             return false;
         }
@@ -83,8 +81,7 @@ namespace app {
     bool ImgClassPostProcess::DoPostProcess()
     {
         return this->m_imgClassifier.GetClassificationResults(
-                this->m_outputTensor, this->m_results,
-                this->m_labels, 5, false);
+            this->m_outputTensor, this->m_results, this->m_labels, 5, false);
     }
 
 } /* namespace app */

@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -43,6 +43,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Include source generator.
 include(source_gen_utils)
+include(ml_framework)
 
 # Enable testing - allows top level to add tests.
 enable_testing()
@@ -59,7 +60,7 @@ endif()
 include(common_opts)
 
 # Check if the resources_downloaded needs update.
-check_update_public_resources(${RESOURCES_PATH})
+#check_update_public_resources(${RESOURCES_PATH})
 
 # Find the platform's build configuration and then add it.
 add_platform_build_configuration(TARGET_PLATFORM ${TARGET_PLATFORM})
@@ -74,9 +75,11 @@ assert_defined(USE_CASE_BUILD)
 assert_defined(CPU_PROFILE_ENABLED)
 assert_defined(CMAKE_TOOLCHAIN_FILE)
 
-if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND "${ML_FRAMEWORK_EXECUTORCH}" STREQUAL "${ML_FRAMEWORK}")
     assert_defined(EXECUTORCH_SRC_PATH)
-elseif("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+elseif("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND "${ML_FRAMEWORK_TFLM}" STREQUAL "${ML_FRAMEWORK}")
     assert_defined(TENSORFLOW_SRC_PATH)
 endif()
 

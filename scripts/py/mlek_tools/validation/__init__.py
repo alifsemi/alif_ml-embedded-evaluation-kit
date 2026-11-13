@@ -14,15 +14,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Model validation utilities for Arm Ethos-U NPU."""
-from .npu_validation import (
+from mlek_tools.validation.npu_validation import (
     NpuValidationArgs,
     normalize_memory_mode,
     normalize_ethos_u_config,
     parse_accelerator_config,
 )
-from .tflite_validator import validate_tflite_model
-from .pte_validator import validate_pte_model
-from .pte_ops_dump import dump_pte_ops, extract_vela_args, has_ethos_u_delegate
+from mlek_tools.validation.tflite_validator import validate_tflite_model
+from mlek_tools.validation.pte_validator import validate_pte_model
+from mlek_tools.validation.pte_ops_dump import dump_pte_ops, extract_vela_args, has_ethos_u_delegate
 
 __all__ = [
     "NpuValidationArgs",

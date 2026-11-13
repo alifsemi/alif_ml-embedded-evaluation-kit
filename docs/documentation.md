@@ -47,7 +47,7 @@ Before starting the setup process, please make sure that you have:
   Read more on ATfE [here](https://developer.arm.com/Tools%20and%20Software/Arm%20Toolchain%20for%20Embedded).
   Current level of support for ATfE, in this repository, is **experimental**.
 
-- An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or a `Fixed Virtual Platform` binary:
+- An Arm® MPS3 FPGA prototyping board and components for FPGA evaluation or an equivalent `Fixed Virtual Platform` binary:
   - An MPS3 board loaded with Arm® Corstone™-300 (`AN552`) or Corstone™-310 reference package (`AN555`). See
     [Download FPGA Images](https://developer.arm.com/downloads/-/download-fpga-images). You
     must have a USB connection between your machine and the MPS3 board - for UART menu and for deploying the
@@ -55,9 +55,13 @@ Before starting the setup process, please make sure that you have:
   - Both `Arm® Corstone™-300` and `Arm® Corstone™-310` based FVPs for MPS3 are available from:
     [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
     and as [Arm® Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware)
-- An Arm® MPS4 `Fixed Virtual Platform` binary to try the latest `Arm® Corstone™-315` and `Arm® Corstone™-320` reference platforms. These can also
-  be downloaded from [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
-  page.
+- An Arm® MPS4 FPGA prototyping board and components for FPGA evaluation or an equivalent `Fixed Virtual Platform` binary:
+  - An MPS4 board loaded with Arm® Corstone™-320 reference package. You
+    must have a USB connection between your machine and the MPS4 board - for UART menu and for deploying the
+    application.
+  - Both `Arm® Corstone™-315` and `Arm® Corstone™-320` based FVPs for MPS4 are available from:
+    [Arm® Ecosystem FVPs](https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps)
+    and as [Arm® Virtual Hardware](https://www.arm.com/products/development-tools/simulation/virtual-hardware)
 
 > **Note:**: There are two Arm® Corstone™-300 implementations available for the MPS3 FPGA board - application
 > notes `AN547` and `AN552`. We are aligned with the latest application note `AN552`. However, the application built
@@ -84,7 +88,10 @@ Please refer to the following documents for additional information:
     <https://www.arm.com/products/silicon-ip-cpu/ethos/ethos-u85>
 
 - Arm® MPS3 FPGA Prototyping Board:
-    <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>
+   <https://www.arm.com/products/development-tools/development-boards/mps3>
+
+- Arm® MPS4 FPGA Prototyping Board:
+    <https://www.arm.com/products/development-tools/development-boards/mps4>
 
 - Arm® Fixed Virtual Platforms: <https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms>
 
@@ -112,8 +119,7 @@ The repository has the following structure:
 │     │    ├── platforms
 │     │    │      ├── mps3
 │     │    │      ├── mps4
-│     │    │      ├── native
-│     │    │      └── simple_platform
+│     │    │      └── native
 │     │    └── ...
 │     └── ...
 ├── source
@@ -159,7 +165,7 @@ What these folders contain:
 - `scripts/cmake/platforms`: Platform build configuration scripts `build_configuration.cmake` are located here.
    These scripts are adding platform sources into the application build stream. The script has 2 functions:
   - `set_platform_global_defaults` - to set platform source locations and other build options.
-  - `platform_custom_post_build` - to execute specific post build steps. For example, MPS3 board related script adds
+  - `platform_custom_post_build` - to execute specific post build steps. For example, MPS3 and MPS4 board related script adds
                                     board specific `images.txt` file creation and calls bin generation command.
                                     Native profile related script compiles unit-tests.
 
@@ -288,7 +294,7 @@ The TensorFlow Lite models used in the use-cases implemented in this project can
 
 ### ExecuTorch models
 
-- [torchvision](https://docs.pytorch.org/vision/0.24/)
+- [torchvision](https://docs.pytorch.org/vision/0.28/)
   - [MobileNet V2](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.mobilenet_v2.html)
 
 - [Hugging Face - PyTorch Image Models (timm)](https://huggingface.co/timm) ( [Apache 2.0 License](https://github.com/huggingface/pytorch-image-models/blob/main/LICENSE) )
@@ -321,8 +327,8 @@ applications from sources and includes illustrating the build options and the pr
 The following graph of source modules aims to explain better intra-project code and build execution dependencies.
 ![intra-project dependencies](./media/build_graph.png)
 
-The project can be built for MPS3 FPGA, FVP emulating MPS3 and FVP emulating MPS4. Using default values for configuration parameters builds
-executable models that support the *Ethos-U* NPU.
+The project can be built for MPS3 FPGA, MPS4 FPGA, FVP emulating MPS3 and FVP emulating MPS4.
+Using default values for configuration parameters builds executable models that support the *Ethos-U* NPU.
 
 For further information, please see:
 
@@ -343,7 +349,6 @@ For further information, please see:
     - [Configuring the build for MPS4 SSE-315](./sections/building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring the build for MPS4 SSE-320](./sections/building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./sections/building.md#configuring-native-unit_test-build)
-    - [Configuring the build for simple-platform](./sections/building.md#configuring-the-build-for-simple_platform)
     - [Building the configured project](./sections/building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./sections/building.md#building-timing-adapter-with-custom-options)
   - [Add custom inputs](./sections/building.md#add-custom-inputs)

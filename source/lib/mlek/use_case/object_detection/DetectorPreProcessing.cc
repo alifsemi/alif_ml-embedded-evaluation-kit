@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or
  * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,7 +30,8 @@ namespace app {
         m_inputTensor{inputTensor}, m_rgb2Gray{rgb2Gray}, m_convertToInt8{convertToInt8}
     {}
 
-    bool DetectorPreProcess::DoPreProcess(const void* data, size_t inputSize) {
+    bool DetectorPreProcess::DoPreProcess(const void* data, size_t inputSize)
+    {
         if (data == nullptr) {
             printf_err("Data pointer is null");
         }
@@ -46,7 +47,9 @@ namespace app {
         debug("Input tensor populated \n");
 
         if (this->m_convertToInt8) {
-            image::ConvertUint8ToInt8(this->m_inputTensor->GetData(), this->m_inputTensor->Bytes());
+            image::ConvertUint8ToInt8(this->m_inputTensor->GetData(),
+                                      this->m_inputTensor->Bytes(),
+                                      this->m_inputTensor->GetQuantParams());
         }
 
         return true;

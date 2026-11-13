@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -139,15 +139,22 @@ int RETARGET(_write)(FILEHANDLE fh, const unsigned char* buf, unsigned int len, 
     case STDOUT:
     case STDERR: {
         int c;
+        unsigned int remaining = len;
 
-        while (len-- > 0) {
+        while (remaining-- > 0) {
             c = fputc(*buf++, stdout);
             if (c == EOF) {
                 return EOF;
             }
         }
 
+#if defined(__ARMCC_VERSION)
+        /* Arm _sys_write returns the number of bytes not written. */
         return 0;
+#else
+        /* GNU _write returns the number of bytes successfully written. */
+        return (int)len;
+#endif
     }
     default:
         return EOF;

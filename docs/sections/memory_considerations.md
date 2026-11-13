@@ -36,7 +36,7 @@ The Arm® *Ethos™-U* NPU requests these Read and Write transactions over the f
 ## Memory available on the target platform
 
 All embedded target platforms supported have platform specific header files that contain memory and other definitions.
-For example, MPS3 target header files can be found under the HAL sources' platform subdirectory and contains the
+For example, MPS3 and MPS4 target header files can be found under the HAL sources' platform subdirectory and contains the
 following definitions:
 
 ```c
@@ -156,7 +156,7 @@ Evaluation kit supports all the *Ethos-U* NPU memory modes:
 | *Ethos™-U85*   | `Dedicated_Sram`    | `Sram_Only`, `Shared_Sram`   |
 
 For further information on the default settings, please refer to: [default_vela.ini](../../scripts/vela/default_vela.ini).
-To use the other supported memory modes refer to [vela.ini](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/5.0.0/ethosu/config_files/Arm/vela.ini).
+To use the other supported memory modes refer to [vela.ini](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/5.2.0/ethosu/config_files/Arm/vela.ini).
 For *Ethos-U55* NPU, the system SRAM can also be used to store the neural network model along with the `tensor arena`.
 Vela supports optimizing the model for this configuration with its `Sram_Only` memory mode.
 Although the Vela settings for this configuration suggests that only AXI0 bus is used, when compiling the model

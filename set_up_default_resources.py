@@ -17,114 +17,94 @@
 """
 Script to set up default resources for ML Embedded Evaluation Kit.
 
-This script is a thin CLI wrapper around mlek_tools.setup.resources.
-Project-specific defaults (versions, paths) are defined here; all orchestration
-logic lives in the mlek_tools package.
+This script is a thin CLI wrapper around mlek_tools.orchestrate.set_up_resources.
+Project-specific defaults (versions, paths, NPU selections) are defined here;
+all orchestration logic lives in the mlek_tools package.
 """
 import itertools
-import logging
-import sys
 import typing
-import dataclasses
-from argparse import ArgumentParser, ArgumentTypeError, Action
-from enum import Enum
+from argparse import Action, ArgumentParser, ArgumentTypeError
 from pathlib import Path
 
-from scripts.py.mlek_tools.setup.npu_config import NpuConfigs, valid_npu_configs
-from scripts.py.mlek_tools.setup.python_venv import PythonEnv
-from scripts.py.mlek_tools.setup.resources import set_up_resources
-from scripts.py.mlek_tools.setup.setup_config import (
-    OptimizationConfig,
-    PathsConfig,
-    SetupConfig,
-    VelaConfig,
+from scripts.py.mlek_tools.config import MLFramework, parse_ml_framework
+from scripts.py.mlek_tools.config.download import DownloadConfig
+from scripts.py.mlek_tools.config.executorch import ExecuTorchConfig
+from scripts.py.mlek_tools.config.npu import (
+    Npu,
+    NpuConfig,
+    supported_npu_config_names,
 )
-from scripts.py.mlek_tools.setup.use_case import load_use_case_resources
-from scripts.py.mlek_tools.setup.util import get_md5sum_for_file
+from scripts.py.mlek_tools.config.optimizer import OptimizerConfig
+from scripts.py.mlek_tools.config.paths import PathsConfig
+from scripts.py.mlek_tools.config.tflite import TfliteConfig
+from scripts.py.mlek_tools.orchestrate import set_up_resources
+from scripts.py.mlek_tools.setup.logging_config import (
+    LOG_LEVELS,
+    LoggingOptions,
+    configure_logging,
+    parse_log_level,
+)
+from scripts.py.mlek_tools.setup.python_venv import PythonEnv
+from scripts.py.mlek_tools.setup.util import get_sha256sum_for_file
+from scripts.py.mlek_tools.use_case.model import load_use_case_resources
 
+# ── Project-specific constants ────────────────────────────────────────────────
 
-class MLFramework(Enum):
-    """Supported ML frameworks for resource setup."""
-    TENSORFLOW_LITE_MICRO = "tflm"
-    EXECUTORCH = "executorch"
-
-
-valid_ml_frameworks: typing.Set[str] = {f.value for f in MLFramework}
-
-VELA_VERSION = "5.0.0"
+VELA_VERSION = "5.2.0"
 INSTALL_VELA_FROM_SOURCE = False
 VELA_URL = "https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela.git"
 MIN_PYTHON_VERSION = (3, 10)
+
 # NPU processor IDs excluded from ExecuTorch optimisation due to toolchain limitations.
 EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS = ("U65",)
 
-# Default NPU configurations (always optimised when models are downloaded)
-default_npu_configs = NpuConfigs.create(
-    valid_npu_configs.get("ethos-u55", 128),
-    valid_npu_configs.get("ethos-u55", 256),
-    valid_npu_configs.get("ethos-u85", 256),
+# Default NPU configurations always optimised when models are downloaded.
+default_npu_configs = (
+    NpuConfig(Npu.ETHOS_U55, 128, Npu.ETHOS_U55.default_memory_mode),
+    NpuConfig(Npu.ETHOS_U55, 256, Npu.ETHOS_U55.default_memory_mode),
+    NpuConfig(Npu.ETHOS_U85, 256, Npu.ETHOS_U85.default_memory_mode),
 )
 
 _current_file_dir = Path(__file__).parent.resolve()
 default_use_case_resources_path = _current_file_dir / "resources" / "use_case_resources.json"
 default_requirements_path = _current_file_dir / "scripts" / "py" / "requirements.txt"
+default_executorch_requirements_path = (
+    _current_file_dir / "scripts" / "py" / "requirements-executorch.txt"
+)
 default_downloads_path = _current_file_dir / "resources_downloaded"
 default_executorch_path = _current_file_dir / "dependencies" / "executorch"
-_default_vela_config_file = _current_file_dir / "scripts" / "vela" / "ensemble_vela.ini"
+default_cmsis_nn_path = _current_file_dir / "dependencies" / "cmsis-nn"
+default_vela_config_file = _current_file_dir / "scripts" / "vela" / "ensemble_vela.ini"
 
-_vela_config = VelaConfig(
-    version=VELA_VERSION,
-    url=VELA_URL,
-    install_from_source=INSTALL_VELA_FROM_SOURCE,
-)
-
-
-# ---------------------------------------------------------------------------
-# Helpers that depend on project-specific defaults
-# ---------------------------------------------------------------------------
+# ── Helpers that depend on project-specific defaults ──────────────────────────
 
 def get_default_use_cases_names() -> typing.List[str]:
-    """
-    Get the names of all default use cases.
-
-    :return:    List of use case names as strings.
-    """
+    """Return the names of all use cases defined in the default resources file."""
     use_case_resources = load_use_case_resources([default_use_case_resources_path])
     return [uc.name for uc in use_case_resources]
 
 
-# ---------------------------------------------------------------------------
-# Public entry point (re-exported for build_default.py compatibility)
-# ---------------------------------------------------------------------------
+# ── Public entry point (re-exported for build_default.py compatibility) ───────
 
 def set_up_resources_with_defaults(
-        setup_config: SetupConfig,
-        optimization_config: OptimizationConfig,
+        download_config: DownloadConfig,
+        optimizer_config: OptimizerConfig,
+        tflite_config: TfliteConfig,
+        executorch_config: ExecuTorchConfig,
         paths_config: PathsConfig,
 ) -> Path:
-    """
-    Convenience wrapper that fills in project-specific defaults before calling
-    the library-level set_up_resources().
+    """Convenience wrapper that fills in the setup-script hash and project defaults.
 
-    :param setup_config:        General setup configuration.
-    :param optimization_config: Configuration related to model optimization.
-    :param paths_config:        Paths configuration. If vela_config_file is not set,
-                                the project default is used.
-    :return:                    Path to the root of the virtual environment.
+    :return: Path to the root of the virtual environment.
     """
-    # Fill in default vela_config_file if the caller left it unset.
-    if paths_config.vela_config_file is None:
-        paths_config = dataclasses.replace(
-            paths_config, vela_config_file=_default_vela_config_file
-        )
-
-    setup_script_hash = get_md5sum_for_file(Path(__file__).resolve())
+    setup_script_hash = get_sha256sum_for_file(Path(__file__).resolve())
 
     venv_path = set_up_resources(
-        setup_config=setup_config,
-        optimization_config=optimization_config,
+        download_config=download_config,
+        optimizer_config=optimizer_config,
+        tflite_config=tflite_config,
+        executorch_config=executorch_config,
         paths_config=paths_config,
-        vela_config=_vela_config,
         setup_script_hash=setup_script_hash,
         default_npu_configs=default_npu_configs,
         default_downloads_path=default_downloads_path,
@@ -133,32 +113,25 @@ def set_up_resources_with_defaults(
 
     python_env = PythonEnv(venv_path)
 
-    # Install the mlek_tools package itself as an editable install so that
-    # the entry-point scripts (gen-audio, gen-model-cpp, pte-ops-dump, …)
-    # are available inside the venv without needing sys.path manipulation.
+    # Install mlek_tools as an editable package so entry-point scripts
+    # (gen-audio, gen-model-cpp, pte-ops-dump, …) are available in the venv.
     python_env.pip_install_if_needed(
-        f"-e {_current_file_dir / 'scripts' / 'py'}",
-        installed_name="mlek-tools",
+        package_specs=["-e", _current_file_dir / "scripts" / "py"],
+        installed_names=["mlek-tools"],
     )
 
-    # Install CI test-suite dependencies (pytest, pytest-xdist) so that
-    # the tests/ci/ suite can be run directly from the activated venv.
+    # Install CI test-suite dependencies so tests/ci/ can run from the venv.
     _test_requirements = _current_file_dir / "tests" / "ci" / "requirements.txt"
     if _test_requirements.is_file():
-        python_env.pip_install_requirements(_test_requirements)
+        python_env.pip_install(requirements_files=_test_requirements)
 
     return venv_path
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
+# ── CLI ───────────────────────────────────────────────────────────────────────
 
 class HttpHeadersAction(Action):
-    """
-    Argparse action that collects HTTP headers into a
-    {domain: [(key, value), ...]} mapping.
-    """
+    """Argparse action that collects HTTP headers into a {domain: [(key, value), …]} mapping."""
 
     def __call__(self, _, namespace, values, option_string=None):
         domain, header = values
@@ -171,6 +144,21 @@ class HttpHeadersAction(Action):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    log_level_group = parser.add_mutually_exclusive_group()
+    log_level_group.add_argument(
+        "--log-level",
+        help=f"Minimum log level emitted to the console. Valid values: {sorted(LOG_LEVELS)}",
+        type=parse_log_level,
+        default=LOG_LEVELS["INFO"],
+        metavar="LEVEL",
+    )
+    log_level_group.add_argument(
+        "--verbose",
+        help="Enable DEBUG logging on the console.",
+        action="store_const",
+        const=LOG_LEVELS["DEBUG"],
+        dest="log_level",
+    )
     parser.add_argument(
         "--skip-vela",
         help="Do not run Vela optimizer on downloaded models.",
@@ -178,51 +166,58 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--ml-frameworks", "--ml-framework",
-        help=f"Specify the ML frameworks for which to set up resources. "
-             f"Valid values are: {valid_ml_frameworks}",
+        help=f"Specify the ML frameworks to set up resources for. "
+             f"Valid values: {', '.join(sorted(MLFramework.accepted_values()))}",
         nargs="+",
-        default=[MLFramework.TENSORFLOW_LITE_MICRO.value],
+        type=parse_ml_framework,
+        default=[MLFramework.TENSORFLOW_LITE_MICRO],
         action="store",
     )
     parser.add_argument(
+        "--additional-npu-config-name",
         "--additional-ethos-u-config-name",
-        help=f"Additional (non-default) configurations for Vela: {valid_npu_configs.names}",
+        help=f"Additional NPU configurations for Vela. "
+             f"Unqualified names select default memory modes: "
+             f"{supported_npu_config_names()}. "
+             f"Memory mode may also be specified: "
+             f"{supported_npu_config_names(memory_mode=True)}",
         default=[],
         action="append",
+        dest="additional_ethos_u_config_name",
     )
     parser.add_argument(
         "--use-case",
-        help=f"Only set up resources for the specified use case (can specify multiple times). "
-             f"Valid values are: {get_default_use_cases_names()}",
+        help=f"Only set up resources for the specified use case (repeatable). "
+             f"Valid values: {get_default_use_cases_names()}",
         default=[],
         action="append",
     )
     parser.add_argument(
         "--arena-cache-size",
-        help="Arena cache size in bytes (if overriding the defaults)",
+        help="Arena cache size in bytes (overrides the default).",
         type=int,
         default=0,
     )
     parser.add_argument(
         "--clean",
-        help="Clean the directory and optimize the downloaded resources",
+        help="Check existing resource metadata and remove stale resource directories before setup.",
         action="store_true",
     )
     parser.add_argument(
         "--parallel",
-        help="Number of threads to use for downloads and model optimisation",
+        help="Number of threads for downloads and model optimisation.",
         type=int,
         default=1,
     )
     parser.add_argument(
         "--requirements-file",
-        help="Path to requirements.txt file to install additional packages",
+        help="Path to a requirements.txt file with additional packages.",
         type=Path,
         default=default_requirements_path,
     )
     parser.add_argument(
         "--use-case-resources-file",
-        help="Path to a use case resources file",
+        help="Path to a use case resources JSON file.",
         type=Path,
         nargs="+",
         default=[],
@@ -230,7 +225,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--downloads-dir",
-        help="Path to downloaded model resources",
+        help="Directory for downloaded model resources.",
         type=Path,
         default=default_downloads_path,
     )
@@ -242,8 +237,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--http-header",
-        help="Specify HTTP Headers to set when downloading from a domain. "
-             "Example: --http-header my-internal-website.com 'Authorization: Bearer $TOKEN'",
+        help="HTTP header for a domain. "
+             "Example: --http-header my-site.com 'Authorization: Bearer $TOKEN'",
         type=str,
         metavar=("DOMAIN", "HEADER"),
         nargs=2,
@@ -259,39 +254,63 @@ if __name__ == "__main__":
     if not Path(parsed_args.requirements_file).is_file():
         raise ArgumentTypeError(f"Invalid requirements file: {parsed_args.requirements_file}")
 
-    logging.basicConfig(filename="log_build_default.log", level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+    configure_logging(
+        Path("log_build_default.log"),
+        LoggingOptions(
+            console_level=parsed_args.log_level,
+            file_mode="a",
+            show_thread=parsed_args.parallel > 1,
+        ),
+    )
 
-    ml_frameworks = valid_ml_frameworks \
-        if len(parsed_args.ml_frameworks) == 0 \
-        else valid_ml_frameworks.intersection(parsed_args.ml_frameworks)
+    ml_frameworks = set(parsed_args.ml_frameworks)
 
-    setup = SetupConfig(
-        run_vela_on_models=not parsed_args.skip_vela,
+    use_tflm = MLFramework.TENSORFLOW_LITE_MICRO in ml_frameworks
+    use_et = MLFramework.EXECUTORCH in ml_frameworks
+
+    use_case_resources_files = (
+        [default_use_case_resources_path]
+        if len(parsed_args.use_case_resources_file) == 0
+        else list(itertools.chain(*parsed_args.use_case_resources_file))
+    )
+
+    requirements_files = [parsed_args.requirements_file]
+    if use_et:
+        requirements_files.append(default_executorch_requirements_path)
+
+    download = DownloadConfig(
         use_case_names=parsed_args.use_case,
         check_clean_folder=parsed_args.clean,
-        set_up_executorch=MLFramework.EXECUTORCH.value in ml_frameworks,
-        set_up_tensorflow=MLFramework.TENSORFLOW_LITE_MICRO.value in ml_frameworks,
         parallel=parsed_args.parallel,
         http_headers=parsed_args.http_header,
-        executorch_excluded_npu_processor_ids=EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS,
     )
 
-    optimization = OptimizationConfig(
-        additional_npu_config_names=parsed_args.additional_ethos_u_config_name,
+    optimizer = OptimizerConfig(
+        vela_config_file=default_vela_config_file,
         arena_cache_size=parsed_args.arena_cache_size,
+        additional_npu_config_names=parsed_args.additional_ethos_u_config_name,
     )
 
-    use_case_resources_files = [default_use_case_resources_path] \
-        if len(parsed_args.use_case_resources_file) == 0 \
-        else list(itertools.chain(*parsed_args.use_case_resources_file))
+    tflite = TfliteConfig(
+        enabled=use_tflm,
+        run_vela=not parsed_args.skip_vela,
+        vela_version=VELA_VERSION,
+        vela_url=VELA_URL,
+        vela_install_from_source=INSTALL_VELA_FROM_SOURCE,
+    )
+
+    executorch = ExecuTorchConfig(
+        enabled=use_et,
+        run_lowering=not parsed_args.skip_vela,
+        executorch_path=parsed_args.executorch_path,
+        cmsis_nn_path=default_cmsis_nn_path,
+        excluded_npu_processor_ids=EXECUTORCH_EXCLUDED_NPU_PROCESSOR_IDS,
+    )
 
     paths = PathsConfig(
         use_case_resources_files=use_case_resources_files,
         downloads_dir=parsed_args.downloads_dir,
-        additional_requirements_file=parsed_args.requirements_file,
-        executorch_path=parsed_args.executorch_path,
-        vela_config_file=_default_vela_config_file,
+        requirements_files=requirements_files,
     )
 
-    set_up_resources_with_defaults(setup, optimization, paths)
+    set_up_resources_with_defaults(download, optimizer, tflite, executorch, paths)

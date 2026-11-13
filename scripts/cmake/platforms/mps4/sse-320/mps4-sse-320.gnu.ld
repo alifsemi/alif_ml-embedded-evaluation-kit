@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or
  * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -75,6 +75,12 @@ SECTIONS
   {
     KEEP(*(.vectors))
   } > BOOT AT > BOOT
+
+  .data.vtable_rw (NOLOAD):
+  {
+    . = ALIGN(0x800);
+    KEEP(*(.bss.NoInit.vtable_rw))
+  } > ITCM AT > ITCM
 
   .text.at_bram :
   {

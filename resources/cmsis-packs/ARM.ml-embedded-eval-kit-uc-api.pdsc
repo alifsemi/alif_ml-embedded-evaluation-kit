@@ -12,14 +12,15 @@
 
   <requirements>
     <packages>
-      <package name="tensorflow-lite-micro" vendor="tensorflow" version="1.25.2"/>
-      <package name="CMSIS" vendor="ARM" version="6.2.0"/>
-      <package name="CMSIS-DSP" vendor="ARM" version="1.16.2"/>
+      <package name="tensorflow-lite-micro" vendor="tensorflow" version="1.26.2"/>
+      <package name="CMSIS" vendor="ARM" version="6.3.0"/>
+      <package name="CMSIS-DSP" vendor="ARM" version="1.17.0"/>
       <package name="CMSIS-NN" vendor="ARM" version="7.0.0"/>
     </packages>
   </requirements>
 
   <releases>
+    <release date="2026-06-19" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.26.6.0.pack" version="26.6.0">26.06.0 release package</release>
     <release date="2026-02-11" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.1.pack" version="25.12.1">25.12.1 release package</release>
     <release date="2025-11-28" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.25.12.0.pack" version="25.12.0">25.12.0 release package</release>
     <release date="2024-09-24" url="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.24.8.0.pack" version="24.8.0">24.08.0 release package</release>
@@ -28,157 +29,176 @@
   </releases>
 
   <taxonomy>
-    <description Cclass="ML Eval Kit" doc="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/Readme.md">A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets.</description>
+    <description Cclass="Machine Learning" Cgroup="MLEK" doc="https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/README.md">A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets.</description>
   </taxonomy>
 
   <conditions>
+    <condition id="ml_framework_iface Condition">
+      <accept Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkImpl" Cvariant="TensorFlowLiteMicro" Cversion="2.0.0"/>
+      <accept Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkImpl" Cvariant="ExecuTorch" Cversion="2.0.0"/>
+    </condition>
+    <condition id="ml_framework_tflm Condition">
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="Log"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkInterface"/>
+      <require Cclass="Machine Learning" Cgroup="TensorFlow"/>
+    </condition>
+    <condition id="ml_framework_et Condition">
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="Log"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkInterface"/>
+      <require Cclass="Machine Learning" Cgroup="ExecuTorch"/>
+    </condition>
     <condition id="arm_math Condition">
       <require Cclass="CMSIS" Cgroup="DSP"/>
     </condition>
     <condition id="common_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="Math"/>
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="Log"/>
-    </condition>
-    <condition id="ml_framework_tflm Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="Machine Learning" Cgroup="TensorFlow"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="Math"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="Log"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkInterface"/>
     </condition>
     <condition id="ad_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="asr_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="img_class_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="kws_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="noise_reduction_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="object_detection_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
     <condition id="vww_api Condition">
-      <require Cclass="ML Eval Kit" Cgroup="Common" Csub="API"/>
-      <require Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM"/>
+      <require Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils"/>
     </condition>
   </conditions>
 
   <components>
-    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Log" Cversion="1.0.0">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="Log" Cversion="2.0.0">
       <description>Logging header-only utility</description>
       <files>
-        <file category="header" name="source/log/include/log_macros.h"/>
+        <file category="header" name="source/lib/mlek/log/log_macros.h"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="Math" Cversion="1.0.0" condition="arm_math Condition">
-      <description>Math function helpers dependent on CMSIS-DSP.</description>
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkInterface" Cversion="2.0.0" condition="ml_framework_iface Condition">
+      <description>ML framework API abstraction layer.</description>
       <files>
-        <file category="source" name="source/math/PlatformMath.cc"/>
-        <file category="include" name="source/log/include/"/>
-        <file category="include" name="source/math/include/"/>
+        <file category="header" name="source/lib/mlek/fwk/iface/Model.hpp"/>
+        <file category="header" name="source/lib/mlek/fwk/iface/Tensor.hpp"/>
+      </files>
+    </component>
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkImpl" Cvariant="TensorFlowLiteMicro" Cversion="2.0.0" condition="ml_framework_tflm Condition">
+      <description>ML framework implementation for TensorFlow Lite Micro.</description>
+      <files>
+        <file category="source" name="source/lib/mlek/fwk/tflm/AdModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/MicroMutableAllOpsResolver.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/MicroNetKwsModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/MobileNetModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/RNNoiseModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/TensorFlowLiteMicro.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/TestModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/TflmModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/TflmResourceVariables.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/TflmTensor.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/VisualWakeWordModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/Wav2LetterModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/tflm/YoloFastestModel.cc"/>
+        <file category="include" name="source/lib/"/>
       </files>
       <Pre_Include_Global_h>
 #define MLEK_LOG_ENABLE
 #define MLEK_LOG_LEVEL MLEK_LOG_LEVEL_INFO</Pre_Include_Global_h>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Common" Csub="API" Cversion="1.0.0" condition="common_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="FwkImpl" Cvariant="ExecuTorch" Cversion="2.0.0" condition="ml_framework_et Condition">
+      <description>ML framework implementation for ExecuTorch.</description>
+      <files>
+        <file category="source" name="source/lib/mlek/fwk/executorch/EtModel.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/executorch/EtModelAllocator.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/executorch/EtPal.cc"/>
+        <file category="source" name="source/lib/mlek/fwk/executorch/EtTensor.cc"/>
+        <file category="include" name="source/lib/"/>
+      </files>
+      <Pre_Include_Global_h>
+#define MLEK_LOG_ENABLE
+#define MLEK_LOG_LEVEL MLEK_LOG_LEVEL_INFO
+#define ML_FWK_TMP_MEM_SIZE 0x01000000</Pre_Include_Global_h>
+    </component>
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="Math" Cversion="2.0.0" condition="arm_math Condition">
+      <description>Math function helpers dependent on CMSIS-DSP.</description>
+      <files>
+        <file category="source" name="source/lib/mlek/math/PlatformMath.cc"/>
+        <file category="include" name="source/lib/"/>
+      </files>
+      <Pre_Include_Global_h>
+#define MLEK_LOG_ENABLE
+#define MLEK_LOG_LEVEL MLEK_LOG_LEVEL_INFO</Pre_Include_Global_h>
+    </component>
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="CommonUtils" Cversion="2.0.0" condition="common_api Condition">
       <description>Common API</description>
       <files>
-        <file category="source" name="source/application/api/common/source/Classifier.cc"/>
-        <file category="source" name="source/application/api/common/source/ImageUtils.cc"/>
-        <file category="source" name="source/application/api/common/source/MelSpectrogram.cc"/>
-        <file category="source" name="source/application/api/common/source/Mfcc.cc"/>
-        <file category="include" name="source/application/api/common/include/"/>
-        <file category="include" name="source/application/api/fwk/iface/"/>
+        <file category="source" name="source/lib/mlek/common/AudioRenderUtils.cc"/>
+        <file category="source" name="source/lib/mlek/common/Classifier.cc"/>
+        <file category="source" name="source/lib/mlek/common/ImageUtils.cc"/>
+        <file category="source" name="source/lib/mlek/common/MelSpectrogram.cc"/>
+        <file category="source" name="source/lib/mlek/common/Mfcc.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="ML Framework" Csub="TFLM" Cversion="1.0.0" condition="ml_framework_tflm Condition">
-      <description>ML framework API for TensorFlow Lite Micro.</description>
-      <files>
-        <file category="source" name="source/application/api/fwk/tflm/source/AdModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/MicroMutableAllOpsResolver.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/MicroNetKwsModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/MobileNetModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/RNNoiseModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/TensorFlowLiteMicro.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/TestModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/TflmModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/TflmTensor.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/VisualWakeWordModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/Wav2LetterModel.cc"/>
-        <file category="source" name="source/application/api/fwk/tflm/source/YoloFastestModel.cc"/>
-        <file category="include" name="source/application/api/fwk/tflm/include/"/>
-      </files>
-    </component>
-    <component Cclass="ML Eval Kit" Cgroup="Vibration" Csub="Anomaly detection" Cversion="1.0.0" condition="ad_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Anomaly detection" Cversion="2.0.0" condition="ad_api Condition">
       <description>Anomaly detection use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/ad/src/AdMelSpectrogram.cc"/>
-        <file category="source" name="source/application/api/use_case/ad/src/AdProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/ad/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/ad/AdMelSpectrogram.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/ad/AdProcessing.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Automatic speech recognition" Cversion="1.0.0" condition="asr_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Automatic speech recognition" Cversion="2.0.0" condition="asr_api Condition">
       <description>ASR use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/asr/src/AsrClassifier.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/ConformerMelSpectrogram.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/ConformerProcessing.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/OutputDecode.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterMfcc.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterPostprocess.cc"/>
-        <file category="source" name="source/application/api/use_case/asr/src/Wav2LetterPreprocess.cc"/>
-        <file category="include" name="source/application/api/use_case/asr/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/AsrClassifier.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/ConformerMelSpectrogram.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/ConformerProcessing.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/OutputDecode.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/Wav2LetterMfcc.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/Wav2LetterPostprocess.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/asr/Wav2LetterPreprocess.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Image classification" Cversion="1.0.0" condition="img_class_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Image classification" Cversion="2.0.0" condition="img_class_api Condition">
       <description>Image classification use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/img_class/src/ImgClassProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/img_class/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/img_class/ImgClassProcessing.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Keyword spotting" Cversion="1.0.0" condition="kws_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Keyword spotting" Cversion="2.0.0" condition="kws_api Condition">
       <description>KWS use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/kws/src/KwsClassifier.cc"/>
-        <file category="source" name="source/application/api/use_case/kws/src/KwsProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/kws/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/kws/KwsClassifier.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/kws/KwsProcessing.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Voice" Csub="Noise reduction" Cversion="1.0.0" condition="noise_reduction_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Noise reduction" Cversion="2.0.0" condition="noise_reduction_api Condition">
       <description>RNN Noise use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/noise_reduction/src/RNNoiseFeatureProcessor.cc"/>
-        <file category="source" name="source/application/api/use_case/noise_reduction/src/RNNoiseProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/noise_reduction/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/noise_reduction/RNNoiseFeatureProcessor.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/noise_reduction/RNNoiseProcessing.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Object detection" Cversion="1.0.0" condition="object_detection_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Object detection" Cversion="2.0.0" condition="object_detection_api Condition">
       <description>Object detection use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/object_detection/src/DetectorPostProcessing.cc"/>
-        <file category="source" name="source/application/api/use_case/object_detection/src/DetectorPreProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/object_detection/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/object_detection/DetectorPostProcessing.cc"/>
+        <file category="source" name="source/lib/mlek/use_case/object_detection/DetectorPreProcessing.cc"/>
       </files>
     </component>
-    <component Cclass="ML Eval Kit" Cgroup="Vision" Csub="Person detection" Cversion="1.0.0" condition="vww_api Condition">
+    <component Cclass="Machine Learning" Cgroup="MLEK" Csub="UseCase" Cvariant="Person detection" Cversion="2.0.0" condition="vww_api Condition">
       <description>Visual wake word use case API.</description>
       <files>
-        <file category="source" name="source/application/api/use_case/vww/src/VisualWakeWordProcessing.cc"/>
-        <file category="include" name="source/application/api/use_case/vww/include/"/>
+        <file category="source" name="source/lib/mlek/use_case/vww/VisualWakeWordProcessing.cc"/>
       </files>
     </component>
   </components>
 </package>
-

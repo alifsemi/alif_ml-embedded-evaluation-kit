@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,6 +26,7 @@ MEMORY
     BRAM  (rwx) : ORIGIN = 0x11000000, LENGTH = 0x00100000
     SRAM  (rwx) : ORIGIN = 0x31000000, LENGTH = 0x00200000
     DDR   (rwx) : ORIGIN = 0x70000000, LENGTH = 0x02000000
+    DDR_HEAP (rwx) : ORIGIN = 0x72000000, LENGTH = 0x000C0000
 
     /* Dynamic load regions declared for use by FVP only
      * These regions are mentioned in the CMake subsystem profile.
@@ -47,13 +48,15 @@ SECTIONS
         KEEP (*(SORT_BY_NAME(.init) SORT_BY_NAME(.init.*)))
 
         /**
-         * Any code that is not time sensitive can be excluded from here.
-         * This code is instead placed on BRAM. See comment in the BRAM
-         * section for details.
+         * Keep startup, platform, application, and runtime code in ITCM.
+         * Debug TFLM code is much larger than optimized code, so linked code
+         * from libtflu executes from BRAM and is loaded from DDR. This makes
+         * Debug builds slower; use Release for performance measurements.
          */
         *(EXCLUDE_FILE(*hal.c.obj
                        *_allocator*.o*
                        *flatbuffer*.o*
+                       *libtflu.a:*
                        *lcd*.obj
                        *timing_adapter.c.obj
                        *s4*.o*)
@@ -127,7 +130,9 @@ SECTIONS
         . = ALIGN (16);
     } > DDR AT > DDR
 
-    /* Read-write data */
+    /* The following BRAM sections execute in BRAM but form one contiguous
+     * load image in DDR for the startup copy from __data_source through
+     * __data_source_end. */
     .data.at_ddr :
     {
         . = ALIGN(16);
@@ -241,7 +246,8 @@ SECTIONS
     PROVIDE( end = __bss_end );
     PROVIDE( __bss_size = __bss_end - __bss_start );
 
-    /* Heap */
+    /* Preserve the full 768 KiB heap in dedicated DDR outside the ordinary
+     * 32 MiB image region. It is NOLOAD and therefore not copied at startup. */
     .heap (NOLOAD) :
     {
         . = ALIGN(8);
@@ -249,8 +255,12 @@ SECTIONS
         . = . + __HEAP_SIZE;
         . = ALIGN(8);
         PROVIDE(__heap_end = .);
-    } > BRAM
+    } > DDR_HEAP
 
+    ASSERT(__heap_start >= ORIGIN(DDR_HEAP), "DDR heap starts below DDR_HEAP")
+    ASSERT(__heap_end <= ORIGIN(DDR_HEAP) + LENGTH(DDR_HEAP), "DDR heap overflow")
+    ASSERT(ORIGIN(DDR_HEAP) >= ORIGIN(DDR) + LENGTH(DDR),
+           "DDR_HEAP overlaps ordinary DDR")
     PROVIDE(__head_size = __heap_end - __heap_start);
 
 
