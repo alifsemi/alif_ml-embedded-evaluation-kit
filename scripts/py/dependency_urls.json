@@ -13,5 +13,5 @@
   "Arm-2D": "https://github.com/ARM-software/Arm-2D/archive/refs/tags/v1.2.1.zip",
   "cortex-dfp": "https://github.com/ARM-software/Cortex_DFP/archive/cd38dbb875f7195e70460eee51faa7ab180c24a1.zip",
   "tensorflow": "https://github.com/tensorflow/tflite-micro/archive/90b983c2b3f1480642e040bbd2ddb37b998f3424.zip",
-  "executorch": "https://github.com/pytorch/executorch/archive/refs/tags/v1.1.0.zip"
+  "executorch": "https://github.com/pytorch/executorch/archive/refs/tags/v1.5.1.zip"
 }
