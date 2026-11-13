@@ -133,8 +133,30 @@ function(print_useroptions)
     message(STATUS "--------------------------------------------------------------------------------------------------")
 endfunction()
 
-# Function to resolve the linker control file path from the platform default,
-# optional per-target override, and optional global override.
+# Resolve the linker control file used to link a target.
+#
+# Arguments:
+#   output_var
+#     Name of the variable that receives the absolute path in PARENT_SCOPE.
+#   default_path
+#     Common linker control file selected by the platform and toolchain.
+#   target_override_path
+#     Optional exact per-target override. Relative paths use CMAKE_SOURCE_DIR.
+#
+# Inputs:
+#   LINKER_SCRIPT_OVERRIDE_PATH
+#     Optional exact global override, used when there is no target override.
+#   CMAKE_BUILD_TYPE
+#     Selects a lowercase sibling directory beside the common file.
+#
+# Outputs:
+#   output_var
+#     The target override, global override, existing build-type variant, or
+#     common file, in that order.
+#
+# Examples:
+#   A Debug build with a default path of platform/board.llvm.ld selects
+#   platform/debug/board.llvm.ld when that file exists.
 function(resolve_linker_script_path output_var default_path target_override_path)
     if (DEFINED target_override_path
             AND NOT "${target_override_path}" STREQUAL ""
@@ -149,10 +171,25 @@ function(resolve_linker_script_path output_var default_path target_override_path
             ABSOLUTE
             BASE_DIR ${CMAKE_SOURCE_DIR})
     else()
-        get_filename_component(linker_script_path
+        get_filename_component(common_linker_script_path
             "${default_path}"
             ABSOLUTE
             BASE_DIR ${CMAKE_SOURCE_DIR})
+
+        string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type_directory)
+        get_filename_component(common_linker_script_directory
+            "${common_linker_script_path}" DIRECTORY)
+        get_filename_component(common_linker_script_name
+            "${common_linker_script_path}" NAME)
+        set(build_type_linker_script_path
+            "${common_linker_script_directory}/${build_type_directory}/${common_linker_script_name}")
+
+        if (NOT "${build_type_directory}" STREQUAL ""
+                AND EXISTS "${build_type_linker_script_path}")
+            set(linker_script_path "${build_type_linker_script_path}")
+        else()
+            set(linker_script_path "${common_linker_script_path}")
+        endif()
     endif()
 
     if (NOT EXISTS "${linker_script_path}")

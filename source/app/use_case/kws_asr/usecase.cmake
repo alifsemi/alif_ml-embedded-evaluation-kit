@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -17,8 +17,9 @@
 #----------------------------------------------------------------------------
 
 # Specify the ML frameworks the use case supports
-set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro")
-if (NOT ${use_case}_ML_FRAMEWORK STREQUAL ${ML_FRAMEWORK})
+set(${use_case}_ML_FRAMEWORK
+    "${ML_FRAMEWORK_TFLM}")
+if (NOT ${ML_FRAMEWORK} IN_LIST ${use_case}_ML_FRAMEWORK)
     set(${use_case}_supports_${ML_FRAMEWORK} OFF)
     return()
 endif ()
@@ -82,8 +83,8 @@ USER_OPTION(${use_case}_MODEL_SCORE_THRESHOLD_ASR "Specify the score threshold [
     STRING)
 
 if (ETHOS_U_NPU_ENABLED)
-    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
-    set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+    set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/kws_micronet_m_vela_${ETHOS_U_NPU_CONFIG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.tflite)
+    set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.tflite)
 else()
     set(DEFAULT_MODEL_PATH_KWS      ${DEFAULT_MODEL_DIR}/kws_micronet_m.tflite)
     set(DEFAULT_MODEL_PATH_ASR      ${DEFAULT_MODEL_DIR}/wav2letter_pruned_int8.tflite)

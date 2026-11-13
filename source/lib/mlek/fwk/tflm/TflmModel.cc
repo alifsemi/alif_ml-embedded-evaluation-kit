@@ -16,6 +16,7 @@
  */
 #include "mlek/fwk/tflm/TflmModel.hpp"
 #include "mlek/fwk/iface/Model.hpp"
+#include "mlek/fwk/tflm/TflmResourceVariables.hpp"
 #include "mlek/fwk/tflm/TflmTensor.hpp"
 #include "mlek/log/log_macros.h"
 
@@ -26,78 +27,78 @@
 
 namespace arm::app::fwk::tflm {
 namespace {
-/**
- * @brief   Infer Arm Ethos-U NPU memory mode from Ethos-U operator inputs.
- * @param[in] model     Pointer the the model object.
- * @return  Memory mode string if detected, or empty string otherwise.
- */
-std::string InferNpuMemoryModeFromEthosUOp(const tflite::Model* model)
-{
-    if (!model || !model->subgraphs() || model->subgraphs()->size() == 0 ||
-        !model->operator_codes()) {
+    /**
+     * @brief   Infer Arm Ethos-U NPU memory mode from Ethos-U operator inputs.
+     * @param[in] model     Pointer the the model object.
+     * @return  Memory mode string if detected, or empty string otherwise.
+     */
+    std::string InferNpuMemoryModeFromEthosUOp(const tflite::Model* model)
+    {
+        if (!model || !model->subgraphs() || model->subgraphs()->size() == 0 ||
+            !model->operator_codes()) {
+            return {};
+        }
+
+        const tflite::SubGraph* subgraph = model->subgraphs()->Get(0);
+        if (!subgraph || !subgraph->operators()) {
+            return {};
+        }
+
+        int ethos_u_opcode = -1;
+        for (uint32_t i = 0; i < model->operator_codes()->size(); ++i) {
+            const tflite::OperatorCode* opcode = model->operator_codes()->Get(i);
+            if (!opcode || opcode->builtin_code() != tflite::BuiltinOperator_CUSTOM) {
+                continue;
+            }
+            const auto* custom = opcode->custom_code();
+            if (custom && (std::strcmp(custom->c_str(), "ethos-u") == 0)) {
+                ethos_u_opcode = static_cast<int>(i);
+                break;
+            }
+        }
+
+        if (ethos_u_opcode < 0) {
+            return {};
+        }
+
+        for (uint32_t i = 0; i < subgraph->operators()->size(); ++i) {
+            const tflite::Operator* op = subgraph->operators()->Get(i);
+            if (!op || op->opcode_index() != ethos_u_opcode) {
+                continue;
+            }
+            const auto* inputs = op->inputs();
+            if (!inputs || inputs->size() <= 3) {
+                continue;
+            }
+
+            /* Vela places tensor arena at index 2 and fast scratch buffer at index 3. */
+            const int32_t arena_idx   = inputs->Get(2);
+            const int32_t scratch_idx = inputs->Get(3);
+            if (arena_idx < 0 || scratch_idx < 0) {
+                continue;
+            }
+
+            const tflite::Tensor* arena   = subgraph->tensors()->Get(arena_idx);
+            const tflite::Tensor* scratch = subgraph->tensors()->Get(scratch_idx);
+            if (!arena || !scratch) {
+                continue;
+            }
+
+            const auto arena_shape   = arena->shape();
+            const auto scratch_shape = scratch->shape();
+            if (!arena_shape || !scratch_shape || arena_shape->size() < 1 ||
+                scratch_shape->size() < 1 || arena_shape->Get(0) < 1) {
+                continue;
+            }
+
+            if (arena_shape->Get(0) == scratch_shape->Get(0)) {
+                return "Sram_Only/Shared_Sram";
+            }
+            return "Dedicated_Sram";
+        }
+
         return {};
     }
-
-    const tflite::SubGraph* subgraph = model->subgraphs()->Get(0);
-    if (!subgraph || !subgraph->operators()) {
-        return {};
-    }
-
-    int ethos_u_opcode = -1;
-    for (uint32_t i = 0; i < model->operator_codes()->size(); ++i) {
-        const tflite::OperatorCode* opcode = model->operator_codes()->Get(i);
-        if (!opcode || opcode->builtin_code() != tflite::BuiltinOperator_CUSTOM) {
-            continue;
-        }
-        const auto* custom = opcode->custom_code();
-        if (custom && (std::strcmp(custom->c_str(), "ethos-u") == 0)) {
-            ethos_u_opcode = static_cast<int>(i);
-            break;
-        }
-    }
-
-    if (ethos_u_opcode < 0) {
-        return {};
-    }
-
-    for (uint32_t i = 0; i < subgraph->operators()->size(); ++i) {
-        const tflite::Operator* op = subgraph->operators()->Get(i);
-        if (!op || op->opcode_index() != ethos_u_opcode) {
-            continue;
-        }
-        const auto* inputs = op->inputs();
-        if (!inputs || inputs->size() <= 3) {
-            continue;
-        }
-
-        /* Vela places tensor arena at index 2 and fast scratch buffer at index 3. */
-        const int32_t arena_idx = inputs->Get(2);
-        const int32_t scratch_idx = inputs->Get(3);
-        if (arena_idx < 0 || scratch_idx < 0) {
-            continue;
-        }
-
-        const tflite::Tensor* arena = subgraph->tensors()->Get(arena_idx);
-        const tflite::Tensor* scratch = subgraph->tensors()->Get(scratch_idx);
-        if (!arena || !scratch) {
-            continue;
-        }
-
-        const auto arena_shape = arena->shape();
-        const auto scratch_shape = scratch->shape();
-        if (!arena_shape || !scratch_shape || arena_shape->size() < 1 ||
-            scratch_shape->size() < 1 || arena_shape->Get(0) < 1) {
-            continue;
-        }
-
-        if (arena_shape->Get(0) == scratch_shape->Get(0)) {
-            return "Sram_Only/Shared_Sram";
-        }
-        return "Dedicated_Sram";
-    }
-
-    return {};
-}
 } /* anonymous namespace */
 
 TflmModel::TflmModel() {}
@@ -163,8 +164,19 @@ bool TflmModel::Init(iface::MemoryRegion& computeBuffer,
         debug("Using existing allocator @ 0x%p\n", this->m_backendData.m_pAllocator);
     }
 
-    this->m_backendData.m_pInterpreter = std::make_unique<tflite::MicroInterpreter>(
-        this->m_backendData.m_pModel, this->GetOpResolver(), this->m_backendData.m_pAllocator);
+    const int resourceVariableCount = CountResourceVariables(this->m_backendData.m_pModel);
+    tflite::MicroResourceVariables* resourceVariables =
+        CreateResourceVariables(resourceVariableCount, this->m_backendData.m_pAllocator);
+    if (resourceVariableCount > 0 && !resourceVariables) {
+        printf_err("Failed to create resource variables\n");
+        return false;
+    }
+
+    this->m_backendData.m_pInterpreter =
+        std::make_unique<tflite::MicroInterpreter>(this->m_backendData.m_pModel,
+                                                   this->GetOpResolver(),
+                                                   this->m_backendData.m_pAllocator,
+                                                   resourceVariables);
 
     if (!this->m_backendData.m_pInterpreter) {
         printf_err("Failed to allocate interpreter\n");
@@ -310,9 +322,7 @@ void TflmModel::LogInterpreterInfo()
 }
 
 bool TflmModel::IsInited() const
-{
-    return this->m_inited;
-}
+{ return this->m_inited; }
 
 bool TflmModel::IsDataSigned() const
 {
@@ -382,9 +392,7 @@ size_t TflmModel::GetNumOutputs() const
 }
 
 iface::TensorType TflmModel::GetType() const
-{
-    return this->m_type;
-}
+{ return this->m_type; }
 
 std::vector<size_t> TflmModel::GetInputShape(size_t index) const
 {
@@ -404,19 +412,13 @@ std::vector<size_t> TflmModel::GetOutputShape(size_t index) const
 
 /** @brief   Gets a pointer to the backend's compute buffer. */
 const iface::MemoryRegion& TflmModel::GetComputeBuffer() const
-{
-    return std::ref(this->m_computeBuffer);
-}
+{ return std::ref(this->m_computeBuffer); }
 
 /** @brief      Gets the pointer to the NN model data array. */
 const iface::MemoryRegion& TflmModel::GetModelBuffer() const
-{
-    return std::ref(this->m_modelBuffer);
-}
+{ return std::ref(this->m_modelBuffer); }
 
 const TflmBackendData& TflmModel::GetBackendData() const
-{
-    return std::ref(this->m_backendData);
-}
+{ return std::ref(this->m_backendData); }
 
 } /* namespace arm::app::fwk::tflm */

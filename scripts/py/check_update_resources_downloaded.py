@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-#  SPDX-FileCopyrightText:  Copyright 2022-2023 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText:  Copyright 2022-2023, 2026 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,42 +20,31 @@ Contains methods to check if the downloaded resources need to be refreshed
 import hashlib
 import json
 import sys
-import typing
 from argparse import ArgumentParser
 from pathlib import Path
 
 
-def get_md5sum_for_file(
-        filepath: typing.Union[str, Path]
-) -> str:
-    """
-    Function to calculate md5sum for contents of a given file.
+def get_sha256sum_for_file(filepath: Path) -> str:
+    """Compute the SHA-256 hex digest of a file's contents.
 
-    Parameters:
-    ----------
-    filepath (string):  Path to the required file.
-
-    Returns:
-    -------
-    Hex digest represented as string.
+    :param filepath:  Path to the file.
+    :return:          Hex string of the SHA-256 digest.
     """
-    md5_sum = hashlib.md5()
+    sha256 = hashlib.sha256()
     with open(filepath, mode='rb') as f:
-        buf = f.read()
-        md5_sum.update(buf)
-    return md5_sum.hexdigest()
+        for chunk in iter(lambda: f.read(8192), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()
 
 
 def check_update_resources_downloaded(
         resource_downloaded_dir: str, set_up_script_path: str
-):
-    """
-    Function that check if the resources downloaded need to be refreshed.
+) -> int:
+    """Check if the downloaded resources need to be refreshed.
 
-    Parameters:
-    ----------
-    resource_downloaded_dir (string):  Specifies the path to resources_downloaded folder.
-    set_up_script_path (string):       Specifies the path to set_up_default_resources.py file.
+    :param resource_downloaded_dir:  Path to resources_downloaded folder.
+    :param set_up_script_path:       Path to set_up_default_resources.py file.
+    :return:                         Status code for the CMake caller.
     """
 
     metadata_file_path = Path(resource_downloaded_dir) / "resources_downloaded_metadata.json"
@@ -63,21 +53,21 @@ def check_update_resources_downloaded(
         with open(metadata_file_path, encoding="utf8") as metadata_json:
             metadata_dict = json.load(metadata_json)
 
-        md5_key = 'set_up_script_md5sum'
-        set_up_script_md5sum_metadata = ''
+        sha256_key = 'set_up_script_sha256sum'
+        set_up_script_sha256sum_metadata = ''
 
-        if md5_key in metadata_dict.keys():
-            set_up_script_md5sum_metadata = metadata_dict["set_up_script_md5sum"]
+        if sha256_key in metadata_dict:
+            set_up_script_sha256sum_metadata = metadata_dict[sha256_key]
 
-        set_up_script_md5sum_current = get_md5sum_for_file(set_up_script_path)
+        set_up_script_sha256sum_current = get_sha256sum_for_file(Path(set_up_script_path))
 
-        if set_up_script_md5sum_current == set_up_script_md5sum_metadata:
+        if set_up_script_sha256sum_current == set_up_script_sha256sum_metadata:
             return 0
 
         # Return code 1 if the resources need to be refreshed.
         print('Error: hash mismatch!')
-        print(f'Metadata: {set_up_script_md5sum_metadata}')
-        print(f'Current : {set_up_script_md5sum_current}')
+        print(f'Metadata: {set_up_script_sha256sum_metadata}')
+        print(f'Current : {set_up_script_sha256sum_current}')
         return 1
 
     # Return error code 2 if the file doesn't exist.

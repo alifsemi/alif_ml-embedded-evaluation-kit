@@ -14,19 +14,38 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Orchestration for Python environment setup, model resource downloads, and optimisation."""
-from .npu_config import NpuConfig, NpuConfigs, valid_npu_configs, get_default_npu_config_from_name
-from .python_venv import PythonEnv, set_up_python_venv
-from .resources import set_up_resources
-from .setup_config import SetupConfig, OptimizationConfig, PathsConfig, VelaConfig, SetupContext
-from .use_case import UseCase, ExecutorchResource, load_use_case_resources
-from .util import call_command, download_file, get_md5sum_for_file, remove_tree_dir
+"""Python environment setup, installation helpers, and shared utilities."""
+from mlek_tools.setup.install import install_executorch_project, setup_executorch, setup_vela
+from mlek_tools.setup.logging_config import (
+    LOG_LEVELS,
+    ColourFormatter,
+    LoggingOptions,
+    configure_logging,
+    parse_log_level,
+)
+from mlek_tools.setup.python_venv import PythonEnv, set_up_python_venv
+from mlek_tools.setup.util import (
+    call_command,
+    download_file,
+    get_sha256sum_for_file,
+    remove_tree_dir,
+    verify_file_sha256,
+)
 
 __all__ = [
-    "NpuConfig", "NpuConfigs", "valid_npu_configs", "get_default_npu_config_from_name",
-    "PythonEnv", "set_up_python_venv",
-    "set_up_resources",
-    "SetupConfig", "OptimizationConfig", "PathsConfig", "VelaConfig", "SetupContext",
-    "UseCase", "ExecutorchResource", "load_use_case_resources",
-    "call_command", "download_file", "get_md5sum_for_file", "remove_tree_dir",
+    "PythonEnv",
+    "ColourFormatter",
+    "LoggingOptions",
+    "LOG_LEVELS",
+    "call_command",
+    "configure_logging",
+    "download_file",
+    "get_sha256sum_for_file",
+    "install_executorch_project",
+    "remove_tree_dir",
+    "set_up_python_venv",
+    "setup_executorch",
+    "setup_vela",
+    "parse_log_level",
+    "verify_file_sha256",
 ]

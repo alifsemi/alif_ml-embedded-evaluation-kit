@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/main/tools/packgen/schema/manifest.schema.json
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#  SPDX-FileCopyrightText: Copyright 2022-2026 Arm Limited and/or
+#  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,8 @@
 #           -o <path-to>/ml-embedded-eval-kit-pack              \ # Where to generate the output
 #           -i <path-to>/tensorflow.tensorflow-lite-micro.pdsc  \ # Tensorflow packs' PDSC file
 #           -i <path-to>/ARM.CMSIS.pdsc                         \ # CMSIS packs' PDSC file
+#           -i <path-to>/ARM.CMSIS-NN.pdsc                      \ # CMSIS packs' PDSC file
+#           -i <path-to>/ARM.CMSIS-DSP.pdsc                     \ # CMSIS packs' PDSC file
 #
 # The PDSC files are the ones extracted from the downloaded packs (and is optional).
 # packgen and packchk must be installed. See https://github.com/Open-CMSIS-Pack/devtools
@@ -37,7 +40,7 @@
 #
 build:
   - name: "build-dir"
-    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON -DML_FRAMEWORK=TensorFlowLiteMicro"
+    options: "cmake -DCMSIS_PACK_GEN_FLOW=ON"
 
 packs:
   - name: "ml-embedded-eval-kit-uc-api"
@@ -48,12 +51,16 @@ packs:
 
     requirements:
       packages:
-        - attributes: { vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.25.2" }
-        - attributes: { vendor: "ARM", name: "CMSIS", version: "6.2.0" }
-        - attributes: { vendor: "ARM", name: "CMSIS-DSP", version: "1.16.2" }
+        - attributes: { vendor: "tensorflow", name: "tensorflow-lite-micro", version: "1.26.2" }
+        - attributes: { vendor: "ARM", name: "CMSIS", version: "6.3.0" }
+        - attributes: { vendor: "ARM", name: "CMSIS-DSP", version: "1.17.0" }
         - attributes: { vendor: "ARM", name: "CMSIS-NN", version: "7.0.0" }
 
     releases:
+      - version: "26.6.0"
+        date: "2026-06-19"
+        description: "26.06.0 release package"
+        url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.26.6.0.pack"
       - version: "25.12.1"
         date: "2026-02-11"
         description: "25.12.1 release package"
@@ -76,77 +83,98 @@ packs:
         url: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/raw/main/resources/cmsis-packs/ARM.ml-embedded-eval-kit-uc-api.22.8.0-Beta.pack"
 
     taxonomy:
-      - attributes: { Cclass: "ML Eval Kit", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/README.md" }
+      - attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", doc: "https://gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit/-/blob/main/README.md" }
         description: "A collection of end-to-end examples provided by Arm for Arm Cortex-M CPU and Arm Ethos-U NPU targets."
 
     components:
       - name: log
         target: log
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Log", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "Log", Cversion: "2.0.0" }
         description: "Logging header-only utility"
         files:
-          - name: "source/log/include/log_macros.h"
+          - name: "source/lib/mlek/log/log_macros.h"
             attributes: { category: header }
+
+      - name: ml_framework_iface
+        target: ml_framework_iface
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "FwkInterface", Cversion: "2.0.0" }
+        description: "ML framework API abstraction layer."
+        files:
+          - name: "source/lib/mlek/fwk/iface/Model.hpp"
+            attributes: { category: header }
+          - name: "source/lib/mlek/fwk/iface/Tensor.hpp"
+            attributes: { category: header }
+        conditions:
+          - accept: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "FwkImpl", Cvariant: "TensorFlowLiteMicro", Cversion: "2.0.0" }
+          - accept: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "FwkImpl", Cvariant: "ExecuTorch", Cversion: "2.0.0" }
+
+      - name: ml_framework_tflm
+        target: ml_framework_tflm
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "FwkImpl", Cvariant: "TensorFlowLiteMicro", Cversion: "2.0.0" }
+        description: "ML framework implementation for TensorFlow Lite Micro."
+        dependencies: ["log", "ml_framework_iface"]
+        conditions:
+          - require: { Cclass: "Machine Learning", Cgroup: "TensorFlow" }
+
+      - name: ml_framework_et
+        target: ml_framework_et
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "FwkImpl", Cvariant: "ExecuTorch", Cversion: "2.0.0" }
+        description: "ML framework implementation for ExecuTorch."
+        dependencies: ["log", "ml_framework_iface"]
+        conditions:
+          - require: { Cclass: "Machine Learning", Cgroup: "ExecuTorch" }
 
       - name: arm_math
         target: arm_math
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "Math", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "Math", Cversion: "2.0.0" }
         description: "Math function helpers dependent on CMSIS-DSP."
         conditions:
           - require: { Cclass: "CMSIS", Cgroup: "DSP" }
 
       - name: common_api
         target: common_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Common", Csub: "API", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "CommonUtils", Cversion: "2.0.0" }
         description: "Common API"
-        dependencies: [ "arm_math", "log" ]
-
-      - name: ml_framework_tflm
-        target: ml_framework_tflm
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "ML Framework", Csub: "TFLM", Cversion: "1.0.0" }
-        description: "ML framework API for TensorFlow Lite Micro."
-        dependencies: common_api
-        conditions:
-          - require: { Cclass: "Machine Learning", Cgroup: "TensorFlow" }
+        dependencies: [ "arm_math", "log", "ml_framework_iface" ]
 
       - name: ad_api
         target: ad_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vibration", Csub: "Anomaly detection", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Anomaly detection", Cversion: "2.0.0" }
         description: "Anomaly detection use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: asr_api
         target: asr_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Automatic speech recognition", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Automatic speech recognition", Cversion: "2.0.0" }
         description: "ASR use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: img_class_api
         target: img_class_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Image classification", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Image classification", Cversion: "2.0.0" }
         description: "Image classification use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: kws_api
         target: kws_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Keyword spotting", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Keyword spotting", Cversion: "2.0.0" }
         description: "KWS use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: noise_reduction_api
         target: noise_reduction_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Voice", Csub: "Noise reduction", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Noise reduction", Cversion: "2.0.0" }
         description: "RNN Noise use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: object_detection_api
         target: object_detection_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Object detection", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Object detection", Cversion: "2.0.0" }
         description: "Object detection use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]
 
       - name: vww_api
         target: vww_api
-        attributes: { Cclass: "ML Eval Kit", Cgroup: "Vision", Csub: "Person detection", Cversion: "1.0.0" }
+        attributes: { Cclass: "Machine Learning", Cgroup: "MLEK", Csub: "UseCase", Cvariant: "Person detection", Cversion: "2.0.0" }
         description: "Visual wake word use case API."
-        dependencies: [ common_api, ml_framework_tflm ]
+        dependencies: [ "common_api" ]

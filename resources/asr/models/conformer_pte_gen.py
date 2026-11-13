@@ -26,6 +26,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import soundfile as sf
+# This resource-local lowering script is linted without the ExecuTorch/Torch
+# optional packages installed. They are installed before the script is executed.
+# pylint: disable=import-error
 import torch
 from conformer import Conformer
 from executorch.backends.arm.ethosu import EthosUPartitioner, EthosUCompileSpec
@@ -79,6 +82,12 @@ class TargetConfig:
     target_name: str
     system_config: str
     memory_mode: str
+    extra_vela_flags: typing.Tuple[str, ...] = ()
+
+    @property
+    def delegate_target_suffix(self) -> str:
+        """ExecuTorch delegated output suffix for this target."""
+        return f"arm_delegate_{self.target_name}_{self.memory_mode}"
 
 
 def preprocess_audio(audio: Path | str) -> torch.Tensor:
@@ -176,7 +185,11 @@ def quantize(
         system_config=cfg.system_config,
         memory_mode=cfg.memory_mode,
         config_ini=config_ini,
-        extra_flags=["--output-format=raw", "--debug-force-regor"],
+        extra_flags=[
+            "--output-format=raw",
+            "--debug-force-regor",
+            *cfg.extra_vela_flags,
+        ],
     )
     quantizer = EthosUQuantizer(compile_spec)
     partitioner = EthosUPartitioner(compile_spec)
@@ -214,7 +227,9 @@ def generate_pte(
     model_name = Path(checkpoint_path).name.split('.')[0]
 
     if cfg.target_name.startswith("ethos-u"):
-        output_model_name = f"{model_name}_arm_delegate_{cfg.target_name}.pte"
+        output_model_name = (
+            f"{model_name}_{cfg.delegate_target_suffix}.pte"
+        )
         exported_program, partitioner = quantize(
             graph_module,
             example_inputs,
@@ -287,6 +302,14 @@ if __name__ == "__main__":
         default="Arm/vela.ini",
         help="Specify custom vela configuration file (vela.ini)",
     )
+    parser.add_argument(
+        "--extra-vela-flag",
+        "--vela-compiler-flag",
+        dest="extra_vela_flags",
+        action="append",
+        default=[],
+        help="Extra Vela flag forwarded to EthosUCompileSpec.extra_flags.",
+    )
     args, _ = parser.parse_known_args()
 
     if not str(args.model_name).endswith(".pt"):
@@ -295,6 +318,7 @@ if __name__ == "__main__":
     generate_pte(checkpoint_path=args.model_name,
                  cfg=TargetConfig(target_name=args.target,
                                   system_config=args.system_config,
-                                  memory_mode=args.memory_mode),
+                                  memory_mode=args.memory_mode,
+                                  extra_vela_flags=tuple(args.extra_vela_flags)),
                  config_ini=args.config,
                  output=args.output)

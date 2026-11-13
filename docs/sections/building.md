@@ -21,7 +21,6 @@
     - [Configuring the build for MPS4 SSE-315](./building.md#configuring-the-build-for-mps4-sse_315)
     - [Configuring the build for MPS4 SSE-320](./building.md#configuring-the-build-for-mps4-sse_320)
     - [Configuring native unit-test build](./building.md#configuring-native-unit_test-build)
-    - [Configuring the build for simple-platform](./building.md#configuring-the-build-for-simple_platform)
     - [Building with CMake Presets](./building.md#building-with-cmake-presets)
     - [Building the configured project](./building.md#building-the-configured-project)
   - [Building timing adapter with custom options](./building.md#building-timing-adapter-with-custom-options)
@@ -188,7 +187,6 @@ The build parameters are:
   - `mps3` (default)
   - `mps4`
   - `native`
-  - `simple_platform`
 
 - `TARGET_SUBSYSTEM`: The target platform subsystem. Specifies the design implementation for the deployment target.
   - For `mps3` target these sub-systems are available:
@@ -209,10 +207,23 @@ The build parameters are:
 - `<use_case>_LINKER_SCRIPT_OVERRIDE_PATH`: Optional linker control file override for a specific use case. This is set
   in the use case CMake logic and takes precedence over `LINKER_SCRIPT_OVERRIDE_PATH` for that application target.
 
-- `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Valid options are `TensorFlowLiteMicro` and
-  `ExecuTorch`. Default value is `TensorFlowLiteMicro`. This option will configure the framework build steps and
-  include them in the binary tree. All use case examples should advertise which framework they support and only
-  the examples that support the framework selected will be included in the binary tree.
+  When neither override is set, CMake first looks for a build-type-specific linker control file. The variant must have
+  the same filename as the common file and be in a lowercase build-type subdirectory beside it. For example, a Debug
+  build whose common file is `sse-300/mps3-sse-300.llvm.ld` uses
+  `sse-300/debug/mps3-sse-300.llvm.ld` when it exists. If the variant does not exist, CMake falls back to the common
+  file. This convention applies to LLVM and GNU linker scripts and Arm Compiler scatter files. Explicit target and
+  global overrides are exact selections and are not searched for build-type variants. Add or remove a variant by
+  reconfiguring the build so CMake can select it.
+
+  The SSE-300 LLVM Debug variant executes TensorFlow Lite for Microcontrollers code from BRAM and places the heap in
+  DDR to preserve full operators and `-O0` debugging within the available ITCM and BRAM. This placement is slower than
+  the common Release layout; use Release builds for performance measurements.
+
+- `ML_FRAMEWORK`: Optional parameter to set the ML framework to be used. Canonical values are `tflm` and
+  `executorch`. Default value is `tflm`. The values `TensorFlowLiteMicro`, `ExecuTorch`, and `et` are also accepted
+  case-insensitively as aliases. This option will configure the framework build steps and include them in the binary
+  tree. All use case examples should advertise which framework they support and only the examples that support the
+  framework selected will be included in the binary tree.
 
 - `TENSORFLOW_SRC_PATH`: Path for TensorFlow Lite Micro source tree. Default value points to the
   `dependencies/tensorflow` git submodule. Repository is hosted
@@ -720,6 +731,19 @@ cmake .. \
     -DTARGET_SUBSYSTEM=sse-320
 ```
 
+To build for Corstone™-320 FPGA (for MPS4 board), an additional flag must be supplied:
+
+```commandline
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+    -DTARGET_PLATFORM=mps4 \
+    -DTARGET_SUBSYSTEM=sse-320 \
+    -DFPGA_PLATFORM_SSE_320=ON
+```
+
+The flag `-DFPGA_PLATFORM_SSE_320=ON` is needed for the binaries to work on the MPS4 board, and the binaries produced by this
+build will not work on FVP.  Omit `FPGA_PLATFORM_SSE_320` to produce binaries that can run on Corstone™-320 FVP.
+
 ### Configuring native unit-test build
 
 ```commandline
@@ -734,20 +758,6 @@ bin
 ├── arm_ml_embedded_evaluation_kit-<usecase2>-tests
 ├── ethos-u-<usecase1>
 └── ethos-u-<usecase1>
-```
-
-### Configuring the build for simple-platform
-
-```commandline
-cmake ../ -DTARGET_PLATFORM=simple_platform
-```
-
-Again, if using `Arm Compiler`, use:
-
-```commandline
-cmake .. \
-    -DTARGET_PLATFORM=simple_platform \
-    -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-armclang.cmake
 ```
 
 ### Building with CMake Presets
@@ -768,9 +778,9 @@ Results of the build are placed underÂ `build/bin`Â folder, for example:
 
 ```tree
 bin
- ├── ethos-u-<use_case_name>.axf
- ├── ethos-u-<use_case_name>.htm
- ├── ethos-u-<use_case_name>.map
+ ├── mlek_<use_case_name>.axf
+ ├── mlek_<use_case_name>.htm
+ ├── mlek_<use_case_name>.map
  └── sectors
         ├── images.txt
         └── <use_case>
@@ -780,12 +790,12 @@ bin
 
 Where for each implemented use-case under the `source/use-case` directory, the following build artifacts are created:
 
-- `ethos-u-<use-case name>.axf`: The built application binary for an ML use-case.
+- `mlek_<use-case name>.axf`: The built application binary for an ML use-case.
 
-- `ethos-u-<use-case name>.map`: Information from building the application. For example: Libraries used, what was
+- `mlek_<use-case name>.map`: Information from building the application. For example: Libraries used, what was
   optimized, and location of objects.
 
-- `ethos-u-<use-case name>.htm`: Human readable file containing the call graph of application functions.
+- `mlek_<use-case name>.htm`: Human readable file containing the call graph of application functions.
 
 - `sectors/<use-case>`: Folder containing the built application. Split into files for loading into different FPGA
   memory regions.

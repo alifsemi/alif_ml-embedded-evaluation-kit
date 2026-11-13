@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -22,6 +22,9 @@ function(set_platform_global_defaults)
         set(CMAKE_TOOLCHAIN_FILE ${MLEK_CMAKE_TOOLCHAIN_DIR}/native-gcc.cmake
                 CACHE FILEPATH "Toolchain file")
     endif()
+
+    add_compile_definitions(MLEK_DISABLE_SECTION_ATTRIBUTES=1)
+
     set(PLATFORM_DRIVERS_DIR "${MLEK_HAL_PLATFORM_DIR}/native" PARENT_SCOPE)
     set(TEST_TPIP ${MLEK_DOWNLOAD_DEP_DIR}/test)
 
@@ -94,10 +97,10 @@ function(platform_custom_post_build)
         list(FILTER TEST_SOURCES EXCLUDE REGEX "^${TEST_SRC_USE_CASE}\/${use_case}\/(tflm|executorch)\/.*$")
 
         set(FWK_TEST_SOURCES_DIR "")
-        if (ML_FRAMEWORK STREQUAL "TensorFlowLiteMicro")
-            set(FWK_TEST_SOURCES_DIR "tflm")
-        elseif (ML_FRAMEWORK STREQUAL "ExecuTorch")
-            set(FWK_TEST_SOURCES_DIR "executorch")
+        if (ML_FRAMEWORK STREQUAL "${ML_FRAMEWORK_TFLM}")
+            set(FWK_TEST_SOURCES_DIR "${ML_FRAMEWORK_TFLM}")
+        elseif (ML_FRAMEWORK STREQUAL "${ML_FRAMEWORK_EXECUTORCH}")
+            set(FWK_TEST_SOURCES_DIR "${ML_FRAMEWORK_EXECUTORCH}")
         else ()
             message(FATAL_ERROR "Invalid ML_FRAMEWORK value: ${ML_FRAMEWORK}")
         endif ()

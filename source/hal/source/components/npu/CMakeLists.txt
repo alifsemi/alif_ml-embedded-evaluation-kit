@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -64,7 +64,7 @@ if (NOT DEFINED ETHOS_U_NPU_MEMORY_MODE)
 endif()
 
 if (ETHOS_U_NPU_MEMORY_MODE STREQUAL Sram_Only)
-    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEM_MODE_SRAM_ONLY")
+    set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SRAM_ONLY")
 elseif (ETHOS_U_NPU_MEMORY_MODE STREQUAL Shared_Sram)
     # Shared Sram can be used for Ethos-U55 and Ethos-U65
     set(ETHOS_U_NPU_MEMORY_MODE_FLAG "-DETHOS_U_NPU_MEMORY_MODE=ETHOS_U_NPU_MEMORY_MODE_SHARED_SRAM")

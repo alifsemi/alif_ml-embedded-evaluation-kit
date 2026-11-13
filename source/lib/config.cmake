@@ -39,8 +39,23 @@ if (NOT DEFINED MLEK_SCRIPTS_DIR)
     set(MLEK_SCRIPTS_DIR ${MLEK_ROOT}/scripts)
 endif()
 
+set(MLEK_RUNTIME_PROVIDER MLEK
+    CACHE STRING "Provider for the ML runtime integration")
+set_property(CACHE MLEK_RUNTIME_PROVIDER PROPERTY STRINGS
+    MLEK
+    External)
+
+if (NOT "${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND NOT "${MLEK_RUNTIME_PROVIDER}" STREQUAL "External")
+    message(FATAL_ERROR "Invalid MLEK_RUNTIME_PROVIDER: ${MLEK_RUNTIME_PROVIDER}")
+endif()
+
 # Add CMake scripts to module path
 list(APPEND CMAKE_MODULE_PATH ${MLEK_ROOT}/scripts/cmake)
+
+# ML Framework
+include(ml_framework)
+configure_ml_framework_option()
 
 # CMSIS sources
 set(CMSIS_DSP_SRC_PATH ${MLEK_DEPENDENCIES_DIR}/cmsis-dsp
@@ -64,8 +79,10 @@ set(EXECUTORCH_SRC_PATH ${MLEK_ROOT}/dependencies/executorch
 set(RESOURCES_PATH ${MLEK_ROOT}/resources_downloaded
     CACHE PATH "Path for resources")
 
-# ExecuTorch set up requires Python virtual env set up.
-if (NOT COMMAND setup_source_generator)
+# MLEK-owned runtime setup requires Python tooling. Embedded projects that
+# provide their own runtime can consume source/lib without creating a venv.
+if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND NOT COMMAND setup_source_generator)
     include(source_gen_utils)
     setup_source_generator()
 endif()

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+ * SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or
  * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -45,17 +45,8 @@ namespace app {
             std::memcpy(unsignedDstPtr, input, inputSize);
         }
 
-        /* VWW model pre-processing is image conversion from uint8 to [0,1] float values,
-         * then quantize them with input quantization info. */
         auto inQuantParams = this->m_inputTensor->GetQuantParams();
-
-        int8_t* signedDstPtr = this->m_inputTensor->GetData<int8_t>();
-        for (size_t i = 0; i < this->m_inputTensor->Bytes(); i++) {
-            auto i_data_int8 = static_cast<int8_t>(
-                    ((static_cast<float>(unsignedDstPtr[i]) / 255.0f) / inQuantParams.scale) + inQuantParams.offset
-                    );
-            signedDstPtr[i] = std::min<int8_t>(INT8_MAX, std::max<int8_t>(i_data_int8, INT8_MIN));
-        }
+        image::ConvertUint8ToInt8(unsignedDstPtr, this->m_inputTensor->Bytes(), inQuantParams);
 
         debug("Input tensor populated \n");
 
@@ -74,8 +65,7 @@ namespace app {
     bool VisualWakeWordPostProcess::DoPostProcess()
     {
         return this->m_vwwClassifier.GetClassificationResults(
-                this->m_outputTensor, this->m_results,
-                this->m_labels, 1, true);
+            this->m_outputTensor, this->m_results, this->m_labels, 1, true);
     }
 
 } /* namespace app */

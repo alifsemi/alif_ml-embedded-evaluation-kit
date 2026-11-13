@@ -50,8 +50,8 @@ Micro or ExecuTorch) and CMSIS-DSP libraries are available as targets within the
 # Enable or disable. By default logging is enabled.
 set(MLEK_LOG_ENABLE OFF)
 
-# Select which framework MLEK should use. Note: this could be set to `ExecuTorch`
-set(ML_FRAMEWORK "TensorFlowLiteMicro")
+# Select which framework MLEK should use. Note: this could be set to `executorch`
+set(ML_FRAMEWORK "tflm")
 
 # Satisfy the two dependencies MLEK relies on:
 add_library(google::tensorflow-lite-micro ALIAS user_defined_tflite_micro_target)
@@ -76,7 +76,7 @@ look something like:
 
 ```cmake
 # Select which framework MLEK should use.
-set(ML_FRAMEWORK "ExecuTorch")
+set(ML_FRAMEWORK "executorch")
 
 # Satisfy the two dependencies MLEK relies on:
 add_library(meta::executorch ALIAS user_defined_executorch_target)

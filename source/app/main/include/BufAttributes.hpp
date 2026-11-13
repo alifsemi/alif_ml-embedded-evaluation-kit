@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021, 2024-2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021, 2024-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,57 +24,59 @@ extern "C" {
 #endif /* defined(__cplusplus) */
 
 #if defined(ARM_NPU)
-    /* When Arm NPU is defined, we use the config set by NPU mem parameters */
-    #include "ethosu_mem_config.h"
-    #define BYTE_ALIGNMENT              ETHOS_U_MEM_BYTE_ALIGNMENT
+/* When Arm NPU is defined, we use the config set by NPU mem parameters */
+#    include "ethosu_mem_config.h"
+#    define BYTE_ALIGNMENT ETHOS_U_MEM_BYTE_ALIGNMENT
 #else /* defined(ARM_NPU) */
-    /* otherwise, we use the default ones here. */
-    #define ACTIVATION_BUF_SECTION      section(".bss.NoInit.activation_buf_sram")
-    #define ACTIVATION_BUF_SECTION_NAME ("SRAM")
-    #define BYTE_ALIGNMENT              16
+/* otherwise, we use the default ones here. */
+#    define ACTIVATION_BUF_SECTION      section(".bss.NoInit.activation_buf_sram")
+#    define ACTIVATION_BUF_SECTION_NAME ("SRAM")
+#    define BYTE_ALIGNMENT              16
 #endif /* defined(ARM_NPU) */
 
 #ifdef __has_attribute
-#define HAVE_ATTRIBUTE(x) __has_attribute(x)
-#else   /* __has_attribute */
-#define HAVE_ATTRIBUTE(x) 0
-#endif  /* __has_attribute */
+#    define HAVE_ATTRIBUTE(x) __has_attribute(x)
+#else /* __has_attribute */
+#    define HAVE_ATTRIBUTE(x) 0
+#endif /* __has_attribute */
 
 #if HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__))
-
 /* We want all buffers/sections to be aligned to 16 byte.  */
-#define ALIGNMENT_REQ               aligned(BYTE_ALIGNMENT)
+#    define ALIGNMENT_REQ  aligned(BYTE_ALIGNMENT)
+#    define ALIGNMENT_ONLY __attribute__((ALIGNMENT_REQ))
 
-#if defined(MODEL_IN_EXT_FLASH)
-#define MODEL_SECTION               section("nn_model_ext_flash")
-#else
-#define MODEL_SECTION               section("nn_model")
-#endif
-
-/* Label section name */
-#define LABEL_SECTION               section("labels")
-
-#ifndef ACTIVATION_BUF_SZ
-    #warning  "ACTIVATION_BUF_SZ needs to be defined. Using default value"
-    #define ACTIVATION_BUF_SZ       0x00200000
-#endif  /* ACTIVATION_BUF_SZ */
-
-/* IFM section name. */
-#define IFM_BUF_SECTION             section("ifm")
+#    if defined(MLEK_DISABLE_SECTION_ATTRIBUTES)
+#        define MODEL_SECTION_ATTRIBUTE  ALIGNMENT_ONLY
+#        define ACTIVATION_BUF_ATTRIBUTE ALIGNMENT_ONLY
+#        define IFM_BUF_ATTRIBUTE        ALIGNMENT_ONLY
+#        define LABELS_ATTRIBUTE         ALIGNMENT_ONLY
+#    else                                           /* defined(MLEK_DISABLE_SECTION_ATTRIBUTES) */
+#        if defined(MODEL_IN_EXT_FLASH)
+#            define MODEL_SECTION section("nn_model_ext_flash") /* Model data section */
+#        else                                                   /* defined(MODEL_IN_EXT_FLASH) */
+#            define MODEL_SECTION section("nn_model") /* Model data section */
+#        endif                                         /* defined(MODEL_IN_EXT_FLASH) */
+#        define LABEL_SECTION   section("labels")   /* Labels if any */
+#        define IFM_BUF_SECTION section("ifm")      /* IFM section name */
+#        ifndef ACTIVATION_BUF_SZ
+#            warning "ACTIVATION_BUF_SZ needs to be defined. Using default value"
+#            define ACTIVATION_BUF_SZ 0x00200000
+#        endif /* ACTIVATION_BUF_SZ */
 
 /* Form the attributes, alignment is mandatory. */
-#define MAKE_ATTRIBUTE(x)           __attribute__((ALIGNMENT_REQ, x))
-#define MODEL_SECTION_ATTRIBUTE      MAKE_ATTRIBUTE(MODEL_SECTION)
-#define ACTIVATION_BUF_ATTRIBUTE    MAKE_ATTRIBUTE(ACTIVATION_BUF_SECTION)
-#define IFM_BUF_ATTRIBUTE           MAKE_ATTRIBUTE(IFM_BUF_SECTION)
-#define LABELS_ATTRIBUTE            MAKE_ATTRIBUTE(LABEL_SECTION)
+#        define MAKE_ATTRIBUTE(x)        __attribute__((ALIGNMENT_REQ, x))
+#        define MODEL_SECTION_ATTRIBUTE  MAKE_ATTRIBUTE(MODEL_SECTION)
+#        define ACTIVATION_BUF_ATTRIBUTE MAKE_ATTRIBUTE(ACTIVATION_BUF_SECTION)
+#        define IFM_BUF_ATTRIBUTE        MAKE_ATTRIBUTE(IFM_BUF_SECTION)
+#        define LABELS_ATTRIBUTE         MAKE_ATTRIBUTE(LABEL_SECTION)
+#    endif /* defined(MLEK_DISABLE_SECTION_ATTRIBUTES) */
 
 #else /* HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__)) */
 
-#define MODEL_SECTION_ATTRIBUTE
-#define ACTIVATION_BUF_ATTRIBUTE
-#define IFM_BUF_ATTRIBUTE
-#define LABELS_ATTRIBUTE
+#    define MODEL_SECTION_ATTRIBUTE
+#    define ACTIVATION_BUF_ATTRIBUTE
+#    define IFM_BUF_ATTRIBUTE
+#    define LABELS_ATTRIBUTE
 
 #endif /* HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__)) */
 
