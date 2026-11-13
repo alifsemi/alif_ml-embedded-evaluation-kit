@@ -13,33 +13,6 @@
     ],
     "configurePresets": [
         {
-            "name": "simple-gcc",
-            "displayName": "simple-gcc",
-            "description": "Target simple platform build with bare-metal gcc toolchain.",
-            "inherits": [
-                "simple-platform",
-                "gcc-toolchain"
-            ]
-        },
-        {
-            "name": "simple-llvm",
-            "displayName": "simple-llvm",
-            "description": "Target simple platform build with bare-metal llvm toolchain.",
-            "inherits": [
-                "simple-platform",
-                "llvm-toolchain"
-            ]
-        },
-        {
-            "name": "simple-armclang",
-            "displayName": "simple-armclang",
-            "description": "Target simple platform build with bare-metal armclang toolchain.",
-            "inherits": [
-                "simple-platform",
-                "armclang-toolchain"
-            ]
-        },
-        {
             "name": "mps3-300-gcc",
             "displayName": "mps3-300-gcc",
             "description": "Target MPS3 board, SSE-300 subsystem with bare-metal gcc toolchain.",
@@ -236,21 +209,6 @@
         {
             "name": "mps4-320-armclang",
             "configurePreset": "mps4-320-armclang",
-            "inherits": "usecase-targets"
-        },
-        {
-            "name": "simple-gcc",
-            "configurePreset": "simple-gcc",
-            "inherits": "usecase-targets"
-        },
-        {
-            "name": "simple-llvm",
-            "configurePreset": "simple-llvm",
-            "inherits": "usecase-targets"
-        },
-        {
-            "name": "simple-armclang",
-            "configurePreset": "simple-armclang",
             "inherits": "usecase-targets"
         }
     ],

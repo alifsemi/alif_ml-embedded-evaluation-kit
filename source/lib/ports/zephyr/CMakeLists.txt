@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -40,7 +40,7 @@ else()
 endif()
 
 if (CONFIG_MLEK_EXAMPLES_FWK_EXECUTORCH)
-    set(ML_FRAMEWORK "ExecuTorch")
+    set(ML_FRAMEWORK "executorch")
     if (NOT CONFIG_EXECUTORCH)
         mlek_config_err(CONFIG_EXECUTORCH)
     endif()
@@ -56,7 +56,7 @@ if (CONFIG_MLEK_EXAMPLES_FWK_EXECUTORCH)
         message(FATAL_ERROR "Neither target 'libexecutorch' nor 'modules__executorch' found.")
     endif()
 elseif (CONFIG_MLEK_EXAMPLES_FWK_TFLM)
-    set(ML_FRAMEWORK "TensorFlowLiteMicro")
+    set(ML_FRAMEWORK "tflm")
     if (NOT CONFIG_TENSORFLOW_LITE_MICRO)
         mlek_config_err(CONFIG_TENSORFLOW_LITE_MICRO)
     endif()

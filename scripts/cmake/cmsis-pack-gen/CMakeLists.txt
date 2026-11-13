@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or
+#  SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or
 #  its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -25,26 +25,27 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
-project(ml-embedded-eval-kit-api
+project(ml-embedded-eval-kit-lib
         DESCRIPTION     "Platform agnostic API for all examples.")
-
-set(SOURCE_ROOT     ${CMAKE_CURRENT_LIST_DIR}/../../../source)
-set(API_PROJECT_DIR ${SOURCE_ROOT}/lib)
 
 option(CMSIS_PACK_GEN_FLOW "Enable CMSIS-pack generation flow" ON)
 
-# Include support for TensorFlow Lite Micro
-set(ML_FRAMEWORK "TensorFlowLiteMicro" CACHE STRING "Choice of ML framework")
+set(MLEK_LIB_PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../source/lib)
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_LIST_DIR}/..")
+include(ml_framework)
 
-# Add common part and the APIs:
-add_subdirectory(${API_PROJECT_DIR} ${CMAKE_BINARY_DIR}/mlek-lib)
+# Add the lib but no framework implementation yet (by setting the proider
+# as external).
+set(MLEK_RUNTIME_PROVIDER "External")
+add_subdirectory(${MLEK_LIB_PROJECT_DIR} ${CMAKE_BINARY_DIR}/mlek-lib)
 
-# Any custom steps that are required for the CMSIS pack generation flow
-# must be declared here:
-if (CMSIS_PACK_GEN_FLOW)
-    target_include_directories(common_api PUBLIC ${TENSORFLOW_SRC_PATH})
-    # For CMSIS packs, we need CMSIS DSP definition.
-    # @TODO: Currently, this line is added multiple times to the include file. Uncomment when
-    # packgen is fixed.
-    # add_compile_definitions(arm_math PRIVATE ARM_MATH_DSP)
-endif()
+# Include support for TensorFlow Lite Micro implementation.
+set(ML_FRAMEWORK "${ML_FRAMEWORK_TFLM}")
+add_subdirectory(${MLEK_LIB_PROJECT_DIR}/mlek/fwk/tflm
+    ${CMAKE_BINARY_DIR}/mlek-lib/tflm)
+
+# Include ExecuTorch framework implementation.
+set(ML_FRAMEWORK "${ML_FRAMEWORK_EXECUTORCH}")
+add_subdirectory(${MLEK_LIB_PROJECT_DIR}/mlek/fwk/executorch
+    ${CMAKE_BINARY_DIR}/mlek-lib/executorch)

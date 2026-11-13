@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2024, 2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com> SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,10 +30,17 @@
 #define CORSTONE320_NSACFG_BASE_NS       0x40080000 /* Corstone-320 Non-Secure Access Configuration Register Block Non-Secure base address */
 
 /** Non-Secure MSTEXPPILL peripheral region */
-#define GPIO0_CMSDK_BASE_NS              0x40100000 /* GPIO 0 Non-Secure base address */
-#define GPIO1_CMSDK_BASE_NS              0x40101000 /* GPIO 1 Non-Secure base address */
-#define GPIO2_CMSDK_BASE_NS              0x40102000 /* GPIO 2 Non-Secure base address */
-#define GPIO3_CMSDK_BASE_NS              0x40103000 /* GPIO 3 Non-Secure base address */
+#if defined(FPGA)
+    #define GPIO0_CMSDK_BASE_NS          0x41100000 /* GPIO 0 Non-Secure base address */
+    #define GPIO1_CMSDK_BASE_NS          0x41101000 /* GPIO 1 Non-Secure base address */
+    #define GPIO2_CMSDK_BASE_NS          0x41102000 /* GPIO 2 Non-Secure base address */
+    #define GPIO3_CMSDK_BASE_NS          0x41103000 /* GPIO 3 Non-Secure base address */
+#else /* defined(FPGA) */
+    #define GPIO0_CMSDK_BASE_NS          0x40100000 /* GPIO 0 Non-Secure base address */
+    #define GPIO1_CMSDK_BASE_NS          0x40101000 /* GPIO 1 Non-Secure base address */
+    #define GPIO2_CMSDK_BASE_NS          0x40102000 /* GPIO 2 Non-Secure base address */
+    #define GPIO3_CMSDK_BASE_NS          0x40103000 /* GPIO 3 Non-Secure base address */
+#endif /* defined(FPGA) */
 #define AHB_USER_0_BASE_NS               0x40104000 /* AHB USER 0 Non-Secure base address */
 #define AHB_USER_1_BASE_NS               0x40105000 /* AHB USER 1 Non-Secure base address */
 #define AHB_USER_2_BASE_NS               0x40106000 /* AHB USER 2 Non-Secure base address */
@@ -68,16 +75,30 @@
 #define SBCon_I2C_SHIELD0_BASE_NS        0x48105000 /* SBCon (I2C - Shield0) Non-Secure base address */
 #define SBCon_I2C_SHIELD1_BASE_NS        0x48106000 /* SBCon (I2C – Shield1) Non-Secure base address */
 #define USER_APB_BASE_NS                 0x48107000 /* USER APB Non-Secure base address */
-#define FPGA_DDR4_EEPROM_BASE_NS         0x48108000 /* FPGA - SBCon I2C (DDR4 EEPROM) Non-Secure base address */
-#define FPGA_SCC_BASE_NS                 0x48200000 /* FPGA - SCC registers Non-Secure base address */
-#define FPGA_I2S_BASE_NS                 0x48201000 /* FPGA - I2S (Audio) Non-Secure base address */
-#define FPGA_IO_BASE_NS                  0x48202000 /* FPGA - IO (System Ctrl + I/O) Non-Secure base address */
-#define UART0_BASE_NS                    0x48203000 /* UART 0 Non-Secure base address */
-#define UART1_BASE_NS                    0x48204000 /* UART 1 Non-Secure base address */
-#define UART2_BASE_NS                    0x48205000 /* UART 2 Non-Secure base address */
-#define UART3_BASE_NS                    0x48206000 /* UART 3 Non-Secure base address */
-#define UART4_BASE_NS                    0x48207000 /* UART 4 Non-Secure base address */
-#define UART5_BASE_NS                    0x48208000 /* UART 5 Non-Secure base address */
+#if defined(FPGA)
+    #define FPGA_DDR4_EEPROM_BASE_NS     0x49208000 /* FPGA - SBCon I2C (DDR4 EEPROM) Non-Secure base address */
+    #define FPGA_SCC_BASE_NS             0x49300000 /* FPGA - SCC registers Non-Secure base address */
+    #define FPGA_I2S_BASE_NS             0x49301000 /* FPGA - I2S (Audio) Non-Secure base address */
+    #define FPGA_IO_BASE_NS              0x49302000 /* FPGA - IO (System Ctrl + I/O) Non-Secure base address */
+    #define UART0_BASE_NS                0x49303000 /* UART 0 Non-Secure base address */
+    #define UART1_BASE_NS                0x49304000 /* UART 1 Non-Secure base address */
+    #define UART2_BASE_NS                0x49305000 /* UART 2 Non-Secure base address */
+    #define UART3_BASE_NS                0x49306000 /* UART 3 Non-Secure base address */
+    #define UART4_BASE_NS                0x49307000 /* UART 4 Non-Secure base address */
+    #define UART5_BASE_NS                0x49308000 /* UART 5 Non-Secure base address */
+#else /* defined(FPGA) */
+    #define FPGA_DDR4_EEPROM_BASE_NS     0x48108000 /* FPGA - SBCon I2C (DDR4 EEPROM) Non-Secure base address */
+    #define FPGA_SCC_BASE_NS             0x48200000 /* FPGA - SCC registers Non-Secure base address */
+    #define FPGA_I2S_BASE_NS             0x48201000 /* FPGA - I2S (Audio) Non-Secure base address */
+    #define FPGA_IO_BASE_NS              0x48202000 /* FPGA - IO (System Ctrl + I/O) Non-Secure base address */
+    #define UART0_BASE_NS                0x48203000 /* UART 0 Non-Secure base address */
+    #define UART1_BASE_NS                0x48204000 /* UART 1 Non-Secure base address */
+    #define UART2_BASE_NS                0x48205000 /* UART 2 Non-Secure base address */
+    #define UART3_BASE_NS                0x48206000 /* UART 3 Non-Secure base address */
+    #define UART4_BASE_NS                0x48207000 /* UART 4 Non-Secure base address */
+    #define UART5_BASE_NS                0x48208000 /* UART 5 Non-Secure base address */
+#endif /* defined(FPGA) */
+
 #define RTC_BASE_NS                      0x4820B000 /* RTC Non-Secure base address */
 #define ISP_BASE_NS                      0x48300000 /* ISP SOC base address */
 #define ISP_VIRTUAL_CAMERA_BASE_NS       0x48400000 /* ISP Virtual Camera base address */
@@ -115,7 +136,13 @@
 #define AHB_USER_1_BASE_S                0x50105000 /* AHB USER 1 Secure base address */
 #define AHB_USER_2_BASE_S                0x50106000 /* AHB USER 2 Secure base address */
 #define AHB_USER_3_BASE_S                0x50107000 /* AHB USER 3 Secure base address */
-#define HDLCD_BASE_S                     0x50310000 /* HDLCD Secure base address */
+
+#if defined(FPGA)
+    #define HDLCD_BASE_S                 0x5930A000 /* HDLCD Secure base address for FPGA */
+#else /* defined(FPGA) */
+    #define HDLCD_BASE_S                 0x50310000 /* HDLCD Secure base address */
+#endif /* defined(FPGA) */
+
 #define ETHERNET_BASE_S                  0x50400000 /* Ethernet Secure base address */
 #define USB_BASE_S                       0x50500000 /* USB Secure base address */
 #define USER_APB0_BASE_S                 0x50700000 /* User APB 0 Secure base address */
@@ -158,15 +185,30 @@
 #define SBCon_I2C_SHIELD1_BASE_S         0x58106000 /* SBCon (I2C – Shield1) Secure base address */
 #define USER_APB_BASE_S                  0x58107000 /* USER APB Secure base address */
 #define FPGA_DDR4_EEPROM_BASE_S          0x58108000 /* FPGA - SBCon I2C (DDR4 EEPROM) Secure base address */
-#define FPGA_SCC_BASE_S                  0x58200000 /* FPGA - SCC registers Secure base address */
-#define FPGA_I2S_BASE_S                  0x58201000 /* FPGA - I2S (Audio) Secure base address */
-#define FPGA_IO_BASE_S                   0x58202000 /* FPGA - IO (System Ctrl + I/O) Secure base address */
-#define UART0_BASE_S                     0x58203000 /* UART 0 Secure base address */
-#define UART1_BASE_S                     0x58204000 /* UART 1 Secure base address */
-#define UART2_BASE_S                     0x58205000 /* UART 2 Secure base address */
-#define UART3_BASE_S                     0x58206000 /* UART 3 Secure base address */
-#define UART4_BASE_S                     0x58207000 /* UART 4 Secure base address */
-#define UART5_BASE_S                     0x58208000 /* UART 5 Secure base address */
+
+#if defined(FPGA)
+    #define FPGA_SCC_BASE_S              0x59300000 /* FPGA - SCC registers Secure base address */
+    #define FPGA_I2S_BASE_S              0x59301000 /* FPGA - I2S (Audio) Secure base address */
+    #define FPGA_IO_BASE_S               0x59302000 /* FPGA - IO (System Ctrl + I/O) Secure base address */
+    #define UART0_BASE_S                 0x59303000 /* UART 0 Secure base address */
+    #define UART1_BASE_S                 0x59304000 /* UART 1 Secure base address */
+    #define UART2_BASE_S                 0x59305000 /* UART 2 Secure base address */
+    #define UART3_BASE_S                 0x59306000 /* UART 3 Secure base address */
+    #define UART4_BASE_S                 0x59307000 /* UART 4 Secure base address */
+    #define UART5_BASE_S                 0x59308000 /* UART 5 Secure base address */
+    #define I2C_HDMI_BASE                0x59309000 /* HDMI I2C for FPGA */
+#else /* defined(FPGA) */
+    #define FPGA_SCC_BASE_S              0x58200000 /* FPGA - SCC registers Secure base address */
+    #define FPGA_I2S_BASE_S              0x58201000 /* FPGA - I2S (Audio) Secure base address */
+    #define FPGA_IO_BASE_S               0x58202000 /* FPGA - IO (System Ctrl + I/O) Secure base address */
+    #define UART0_BASE_S                 0x58203000 /* UART 0 Secure base address */
+    #define UART1_BASE_S                 0x58204000 /* UART 1 Secure base address */
+    #define UART2_BASE_S                 0x58205000 /* UART 2 Secure base address */
+    #define UART3_BASE_S                 0x58206000 /* UART 3 Secure base address */
+    #define UART4_BASE_S                 0x58207000 /* UART 4 Secure base address */
+    #define UART5_BASE_S                 0x58208000 /* UART 5 Secure base address */
+#endif /* defined(FPGA) */
+
 #define RTC_BASE_S                       0x5820B000 /* RTC Secure base address */
 
 #define VSOCKET_BASE_S                   0x5FEE0000 /*!< VSOCKET Secure base address */

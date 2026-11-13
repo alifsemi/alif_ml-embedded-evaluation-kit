@@ -12,15 +12,15 @@
             "hidden": true,
             "targets": [
                 "all",
-                "ethos-u-ad",
-                "ethos-u-asr",
-                "ethos-u-img_class",
-                "ethos-u-inference_runner",
-                "ethos-u-kws_asr",
-                "ethos-u-kws",
-                "ethos-u-noise_reduction",
-                "ethos-u-object_detection",
-                "ethos-u-vww"
+                "mlek_ad",
+                "mlek_asr",
+                "mlek_img_class",
+                "mlek_inference_runner",
+                "mlek_kws_asr",
+                "mlek_kws",
+                "mlek_noise_reduction",
+                "mlek_object_detection",
+                "mlek_vww"
             ]
         }
     ]

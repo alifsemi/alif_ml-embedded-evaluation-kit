@@ -26,7 +26,9 @@
 #----------------------------------------------------------------------------
 
 # Specify the ML frameworks the use case supports
-set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro;ExecuTorch")
+set(${use_case}_ML_FRAMEWORK
+    "${ML_FRAMEWORK_TFLM}"
+    "${ML_FRAMEWORK_EXECUTORCH}")
 if (NOT ${ML_FRAMEWORK} IN_LIST ${use_case}_ML_FRAMEWORK)
     message(STATUS "${use_case} does not support ${ML_FRAMEWORK} framework")
     set(${use_case}_supports_${ML_FRAMEWORK} OFF)
@@ -38,22 +40,22 @@ set(${use_case}_supports_${ML_FRAMEWORK} ON)
 # Append the API to use for this use case
 list(APPEND ${use_case}_API_LIST "img_class" "alif_ui")
 
-if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
+if ("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_TFLM}")
     set(DEFAULT_ACTIVATION_BUF_SZ  0x00200000)
     set(LABELS_TXT_FILE ${MLEK_ROOT}/resources/img_class/labels/labels_mobilenet_v2_1.0_224.txt)
 
     if (ETHOS_U_NPU_ENABLED)
-        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8_vela_${ETHOS_U_NPU_CONFIG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.tflite)
     else()
         set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/img_class/mobilenet_v2_1.0_224_INT8.tflite)
     endif()
 
-elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
+elseif("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_EXECUTORCH}")
     set(LABELS_TXT_FILE ${MLEK_ROOT}/resources/img_class/labels/labels_mobilenet_v2_1.IMAGENET1K_V2.txt)
 
     if (ETHOS_U_NPU_ENABLED)
         string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
-        set(DEFAULT_MODEL_PATH          ${RESOURCES_PATH}/img_class/mv2_arm_delegate_${_NPU_CFG_ID}.pte)
+        set(DEFAULT_MODEL_PATH          ${RESOURCES_PATH}/img_class/mv2_arm_delegate_${_NPU_CFG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.pte)
         set(DEFAULT_ACTIVATION_BUF_SZ   0x00200000)
     else()
         set(DEFAULT_MODEL_PATH          ${RESOURCES_PATH}/img_class/mv2_arm_TOSA-1.0+INT.pte)

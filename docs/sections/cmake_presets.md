@@ -26,10 +26,10 @@ It is encouraged to create a personal `CMakeUserPreset.json` with personal user 
     "configurePresets": [
         {
             "name": "example-user-preset",
-            "displayName": "My config simple-gcc",
-            "description": "This preset uses public presets available in this repository.",
+            "displayName": "My config mps3-300-gcc",
+            "description": "Build for MPS3 SSE-300 using GCC and public presets.",
             "inherits": [
-                "simple-gcc",
+                "mps3-300-gcc",
                 "log-debug",
                 "single-input"
             ]
@@ -82,9 +82,6 @@ mps4-315-armclang
 mps4-320-gcc
 mps4-320-llvm
 mps4-320-armclang
-simple-gcc
-simple-llvm
-simple-armclang
 ```
 This will automatically configure and build the evaluation-kit into a corresponding folder.
 You can still pass in build flags as usual, for example:

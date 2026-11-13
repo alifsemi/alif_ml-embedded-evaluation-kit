@@ -142,7 +142,15 @@ else()
         # include directory paths for it to be installed as a dependency
         # for the Arm Ethos-U NPU backend within ExecuTorch.
         if (TARGET ethosu_core_driver AND EXECUTORCH_BUILD_ARM_BAREMETAL)
-            install(TARGETS ethosu_core_driver EXPORT ExecuTorchTargets)
+            # ExecuTorch 1.3 and newer export the ethosu_core_driver target
+            # from the Arm backend.
+            get_property(_ET_ETHOSU_CORE_DRIVER_EXPORTED GLOBAL
+                PROPERTY ET_ETHOSU_CORE_DRIVER_EXPORTED)
+            if (NOT _ET_ETHOSU_CORE_DRIVER_EXPORTED)
+                install(TARGETS ethosu_core_driver EXPORT ExecuTorchTargets)
+                set_property(GLOBAL PROPERTY ET_ETHOSU_CORE_DRIVER_EXPORTED TRUE)
+            endif()
+
             get_target_property(_NPU_INTERFACE_INC
                 ethosu_core_driver INTERFACE_INCLUDE_DIRECTORIES)
             set_target_properties(ethosu_core_driver
@@ -235,7 +243,7 @@ function(generate_pte_ops_lib)
     endif()
 
     # Generate C++ bindings to register kernels into both PyTorch (for AOT) and
-    # Executorch (for runtime). Here select all ops in functions.yaml
+    # ExecuTorch (for runtime). Here select all ops in functions.yaml
     if ("${PARSED_SELECT_OPS_LIST}" STREQUAL "" AND
         "${PTE_FOR_OPS_LIB}" STREQUAL "")
         message(STATUS "No portable ops library needs to be generated.")

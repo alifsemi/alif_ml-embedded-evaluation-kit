@@ -1,4 +1,4 @@
-#  SPDX-FileCopyrightText:  Copyright 2025 Arm Limited
+#  SPDX-FileCopyrightText:  Copyright 2025-2026 Arm Limited
 #  and/or its affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -26,7 +26,7 @@ variables:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   rules:
-    - changes: [CI.Dockerfile]
+    - changes: [Dockerfile]
       if: $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"
       when: always
 
@@ -34,14 +34,14 @@ build-amd64:
   extends: .default_buildah
   tags: [amd64-shared]
   script:
-    - buildah build --format=$BUILDAH_FORMAT --storage-driver=$STORAGE_DRIVER --platform=linux/amd64 -f .ci/CI.Dockerfile -t $CI_REGISTRY_IMAGE:amd64-$CI_COMMIT_SHORT_SHA .
+    - buildah build --format=$BUILDAH_FORMAT --storage-driver=$STORAGE_DRIVER --platform=linux/amd64 --target base -t $CI_REGISTRY_IMAGE:amd64-$CI_COMMIT_SHORT_SHA .
     - buildah push $CI_REGISTRY_IMAGE:amd64-$CI_COMMIT_SHORT_SHA
 
 build-arm64:
   extends: .default_buildah
   tags: [arm64-shared]
   script:
-    - buildah build --format=$BUILDAH_FORMAT --storage-driver=$STORAGE_DRIVER --platform=linux/arm64/v8 -f .ci/CI.Dockerfile -t $CI_REGISTRY_IMAGE:arm64-$CI_COMMIT_SHORT_SHA .
+    - buildah build --format=$BUILDAH_FORMAT --storage-driver=$STORAGE_DRIVER --platform=linux/arm64/v8 --target base -t $CI_REGISTRY_IMAGE:arm64-$CI_COMMIT_SHORT_SHA .
     - buildah push $CI_REGISTRY_IMAGE:arm64-$CI_COMMIT_SHORT_SHA
 
 create_manifest:

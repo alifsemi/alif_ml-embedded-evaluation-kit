@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# ExecuTorch and its PyTorch dependencies.
+# Only installed when --ml-frameworks executorch is requested.
+# Use PyTorch CPU wheels to avoid pulling NVIDIA CUDA runtime packages on Linux.
+# On macOS, PyTorch wheels are CPU-only and are not published with the +cpu suffix.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+executorch==1.5.1
+torch==2.14.0+cpu; sys_platform == "linux"
+torch==2.14.0; sys_platform == "darwin"
+torchao==0.18.0+cpu; sys_platform == "linux"
+torchao==0.18.0; sys_platform == "darwin"
+torchaudio==2.11.0+cpu; sys_platform == "linux"
+torchaudio==2.11.0; sys_platform == "darwin"
+torchvision==0.29.0+cpu; sys_platform == "linux"
+torchvision==0.29.0; sys_platform == "darwin"
+tosa-tools==2026.5.0

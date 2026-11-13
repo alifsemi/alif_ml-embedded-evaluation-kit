@@ -89,16 +89,16 @@ cmake --build build -j$(nproc)
 
 Key CMake options (see [build options](docs/sections/building.md#build-options) for full list):
 
-| Option | Values | Description |
-|--------|--------|-------------|
-| `TARGET_PLATFORM` | `mps3` (default), `mps4`, `native`, `simple_platform` | Target platform |
-| `TARGET_SUBSYSTEM` | `sse-300` (default), `sse-310`, `sse-315`, `sse-320` | Platform subsystem/design |
-| `ML_FRAMEWORK` | `TensorFlowLiteMicro` (default), `ExecuTorch` | ML inference framework |
-| `ETHOS_U_NPU_ID` | `U55` (default), `U65`, `U85` | Ethos-U NPU variant |
-| `ETHOS_U_NPU_ENABLED` | `ON` (default), `OFF` | Enable/disable NPU support |
-| `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED` | `ON` (default), `OFF` | Enable/disable timing adapter (simulates memory bandwidth/latency constraints; disable for faster builds) |
-| `USE_CASE_BUILD` | e.g. `img_class`, `"img_class;kws"` | Build only specific use cases |
-| `USE_SINGLE_INPUT` | `ON`, `OFF` (default) | Use single input sample per use case (faster for testing) |
+| Option                                  | Values                                                     | Description                                                                                           |
+|-----------------------------------------|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `TARGET_PLATFORM`                       | `mps3` (default), `mps4`, `native`                         | Target platform                                                                                       |
+| `TARGET_SUBSYSTEM`                      | `sse-300` (default), `sse-310`, `sse-315`, `sse-320`       | Platform subsystem/design                                                                             |
+| `ML_FRAMEWORK`                          | `tflm` (default), `executorch`; aliases include `et`       | ML inference framework                                                                                |
+| `ETHOS_U_NPU_ID`                        | `U55` (default), `U65`, `U85`                              | Ethos-U NPU variant                                                                                   |
+| `ETHOS_U_NPU_ENABLED`                   | `ON` (default), `OFF`                                      | Enable/disable NPU support                                                                            |
+| `ETHOS_U_NPU_TIMING_ADAPTER_ENABLED`    | `ON` (default), `OFF`                                      | Enable/disable timing adapter                                                                         |
+| `USE_CASE_BUILD`                        | e.g. `img_class`, `"img_class;kws"`                        | Build only specific use cases                                                                         |
+| `USE_SINGLE_INPUT`                      | `ON`, `OFF` (default)                                      | Use single input sample per use case (faster for testing)                                             |
 
 ## Testing
 
@@ -169,7 +169,8 @@ Full guidelines: [coding_guidelines.md](docs/sections/coding_guidelines.md). Key
 
 ### Static Analysis
 - **clang-format**: Configuration in `.clang-format` (LLVM-based style). Run: `clang-format -style=file -i <file>`
-- **cppcheck**: Used via pre-push git hook. Setup: `python scripts/py/setup_hooks.py <hooks-dir>`
+- **pre-commit**: Install with `python3 -m pip install pre-commit` and register with `pre-commit install`
+- **cppcheck**: Run via the configured `pre-commit` hook, for example `pre-commit run cppcheck --all-files`
 - **PyLint**: Python code must satisfy PyLint `3.3.8`.
 - Avoid PyLint `disable` statements where practical; prefer refactoring to satisfy checks.
 
@@ -205,7 +206,7 @@ current year using these rules:
 - DCO sign-off required on all commits (`git commit -s`)
 - Code review via [Arm's GitLab](https://git.gitlab.arm.com/artificial-intelligence/ethos-u/ml-embedded-evaluation-kit)
 - All build variants and unit tests must pass before submission
-- Run clang-format and cppcheck before pushing
+- Run `pre-commit` before pushing
 
 ## Key Dependencies (Git Submodules)
 

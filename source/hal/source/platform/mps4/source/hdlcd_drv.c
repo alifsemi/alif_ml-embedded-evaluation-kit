@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2023, 2024-2025 Arm Limited and/or
+ * SPDX-FileCopyrightText: Copyright 2023, 2024-2026 Arm Limited and/or
  * its affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *

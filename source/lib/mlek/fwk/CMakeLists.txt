@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -27,22 +27,32 @@ project(${ML_FWK_IFACE_TARGET}
     LANGUAGES       CXX)
 
 if (NOT DEFINED ML_FRAMEWORK)
-    message(FATAL_ERROR "ML_FRAMEWORK must be defined")
+    set(ML_FRAMEWORK "")
 endif ()
 
 # Add interface library
 add_library(${ML_FWK_IFACE_TARGET} INTERFACE)
 add_library(mlek::${ML_FWK_IFACE_TARGET} ALIAS ${ML_FWK_IFACE_TARGET})
 
-if ("ExecuTorch" STREQUAL ${ML_FRAMEWORK})
+if (NOT DEFINED MLEK_RUNTIME_PROVIDER)
+    set(MLEK_RUNTIME_PROVIDER MLEK)
+endif()
+
+if ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "External")
+    message(STATUS "ML runtime is provided externally; adding only the framework interface.")
+elseif ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND "${ML_FRAMEWORK_EXECUTORCH}" STREQUAL "${ML_FRAMEWORK}")
     message(STATUS "Adding ExecuTorch framework to the build...")
     add_subdirectory(executorch)
     set_target_properties(ml_framework_et PROPERTIES POSITION_INDEPENDENT_CODE FALSE)
     add_library(mlek::ml_framework_impl ALIAS ml_framework_et)
-elseif ("TensorFlowLiteMicro" STREQUAL ${ML_FRAMEWORK})
+elseif ("${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK"
+        AND "${ML_FRAMEWORK_TFLM}" STREQUAL "${ML_FRAMEWORK}")
     message(STATUS "Adding TensorFlow Lite Micro framework to the build...")
     add_subdirectory(tflm)
     add_library(mlek::ml_framework_impl ALIAS ml_framework_tflm)
+elseif (NOT "${MLEK_RUNTIME_PROVIDER}" STREQUAL "MLEK")
+    message(FATAL_ERROR "Unsupported ML runtime provider '${MLEK_RUNTIME_PROVIDER}'.")
 else ()
     message(FATAL_ERROR "Unsupported ML framework '${ML_FRAMEWORK}'.")
 endif ()

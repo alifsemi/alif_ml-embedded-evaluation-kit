@@ -69,7 +69,7 @@ def read_device_info() {
 
 def download_dependencies() {
     sh "rm -Rf dependencies"
-    sh "python3.10 download_dependencies.py"
+    sh "python3.10 scripts/py/download_dependencies.py"
 }
 
 /**
@@ -77,9 +77,10 @@ def download_dependencies() {
  * and Vela optimisations are run in parallel (one job per CPU).
  *
  * @param executorch  Set up ExecuTorch too (for the use case alif_asr with ExecuTorch). It needs
- *                    torch and the other packages of the default requirements.txt (several GB).
- *                    Without it only TensorFlow Lite Micro is set up with the trimmed
- *                    requirements_tflm.txt (no torch, CUDA or ExecuTorch).
+ *                    torch and the other packages of requirements-executorch.txt (several GB),
+ *                    which set_up_default_resources.py installs when the executorch framework is
+ *                    selected. Without it only TensorFlow Lite Micro is set up, with the default
+ *                    requirements.txt (no torch, CUDA or ExecuTorch).
  */
 def setup_resources(boolean executorch = false) {
     /* Temp workaround for Jenkins encoding issue. These PDF filenames are written with some Chinese characters.
@@ -87,10 +88,8 @@ def setup_resources(boolean executorch = false) {
      * the workspace, the stash fails because of the file names and hides the real error. */
     sh "rm -rf dependencies/Arm-2D/examples/common/loader/zhrgb565_loader/zhrgb565/*.pdf"
 
-    def frameworks_and_requirements = executorch ?
-        "--ml-frameworks tflm executorch" :
-        "--requirements-file scripts/py/requirements_tflm.txt"
-    psh "#!/bin/bash\npython3.10 set_up_default_resources.py ${frameworks_and_requirements} " +
+    def frameworks = executorch ? "tflm executorch" : "tflm"
+    psh "#!/bin/bash\npython3.10 set_up_default_resources.py --ml-frameworks ${frameworks} " +
         "--additional-ethos-u-config-name ethos-u55-256 --parallel \$(nproc)"
 }
 

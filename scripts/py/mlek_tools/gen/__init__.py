@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """C++ source file generation utilities."""
-from .gen_utils import (
+from mlek_tools.gen.gen_utils import (
     AudioSample,
     gen_header,
     read_audio_file,

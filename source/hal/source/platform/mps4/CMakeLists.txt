@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -32,25 +32,40 @@ if (NOT ${CMAKE_CROSSCOMPILING})
 endif()
 
 # Define target specific base addresses here (before adding the components)
-set(UART0_BASE              "0x48203000"    CACHE STRING "UART base address")
-set(UART0_BAUDRATE          "115200"        CACHE STRING "UART baudrate")
-set(SYSTEM_CORE_CLOCK       "25000000"      CACHE STRING "System peripheral clock (Hz)")
+if (FPGA_PLATFORM_SSE_320)
+    set(UART0_BASE              "0x59303000"    CACHE STRING "UART base address")
+    set(SYSTEM_CORE_CLOCK       "50000000"      CACHE STRING "System peripheral clock (Hz)")
+else()
+    set(UART0_BASE              "0x58203000"    CACHE STRING "UART base address")
+    set(SYSTEM_CORE_CLOCK       "50000000"      CACHE STRING "System peripheral clock (Hz)")
+endif()
+set(UART0_BAUDRATE              "115200"        CACHE STRING "UART baudrate")
 
-set(ETHOS_U_IRQN            "16"            CACHE STRING "Ethos-U Interrupt")
-set(ETHOS_U_SEC_ENABLED     "1"             CACHE STRING "Ethos-U NPU Security enable")
-set(ETHOS_U_PRIV_ENABLED    "1"             CACHE STRING "Ethos-U NPU Privilege enable")
+set(ETHOS_U_IRQN                "16"            CACHE STRING "Ethos-U Interrupt")
+set(ETHOS_U_SEC_ENABLED         "1"             CACHE STRING "Ethos-U NPU Security enable")
+set(ETHOS_U_PRIV_ENABLED        "1"             CACHE STRING "Ethos-U NPU Privilege enable")
 
 if (ETHOS_U_SEC_ENABLED)
-    set(ETHOS_U_BASE_ADDR   "0x50004000"    CACHE STRING "Ethos-U NPU base address")
+    set(ETHOS_U_BASE_ADDR       "0x50004000"    CACHE STRING "Ethos-U NPU base address")
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED AND TARGET_SUBSYSTEM STREQUAL sse-320)
-        set(TA_SRAM_BASE    "0x50006000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
-        set(TA_EXT_BASE     "0x50006800"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        if (FPGA_PLATFORM_SSE_320)
+            set(TA_SRAM_BASE    "0x51102000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE     "0x51102400"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        else()
+            set(TA_SRAM_BASE    "0x50006000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE     "0x50006800"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        endif()
     endif()
 else ()
-    set(ETHOS_U_BASE_ADDR   "0x40004000"    CACHE STRING "Ethos-U NPU base address")
+    set(ETHOS_U_BASE_ADDR       "0x40004000"    CACHE STRING "Ethos-U NPU base address")
     if (ETHOS_U_NPU_TIMING_ADAPTER_ENABLED AND TARGET_SUBSYSTEM STREQUAL sse-320)
-        set(TA_SRAM_BASE    "0x40006000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
-        set(TA_EXT_BASE     "0x40006800"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        if (FPGA_PLATFORM_SSE_320)
+            set(TA_SRAM_BASE    "0x41102000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE     "0x41102400"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        else()
+            set(TA_SRAM_BASE    "0x40006000"    CACHE STRING "Ethos-U NPU SRAM timing adapter")
+            set(TA_EXT_BASE     "0x40006800"    CACHE STRING "Ethos-U NPU EXT timing adapter")
+        endif()
     endif()
 endif ()
 
@@ -63,9 +78,15 @@ set(DYNAMIC_IFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved fo
 math(EXPR OFM_BASE      "${DYNAMIC_IFM_BASE} + ${DYNAMIC_IFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
 set(DYNAMIC_OFM_BASE    "${OFM_BASE}" CACHE STRING "Base address for OFMs to be dumped to")
 set(DYNAMIC_OFM_SIZE    "0x01000000" CACHE STRING "Size of the space reserved for the OFM")
-math(EXPR TMP_BASE      "${DYNAMIC_OFM_BASE} + ${DYNAMIC_OFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
-set(ML_FWK_TMP_MEM_BASE "${TMP_BASE}" CACHE STRING "Region used by ML framework for any temporary allocations")
-set(ML_FWK_TMP_MEM_SIZE "0x02000000" CACHE STRING "Buffer size for ML framework's temporary allocations")
+
+if (FPGA_PLATFORM_SSE_320)
+    set(ML_FWK_TMP_MEM_BASE "0x72000000" CACHE STRING "Region used by ML framework for any temporary allocations")
+    set(ML_FWK_TMP_MEM_SIZE "0x02000000" CACHE STRING "Buffer size for ML framework's temporary allocations")
+else()
+    math(EXPR TMP_BASE      "${DYNAMIC_OFM_BASE} + ${DYNAMIC_OFM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
+    set(ML_FWK_TMP_MEM_BASE "${TMP_BASE}" CACHE STRING "Region used by ML framework for any temporary allocations")
+    set(ML_FWK_TMP_MEM_SIZE "0x02000000" CACHE STRING "Buffer size for ML framework's temporary allocations")
+endif()
 
 # HDLCD parameters
 math(EXPR FB_BASE       "${ML_FWK_TMP_MEM_BASE} + ${ML_FWK_TMP_MEM_SIZE}" OUTPUT_FORMAT HEXADECIMAL)
@@ -133,6 +154,11 @@ add_subdirectory(${COMPONENTS_DIR}/audio ${CMAKE_BINARY_DIR}/audio)
 # memory map and interrupt numbers.
 target_include_directories(cmsis_device PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/${TARGET_SUBSYSTEM})
+
+if (FPGA_PLATFORM_SSE_320)
+    target_compile_definitions(${PLATFORM_DRIVERS_TARGET} PRIVATE
+        FPGA=1)
+endif()
 
 ## Logging utilities:
 if (NOT TARGET hal_log)
