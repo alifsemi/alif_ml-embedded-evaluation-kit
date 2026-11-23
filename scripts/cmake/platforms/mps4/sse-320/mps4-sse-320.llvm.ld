@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2025-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -48,6 +48,12 @@ SECTIONS
         KEEP (*(.data.init.enter))
         KEEP (*(SORT_BY_NAME(.init) SORT_BY_NAME(.init.*)))
     } > BOOT AT > BOOT
+
+    .data.vtable_rw (NOLOAD):
+    {
+      . = ALIGN(0x800);
+      KEEP (*(.bss.NoInit.vtable_rw))
+    } > ITCM AT > ITCM
 
     /**< Most of the RO code lives in this space. */
     .text.at_bram :

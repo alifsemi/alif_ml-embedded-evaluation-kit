@@ -43,9 +43,11 @@ repos:
       - id: cppcheck
         args:
           - --error-exitcode=1
+          - --check-level=exhaustive
           - --enable=performance,portability
           - --suppress=missingInclude
           - --suppress=missingIncludeSystem
+          - --suppress=preprocessorErrorDirective
           - --suppress=*:tests*
         additional_dependencies:
           - cppcheck==1.5.1

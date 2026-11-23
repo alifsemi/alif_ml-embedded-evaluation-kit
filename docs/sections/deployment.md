@@ -103,7 +103,7 @@ below, we assume it is: `~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4`.
 To run a use-case on the FVP, from the [Build directory](../sections/building.md#create-a-build-directory):
 
 ```commandline
-~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/ethos-u-<use_case>.axf
+~/FVP_Corstone_SSE-300/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 -a ./bin/mlek_<use_case>.axf
 telnetterminal0: Listening for serial connection on port 5000
 telnetterminal1: Listening for serial connection on port 5001
 telnetterminal2: Listening for serial connection on port 5002
@@ -195,7 +195,7 @@ to the command line arguments when starting the FVP. For example:
 FVP_install_location/models/Linux64_GCC-6.4/FVP_Corstone_SSE-300_Ethos-U55 \
     -C mps3_board.visualisation.disable-visualisation=1 \
     -C mps3_board.telnetterminal0.start_telnet=0 \
-    ./bin/mps3-sse-300/ethos-u-<use_case>.axf
+    ./bin/mps3-sse-300/mlek_<use_case>.axf
    ```
 
 #### Arm® Corstone™-315 and Arm® Corstone™-320
@@ -207,7 +207,7 @@ FVP_install_location/models/Linux64_GCC-9.3/FVP_Corstone_SSE-315 \
     -C mps4_board.visualisation.disable-visualisation=1 \
     -C vis_hdlcd.disable_visualisation=1 \
     -C mps4_board.telnetterminal0.start_telnet=0 \
-    ./bin/mps4-sse-315/ethos-u-<use_case>.axf
+    ./bin/mps4-sse-315/mlek_<use_case>.axf
    ```
 
 By default, there is no interaction on telnet needed and the application output can be directed to standard output by
@@ -229,7 +229,7 @@ telnet localhost 5000
 > application within the Docker container, the following command can be used to run the FVP in headless mode.
 >
 > ```commandline
-> ${FVP_315_U65} -a <path/to/ethos-u-<use_case>.axf> ${FVP_315_ARGS}
+> ${FVP_315_U65} -a <path/to/mlek_<use_case>.axf> ${FVP_315_ARGS}
 > ```
 
 ### Semihosting
@@ -297,14 +297,15 @@ To run the VSI enabled application, append the command line with the `v_path` ar
     -C mps4_board.v_path=dependencies/avh/interface/video/python
 ```
 
-## MPS3 FPGA board
+## MPS3 + MPS4 FPGA board
 
-> **Note:**  Before proceeding, make sure that you have the MPS3 board powered on, and a USB A to B cable connected
-> between your machine and the MPS3. The connector on the MPS3 is marked as "Debug USB".
+> **Note:**  Before proceeding, make sure that you have the MPS3/MPS4 board powered on, and a USB cable connected
+> between your machine and the board (USB-A to USB-B for MPS3, USB-A to USB-C for MPS4).
+> The connector on the board is marked as "Debug USB".
 
 ![MPS3](../media/mps3.png)
 
-### MPS3 board top-view
+### MPS3/MPS4 board top-view
 
 Once the board has booted, the micro SD card is enumerated as a mass storage device. On most systems, this is
 automatically mounted. However, manual mounting is sometimes required.
@@ -321,28 +322,33 @@ with no flow control.
 For more information on getting started with an MPS3 board, please refer to:
 [MPS3 Getting Started](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/MPS3GettingStarted.pdf).
 
-### Deployment on MPS3 board
+### Deployment on MPS3/MPS4 board
 
 To run the application on MPS3 platform, you must first ensure that the platform has been set up using the correct
 configuration.
 
 > **Note:**: These instructions are valid only if the evaluation is being done using the MPS3 FPGA platform using
-> an Arm® Corstone™-300 (AN552) or Corstone™-310 (AN555) implementations.
+> an Arm® Corstone™-300 (AN552) or Corstone™-310 (AN555) implementations, or MPS4 FPGA using Corstone™-320 implementation.
 
 For details on platform set-up, please see the relevant documentation.
 
 - Arm® Corstone™-300 implementation `AN552`: [Arm Developer - AN552](https://developer.arm.com/documentation/dai0552/).
 - Arm® Corstone™-310 implementation `AN555`: [Arm Developer - AN555](https://developer.arm.com/documentation/107642/B/?lang=en)
 
-For the MPS3 FPGA board, instead of loading the `axf` file directly, copy the executable blobs generated under the
-`sectors/<use_case>` subdirectory to the micro SD card located on the board. Also, the `sectors/images.txt` file is
+For the MPS3/MPS4 FPGA board, instead of loading the `axf` file directly, copy the executable blobs generated under the
+`sectors/<use_case>` subdirectory to the microSD card located on the board. Also, the `sectors/images.txt` file is
 used by the MPS3 to understand which memory regions the blobs must be loaded into.
 
-Once the USB A to USB B cable between the MPS3 and the development machine is connected, and the MPS3 board powered on,
+Once the USB cable between the board and the development machine is connected, and the board powered on,
 the board enumerates as a mass storage device over this USB connection.
+The MPS3 board has a USB-B for its debug USB interface, and the MPS4 board has USB-C.
 
-Depending on the version of the board you are using, there might be two devices listed. The device named `V2M-MPS3`, or
-`V2MMPS3` is the `SD card`. Note that if `V2M-MPS3` or `V2MMPS3` device is not listed, you may need to enable USB
+Depending on the version of the board you are using, there might be two devices listed.
+One of the devices will be the microSD card on the board, which will likely be named:
+- `V2M-MPS3` for MPS3
+- `MPS4` for MPS4
+
++Note that if `V2M-MPS3` or `MPS4` device is not listed, you may need to enable USB
 connection from the board. You can do this by opening a serial connection to the first serial port (as specified in
 point 3 in the instructions below) and issuing a `usb_on` command at the prompt:
 
@@ -368,23 +374,43 @@ this size, you must use the approach described below.
     ```tree
     ./bin/sectors/
         └── img_class
-            ├── ddr.bin
-            └── bram.bin
+            ├── bram.bin
+            └── ddr.bin
     ```
-    As reflected in the names above, the primary code memory for Arm® Corstone™-300 is the ITCM. For Arm® Corstone™-310
-    however, this is the FPGA SRAM (or BRAM) region instead. This is because the ITCM is only 32kB which cannot
-    accommodate the code footprint for our applications.
+    For Corstone™-320, the tree should have:
+    ```tree
+    ./bin/sectors/
+        └── img_class
+            ├── boot.bin
+            ├── bram.bin
+            └── ddr.bin
+    ```
+    As reflected in the names above, the primary code memory for Arm® Corstone™-300 is the ITCM.
+    For Arm® Corstone™-310 however, this is the FPGA SRAM (or BRAM) region instead.
+    This is because the ITCM is only 32kB which cannot accommodate the code footprint for our applications.
+    For Arm® Corstone™-320, there is a read-only boot region where our boot code must be placed.
 
-    For Linux machines, with the assumption that the micro SD card is mounted at `/media/user/V2M-MPS3/`, we can use:
+    Copy these binaries to the connected MPS3 board as follows:
+
     ```commandline
+    # MPS3
     cp -av ./bin/sectors/img_class/* /media/user/V2M-MPS3/SOFTWARE/ && sync
     ```
-    For macOS®, the micro SD card is likely mounted at  `/Volumes/V2M-MPS3`.
 
-    Note that the `itcm.bin` (or `bram.bin`) and `ddr.bin` files correspond to the part of the application residing in
-    the first and second load region respectively, as defined in the
-    [scatter file for sse-300](../../scripts/cmake/platforms/mps3/sse-300/mps3-sse-300.sct)
-    and [scatter file for sse-310](../../scripts/cmake/platforms/mps3/sse-310/mps3-sse-310.sct)
+    or for MPS4:
+
+    ```commandline
+   # MPS4
+    cp -av ./bin/sectors/img_class/* /media/user/MPS4/SOFTWARE/ && sync
+    ```
+
+    For macOS®, the micro SD card is likely mounted at `/Volumes/V2M-MPS3` or `/Volumes/MPS4`.
+
+    Note that the `boot.bin`, `itcm.bin`, `bram.bin` and `ddr.bin` files correspond to the part of the application
+    residing in different load regions, as defined in the
+    [scatter file for sse-300](../../scripts/cmake/platforms/mps3/sse-300/mps3-sse-300.armclang.sct),
+    [scatter file for sse-310](../../scripts/cmake/platforms/mps3/sse-310/mps3-sse-310.armclang.sct) and
+    [scatter file for sse-320](../../scripts/cmake/platforms/mps4/sse-320/mps4-sse-320.armclang.sct).
 
 
 2. The `./bin/sectors/images.txt` file must be copied over to the MPS3. The exact location for the destination depends
@@ -393,20 +419,32 @@ this size, you must use the approach described below.
    For example, with revision `C` of the MPS3 board hardware, using an application note directory named `AN552`, we can
    replace the `images.txt` file by:
     ```commandline
-    cp ./bin/sectors/images.txt /media/user/V2M-MPS3/MB/HBI0309C/AN552/images.txt && sync
+    # MPS3
+    cp ./bin/sectors/images.txt /media/$USER/V2M-MPS3/MB/HBI0309C/AN552/images.txt && sync
+    ```
+   With revision `B` of the MPS4 board hardware, using the Corstone™-320 image, use the following:
+    ```commandline
+    # MPS4
+    cp ./bin/sectors/images.txt /media/$USER/MPS4/MB/HBI0376B/FI101/images.txt && sync
     ```
 
-   > **NOTE**: Make sure the SD card is unmounted correctly after all the files have been copied. For example:
-    > 
+    > **NOTE**: Make sure the SD card is unmounted correctly after all the files have been copied. For example:
+
     > On Linux:
     > ```commandline
+    > # MPS3
     > umount /media/user/V2M-MPS3
+    > # MPS4
+    > umount /media/user/MPS4
     > ```
     > On macOS®:
     > ```commandline
+    > # MPS3
     > diskutil eject /Volumes/V2M-MPS3
+    > # MPS4
+    > diskutil eject /Volumes/MPS4
     > ```
-    
+
 
 3. Open the first serial port available from MPS3. For example, `/dev/ttyUSB0` or `/dev/tty.usbserial-000000`. This can be typically done using
    `minicom`, `screen`, or `Putty` applications. Make sure the configuration is set to 115200 8/N/1 and that the

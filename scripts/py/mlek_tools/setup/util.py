@@ -26,7 +26,7 @@ import typing
 import urllib
 import urllib.parse
 import urllib.request
-from netrc import netrc
+from netrc import NetrcParseError, netrc
 from pathlib import Path
 from urllib.error import URLError
 
@@ -61,10 +61,21 @@ def build_opener(domain: str) -> urllib.request.OpenerDirector:
     """
     handlers = []
     if default_netrc_path.is_file():
-        netrc_entry = netrc().authenticators(domain)
-        if netrc_entry:
-            login, _, password = netrc_entry
-            handlers.append(create_basic_auth_handler(domain, login, password))
+        try:
+            # Use the default path lookup so Python keeps applying ~/.netrc
+            # permission checks before credentials are read.
+            netrc_entry = netrc().authenticators(domain)
+            if netrc_entry:
+                login, _, password = netrc_entry
+                handlers.append(create_basic_auth_handler(domain, login, password))
+        except NetrcParseError as err:
+            # Treat an unusable ~/.netrc as no credentials, so public
+            # downloads are not blocked by an unrelated local config issue.
+            logging.warning(
+                "Ignoring unusable netrc file %s at line %s.",
+                default_netrc_path,
+                err.lineno,
+            )
     return urllib.request.build_opener(*handlers)
 
 
@@ -72,12 +83,16 @@ def download_file(
         url: str,
         dest: Path,
         http_headers: HttpHeadersType,
+        expected_sha256: typing.Optional[str] = None,
 ) -> Path:
     """
-    Download a file
+    Download a file and optionally verify its SHA-256 digest.
 
-    @param url:     The URL of the file to download
-    @param dest:    The destination of downloaded file
+    :param url:              The URL of the file to download.
+    :param dest:             The destination of downloaded file.
+    :param http_headers:     Per-domain HTTP headers for authentication.
+    :param expected_sha256:  Expected SHA-256 digest, if known.
+    :return:                 The destination path.
     """
     parsed_url = urllib.parse.urlparse(url)
     opener = build_opener(parsed_url.netloc)
@@ -93,6 +108,8 @@ def download_file(
     except URLError:
         logging.error("URLError while downloading %s.", url)
         raise
+    if expected_sha256 is not None:
+        verify_file_sha256(dest, expected_sha256)
     return dest
 
 
@@ -137,19 +154,39 @@ def call_command(
     return log if capture_output else None
 
 
-def get_md5sum_for_file(filepath: Path) -> str:
+def get_sha256sum_for_file(filepath: Path) -> str:
     """
-    Compute the MD5 hex digest of a file's contents.
+    Compute the SHA-256 hex digest of a file's contents.
 
     :param filepath:    Path to the file.
-    :return:            Hex string of the MD5 digest.
+    :return:            Hex string of the SHA-256 digest.
     """
-    md5 = hashlib.md5()
+    sha256 = hashlib.sha256()
     with open(filepath, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
-            md5.update(chunk)
-    return md5.hexdigest()
+            sha256.update(chunk)
+    return sha256.hexdigest()
 
+
+def verify_file_sha256(
+        filepath: Path,
+        expected_sha256: str,
+):
+    """
+    Verify a file's SHA-256 digest.
+
+    :param filepath:         Path to the file to verify.
+    :param expected_sha256:  Expected SHA-256 digest.
+    :raises RuntimeError:    If the file has an unexpected digest.
+    """
+    actual_sha256 = get_sha256sum_for_file(filepath)
+    if actual_sha256 != expected_sha256:
+        raise RuntimeError(
+            f"SHA-256 mismatch for {filepath}: "
+            f"expected {expected_sha256}, actual {actual_sha256}"
+        )
+
+    logging.debug("- Verified SHA-256 for %s.", filepath)
 
 
 def remove_tree_dir(dir_path: Path):

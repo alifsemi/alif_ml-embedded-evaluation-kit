@@ -75,7 +75,7 @@ target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC ${ARM_CPU})
 
 # Tell linker that reset interrupt handler is our entry point
 if (CMAKE_C_COMPILER_ID STREQUAL Clang)
-    target_compile_definitions(${CMSIS_DEVICE_TARGET} PRIVATE
+    target_compile_definitions(${CMSIS_DEVICE_TARGET} PUBLIC
         __VECTOR_TABLE=__interrupt_vector)
     target_link_options(
         ${CMSIS_DEVICE_TARGET}

@@ -27,7 +27,9 @@
 #----------------------------------------------------------------------------
 
 # Specify the ML frameworks the use case supports
-set(${use_case}_ML_FRAMEWORK "TensorFlowLiteMicro;ExecuTorch")
+set(${use_case}_ML_FRAMEWORK
+    "${ML_FRAMEWORK_TFLM}"
+    "${ML_FRAMEWORK_EXECUTORCH}")
 if (NOT ${ML_FRAMEWORK} IN_LIST ${use_case}_ML_FRAMEWORK)
     set(${use_case}_supports_${ML_FRAMEWORK} OFF)
     return()
@@ -36,7 +38,7 @@ endif ()
 # Default Conformer model is not supported on all NPUs yet.
 # TODO: Remove this check once this limitation is resolved.
 if (DEFINED ETHOS_U_NPU_ID)
-    if (${ML_FRAMEWORK} STREQUAL "ExecuTorch"
+    if ("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_EXECUTORCH}"
         AND ${ETHOS_U_NPU_ID} STREQUAL "U55"
         AND NOT DEFINED ${use_case}_MODEL_PATH)
         message(STATUS "Arm Ethos-U55 NPU is not supported with Conformer model yet.")
@@ -56,7 +58,7 @@ USER_OPTION(${use_case}_MODEL_IN_EXT_FLASH "Run model from external flash"
     ON
     BOOL)
 
-if (${ML_FRAMEWORK} STREQUAL "ExecuTorch")
+if ("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_EXECUTORCH}")
     USER_OPTION(${use_case}_LABELS_TXT_FILE "Labels' txt file for the chosen model."
         ${MLEK_ROOT}/resources/asr/labels/librispeech_sp.pieces
         FILEPATH)
@@ -112,13 +114,13 @@ generate_labels_code(
     OUTPUT_FILENAME "${${use_case}_LABELS_CPP_FILE}"
 )
 
-if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
+if ("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_TFLM}")
     USER_OPTION(${use_case}_ACTIVATION_BUF_SZ "Activation buffer size for the chosen model"
         0x00200000
         STRING)
 
     if (ETHOS_U_NPU_ENABLED)
-        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}.tflite)
+        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/wav2letter_pruned_int8_vela_${ETHOS_U_NPU_CONFIG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.tflite)
     else()
         set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/wav2letter_pruned_int8.tflite)
     endif()
@@ -130,11 +132,11 @@ if (${ML_FRAMEWORK} STREQUAL "TensorFlowLiteMicro")
         "extern const int   g_ctxLen         =  98"
         "extern const float g_ScoreThreshold = ${${use_case}_MODEL_SCORE_THRESHOLD}"
         )
-elseif(${ML_FRAMEWORK} STREQUAL "ExecuTorch")
+elseif("${ML_FRAMEWORK}" STREQUAL "${ML_FRAMEWORK_EXECUTORCH}")
 
     if (ETHOS_U_NPU_ENABLED)
         string(TOLOWER ${ETHOSU_TARGET_NPU_CONFIG} _NPU_CFG_ID)
-        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/conformer_fp32_cln_wer_6_47_arm_delegate_${_NPU_CFG_ID}.pte)
+        set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/conformer_fp32_cln_wer_6_47_arm_delegate_${_NPU_CFG_ID}_${ETHOS_U_NPU_MEMORY_MODE}.pte)
         set(DEFAULT_ACT_BUF_SZ      0x00108000) # ~1 MiB
     else()
         set(DEFAULT_MODEL_PATH      ${RESOURCES_PATH}/asr/conformer_fp32_cln_wer_6_47_arm_TOSA-1.0+FP.pte)

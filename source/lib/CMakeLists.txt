@@ -78,7 +78,7 @@ endfunction()
 # Function to create an ML framework specific implementation interface library
 # to allow easier use of targets defined in this CMake project.
 # The function will create an alias library as well namespaced with 'mlek::'
-# and the library will be called 'API_NAME_et_impl' or 'API_NAME_tflm_impl'.
+# and the library will be called 'API_NAME_impl'.
 # @param[in]    API_NAME        Name of the API to target. The name is suffixed
 #                               by '_api' to get the expected target defined
 #                               by subdirectory 'use_case'.
@@ -114,9 +114,14 @@ if (NOT DEFINED MLEK_API_LIST)
                         "${CMAKE_CURRENT_SOURCE_DIR}/mlek/use_case")
 endif()
 
-foreach(_api_name ${MLEK_API_LIST})
-    create_mlek_impl_lib_target(API_NAME ${_api_name})
-endforeach()
+if (TARGET mlek::ml_framework_impl)
+    foreach(_api_name ${MLEK_API_LIST})
+        create_mlek_impl_lib_target(API_NAME ${_api_name})
+    endforeach()
+else()
+    message(STATUS "No MLEK ML framework implementation target; "
+                   "skipping use-case implementation convenience targets.")
+endif()
 
 # Only include export/install logic when building as part of the top-level MLEK
 # project. When this library is embedded in another project, defer export to

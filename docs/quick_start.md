@@ -31,7 +31,7 @@ To get started quickly, please follow these steps:
     embedded system that contains an *Ethos-U* NPU.
 
     It is worth noting that to take full advantage of the capabilities of the NPU, the neural network operators must be
-    [supported by Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/4.2.0/SUPPORTED_OPS.md).
+    [supported by Vela](https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-vela/-/blob/5.2.0/SUPPORTED_OPS.md).
 
     ```commandline
     python3 ./build_default.py
@@ -78,7 +78,7 @@ mkdir resources_downloaded && cd resources_downloaded
 python3 -m venv env
 env/bin/python3 -m pip install --upgrade pip
 env/bin/python3 -m pip install --upgrade setuptools
-env/bin/python3 -m pip install ethos-u-vela==5.0.0
+env/bin/python3 -m pip install ethos-u-vela==5.2.0
 cd ..
 
 curl -L https://github.com/ARM-software/ML-zoo/raw/7c32b097f7d94aae2cd0b98a8ed5a3ba81e66b18/models/anomaly_detection/micronet_medium/tflite_int8/ad_medium_int8.tflite \

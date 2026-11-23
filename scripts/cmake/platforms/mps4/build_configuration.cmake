@@ -24,6 +24,15 @@ function(set_platform_global_defaults)
         sse-315
         STRING)
 
+    # For sse-320 specifically, binaries built for FVP will not work on FPGA and vice versa.
+    # As a result, the flag `FPGA_PLATFORM_SSE_320` must be provided when building for FPGA,
+    # and omitted when building for FVP.
+    if(${TARGET_SUBSYSTEM} STREQUAL sse-320)
+        USER_OPTION(FPGA_PLATFORM_SSE_320 "Building for Arm Corstone-320 FPGA platform"
+            OFF
+            BOOL)
+    endif()
+
     # NPU respective to target subsystem
     if(TARGET_SUBSYSTEM STREQUAL sse-315)
         set(DEFAULT_ETHOS_U_NPU_ID  "U65")

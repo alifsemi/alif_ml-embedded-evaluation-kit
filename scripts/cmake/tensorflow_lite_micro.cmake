@@ -34,13 +34,13 @@ assert_defined(TENSORFLOW_SRC_PATH)
 function(build_tflite_micro_cmake)
     include(FetchContent)
     set(CORE_SOFTWARE_REPO_URL "https://gitlab.arm.com/artificial-intelligence/ethos-u/ethos-u-core-software")
-    set(CORE_SOFTWARE_GIT_REF  "26.02")
+    set(CORE_SOFTWARE_GIT_REF  "26.08")
     set(TFLM_CMAKE_URL "${CORE_SOFTWARE_REPO_URL}/-/raw/${CORE_SOFTWARE_GIT_REF}/tflite_micro.cmake?ref_type=tags&inline=false")
-    set(TFLM_CMAKE_MD5 "52985fb8910dbaf034a17f9c6140b9d2")
+    set(TFLM_CMAKE_SHA256 "f3477fbac685e27516d6e5ca6f1dfd88fdd416dfe469a4be33817e0c4c819ad6")
 
     FetchContent_Declare(TensorFlow_Lite_Micro_CMake_Wrapper
         URL                 ${TFLM_CMAKE_URL}
-        URL_HASH            MD5=${TFLM_CMAKE_MD5}
+        URL_HASH            SHA256=${TFLM_CMAKE_SHA256}
         DOWNLOAD_DIR        ${CMAKE_BINARY_DIR}
         DOWNLOAD_NAME       "tflite_micro.cmake"
         DOWNLOAD_NO_EXTRACT ON)
@@ -91,9 +91,16 @@ function(build_tflite_micro_cmake)
     endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL "ARMClang")
-        # Additional option to enable "full" floating point standard conformance
-        # (needed for NaNs and infinity).
-        target_compile_options(tflu PRIVATE "-ffp-mode=full")
+        # Keep the TensorFlow Lite Micro build in full floating-point
+        # conformance mode for NaNs and infinity, but disable the trapping and
+        # rounding sub-modes that trigger the Arm Compiler slowdown in the
+        # reference Quantize/Dequantize kernels. See:
+        # - artificial-intelligence/ethos-u/ml-embedded-evaluation-kit#2
+        target_compile_options(tflu PRIVATE
+            "-Wno-overriding-option"
+            "-ffp-mode=full"
+            "-fno-trapping-math"
+            "-fno-rounding-math")
     endif()
 
     # If CPU_HEADER_FILE is defined, add this to compile definitions.

@@ -67,17 +67,6 @@
             }
         },
         {
-            "name": "simple-platform",
-            "description": "Target simple platform.",
-            "hidden": true,
-            "cacheVariables": {
-                "TARGET_PLATFORM": {
-                    "type": "STRING",
-                    "value": "simple_platform"
-                }
-            }
-        },
-        {
             "name": "native-platform",
             "description": "Target native platform.",
             "hidden": true,
