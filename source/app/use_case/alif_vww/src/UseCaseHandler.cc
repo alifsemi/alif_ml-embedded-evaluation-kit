@@ -70,7 +70,7 @@ namespace {
 
 using arm::app::fwk::iface::Model;
 
-#if defined(GPIO_PROFILING_CI)
+#if defined(GPIO_PROFILING_CI) || defined(CI_RUN)
 /* Automated measurement: run inference continuously, without waiting for a button press. */
 #define INFERENCE_REQUESTED() (true)
 #else

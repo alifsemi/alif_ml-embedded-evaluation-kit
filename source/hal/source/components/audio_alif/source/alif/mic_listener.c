@@ -145,7 +145,8 @@ uint32_t secondary_ch = SECONDARY_CHANNEL;
 /* PDM Channel configurations */
 #define PDM_PHASE             0x0000001F
 #define PDM_GAIN              0x00000800
-#define PDM_PEAK_DETECT_TH    0x00060002
+/* TH_HI = 0xFFFF is above any 16-bit sample magnitude, so the audio detect IRQ never asserts */
+#define PDM_PEAK_DETECT_TH    0xFFFF0000
 #define PDM_PEAK_DETECT_ITV   0x0004002D
 #define PDM_IIR_COEF          0x00000004
 
@@ -168,7 +169,11 @@ static void PDM_fifo_callback(uint32_t event)
 
     if(event & ARM_PDM_EVENT_AUDIO_DETECTION)
     {
-        printf("*** PDM_fifo_callback: ARM_PDM_EVENT_AUDIO_DETECTION ***\n");
+        static uint32_t pdm_audio_detect_count = 0;
+        pdm_audio_detect_count++;
+        if(pdm_audio_detect_count == 1) {
+            printf("*** PDM_fifo_callback: ARM_PDM_EVENT_AUDIO_DETECTION (further occurrences suppressed)***\n");
+        }
     }
 }
 

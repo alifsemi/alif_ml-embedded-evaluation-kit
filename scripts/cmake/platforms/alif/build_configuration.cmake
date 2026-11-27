@@ -46,6 +46,12 @@ function(set_platform_global_defaults)
         message(STATUS "Alif GPIO profiling enabled!")
     endif()
 
+    set(CI_RUN OFF CACHE BOOL "Run the use cases in CI mode, e.g. start inference without waiting for a button press.")
+    if (CI_RUN)
+        add_compile_definitions(CI_RUN)
+        message(STATUS "Alif CI run enabled!")
+    endif()
+
     set(GPIO_PROFILING_CI OFF CACHE BOOL "Automated (CI) power measurement: keep the GPIO profiling line idle for the first rounds so the automation can start waiting for the signal. Only used with GPIO_PROFILING.")
     if (GPIO_PROFILING AND GPIO_PROFILING_CI)
         add_compile_definitions(GPIO_PROFILING_CI)
