@@ -57,7 +57,7 @@ def initial_builds() {
         //      ['test_build_gnu_obj_hp_release_devkit_e8', 'build_gcc_hp_release_devkit-e8/bin/sectors/alif_object_detection/mram.bin'],
         //      ['test_build_gnu_vww_hp_release_devkit_e8', 'build_gcc_hp_release_devkit-e8/bin/sectors/alif_vww/mram.bin']]],
         [name: 'Build HP GCC Release AppKit-e8',
-         builds: [['hp', 'Release', 'gcc', 'AppKit-e8', '-DALIF_CAMERA_MODULE=OV5675']],
+         builds: [['hp', 'Release', 'gcc', 'AppKit-e8', '-DALIF_CAMERA_MODULE=OV5675 -DCI_RUN=ON']],
          artifact: '*.bin',
          stashes: [
              ['test_build_gnu_img_hp_release_appkit_e8', 'build_gcc_hp_release_appkit-e8/bin/sectors/alif_img_class/mram.bin'],
@@ -122,7 +122,7 @@ def more_builds() {
         [name: 'Build HP GCC Debug DevKit-e7/e8',
          builds: [['hp', 'Debug', 'gcc', 'DevKit-e7'], ['hp', 'Debug', 'gcc', 'DevKit-e8']]],
         [name: 'Build HP ARMCLANG Release DevKit-e7/e8/AppKit-e8',
-         builds: [['hp', 'Release', 'armclang', 'DevKit-e7'], ['hp', 'Release', 'armclang', 'DevKit-e8'], ['hp', 'Release', 'armclang', 'AppKit-e8', '-DALIF_CAMERA_MODULE=OV5675']],
+         builds: [['hp', 'Release', 'armclang', 'DevKit-e7'], ['hp', 'Release', 'armclang', 'DevKit-e8'], ['hp', 'Release', 'armclang', 'AppKit-e8', '-DALIF_CAMERA_MODULE=OV5675 -DCI_RUN=ON']],
          artifact: 'ER_ROM',
          stashes: [
              ['test_build_armclang_img_hp_release_devkit_e7', 'build_armclang_hp_release_devkit-e7/bin/sectors/alif_img_class/ER_ROM'],

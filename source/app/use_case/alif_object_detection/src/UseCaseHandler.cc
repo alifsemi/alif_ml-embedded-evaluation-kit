@@ -55,7 +55,7 @@
 #define LV_ZOOM         (2 * 256)
 #endif // NO_DISPLAY
 
-#if defined(GPIO_PROFILING_CI)
+#if defined(GPIO_PROFILING_CI) || defined(CI_RUN)
 /* Automated measurement: run inference continuously, without waiting for a button press. */
 #define INFERENCE_REQUESTED() (true)
 #else
